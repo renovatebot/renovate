@@ -1,6 +1,6 @@
 {
   "name": "react-element-to-jsx-string",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "dependencies": {
     "babel": {
       "version": "5.8.23",
@@ -9,7 +9,7 @@
       "dependencies": {
         "babel-core": {
           "version": "5.8.25",
-          "from": "babel-core@>=5.6.21 <6.0.0",
+          "from": "babel-core@>=5.8.23 <6.0.0",
           "resolved": "https://registry.npmjs.org/babel-core/-/babel-core-5.8.25.tgz",
           "dependencies": {
             "babel-plugin-constant-folding": {
@@ -1115,7 +1115,7 @@
             },
             "inherits": {
               "version": "2.0.1",
-              "from": "inherits@>=2.0.1 <2.1.0",
+              "from": "inherits@>=2.0.0 <3.0.0",
               "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
             },
             "minimatch": {
@@ -2493,7 +2493,7 @@
         },
         "glob": {
           "version": "5.0.15",
-          "from": "glob@>=5.0.14 <6.0.0",
+          "from": "glob@>=5.0.5 <6.0.0",
           "resolved": "https://registry.npmjs.org/glob/-/glob-5.0.15.tgz",
           "dependencies": {
             "inflight": {
@@ -2510,7 +2510,7 @@
             },
             "inherits": {
               "version": "2.0.1",
-              "from": "inherits@>=2.0.1 <2.1.0",
+              "from": "inherits@>=2.0.0 <3.0.0",
               "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
             },
             "once": {
@@ -3301,7 +3301,7 @@
             },
             "inherits": {
               "version": "2.0.1",
-              "from": "inherits@>=2.0.1 <2.1.0",
+              "from": "inherits@>=2.0.0 <3.0.0",
               "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.1.tgz"
             }
           }
@@ -3446,14 +3446,9 @@
       "from": "react-addons-test-utils@>=0.14.0 <0.15.0",
       "resolved": "https://registry.npmjs.org/react-addons-test-utils/-/react-addons-test-utils-0.14.0.tgz"
     },
-    "react-dom": {
-      "version": "0.14.0",
-      "from": "react-dom@>=0.14.0 <0.15.0",
-      "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-0.14.0.tgz"
-    },
     "sortobject": {
       "version": "1.0.0",
-      "from": "sortobject@*",
+      "from": "sortobject@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/sortobject/-/sortobject-1.0.0.tgz"
     },
     "stringify-object": {

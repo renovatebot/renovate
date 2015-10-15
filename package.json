@@ -25,8 +25,7 @@
     "react": "^0.14.0"
   },
   "peerDependencies": {
-    "react": "^0.14.0",
-    "react-dom": "^0.14.0"
+    "react": "^0.14.0"
   },
   "dependencies": {
     "collapse-white-space": "^1.0.0",
