@@ -151,4 +151,12 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
       reactElementToJSXString(null);
     }).toThrow('react-element-to-jsx-string: Expected a ReactElement');
   });
+
+  it('ignores object keys order (sortobject)', () => {
+    expect(
+      reactElementToJSXString(<div o={{a: 1, b: 2}}/>)
+    ).toEqual(
+      reactElementToJSXString(<div o={{b: 2, a: 1}}/>)
+    );
+  });
 });

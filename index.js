@@ -1,7 +1,8 @@
 import React from 'react';
-import stringify from 'stringify-object';
 import collapse from 'collapse-white-space';
 import {isElement} from 'react-addons-test-utils';
+import stringify from 'stringify-object';
+import sortobject from 'sortobject';
 
 export default function reactElementToJSXString(ReactElement) {
   return toJSXString({ReactElement});
@@ -115,6 +116,11 @@ function recurse({lvl, inline}) {
 }
 
 function stringifyObject(obj) {
+  // sortobject fails on some types, like regex
+  if (Object.keys(obj).length > 0) {
+    obj = sortobject(obj);
+  }
+
   return collapse(stringify(obj))
     .replace(/{ /g, '{')
     .replace(/ }/g, '}')

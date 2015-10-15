@@ -3451,6 +3451,11 @@
       "from": "react-dom@>=0.14.0 <0.15.0",
       "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-0.14.0.tgz"
     },
+    "sortobject": {
+      "version": "1.0.0",
+      "from": "sortobject@*",
+      "resolved": "https://registry.npmjs.org/sortobject/-/sortobject-1.0.0.tgz"
+    },
     "stringify-object": {
       "version": "2.3.0",
       "from": "stringify-object@>=2.3.0 <3.0.0",

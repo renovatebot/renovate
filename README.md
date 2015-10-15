@@ -19,6 +19,7 @@ Features:
 - supports nesting
 - props: supports string, number, function (inlined as `prop={function () {code;}}`), object, ReactElement (inlined), regex..
 - order props alphabetically
+- sort object keys in a deterministic order (`o={{a: 1, b:2}} === o={{b:2, a:1}}`)
 - React's documentation indent style for JSX
 
 ## Setup
