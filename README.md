@@ -49,6 +49,13 @@ npm test
 npm run test:watch
 ```
 
+## Build
+
+```sh
+npm run build
+npm run build:watch
+```
+
 ## Thanks
 
 [alexlande/react-to-jsx](https://github.com/alexlande/react-to-jsx/) was a good source of inspiration.
