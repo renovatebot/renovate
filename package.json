@@ -1,0 +1,36 @@
+{
+  "name": "react-element-to-jsx-string",
+  "version": "1.0.0",
+  "description": "Turn a ReactElement into the corresponding JSX string.",
+  "main": "index-dist.js",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "babel index.js -o index-dist.js",
+    "build:watch": "babel index.js -o index-dist.js -w",
+    "test": "mocha --opts mocha.opts && eslint .",
+    "test:watch": "mocha --opts mocha.opts --watch --reporter min"
+  },
+  "author": "Algolia <support@algolia.com> (https://github.com/algolia/)",
+  "license": "MIT",
+  "repository": "algolia/react-element-to-jsx-string",
+  "devDependencies": {
+    "babel": "^5.8.23",
+    "babel-eslint": "^4.1.3",
+    "eslint": "^1.6.0",
+    "eslint-config-airbnb": "^0.1.0",
+    "eslint-config-algolia": "^4.1.0",
+    "eslint-plugin-react": "^3.5.1",
+    "expect": "^1.12.2",
+    "mocha": "^2.3.3",
+    "react": "^0.14.0"
+  },
+  "peerDependencies": {
+    "react": "^0.14.0",
+    "react-dom": "^0.14.0"
+  },
+  "dependencies": {
+    "collapse-white-space": "^1.0.0",
+    "react-addons-test-utils": "^0.14.0",
+    "stringify-object": "^2.3.0"
+  }
+}
