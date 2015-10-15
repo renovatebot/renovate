@@ -61,6 +61,12 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
     ).toEqual(`<div obj={{hello: 'world'}} />`);
   });
 
+  it(`reactElementToJSXString(<div obj={{hello: [1, 2], world: {nested: true}}}/>)`, () => {
+    expect(
+      reactElementToJSXString(<div obj={{hello: [1, 2], world: {nested: true}}}/>)
+    ).toEqual(`<div obj={{hello: [1, 2], world: {nested: true}}} />`);
+  });
+
   it(`reactElementToJSXString(<div></div>)`, () => {
     expect(
       reactElementToJSXString(<div></div>)

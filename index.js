@@ -116,8 +116,10 @@ function recurse({lvl, inline}) {
 
 function stringifyObject(obj) {
   return collapse(stringify(obj))
-    .replace(/^{ /, '{')
-    .replace(/ }$/, '}');
+    .replace(/{ /g, '{')
+    .replace(/ }/g, '}')
+    .replace(/\[ /g, '[')
+    .replace(/ \]/g, ']');
 }
 
 function spacer(times) {
