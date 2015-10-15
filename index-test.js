@@ -2,7 +2,7 @@
 
 import React from 'react';
 import expect from 'expect';
-import reactElementToJSXString from './';
+import reactElementToJSXString from './index';
 
 class TestComponent extends React.Component {}
 
