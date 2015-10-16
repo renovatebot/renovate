@@ -97,7 +97,7 @@ function formatPropValue(propValue) {
 
 function formatValue(value) {
   if (typeof value === 'function') {
-    return `function () {code;}`;
+    return function noRefCheck() {};
   } else if (isElement(value)) {
     return toJSXString({ReactElement: value, inline: true});
   } else if (value && Object.keys(value).length > 0) {

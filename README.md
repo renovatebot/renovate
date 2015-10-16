@@ -16,8 +16,8 @@ Turn a ReactElement into the corresponding JSX string.
 Useful for unit testing and any other need you may think of.
 
 Features:
-- supports nesting
-- props: supports string, number, function (inlined as `prop={function () {code;}}`), object, ReactElement (inlined), regex..
+- supports nesting and deep nesting like `<div a={{b: {c: {d: <div />}}}} />`
+- props: supports string, number, function (inlined as `prop={function noRefCheck() {}}`), object, ReactElement (inlined), regex..
 - order props alphabetically
 - sort object keys in a deterministic order (`o={{a: 1, b:2}} === o={{b:2, a:1}}`)
 - React's documentation indent style for JSX

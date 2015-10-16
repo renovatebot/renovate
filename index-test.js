@@ -28,13 +28,13 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   it(`reactElementToJSXString(<div fn={() => {}}/>)`, () => {
     expect(
       reactElementToJSXString(<div fn={() => {}}/>)
-    ).toEqual(`<div fn={function () {code;}} />`);
+    ).toEqual(`<div fn={function noRefCheck() {}} />`);
   });
 
   it(`reactElementToJSXString(<div fn={function hello(){}}/>)`, () => {
     expect(
       reactElementToJSXString(<div fn={function hello() {}}/>)
-    ).toEqual(`<div fn={function () {code;}} />`);
+    ).toEqual(`<div fn={function noRefCheck() {}} />`);
   });
 
   it(`reactElementToJSXString(<div co={<div a="1" />} />)`, () => {
@@ -175,4 +175,11 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
       reactElementToJSXString(<div a={undefined} />)
     );
   });
+
+  it(`reactElementToJSXString(<div a={{b: function hello() {}}} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={{b: function hello() {}}} />)
+    ).toEqual(`<div a={{b: function noRefCheck() {}}} />`);
+  });
+
 });
