@@ -199,4 +199,22 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
       reactElementToJSXString(<div a={{}} />)
     ).toEqual(`<div a={{}} />`);
   });
+
+  it(`reactElementToJSXString(<div><span /><span /></div>)`, () => {
+    expect(
+      reactElementToJSXString(<div><span /><span /></div>)
+    ).toEqual(`<div>
+  <span />
+  <span />
+</div>`);
+  });
+
+  it(`reactElementToJSXString(<div>foo<div /></div>)`, () => {
+    expect(
+      reactElementToJSXString(<div>foo<div /></div>)
+    ).toEqual(`<div>
+  foo
+  <div />
+</div>`);
+  });
 });

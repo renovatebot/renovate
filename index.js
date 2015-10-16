@@ -11,8 +11,11 @@ export default function reactElementToJSXString(ReactElement) {
 }
 
 function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
-  if (!isElement(ReactElement)) {
-    throw new Error('react-element-to-jsx-string: Expected a ReactElement');
+  if (typeof ReactElement === 'string') {
+    return ReactElement;
+  } else if (!isElement(ReactElement)) {
+    throw new Error('react-element-to-jsx-string: Expected a ReactElement, ' +
+      'got `' + (typeof ReactElement) + '`');
   }
 
   let tagName;
@@ -58,7 +61,7 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
         .toArray(children)
         .map(
           recurse({lvl, inline})
-        );
+        ).join('\n' + spacer(lvl));
     }
     if (!inline) {
       out += `\n`;
