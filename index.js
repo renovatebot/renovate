@@ -116,7 +116,7 @@ function formatValue(value) {
     return '<__reactElementToJSXString__Wrapper__>' +
       toJSXString({ReactElement: value, inline: true}) +
       '</__reactElementToJSXString__Wrapper__>';
-  } else if (isPlainObject(value)) {
+  } else if (isPlainObject(value) || Array.isArray(value)) {
     return '<__reactElementToJSXString__Wrapper__>' +
       stringifyObject(value) +
       '</__reactElementToJSXString__Wrapper__>';
@@ -132,7 +132,7 @@ function recurse({lvl, inline}) {
 }
 
 function stringifyObject(obj) {
-  if (Object.keys(obj).length > 0) {
+  if (Object.keys(obj).length > 0 || obj.length > 0) {
     obj = traverse(obj).map(function(value) {
       if (isElement(value) || this.isLeaf) {
         this.update(formatValue(value));
