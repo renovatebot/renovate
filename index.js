@@ -1,8 +1,10 @@
 import React from 'react';
 import collapse from 'collapse-white-space';
 import {isElement} from 'react-addons-test-utils';
+import isPlainObject from 'is-plain-object';
 import stringify from 'stringify-object';
 import sortobject from 'sortobject';
+import traverse from 'traverse';
 
 export default function reactElementToJSXString(ReactElement) {
   return toJSXString({ReactElement});
@@ -83,6 +85,8 @@ function formatProps(props) {
       return {
         name: propName,
         value: formatPropValue(props[propName])
+          .replace(/'?<__reactElementToJSXString__ReactElement__>/g, '')
+          .replace(/<\/__reactElementToJSXString__ReactElement__>'?/g, '')
       };
     });
 }
@@ -99,8 +103,17 @@ function formatValue(value) {
   if (typeof value === 'function') {
     return function noRefCheck() {};
   } else if (isElement(value)) {
-    return toJSXString({ReactElement: value, inline: true});
-  } else if (value && Object.keys(value).length > 0) {
+    // we use this delimiter hack in cases where the react element is a property
+    // of an object from a root prop
+    // i.e.
+    //   reactElementToJSXString(<div a={{b: <div />}} />
+    //   // <div a={{b: <div />}} />
+    // we then remove the whole wrapping
+    // otherwise, the element would be surrounded by quotes: <div a={{b: '<div />'}} />
+    return '<__reactElementToJSXString__ReactElement__>' +
+      toJSXString({ReactElement: value, inline: true}) +
+      '</__reactElementToJSXString__ReactElement__>';
+  } else if (isPlainObject(value)) {
     return stringifyObject(value);
   }
 
@@ -114,10 +127,13 @@ function recurse({lvl, inline}) {
 }
 
 function stringifyObject(obj) {
-  // sortobject fails on some types, like regex
-  if (obj && Object.keys(obj).length > 0) {
-    obj = sortobject(obj);
-  }
+  obj = traverse(obj).map(function(value) {
+    if (isElement(value) || this.isLeaf) {
+      this.update(formatValue(value));
+    }
+  });
+
+  obj = sortobject(obj);
 
   return collapse(stringify(obj))
     .replace(/{ /g, '{')

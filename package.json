@@ -29,8 +29,10 @@
   },
   "dependencies": {
     "collapse-white-space": "^1.0.0",
+    "is-plain-object": "^2.0.1",
     "react-addons-test-utils": "^0.14.0",
     "sortobject": "^1.0.0",
-    "stringify-object": "^2.3.0"
+    "stringify-object": "^2.3.0",
+    "traverse": "^0.6.6"
   }
 }

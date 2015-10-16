@@ -182,4 +182,9 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
     ).toEqual(`<div a={{b: function noRefCheck() {}}} />`);
   });
 
+  it(`reactElementToJSXString(<div a={{b: {c: {d: <div />}}}} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={{b: {c: {d: <div />}}}} />)
+    ).toEqual(`<div a={{b: {c: {d: <div />}}}} />`);
+  });
 });
