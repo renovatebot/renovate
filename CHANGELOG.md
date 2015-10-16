@@ -1,3 +1,13 @@
+<a name="2.0.4"></a>
+## [2.0.4](https://github.com/algolia/react-element-to-jsx-string/compare/v2.0.3...v2.0.4) (2015-10-16)
+
+
+### Bug Fixes
+
+* **tagName:** fixed an edge-case with decorated component name ([9169ac7](https://github.com/algolia/react-element-to-jsx-string/commit/9169ac7))
+
+
+
 <a name="2.0.3"></a>
 ## [2.0.3](https://github.com/algolia/react-element-to-jsx-string/compare/v2.0.2...v2.0.3) (2015-10-16)
 
