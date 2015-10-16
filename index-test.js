@@ -152,11 +152,27 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
     }).toThrow('react-element-to-jsx-string: Expected a ReactElement');
   });
 
-  it('ignores object keys order (sortobject)', () => {
+  it(`ignores object keys order (sortobject)`, () => {
     expect(
       reactElementToJSXString(<div o={{a: 1, b: 2}}/>)
     ).toEqual(
       reactElementToJSXString(<div o={{b: 2, a: 1}}/>)
+    );
+  });
+
+  it(`reactElementToJSXString(<div a={null} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={null} />)
+    ).toEqual(
+      reactElementToJSXString(<div a={null} />)
+    );
+  });
+
+  it(`reactElementToJSXString(<div a={undefined} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={undefined} />)
+    ).toEqual(
+      reactElementToJSXString(<div a={undefined} />)
     );
   });
 });
