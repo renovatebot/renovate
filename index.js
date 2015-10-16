@@ -25,6 +25,7 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
   } else {
     tagName = ReactElement.type.name ||
       ReactElement.type.displayName ||
+      ReactElement.type.type ||
       ReactElement.type;
   }
 

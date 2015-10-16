@@ -2,6 +2,7 @@
 
 import React from 'react';
 import expect from 'expect';
+import {createRenderer} from 'react-addons-test-utils';
 import reactElementToJSXString from './index';
 
 class TestComponent extends React.Component {}
@@ -253,5 +254,30 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
     expect(
       reactElementToJSXString(<div a={[<div><span /></div>]} />)
     ).toEqual(`<div a={[<div><span /></div>]} />`);
+  });
+
+  it(`reactElementToJSXString(decorator(<span />)`, () => {
+    function myDecorator(ComposedComponent) {
+      class MyDecorator extends React.Component {
+        render() {
+          return (
+            <div>
+              <ComposedComponent {...this.props} />
+            </div>
+          );
+        }
+      }
+      MyDecorator.displayName = ComposedComponent.name + '-Decorated';
+      return MyDecorator;
+    }
+
+    var NestedSpan = myDecorator(<span />);
+    var renderer = createRenderer();
+    renderer.render(<NestedSpan />);
+    expect(
+      reactElementToJSXString(renderer.getRenderOutput())
+    ).toEqual(`<div>
+  <span />
+</div>`);
   });
 });
