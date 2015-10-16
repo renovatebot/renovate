@@ -1,3 +1,13 @@
+<a name="2.0.3"></a>
+## [2.0.3](https://github.com/algolia/react-element-to-jsx-string/compare/v2.0.2...v2.0.3) (2015-10-16)
+
+
+### Bug Fixes
+
+* handle arrays the right way ([597a910](https://github.com/algolia/react-element-to-jsx-string/commit/597a910))
+
+
+
 <a name="2.0.2"></a>
 ## [2.0.2](https://github.com/algolia/react-element-to-jsx-string/compare/v2.0.1...v2.0.2) (2015-10-16)
 
