@@ -262,7 +262,7 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
         render() {
           return (
             <div>
-              <ComposedComponent {...this.props} />
+              {React.createElement(ComposedComponent.type, this.props)}
             </div>
           );
         }
