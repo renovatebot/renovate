@@ -1,3 +1,22 @@
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v1.1.2...v2.0.0) (2015-10-16)
+
+
+### Features
+
+* **deep:** handle deeply set functions ([ad21917](https://github.com/algolia/react-element-to-jsx-string/commit/ad21917))
+* **deep:** handle deeply set React elements ([a06f329](https://github.com/algolia/react-element-to-jsx-string/commit/a06f329))
+
+
+### BREAKING CHANGES
+
+* deep: functions are now stringified to `function noRefCheck()
+{}` instead of `function () {code;}`. For various reasons AND to be
+specific about the fact that we do not represent the function in a
+realistic way.
+
+
+
 <a name="1.1.2"></a>
 ## [1.1.2](https://github.com/algolia/react-element-to-jsx-string/compare/v1.1.1...v1.1.2) (2015-10-16)
 
