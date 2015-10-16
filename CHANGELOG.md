@@ -1,4 +1,14 @@
 <a name="1.1.1"></a>
+## [1.1.1](https://github.com/algolia/react-element-to-jsx-string/compare/v1.1.1...v1.1.1) (2015-10-16)
+
+
+### Bug Fixes
+
+* handle null and undefined prop values ([9a57a10](https://github.com/algolia/react-element-to-jsx-string/commit/9a57a10)), closes [#1](https://github.com/algolia/react-element-to-jsx-string/issues/1)
+
+
+
+<a name="1.1.1"></a>
 ## [1.1.1](https://github.com/algolia/react-element-to-jsx-string/compare/v1.1.0...v1.1.1) (2015-10-15)
 
 
