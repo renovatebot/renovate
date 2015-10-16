@@ -182,9 +182,21 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
     ).toEqual(`<div a={{b: function noRefCheck() {}}} />`);
   });
 
-  it(`reactElementToJSXString(<div a={{b: {c: {d: <div />}}}} />`, () => {
+  it(`reactElementToJSXString(<div a={{b: {c: {d: <div />, e: null}}}} />`, () => {
     expect(
-      reactElementToJSXString(<div a={{b: {c: {d: <div />}}}} />)
-    ).toEqual(`<div a={{b: {c: {d: <div />}}}} />`);
+      reactElementToJSXString(<div a={{b: {c: {d: <div />, e: null}}}} />)
+    ).toEqual(`<div a={{b: {c: {d: <div />, e: null}}}} />`);
+  });
+
+  it(`reactElementToJSXString(<div a={{b: {}}} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={{b: {}}} />)
+    ).toEqual(`<div a={{b: {}}} />`);
+  });
+
+  it(`reactElementToJSXString(<div a={{}} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={{}} />)
+    ).toEqual(`<div a={{}} />`);
   });
 });

@@ -85,8 +85,8 @@ function formatProps(props) {
       return {
         name: propName,
         value: formatPropValue(props[propName])
-          .replace(/'?<__reactElementToJSXString__ReactElement__>/g, '')
-          .replace(/<\/__reactElementToJSXString__ReactElement__>'?/g, '')
+          .replace(/'?<__reactElementToJSXString__Wrapper__>/g, '')
+          .replace(/<\/__reactElementToJSXString__Wrapper__>'?/g, '')
       };
     });
 }
@@ -110,11 +110,13 @@ function formatValue(value) {
     //   // <div a={{b: <div />}} />
     // we then remove the whole wrapping
     // otherwise, the element would be surrounded by quotes: <div a={{b: '<div />'}} />
-    return '<__reactElementToJSXString__ReactElement__>' +
+    return '<__reactElementToJSXString__Wrapper__>' +
       toJSXString({ReactElement: value, inline: true}) +
-      '</__reactElementToJSXString__ReactElement__>';
+      '</__reactElementToJSXString__Wrapper__>';
   } else if (isPlainObject(value)) {
-    return stringifyObject(value);
+    return '<__reactElementToJSXString__Wrapper__>' +
+      stringifyObject(value) +
+      '</__reactElementToJSXString__Wrapper__>';
   }
 
   return value;
@@ -127,13 +129,15 @@ function recurse({lvl, inline}) {
 }
 
 function stringifyObject(obj) {
-  obj = traverse(obj).map(function(value) {
-    if (isElement(value) || this.isLeaf) {
-      this.update(formatValue(value));
-    }
-  });
+  if (Object.keys(obj).length > 0) {
+    obj = traverse(obj).map(function(value) {
+      if (isElement(value) || this.isLeaf) {
+        this.update(formatValue(value));
+      }
+    });
 
-  obj = sortobject(obj);
+    obj = sortobject(obj);
+  }
 
   return collapse(stringify(obj))
     .replace(/{ /g, '{')
