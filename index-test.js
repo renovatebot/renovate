@@ -200,6 +200,7 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
     ).toEqual(`<div a={{}} />`);
   });
 
+
   it(`reactElementToJSXString(<div><span /><span /></div>)`, () => {
     expect(
       reactElementToJSXString(<div><span /><span /></div>)
@@ -216,5 +217,41 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   foo
   <div />
 </div>`);
+  });
+
+  it(`reactElementToJSXString(<div a={[1, 2, 3, 4]} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={[1, 2, 3, 4]} />)
+    ).toEqual(`<div a={[1, 2, 3, 4]} />`);
+  });
+
+  it(`reactElementToJSXString(<div a={[1, 2, 3, 4]} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={[{Hello: ', world!'}]} />)
+    ).toEqual(`<div a={[{Hello: ', world!'}]} />`);
+  });
+
+  it(`reactElementToJSXString(<div a={[{}]} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={[{}]} />)
+    ).toEqual(`<div a={[{}]} />`);
+  });
+
+  it(`reactElementToJSXString(<div a={[]} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={[]} />)
+    ).toEqual(`<div a={[]} />`);
+  });
+
+  it(`reactElementToJSXString(<div a={[]} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={[]} />)
+    ).toEqual(`<div a={[]} />`);
+  });
+
+  it(`reactElementToJSXString(<div a={[<div><span /></div>]} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={[<div><span /></div>]} />)
+    ).toEqual(`<div a={[<div><span /></div>]} />`);
   });
 });
