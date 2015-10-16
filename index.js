@@ -92,21 +92,19 @@ function formatPropValue(propValue) {
     return `"${propValue}"`;
   }
 
-  let out = `{`;
+  return `{${formatValue(propValue)}}`;
+}
 
-  if (typeof propValue === 'function') {
-    out += `function () {code;}`;
-  } else if (typeof propValue === 'number') {
-    out += propValue;
-  } else if (isElement(propValue)) {
-    out += toJSXString({ReactElement: propValue, inline: true});
-  } else {
-    out += stringifyObject(propValue);
+function formatValue(value) {
+  if (typeof value === 'function') {
+    return `function () {code;}`;
+  } else if (isElement(value)) {
+    return toJSXString({ReactElement: value, inline: true});
+  } else if (value && Object.keys(value).length > 0) {
+    return stringifyObject(value);
   }
 
-  out += `}`;
-
-  return out;
+  return value;
 }
 
 function recurse({lvl, inline}) {
