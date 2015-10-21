@@ -1,3 +1,13 @@
+<a name="2.0.5"></a>
+## [2.0.5](https://github.com/algolia/react-element-to-jsx-string/compare/v2.0.4...v2.0.5) (2015-10-21)
+
+
+### Bug Fixes
+
+* merge plain strings props replacements ([7c2bf27](https://github.com/algolia/react-element-to-jsx-string/commit/7c2bf27))
+
+
+
 <a name="2.0.4"></a>
 ## [2.0.4](https://github.com/algolia/react-element-to-jsx-string/compare/v2.0.3...v2.0.4) (2015-10-16)
 

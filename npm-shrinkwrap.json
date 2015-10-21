@@ -1,6 +1,6 @@
 {
   "name": "react-element-to-jsx-string",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "dependencies": {
     "babel": {
       "version": "5.8.23",
