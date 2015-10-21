@@ -284,7 +284,7 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   it(`reactElementToJSXString(<div>Hello {this.props.name}</div>`, () => {
     class InlineProps extends React.Component {
       render() {
-        return <div>Hello {this.props.name}</div>
+        return <div>Hello {this.props.name}</div>;
       }
     }
 

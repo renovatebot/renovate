@@ -81,7 +81,7 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
   return out;
 }
 
-function mergePlainStringChildren(prev, cur, index, arr) {
+function mergePlainStringChildren(prev, cur) {
   var lastItem = prev[prev.length - 1];
 
   if (typeof lastItem === 'string' && typeof cur === 'string') {
