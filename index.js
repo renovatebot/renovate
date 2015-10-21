@@ -60,6 +60,7 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
     } else {
       out += React.Children
         .toArray(children)
+        .reduce(mergePlainStringChildren, [])
         .map(
           recurse({lvl, inline})
         ).join('\n' + spacer(lvl));
@@ -78,6 +79,18 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
   }
 
   return out;
+}
+
+function mergePlainStringChildren(prev, cur, index, arr) {
+  var lastItem = prev[prev.length - 1];
+
+  if (typeof lastItem === 'string' && typeof cur === 'string') {
+    prev[prev.length - 1] += cur;
+  } else {
+    prev.push(cur);
+  }
+
+  return prev;
 }
 
 function formatProps(props) {

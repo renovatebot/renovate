@@ -280,4 +280,21 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   <span />
 </div>`);
   });
+
+  it(`reactElementToJSXString(<div>Hello {this.props.name}</div>`, () => {
+    class InlineProps extends React.Component {
+      render() {
+        return <div>Hello {this.props.name}</div>
+      }
+    }
+
+    let renderer = createRenderer();
+    renderer.render(<InlineProps name="John" />);
+    let actualElement = renderer.getRenderOutput();
+    expect(reactElementToJSXString(actualElement))
+      .toEqual(
+`<div>
+  Hello John
+</div>`);
+  });
 });
