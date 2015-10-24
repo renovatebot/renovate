@@ -328,4 +328,14 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   />
 </div>`);
   });
+
+  it(`reactElementToJSXString(<div aprop="test" key="yes" />`, () => {
+    expect(
+      reactElementToJSXString(<div aprop="test" key="yes" />)
+    ).toEqual(
+`<div
+  key="yes"
+  aprop="test"
+/>`);
+  });
 });

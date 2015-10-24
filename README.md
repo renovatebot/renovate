@@ -20,6 +20,7 @@ Features:
 - props: supports string, number, function (inlined as `prop={function noRefCheck() {}}`), object, ReactElement (inlined), regex..
 - order props alphabetically
 - sort object keys in a deterministic order (`o={{a: 1, b:2}} === o={{b:2, a:1}}`)
+- handle `ref` and `key` attributes, they are always on top of props
 - React's documentation indent style for JSX
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->

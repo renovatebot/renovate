@@ -38,6 +38,12 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
     attributes.push(getJSXAttribute('ref', ReactElement.ref));
   }
 
+  if (ReactElement.key !== null &&
+      // React automatically add key=".X" when there are some children
+      !/^\./.test(ReactElement.key)) {
+    attributes.push(getJSXAttribute('key', ReactElement.key));
+  }
+
   attributes = attributes.concat(props);
 
   attributes.forEach(attribute => {
