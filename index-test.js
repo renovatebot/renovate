@@ -297,4 +297,35 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   Hello John
 </div>`);
   });
+
+  it(`reactElementToJSXString(<div a={[<div><span /></div>]} />`, () => {
+    expect(
+      reactElementToJSXString(<div a={[<div><span /></div>]} />)
+    ).toEqual(`<div a={[<div><span /></div>]} />`);
+  });
+
+  it(`reactElementToJSXString(<div aprop="test" ref="yes" />`, () => {
+    expect(
+      reactElementToJSXString(<div aprop="test" ref="yes" />)
+    ).toEqual(
+`<div
+  ref="yes"
+  aprop="test"
+/>`);
+  });
+
+  it(`reactElementToJSXString(<div aprop="a" ref="yes"><span ref="wee" zprop="z"/></div>`, () => {
+    expect(
+      reactElementToJSXString(<div aprop="a" ref="yes"><span ref="wee" zprop="z"/></div>)
+    ).toEqual(
+`<div
+  ref="yes"
+  aprop="a"
+>
+  <span
+    ref="wee"
+    zprop="z"
+  />
+</div>`);
+  });
 });
