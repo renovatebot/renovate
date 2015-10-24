@@ -3,6 +3,7 @@ node_js: 4
 install: npm install
 script:
  - npm test
+ - npm prune
  - npm shrinkwrap --dev
 before_cache: npm prune
 branches:
