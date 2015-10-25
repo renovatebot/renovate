@@ -1,3 +1,14 @@
+<a name="2.1.0"></a>
+# [2.1.0](https://github.com/algolia/react-element-to-jsx-string/compare/v2.0.5...v2.1.0) (2015-10-25)
+
+
+### Features
+
+* handle key="" ([da85281](https://github.com/algolia/react-element-to-jsx-string/commit/da85281))
+* handle ref="manual-ref" ([5b18191](https://github.com/algolia/react-element-to-jsx-string/commit/5b18191))
+
+
+
 <a name="2.0.5"></a>
 ## [2.0.5](https://github.com/algolia/react-element-to-jsx-string/compare/v2.0.4...v2.0.5) (2015-10-21)
 
