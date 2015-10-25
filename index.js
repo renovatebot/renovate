@@ -31,19 +31,32 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
 
   let out = `<${tagName}`;
   let props = formatProps(ReactElement.props);
+  let attributes = [];
   let children = ReactElement.props.children;
 
-  props.forEach(prop => {
-    if (props.length === 1 || inline) {
+  if (ReactElement.ref !== null) {
+    attributes.push(getJSXAttribute('ref', ReactElement.ref));
+  }
+
+  if (ReactElement.key !== null &&
+      // React automatically add key=".X" when there are some children
+      !/^\./.test(ReactElement.key)) {
+    attributes.push(getJSXAttribute('key', ReactElement.key));
+  }
+
+  attributes = attributes.concat(props);
+
+  attributes.forEach(attribute => {
+    if (attributes.length === 1 || inline) {
       out += ` `;
     } else {
       out += `\n${spacer(lvl + 1)}`;
     }
 
-    out += `${prop.name}=${prop.value}`;
+    out += `${attribute.name}=${attribute.value}`;
   });
 
-  if (props.length > 1 && !inline) {
+  if (attributes.length > 1 && !inline) {
     out += `\n${spacer(lvl)}`;
   }
 
@@ -71,7 +84,7 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
     }
     out += `</${tagName}>`;
   } else {
-    if (props.length <= 1) {
+    if (attributes.length <= 1) {
       out += ` `;
     }
 
@@ -99,16 +112,20 @@ function formatProps(props) {
     .filter(noChildren)
     .sort()
     .map(propName => {
-      return {
-        name: propName,
-        value: formatPropValue(props[propName])
-          .replace(/'?<__reactElementToJSXString__Wrapper__>/g, '')
-          .replace(/<\/__reactElementToJSXString__Wrapper__>'?/g, '')
-      };
+      return getJSXAttribute(propName, props[propName]);
     });
 }
 
-function formatPropValue(propValue) {
+function getJSXAttribute(name, value) {
+  return {
+    name,
+    value: formatJSXAttribute(value)
+      .replace(/'?<__reactElementToJSXString__Wrapper__>/g, '')
+      .replace(/<\/__reactElementToJSXString__Wrapper__>'?/g, '')
+  };
+}
+
+function formatJSXAttribute(propValue) {
   if (typeof propValue === 'string') {
     return `"${propValue}"`;
   }
