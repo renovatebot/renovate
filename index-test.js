@@ -338,4 +338,12 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   aprop="test"
 />`);
   });
+
+  it(`reactElementToJSXString(<div>\\n  {null}\\n</div>`, () => {
+    let element = <div>
+  {null}
+</div>;
+
+    expect(reactElementToJSXString(element)).toEqual(`<div />`);
+  });
 });
