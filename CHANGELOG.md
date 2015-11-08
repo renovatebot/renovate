@@ -1,3 +1,15 @@
+<a name="2.1.2"></a>
+## [2.1.2](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.0...v2.1.2) (2015-11-08)
+
+
+### Bug Fixes
+
+* **whitespace:** handle {true} {false} ([eaca1a2](https://github.com/algolia/react-element-to-jsx-string/commit/eaca1a2)), closes [#6](https://github.com/algolia/react-element-to-jsx-string/issues/6) [#7](https://github.com/algolia/react-element-to-jsx-string/issues/7)
+* handle <div>{123}</div> ([609ac78](https://github.com/algolia/react-element-to-jsx-string/commit/609ac78)), closes [#8](https://github.com/algolia/react-element-to-jsx-string/issues/8)
+* **whitespace:** stop rendering it differently in SOME cases ([128aa95](https://github.com/algolia/react-element-to-jsx-string/commit/128aa95))
+
+
+
 <a name="2.1.1"></a>
 ## [2.1.1](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.0...v2.1.1) (2015-11-08)
 
