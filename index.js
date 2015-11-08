@@ -11,7 +11,7 @@ export default function reactElementToJSXString(ReactElement) {
 }
 
 function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
-  if (typeof ReactElement === 'string') {
+  if (typeof ReactElement === 'string' || typeof ReactElement === 'number') {
     return ReactElement;
   } else if (!isElement(ReactElement)) {
     throw new Error('react-element-to-jsx-string: Expected a ReactElement, ' +

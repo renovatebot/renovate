@@ -390,4 +390,12 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
       reactElementToJSXString(<div>{null}</div>)
     ).toEqual(`<div />`);
   });
+
+  it(`reactElementToJSXString(<div>{123}</div>)`, () => {
+    expect(
+      reactElementToJSXString(<div>{123}</div>)
+    ).toEqual(`<div>
+  123
+</div>`);
+  });
 });
