@@ -1,4 +1,6 @@
 /* eslint-env mocha */
+/* eslint react/no-multi-comp:0 */
+/* eslint react/prop-types:0 */
 
 import React from 'react';
 import expect from 'expect';
@@ -340,9 +342,9 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   });
 
   it(`reactElementToJSXString(<div>\\n  {null}\\n</div>`, () => {
-    let element = <div>
+    let element = (<div>
   {null}
-</div>;
+</div>);
 
     expect(reactElementToJSXString(element)).toEqual(`<div />`);
   });
