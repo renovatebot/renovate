@@ -33,8 +33,7 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
   let props = formatProps(ReactElement.props);
   let attributes = [];
   let children = React.Children.toArray(ReactElement.props.children)
-    .filter(onlyMeaningfulChildren)
-    .map(displayWhitespace);
+    .filter(onlyMeaningfulChildren);
 
   if (ReactElement.ref !== null) {
     attributes.push(getJSXAttribute('ref', ReactElement.ref));
@@ -191,12 +190,4 @@ function noChildren(propName) {
 
 function onlyMeaningfulChildren(children) {
   return children !== true && children !== false && children !== null;
-}
-
-function displayWhitespace(children) {
-  if (children === ' ') {
-    return '<whitespace>';
-  }
-
-  return children;
 }

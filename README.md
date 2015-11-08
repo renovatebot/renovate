@@ -22,7 +22,6 @@ Features:
 - sort object keys in a deterministic order (`o={{a: 1, b:2}} === o={{b:2, a:1}}`)
 - handle `ref` and `key` attributes, they are always on top of props
 - React's documentation indent style for JSX
-- Display whitespace as `<whitespace>` when needed
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->

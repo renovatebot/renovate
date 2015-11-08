@@ -382,9 +382,7 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   it(`reactElementToJSXString(<div> {false} </div>)`, () => {
     expect(
       reactElementToJSXString(<div> {false} </div>)
-    ).toEqual(`<div>
-  <whitespace><whitespace>
-</div>`);
+    ).toEqual(`<div>\n    \n</div>`);
   });
 
   it(`reactElementToJSXString(<div>{null}</div>)`, () => {
