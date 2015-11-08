@@ -346,4 +346,48 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
 
     expect(reactElementToJSXString(element)).toEqual(`<div />`);
   });
+
+  it(`reactElementToJSXString(<div>{true}</div>)`, () => {
+    expect(
+      reactElementToJSXString(<div>{true}</div>)
+    ).toEqual(`<div />`);
+  });
+
+  it(`reactElementToJSXString(<div>{false}</div>)`, () => {
+    expect(
+      reactElementToJSXString(<div>{false}</div>)
+    ).toEqual(`<div />`);
+  });
+
+  it(`reactElementToJSXString(<div>{false}</div>)`, () => {
+    expect(
+      reactElementToJSXString(<div>
+        {false}
+</div>)
+    ).toEqual(
+      reactElementToJSXString(<div></div>)
+    );
+  });
+
+  it(`reactElementToJSXString(<div>\n{false}\n</div>)`, () => {
+    expect(
+      reactElementToJSXString(<div>
+{false}
+</div>)
+    ).toEqual(`<div />`);
+  });
+
+  it(`reactElementToJSXString(<div> {false} </div>)`, () => {
+    expect(
+      reactElementToJSXString(<div> {false} </div>)
+    ).toEqual(`<div>
+  <whitespace><whitespace>
+</div>`);
+  });
+
+  it(`reactElementToJSXString(<div>{null}</div>)`, () => {
+    expect(
+      reactElementToJSXString(<div>{null}</div>)
+    ).toEqual(`<div />`);
+  });
 });

@@ -32,7 +32,9 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
   let out = `<${tagName}`;
   let props = formatProps(ReactElement.props);
   let attributes = [];
-  let children = ReactElement.props.children;
+  let children = React.Children.toArray(ReactElement.props.children)
+    .filter(onlyMeaningfulChildren)
+    .map(displayWhitespace);
 
   if (ReactElement.ref !== null) {
     attributes.push(getJSXAttribute('ref', ReactElement.ref));
@@ -60,7 +62,7 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
     out += `\n${spacer(lvl)}`;
   }
 
-  if (React.Children.count(children) > 0) {
+  if (children.length > 0) {
     out += `>`;
     lvl++;
     if (!inline) {
@@ -71,8 +73,7 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
     if (typeof children === 'string') {
       out += children;
     } else {
-      out += React.Children
-        .toArray(children)
+      out += children
         .reduce(mergePlainStringChildren, [])
         .map(
           recurse({lvl, inline})
@@ -186,4 +187,16 @@ function spacer(times) {
 
 function noChildren(propName) {
   return propName !== 'children';
+}
+
+function onlyMeaningfulChildren(children) {
+  return children !== true && children !== false && children !== null;
+}
+
+function displayWhitespace(children) {
+  if (children === ' ') {
+    return '<whitespace>';
+  }
+
+  return children;
 }
