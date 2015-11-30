@@ -5,6 +5,7 @@ import isPlainObject from 'is-plain-object';
 import stringify from 'stringify-object';
 import sortobject from 'sortobject';
 import traverse from 'traverse';
+import fill from 'lodash.fill';
 
 export default function reactElementToJSXString(ReactElement) {
   return toJSXString({ReactElement});
@@ -181,7 +182,7 @@ function stringifyObject(obj) {
 }
 
 function spacer(times) {
-  return new Array(times).fill(`  `).join(``);
+  return fill(new Array(times), `  `).join(``);
 }
 
 function noChildren(propName) {
