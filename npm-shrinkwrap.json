@@ -2,7 +2,7 @@
   "name": "react-element-to-jsx-string",
   "version": "2.1.2",
   "npm-shrinkwrap-version": "200.4.0",
-  "node-version": "v4.1.1",
+  "node-version": "v4.2.2",
   "dependencies": {
     "babel": {
       "version": "5.8.29",
@@ -2646,15 +2646,9 @@
         }
       }
     },
-    "lodash.fill": {
-      "version": "3.2.2",
-      "resolved": "https://registry.npmjs.org/lodash.fill/-/lodash.fill-3.2.2.tgz",
-      "dependencies": {
-        "lodash._isiterateecall": {
-          "version": "3.0.9",
-          "resolved": "https://registry.npmjs.org/lodash._isiterateecall/-/lodash._isiterateecall-3.0.9.tgz"
-        }
-      }
+    "lodash": {
+      "version": "3.10.1",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz"
     },
     "mocha": {
       "version": "2.3.3",

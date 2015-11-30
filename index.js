@@ -5,7 +5,7 @@ import isPlainObject from 'is-plain-object';
 import stringify from 'stringify-object';
 import sortobject from 'sortobject';
 import traverse from 'traverse';
-import fill from 'lodash.fill';
+import fill from 'lodash/array/fill';
 
 export default function reactElementToJSXString(ReactElement) {
   return toJSXString({ReactElement});
