@@ -22,6 +22,7 @@
     "eslint-config-algolia": "^4.2.0",
     "eslint-plugin-react": "^3.8.0",
     "expect": "^1.12.2",
+    "lodash.fill": "^3.2.2",
     "mocha": "^2.3.3",
     "npm-shrinkwrap": "^200.4.0",
     "react": "^0.14.2"

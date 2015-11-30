@@ -2646,6 +2646,16 @@
         }
       }
     },
+    "lodash.fill": {
+      "version": "3.2.2",
+      "resolved": "https://registry.npmjs.org/lodash.fill/-/lodash.fill-3.2.2.tgz",
+      "dependencies": {
+        "lodash._isiterateecall": {
+          "version": "3.0.9",
+          "resolved": "https://registry.npmjs.org/lodash._isiterateecall/-/lodash._isiterateecall-3.0.9.tgz"
+        }
+      }
+    },
     "mocha": {
       "version": "2.3.3",
       "resolved": "https://registry.npmjs.org/mocha/-/mocha-2.3.3.tgz",
