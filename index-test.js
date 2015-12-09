@@ -6,10 +6,14 @@ import React from 'react';
 import expect from 'expect';
 import {createRenderer} from 'react-addons-test-utils';
 import reactElementToJSXString from './index';
-import StatelessComponent from './tests/StatelessComponent';
-import StatelessAnonComponent from './tests/StatelessAnonComponent';
+import AnonymousStatelessComponent from './AnonymousStatelessComponent';
 
 class TestComponent extends React.Component {}
+
+function NamedStatelessComponent(props) {
+  let {children} = props;
+  return <div>{children}</div>;
+}
 
 describe(`reactElementToJSXString(ReactElement)`, () => {
   it(`reactElementToJSXString(<TestComponent/>)`, () => {
@@ -18,16 +22,17 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
     ).toEqual(`<TestComponent />`);
   });
 
-  it(`reactElementToJSXString(<StatelessComponent/>)`, () => {
+  it(`reactElementToJSXString(<NamedStatelessComponent/>)`, () => {
     expect(
-      reactElementToJSXString(<StatelessComponent/>)
-      ).toEqual(`<StatelessComponent />`);
+      reactElementToJSXString(<NamedStatelessComponent/>)
+      ).toEqual(`<NamedStatelessComponent />`);
   });
 
-  it(`reactElementToJSXString(<StatelessAnonComponent/>)`, () => {
+  // cannot be done, see https://github.com/algolia/react-element-to-jsx-string/issues/11
+  it.skip(`reactElementToJSXString(<AnonymousStatelessComponent/>)`, () => {
     expect(
-      reactElementToJSXString(<StatelessAnonComponent/>)
-      ).toEqual(`<StatelessAnonComponent />`);
+      reactElementToJSXString(<AnonymousStatelessComponent/>)
+      ).toEqual(`<AnonymousStatelessComponent />`);
   });
 
   it(`reactElementToJSXString(React.createElement('div'))`, () => {
