@@ -6,6 +6,8 @@ import React from 'react';
 import expect from 'expect';
 import {createRenderer} from 'react-addons-test-utils';
 import reactElementToJSXString from './index';
+import StatelessComponent from './tests/StatelessComponent';
+import StatelessAnonComponent from './tests/StatelessAnonComponent';
 
 class TestComponent extends React.Component {}
 
@@ -14,6 +16,18 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
     expect(
       reactElementToJSXString(<TestComponent/>)
     ).toEqual(`<TestComponent />`);
+  });
+
+  it(`reactElementToJSXString(<StatelessComponent/>)`, () => {
+    expect(
+      reactElementToJSXString(<StatelessComponent/>)
+      ).toEqual(`<StatelessComponent />`);
+  });
+
+  it(`reactElementToJSXString(<StatelessAnonComponent/>)`, () => {
+    expect(
+      reactElementToJSXString(<StatelessAnonComponent/>)
+      ).toEqual(`<StatelessAnonComponent />`);
   });
 
   it(`reactElementToJSXString(React.createElement('div'))`, () => {
