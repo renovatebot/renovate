@@ -190,5 +190,5 @@ function noChildren(propName) {
 }
 
 function onlyMeaningfulChildren(children) {
-  return children !== true && children !== false && children !== null;
+  return children !== true && children !== false && children !== null && children !== '';
 }
