@@ -1,3 +1,12 @@
+<a name="2.1.4"></a>
+## [2.1.4](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.3...v2.1.4) (2015-12-10)
+
+
+### Bug Fixes
+
+* **stateless comps:** add No Display Name as default component name ([89ea2f2](https://github.com/algolia/react-element-to-jsx-string/commit/89ea2f2))
+* consider elements containing only {''} as empty (resulting DOM being empty) ([d837683](https://github.com/algolia/react-element-to-jsx-string/commit/d837683))
+
 <a name="2.1.3"></a>
 ## [2.1.3](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.0...v2.1.3) (2015-11-30)
 
