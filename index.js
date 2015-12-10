@@ -19,16 +19,11 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
       'got `' + (typeof ReactElement) + '`');
   }
 
-  let tagName;
-
-  if (ReactElement.type === undefined) {
-    tagName = 'UnknownElement';
-  } else {
-    tagName = ReactElement.type.name ||
-      ReactElement.type.displayName ||
-      ReactElement.type.type ||
-      ReactElement.type;
-  }
+  let tagName = ReactElement.type.name || // function name
+    ReactElement.type.displayName ||
+    (typeof ReactElement.type === 'function' ? // function without a name, you should provide one
+      'No Display Name' :
+      ReactElement.type);
 
   let out = `<${tagName}`;
   let props = formatProps(ReactElement.props);

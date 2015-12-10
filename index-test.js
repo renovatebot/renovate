@@ -28,11 +28,20 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
       ).toEqual(`<NamedStatelessComponent />`);
   });
 
-  // cannot be done, see https://github.com/algolia/react-element-to-jsx-string/issues/11
-  it.skip(`reactElementToJSXString(<AnonymousStatelessComponent/>)`, () => {
+  it(`reactElementToJSXString(<AnonymousStatelessComponent/>)`, () => {
     expect(
       reactElementToJSXString(<AnonymousStatelessComponent/>)
-      ).toEqual(`<AnonymousStatelessComponent />`);
+      ).toEqual(`<No Display Name />`);
+  });
+
+  it(`reactElementToJSXString(<AnonymousStatelessComponent/>) with a displayName`, () => {
+    AnonymousStatelessComponent.displayName = 'I have a name!';
+
+    expect(
+      reactElementToJSXString(<AnonymousStatelessComponent/>)
+      ).toEqual(`<I have a name! />`);
+
+    delete AnonymousStatelessComponent.displayName;
   });
 
   it(`reactElementToJSXString(React.createElement('div'))`, () => {
