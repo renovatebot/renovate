@@ -1,3 +1,10 @@
+<a name="2.1.5"></a>
+## [2.1.5](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.4...v2.1.5) (2016-01-05)
+
+### Bug Fixes
+
+* stop breaking lines when interpolating {number}s ([13b832c](https://github.com/algolia/react-element-to-jsx-string/commit/13b832c))
+
 <a name="2.1.4"></a>
 ## [2.1.4](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.3...v2.1.4) (2015-12-10)
 
