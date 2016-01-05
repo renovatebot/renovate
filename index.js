@@ -93,6 +93,10 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
 function mergePlainStringChildren(prev, cur) {
   var lastItem = prev[prev.length - 1];
 
+  if (typeof cur === 'number') {
+    cur = '' + cur;
+  }
+
   if (typeof lastItem === 'string' && typeof cur === 'string') {
     prev[prev.length - 1] += cur;
   } else {

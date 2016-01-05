@@ -432,4 +432,12 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
       reactElementToJSXString(<div>{''}</div>)
     ).toEqual(reactElementToJSXString(<div/>));
   });
+
+  it(`reactElementToJSXString(<div>String with {1} js expression</div>)`, () => {
+    expect(
+      reactElementToJSXString(<div>String with {1} js number</div>)
+    ).toEqual(`<div>
+  String with 1 js number
+</div>`);
+  });
 });
