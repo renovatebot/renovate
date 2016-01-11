@@ -440,4 +440,28 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
   String with 1 js number
 </div>`);
   });
+
+  it(`reactElementToJSXString(<TestComponent />, { displayName: toUpper })`, () => {
+    expect(
+      reactElementToJSXString(<TestComponent />, {
+        displayName: (element) => element.type.name.toUpperCase()
+      })
+    ).toEqual(`<TESTCOMPONENT />`);
+  });
+
+  it(`reactElementToJSXString(<div co={<div a="1" />} />, { displayName: toUpper })`, () => {
+    expect(
+      reactElementToJSXString(<div co={<div a="1" />} />, {
+        displayName: (element) => element.type.toUpperCase()
+      })
+    ).toEqual(`<DIV co={<DIV a="1" />} />`);
+  });
+
+  it(`reactElementToJSXString(<div co={{a: <div a="1" />}} />, { displayName: toUpper })`, () => {
+    expect(
+      reactElementToJSXString(<div co={{a: <div a="1" />}} />, {
+        displayName: (element) => element.type.toUpperCase()
+      })
+    ).toEqual(`<DIV co={{a: <DIV a="1" />}} />`);
+  });
 });

@@ -7,11 +7,11 @@ import sortobject from 'sortobject';
 import traverse from 'traverse';
 import fill from 'lodash/array/fill';
 
-export default function reactElementToJSXString(ReactElement) {
-  return toJSXString({ReactElement});
+export default function reactElementToJSXString(ReactElement, options) {
+  return toJSXString({ReactElement, options});
 }
 
-function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
+function toJSXString({ReactElement = null, lvl = 0, inline = false, options = {}}) {
   if (typeof ReactElement === 'string' || typeof ReactElement === 'number') {
     return ReactElement;
   } else if (!isElement(ReactElement)) {
@@ -19,26 +19,23 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
       'got `' + (typeof ReactElement) + '`');
   }
 
-  let tagName = ReactElement.type.name || // function name
-    ReactElement.type.displayName ||
-    (typeof ReactElement.type === 'function' ? // function without a name, you should provide one
-      'No Display Name' :
-      ReactElement.type);
+  let getDisplayName = options.displayName || getDefaultDisplayName;
+  let tagName = getDisplayName(ReactElement);
 
   let out = `<${tagName}`;
-  let props = formatProps(ReactElement.props);
+  let props = formatProps(ReactElement.props, options);
   let attributes = [];
   let children = React.Children.toArray(ReactElement.props.children)
     .filter(onlyMeaningfulChildren);
 
   if (ReactElement.ref !== null) {
-    attributes.push(getJSXAttribute('ref', ReactElement.ref));
+    attributes.push(getJSXAttribute('ref', ReactElement.ref, options));
   }
 
   if (ReactElement.key !== null &&
       // React automatically add key=".X" when there are some children
       !/^\./.test(ReactElement.key)) {
-    attributes.push(getJSXAttribute('key', ReactElement.key));
+    attributes.push(getJSXAttribute('key', ReactElement.key, options));
   }
 
   attributes = attributes.concat(props);
@@ -71,7 +68,7 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
       out += children
         .reduce(mergePlainStringChildren, [])
         .map(
-          recurse({lvl, inline})
+          recurse({lvl, inline, options})
         ).join('\n' + spacer(lvl));
     }
     if (!inline) {
@@ -90,6 +87,14 @@ function toJSXString({ReactElement = null, lvl = 0, inline = false}) {
   return out;
 }
 
+function getDefaultDisplayName(ReactElement) {
+  return ReactElement.type.name || // function name
+    ReactElement.type.displayName ||
+    (typeof ReactElement.type === 'function' ? // function without a name, you should provide one
+      'No Display Name' :
+      ReactElement.type);
+}
+
 function mergePlainStringChildren(prev, cur) {
   var lastItem = prev[prev.length - 1];
 
@@ -106,34 +111,34 @@ function mergePlainStringChildren(prev, cur) {
   return prev;
 }
 
-function formatProps(props) {
+function formatProps(props, options) {
   return Object
     .keys(props)
     .filter(noChildren)
     .sort()
     .map(propName => {
-      return getJSXAttribute(propName, props[propName]);
+      return getJSXAttribute(propName, props[propName], options);
     });
 }
 
-function getJSXAttribute(name, value) {
+function getJSXAttribute(name, value, options) {
   return {
     name,
-    value: formatJSXAttribute(value)
+    value: formatJSXAttribute(value, options)
       .replace(/'?<__reactElementToJSXString__Wrapper__>/g, '')
       .replace(/<\/__reactElementToJSXString__Wrapper__>'?/g, '')
   };
 }
 
-function formatJSXAttribute(propValue) {
+function formatJSXAttribute(propValue, options) {
   if (typeof propValue === 'string') {
     return `"${propValue}"`;
   }
 
-  return `{${formatValue(propValue)}}`;
+  return `{${formatValue(propValue, options)}}`;
 }
 
-function formatValue(value) {
+function formatValue(value, options) {
   if (typeof value === 'function') {
     return function noRefCheck() {};
   } else if (isElement(value)) {
@@ -145,28 +150,28 @@ function formatValue(value) {
     // we then remove the whole wrapping
     // otherwise, the element would be surrounded by quotes: <div a={{b: '<div />'}} />
     return '<__reactElementToJSXString__Wrapper__>' +
-      toJSXString({ReactElement: value, inline: true}) +
+      toJSXString({ReactElement: value, inline: true, options}) +
       '</__reactElementToJSXString__Wrapper__>';
   } else if (isPlainObject(value) || Array.isArray(value)) {
     return '<__reactElementToJSXString__Wrapper__>' +
-      stringifyObject(value) +
+      stringifyObject(value, options) +
       '</__reactElementToJSXString__Wrapper__>';
   }
 
   return value;
 }
 
-function recurse({lvl, inline}) {
+function recurse({lvl, inline, options}) {
   return ReactElement => {
-    return toJSXString({ReactElement, lvl, inline});
+    return toJSXString({ReactElement, lvl, inline, options});
   };
 }
 
-function stringifyObject(obj) {
+function stringifyObject(obj, options) {
   if (Object.keys(obj).length > 0 || obj.length > 0) {
     obj = traverse(obj).map(function(value) {
       if (isElement(value) || this.isLeaf) {
-        this.update(formatValue(value));
+        this.update(formatValue(value, options));
       }
     });
 
