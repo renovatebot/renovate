@@ -57,6 +57,16 @@ console.log(reactElementToJSXString(<div a="1" b="2">Hello, world!</div>));
 // </div>
 ```
 
+## API
+
+### reactElementToJSXString(ReactElement[, options])
+
+**options.displayName: function(ReactElement)**
+  
+  Provide a different algorithm in charge of finding the right display name (name of the underlying Class) for your element.
+
+  Just return the name you want for the provided ReactElement, as a string.
+
 ## Test
 
 ```sh

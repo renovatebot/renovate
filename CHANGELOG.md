@@ -1,3 +1,10 @@
+<a name="2.2.0"></a>
+# [2.2.0](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.5...v2.2.0) (2016-01-14)
+
+* add reactElementToJSXString(ReactElement, opts) opts.displayName option to
+  allow choosing the display name of components
+
+
 <a name="2.1.5"></a>
 ## [2.1.5](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.4...v2.1.5) (2016-01-05)
 
