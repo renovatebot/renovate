@@ -1,6 +1,6 @@
 {
   "name": "react-element-to-jsx-string",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "npm-shrinkwrap-version": "200.4.0",
   "node-version": "v5.5.0",
   "dependencies": {
