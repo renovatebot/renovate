@@ -16,19 +16,19 @@
   "repository": "algolia/react-element-to-jsx-string",
   "devDependencies": {
     "babel": "^5.8.29",
-    "babel-eslint": "^4.1.4",
-    "eslint": "^1.9.0",
+    "babel-eslint": "^4.1.8",
+    "eslint": "^1.10.3",
     "eslint-config-airbnb": "^1.0.0",
-    "eslint-config-algolia": "^4.2.0",
-    "eslint-plugin-react": "^3.8.0",
-    "expect": "^1.12.2",
+    "eslint-config-algolia": "^4.6.0",
+    "eslint-plugin-react": "^3.16.1",
+    "expect": "^1.14.0",
     "lodash.fill": "^3.2.2",
-    "mocha": "^2.3.3",
+    "mocha": "^2.4.5",
     "npm-shrinkwrap": "^200.4.0",
-    "react": "^0.14.2"
+    "react": "^0.14.7"
   },
   "peerDependencies": {
-    "react": "^0.14.0"
+    "react": "^0.14.7"
   },
   "dependencies": {
     "collapse-white-space": "^1.0.0",
