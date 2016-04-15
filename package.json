@@ -27,13 +27,13 @@
     "react": "^15.0.1"
   },
   "peerDependencies": {
-    "react": "^0.14.7 || ^15.0.1"
+    "react": "^0.14.8 || ^15.0.1"
   },
   "dependencies": {
     "collapse-white-space": "^1.0.0",
     "is-plain-object": "^2.0.1",
     "lodash": "^3.10.1",
-    "react-addons-test-utils": "^15.0.1",
+    "react-addons-test-utils": "^0.14.8 || ^15.0.1",
     "sortobject": "^1.0.0",
     "stringify-object": "^2.3.1",
     "traverse": "^0.6.6"
