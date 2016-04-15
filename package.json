@@ -8,8 +8,7 @@
     "build": "babel index.js -o index-dist.js",
     "build:watch": "babel index.js -o index-dist.js -w",
     "test": "mocha --opts mocha.opts && eslint .",
-    "test:watch": "mocha --opts mocha.opts --watch --reporter min",
-    "shrinkwrap": "npm-shrinkwrap --dev"
+    "test:watch": "mocha --opts mocha.opts --watch --reporter min"
   },
   "author": "Algolia <support@algolia.com> (https://github.com/algolia/)",
   "license": "MIT",
@@ -23,19 +22,18 @@
     "eslint-plugin-algolia": "^1.5.0",
     "eslint-plugin-react": "^4.2.3",
     "expect": "^1.14.0",
-    "lodash.fill": "^3.2.2",
+    "lodash.fill": "^3.3.4",
     "mocha": "^2.4.5",
-    "npm-shrinkwrap": "^200.4.0",
-    "react": "^0.14.7"
+    "react": "^15.0.1"
   },
   "peerDependencies": {
-    "react": "^0.14.7 || ^15.0.0-rc.1"
+    "react": "^0.14.7 || ^15.0.1"
   },
   "dependencies": {
     "collapse-white-space": "^1.0.0",
     "is-plain-object": "^2.0.1",
     "lodash": "^3.10.1",
-    "react-addons-test-utils": "^0.14.2 || ^15.0.0-rc.1",
+    "react-addons-test-utils": "^15.0.1",
     "sortobject": "^1.0.0",
     "stringify-object": "^2.3.1",
     "traverse": "^0.6.6"
