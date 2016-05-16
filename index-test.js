@@ -464,4 +464,14 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
       })
     ).toEqual(`<DIV co={{a: <DIV a="1" />}} />`);
   });
+  it('should omit true as value', () => {
+    expect(
+      reactElementToJSXString(<div primary={true} />)  // eslint-disable-line react/jsx-boolean-value
+    ).toEqual(`<div primary />`);
+  });
+  it('should omit attributes with false as value', () => {
+    expect(
+      reactElementToJSXString(<div primary={false} />)  // eslint-disable-line react/jsx-boolean-value
+    ).toEqual(`<div />`);
+  });
 });
