@@ -1,6 +1,7 @@
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v2.6.1...v3.0.0) (2016-05-25)
 
+Boolean attributes are now translated to short version automatically.
 
 
 <a name="2.6.0"></a>
