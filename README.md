@@ -17,7 +17,7 @@ Useful for unit testing and any other need you may think of.
 
 Features:
 - supports nesting and deep nesting like `<div a={{b: {c: {d: <div />}}}} />`
-- props: supports string, number, function (inlined as `prop={function noRefCheck() {}}`), object, ReactElement (inlined), regex..
+- props: supports string, number, function (inlined as `prop={function noRefCheck() {}}`), object, ReactElement (inlined), regex, booleans (with [shorthand syntax](https://facebook.github.io/react/docs/jsx-in-depth.html#boolean-attributes)), ...
 - order props alphabetically
 - sort object keys in a deterministic order (`o={{a: 1, b:2}} === o={{b:2, a:1}}`)
 - handle `ref` and `key` attributes, they are always on top of props

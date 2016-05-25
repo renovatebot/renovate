@@ -47,7 +47,11 @@ export default function reactElementToJSXString(ReactElement, options = {}) {
         out += `\n${spacer(lvl + 1)}`;
       }
 
-      out += `${attribute.name}=${attribute.value}`;
+      if (attribute.value === '{true}') {
+        out += `${attribute.name}`;
+      } else {
+        out += `${attribute.name}=${attribute.value}`;
+      }
     });
 
     if (attributes.length > 1 && !inline) {
@@ -91,6 +95,7 @@ export default function reactElementToJSXString(ReactElement, options = {}) {
     return Object
       .keys(props)
       .filter(noChildren)
+      .filter(prop => noFalse(props[prop]))
       .sort()
       .map(propName => {
         return getJSXAttribute(propName, props[propName]);
@@ -193,6 +198,10 @@ function spacer(times) {
 
 function noChildren(propName) {
   return propName !== 'children';
+}
+
+function noFalse(propValue) {
+  return typeof propValue !== 'boolean' || propValue;
 }
 
 function onlyMeaningfulChildren(children) {
