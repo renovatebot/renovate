@@ -7,8 +7,8 @@ import sortobject from 'sortobject';
 import traverse from 'traverse';
 import fill from 'lodash/array/fill';
 
-export default function reactElementToJSXString(ReactElement, options = {}) {
-  let getDisplayName = options.displayName || getDefaultDisplayName;
+export default function reactElementToJSXString(ReactElement, {displayName, showDefaultProps = true} = {}) {
+  let getDisplayName = displayName || getDefaultDisplayName;
 
   return toJSXString({ReactElement});
 
@@ -92,13 +92,18 @@ export default function reactElementToJSXString(ReactElement, options = {}) {
   }
 
   function formatProps(props, defaultProps) {
-    return Object
+    let formated = Object
       .keys(props)
       .filter(noChildren)
-      .filter(key => noFalse(props[key]))
-      .filter((key, value) => {
+      .filter(key => noFalse(props[key]));
+
+    if (!showDefaultProps) {
+      formated = formated.filter((key, value) => {
         return defaultProps[key] ? defaultProps[key] === value : true;
-      })
+      });
+    }
+
+    return formated
       .sort()
       .map(propName => {
         return getJSXAttribute(propName, props[propName]);
