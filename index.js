@@ -23,7 +23,7 @@ export default function reactElementToJSXString(ReactElement, options = {}) {
     let tagName = getDisplayName(Element);
 
     let out = `<${tagName}`;
-    let props = formatProps(Element.props);
+    let props = formatProps(Element.props, getDefaultProps(Element));
     let attributes = [];
     let children = React.Children.toArray(Element.props.children)
     .filter(onlyMeaningfulChildren);
@@ -91,11 +91,14 @@ export default function reactElementToJSXString(ReactElement, options = {}) {
     return out;
   }
 
-  function formatProps(props) {
+  function formatProps(props, defaultProps) {
     return Object
       .keys(props)
       .filter(noChildren)
-      .filter(prop => noFalse(props[prop]))
+      .filter(key => noFalse(props[key]))
+      .filter((key, value) => {
+        return defaultProps[key] === value
+      })
       .sort()
       .map(propName => {
         return getJSXAttribute(propName, props[propName]);
@@ -174,6 +177,10 @@ function getDefaultDisplayName(ReactElement) {
     (typeof ReactElement.type === 'function' ? // function without a name, you should provide one
       'No Display Name' :
       ReactElement.type);
+}
+
+function getDefaultProps(ReactElement) {
+  return ReactElement.type.defaultProps
 }
 
 function mergePlainStringChildren(prev, cur) {
