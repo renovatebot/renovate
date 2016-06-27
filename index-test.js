@@ -17,7 +17,7 @@ function NamedStatelessComponent(props) {
 
 class DefaultPropsComponent extends React.Component {}
 
-DefaultPropsComponent.defaultProps = { test: 'test' };
+DefaultPropsComponent.defaultProps = {test: 'test'};
 
 describe(`reactElementToJSXString(ReactElement)`, () => {
   it(`reactElementToJSXString(<TestComponent/>)`, () => {

@@ -97,7 +97,7 @@ export default function reactElementToJSXString(ReactElement, options = {}) {
       .filter(noChildren)
       .filter(key => noFalse(props[key]))
       .filter((key, value) => {
-        return defaultProps[key] ? defaultProps[key] === value : true
+        return defaultProps[key] ? defaultProps[key] === value : true;
       })
       .sort()
       .map(propName => {
@@ -180,7 +180,7 @@ function getDefaultDisplayName(ReactElement) {
 }
 
 function getDefaultProps(ReactElement) {
-  return ReactElement.type.defaultProps || {}
+  return ReactElement.type.defaultProps || {};
 }
 
 function mergePlainStringChildren(prev, cur) {
