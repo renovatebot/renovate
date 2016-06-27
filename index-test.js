@@ -461,7 +461,7 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
 
   it('should not render default props if "showDefaultProps" option is false', () => {
     expect(
-      reactElementToJSXString(<DefaultPropsComponent />, { showDefaultProps: false })
+      reactElementToJSXString(<DefaultPropsComponent />, {showDefaultProps: false})
     ).toEqual(`<DefaultPropsComponent />`);
   });
 
