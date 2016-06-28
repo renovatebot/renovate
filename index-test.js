@@ -15,6 +15,10 @@ function NamedStatelessComponent(props) {
   return <div>{children}</div>;
 }
 
+class DefaultPropsComponent extends React.Component {}
+
+DefaultPropsComponent.defaultProps = {test: 'test'};
+
 describe(`reactElementToJSXString(ReactElement)`, () => {
   it(`reactElementToJSXString(<TestComponent/>)`, () => {
     expect(
@@ -447,6 +451,18 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
         displayName: (element) => element.type.name.toUpperCase()
       })
     ).toEqual(`<TESTCOMPONENT />`);
+  });
+
+  it('should render default props', () => {
+    expect(
+      reactElementToJSXString(<DefaultPropsComponent />)
+    ).toEqual(`<DefaultPropsComponent test="test" />`);
+  });
+
+  it('should not render default props if "showDefaultProps" option is false', () => {
+    expect(
+      reactElementToJSXString(<DefaultPropsComponent />, {showDefaultProps: false})
+    ).toEqual(`<DefaultPropsComponent />`);
   });
 
   it(`reactElementToJSXString(<div co={<div a="1" />} />, { displayName: toUpper })`, () => {
