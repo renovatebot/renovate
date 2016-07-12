@@ -4,7 +4,7 @@ before_cache: npm prune
 branches:
   only:
     - master
-    - develop
+    - /^greenkeeper-.*$/
 # force container based infra
 # http://docs.travis-ci.com/user/workers/container-based-infrastructure/#Routing-your-build-to-container-based-infrastructure
 sudo: false
