@@ -1,10 +1,5 @@
 language: node_js
-node_js: 4
-install: npm install
-script:
- - npm test
- - npm prune
- - npm shrinkwrap --dev
+node_js: 6
 before_cache: npm prune
 branches:
   only:
