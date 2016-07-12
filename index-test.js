@@ -465,6 +465,12 @@ describe(`reactElementToJSXString(ReactElement)`, () => {
     ).toEqual(`<DefaultPropsComponent />`);
   });
 
+  it('should render props that differ from their defaults if "showDefaultProps" option is false', () => {
+    expect(
+      reactElementToJSXString(<DefaultPropsComponent test="foo" />, {showDefaultProps: false})
+    ).toEqual(`<DefaultPropsComponent test="foo" />`);
+  });
+
   it(`reactElementToJSXString(<div co={<div a="1" />} />, { displayName: toUpper })`, () => {
     expect(
       reactElementToJSXString(<div co={<div a="1" />} />, {

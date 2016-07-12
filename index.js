@@ -98,8 +98,8 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
       .filter(key => noFalse(props[key]));
 
     if (!showDefaultProps) {
-      formated = formated.filter((key, value) => {
-        return defaultProps[key] ? defaultProps[key] === value : true;
+      formated = formated.filter(key => {
+        return defaultProps[key] ? defaultProps[key] !== props[key] : true;
       });
     }
 
