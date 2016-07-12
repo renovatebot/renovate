@@ -1,6 +1,6 @@
 {
   "name": "react-element-to-jsx-string",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Turn a ReactElement into the corresponding JSX string.",
   "main": "index-dist.js",
   "scripts": {
