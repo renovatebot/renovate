@@ -21,7 +21,6 @@
     "babel-register": "^6.9.0",
     "eslint-config-algolia": "^5.1.0",
     "expect": "^1.14.0",
-    "lodash.fill": "^3.3.4",
     "mocha": "^2.4.5",
     "react": "^15.2.1"
   },
