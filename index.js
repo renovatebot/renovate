@@ -8,7 +8,7 @@ import traverse from 'traverse';
 import fill from 'lodash/array/fill';
 
 export default function reactElementToJSXString(ReactElement, {displayName, showDefaultProps = true} = {}) {
-  let getDisplayName = displayName || getDefaultDisplayName;
+  const getDisplayName = displayName || getDefaultDisplayName;
 
   return toJSXString({ReactElement});
 
@@ -16,16 +16,18 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
     if (typeof Element === 'string' || typeof Element === 'number') {
       return Element;
     } else if (!isElement(Element)) {
-      throw new Error('react-element-to-jsx-string: Expected a ReactElement, ' +
-      'got `' + (typeof Element) + '`');
+      throw new Error(
+`react-element-to-jsx-string: Expected a ReactElement,
+got \`${typeof Element}\``
+      );
     }
 
-    let tagName = getDisplayName(Element);
+    const tagName = getDisplayName(Element);
 
     let out = `<${tagName}`;
-    let props = formatProps(Element.props, getDefaultProps(Element));
+    const props = formatProps(Element.props, getDefaultProps(Element));
     let attributes = [];
-    let children = React.Children.toArray(Element.props.children)
+    const children = React.Children.toArray(Element.props.children)
     .filter(onlyMeaningfulChildren);
 
     if (Element.ref !== null) {
@@ -34,7 +36,7 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
 
     if (Element.key !== null &&
       // React automatically add key=".X" when there are some children
-      !/^\./.test(Element.key)) {
+      !(/^\./).test(Element.key)) {
       attributes.push(getJSXAttribute('key', Element.key));
     }
 
@@ -42,7 +44,7 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
 
     attributes.forEach(attribute => {
       if (attributes.length === 1 || inline) {
-        out += ` `;
+        out += ' ';
       } else {
         out += `\n${spacer(lvl + 1)}`;
       }
@@ -59,7 +61,7 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
     }
 
     if (children.length > 0) {
-      out += `>`;
+      out += '>';
       lvl++;
       if (!inline) {
         out += `\n`;
@@ -73,7 +75,7 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
         .reduce(mergePlainStringChildren, [])
         .map(
           recurse({lvl, inline})
-        ).join('\n' + spacer(lvl));
+        ).join(`\n${spacer(lvl)}`);
       }
       if (!inline) {
         out += `\n`;
@@ -82,7 +84,7 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
       out += `</${tagName}>`;
     } else {
       if (attributes.length <= 1) {
-        out += ` `;
+        out += ' ';
       }
 
       out += '/>';
@@ -92,22 +94,18 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
   }
 
   function formatProps(props, defaultProps) {
-    let formated = Object
+    let formatted = Object
       .keys(props)
       .filter(noChildren)
       .filter(key => noFalse(props[key]));
 
     if (!showDefaultProps) {
-      formated = formated.filter(key => {
-        return defaultProps[key] ? defaultProps[key] !== props[key] : true;
-      });
+      formatted = formatted.filter(key => defaultProps[key] ? defaultProps[key] !== props[key] : true);
     }
 
-    return formated
+    return formatted
       .sort()
-      .map(propName => {
-        return getJSXAttribute(propName, props[propName]);
-      });
+      .map(propName => getJSXAttribute(propName, props[propName]));
   }
 
   function getJSXAttribute(name, value) {
@@ -128,6 +126,8 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
   }
 
   function formatValue(value) {
+    const wrapper = '__reactElementToJSXString__Wrapper__';
+
     if (typeof value === 'function') {
       return function noRefCheck() {};
     } else if (isElement(value)) {
@@ -138,26 +138,21 @@ export default function reactElementToJSXString(ReactElement, {displayName, show
       //   // <div a={{b: <div />}} />
       // we then remove the whole wrapping
       // otherwise, the element would be surrounded by quotes: <div a={{b: '<div />'}} />
-      return '<__reactElementToJSXString__Wrapper__>' +
-        toJSXString({ReactElement: value, inline: true}) +
-        '</__reactElementToJSXString__Wrapper__>';
+      return `<${wrapper}>${toJSXString({ReactElement: value, inline: true})}</${wrapper}>`;
     } else if (isPlainObject(value) || Array.isArray(value)) {
-      return '<__reactElementToJSXString__Wrapper__>' +
-        stringifyObject(value) +
-        '</__reactElementToJSXString__Wrapper__>';
+      return `<${wrapper}>${stringifyObject(value)}</${wrapper}>`;
     }
 
     return value;
   }
 
   function recurse({lvl, inline}) {
-    return Element => {
-      return toJSXString({ReactElement: Element, lvl, inline});
-    };
+    return Element => toJSXString({ReactElement: Element, lvl, inline});
   }
 
   function stringifyObject(obj) {
     if (Object.keys(obj).length > 0 || obj.length > 0) {
+      // eslint-disable-next-line array-callback-return
       obj = traverse(obj).map(function(value) {
         if (isElement(value) || this.isLeaf) {
           this.update(formatValue(value));
@@ -189,10 +184,10 @@ function getDefaultProps(ReactElement) {
 }
 
 function mergePlainStringChildren(prev, cur) {
-  var lastItem = prev[prev.length - 1];
+  const lastItem = prev[prev.length - 1];
 
   if (typeof cur === 'number') {
-    cur = '' + cur;
+    cur = String(cur);
   }
 
   if (typeof lastItem === 'string' && typeof cur === 'string') {
@@ -205,7 +200,7 @@ function mergePlainStringChildren(prev, cur) {
 }
 
 function spacer(times) {
-  return fill(new Array(times), `  `).join(``);
+  return fill(new Array(times), '  ').join('');
 }
 
 function noChildren(propName) {

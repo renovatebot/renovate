@@ -1,2 +1,2 @@
---compilers js:babel/register
+--compilers js:babel-register
 index-test.js
