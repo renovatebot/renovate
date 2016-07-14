@@ -7,7 +7,7 @@ import sortobject from 'sortobject';
 import traverse from 'traverse';
 import {fill} from 'lodash';
 
-export default function reactElementToJSXString(ReactElement, {displayName, showDefaultProps = true} = {}) {
+export default function reactElementToJSXString(ReactElement, {displayName, showDefaultProps = true, showFunctions = false} = {}) {
   const getDisplayName = displayName || getDefaultDisplayName;
 
   return toJSXString({ReactElement});
@@ -128,7 +128,7 @@ got \`${typeof Element}\``
   function formatValue(value) {
     const wrapper = '__reactElementToJSXString__Wrapper__';
 
-    if (typeof value === 'function') {
+    if (typeof value === 'function' && !showFunctions) {
       return function noRefCheck() {};
     } else if (isElement(value)) {
       // we use this delimiter hack in cases where the react element is a property
