@@ -7,7 +7,13 @@ import sortobject from 'sortobject';
 import traverse from 'traverse';
 import {fill} from 'lodash';
 
-export default function reactElementToJSXString(ReactElement, {displayName, showDefaultProps = true, showFunctions = false} = {}) {
+export default function reactElementToJSXString(
+  ReactElement, {
+    displayName,
+    showDefaultProps = true,
+    showFunctions = false
+  } = {}
+) {
   const getDisplayName = displayName || getDefaultDisplayName;
 
   return toJSXString({ReactElement});
