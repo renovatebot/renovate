@@ -75,9 +75,9 @@ console.log(reactElementToJSXString(<div a="1" b="2">Hello, world!</div>));
 
 **options.showFunctions: boolean, default false**
 
-  If true, functions are shown.
+  If true, functions bodies are shown.
 
-  If false, functions are replaced by `function noRefCheck() {}`.
+  If false, functions bodies are replaced with `function noRefCheck() {}`.
 
 ## Test
 
@@ -98,4 +98,3 @@ npm run build:watch
 [alexlande/react-to-jsx](https://github.com/alexlande/react-to-jsx/) was a good source of inspiration.
 
 We built our own module because we had some needs like ordering props in alphabetical order.
-
