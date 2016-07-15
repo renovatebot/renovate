@@ -73,6 +73,12 @@ console.log(reactElementToJSXString(<div a="1" b="2">Hello, world!</div>));
 
   If false, default props are omitted unless they differ from from the default value.
 
+**options.showFunctions: boolean, default false**
+
+  If true, functions are shown.
+
+  If false, functions are replaced by `function noRefCheck() {}`.
+
 ## Test
 
 ```sh

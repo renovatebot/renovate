@@ -495,4 +495,12 @@ describe('reactElementToJSXString(ReactElement)', () => {
       reactElementToJSXString(<div primary={false} />)  // eslint-disable-line react/jsx-boolean-value
     ).toEqual('<div />');
   });
+
+  it('should return the actual functions when "showFunctions" is true', () => {
+    expect(
+      reactElementToJSXString(<div fn={() => 'value'}/>, {showFunctions: true})
+    ).toEqual(`<div fn={function fn() {
+        return 'value';
+      }} />`);
+  });
 });
