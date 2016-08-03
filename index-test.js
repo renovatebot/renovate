@@ -20,7 +20,7 @@ DefaultPropsComponent.defaultProps = {test: 'test'};
 
 class DisplayNamePrecedence extends React.Component {}
 
-DisplayNamePrecedence.displayName = "This should take precedence";
+DisplayNamePrecedence.displayName = 'This should take precedence';
 
 describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<TestComponent/>)', () => {
