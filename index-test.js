@@ -18,6 +18,10 @@ class DefaultPropsComponent extends React.Component {}
 
 DefaultPropsComponent.defaultProps = {test: 'test'};
 
+class DisplayNamePrecedence extends React.Component {}
+
+DisplayNamePrecedence.displayName = "This should take precedence";
+
 describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<TestComponent/>)', () => {
     expect(
@@ -502,5 +506,11 @@ describe('reactElementToJSXString(ReactElement)', () => {
     ).toEqual(`<div fn={function fn() {
         return 'value';
       }} />`);
+  });
+
+  it('reactElementToJSXString(DisplayNamePrecedence)', () => {
+    expect(
+      reactElementToJSXString(<DisplayNamePrecedence />)
+      ).toEqual('<This should take precedence />');
   });
 });
