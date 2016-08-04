@@ -508,9 +508,9 @@ describe('reactElementToJSXString(ReactElement)', () => {
       }} />`);
   });
 
-  it('reactElementToJSXString(DisplayNamePrecedence)', () => {
+  it('reactElementToJSXString(<DisplayNamePrecedence />)', () => {
     expect(
       reactElementToJSXString(<DisplayNamePrecedence />)
-      ).toEqual('<This should take precedence />');
+    ).toEqual('<This should take precedence />');
   });
 });
