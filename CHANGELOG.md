@@ -1,3 +1,13 @@
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v3.2.0...v4.0.0) (2016-08-04)
+
+### BREAKING CHANGES
+
+* `Component.displayName` now takes precedence over `Component.name`. This will
+break for class and functional components that defined a `displayName` different
+from the class or function's own name.
+
+
 <a name="3.2.0"></a>
 # [3.2.0](https://github.com/algolia/react-element-to-jsx-string/compare/v3.1.2...v3.2.0) (2016-07-15)
 
