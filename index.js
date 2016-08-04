@@ -178,8 +178,8 @@ got \`${typeof Element}\``
 
 
 function getDefaultDisplayName(ReactElement) {
-  return ReactElement.type.name || // function name
-    ReactElement.type.displayName ||
+  return ReactElement.type.displayName ||
+    ReactElement.type.name || // function name
     (typeof ReactElement.type === 'function' ? // function without a name, you should provide one
       'No Display Name' :
       ReactElement.type);
