@@ -21,7 +21,7 @@
     "babel-register": "^6.9.0",
     "eslint-config-algolia": "^5.1.0",
     "expect": "^1.14.0",
-    "mocha": "^2.4.5",
+    "mocha": "^3.0.1",
     "react": "^15.2.1"
   },
   "peerDependencies": {
