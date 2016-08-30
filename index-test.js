@@ -456,6 +456,18 @@ describe('reactElementToJSXString(ReactElement)', () => {
     ).toEqual('<TESTCOMPONENT />');
   });
 
+  it('reactElementToJSXString(<TestComponent />, { useBooleanShorthandSyntax: false })', () => {
+    expect(
+      reactElementToJSXString(<TestComponent testTrue={true} testFalse={false} />, {
+        useBooleanShorthandSyntax: false
+      })
+    ).toEqual(
+`<TestComponent
+  testFalse={false}
+  testTrue={true}
+/>`);
+  });
+
   it('should render default props', () => {
     expect(
       reactElementToJSXString(<DefaultPropsComponent />)

@@ -11,7 +11,8 @@ export default function reactElementToJSXString(
   ReactElement, {
     displayName,
     showDefaultProps = true,
-    showFunctions = false
+    showFunctions = false,
+    useBooleanShorthandSyntax = true
   } = {}
 ) {
   const getDisplayName = displayName || getDefaultDisplayName;
@@ -55,7 +56,7 @@ got \`${typeof Element}\``
         out += `\n${spacer(lvl + 1)}`;
       }
 
-      if (attribute.value === '{true}') {
+      if (useBooleanShorthandSyntax && attribute.value === '{true}') {
         out += `${attribute.name}`;
       } else {
         out += `${attribute.name}=${attribute.value}`;
@@ -102,8 +103,11 @@ got \`${typeof Element}\``
   function formatProps(props, defaultProps) {
     let formatted = Object
       .keys(props)
-      .filter(noChildren)
-      .filter(key => noFalse(props[key]));
+      .filter(noChildren);
+
+    if (useBooleanShorthandSyntax) {
+      formatted = formatted.filter(key => noFalse(props[key]));
+    }
 
     if (!showDefaultProps) {
       formatted = formatted.filter(key => defaultProps[key] ? defaultProps[key] !== props[key] : true);
