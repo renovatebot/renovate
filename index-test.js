@@ -10,7 +10,7 @@ import AnonymousStatelessComponent from './AnonymousStatelessComponent';
 class TestComponent extends React.Component {}
 
 function NamedStatelessComponent(props) {
-  let {children} = props;
+  const {children} = props;
   return <div>{children}</div>;
 }
 
