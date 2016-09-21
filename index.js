@@ -10,6 +10,7 @@ import {fill} from 'lodash';
 export default function reactElementToJSXString(
   ReactElement, {
     displayName,
+    filterProps = [],
     showDefaultProps = true,
     showFunctions = false,
     useBooleanShorthandSyntax = true
@@ -47,7 +48,9 @@ got \`${typeof Element}\``
       attributes.push(getJSXAttribute('key', Element.key));
     }
 
-    attributes = attributes.concat(props);
+    attributes = attributes
+      .concat(props)
+      .filter(({name}) => filterProps.indexOf(name) === -1);
 
     attributes.forEach(attribute => {
       if (attributes.length === 1 || inline) {
