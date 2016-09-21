@@ -456,6 +456,14 @@ describe('reactElementToJSXString(ReactElement)', () => {
     ).toEqual('<TESTCOMPONENT />');
   });
 
+  it('reactElementToJSXString(<TestComponent />, { filterProps: [\'key\', \'className\'] })', () => {
+    expect(
+      reactElementToJSXString(<TestComponent a="b" key="aKey" className="aClass" />, {
+        filterProps: ['key', 'className']
+      })
+    ).toEqual('<TestComponent a="b" />');
+  });
+
   it('reactElementToJSXString(<TestComponent />, { useBooleanShorthandSyntax: false })', () => {
     expect(
       reactElementToJSXString(<TestComponent testTrue={true} testFalse={false} />, {
