@@ -107,6 +107,18 @@ npm run build
 npm run build:watch
 ```
 
+## Release
+
+```sh
+npm install mversion json -g
+mversion patch && \
+git commit -am `json -f package.json version` && \
+git tag v`json -f package.json version` && \
+git push && \
+git push --tags && \
+npm publish
+```
+
 ## Thanks
 
 [alexlande/react-to-jsx](https://github.com/alexlande/react-to-jsx/) was a good source of inspiration.
