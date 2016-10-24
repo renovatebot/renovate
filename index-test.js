@@ -238,7 +238,6 @@ describe('reactElementToJSXString(ReactElement)', () => {
     ).toEqual('<div a={{}} />');
   });
 
-
   it('reactElementToJSXString(<div><span /><span /></div>)', () => {
     expect(
       reactElementToJSXString(<div><span /><span /></div>)
@@ -287,10 +286,10 @@ describe('reactElementToJSXString(ReactElement)', () => {
     ).toEqual('<div a={[]} />');
   });
 
-  it('reactElementToJSXString(<div a={[<div><span /></div>]} />', () => {
+  it('reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />', () => {
     expect(
-      reactElementToJSXString(<div a={[<div><span /></div>]} />)
-    ).toEqual('<div a={[<div><span /></div>]} />');
+      reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />)
+    ).toEqual('<div a={[<div key="0"><span /></div>]} />');
   });
 
   it('reactElementToJSXString(decorator(<span />)', () => {
@@ -335,10 +334,10 @@ describe('reactElementToJSXString(ReactElement)', () => {
 </div>`);
   });
 
-  it('reactElementToJSXString(<div a={[<div><span /></div>]} />', () => {
+  it('reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />', () => {
     expect(
-      reactElementToJSXString(<div a={[<div><span /></div>]} />)
-    ).toEqual('<div a={[<div><span /></div>]} />');
+      reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />)
+    ).toEqual('<div a={[<div key="0"><span /></div>]} />');
   });
 
   it('reactElementToJSXString(<div aprop="test" ref="yes" />', () => {
@@ -451,7 +450,7 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<TestComponent />, { displayName: toUpper })', () => {
     expect(
       reactElementToJSXString(<TestComponent />, {
-        displayName: element => element.type.name.toUpperCase()
+        displayName: element => element.type.name.toUpperCase(),
       })
     ).toEqual('<TESTCOMPONENT />');
   });
@@ -459,7 +458,7 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<TestComponent />, { filterProps: [\'key\', \'className\'] })', () => {
     expect(
       reactElementToJSXString(<TestComponent a="b" key="aKey" className="aClass" />, {
-        filterProps: ['key', 'className']
+        filterProps: ['key', 'className'],
       })
     ).toEqual('<TestComponent a="b" />');
   });
@@ -467,7 +466,7 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<TestComponent />, { useBooleanShorthandSyntax: false })', () => {
     expect(
       reactElementToJSXString(<TestComponent testTrue={true} testFalse={false} />, {
-        useBooleanShorthandSyntax: false
+        useBooleanShorthandSyntax: false,
       })
     ).toEqual(
 `<TestComponent
@@ -497,7 +496,7 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<div co={<div a="1" />} />, { displayName: toUpper })', () => {
     expect(
       reactElementToJSXString(<div co={<div a="1" />} />, {
-        displayName: element => element.type.toUpperCase()
+        displayName: element => element.type.toUpperCase(),
       })
     ).toEqual('<DIV co={<DIV a="1" />} />');
   });
@@ -505,7 +504,7 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<div co={{a: <div a="1" />}} />, { displayName: toUpper })', () => {
     expect(
       reactElementToJSXString(<div co={{a: <div a="1" />}} />, {
-        displayName: element => element.type.toUpperCase()
+        displayName: element => element.type.toUpperCase(),
       })
     ).toEqual('<DIV co={{a: <DIV a="1" />}} />');
   });

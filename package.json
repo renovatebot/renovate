@@ -14,18 +14,22 @@
   "license": "MIT",
   "repository": "algolia/react-element-to-jsx-string",
   "devDependencies": {
-    "babel-cli": "^6.10.1",
+    "babel-cli": "^6.16.0",
+    "babel-eslint": "^7.0.0",
     "babel-plugin-lodash": "^3.2.9",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-react": "^6.11.1",
-    "babel-preset-stage-2": "^6.11.0",
-    "babel-register": "^6.9.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-2": "^6.17.0",
+    "babel-register": "^6.16.3",
     "eslint": "^3.8.1",
-    "eslint-config-algolia": "^5.1.0",
+    "eslint-config-algolia": "^6.0.1",
+    "eslint-import-resolver-webpack": "^0.6.0",
+    "eslint-plugin-import": "^2.0.1",
+    "eslint-plugin-jasmine": "^1.8.1",
     "eslint-plugin-react": "^6.4.1",
     "expect": "^1.14.0",
-    "mocha": "^3.0.1",
-    "react": "^15.2.1"
+    "mocha": "^3.1.2",
+    "react": "^15.3.2"
   },
   "peerDependencies": {
     "react": "^0.14.8 || ^15.0.1"

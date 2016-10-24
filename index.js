@@ -13,7 +13,7 @@ export default function reactElementToJSXString(
     filterProps = [],
     showDefaultProps = true,
     showFunctions = false,
-    useBooleanShorthandSyntax = true
+    useBooleanShorthandSyntax = true,
   } = {}
 ) {
   const getDisplayName = displayName || getDefaultDisplayName;
@@ -126,7 +126,7 @@ got \`${typeof Element}\``
       name,
       value: formatJSXAttribute(value)
         .replace(/'?<__reactElementToJSXString__Wrapper__>/g, '')
-        .replace(/<\/__reactElementToJSXString__Wrapper__>'?/g, '')
+        .replace(/<\/__reactElementToJSXString__Wrapper__>'?/g, ''),
     };
   }
 
@@ -182,7 +182,6 @@ got \`${typeof Element}\``
       .replace(/ \]/g, ']');
   }
 }
-
 
 function getDefaultDisplayName(ReactElement) {
   return ReactElement.type.displayName ||
