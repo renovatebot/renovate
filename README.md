@@ -111,7 +111,7 @@ npm run build:watch
 
 ```sh
 npm install mversion json -g
-mversion patch && \
+mversion patch && \ # or minor, or major, follow http://semver.org/
 git commit -am `json -f package.json version` && \
 git tag v`json -f package.json version` && \
 git push && \
