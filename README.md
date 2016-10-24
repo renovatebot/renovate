@@ -109,9 +109,11 @@ npm run build:watch
 
 ## Release
 
+Decide if this is a `patch`, `minor` or `major` release, look at http://semver.org/
+
 ```sh
 npm install mversion json -g
-mversion patch && \ # or minor, or major, follow http://semver.org/
+mversion PatchOrMinorOrMajor && \
 git commit -am `json -f package.json version` && \
 git tag v`json -f package.json version` && \
 git push && \
