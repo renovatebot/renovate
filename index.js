@@ -34,27 +34,37 @@ got \`${typeof Element}\``
     const tagName = getDisplayName(Element);
 
     let out = `<${tagName}`;
-    const props = formatProps(Element.props, getDefaultProps(Element));
+    const props = formatProps(Element.props, getDefaultProps(Element), inline, lvl);
     let attributes = [];
     const children = React.Children.toArray(Element.props.children)
     .filter(onlyMeaningfulChildren);
 
     if (Element.ref !== null) {
-      attributes.push(getJSXAttribute('ref', Element.ref));
+      attributes.push(getJSXAttribute('ref', Element.ref, inline, lvl));
     }
 
     if (Element.key !== null &&
       // React automatically add key=".X" when there are some children
       !(/^\./).test(Element.key)) {
-      attributes.push(getJSXAttribute('key', Element.key));
+      attributes.push(getJSXAttribute('key', Element.key, inline, lvl));
     }
 
     attributes = attributes
       .concat(props)
       .filter(({name}) => filterProps.indexOf(name) === -1);
 
+    let containsMultilineAttr = false;
     attributes.forEach(attribute => {
-      if (attributes.length === 1 || inline) {
+      let isMultilineAttr = false;
+      if (['plainObject', 'array', 'function'].indexOf(attribute.type) > -1) {
+        isMultilineAttr = attribute.value.indexOf('\n') > -1;
+      }
+
+      if (isMultilineAttr) {
+        containsMultilineAttr = true;
+      }
+
+      if ((attributes.length === 1 || inline) && !isMultilineAttr) {
         out += ' ';
       } else {
         out += `\n${spacer(lvl + 1, tabStop)}`;
@@ -67,7 +77,7 @@ got \`${typeof Element}\``
       }
     });
 
-    if (attributes.length > 1 && !inline) {
+    if ((attributes.length > 1 || containsMultilineAttr) && !inline) {
       out += `\n${spacer(lvl, tabStop)}`;
     }
 
@@ -104,7 +114,7 @@ got \`${typeof Element}\``
     return out;
   }
 
-  function formatProps(props, defaultProps) {
+  function formatProps(props, defaultProps, inline, lvl) {
     let formatted = Object
       .keys(props)
       .filter(noChildren);
@@ -119,27 +129,44 @@ got \`${typeof Element}\``
 
     return formatted
       .sort()
-      .map(propName => getJSXAttribute(propName, props[propName]));
+      .map(propName => getJSXAttribute(propName, props[propName], inline, lvl));
   }
 
-  function getJSXAttribute(name, value) {
+  function getJSXAttribute(name, value, inline, lvl) {
     return {
       name,
-      value: formatJSXAttribute(value)
+      type: getValueType(value),
+      value: formatJSXAttribute(value, inline, lvl)
         .replace(/'?<__reactElementToJSXString__Wrapper__>/g, '')
         .replace(/<\/__reactElementToJSXString__Wrapper__>'?/g, ''),
     };
   }
 
-  function formatJSXAttribute(propValue) {
+  function formatJSXAttribute(propValue, inline, lvl) {
     if (typeof propValue === 'string') {
       return `"${propValue}"`;
     }
 
-    return `{${formatValue(propValue)}}`;
+    return `{${formatValue(propValue, inline, lvl)}}`;
   }
 
-  function formatValue(value) {
+  function getValueType(value) {
+    if (isElement(value)) {
+      return 'element';
+    }
+
+    if (isPlainObject(value)) {
+      return 'plainObject';
+    }
+
+    if (Array.isArray(value)) {
+      return 'array';
+    }
+
+    return typeof value;
+  }
+
+  function formatValue(value, inline, lvl) {
     const wrapper = '__reactElementToJSXString__Wrapper__';
 
     if (typeof value === 'function' && !showFunctions) {
@@ -154,7 +181,7 @@ got \`${typeof Element}\``
       // otherwise, the element would be surrounded by quotes: <div a={{b: '<div />'}} />
       return `<${wrapper}>${toJSXString({ReactElement: value, inline: true})}</${wrapper}>`;
     } else if (isPlainObject(value) || Array.isArray(value)) {
-      return `<${wrapper}>${stringifyObject(value)}</${wrapper}>`;
+      return `<${wrapper}>${stringifyObject(value, inline, lvl)}</${wrapper}>`;
     }
 
     return value;
@@ -164,23 +191,32 @@ got \`${typeof Element}\``
     return Element => toJSXString({ReactElement: Element, lvl, inline});
   }
 
-  function stringifyObject(obj) {
+  function stringifyObject(obj, inline, lvl) {
     if (Object.keys(obj).length > 0 || obj.length > 0) {
       // eslint-disable-next-line array-callback-return
       obj = traverse(obj).map(function(value) {
         if (isElement(value) || this.isLeaf) {
-          this.update(formatValue(value));
+          this.update(formatValue(value, inline, lvl));
         }
       });
 
       obj = sortobject(obj);
     }
 
-    return collapse(stringify(obj))
-      .replace(/{ /g, '{')
-      .replace(/ }/g, '}')
-      .replace(/\[ /g, '[')
-      .replace(/ \]/g, ']');
+    const stringified = stringify(obj);
+
+    if (inline) {
+      return collapse(stringified)
+        .replace(/{ /g, '{')
+        .replace(/ }/g, '}')
+        .replace(/\[ /g, '[')
+        .replace(/ \]/g, ']');
+    }
+
+    // Replace tabs with spaces, and add necessary indentation in front of each new line
+    return stringified
+      .replace(/\t/g, spacer(1, tabStop))
+      .replace(/\n([^$])/g, `\n${spacer(lvl + 1, tabStop)}$1`);
   }
 }
 
@@ -213,7 +249,7 @@ function mergePlainStringChildren(prev, cur) {
 }
 
 function spacer(times, tabStop) {
-  return fill(new Array(times * tabStop), ' ').join('');
+  return times === 0 ? '' : fill(new Array(times * tabStop), ' ').join('');
 }
 
 function noChildren(propName) {

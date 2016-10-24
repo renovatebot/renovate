@@ -96,13 +96,27 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<div obj={{hello: \'world\'}}/>)', () => {
     expect(
       reactElementToJSXString(<div obj={{hello: 'world'}}/>)
-    ).toEqual('<div obj={{hello: \'world\'}} />');
+    ).toEqual(`<div
+  obj={{
+    hello: 'world'
+  }}
+ />`);
   });
 
   it('reactElementToJSXString(<div obj={{hello: [1, 2], world: {nested: true}}}/>)', () => {
     expect(
       reactElementToJSXString(<div obj={{hello: [1, 2], world: {nested: true}}}/>)
-    ).toEqual('<div obj={{hello: [1, 2], world: {nested: true}}} />');
+    ).toEqual(`<div
+  obj={{
+    hello: [
+      1,
+      2
+    ],
+    world: {
+      nested: true
+    }
+  }}
+ />`);
   });
 
   it('reactElementToJSXString(<div></div>)', () => {
@@ -212,6 +226,32 @@ describe('reactElementToJSXString(ReactElement)', () => {
 </div>`);
   });
 
+  it('reactElementToJSXString(<div a={{a: "1", b: {c: "3"}}}><div b={{c: {d: "4"}}}>Hello</div></div>)', () => {
+    expect(
+      reactElementToJSXString(
+        <div a={{a: '1', b: {c: '3'}}}><div b={{c: {d: '4'}}}>Hello</div></div>,
+      )
+    ).toEqual(
+`<div
+  a={{
+    a: '1',
+    b: {
+      c: '3'
+    }
+  }}
+>
+  <div
+    b={{
+      c: {
+        d: '4'
+      }
+    }}
+  >
+    Hello
+  </div>
+</div>`);
+  });
+
   it('reactElementToJSXString()', () => {
     expect(() => {
       reactElementToJSXString();
@@ -251,19 +291,36 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<div a={{b: function hello() {}}} />', () => {
     expect(
       reactElementToJSXString(<div a={{b: function hello() {}}} />)
-    ).toEqual('<div a={{b: function noRefCheck() {}}} />');
+    ).toEqual(`<div
+  a={{
+    b: function noRefCheck() {}
+  }}
+ />`);
   });
 
   it('reactElementToJSXString(<div a={{b: {c: {d: <div />, e: null}}}} />', () => {
     expect(
       reactElementToJSXString(<div a={{b: {c: {d: <div />, e: null}}}} />)
-    ).toEqual('<div a={{b: {c: {d: <div />, e: null}}}} />');
+    ).toEqual(`<div
+  a={{
+    b: {
+      c: {
+        d: <div />,
+        e: null
+      }
+    }
+  }}
+ />`);
   });
 
   it('reactElementToJSXString(<div a={{b: {}}} />', () => {
     expect(
       reactElementToJSXString(<div a={{b: {}}} />)
-    ).toEqual('<div a={{b: {}}} />');
+    ).toEqual(`<div
+  a={{
+    b: {}
+  }}
+ />`);
   });
 
   it('reactElementToJSXString(<div a={{}} />', () => {
@@ -293,25 +350,36 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<div a={[1, 2, 3, 4]} />', () => {
     expect(
       reactElementToJSXString(<div a={[1, 2, 3, 4]} />)
-    ).toEqual('<div a={[1, 2, 3, 4]} />');
+    ).toEqual(`<div
+  a={[
+    1,
+    2,
+    3,
+    4
+  ]}
+ />`);
   });
 
-  it('reactElementToJSXString(<div a={[1, 2, 3, 4]} />', () => {
+  it('reactElementToJSXString(<div a={[{Hello: \', world!\'}]} />)', () => {
     expect(
       reactElementToJSXString(<div a={[{Hello: ', world!'}]} />)
-    ).toEqual('<div a={[{Hello: \', world!\'}]} />');
+    ).toEqual(`<div
+  a={[
+    {
+      Hello: ', world!'
+    }
+  ]}
+ />`);
   });
 
   it('reactElementToJSXString(<div a={[{}]} />', () => {
     expect(
       reactElementToJSXString(<div a={[{}]} />)
-    ).toEqual('<div a={[{}]} />');
-  });
-
-  it('reactElementToJSXString(<div a={[]} />', () => {
-    expect(
-      reactElementToJSXString(<div a={[]} />)
-    ).toEqual('<div a={[]} />');
+    ).toEqual(`<div
+  a={[
+    {}
+  ]}
+ />`);
   });
 
   it('reactElementToJSXString(<div a={[]} />', () => {
@@ -323,7 +391,11 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />', () => {
     expect(
       reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />)
-    ).toEqual('<div a={[<div key="0"><span /></div>]} />');
+    ).toEqual(`<div
+  a={[
+    <div key="0"><span /></div>
+  ]}
+ />`);
   });
 
   it('reactElementToJSXString(decorator(<span />)', () => {
@@ -366,12 +438,6 @@ describe('reactElementToJSXString(ReactElement)', () => {
 `<div>
   Hello John
 </div>`);
-  });
-
-  it('reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />', () => {
-    expect(
-      reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />)
-    ).toEqual('<div a={[<div key="0"><span /></div>]} />');
   });
 
   it('reactElementToJSXString(<div aprop="test" ref="yes" />', () => {
@@ -540,7 +606,11 @@ describe('reactElementToJSXString(ReactElement)', () => {
       reactElementToJSXString(<div co={{a: <div a="1" />}} />, {
         displayName: element => element.type.toUpperCase(),
       })
-    ).toEqual('<DIV co={{a: <DIV a="1" />}} />');
+    ).toEqual(`<DIV
+  co={{
+    a: <DIV a="1" />
+  }}
+ />`);
   });
   it('should omit true as value', () => {
     expect(
@@ -556,9 +626,11 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('should return the actual functions when "showFunctions" is true', () => {
     expect(
       reactElementToJSXString(<div fn={() => 'value'}/>, {showFunctions: true})
-    ).toEqual(`<div fn={function fn() {
+    ).toEqual(`<div
+  fn={function fn() {
         return 'value';
-      }} />`);
+      }}
+ />`);
   });
 
   it('reactElementToJSXString(<DisplayNamePrecedence />)', () => {
