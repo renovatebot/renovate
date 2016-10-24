@@ -153,6 +153,15 @@ describe('reactElementToJSXString(ReactElement)', () => {
 </div>`);
   });
 
+  it('reactElementToJSXString(<div>Hello</div>, {tabStop: 4})', () => {
+    expect(
+      reactElementToJSXString(<div>Hello</div>, {tabStop: 4})
+    ).toEqual(
+`<div>
+    Hello
+</div>`);
+  });
+
   it('reactElementToJSXString(<div><div>Hello</div></div>)', () => {
     expect(
       reactElementToJSXString(<div><div>Hello</div></div>)
@@ -161,6 +170,17 @@ describe('reactElementToJSXString(ReactElement)', () => {
   <div>
     Hello
   </div>
+</div>`);
+  });
+
+  it('reactElementToJSXString(<div><div>Hello</div></div>, {tabStop: 4})', () => {
+    expect(
+      reactElementToJSXString(<div><div>Hello</div></div>, {tabStop: 4})
+    ).toEqual(
+`<div>
+    <div>
+        Hello
+    </div>
 </div>`);
   });
 
@@ -175,6 +195,20 @@ describe('reactElementToJSXString(ReactElement)', () => {
   <div>
     Hello
   </div>
+</div>`);
+  });
+
+  it('reactElementToJSXString(<div a="1" b="2"><div>Hello</div></div>, {tabStop: 4})', () => {
+    expect(
+      reactElementToJSXString(<div a="1" b="2"><div>Hello</div></div>, {tabStop: 4})
+    ).toEqual(
+`<div
+    a="1"
+    b="2"
+>
+    <div>
+        Hello
+    </div>
 </div>`);
   });
 

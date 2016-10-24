@@ -83,12 +83,16 @@ console.log(reactElementToJSXString(<div a="1" b="2">Hello, world!</div>));
 
   If false, functions bodies are replaced with `function noRefCheck() {}`.
 
+**options.tabStop: number, default 2**
+
+  Provide a different number of columns for indentation.
+
 **options.useBooleanShorthandSyntax: boolean, default true**
 
   If true, Boolean prop values will be omitted for [shorthand syntax](https://facebook.github.io/react/docs/jsx-in-depth.html#boolean-attributes).
 
   If false, Boolean prop values will be explicitly output like `prop={true}` and `prop={false}`
-  
+
 ## Test
 
 ```sh
