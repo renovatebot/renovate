@@ -1,3 +1,29 @@
+<a name="5.0.0"></a>
+# [5.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v4.2.0...v5.0.0) (2016-10-24)
+
+
+### Features
+
+* **pretty:** prettify objects, arrays, nested ([864b9db](https://github.com/algolia/react-element-to-jsx-string/commit/864b9db))
+
+
+### BREAKING CHANGES
+
+* pretty: objects and arrays are now prettified by default following #50 
+If this is a concern to you, open a PR that adds an option to inline parts or the whole output like before
+
+
+
+<a name="4.2.0"></a>
+# [4.2.0](https://github.com/algolia/react-element-to-jsx-string/compare/v4.1.0...v4.2.0) (2016-09-21)
+
+
+
+<a name="4.1.0"></a>
+# [4.1.0](https://github.com/algolia/react-element-to-jsx-string/compare/v4.0.0...v4.1.0) (2016-08-30)
+
+
+
 <a name="4.0.0"></a>
 # [4.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v3.2.0...v4.0.0) (2016-08-04)
 
