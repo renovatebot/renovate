@@ -25,7 +25,7 @@
     "eslint-config-algolia": "^6.0.1",
     "eslint-import-resolver-webpack": "^0.6.0",
     "eslint-plugin-import": "^2.0.1",
-    "eslint-plugin-jasmine": "^1.8.1",
+    "eslint-plugin-jasmine": "^2.0.0",
     "eslint-plugin-react": "^6.4.1",
     "expect": "^1.14.0",
     "mocha": "^3.1.2",
