@@ -40,7 +40,7 @@
     "lodash": "^4.13.1",
     "react-addons-test-utils": "^0.14.8 || ^15.0.1",
     "sortobject": "^1.0.0",
-    "stringify-object": "^2.3.1",
+    "stringify-object": "^3.0.0",
     "traverse": "^0.6.6"
   }
 }
