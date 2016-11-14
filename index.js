@@ -210,7 +210,7 @@ got \`${typeof Element}\``
         .replace(/{ /g, '{')
         .replace(/ }/g, '}')
         .replace(/\[ /g, '[')
-        .replace(/ \]/g, ']');
+        .replace(/ ]/g, ']');
     }
 
     // Replace tabs with spaces, and add necessary indentation in front of each new line
