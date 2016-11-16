@@ -1,6 +1,5 @@
-import React from 'react';
+import React, {isValidElement as isElement} from 'react';
 import collapse from 'collapse-white-space';
-import {isElement} from 'react-addons-test-utils';
 import isPlainObject from 'is-plain-object';
 import stringify from 'stringify-object';
 import sortobject from 'sortobject';

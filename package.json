@@ -21,16 +21,18 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
     "babel-register": "^6.18.0",
-    "eslint": "^3.10.1",
+    "eslint": "^3.10.2",
     "eslint-config-algolia": "^6.0.1",
     "eslint-import-resolver-webpack": "^0.7.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jasmine": "^2.1.0",
-    "eslint-plugin-react": "^6.7.0",
+    "eslint-plugin-react": "^6.7.1",
     "expect": "^1.14.0",
     "mocha": "^3.1.2",
-    "react": "^15.3.2",
-    "webpack": "^1.13.3"
+    "react": "^15.4.0",
+    "react-dom": "^15.4.0",
+    "webpack": "^1.13.3",
+    "react-addons-test-utils": "^15.4.0"
   },
   "peerDependencies": {
     "react": "^0.14.8 || ^15.0.1"
@@ -38,8 +40,7 @@
   "dependencies": {
     "collapse-white-space": "^1.0.0",
     "is-plain-object": "^2.0.1",
-    "lodash": "^4.17.0",
-    "react-addons-test-utils": "^0.14.8 || ^15.0.1",
+    "lodash": "^4.17.2",
     "sortobject": "^1.0.0",
     "stringify-object": "^3.0.0",
     "traverse": "^0.6.6"
