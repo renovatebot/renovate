@@ -1,3 +1,13 @@
+<a name="5.0.1"></a>
+## [5.0.1](https://github.com/algolia/react-element-to-jsx-string/compare/v5.0.0...v5.0.1) (2016-11-16)
+
+
+### Bug Fixes
+
+* **deps:** remove direct dep on react-addons-test-utils ([06d2588](https://github.com/algolia/react-element-to-jsx-string/commit/06d2588)), closes [#56](https://github.com/algolia/react-element-to-jsx-string/issues/56)
+
+
+
 <a name="5.0.0"></a>
 # [5.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v4.2.0...v5.0.0) (2016-10-24)
 
