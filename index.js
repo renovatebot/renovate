@@ -84,7 +84,7 @@ got \`${typeof Element}\``
       out += '>';
       lvl++;
       if (!inline) {
-        out += `\n`;
+        out += '\n';
         out += spacer(lvl, tabStop);
       }
 
@@ -98,7 +98,7 @@ got \`${typeof Element}\``
         ).join(`\n${spacer(lvl, tabStop)}`);
       }
       if (!inline) {
-        out += `\n`;
+        out += '\n';
         out += spacer(lvl - 1, tabStop);
       }
       out += `</${tagName}>`;

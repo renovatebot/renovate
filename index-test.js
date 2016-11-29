@@ -505,7 +505,7 @@ describe('reactElementToJSXString(ReactElement)', () => {
     );
   });
 
-  it(`reactElementToJSXString(<div>\n{false}\n</div>)`, () => {
+  it('reactElementToJSXString(<div>\n{false}\n</div>)', () => {
     expect(
       reactElementToJSXString(<div>
 {false}
@@ -516,7 +516,7 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<div> {false} </div>)', () => {
     expect(
       reactElementToJSXString(<div> {false} </div>)
-    ).toEqual(`<div>\n    \n</div>`);
+    ).toEqual('<div>\n    \n</div>');
   });
 
   it('reactElementToJSXString(<div>{null}</div>)', () => {
