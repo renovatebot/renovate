@@ -21,7 +21,7 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
     "babel-register": "^6.18.0",
-    "eslint": "^3.10.2",
+    "eslint": "^3.11.1",
     "eslint-config-algolia": "^6.0.1",
     "eslint-import-resolver-webpack": "^0.7.0",
     "eslint-plugin-import": "^2.2.0",
