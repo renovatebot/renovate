@@ -119,7 +119,7 @@ got \`${typeof Element}\``
       .filter(noChildren);
 
     if (useBooleanShorthandSyntax) {
-      formatted = formatted.filter(key => noFalse(props[key]));
+      formatted = formatted.filter(key => noFalse(props[key], defaultProps[key]));
     }
 
     if (!showDefaultProps) {
@@ -255,8 +255,8 @@ function noChildren(propName) {
   return propName !== 'children';
 }
 
-function noFalse(propValue) {
-  return typeof propValue !== 'boolean' || propValue;
+function noFalse(propValue, defaultValue) {
+  return typeof propValue !== 'boolean' || propValue || Boolean(defaultValue);
 }
 
 function onlyMeaningfulChildren(children) {

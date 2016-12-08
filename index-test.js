@@ -16,7 +16,7 @@ function NamedStatelessComponent(props) {
 
 class DefaultPropsComponent extends React.Component {}
 
-DefaultPropsComponent.defaultProps = {test: 'test'};
+DefaultPropsComponent.defaultProps = {test: 'test', boolean: true};
 
 class DisplayNamePrecedence extends React.Component {}
 
@@ -578,7 +578,11 @@ describe('reactElementToJSXString(ReactElement)', () => {
   it('should render default props', () => {
     expect(
       reactElementToJSXString(<DefaultPropsComponent />)
-    ).toEqual('<DefaultPropsComponent test="test" />');
+    ).toEqual(
+`<DefaultPropsComponent
+  boolean
+  test="test"
+/>`);
   });
 
   it('should not render default props if "showDefaultProps" option is false', () => {
@@ -591,6 +595,12 @@ describe('reactElementToJSXString(ReactElement)', () => {
     expect(
       reactElementToJSXString(<DefaultPropsComponent test="foo" />, {showDefaultProps: false})
     ).toEqual('<DefaultPropsComponent test="foo" />');
+  });
+
+  it('should render boolean props if value is `false`, default is `true` and "showDefaultProps" is false', () => {
+    expect(
+      reactElementToJSXString(<DefaultPropsComponent boolean={false} />, {showDefaultProps: false})
+    ).toEqual('<DefaultPropsComponent boolean={false} />');
   });
 
   it('reactElementToJSXString(<div co={<div a="1" />} />, { displayName: toUpper })', () => {
