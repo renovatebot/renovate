@@ -1,0 +1,7 @@
+.babelrc
+.eslintignore
+.eslintrc.js
+.travis.yml
+*.js
+!index-dist.js
+mocha.opts
