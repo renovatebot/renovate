@@ -29,6 +29,7 @@ if (!module.parent) {
 
 function updateRepo({ token, repoName }) {
   const repoPath = `tmp/${repoName}`;
+  rimraf.sync(repoPath);
   mkdirp.sync(repoPath);
 
   let repo;
