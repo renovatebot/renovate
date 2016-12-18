@@ -17,17 +17,22 @@ if (!module.parent) {
   // https://github.com/settings/tokens/new
   const token = process.argv[2];
   const repoName = process.argv[3];
+  let packageFile = process.argv[4];
 
   if (!token || !repoName) {
     console.error(`Usage: node index.js <token> <repo>`);
     process.exit(1);
   }
+  
+  if (!packageFile) {
+  	packageFile = 'package.json';
+  }
 
-  updateRepo({ token, repoName })
+  updateRepo({ token, repoName, packageFile })
     .catch(err => console.log(err.stack || err));
 }
 
-function updateRepo({ token, repoName }) {
+function updateRepo({ token, repoName, packageFile }) {
   const repoPath = `tmp/${repoName}`;
   rimraf.sync(repoPath);
   mkdirp.sync(repoPath);
@@ -57,7 +62,7 @@ function updateRepo({ token, repoName }) {
     })
     .then(commit => {
       headCommit = commit;
-      return readFile(headCommit, 'package.json');
+      return readFile(headCommit, packageFile);
     })
     .then(blob => {
       const pkg = JSON.parse(blob);
@@ -112,7 +117,7 @@ function updateRepo({ token, repoName }) {
     return repo.getBranchCommit(branchName)
       .then(_commit => {
         commit = _commit;
-        return readFile(commit, 'package.json');
+        return readFile(commit, packageFile);
       })
       .then(blob => {
         const pkg = JSON.parse(String(blob));
@@ -122,7 +127,7 @@ function updateRepo({ token, repoName }) {
         }
 
         pkg[depType][depName] = nextVersion;
-        fs.writeFileSync(`${repoPath}/package.json`, JSON.stringify(pkg, null, 2) + '\n');
+        fs.writeFileSync(`${repoPath}/${packageFile}`, JSON.stringify(pkg, null, 2) + '\n');
 
         return commitAndPush(commit, depName, nextVersion, branchName);
       });
@@ -138,7 +143,7 @@ function updateRepo({ token, repoName }) {
       .refreshIndex()
       .then(indexResult => {
         index = indexResult;
-        return index.addByPath('package.json');
+        return index.addByPath(packageFile);
       })
       .then(() => index.write())
       .then(() => index.writeTree())
@@ -213,7 +218,7 @@ function updateRepo({ token, repoName }) {
 
   function readFile(commit, filename) {
     return commit
-      .getEntry('package.json')
+      .getEntry(packageFile)
       .then(entry => entry.getBlob())
       .then(blob => String(blob));
   }
