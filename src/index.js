@@ -90,16 +90,22 @@ function updateRepo({ token, repoName, packageFile }) {
             const latestAvailable = res.body['dist-tags'].latest;
 
             if (semver.gt(latestAvailable, currentVersion)) {
-              return updateDependency(depType, depName, latestAvailable)
+              let majorUpgrade = false;
+              if (semver.major(latestAvailable) !== semver.major(currentVersion)) {
+                majorUpgrade = true;
+              }
+              return updateDependency(depType, depName, latestAvailable, majorUpgrade)
             }
           });
       });
     }, Promise.resolve());
   }
 
-  function updateDependency(depType, depName, nextVersion) {
-    const branchName = `upgrade/${depName}`;
-
+  function updateDependency(depType, depName, nextVersion, majorUpgrade) {
+    let branchName = `upgrade/${depName}`;
+    if (majorUpgrade) {
+      branchName += '-major';
+	}
     // try to checkout remote branche
     try {
       nativeCall(`git checkout ${branchName}`);
@@ -107,11 +113,11 @@ function updateRepo({ token, repoName, packageFile }) {
       nativeCall(`git checkout -b ${branchName}`);
     }
 
-    return updateBranch(branchName, depType, depName, nextVersion)
+    return updateBranch(branchName, depType, depName, nextVersion, majorUpgrade)
       .then(() => nativeCall(`git checkout master`));
   }
 
-  function updateBranch(branchName, depType, depName, nextVersion) {
+  function updateBranch(branchName, depType, depName, nextVersion, majorUpgrade) {
     let commit;
 
     return repo.getBranchCommit(branchName)
@@ -129,12 +135,15 @@ function updateRepo({ token, repoName, packageFile }) {
         pkg[depType][depName] = nextVersion;
         fs.writeFileSync(`${repoPath}/${packageFile}`, JSON.stringify(pkg, null, 2) + '\n');
 
-        return commitAndPush(commit, depName, nextVersion, branchName);
+        return commitAndPush(commit, depName, nextVersion, branchName, majorUpgrade);
       });
   }
 
-  function commitAndPush(commit, depName, nextVersion, branchName) {
-    const updateMessage = `Update ${depName} to version ${nextVersion}`;
+  function commitAndPush(commit, depName, nextVersion, branchName, majorUpgrade) {
+    let updateMessage = `Update ${depName} to version ${nextVersion}`;
+    if (majorUpgrade) {
+      updateMessage += ' (MAJOR)';
+    }
     console.log(updateMessage);
 
     let index;
@@ -176,7 +185,11 @@ function updateRepo({ token, repoName, packageFile }) {
         );
       })
       .then(() => {
-        return createPullRequest(branchName, `Update ${depName}`);
+        let prTitle = `Update ${depName}`;
+        if (majorUpgrade) {
+        	prTitle += ' (MAJOR)';
+        }
+        return createPullRequest(branchName, prTitle);
       });
   }
 
