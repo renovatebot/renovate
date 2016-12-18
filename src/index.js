@@ -7,8 +7,8 @@ const fs = require('fs');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 
-const authorName = 'firstName lastName'; // commit credentials
-const authorEmail = 'admin@example.com'; // commit credentials
+const authorName = 'Renovate Bot'; // commit credentials
+const authorEmail = 'renovate-bot@keylocation.sg'; // commit credentials
 
 const sshPublicKeyPath = `${process.env.HOME}/.ssh/id_rsa.pub`;
 const sshPrivateKeyPath = `${process.env.HOME}/.ssh/id_rsa`;
