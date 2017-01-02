@@ -11,7 +11,10 @@
     "test:watch": "mocha --opts mocha.opts --watch --reporter min",
     "release": "./release.sh"
   },
-  "author": "Algolia <support@algolia.com> (https://github.com/algolia/)",
+  "author": {
+    "name": "Algolia, Inc.",
+    "url": "https://github.com/algolia"
+  },
   "license": "MIT",
   "repository": "algolia/react-element-to-jsx-string",
   "devDependencies": {
