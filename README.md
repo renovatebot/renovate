@@ -112,13 +112,7 @@ npm run build:watch
 Decide if this is a `patch`, `minor` or `major` release, look at http://semver.org/
 
 ```sh
-yarn global add mversion json && \
-mversion path-or-minor-or-major && \
-git commit -am `json -f package.json version` && \
-git tag v`json -f package.json version` && \
-git push && \
-git push --tags && \
-yarn publish
+yarn release [major|minor|patch|x.x.x]
 ```
 
 ## Thanks
