@@ -1,13 +1,12 @@
 language: node_js
-node_js: 6
+node_js: stable
 before_cache: npm prune
 branches:
   only:
     - master
     - /^greenkeeper-.*$/
-# force container based infra
-# http://docs.travis-ci.com/user/workers/container-based-infrastructure/#Routing-your-build-to-container-based-infrastructure
-sudo: false
 cache:
   directories:
     - node_modules
+    - ~/.yarn
+    - ~/.nvm
