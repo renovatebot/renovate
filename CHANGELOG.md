@@ -1,3 +1,21 @@
+<a name="6.0.0"></a>
+# [6.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v5.0.7...v6.0.0) (2017-01-03)
+
+
+### Chores
+
+* **build:** switch to stringify-object[@3](https://github.com/3) ([e9a5c7f](https://github.com/algolia/react-element-to-jsx-string/commit/e9a5c7f))
+
+
+### BREAKING CHANGES
+
+* build: You need an ES2015 env to use
+react-element-to-jsx-string now
+
+You can use the Babel polyfill to do so.
+
+
+
 <a name="5.0.7"></a>
 ## [5.0.7](https://github.com/algolia/react-element-to-jsx-string/compare/v5.0.6...v5.0.7) (2017-01-03)
 
