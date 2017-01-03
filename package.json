@@ -25,6 +25,8 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-2": "^6.18.0",
     "babel-register": "^6.18.0",
+    "conventional-changelog-cli": "^1.2.0",
+    "doctoc": "^1.2.0",
     "eslint": "^3.12.2",
     "eslint-config-algolia": "^6.0.1",
     "eslint-import-resolver-webpack": "^0.8.0",
@@ -46,7 +48,7 @@
     "is-plain-object": "^2.0.1",
     "lodash": "^4.17.4",
     "sortobject": "^1.0.0",
-    "stringify-object": "2.4.0",
+    "stringify-object": "^3.1.0",
     "traverse": "^0.6.6"
   }
 }

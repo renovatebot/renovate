@@ -27,12 +27,15 @@ Features:
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [react-element-to-jsx-string](#react-element-to-jsx-string)
-  - [Setup](#setup)
-  - [Usage](#usage)
-  - [Test](#test)
-  - [Build](#build)
-  - [Thanks](#thanks)
+- [Setup](#setup)
+- [Usage](#usage)
+- [API](#api)
+  - [reactElementToJSXString(ReactElement[, options])](#reactelementtojsxstringreactelement-options)
+- [Environment requirements](#environment-requirements)
+- [Test](#test)
+- [Build](#build)
+- [Release](#release)
+- [Thanks](#thanks)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -92,6 +95,13 @@ console.log(reactElementToJSXString(<div a="1" b="2">Hello, world!</div>));
   If true, Boolean prop values will be omitted for [shorthand syntax](https://facebook.github.io/react/docs/jsx-in-depth.html#boolean-attributes).
 
   If false, Boolean prop values will be explicitly output like `prop={true}` and `prop={false}`
+
+## Environment requirements
+
+The environment you use to use `react-element-to-jsx-string` should have [ES2015](https://babeljs.io/learn-es2015/) support.
+
+Use the [Babel polyfill](https://babeljs.io/docs/usage/polyfill/) or any other method that will make you
+environment behave like an ES2015 environment.
 
 ## Test
 

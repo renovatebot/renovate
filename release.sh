@@ -24,6 +24,8 @@ if [[ $# -eq 0 ]] ; then
 fi
 
 mversion $1
+conventional-changelog --infile CHANGELOG.md --same-file --preset angular
+doctoc README.md
 git commit -am "$(json -f package.json version)"
 git tag v`json -f package.json version`
 git push

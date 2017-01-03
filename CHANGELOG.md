@@ -1,3 +1,23 @@
+<a name="5.0.7"></a>
+## [5.0.7](https://github.com/algolia/react-element-to-jsx-string/compare/v5.0.6...v5.0.7) (2017-01-03)
+
+
+### Bug Fixes
+
+* **build:** revert to stringify-object[@2](https://github.com/2) ([58542bc](https://github.com/algolia/react-element-to-jsx-string/commit/58542bc)), closes [#71](https://github.com/algolia/react-element-to-jsx-string/issues/71)
+
+
+
+<a name="5.0.6"></a>
+## [5.0.6](https://github.com/algolia/react-element-to-jsx-string/compare/v5.0.5...v5.0.6) (2017-01-02)
+
+
+
+<a name="5.0.5"></a>
+## [5.0.5](https://github.com/algolia/react-element-to-jsx-string/compare/v5.0.4...v5.0.5) (2017-01-02)
+
+
+
 <a name="5.0.4"></a>
 ## [5.0.4](https://github.com/algolia/react-element-to-jsx-string/compare/v5.0.3...v5.0.4) (2016-12-08)
 
@@ -34,7 +54,7 @@
 
 ### BREAKING CHANGES
 
-* pretty: objects and arrays are now prettified by default following #50 
+* pretty: objects and arrays are now prettified by default following #50
 If this is a concern to you, open a PR that adds an option to inline parts or the whole output like before
 
 
@@ -52,11 +72,6 @@ If this is a concern to you, open a PR that adds an option to inline parts or th
 <a name="4.0.0"></a>
 # [4.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v3.2.0...v4.0.0) (2016-08-04)
 
-### BREAKING CHANGES
-
-* `Component.displayName` now takes precedence over `Component.name`. This will
-break for class and functional components that defined a `displayName` different
-from the class or function's own name.
 
 
 <a name="3.2.0"></a>
@@ -82,46 +97,52 @@ from the class or function's own name.
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v2.6.1...v3.0.0) (2016-05-25)
 
-Boolean attributes are now translated to short version automatically.
+
+
+<a name="2.6.1"></a>
+## [2.6.1](https://github.com/algolia/react-element-to-jsx-string/compare/v2.6.0...v2.6.1) (2016-04-15)
+
+
+### Bug Fixes
+
+* **deps:** allow react 0.14 ([7347b71](https://github.com/algolia/react-element-to-jsx-string/commit/7347b71)), closes [#24](https://github.com/algolia/react-element-to-jsx-string/issues/24)
+
 
 
 <a name="2.6.0"></a>
-# [2.6.0](https://github.com/algolia/react-element-to-jsx-string/compare/v2.6.1...v2.6.0) (2016-04-15)
+# [2.6.0](https://github.com/algolia/react-element-to-jsx-string/compare/2.5.0...v2.6.0) (2016-04-15)
+
+
+### Features
+
+* **React:** React v15 compat ([37ee7b5](https://github.com/algolia/react-element-to-jsx-string/commit/37ee7b5))
 
 
 
-
-<a name="2.5.0"></a>
-# [2.5.0](https://github.com/algolia/react-element-to-jsx-string/compare/v2.6.0...v2.5.0) (2016-04-15)
-
+<a name="2.4.0"></a>
+# [2.4.0](https://github.com/algolia/react-element-to-jsx-string/compare/2.3.0...2.4.0) (2016-02-02)
 
 
 
 <a name="2.3.0"></a>
-# [2.3.0](https://github.com/algolia/react-element-to-jsx-string/compare/2.4.0...v2.3.0) (2016-02-02)
+# [2.3.0](https://github.com/algolia/react-element-to-jsx-string/compare/v2.2.0...2.3.0) (2016-02-02)
 
 
+### Features
 
-
-<a name="2.2.0"></a>
-# [2.2.0](https://github.com/algolia/react-element-to-jsx-string/compare/2.3.0...v2.2.0) (2016-02-02)
-
+* **deps:** upgrade all deps ([f3e368d](https://github.com/algolia/react-element-to-jsx-string/commit/f3e368d))
 
 
 
 <a name="2.2.0"></a>
 # [2.2.0](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.5...v2.2.0) (2016-01-14)
 
-* add reactElementToJSXString(ReactElement, opts) opts.displayName option to
-  allow choosing the display name of components
 
 
 <a name="2.1.5"></a>
 ## [2.1.5](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.4...v2.1.5) (2016-01-05)
 
-### Bug Fixes
 
-* stop breaking lines when interpolating {number}s ([13b832c](https://github.com/algolia/react-element-to-jsx-string/commit/13b832c))
 
 <a name="2.1.4"></a>
 ## [2.1.4](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.3...v2.1.4) (2015-12-10)
@@ -129,8 +150,9 @@ Boolean attributes are now translated to short version automatically.
 
 ### Bug Fixes
 
-* **stateless comps:** add No Display Name as default component name ([89ea2f2](https://github.com/algolia/react-element-to-jsx-string/commit/89ea2f2))
-* consider elements containing only {''} as empty (resulting DOM being empty) ([d837683](https://github.com/algolia/react-element-to-jsx-string/commit/d837683))
+* **stateless comps:** add No Display Name as default component name ([dc0f65c](https://github.com/algolia/react-element-to-jsx-string/commit/dc0f65c)), closes [#11](https://github.com/algolia/react-element-to-jsx-string/issues/11)
+
+
 
 <a name="2.1.3"></a>
 ## [2.1.3](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.0...v2.1.3) (2015-11-30)
@@ -142,29 +164,6 @@ Boolean attributes are now translated to short version automatically.
 * **lodash:** just use plain lodash and import ([062b3fe](https://github.com/algolia/react-element-to-jsx-string/commit/062b3fe))
 * **whitespace:** handle {true} {false} ([eaca1a2](https://github.com/algolia/react-element-to-jsx-string/commit/eaca1a2)), closes [#6](https://github.com/algolia/react-element-to-jsx-string/issues/6) [#7](https://github.com/algolia/react-element-to-jsx-string/issues/7)
 * **whitespace:** stop rendering it differently in SOME cases ([128aa95](https://github.com/algolia/react-element-to-jsx-string/commit/128aa95))
-
-
-
-<a name="2.1.2"></a>
-## [2.1.2](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.0...v2.1.2) (2015-11-08)
-
-
-### Bug Fixes
-
-* **whitespace:** handle {true} {false} ([eaca1a2](https://github.com/algolia/react-element-to-jsx-string/commit/eaca1a2)), closes [#6](https://github.com/algolia/react-element-to-jsx-string/issues/6) [#7](https://github.com/algolia/react-element-to-jsx-string/issues/7)
-* handle <div>{123}</div> ([609ac78](https://github.com/algolia/react-element-to-jsx-string/commit/609ac78)), closes [#8](https://github.com/algolia/react-element-to-jsx-string/issues/8)
-* **whitespace:** stop rendering it differently in SOME cases ([128aa95](https://github.com/algolia/react-element-to-jsx-string/commit/128aa95))
-
-
-
-<a name="2.1.1"></a>
-## [2.1.1](https://github.com/algolia/react-element-to-jsx-string/compare/v2.1.0...v2.1.1) (2015-11-08)
-
-
-### Bug Fixes
-
-* **whitespace:** handle {true} {false} ([eaca1a2](https://github.com/algolia/react-element-to-jsx-string/commit/eaca1a2)), closes [#6](https://github.com/algolia/react-element-to-jsx-string/issues/6) [#7](https://github.com/algolia/react-element-to-jsx-string/issues/7)
-* handle <div>{123}</div> ([609ac78](https://github.com/algolia/react-element-to-jsx-string/commit/609ac78)), closes [#8](https://github.com/algolia/react-element-to-jsx-string/issues/8)
 
 
 
@@ -263,7 +262,6 @@ realistic way.
 
 
 
-
 <a name="1.1.0"></a>
 # [1.1.0](https://github.com/algolia/react-element-to-jsx-string/compare/3e2e7b8...v1.1.0) (2015-10-15)
 
@@ -272,9 +270,7 @@ realistic way.
 
 * **whitespace:** remove unwanted whitespace in output ([3e2e7b8](https://github.com/algolia/react-element-to-jsx-string/commit/3e2e7b8))
 
+
 ### Features
 
 * sort object keys in a deterministic way ([c1ce8a6](https://github.com/algolia/react-element-to-jsx-string/commit/c1ce8a6))
-
-
-
