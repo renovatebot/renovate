@@ -42,7 +42,7 @@ Features:
 ## Setup
 
 ```sh
-npm install react-element-to-jsx-string --save[-dev]
+yarn add react-element-to-jsx-string [--dev]
 ```
 
 ## Usage
@@ -106,15 +106,15 @@ environment behave like an ES2015 environment.
 ## Test
 
 ```sh
-npm test
-npm run test:watch
+yarn test
+yarn test:watch
 ```
 
 ## Build
 
 ```sh
-npm run build
-npm run build:watch
+yarn build
+yarn build:watch
 ```
 
 ## Release
