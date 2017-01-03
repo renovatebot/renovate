@@ -46,7 +46,7 @@
     "is-plain-object": "^2.0.1",
     "lodash": "^4.17.4",
     "sortobject": "^1.0.0",
-    "stringify-object": "^3.1.0",
+    "stringify-object": "2.4.0",
     "traverse": "^0.6.6"
   }
 }
