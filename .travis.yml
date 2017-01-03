@@ -1,7 +1,5 @@
 language: node_js
 node_js: stable
-before_install: rm -rf /home/travis/.yarn
-before_cache: npm prune
 branches:
   only:
     - master
