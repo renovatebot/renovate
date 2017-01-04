@@ -1,10 +1,12 @@
 {
   "private": true,
   "dependencies": {
-    "got": "^6.6.3",
-    "mkdirp": "^0.5.1",
-    "nodegit": "^0.16.0",
-    "rimraf": "^2.5.4",
-    "semver": "^5.3.0"
+    "gh-got": "5.0.0",
+    "got": "6.6.3",
+    "mkdirp": "0.5.1",
+    "nodegit": "0.16.0",
+    "rimraf": "2.5.4",
+    "semver": "5.3.0",
+    "semver-stable": "2.0.4"
   }
 }
