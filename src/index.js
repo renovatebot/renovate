@@ -86,17 +86,18 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
         if (res.body.length > 0) {
           console.log(`Dependency ${depName} upgrade to ${nextVersionMajor}.x PR already existed, so skipping`);
         } else {
-          writeUpdates(depType, depName, branchName, prName, nextVersion);
+          writeUpdates(depType, depName, branchName, prName, currentVersion, nextVersion);
         }
       });
   } else {
     prName = `Upgrade dependency ${depName} to version ${nextVersion}`;
-    writeUpdates(depType, depName, branchName, prName, nextVersion);
+    writeUpdates(depType, depName, branchName, prName, currentVersion, nextVersion);
   }
 }
 
-function writeUpdates(depType, depName, branchName, prName, nextVersion) {
+function writeUpdates(depType, depName, branchName, prName, currentVersion, nextVersion) {
   const commitMessage = `Upgrade dependency ${depName} to version ${nextVersion}`;
+  const prBody = `This Pull Request updates dependency ${depName} from version ${currentVersion} to ${nextVersion}.`;
   // Try to create branch
   const body = {
     ref: `refs/heads/${branchName}`,
@@ -130,7 +131,7 @@ function writeUpdates(depType, depName, branchName, prName, nextVersion) {
             content: new Buffer(branchPackageString).toString('base64')
           }
         }).then(res => {
-          return createOrUpdatePullRequest(branchName, prName);
+          return createOrUpdatePullRequest(branchName, prName, prBody);
         });
       }
     });
@@ -140,14 +141,14 @@ function writeUpdates(depType, depName, branchName, prName, nextVersion) {
   });
 }
 
-function createOrUpdatePullRequest(branchName, title) {
+function createOrUpdatePullRequest(branchName, title, body) {
   return ghGot.post(`repos/${repoName}/pulls`, {
     token: token,
     body: {
       title: title,
       head: branchName,
       base: 'master',
-      body: ''
+      body: body,
     }
   }).then(res => {
     console.log('Created Pull Request: ' + title);
@@ -167,7 +168,8 @@ function createOrUpdatePullRequest(branchName, title) {
         return ghGot.patch(`repos/${repoName}/pulls/${existingPrNo}`, {
           token: token,
           body: {
-            title: title
+            title: title,
+            body: body,
           }
         }).then(res => {
           console.log('Updated Pull Request: ' + title);
