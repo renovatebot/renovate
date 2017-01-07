@@ -59,41 +59,45 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
   } else {
     prTitle = config.templates.prTitleMinor({ depType, depName, currentVersion, nextVersion, nextVersionMajor });
   }
+  const prBody = config.templates.prBody({ depName, currentVersion, nextVersion });
+  const commitMessage = config.templates.commitMessage({ depName, currentVersion, nextVersion });
+
   // Check if same PR already existed and skip if so
   return github.checkForClosedPr(branchName, prTitle).then((prExisted) => {
     if (prExisted) {
       console.log(`${depName}: Skipping due to existing PR found.`);
       return;
     }
-    const prBody = config.templates.prBody({ depName, currentVersion, nextVersion });
-    return github.createBranch(branchName).catch(error => {
+    // Save an API call by attempting to create branch without checking for existence first
+    return github.createBranch(branchName)
+    .catch(error => {
+      // Check in case it's because the branch already existed
       if (error.response.body.message !== 'Reference already exists') {
+        // In this case it means we really do have a problem and can't continue
         console.log('Error creating branch: ' + branchName);
-        console.log(error.response.body);
+        console.log('Response body: ' + error.response.body);
+        throw error;
       }
-    }).then(res => {
-      if (config.verbose) {
-        console.log(`Branch exists (${branchName}), now writing file`);
-      }
+    }).then(() => {
+      // Retrieve the package.json from this renovate branch
       return github.getFile(packageFile, branchName).then(res => {
-        const oldFileSHA = res.body.sha;
+        const currentSHA = res.body.sha;
         let currentFileContent = JSON.parse(new Buffer(res.body.content, 'base64').toString());
         if (currentFileContent[depType][depName] !== nextVersion) {
           // Branch is new, or needs version updated
+          if (config.verbose) {
+            console.log(`Updating ${depName} to ${nextVersion} in branch ${branchName}`);
+          }
           currentFileContent[depType][depName] = nextVersion;
-          const newPackageString = JSON.stringify(currentFileContent, null, 2) + '\n';
-
-          var commitMessage = config.templates.commitMessage({ depName, currentVersion, nextVersion });
-
-          return github.writeFile(branchName, oldFileSHA, packageFile, newPackageString, commitMessage)
+          const newPackageContents = JSON.stringify(currentFileContent, null, 2) + '\n';
+          return github.writeFile(branchName, currentSHA, packageFile, newPackageContents, commitMessage)
           .then(() => {
             return createOrUpdatePullRequest(branchName, prTitle, prBody);
-          })
-          .catch(err => {
-            console.error('Error writing new package file for ' + depName);
-            console.log(err);
           });
         } else {
+          if (config.verbose) {
+            console.log(`${depName} was already up-to-date in branch ${branchName}`);
+          }
           // File was up to date. Ensure PR
           return createOrUpdatePullRequest(branchName, prTitle, prBody);
         }
@@ -106,21 +110,16 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
 }
 
 function createOrUpdatePullRequest(branchName, prTitle, prBody) {
-  return github.getPrNo(branchName).then(prNo => {
-    if (prNo) {
-      // PR already exists - update it
-      // Note: PR might be unchanged, so no log message
-      return github.updatePr(prNo, prTitle, prBody)
-      .catch(err => {
-        console.error('Error: Failed to update Pull Request: ' + prTitle);
-        console.log(err);
-      });
+  return github.getPr(branchName).then(pr => {
+    if (pr) {
+      if (pr.title === prTitle && pr.body === prBody) {
+        if (config.verbose) {
+          console.log('PR already up-to-date');
+        }
+      } else {
+        console.log(`Updating PR #${pr.number}`);
+        return github.updatePr(pr.number, prTitle, prBody);
+      }
     }
-    return github.createPr(branchName, prTitle, prBody).then(res => {
-      console.log('Created Pull Request: ' + prTitle);
-    }).catch(err => {
-      console.error('Error: Failed to create Pull Request: ' + prTitle);
-      console.log(err);
-    });
   });
 }

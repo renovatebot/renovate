@@ -67,17 +67,14 @@ module.exports = {
       return JSON.parse(new Buffer(res.body.content, 'base64').toString());
     });
   },
-  getPrNo: function(branchName, state = 'open') {
-    return ghGot(`repos/${config.repoName}/pulls?state=${state}&base=${config.baseBranch}&head=${config.userName}:${branchName}`, {
+  getPr: function(branchName) {
+    return ghGot(`repos/${config.repoName}/pulls?state=open&base=${config.baseBranch}&head=${config.userName}:${branchName}`, {
       token: config.token,
     }).then(res => {
-      let prNo = 0;
-      res.body.forEach(function(result) {
-        if (result.state === 'open' && result.head.label === `${config.userName}:${branchName}`) {
-          prNo = result.number;
-        }
-      });
-      return prNo;
+      if (res.body.length) {
+        return res.body[0];
+      }
+      return null;
     });
   },
   writeFile: function(branchName, oldFileSHA, filePath, fileContents, message) {
