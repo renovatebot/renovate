@@ -1,5 +1,5 @@
 module.exports = {
-  verbose: false,
+  verbose: true,
   baseBranch: 'master',
   templates: {
     branchName: (params) => {
