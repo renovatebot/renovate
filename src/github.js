@@ -45,32 +45,16 @@ module.exports = {
       }
     });
   },
-  checkPrExists(branchName, prTitle) {
-    if (config.verbose) {
-      console.log(`Checking if branch/PR exists: ${branchName} / ${prTitle}`);
-    }
-    return ghGot(`repos/${config.repoName}/pulls?state=closed&head=${config.userName}:${branchName}`, { token: config.token })
-      .then(res => {
-        if (config.verbose) {
-          console.log(`Got ${res.body.length} results for ${branchName}`);
-        }
-        let prAlreadyExists = false;
-        res.body.forEach(function(result) {
-          if (result.title === prTitle && result.head.label === `${config.userName}:${branchName}`) {
-            prAlreadyExists = true;
-          }
-        });
-        if (config.verbose) {
-          if (prAlreadyExists) {
-            console.log(`PR already exists for ${branchName}`);
-          } else {
-            console.log(`PR doesn't exist for ${branchName}`);
-          }
-        }
-        return prAlreadyExists;
-      }).catch((err) => {
-        console.error('Error checking if PR already existed');
+  checkForClosedPr(branchName, prTitle) {
+    return ghGot(`repos/${config.repoName}/pulls?state=closed&head=${config.userName}:${branchName}`, {
+      token: config.token
+    }).then(res => {
+      return res.body.some((pr) => {
+        return pr.title === prTitle && pr.head.label === `${config.userName}:${branchName}`;
       });
+    }).catch((err) => {
+      console.error('Error checking if PR already existed');
+    });
   },
   getFile: function(filePath, branchName) {
     branchName = branchName || config.baseBranch;
@@ -83,8 +67,8 @@ module.exports = {
       return JSON.parse(new Buffer(res.body.content, 'base64').toString());
     });
   },
-  getPrNo: function(branchName) {
-    return ghGot(`repos/${config.repoName}/pulls?base=${config.baseBranch}&head=${config.userName}:${branchName}`, {
+  getPrNo: function(branchName, state = 'open') {
+    return ghGot(`repos/${config.repoName}/pulls?state=${state}&base=${config.baseBranch}&head=${config.userName}:${branchName}`, {
       token: config.token,
     }).then(res => {
       let prNo = 0;

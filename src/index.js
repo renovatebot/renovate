@@ -60,7 +60,7 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
     prTitle = config.templates.prTitleMinor({ depType, depName, currentVersion, nextVersion, nextVersionMajor });
   }
   // Check if same PR already exists or existed
-  return github.checkPrExists(branchName, prTitle).then((prExisted) => {
+  return github.checkForClosedPr(branchName, prTitle).then((prExisted) => {
     if (!prExisted) {
       return writeUpdates(depType, depName, branchName, prTitle, currentVersion, nextVersion);
     } else {
