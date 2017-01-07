@@ -5,42 +5,48 @@ const config = require('./config');
 const github = require('./github');
 const npm = require('./npm');
 
-const token = process.env.RENOVATE_TOKEN;
-// token must be defined
-if (typeof token === 'undefined') {
-  console.error('Error: Environment variable RENOVATE_TOKEN must be defined');
-  process.exit(1);
-}
-
-if (process.argv.length < 3 || process.argv.length > 4) {
-  console.error('Error: You must specify the GitHub repository and optionally path.');
-  console.log('Example: node src singapore/renovate');
-  console.log('Example: node src foo/bar baz/package.json');
-  process.exit(1);
-}
-
-// Process command line arguments
-const repoName = process.argv[2];
-const userName = repoName.split('/')[0];
-const packageFile = process.argv[3] || 'package.json';;
-
 npm.init(config.verbose);
 
-let basePackageJson;
+// Process arguments
+const repoName = process.argv[2];
+const packageFile = process.argv[3] || 'package.json';
+const token = process.env.RENOVATE_TOKEN;
 
-github.init(token, repoName, config.baseBranch, config.verbose)
+validateArguments();
+
+initializeGitHub()
 .then(getPackageFileContents)
-.then(getAllUpgrades)
+.then(determineUpgrades)
 .then(processUpgradesSequentially)
 .catch(err => {
   console.log('updateDependency error: ' + err);
 });
 
+function validateArguments() {
+  // token must be defined
+  if (typeof token === 'undefined') {
+    console.error('Error: Environment variable RENOVATE_TOKEN must be defined');
+    process.exit(1);
+  }
+
+  // Check arguments
+  if (process.argv.length < 3 || process.argv.length > 4) {
+    console.error('Error: You must specify the GitHub repository and optionally path.');
+    console.log('Example: node src singapore/renovate');
+    console.log('Example: node src foo/bar baz/package.json');
+    process.exit(1);
+  }
+}
+
+function initializeGitHub() {
+  return github.init(token, repoName, config.baseBranch, config.verbose);
+}
+
 function getPackageFileContents() {
   return github.getFileContents(packageFile);
 }
 
-function getAllUpgrades(packageFileContents) {
+function determineUpgrades(packageFileContents) {
   return npm.getAllDependencyUpgrades(packageFileContents);
 }
 
