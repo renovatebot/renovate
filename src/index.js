@@ -29,15 +29,19 @@ npm.init(config.verbose);
 let basePackageJson;
 
 github.init(token, repoName, config.baseBranch, config.verbose)
-.then(getPackageFile)
-.then(npm.getAllDependencyUpgrades)
+.then(getPackageFileContents)
+.then(getAllUpgrades)
 .then(processUpgradesSequentially)
 .catch(err => {
   console.log('updateDependency error: ' + err);
 });
 
-function getPackageFile() {
+function getPackageFileContents() {
   return github.getFileContents(packageFile);
+}
+
+function getAllUpgrades(packageFileContents) {
+  return npm.getAllDependencyUpgrades(packageFileContents);
 }
 
 function processUpgradesSequentially(upgrades) {
