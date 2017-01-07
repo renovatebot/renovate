@@ -92,14 +92,14 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
           const newPackageContents = JSON.stringify(currentFileContent, null, 2) + '\n';
           return github.writeFile(branchName, currentSHA, packageFile, newPackageContents, commitMessage)
           .then(() => {
-            return createOrUpdatePullRequest(branchName, prTitle, prBody);
+            return ensurePr(branchName, prTitle, prBody);
           });
         } else {
           if (config.verbose) {
             console.log(`${depName} was already up-to-date in branch ${branchName}`);
           }
           // File was up to date. Ensure PR
-          return createOrUpdatePullRequest(branchName, prTitle, prBody);
+          return ensurePr(branchName, prTitle, prBody);
         }
       });
     })
@@ -109,7 +109,7 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
   });
 }
 
-function createOrUpdatePullRequest(branchName, prTitle, prBody) {
+function ensurePr(branchName, prTitle, prBody) {
   return github.getPr(branchName).then(pr => {
     if (pr) {
       if (pr.title === prTitle && pr.body === prBody) {
