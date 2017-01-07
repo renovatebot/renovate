@@ -41,8 +41,8 @@ github.init(token, repoName, config.baseBranch, config.verbose).then(() => {
   // We are processing each upgrade sequentially for two major reasons:
   // 1. Reduce chances of GitHub API rate limiting
   // 2. Edge case collision of branch name, e.g. dependency also listed as dev dependency
-  return upgrades.reduce((promiseChain, upgrade) => {
-    return promiseChain.then(() => {
+  return upgrades.reduce((promise, upgrade) => {
+    return promise.then(() => {
       return updateDependency(upgrade.depType, upgrade.depName, upgrade.currentVersion, upgrade.nextVersion);
     });
   }, Promise.resolve());
