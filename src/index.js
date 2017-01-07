@@ -29,47 +29,26 @@ npm.init(config.verbose);
 let basePackageJson;
 
 github.init(token, repoName, config.baseBranch, config.verbose).then(() => {
+  // Get the base package.json
   return github.getFileContents(packageFile);
 }).then((packageContents) => {
-  basePackageJson = packageContents;
-  return iterateDependencies('dependencies');
-}).then(() => {
-  iterateDependencies('devDependencies');
-}).catch(err => {
-  console.log('Error: ' + err);
-});
-
-function iterateDependencies(depType) {
-  const deps = basePackageJson[depType];
-  if (!deps) {
-    return;
+  // Get the list of possible upgrades
+  return npm.getAllDependencyUpgrades(packageContents);
+}).then((upgrades) => {
+  if (config.verbose) {
+    console.log('All upgrades: ' + JSON.stringify(upgrades));
   }
-  console.log(`Checking ${Object.keys(deps).length} ${depType}`);
-  return Object.keys(deps).reduce((total, depName) => {
-    return total.then(() => {
-      if (config.verbose) {
-        console.log(' * ' + depName);
-      }
-      const currentVersion = deps[depName].replace(/[^\d.]/g, '');
-      if (!semver.valid(currentVersion)) {
-        console.log(`${depName}: Invalid current version`);
-        return;
-      }
-
-      return npm.getDependencyUpgrades(depName, currentVersion)
-      .then(allUpgrades => {
-        if (config.verbose) {
-          console.log(`All upgrades for ${depName}: ${JSON.stringify(allUpgrades)}`);
-        }
-        return Object.keys(allUpgrades).reduce((promiseChain, upgrade) => {
-          return promiseChain.then(() => {
-            return updateDependency(depType, depName, currentVersion, allUpgrades[upgrade]);
-          });
-        }, Promise.resolve());
-      });
+  // We are processing each upgrade sequentially for two major reasons:
+  // 1. Reduce chances of GitHub API rate limiting
+  // 2. Edge case collision of branch name, e.g. dependency also listed as dev dependency
+  return upgrades.reduce((promiseChain, upgrade) => {
+    return promiseChain.then(() => {
+      return updateDependency(upgrade.depType, upgrade.depName, upgrade.currentVersion, upgrade.nextVersion);
     });
   }, Promise.resolve());
-}
+}).catch(err => {
+  console.log('updateDependency error: ' + err);
+});
 
 function updateDependency(depType, depName, currentVersion, nextVersion) {
   const nextVersionMajor = semver.major(nextVersion);
