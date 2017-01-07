@@ -31,10 +31,9 @@ let basePackageJson;
 github.init(token, repoName, config.baseBranch, config.verbose).then(() => {
   // Get the base package.json
   return github.getFileContents(packageFile);
-}).then((packageContents) => {
-  // Get the list of possible upgrades
-  return npm.getAllDependencyUpgrades(packageContents);
-}).then((upgrades) => {
+})
+.then(npm.getAllDependencyUpgrades)
+.then((upgrades) => {
   if (config.verbose) {
     console.log('All upgrades: ' + JSON.stringify(upgrades));
   }

@@ -22,35 +22,10 @@ module.exports = {
     });
     return allDependencies;
   },
-
-  getDependencyUpgrades: function(depName, currentVersion) {
-    return getDependency(depName)
-    .then(res => {
-      let allUpgrades = {};
-      if (!res.body['versions']) {
-        console.log(depName + ' versions is null');
-      }
-      Object.keys(res.body['versions']).forEach(function(version) {
-        if (stable.is(currentVersion) && !stable.is(version)) {
-          // Ignore unstable versions, unless the current version is unstable
-          return;
-        }
-        if (semver.gt(version, currentVersion)) {
-          // Group by major versions
-          var thisMajor = semver.major(version);
-          if (!allUpgrades[thisMajor] || semver.gt(version, allUpgrades[thisMajor])) {
-            allUpgrades[thisMajor] = version;
-          }
-        }
-      });
-      return allUpgrades;
-    });
-  },
   getAllDependencyUpgrades: function(packageContents) {
     const allDependencyChecks = [];
     const allDependencyUpgrades = [];
     const dependencyTypes = ['dependencies', 'devDependencies'];
-    const getDependencyUpgrades = this.getDependencyUpgrades;
     dependencyTypes.forEach(function(depType) {
       if (!packageContents[depType]) {
         return;
@@ -89,4 +64,28 @@ module.exports = {
 function getDependency(depName) {
   // supports scoped packages, e.g. @user/package
   return got(`https://registry.npmjs.org/${depName.replace('/', '%2F')}`, { json: true });
+}
+
+function getDependencyUpgrades(depName, currentVersion) {
+  return getDependency(depName)
+  .then(res => {
+    let allUpgrades = {};
+    if (!res.body['versions']) {
+      console.log(depName + ' versions is null');
+    }
+    Object.keys(res.body['versions']).forEach(function(version) {
+      if (stable.is(currentVersion) && !stable.is(version)) {
+        // Ignore unstable versions, unless the current version is unstable
+        return;
+      }
+      if (semver.gt(version, currentVersion)) {
+        // Group by major versions
+        var thisMajor = semver.major(version);
+        if (!allUpgrades[thisMajor] || semver.gt(version, allUpgrades[thisMajor])) {
+          allUpgrades[thisMajor] = version;
+        }
+      }
+    });
+    return allUpgrades;
+  });
 }
