@@ -43,6 +43,8 @@ module.exports = {
         base: config.baseBranch,
         body: body,
       }
+    }).then(res => {
+      return res.body;
     });
   },
   checkForClosedPr(branchName, prTitle) {
