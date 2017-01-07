@@ -1,138 +1,127 @@
-const ghGot = require('gh-got');
-const got = require('got');
 const semver = require('semver');
 const stable = require('semver-stable');
 
+const config = require('./config');
+const github = require('./github');
+const npm = require('./npm');
+
 const token = process.env.RENOVATE_TOKEN;
+// token must be defined
+if (typeof token === 'undefined') {
+  console.error('Error: Environment variable RENOVATE_TOKEN must be defined');
+  process.exit(1);
+}
+
+if (process.argv.length < 3 || process.argv.length > 4) {
+  console.error('Error: You must specify the GitHub repository and optionally path.');
+  console.log('Example: node src singapore/renovate');
+  console.log('Example: node src foo/bar baz/package.json');
+  process.exit(1);
+}
+
+// Process command line arguments
 const repoName = process.argv[2];
 const userName = repoName.split('/')[0];
 const packageFile = process.argv[3] || 'package.json';
 
-let masterSHA;
-let masterPackageJson;
+npm.init(config.verbose);
 
-ghGot(`repos/${repoName}/git/refs/head`, {token: token}).then(res => {
-  // First, get the SHA for master branch
-  res.body.forEach(function(branch) {
-    // Loop through all branches because master may not be the first
-    if (branch.ref === 'refs/heads/master') {
-      // This is the SHA we will create new branches from
-      masterSHA = branch.object.sha;
-    }
-  });
-  // Now, retrieve the master package.json
-  ghGot(`repos/${repoName}/contents/${packageFile}`, {token: token}).then(res => {
-    masterPackageJson = JSON.parse(new Buffer(res.body.content, 'base64').toString());
-    // Iterate through dependencies and then devDependencies
-    return iterateDependencies('dependencies')
-      .then(() => iterateDependencies('devDependencies'));
-  }).catch(err => {
-    console.log('Error reading master package.json');
-  });
+let basePackageJson;
+
+github.init(token, repoName, config.baseBranch, config.verbose).then(() => {
+  return github.getFileContents(packageFile);
+}).then((packageContents) => {
+  basePackageJson = packageContents;
+  return iterateDependencies('dependencies');
+}).then(() => {
+  iterateDependencies('devDependencies');
+}).catch(err => {
+  console.log('Error: ' + err);
 });
 
 function iterateDependencies(depType) {
-  const deps = masterPackageJson[depType];
+  const deps = basePackageJson[depType];
   if (!deps) {
     return;
   }
+  console.log(`Checking ${Object.keys(deps).length} ${depType}`);
   return Object.keys(deps).reduce((total, depName) => {
     return total.then(() => {
+      if (config.verbose) {
+        console.log(' * ' + depName);
+      }
       const currentVersion = deps[depName].replace(/[^\d.]/g, '');
-
       if (!semver.valid(currentVersion)) {
-        console.log('Invalid current version');
+        console.log(`${depName}: Invalid current version`);
         return;
       }
 
-      // supports scoped packages, e.g. @user/package
-      return got(`https://registry.npmjs.org/${depName.replace('/', '%2F')}`, { json: true })
-        .then(res => {
-          let allUpgrades = {};
-          Object.keys(res.body['versions']).forEach(function(version) {
-            if (stable.is(currentVersion) && !stable.is(version)) {
-              return;
-            }
-            if (semver.gt(version, currentVersion)) {
-              var thisMajor = semver.major(version);
-              if (!allUpgrades[thisMajor] || semver.gt(version, allUpgrades[thisMajor])) {
-                allUpgrades[thisMajor] = version;
-              }
-            }
+      return npm.getDependencyUpgrades(depName, currentVersion)
+      .then(allUpgrades => {
+        if (config.verbose) {
+          console.log(`All upgrades for ${depName}: ${JSON.stringify(allUpgrades)}`);
+        }
+        return Object.keys(allUpgrades).reduce((promiseChain, upgrade) => {
+          return promiseChain.then(() => {
+            return updateDependency(depType, depName, currentVersion, allUpgrades[upgrade]);
           });
-
-          let upgradePromises = [];
-
-          Object.keys(allUpgrades).forEach(function(upgrade) {
-            const nextVersion = allUpgrades[upgrade];
-            upgradePromises.push(updateDependency(depType, depName, currentVersion, nextVersion));
-          });
-
-          return Promise.all(upgradePromises);
-        });
+        }, Promise.resolve());
+      });
     });
   }, Promise.resolve());
 }
 
 function updateDependency(depType, depName, currentVersion, nextVersion) {
   const nextVersionMajor = semver.major(nextVersion);
-  const branchName = `upgrade/${depName}-${nextVersionMajor}.x`;
-  let prName = '';
+  const branchName = config.templates.branchName({depType, depName, currentVersion, nextVersion, nextVersionMajor});
+  let prTitle = '';
   if (nextVersionMajor > semver.major(currentVersion)) {
-    prName = `Upgrade dependency ${depName} to version ${nextVersionMajor}.x`;
-    // Check if PR was already closed previously
-    ghGot(`repos/${repoName}/pulls?state=closed&head=${userName}:${branchName}`, { token: token })
-      .then(res => {
-        if (res.body.length > 0) {
-          console.log(`Dependency ${depName} upgrade to ${nextVersionMajor}.x PR already existed, so skipping`);
-        } else {
-          writeUpdates(depType, depName, branchName, prName, currentVersion, nextVersion);
-        }
-      });
+    prTitle = config.templates.prTitleMajor({ depType, depName, currentVersion, nextVersion, nextVersionMajor });
   } else {
-    prName = `Upgrade dependency ${depName} to version ${nextVersion}`;
-    writeUpdates(depType, depName, branchName, prName, currentVersion, nextVersion);
+    prTitle = config.templates.prTitleMinor({ depType, depName, currentVersion, nextVersion, nextVersionMajor });
   }
+  // Check if same PR already exists or existed
+  return github.checkPrExists(branchName, prTitle).then((prExisted) => {
+    if (!prExisted) {
+      return writeUpdates(depType, depName, branchName, prTitle, currentVersion, nextVersion);
+    } else {
+      console.log(`${depName}: Skipping due to existing PR found.`);
+    }
+  });
 }
 
-function writeUpdates(depType, depName, branchName, prName, currentVersion, nextVersion) {
-  const commitMessage = `Upgrade dependency ${depName} to version ${nextVersion}`;
-  const prBody = `This Pull Request updates dependency ${depName} from version ${currentVersion} to ${nextVersion}.`;
-  // Try to create branch
-  const body = {
-    ref: `refs/heads/${branchName}`,
-    sha: masterSHA
-  };
-  ghGot.post(`repos/${repoName}/git/refs`, {
-    token: token,
-    body: body
-  }).catch(error => {
+function writeUpdates(depType, depName, branchName, prTitle, currentVersion, nextVersion) {
+  const prBody = config.templates.prBody({ depName, currentVersion, nextVersion });
+  return github.createBranch(branchName).catch(error => {
     if (error.response.body.message !== 'Reference already exists') {
-      console.log('Error creating branch' + branchName);
+      console.log('Error creating branch: ' + branchName);
       console.log(error.response.body);
     }
   }).then(res => {
-    ghGot(`repos/${repoName}/contents/${packageFile}?ref=${branchName}`, { token: token })
-    .then(res => {
+    if (config.verbose) {
+      console.log(`Branch exists (${branchName}), now writing file`);
+    }
+    return github.getFile(packageFile, branchName).then(res => {
       const oldFileSHA = res.body.sha;
-      let branchPackageJson = JSON.parse(new Buffer(res.body.content, 'base64').toString());
-      if (branchPackageJson[depType][depName] !== nextVersion) {
+      let currentFileContent = JSON.parse(new Buffer(res.body.content, 'base64').toString());
+      if (currentFileContent[depType][depName] !== nextVersion) {
         // Branch is new, or needs version updated
-        console.log(`Dependency ${depName} needs upgrading to ${nextVersion}`);
-        branchPackageJson[depType][depName] = nextVersion;
-        branchPackageString = JSON.stringify(branchPackageJson, null, 2) + '\n';
+        currentFileContent[depType][depName] = nextVersion;
+        const newPackageString = JSON.stringify(currentFileContent, null, 2) + '\n';
 
-        ghGot.put(`repos/${repoName}/contents/${packageFile}`, {
-          token: token,
-          body: {
-            branch: branchName,
-            sha: oldFileSHA,
-            message: commitMessage,
-            content: new Buffer(branchPackageString).toString('base64')
-          }
-        }).then(res => {
-          return createOrUpdatePullRequest(branchName, prName, prBody);
+        var commitMessage = config.templates.commitMessage({ depName, currentVersion, nextVersion });
+
+        return github.writeFile(branchName, oldFileSHA, packageFile, newPackageString, commitMessage)
+        .then(() => {
+          return createOrUpdatePullRequest(branchName, prTitle, prBody);
+        })
+        .catch(err => {
+          console.error('Error writing new package file for ' + depName);
+          console.log(err);
         });
+      } else {
+        // File was up to date. Ensure PR
+        return createOrUpdatePullRequest(branchName, prTitle, prBody);
       }
     });
   })
@@ -141,44 +130,22 @@ function writeUpdates(depType, depName, branchName, prName, currentVersion, next
   });
 }
 
-function createOrUpdatePullRequest(branchName, title, body) {
-  return ghGot.post(`repos/${repoName}/pulls`, {
-    token: token,
-    body: {
-      title: title,
-      head: branchName,
-      base: 'master',
-      body: body,
-    }
-  }).then(res => {
-    console.log('Created Pull Request: ' + title);
-  }).catch(error => {
-    if (error.response.body.errors[0].message.indexOf('A pull request already exists') === 0) {
-      // Pull Request already exists
-      // Now we need to find the Pull Request number
-      return ghGot(`repos/${repoName}/pulls?base=master&head=${userName}:${branchName}`, {
-        token: token,
-      }).then(res => {
-        // TODO iterate through list and confirm branch
-        if (res.body.length !== 1) {
-          console.error('Could not find matching PR');
-          return;
-        }
-        const existingPrNo = res.body[0].number;
-        return ghGot.patch(`repos/${repoName}/pulls/${existingPrNo}`, {
-          token: token,
-          body: {
-            title: title,
-            body: body,
-          }
-        }).then(res => {
-          console.log('Updated Pull Request: ' + title);
-        });
+function createOrUpdatePullRequest(branchName, prTitle, prBody) {
+  return github.getPrNo(branchName).then(prNo => {
+    if (prNo) {
+      // PR already exists - update it
+      // Note: PR might be unchanged, so no log message
+      return github.updatePr(prNo, prTitle, prBody)
+      .catch(err => {
+        console.error('Error: Failed to update Pull Request: ' + prTitle);
+        console.log(err);
       });
-    } else {
-      console.log('Error creating Pull Request:');
-      console.log(error.response.body);
-      Promise.reject();
     }
+    return github.createPr(branchName, prTitle, prBody).then(res => {
+      console.log('Created Pull Request: ' + prTitle);
+    }).catch(err => {
+      console.error('Error: Failed to create Pull Request: ' + prTitle);
+      console.log(err);
+    });
   });
 }
