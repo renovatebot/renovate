@@ -88,6 +88,16 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
       console.log(`${depName}: Skipping due to existing PR found.`);
       return;
     }
+
+    return ensureBranch()
+    .then(ensureCommit)
+    .then(ensurePr)
+    .catch(error => {
+      console.log('Error updating dependency depName: ' + error);
+      // Don't throw here - we don't want to stop the other renovations
+    });
+  });
+  function ensureBranch() {
     // Save an API call by attempting to create branch without checking for existence first
     return github.createBranch(branchName)
     .catch(error => {
@@ -98,48 +108,45 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
         console.log('Response body: ' + error.response.body);
         throw error;
       }
-    }).then(() => {
-      // Retrieve the package.json from this renovate branch
-      return github.getFile(packageFile, branchName).then(res => {
-        const currentSHA = res.body.sha;
-        let currentFileContent = JSON.parse(new Buffer(res.body.content, 'base64').toString());
-        if (currentFileContent[depType][depName] !== nextVersion) {
-          // Branch is new, or needs version updated
-          if (config.verbose) {
-            console.log(`Updating ${depName} to ${nextVersion} in branch ${branchName}`);
-          }
-          currentFileContent[depType][depName] = nextVersion;
-          const newPackageContents = JSON.stringify(currentFileContent, null, 2) + '\n';
-          return github.writeFile(branchName, currentSHA, packageFile, newPackageContents, commitMessage)
-          .then(() => {
-            return ensurePr(branchName, prTitle, prBody);
-          });
-        } else {
-          if (config.verbose) {
-            console.log(`${depName} was already up-to-date in branch ${branchName}`);
-          }
-          // File was up to date. Ensure PR
-          return ensurePr(branchName, prTitle, prBody);
-        }
-      });
-    })
-    .catch(error => {
-      console.log('Promise catch');
     });
-  });
-}
-
-function ensurePr(branchName, prTitle, prBody) {
-  return github.getPr(branchName).then(pr => {
-    if (pr) {
-      if (pr.title === prTitle && pr.body === prBody) {
+  }
+  function ensureCommit() {
+    // Retrieve the package.json from this renovate branch
+    return github.getFile(packageFile, branchName).then(res => {
+      const currentSHA = res.body.sha;
+      let currentFileContent = JSON.parse(new Buffer(res.body.content, 'base64').toString());
+      if (currentFileContent[depType][depName] !== nextVersion) {
+        // Branch is new, or needs version updated
         if (config.verbose) {
-          console.log('PR already up-to-date');
+          console.log(`${depName}: Updating to ${nextVersion} in branch ${branchName}`);
+        }
+        currentFileContent[depType][depName] = nextVersion;
+        const newPackageContents = JSON.stringify(currentFileContent, null, 2) + '\n';
+        return github.writeFile(branchName, currentSHA, packageFile, newPackageContents, commitMessage);
+      } else {
+        if (config.verbose) {
+          console.log(`${depName}: Already up-to-date in branch ${branchName}`);
+        }
+        return;
+      }
+    });
+  }
+  function ensurePr() {
+    return github.getPr(branchName).then(pr => {
+      if (pr) {
+        if (pr.title === prTitle && pr.body === prBody) {
+          if (config.verbose) {
+            console.log(`${depName}: PR #${pr.number} already up-to-date`);
+          }
+        } else {
+          console.log(`${depName}: Updating PR #${pr.number}`);
+          return github.updatePr(pr.number, prTitle, prBody);
         }
       } else {
-        console.log(`Updating PR #${pr.number}`);
-        return github.updatePr(pr.number, prTitle, prBody);
+        return github.createPr(branchName, prTitle, prBody).then((pr) => {
+          console.log(`${depName}: Created PR #${pr.number}`);
+        });
       }
-    }
-  });
+    });
+  }
 }
