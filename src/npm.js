@@ -41,7 +41,9 @@ module.exports = {
         allDependencyChecks.push(getDependencyUpgrades(depName, currentVersion)
         .then(res => {
           if (Object.keys(res).length > 0) {
-            console.log(`${depName} upgrades: ${JSON.stringify(res)}`);
+            if (config.verbose) {
+              console.log(`${depName}: Upgrades = ${JSON.stringify(res)}`);
+            }
             Object.keys(res).forEach(function(majorVersion) {
               allDependencyUpgrades.push({
                 depType: depType,
@@ -50,7 +52,10 @@ module.exports = {
                 nextVersion: res[majorVersion],
               });
             });
-
+          } else {
+            if (config.verbose) {
+              console.log(`${depName}: No upgrades required`);
+            }
           }
         }));
       });

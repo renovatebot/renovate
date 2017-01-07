@@ -39,14 +39,19 @@ function validateArguments() {
 }
 
 function initializeGitHub() {
+  if (config.verbose) {
+    console.log('Initializing GitHub');
+  }
   return github.init(token, repoName, config.baseBranch, config.verbose);
 }
 
 function getPackageFileContents() {
+  console.log('Getting package file contents');
   return github.getFileContents(packageFile);
 }
 
 function determineUpgrades(packageFileContents) {
+  console.log('Determining required upgrades');
   return npm.getAllDependencyUpgrades(packageFileContents);
 }
 
@@ -77,6 +82,7 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
   const commitMessage = config.templates.commitMessage({ depName, currentVersion, nextVersion });
 
   // Check if same PR already existed and skip if so
+  // This allows users to close an unwanted upgrade PR and not worry about seeing it raised again
   return github.checkForClosedPr(branchName, prTitle).then((prExisted) => {
     if (prExisted) {
       console.log(`${depName}: Skipping due to existing PR found.`);
