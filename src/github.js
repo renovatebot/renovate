@@ -56,14 +56,9 @@ module.exports = {
       console.error('Error checking if PR already existed');
     });
   },
-  getFile: function(filePath, branchName) {
-    branchName = branchName || config.baseBranch;
-    return ghGot(`repos/${config.repoName}/contents/${filePath}?ref=${branchName}`, {
-      token: config.token,
-    });
-  },
+  getFile: getFile,
   getFileContents: function(filePath, branchName) {
-    return this.getFile(filePath, branchName).then(res => {
+    return getFile(filePath, branchName).then(res => {
       return JSON.parse(new Buffer(res.body.content, 'base64').toString());
     });
   },
@@ -98,3 +93,10 @@ module.exports = {
     });
   },
 };
+
+function getFile(filePath, branchName) {
+  branchName = branchName || config.baseBranch;
+  return ghGot(`repos/${config.repoName}/contents/${filePath}?ref=${branchName}`, {
+    token: config.token,
+  });
+}

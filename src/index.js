@@ -22,18 +22,25 @@ if (process.argv.length < 3 || process.argv.length > 4) {
 // Process command line arguments
 const repoName = process.argv[2];
 const userName = repoName.split('/')[0];
-const packageFile = process.argv[3] || 'package.json';
+const packageFile = process.argv[3] || 'package.json';;
 
 npm.init(config.verbose);
 
 let basePackageJson;
 
-github.init(token, repoName, config.baseBranch, config.verbose).then(() => {
-  // Get the base package.json
-  return github.getFileContents(packageFile);
-})
+github.init(token, repoName, config.baseBranch, config.verbose)
+.then(getPackageFile)
 .then(npm.getAllDependencyUpgrades)
-.then((upgrades) => {
+.then(processUpgradesSequentially)
+.catch(err => {
+  console.log('updateDependency error: ' + err);
+});
+
+function getPackageFile() {
+  return github.getFileContents(packageFile);
+}
+
+function processUpgradesSequentially(upgrades) {
   if (config.verbose) {
     console.log('All upgrades: ' + JSON.stringify(upgrades));
   }
@@ -45,9 +52,7 @@ github.init(token, repoName, config.baseBranch, config.verbose).then(() => {
       return updateDependency(upgrade.depType, upgrade.depName, upgrade.currentVersion, upgrade.nextVersion);
     });
   }, Promise.resolve());
-}).catch(err => {
-  console.log('updateDependency error: ' + err);
-});
+}
 
 function updateDependency(depType, depName, currentVersion, nextVersion) {
   const nextVersionMajor = semver.major(nextVersion);
