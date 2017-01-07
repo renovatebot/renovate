@@ -65,47 +65,43 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
       console.log(`${depName}: Skipping due to existing PR found.`);
       return;
     }
-    return writeUpdates(depType, depName, branchName, prTitle, currentVersion, nextVersion);
-  });
-}
-
-function writeUpdates(depType, depName, branchName, prTitle, currentVersion, nextVersion) {
-  const prBody = config.templates.prBody({ depName, currentVersion, nextVersion });
-  return github.createBranch(branchName).catch(error => {
-    if (error.response.body.message !== 'Reference already exists') {
-      console.log('Error creating branch: ' + branchName);
-      console.log(error.response.body);
-    }
-  }).then(res => {
-    if (config.verbose) {
-      console.log(`Branch exists (${branchName}), now writing file`);
-    }
-    return github.getFile(packageFile, branchName).then(res => {
-      const oldFileSHA = res.body.sha;
-      let currentFileContent = JSON.parse(new Buffer(res.body.content, 'base64').toString());
-      if (currentFileContent[depType][depName] !== nextVersion) {
-        // Branch is new, or needs version updated
-        currentFileContent[depType][depName] = nextVersion;
-        const newPackageString = JSON.stringify(currentFileContent, null, 2) + '\n';
-
-        var commitMessage = config.templates.commitMessage({ depName, currentVersion, nextVersion });
-
-        return github.writeFile(branchName, oldFileSHA, packageFile, newPackageString, commitMessage)
-        .then(() => {
-          return createOrUpdatePullRequest(branchName, prTitle, prBody);
-        })
-        .catch(err => {
-          console.error('Error writing new package file for ' + depName);
-          console.log(err);
-        });
-      } else {
-        // File was up to date. Ensure PR
-        return createOrUpdatePullRequest(branchName, prTitle, prBody);
+    const prBody = config.templates.prBody({ depName, currentVersion, nextVersion });
+    return github.createBranch(branchName).catch(error => {
+      if (error.response.body.message !== 'Reference already exists') {
+        console.log('Error creating branch: ' + branchName);
+        console.log(error.response.body);
       }
+    }).then(res => {
+      if (config.verbose) {
+        console.log(`Branch exists (${branchName}), now writing file`);
+      }
+      return github.getFile(packageFile, branchName).then(res => {
+        const oldFileSHA = res.body.sha;
+        let currentFileContent = JSON.parse(new Buffer(res.body.content, 'base64').toString());
+        if (currentFileContent[depType][depName] !== nextVersion) {
+          // Branch is new, or needs version updated
+          currentFileContent[depType][depName] = nextVersion;
+          const newPackageString = JSON.stringify(currentFileContent, null, 2) + '\n';
+
+          var commitMessage = config.templates.commitMessage({ depName, currentVersion, nextVersion });
+
+          return github.writeFile(branchName, oldFileSHA, packageFile, newPackageString, commitMessage)
+          .then(() => {
+            return createOrUpdatePullRequest(branchName, prTitle, prBody);
+          })
+          .catch(err => {
+            console.error('Error writing new package file for ' + depName);
+            console.log(err);
+          });
+        } else {
+          // File was up to date. Ensure PR
+          return createOrUpdatePullRequest(branchName, prTitle, prBody);
+        }
+      });
+    })
+    .catch(error => {
+      console.log('Promise catch');
     });
-  })
-  .catch(error => {
-    console.log('Promise catch');
   });
 }
 
