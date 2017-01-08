@@ -19,7 +19,7 @@ initializeGitHub()
 .then(determineUpgrades)
 .then(processUpgradesSequentially)
 .catch(err => {
-  console.log('updateDependency error: ' + err);
+  console.log('renovate caught error: ' + err);
 });
 
 function validateArguments() {
@@ -108,6 +108,7 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
         console.log('Response body: ' + error.response.body);
         throw error;
       }
+      // Otherwise we swallow this error and continue
     });
   }
   function ensureCommit() {
