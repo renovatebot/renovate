@@ -5,8 +5,8 @@ const stable = require('semver-stable');
 var config = {};
 
 module.exports = {
-  init: function(verbose = false) {
-    config.verbose = verbose;
+  init: function(setConfig) {
+    config = setConfig;
   },
   getDependencies: function(packageContents) {
     const allDependencies = [];

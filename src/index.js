@@ -6,7 +6,7 @@ const github = require('./helpers/github');
 const npm = require('./helpers/npm');
 const packageJson = require('./helpers/packageJson');
 
-npm.init(config.verbose);
+npm.init(config);
 
 // Process arguments
 const repoName = process.argv[2];
