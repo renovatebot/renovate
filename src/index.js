@@ -1,7 +1,7 @@
 const semver = require('semver');
 const stable = require('semver-stable');
 
-const config = require('./config');
+const config = require('./defaults');
 const github = require('./helpers/github');
 const npm = require('./helpers/npm');
 const packageJson = require('./helpers/packageJson');
