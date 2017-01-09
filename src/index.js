@@ -2,8 +2,8 @@ const semver = require('semver');
 const stable = require('semver-stable');
 
 const config = require('./config');
-const github = require('./github');
-const npm = require('./npm');
+const github = require('./helpers/github');
+const npm = require('./helpers/npm');
 const packageJson = require('./helpers/packageJson');
 
 npm.init(config.verbose);
