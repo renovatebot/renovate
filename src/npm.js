@@ -49,7 +49,7 @@ module.exports = {
                 depType: depType,
                 depName: depName,
                 currentVersion: currentVersion,
-                nextVersion: res[majorVersion],
+                newVersion: res[majorVersion],
               });
             });
           } else {

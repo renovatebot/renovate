@@ -65,22 +65,22 @@ function processUpgradesSequentially(upgrades) {
   // 2. Edge case collision of branch name, e.g. dependency also listed as dev dependency
   return upgrades.reduce((promise, upgrade) => {
     return promise.then(() => {
-      return updateDependency(upgrade.depType, upgrade.depName, upgrade.currentVersion, upgrade.nextVersion);
+      return updateDependency(upgrade.depType, upgrade.depName, upgrade.currentVersion, upgrade.newVersion);
     });
   }, Promise.resolve());
 }
 
-function updateDependency(depType, depName, currentVersion, nextVersion) {
-  const nextVersionMajor = semver.major(nextVersion);
-  const branchName = config.templates.branchName({depType, depName, currentVersion, nextVersion, nextVersionMajor});
+function updateDependency(depType, depName, currentVersion, newVersion) {
+  const newVersionMajor = semver.major(newVersion);
+  const branchName = config.templates.branchName({depType, depName, currentVersion, newVersion, newVersionMajor});
   let prTitle = '';
-  if (nextVersionMajor > semver.major(currentVersion)) {
-    prTitle = config.templates.prTitleMajor({ depType, depName, currentVersion, nextVersion, nextVersionMajor });
+  if (newVersionMajor > semver.major(currentVersion)) {
+    prTitle = config.templates.prTitleMajor({ depType, depName, currentVersion, newVersion, newVersionMajor });
   } else {
-    prTitle = config.templates.prTitleMinor({ depType, depName, currentVersion, nextVersion, nextVersionMajor });
+    prTitle = config.templates.prTitleMinor({ depType, depName, currentVersion, newVersion, newVersionMajor });
   }
-  const prBody = config.templates.prBody({ depName, currentVersion, nextVersion });
-  const commitMessage = config.templates.commitMessage({ depName, currentVersion, nextVersion });
+  const prBody = config.templates.prBody({ depName, currentVersion, newVersion });
+  const commitMessage = config.templates.commitMessage({ depName, currentVersion, newVersion });
 
   // Check if same PR already existed and skip if so
   // This allows users to close an unwanted upgrade PR and not worry about seeing it raised again
@@ -118,12 +118,12 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
       const currentSHA = res.body.sha;
       const currentFileContent = new Buffer(res.body.content, 'base64').toString();
       const currentFileContentJson = JSON.parse(currentFileContent);
-      if (currentFileContentJson[depType][depName] !== nextVersion) {
+      if (currentFileContentJson[depType][depName] !== newVersion) {
         // Branch is new, or needs version updated
         if (config.verbose) {
-          console.log(`${depName}: Updating to ${nextVersion} in branch ${branchName}`);
+          console.log(`${depName}: Updating to ${newVersion} in branch ${branchName}`);
         }
-        const newPackageContents = packageJson.setNewValue(currentFileContent, depType, depName, nextVersion);
+        const newPackageContents = packageJson.setNewValue(currentFileContent, depType, depName, newVersion);
         return github.writeFile(branchName, currentSHA, packageFile, newPackageContents, commitMessage);
       } else {
         if (config.verbose) {
