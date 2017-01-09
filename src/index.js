@@ -65,16 +65,18 @@ function processUpgradesSequentially(upgrades) {
   // 2. Edge case collision of branch name, e.g. dependency also listed as dev dependency
   return upgrades.reduce((promise, upgrade) => {
     return promise.then(() => {
-      return updateDependency(upgrade.depType, upgrade.depName, upgrade.currentVersion, upgrade.newVersion);
+      return updateDependency(upgrade.upgradeType, upgrade.depType, upgrade.depName, upgrade.currentVersion, upgrade.newVersion);
     });
   }, Promise.resolve());
 }
 
-function updateDependency(depType, depName, currentVersion, newVersion) {
+function updateDependency(upgradeType, depType, depName, currentVersion, newVersion) {
   const newVersionMajor = semver.major(newVersion);
   const branchName = config.templates.branchName({depType, depName, currentVersion, newVersion, newVersionMajor});
   let prTitle = '';
-  if (newVersionMajor > semver.major(currentVersion)) {
+  if (upgradeType === 'pin') {
+    prTitle = config.templates.prTitlePin({ depType, depName, currentVersion, newVersion, newVersionMajor });
+  } else if (newVersionMajor > semver.major(currentVersion)) {
     prTitle = config.templates.prTitleMajor({ depType, depName, currentVersion, newVersion, newVersionMajor });
   } else {
     prTitle = config.templates.prTitleMinor({ depType, depName, currentVersion, newVersion, newVersionMajor });

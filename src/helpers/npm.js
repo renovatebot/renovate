@@ -32,7 +32,7 @@ module.exports = {
       }
       Object.keys(packageContents[depType]).forEach(function(depName) {
         var currentVersion = packageContents[depType][depName];
-        if (!semver.valid(currentVersion)) {
+        if (!isValidVersion(currentVersion)) {
           if (config.verbose) {
             console.log(`${depName}: Skipping invalid version ${currentVersion}`);
           }
@@ -44,12 +44,13 @@ module.exports = {
             if (config.verbose) {
               console.log(`${depName}: Upgrades = ${JSON.stringify(res)}`);
             }
-            Object.keys(res).forEach(function(majorVersion) {
+            Object.keys(res).forEach(function(key) {
               allDependencyUpgrades.push({
+                upgradeType: (key === 'pin') ? 'pin' : 'upgrade',
                 depType: depType,
                 depName: depName,
                 currentVersion: currentVersion,
-                newVersion: res[majorVersion],
+                newVersion: res[key],
               });
             });
           } else {
@@ -74,10 +75,14 @@ function getDependency(depName) {
 function getDependencyUpgrades(depName, currentVersion) {
   return getDependency(depName)
   .then(res => {
-    let allUpgrades = {};
     if (!res.body['versions']) {
       console.log(depName + ' versions is null');
     }
+    if (isRange(currentVersion)) {
+      // Pin ranges to their maximum satisfying version
+      return { 'pin': semver.maxSatisfying(Object.keys(res.body.versions), currentVersion) };
+    }
+    const allUpgrades = {};
     Object.keys(res.body['versions']).forEach(function(version) {
       if (stable.is(currentVersion) && !stable.is(version)) {
         // Ignore unstable versions, unless the current version is unstable
@@ -93,4 +98,14 @@ function getDependencyUpgrades(depName, currentVersion) {
     });
     return allUpgrades;
   });
+}
+
+function isRange(input) {
+  // Pinned versions also return true for semver.validRange
+  // We need to check first that they're not "valid" to get only ranges
+  return !semver.valid(input) && semver.validRange(input);
+}
+
+function isValidVersion(input) {
+  return semver.valid(input) || semver.validRange(input);
 }
