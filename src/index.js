@@ -4,6 +4,7 @@ const stable = require('semver-stable');
 const config = require('./config');
 const github = require('./github');
 const npm = require('./npm');
+const packageJson = require('./helpers/packageJson');
 
 npm.init(config.verbose);
 
@@ -115,14 +116,14 @@ function updateDependency(depType, depName, currentVersion, nextVersion) {
     // Retrieve the package.json from this renovate branch
     return github.getFile(packageFile, branchName).then(res => {
       const currentSHA = res.body.sha;
-      let currentFileContent = JSON.parse(new Buffer(res.body.content, 'base64').toString());
-      if (currentFileContent[depType][depName] !== nextVersion) {
+      const currentFileContent = new Buffer(res.body.content, 'base64').toString();
+      const currentFileContentJson = JSON.parse(currentFileContent);
+      if (currentFileContentJson[depType][depName] !== nextVersion) {
         // Branch is new, or needs version updated
         if (config.verbose) {
           console.log(`${depName}: Updating to ${nextVersion} in branch ${branchName}`);
         }
-        currentFileContent[depType][depName] = nextVersion;
-        const newPackageContents = JSON.stringify(currentFileContent, null, 2) + '\n';
+        const newPackageContents = packageJson.setNewValue(currentFileContent, depType, depName, nextVersion);
         return github.writeFile(branchName, currentSHA, packageFile, newPackageContents, commitMessage);
       } else {
         if (config.verbose) {

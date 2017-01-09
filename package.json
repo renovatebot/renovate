@@ -3,6 +3,7 @@
   "dependencies": {
     "gh-got": "5.0.0",
     "got": "6.6.3",
+    "lodash": "4.17.4",
     "mkdirp": "0.5.1",
     "nodegit": "0.16.0",
     "rimraf": "2.5.4",
