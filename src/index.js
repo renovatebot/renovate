@@ -117,8 +117,8 @@ function updateDependency(depType, depName, currentVersion, newVersion) {
     return github.getFile(packageFile, branchName).then(res => {
       const currentSHA = res.body.sha;
       const currentFileContent = new Buffer(res.body.content, 'base64').toString();
-      const currentFileContentJson = JSON.parse(currentFileContent);
-      if (currentFileContentJson[depType][depName] !== newVersion) {
+      const currentJson = JSON.parse(currentFileContent);
+      if (currentJson[depType][depName] !== newVersion) {
         // Branch is new, or needs version updated
         if (config.verbose) {
           console.log(`${depName}: Updating to ${newVersion} in branch ${branchName}`);
