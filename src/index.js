@@ -1,12 +1,9 @@
 const semver = require('semver');
 const stable = require('semver-stable');
 
-const config = require('./defaults');
 const github = require('./helpers/github');
 const npm = require('./helpers/npm');
 const packageJson = require('./helpers/packageJson');
-
-npm.init(config);
 
 // Process arguments
 const repoName = process.argv[2];
@@ -14,8 +11,10 @@ const packageFile = process.argv[3] || 'package.json';
 const token = process.env.RENOVATE_TOKEN;
 
 validateArguments();
+const config = initConfig();
+npm.init(config);
 
-initializeGitHub()
+initGitHub()
 .then(getPackageFileContents)
 .then(determineUpgrades)
 .then(processUpgradesSequentially)
@@ -42,7 +41,18 @@ function validateArguments() {
   }
 }
 
-function initializeGitHub() {
+function initConfig() {
+  const defaultConfig = require('./defaults');
+  let customConfig = {};
+  try {
+    customConfig = require('./config');
+  } catch(e) {
+    // Do nothing
+  }
+  return Object.assign(defaultConfig, customConfig);
+}
+
+function initGitHub() {
   if (config.verbose) {
     console.log('Initializing GitHub');
   }
