@@ -1,5 +1,28 @@
 {
   "private": true,
+  "name": "renovate",
+  "description": "Keep npm dependencies up-to-date.",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "start": "node src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/singapore/renovate.git"
+  },
+  "keywords": [
+    "npm",
+    "outdated",
+    "update"
+  ],
+  "author": "Rhys Arkins <rhys@keylocation.sg>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/singapore/renovate/issues"
+  },
+  "homepage": "https://github.com/singapore/renovate#readme",
   "dependencies": {
     "gh-got": "5.0.0",
     "got": "6.6.3",
