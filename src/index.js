@@ -65,21 +65,22 @@ function processUpgradesSequentially(upgrades) {
   // 2. Edge case collision of branch name, e.g. dependency also listed as dev dependency
   return upgrades.reduce((promise, upgrade) => {
     return promise.then(() => {
-      return updateDependency(upgrade.upgradeType, upgrade.depType, upgrade.depName, upgrade.currentVersion, upgrade.newVersion);
+      return updateDependency(upgrade);
     });
   }, Promise.resolve());
 }
 
-function updateDependency(upgradeType, depType, depName, currentVersion, newVersion) {
+function updateDependency({ upgradeType, depType, depName, currentVersion, newVersion }) {
   const newVersionMajor = semver.major(newVersion);
   const branchName = config.templates.branchName({depType, depName, currentVersion, newVersion, newVersionMajor});
   let prTitle = '';
   if (upgradeType === 'pin') {
     prTitle = config.templates.prTitlePin({ depType, depName, currentVersion, newVersion, newVersionMajor });
-  } else if (newVersionMajor > semver.major(currentVersion)) {
-    prTitle = config.templates.prTitleMajor({ depType, depName, currentVersion, newVersion, newVersionMajor });
-  } else {
+  } else if (upgradeType === 'minor') {
+    // Use same title for range or minor
     prTitle = config.templates.prTitleMinor({ depType, depName, currentVersion, newVersion, newVersionMajor });
+  } else {
+    prTitle = config.templates.prTitleMajor({ depType, depName, currentVersion, newVersion, newVersionMajor });
   }
   const prBody = config.templates.prBody({ depName, currentVersion, newVersion });
   const commitMessage = config.templates.commitMessage({ depName, currentVersion, newVersion });

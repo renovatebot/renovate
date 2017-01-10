@@ -40,17 +40,17 @@ module.exports = {
         }
         allDependencyChecks.push(getDependencyUpgrades(depName, currentVersion)
         .then(res => {
-          if (Object.keys(res).length > 0) {
+          if (res.length > 0) {
             if (config.verbose) {
               console.log(`${depName}: Upgrades = ${JSON.stringify(res)}`);
             }
-            Object.keys(res).forEach(function(key) {
+            res.forEach(function(upgrade) {
               allDependencyUpgrades.push({
-                upgradeType: (key === 'pin') ? 'pin' : 'upgrade',
                 depType: depType,
                 depName: depName,
                 currentVersion: currentVersion,
-                newVersion: res[key],
+                upgradeType: upgrade.type,
+                newVersion: upgrade.version,
               });
             });
           } else {
@@ -78,11 +78,17 @@ function getDependencyUpgrades(depName, currentVersion) {
     if (!res.body['versions']) {
       console.log(depName + ' versions is null');
     }
+    const allUpgrades = {};
     if (isRange(currentVersion)) {
       // Pin ranges to their maximum satisfying version
-      return { 'pin': semver.maxSatisfying(Object.keys(res.body.versions), currentVersion) };
+      const maxSatisfying = semver.maxSatisfying(Object.keys(res.body.versions), currentVersion);
+      allUpgrades['pin'] = {
+        type: 'pin',
+        version: maxSatisfying,
+      };
+      currentVersion = maxSatisfying;
     }
-    const allUpgrades = {};
+    const currentMajor = semver.major(currentVersion);
     Object.keys(res.body['versions']).forEach(function(version) {
       if (stable.is(currentVersion) && !stable.is(version)) {
         // Ignore unstable versions, unless the current version is unstable
@@ -91,12 +97,20 @@ function getDependencyUpgrades(depName, currentVersion) {
       if (semver.gt(version, currentVersion)) {
         // Group by major versions
         var thisMajor = semver.major(version);
-        if (!allUpgrades[thisMajor] || semver.gt(version, allUpgrades[thisMajor])) {
-          allUpgrades[thisMajor] = version;
+        if (!allUpgrades[thisMajor] || semver.gt(version, allUpgrades[thisMajor].version)) {
+          allUpgrades[thisMajor] = {
+            type: (thisMajor > currentMajor) ? 'major' : 'minor',
+            version: version,
+          };
         }
       }
     });
-    return allUpgrades;
+    if (allUpgrades['pin'] && Object.keys(allUpgrades).length > 1) {
+      // Remove the pin
+      delete allUpgrades['pin'];
+    }
+    // Return only the values
+    return Object.keys(allUpgrades).map(key => allUpgrades[key]);
   });
 }
 
