@@ -1,6 +1,5 @@
 module.exports = {
   verbose: false,
-  baseBranch: 'master',
   templates: {
     branchName: (params) => {
       return `renovate/${params.depName}-${params.newVersionMajor}.x`;

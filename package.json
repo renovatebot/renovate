@@ -1,9 +1,12 @@
 {
   "private": true,
   "dependencies": {
+    "better-console": "1.0.0",
+    "colors": "1.1.2",
     "gh-got": "5.0.0",
     "got": "6.6.3",
     "lodash": "4.17.4",
+    "manakin": "0.4.6",
     "mkdirp": "0.5.1",
     "nodegit": "0.16.0",
     "rimraf": "2.5.4",

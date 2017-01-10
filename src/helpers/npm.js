@@ -76,7 +76,7 @@ function getDependencyUpgrades(depName, currentVersion) {
   return getDependency(depName)
   .then(res => {
     if (!res.body['versions']) {
-      console.log(depName + ' versions is null');
+      console.error(depName + ' versions is null');
     }
     const allUpgrades = {};
     if (isRange(currentVersion)) {

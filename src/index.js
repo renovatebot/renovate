@@ -1,3 +1,6 @@
+// Set colours for console globally
+require('manakin').global;
+
 const semver = require('semver');
 const stable = require('semver-stable');
 
@@ -9,18 +12,29 @@ const config = initConfig();
 validateArguments();
 npm.init(config);
 
-const repoName = Object.keys(config.repositories)[0];
-const packageFile = config.repositories[repoName] || 'package.json';
-
-initGitHub()
-.then(getPackageFileContents)
-.then(determineUpgrades)
-.then(processUpgradesSequentially)
+config.repositories.reduce((repoPromise, repo) => {
+  return repoPromise.then(() => {
+    const repoName = repo.name;
+    return repo.packageFiles.reduce((packageFilePromise, packageFile) => {
+      return packageFilePromise.then(() => {
+        return initGitHub(repoName, packageFile)
+        .then(getPackageFileContents)
+        .then(determineUpgrades)
+        .then(processUpgradesSequentially)
+        .then(() => {
+          console.success(`Repo ${repoName} ${packageFile} done`);
+        })
+        .catch(err => {
+          console.error('renovate caught error: ' + err);
+        });
+      });
+    }, repoPromise);
+  });
+}, Promise.resolve())
 .then(() => {
-  console.log('Done');
-})
-.catch(err => {
-  console.log('renovate caught error: ' + err);
+  if (config.repositories.length < 1) {
+    console.success('All repos done');
+  }
 });
 
 function initConfig() {
@@ -39,17 +53,28 @@ function initConfig() {
   const repoName = process.argv[2];
   const packageFile = process.argv[3] || 'package.json';
   if (repoName) {
-    cliConfig.repositories = {};
-    cliConfig.repositories[repoName] = packageFile;
+    cliConfig.repositories = [
+      {
+        name: repoName,
+        packageFiles: [packageFile],
+      },
+    ];
   }
   const combinedConfig = Object.assign(defaultConfig, customConfig, cliConfig);
-  if (Array.isArray(combinedConfig.repositories)) {
-    const newRepositories = {};
-    combinedConfig.repositories.forEach(repo => {
-      newRepositories[repo] = 'package.json';
-    });
-    combinedConfig.repositories = newRepositories;
-  }
+  // First, convert any strings to objects
+  combinedConfig.repositories.forEach(function(repo, index) {
+    if (typeof repo === 'string') {
+      combinedConfig.repositories[index] = {
+        name: repo,
+      };
+    }
+  });
+  // Add 'package.json' if missing
+  combinedConfig.repositories.forEach(function(repo, index) {
+    if (!repo.packageFiles || !repo.packageFiles.length) {
+      repo.packageFiles = ['package.json'];
+    }
+  });
   if (combinedConfig.verbose) {
     console.log('config = ' + JSON.stringify(combinedConfig));
   }
@@ -63,33 +88,31 @@ function validateArguments() {
     process.exit(1);
   }
   // We also need a repository
-  if (typeof Object.keys(config.repositories).length === 0) {
-    console.error('Error: A repository must be configured');
+  if (!config.repositories || config.repositories.length === 0) {
+    console.error('Error: At least one repository must be configured');
   }
 }
 
-function initGitHub() {
-  if (config.verbose) {
-    console.log('Initializing GitHub');
-  }
+function initGitHub(repoName, packageFile) {
+  console.info('Initializing GitHub repo ' + repoName + ', ' + packageFile);
   return github.init(config, repoName, packageFile);
 }
 
 function getPackageFileContents() {
-  console.log('Getting package file contents');
-  return github.getFileContents(config.packageFile);
+  console.info('Getting package file contents');
+  return github.getPackageFileContents();
 }
 
 function determineUpgrades(packageFileContents) {
-  console.log('Determining required upgrades');
+  console.info('Determining required upgrades');
   return npm.getAllDependencyUpgrades(packageFileContents);
 }
 
 function processUpgradesSequentially(upgrades) {
   if (Object.keys(upgrades).length) {
-    console.log('Processing upgrades');
+    console.info('Processing upgrades');
   } else {
-    console.log('No upgrades to process');
+    console.info('No upgrades to process');
   }
   if (config.verbose) {
     console.log('All upgrades: ' + JSON.stringify(upgrades));
@@ -123,7 +146,9 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
   // This allows users to close an unwanted upgrade PR and not worry about seeing it raised again
   return github.checkForClosedPr(branchName, prTitle).then((prExisted) => {
     if (prExisted) {
-      console.log(`${depName}: Skipping due to existing PR found.`);
+      if (config.verbose) {
+        console.log(`${depName}: Skipping due to existing PR found.`);
+      }
       return;
     }
 
@@ -131,7 +156,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
     .then(ensureCommit)
     .then(ensurePr)
     .catch(error => {
-      console.log('Error updating dependency depName: ' + error);
+      console.error(`Error updating dependency ${depName}:  ${error}`);
       // Don't throw here - we don't want to stop the other renovations
     });
   });
@@ -142,8 +167,8 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
       // Check in case it's because the branch already existed
       if (error.response.body.message !== 'Reference already exists') {
         // In this case it means we really do have a problem and can't continue
-        console.log('Error creating branch: ' + branchName);
-        console.log('Response body: ' + error.response.body);
+        console.error('Error creating branch: ' + branchName);
+        console.error('Response body: ' + error.response.body);
         throw error;
       }
       // Otherwise we swallow this error and continue
@@ -151,7 +176,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
   }
   function ensureCommit() {
     // Retrieve the package.json from this renovate branch
-    return github.getFile(config.packageFile, branchName).then(res => {
+    return github.getPackageFile(branchName).then(res => {
       const currentSHA = res.body.sha;
       const currentFileContent = new Buffer(res.body.content, 'base64').toString();
       const currentJson = JSON.parse(currentFileContent);
@@ -161,7 +186,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
           console.log(`${depName}: Updating to ${newVersion} in branch ${branchName}`);
         }
         const newPackageContents = packageJson.setNewValue(currentFileContent, depType, depName, newVersion);
-        return github.writeFile(branchName, currentSHA, packageFile, newPackageContents, commitMessage);
+        return github.writePackageFile(branchName, currentSHA, newPackageContents, commitMessage);
       } else {
         if (config.verbose) {
           console.log(`${depName}: branch ${branchName} is already up-to-date`);
@@ -178,12 +203,12 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
             console.log(`${depName}: PR #${pr.number} already up-to-date`);
           }
         } else {
-          console.log(`${depName}: Updating PR #${pr.number}`);
+          console.info(`${depName}: Updating PR #${pr.number}`);
           return github.updatePr(pr.number, prTitle, prBody);
         }
       } else {
         return github.createPr(branchName, prTitle, prBody).then((pr) => {
-          console.log(`${depName}: Created PR #${pr.number}`);
+          console.info(`${depName}: Created PR #${pr.number}`);
         });
       }
     });
