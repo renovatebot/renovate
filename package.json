@@ -1,8 +1,6 @@
 {
   "private": true,
   "dependencies": {
-    "better-console": "1.0.0",
-    "colors": "1.1.2",
     "gh-got": "5.0.0",
     "got": "6.6.3",
     "lodash": "4.17.4",
