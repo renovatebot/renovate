@@ -42,7 +42,18 @@ function initConfig() {
     cliConfig.repositories = {};
     cliConfig.repositories[repoName] = packageFile;
   }
-  return Object.assign(defaultConfig, customConfig, cliConfig);
+  const combinedConfig = Object.assign(defaultConfig, customConfig, cliConfig);
+  if (Array.isArray(combinedConfig.repositories)) {
+    const newRepositories = {};
+    combinedConfig.repositories.forEach(repo => {
+      newRepositories[repo] = 'package.json';
+    });
+    combinedConfig.repositories = newRepositories;
+  }
+  if (combinedConfig.verbose) {
+    console.log('config = ' + JSON.stringify(combinedConfig));
+  }
+  return combinedConfig;
 }
 
 function validateArguments() {
