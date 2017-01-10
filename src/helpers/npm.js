@@ -2,36 +2,36 @@ const got = require('got');
 const semver = require('semver');
 const stable = require('semver-stable');
 
-var config = {};
+let config = {};
 
 module.exports = {
-  init: function(setConfig) {
+  init(setConfig) {
     config = setConfig;
   },
-  getDependencies: function(packageContents) {
+  getDependencies(packageContents) {
     const allDependencies = [];
     const dependencyTypes = ['dependencies', 'devDependencies'];
-    dependencyTypes.forEach(function(depType) {
-      Object.keys(packageContents[depType]).forEach(function(depName) {
+    dependencyTypes.forEach((depType) => {
+      Object.keys(packageContents[depType]).forEach((depName) => {
         allDependencies.push({
-          depType: depType,
-          depName: depName,
+          depType,
+          depName,
           currentVersion: packageContents[depType][depName],
         });
       });
     });
     return allDependencies;
   },
-  getAllDependencyUpgrades: function(packageContents) {
+  getAllDependencyUpgrades(packageContents) {
     const allDependencyChecks = [];
     const allDependencyUpgrades = [];
     const dependencyTypes = ['dependencies', 'devDependencies'];
-    dependencyTypes.forEach(function(depType) {
+    dependencyTypes.forEach((depType) => {
       if (!packageContents[depType]) {
         return;
       }
-      Object.keys(packageContents[depType]).forEach(function(depName) {
-        var currentVersion = packageContents[depType][depName];
+      Object.keys(packageContents[depType]).forEach((depName) => {
+        const currentVersion = packageContents[depType][depName];
         if (!isValidVersion(currentVersion)) {
           if (config.verbose) {
             console.log(`${depName}: Skipping invalid version ${currentVersion}`);
@@ -39,31 +39,28 @@ module.exports = {
           return;
         }
         allDependencyChecks.push(getDependencyUpgrades(depName, currentVersion)
-        .then(res => {
+        .then((res) => {
           if (res.length > 0) {
             if (config.verbose) {
               console.log(`${depName}: Upgrades = ${JSON.stringify(res)}`);
             }
-            res.forEach(function(upgrade) {
+            res.forEach((upgrade) => {
               allDependencyUpgrades.push({
-                depType: depType,
-                depName: depName,
-                currentVersion: currentVersion,
+                depType,
+                depName,
+                currentVersion,
                 upgradeType: upgrade.type,
                 newVersion: upgrade.version,
               });
             });
-          } else {
-            if (config.verbose) {
-              console.log(`${depName}: No upgrades required`);
-            }
+          } else if (config.verbose) {
+            console.log(`${depName}: No upgrades required`);
           }
+          return Promise.resolve();
         }));
       });
     });
-    return Promise.all(allDependencyChecks).then(() => {
-      return allDependencyUpgrades;
-    });
+    return Promise.all(allDependencyChecks).then(() => allDependencyUpgrades);
   },
 };
 
@@ -74,40 +71,41 @@ function getDependency(depName) {
 
 function getDependencyUpgrades(depName, currentVersion) {
   return getDependency(depName)
-  .then(res => {
-    if (!res.body['versions']) {
-      console.error(depName + ' versions is null');
+  .then((res) => {
+    if (!res.body.versions) {
+      console.error(`${depName} versions is null`);
     }
     const allUpgrades = {};
+    let workingVersion = currentVersion;
     if (isRange(currentVersion)) {
       // Pin ranges to their maximum satisfying version
       const maxSatisfying = semver.maxSatisfying(Object.keys(res.body.versions), currentVersion);
-      allUpgrades['pin'] = {
+      allUpgrades.pin = {
         type: 'pin',
         version: maxSatisfying,
       };
-      currentVersion = maxSatisfying;
+      workingVersion = maxSatisfying;
     }
-    const currentMajor = semver.major(currentVersion);
-    Object.keys(res.body['versions']).forEach(function(version) {
-      if (stable.is(currentVersion) && !stable.is(version)) {
+    const currentMajor = semver.major(workingVersion);
+    Object.keys(res.body.versions).forEach((version) => {
+      if (stable.is(workingVersion) && !stable.is(version)) {
         // Ignore unstable versions, unless the current version is unstable
         return;
       }
-      if (semver.gt(version, currentVersion)) {
+      if (semver.gt(version, workingVersion)) {
         // Group by major versions
-        var thisMajor = semver.major(version);
+        const thisMajor = semver.major(version);
         if (!allUpgrades[thisMajor] || semver.gt(version, allUpgrades[thisMajor].version)) {
           allUpgrades[thisMajor] = {
             type: (thisMajor > currentMajor) ? 'major' : 'minor',
-            version: version,
+            version,
           };
         }
       }
     });
-    if (allUpgrades['pin'] && Object.keys(allUpgrades).length > 1) {
+    if (allUpgrades.pin && Object.keys(allUpgrades).length > 1) {
       // Remove the pin
-      delete allUpgrades['pin'];
+      delete allUpgrades.pin;
     }
     // Return only the values
     return Object.keys(allUpgrades).map(key => allUpgrades[key]);

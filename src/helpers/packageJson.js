@@ -1,38 +1,36 @@
 const _ = require('lodash');
 
 module.exports = {
-  setNewValue: function(currentFileContent, depType, depName, newVersion) {
+  setNewValue(currentFileContent, depType, depName, newVersion) {
     const parsedContents = JSON.parse(currentFileContent);
     // Save the old version
     const oldVersion = parsedContents[depType][depName];
     // Update the file = this is what we want
     parsedContents[depType][depName] = newVersion;
     // Look for the old version number
-    const versionHits = indexes(currentFileContent, `"${oldVersion}"`);
-    let newSource = null;
-    // Loop through all instances of string until one matches
-    versionHits.some(function(index) {
-      // Replace the string and parse the result
-      const testSource = replaceStringAtIndex(currentFileContent, oldVersion, newVersion, index+1);
-      if (_.isEqual(parsedContents, JSON.parse(testSource))) {
-        newSource = testSource;
-        return true;
+    const searchString = `"${oldVersion}"`;
+    const newString = `"${newVersion}"`;
+    let newFileContent = null;
+    // Skip ahead to depType section
+    let searchIndex = currentFileContent.indexOf(`"${depType}"`) + depType.length;
+    // Iterate through the rest of the file
+    for (; searchIndex < currentFileContent.length; searchIndex += 1) {
+      // First check if we have a hit for the old version
+      if (currentFileContent.substring(searchIndex, searchIndex + searchString.length) === searchString) {
+        // Now test if the result matches
+        const testContent =
+          currentFileContent.substr(0, searchIndex) + newString +
+          currentFileContent.substr(searchIndex + searchString.length);
+        // Compare the parsed JSON structure of old and new
+        if (_.isEqual(parsedContents, JSON.parse(testContent))) {
+          newFileContent = testContent;
+          break;
+        }
       }
-    });
-    return newSource;
-  }
-};
-
-function indexes(currentFileContent, find) {
-  var result = [];
-  for (i = 0; i < currentFileContent.length; ++i) {
-    if (currentFileContent.substring(i, i + find.length) == find) {
-      result.push(i);
     }
-  }
-  return result;
-}
-
-function replaceStringAtIndex(currentFileContent, oldStr, newStr, index) {
-  return currentFileContent.substr(0, index) + newStr + currentFileContent.substr(index + oldStr.length);
-}
+    if (!newFileContent) {
+      throw new Error('Could not find old version');
+    }
+    return newFileContent;
+  },
+};
