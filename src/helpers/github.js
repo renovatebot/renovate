@@ -4,12 +4,10 @@ var config = {};
 
 module.exports = {
   // Initialize GitHub by getting base branch SHA
-  init: function(token, repoName, baseBranch, verbose = false) {
-    config.token = token;
+  init: function(setConfig, repoName, packageFile) {
+    config = setConfig;
     config.repoName = repoName;
-    config.baseBranch = baseBranch;
-    config.verbose = verbose;
-
+    config.packageFile = packageFile;
     config.userName = repoName.split('/')[0];
 
     return ghGot(`repos/${config.repoName}/git/refs/head`, {token: config.token}).then(res => {

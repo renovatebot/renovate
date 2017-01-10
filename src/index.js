@@ -5,14 +5,12 @@ const github = require('./helpers/github');
 const npm = require('./helpers/npm');
 const packageJson = require('./helpers/packageJson');
 
-// Process arguments
-const repoName = process.argv[2];
-const packageFile = process.argv[3] || 'package.json';
-const token = process.env.RENOVATE_TOKEN;
-
-validateArguments();
 const config = initConfig();
+validateArguments();
 npm.init(config);
+
+const repoName = Object.keys(config.repositories)[0];
+const packageFile = config.repositories[repoName] || 'package.json';
 
 initGitHub()
 .then(getPackageFileContents)
@@ -25,22 +23,6 @@ initGitHub()
   console.log('renovate caught error: ' + err);
 });
 
-function validateArguments() {
-  // token must be defined
-  if (typeof token === 'undefined') {
-    console.error('Error: Environment variable RENOVATE_TOKEN must be defined');
-    process.exit(1);
-  }
-
-  // Check arguments
-  if (process.argv.length < 3 || process.argv.length > 4) {
-    console.error('Error: You must specify the GitHub repository and optionally path.');
-    console.log('Example: node src singapore/renovate');
-    console.log('Example: node src foo/bar baz/package.json');
-    process.exit(1);
-  }
-}
-
 function initConfig() {
   const defaultConfig = require('./defaults');
   let customConfig = {};
@@ -49,19 +31,42 @@ function initConfig() {
   } catch(e) {
     // Do nothing
   }
-  return Object.assign(defaultConfig, customConfig);
+  const cliConfig = {};
+  if (process.env.RENOVATE_TOKEN) {
+    cliConfig.token = process.env.RENOVATE_TOKEN;
+  }
+  // Check if repository name and package file are provided via CLI
+  const repoName = process.argv[2];
+  const packageFile = process.argv[3] || 'package.json';
+  if (repoName) {
+    cliConfig.repositories = {};
+    cliConfig.repositories[repoName] = packageFile;
+  }
+  return Object.assign(defaultConfig, customConfig, cliConfig);
+}
+
+function validateArguments() {
+  // token must be defined
+  if (typeof config.token === 'undefined') {
+    console.error('Error: A GitHub token must be configured');
+    process.exit(1);
+  }
+  // We also need a repository
+  if (typeof Object.keys(config.repositories).length === 0) {
+    console.error('Error: A repository must be configured');
+  }
 }
 
 function initGitHub() {
   if (config.verbose) {
     console.log('Initializing GitHub');
   }
-  return github.init(token, repoName, config.baseBranch, config.verbose);
+  return github.init(config, repoName, packageFile);
 }
 
 function getPackageFileContents() {
   console.log('Getting package file contents');
-  return github.getFileContents(packageFile);
+  return github.getFileContents(config.packageFile);
 }
 
 function determineUpgrades(packageFileContents) {
@@ -135,7 +140,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
   }
   function ensureCommit() {
     // Retrieve the package.json from this renovate branch
-    return github.getFile(packageFile, branchName).then(res => {
+    return github.getFile(config.packageFile, branchName).then(res => {
       const currentSHA = res.body.sha;
       const currentFileContent = new Buffer(res.body.content, 'base64').toString();
       const currentJson = JSON.parse(currentFileContent);
@@ -148,7 +153,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
         return github.writeFile(branchName, currentSHA, packageFile, newPackageContents, commitMessage);
       } else {
         if (config.verbose) {
-          console.log(`${depName}: Already up-to-date in branch ${branchName}`);
+          console.log(`${depName}: branch ${branchName} is already up-to-date`);
         }
         return;
       }
