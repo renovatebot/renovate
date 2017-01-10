@@ -19,6 +19,9 @@ initializeGitHub()
 .then(getPackageFileContents)
 .then(determineUpgrades)
 .then(processUpgradesSequentially)
+.then(() => {
+  console.log('Done');
+})
 .catch(err => {
   console.log('renovate caught error: ' + err);
 });
@@ -57,6 +60,11 @@ function determineUpgrades(packageFileContents) {
 }
 
 function processUpgradesSequentially(upgrades) {
+  if (Object.keys(upgrades).length) {
+    console.log('Processing upgrades');
+  } else {
+    console.log('No upgrades to process');
+  }
   if (config.verbose) {
     console.log('All upgrades: ' + JSON.stringify(upgrades));
   }
