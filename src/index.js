@@ -14,6 +14,7 @@ module.exports = function init(setConfig) {
   github.setLogger(logger);
   npm.setLogger(logger);
   packageJson.setLogger(logger);
+  changelog.setGitHubToken(config.token);
 
   return processPackageFile;
 };
