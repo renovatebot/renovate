@@ -24,9 +24,8 @@ function init(setConfig, repoName, packageFile) {
   config.packageFile = packageFile;
 
   function getRepo() {
-    return ghGot(`repos/${config.repoName}`, { token: config.token }).then(
-      res => res.body,
-    );
+    return ghGot(`repos/${config.repoName}`, { token: config.token })
+    .then(res => res.body);
   }
 
   function processRepo(repo) {
@@ -74,8 +73,7 @@ function writePackageFile(branchName, oldFileSHA, fileContents, message) {
     oldFileSHA,
     config.packageFile,
     fileContents,
-    message,
-  );
+    message);
 }
 
 // Branch
@@ -93,15 +91,12 @@ function createBranch(branchName) {
 function checkForClosedPr(branchName, prTitle) {
   return ghGot(
     `repos/${config.repoName}/pulls?state=closed&head=${config.owner}:${branchName}`,
-    { token: config.token },
-  )
-    .then(
-      res => res.body.some(
-        pr => pr.title === prTitle &&
-          pr.head.label === `${config.owner}:${branchName}`,
-      ),
-    )
-    .catch((error) => {
+    {
+      token: config.token
+    }).then(res => res.body.some(
+      pr => pr.title === prTitle &&
+        pr.head.label === `${config.owner}:${branchName}`)
+    ).catch((error) => {
       console.error(`Error checking if PR already existed: ${error}`);
     });
 }
@@ -135,16 +130,15 @@ function updatePr(prNo, title, body) {
 
 // Generic File operations
 function getFile(filePath, branchName = config.defaultBranch) {
-  return ghGot(
-    `repos/${config.repoName}/contents/${filePath}?ref=${branchName}`,
-    { token: config.token },
-  );
+  return ghGot(`repos/${config.repoName}/contents/${filePath}?ref=${branchName}`,
+    {
+      token: config.token
+    });
 }
 
 function getFileContents(filePath, branchName) {
-  return getFile(filePath, branchName).then(
-    res => JSON.parse(new Buffer(res.body.content, 'base64').toString()),
-  );
+  return getFile(filePath, branchName)
+  .then(res => JSON.parse(new Buffer(res.body.content, 'base64').toString()));
 }
 
 function writeFile(branchName, oldFileSHA, filePath, fileContents, message) {

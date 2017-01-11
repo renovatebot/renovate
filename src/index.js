@@ -222,10 +222,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
     // Retrieve the package.json from this renovate branch
     return github.getPackageFile(branchName).then((res) => {
       const currentSHA = res.body.sha;
-      const currentFileContent = new Buffer(
-        res.body.content,
-        'base64',
-      ).toString();
+      const currentFileContent = new Buffer(res.body.content, 'base64').toString();
       const currentJson = JSON.parse(currentFileContent);
       if (currentJson[depType][depName] === newVersion) {
         if (config.verbose) {
@@ -235,22 +232,18 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
       }
       // Branch must need updating
       if (config.verbose) {
-        console.log(
-          `${depName}: Updating to ${newVersion} in branch ${branchName}`,
-        );
+        console.log(`${depName}: Updating to ${newVersion} in branch ${branchName}`);
       }
       const newPackageContents = packageJson.setNewValue(
         currentFileContent,
         depType,
         depName,
-        newVersion,
-      );
+        newVersion);
       return github.writePackageFile(
         branchName,
         currentSHA,
         newPackageContents,
-        commitMessage,
-      );
+        commitMessage);
     });
   }
 
@@ -279,9 +272,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
       // Check if existing PR needs updating
       if (existingPr.title === prTitle || existingPr.body === prBody) {
         if (config.verbose) {
-          console.log(
-            `${depName}: PR #${existingPr.number} already up-to-date`,
-          );
+          console.log(`${depName}: PR #${existingPr.number} already up-to-date`);
         }
         return Promise.resolve();
       }

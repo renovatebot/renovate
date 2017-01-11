@@ -34,9 +34,7 @@ module.exports = {
         const currentVersion = packageContents[depType][depName];
         if (!isValidVersion(currentVersion)) {
           if (config.verbose) {
-            console.log(
-              `${depName}: Skipping invalid version ${currentVersion}`,
-            );
+            console.log(`${depName}: Skipping invalid version ${currentVersion}`);
           }
           return;
         }
@@ -59,8 +57,7 @@ module.exports = {
               console.log(`${depName}: No upgrades required`);
             }
             return Promise.resolve();
-          }),
-        );
+          }));
       });
     });
     return Promise.all(allDependencyChecks).then(() => allDependencyUpgrades);
@@ -85,8 +82,7 @@ function getDependencyUpgrades(depName, currentVersion) {
       // Pin ranges to their maximum satisfying version
       const maxSatisfying = semver.maxSatisfying(
         Object.keys(res.body.versions),
-        currentVersion,
-      );
+        currentVersion);
       allUpgrades.pin = { type: 'pin', version: maxSatisfying };
       workingVersion = maxSatisfying;
     }
