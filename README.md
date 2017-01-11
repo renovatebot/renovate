@@ -35,11 +35,11 @@ node src singapore/renovate
 Example of running with a custom `package.json` location:
 
 ```sh
-node src JDSUW284HSJDSFKSUS22942H2H15KK singapore/renovate containers/build/package.json
+node src singapore/renovate containers/build/package.json
 ```
 
 Note: as mentioned above, you need to expose the environment variable `RENOVATE_TOKEN`. One way of doing it is like this:
 
 ```sh
-RENOVATE_TOKEN=JDSUW284HSJDSFKSUS22942H2H15KK node src singpaore/renovate
+RENOVATE_TOKEN=JDSUW284HSJDSFKSUS22942H2H15KK node src singapore/renovate
 ```
