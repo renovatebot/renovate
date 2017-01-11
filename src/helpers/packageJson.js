@@ -17,11 +17,9 @@ module.exports = {
     // Iterate through the rest of the file
     for (; searchIndex < currentFileContent.length; searchIndex += 1) {
       // First check if we have a hit for the old version
-      if (currentFileContent.substring(searchIndex, searchIndex + searchString.length) === searchString) {
+      if (matchAt(currentFileContent, searchIndex, searchString)) {
         // Now test if the result matches
-        const testContent = currentFileContent.substr(0, searchIndex) +
-          newString +
-          currentFileContent.substr(searchIndex + searchString.length);
+        const testContent = replaceAt(currentFileContent, searchIndex, searchString, newString);
         // Compare the parsed JSON structure of old and new
         if (_.isEqual(parsedContents, JSON.parse(testContent))) {
           newFileContent = testContent;
@@ -35,3 +33,13 @@ module.exports = {
     return newFileContent;
   },
 };
+
+// Return true if the match string is found at index in content
+function matchAt(content, index, match) {
+  return content.substring(index, index + match.length) === match;
+}
+
+// Replace oldString with newString at location index of content
+function replaceAt(content, index, oldString, newString) {
+  return content.substr(0, index) + newString + content.substr(index, oldString.length);
+}

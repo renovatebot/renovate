@@ -10,7 +10,6 @@ module.exports = {
         'promise',
     ],
     'rules': {
-      'max-len': [1, 120],
       'no-console': 0,
       'no-use-before-define': 0,
       'promise/always-return': 'error',
