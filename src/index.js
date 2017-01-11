@@ -1,14 +1,14 @@
 const semver = require('semver');
-const winston = require('winston');
 
 const github = require('./helpers/github');
+const configurator = require('./helpers/configurator');
 const npm = require('./helpers/npm');
 const packageJson = require('./helpers/packageJson');
 
-const config = initConfig();
+const config = configurator.init(process.argv);
 const logger = config.logger;
-logger.verbose(`config = ${JSON.stringify(config)}`);
-validateArguments();
+
+// Initialize npm
 npm.init(config);
 
 // Initialize our promise chain
@@ -16,93 +16,17 @@ let p = Promise.resolve();
 
 // Queue up each repo/package combination
 config.repositories.forEach((repo) => {
-  const repoName = repo.name;
   repo.packageFiles.forEach((packageFile) => {
-    p = p.then(() => processRepoPackageFile(repoName, packageFile));
+    p = p.then(() => processRepoPackageFile(repo.name, packageFile));
   });
 });
-// Print something nice once the chain is done
-p
-  .then(() => {
-    // eslint-disable-next-line promise/always-return
-    if (config.repositories.length > 1) {
-      logger.info('All repos done');
-    }
-  })
-  .catch((error) => {
-    logger.error(`Unexpected error: ${error}`);
-  });
-
-// This function reads in all configs and merges them
-function initConfig() {
-  /* eslint-disable global-require */
-  const defaultConfig = require('./defaults');
-  let customConfig = {};
-  try {
-    customConfig = require('./config');
-  } catch (err) {
-    // Do nothing
-  }
-  /* eslint-enable global-require */
-  const cliConfig = {};
-  if (process.env.LOG_LEVEL) {
-    cliConfig.logLevel = process.env.LOG_LEVEL;
-  }
-  if (process.env.RENOVATE_TOKEN) {
-    cliConfig.token = process.env.RENOVATE_TOKEN;
-  }
-  // Check if repository name and package file are provided via CLI
-  const repoName = process.argv[2];
-  const packageFile = process.argv[3] || 'package.json';
-  if (repoName) {
-    cliConfig.repositories = [
-      {
-        name: repoName,
-        packageFiles: [packageFile],
-      },
-    ];
-  }
-  const combinedConfig = Object.assign(defaultConfig, customConfig, cliConfig);
-  // First, convert any strings to objects
-  combinedConfig.repositories.forEach((repo, index) => {
-    if (typeof repo === 'string') {
-      combinedConfig.repositories[index] = { name: repo };
-    }
-  });
-  // Add 'package.json' if missing
-  combinedConfig.repositories.forEach((repo, index) => {
-    if (!repo.packageFiles || !repo.packageFiles.length) {
-      combinedConfig.repositories[index].packageFiles = ['package.json'];
-    }
-  });
-
-  // Add the logger
-  combinedConfig.logger = new (winston.Logger)({
-    transports: [
-      // colorize the output to the console
-      new (winston.transports.Console)({ colorize: true }),
-    ],
-  });
-
-  // Winston log level can be controlled via config or env
-  if (combinedConfig.logLevel) {
-    combinedConfig.logger.level = combinedConfig.logLevel;
-  }
-  return combinedConfig;
-}
-
-// This function makes sure we have a token and at least one repository
-function validateArguments() {
-  // token must be defined
-  if (typeof config.token === 'undefined') {
-    logger.error('Error: A GitHub token must be configured');
-    process.exit(1);
-  }
-  // We also need a repository
-  if (!config.repositories || config.repositories.length === 0) {
-    logger.error('Error: At least one repository must be configured');
-  }
-}
+// eslint-disable-next-line promise/always-return
+p.then(() => {
+  logger.info('Renovate finished');
+})
+.catch((error) => {
+  logger.error(`Unexpected error: ${error}`);
+});
 
 // This function manages the queue per-package file
 function processRepoPackageFile(repoName, packageFile) {
