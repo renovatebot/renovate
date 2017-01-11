@@ -91,12 +91,10 @@ function createBranch(branchName) {
 function checkForClosedPr(branchName, prTitle) {
   return ghGot(
     `repos/${config.repoName}/pulls?state=closed&head=${config.owner}:${branchName}`,
-    {
-      token: config.token
-    }).then(res => res.body.some(
-      pr => pr.title === prTitle &&
-        pr.head.label === `${config.owner}:${branchName}`)
-    ).catch((error) => {
+    { token: config.token })
+    .then(res =>
+      res.body.some(pr => pr.title === prTitle && pr.head.label === `${config.owner}:${branchName}`))
+    .catch((error) => {
       console.error(`Error checking if PR already existed: ${error}`);
     });
 }
@@ -132,7 +130,7 @@ function updatePr(prNo, title, body) {
 function getFile(filePath, branchName = config.defaultBranch) {
   return ghGot(`repos/${config.repoName}/contents/${filePath}?ref=${branchName}`,
     {
-      token: config.token
+      token: config.token,
     });
 }
 
