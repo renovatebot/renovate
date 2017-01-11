@@ -2,7 +2,7 @@
   "private": true,
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint .",
