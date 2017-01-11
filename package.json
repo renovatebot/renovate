@@ -1,5 +1,4 @@
 {
-  "private": true,
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date.",
   "version": "1.0.3",
