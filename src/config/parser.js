@@ -13,7 +13,7 @@ module.exports = function init() {
   const defaultConfig = require('./defaults');
   let customConfig = {};
   try {
-    customConfig = require('../../config');
+    customConfig = require('../../config'); // eslint-disable-line import/no-unresolved
   } catch (err) {
     // Do nothing
   }
