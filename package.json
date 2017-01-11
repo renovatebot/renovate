@@ -25,7 +25,7 @@
   "homepage": "https://github.com/singapore/renovate#readme",
   "dependencies": {
     "gh-got": "5.0.0",
-    "got": "6.6.3",
+    "got": "6.7.1",
     "lodash": "4.17.4",
     "manakin": "0.4.6",
     "mkdirp": "0.5.1",
