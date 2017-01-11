@@ -18,7 +18,7 @@
     "update"
   ],
   "author": "Rhys Arkins <rhys@keylocation.sg>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/singapore/renovate/issues"
   },
