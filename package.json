@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint .",
