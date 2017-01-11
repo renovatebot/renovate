@@ -52,6 +52,9 @@ function processUpgradesSequentially(upgrades) {
 }
 
 function getChangelog(upgrade) {
+  if (!upgrade.workingVersion || upgrade.workingVersion === upgrade.newVersion) {
+    return Object.assign(upgrade, { changelog: '' });
+  }
   const semverString = `>${upgrade.workingVersion} <=${upgrade.newVersion}`;
   let log = '';
   logger.debug(`semverString: ${semverString}`);
