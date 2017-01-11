@@ -39,6 +39,7 @@ function getAllDependencyUpgrades(packageContents) {
                 upgradeType: upgrade.type,
                 newVersion: upgrade.version,
                 newVersionMajor: semver.major(upgrade.version),
+                workingVersion: upgrade.workingVersion,
               });
             });
           } else {
@@ -89,6 +90,7 @@ function getDependencyUpgrades(depName, currentVersion) {
           allUpgrades[thisMajor] = {
             type: thisMajor > currentMajor ? 'major' : 'minor',
             version,
+            workingVersion,
           };
         }
       }

@@ -23,8 +23,11 @@
     "url": "https://github.com/singapore/renovate/issues"
   },
   "homepage": "https://github.com/singapore/renovate#readme",
-  "engines" : { "node" : ">=6.9.0" },
+  "engines": {
+    "node": ">=6.9.0"
+  },
   "dependencies": {
+    "changelog": "1.0.7",
     "gh-got": "5.0.0",
     "got": "6.7.1",
     "lodash": "4.17.4",

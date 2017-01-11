@@ -1,3 +1,4 @@
+const changelog = require('changelog');
 const github = require('./helpers/github');
 const npm = require('./helpers/npm');
 const packageJson = require('./helpers/packageJson');
@@ -45,7 +46,25 @@ function processUpgradesSequentially(upgrades) {
   // 1. Reduce chances of GitHub API rate limiting
   // 2. Edge case collision of branch name, e.g. dependency also listed as dev dependency
   return upgrades.reduce(
-    (promise, upgrade) => promise.then(() => updateDependency(upgrade)), Promise.resolve());
+    (promise, upgrade) => promise
+      .then(() => getChangelog(upgrade))
+      .then(updateDependency), Promise.resolve());
+}
+
+function getChangelog(upgrade) {
+  const semverString = `>${upgrade.workingVersion} <=${upgrade.newVersion}`;
+  let log = '';
+  logger.debug(`semverString: ${semverString}`);
+  return changelog.generate(upgrade.depName, semverString)
+    .then(changelog.markdown)
+    .then((res) => {
+      log = res;
+      return logger.silly(`${upgrade.depName} ${upgrade.newVersion} changelog: ${res}`);
+    })
+    .catch((error) => {
+      logger.verbose(`getChangelog error: ${error}`);
+    })
+    .then(() => Object.assign(upgrade, { changelog: log }));
 }
 
 function updateDependency(upgrade) {
@@ -147,7 +166,7 @@ function updateDependency(upgrade) {
         return createPr();
       }
       // Check if existing PR needs updating
-      if (existingPr.title === prTitle || existingPr.body === prBody) {
+      if (existingPr.title === prTitle && existingPr.body === prBody) {
         logger.verbose(`${depName}: PR #${existingPr.number} already up-to-date`);
         return Promise.resolve();
       }

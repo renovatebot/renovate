@@ -32,7 +32,6 @@ function setNewValue(currentFileContent, depType, depName, newVersion) {
       logger.debug(`Found match at index ${searchIndex}`);
       // Now test if the result matches
       const testContent = replaceAt(currentFileContent, searchIndex, searchString, newString);
-      logger.debug(`testContent = ${testContent}`);
       // Compare the parsed JSON structure of old and new
       if (_.isEqual(parsedContents, JSON.parse(testContent))) {
         newFileContent = testContent;
