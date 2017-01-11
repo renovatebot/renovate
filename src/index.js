@@ -1,11 +1,11 @@
 const semver = require('semver');
-
-const github = require('./helpers/github');
 const configurator = require('./helpers/configurator');
-const npm = require('./helpers/npm');
-const packageJson = require('./helpers/packageJson');
 
 const config = configurator.init(process.argv);
+const github = require('./helpers/github');
+const npm = require('./helpers/npm');
+const packageJson = require('./helpers/packageJson')(config);
+
 const logger = config.logger;
 
 // Initialize npm
