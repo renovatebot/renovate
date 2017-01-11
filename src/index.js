@@ -1,14 +1,13 @@
-// Set colours for console globally
-// eslint-disable-next-line no-unused-expressions
-require('manakin').global;
-
 const semver = require('semver');
+const winston = require('winston');
 
 const github = require('./helpers/github');
 const npm = require('./helpers/npm');
 const packageJson = require('./helpers/packageJson');
 
 const config = initConfig();
+const logger = config.logger;
+logger.verbose(`config = ${JSON.stringify(config)}`);
 validateArguments();
 npm.init(config);
 
@@ -27,11 +26,11 @@ p
   .then(() => {
     // eslint-disable-next-line promise/always-return
     if (config.repositories.length > 1) {
-      console.success('All repos done');
+      logger.info('All repos done');
     }
   })
   .catch((error) => {
-    console.log(`Unexpected error: ${error}`);
+    logger.error(`Unexpected error: ${error}`);
   });
 
 // This function reads in all configs and merges them
@@ -46,6 +45,9 @@ function initConfig() {
   }
   /* eslint-enable global-require */
   const cliConfig = {};
+  if (process.env.LOG_LEVEL) {
+    cliConfig.logLevel = process.env.LOG_LEVEL;
+  }
   if (process.env.RENOVATE_TOKEN) {
     cliConfig.token = process.env.RENOVATE_TOKEN;
   }
@@ -73,8 +75,18 @@ function initConfig() {
       combinedConfig.repositories[index].packageFiles = ['package.json'];
     }
   });
-  if (combinedConfig.verbose) {
-    console.log(`config = ${JSON.stringify(combinedConfig)}`);
+
+  // Add the logger
+  combinedConfig.logger = new (winston.Logger)({
+    transports: [
+      // colorize the output to the console
+      new (winston.transports.Console)({ colorize: true }),
+    ],
+  });
+
+  // Winston log level can be controlled via config or env
+  if (combinedConfig.logLevel) {
+    combinedConfig.logger.level = combinedConfig.logLevel;
   }
   return combinedConfig;
 }
@@ -83,12 +95,12 @@ function initConfig() {
 function validateArguments() {
   // token must be defined
   if (typeof config.token === 'undefined') {
-    console.error('Error: A GitHub token must be configured');
+    logger.error('Error: A GitHub token must be configured');
     process.exit(1);
   }
   // We also need a repository
   if (!config.repositories || config.repositories.length === 0) {
-    console.error('Error: At least one repository must be configured');
+    logger.error('Error: At least one repository must be configured');
   }
 }
 
@@ -100,37 +112,35 @@ function processRepoPackageFile(repoName, packageFile) {
     .then(processUpgradesSequentially)
     // eslint-disable-next-line promise/always-return
     .then(() => {
-      console.success(`Repo ${repoName} ${packageFile} done`);
+      logger.info(`Repo ${repoName} ${packageFile} done`);
     })
     .catch((error) => {
-      console.error(`renovate caught error: ${error}`);
+      logger.error(`renovate caught error: ${error}`);
     });
 }
 
 function initGitHub(repoName, packageFile) {
-  console.info(`Initializing GitHub repo ${repoName}, ${packageFile}`);
+  logger.info(`Initializing GitHub repo ${repoName}, ${packageFile}`);
   return github.init(config, repoName, packageFile);
 }
 
 function getPackageFileContents() {
-  console.info('Getting package file contents');
+  logger.info('Getting package file contents');
   return github.getPackageFileContents();
 }
 
 function determineUpgrades(packageFileContents) {
-  console.info('Determining required upgrades');
+  logger.info('Determining required upgrades');
   return npm.getAllDependencyUpgrades(packageFileContents);
 }
 
 function processUpgradesSequentially(upgrades) {
   if (Object.keys(upgrades).length) {
-    console.info('Processing upgrades');
+    logger.info('Processing upgrades');
   } else {
-    console.info('No upgrades to process');
+    logger.info('No upgrades to process');
   }
-  if (config.verbose) {
-    console.log(`All upgrades: ${JSON.stringify(upgrades)}`);
-  }
+  logger.verbose(`All upgrades: ${JSON.stringify(upgrades)}`);
   // We are processing each upgrade sequentially for two major reasons:
   // 1. Reduce chances of GitHub API rate limiting
   // 2. Edge case collision of branch name, e.g. dependency also listed as dev dependency
@@ -189,9 +199,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
   // This allows users to close an unwanted upgrade PR and not worry about seeing it raised again
   return github.checkForClosedPr(branchName, prTitle).then((prExisted) => {
     if (prExisted) {
-      if (config.verbose) {
-        console.log(`${depName}: Skipping due to existing PR found.`);
-      }
+      logger.verbose(`${depName}: Skipping due to existing PR found.`);
       return Promise.resolve();
     }
     return ensureAll();
@@ -201,7 +209,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
     .then(ensureCommit)
     .then(ensurePr)
     .catch((error) => {
-      console.error(`Error updating dependency ${depName}:  ${error}`);
+      logger.error(`Error updating dependency ${depName}:  ${error}`);
       // Don't throw here - we don't want to stop the other renovations
     });
   }
@@ -211,8 +219,8 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
       // Check in case it's because the branch already existed
       if (error.response.body.message !== 'Reference already exists') {
         // In this case it means we really do have a problem and can't continue
-        console.error(`Error creating branch: ${branchName}`);
-        console.error(`Response body: ${error.response.body}`);
+        logger.error(`Error creating branch: ${branchName}`);
+        logger.error(`Response body: ${error.response.body}`);
         throw error;
       }
       // Otherwise we swallow this error and continue
@@ -225,15 +233,11 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
       const currentFileContent = new Buffer(res.body.content, 'base64').toString();
       const currentJson = JSON.parse(currentFileContent);
       if (currentJson[depType][depName] === newVersion) {
-        if (config.verbose) {
-          console.log(`${depName}: branch ${branchName} is already up-to-date`);
-        }
+        logger.verbose(`${depName}: branch ${branchName} is already up-to-date`);
         return Promise.resolve();
       }
       // Branch must need updating
-      if (config.verbose) {
-        console.log(`${depName}: Updating to ${newVersion} in branch ${branchName}`);
-      }
+      logger.verbose(`${depName}: Updating to ${newVersion} in branch ${branchName}`);
       const newPackageContents = packageJson.setNewValue(
         currentFileContent,
         depType,
@@ -252,14 +256,14 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
     // Create PR based on current state
     function createPr() {
       return github.createPr(branchName, prTitle, prBody).then((newPr) => {
-        console.info(`${depName}: Created PR #${newPr.number}`);
+        logger.info(`${depName}: Created PR #${newPr.number}`);
         return Promise.resolve();
       });
     }
     // Update PR based on current state
     function updatePr(existingPr) {
       return github.updatePr(existingPr.number, prTitle, prBody).then(() => {
-        console.info(`${depName}: Updated PR #${existingPr.number}`);
+        logger.info(`${depName}: Updated PR #${existingPr.number}`);
         return Promise.resolve();
       });
     }
@@ -271,9 +275,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
       }
       // Check if existing PR needs updating
       if (existingPr.title === prTitle || existingPr.body === prBody) {
-        if (config.verbose) {
-          console.log(`${depName}: PR #${existingPr.number} already up-to-date`);
-        }
+        logger.verbose(`${depName}: PR #${existingPr.number} already up-to-date`);
         return Promise.resolve();
       }
       // PR must need updating
@@ -283,7 +285,7 @@ function updateDependency({ upgradeType, depType, depName, currentVersion, newVe
     return github.getPr(branchName)
     .then(processExistingPr)
     .catch((error) => {
-      console.log(`${depName} failed to ensure PR: ${error}`);
+      logger.error(`${depName} failed to ensure PR: ${error}`);
     });
   }
 }

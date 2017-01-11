@@ -1,6 +1,7 @@
 const ghGot = require('gh-got');
 
 let config = {};
+let logger = null;
 
 module.exports = {
   init,
@@ -20,6 +21,7 @@ module.exports = {
 // Initialize GitHub by getting base branch and SHA
 function init(setConfig, repoName, packageFile) {
   config = setConfig;
+  logger = config.logger;
   config.repoName = repoName;
   config.packageFile = packageFile;
 
@@ -53,7 +55,7 @@ function init(setConfig, repoName, packageFile) {
   .then(processRepo)
   .then(getRepoSHA)
   .catch((err) => {
-    console.error(`GitHub init error: ${err}`);
+    logger.error(`GitHub init error: ${err}`);
     throw err;
   });
 }
@@ -95,7 +97,7 @@ function checkForClosedPr(branchName, prTitle) {
     .then(res =>
       res.body.some(pr => pr.title === prTitle && pr.head.label === `${config.owner}:${branchName}`))
     .catch((error) => {
-      console.error(`Error checking if PR already existed: ${error}`);
+      logger.error(`Error checking if PR already existed: ${error}`);
     });
 }
 

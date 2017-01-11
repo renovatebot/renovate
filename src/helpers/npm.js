@@ -3,10 +3,12 @@ const semver = require('semver');
 const stable = require('semver-stable');
 
 let config = {};
+let logger = null;
 
 module.exports = {
   init(setConfig) {
     config = setConfig;
+    logger = config.logger;
   },
   getDependencies(packageContents) {
     const allDependencies = [];
@@ -33,17 +35,13 @@ module.exports = {
       Object.keys(packageContents[depType]).forEach((depName) => {
         const currentVersion = packageContents[depType][depName];
         if (!isValidVersion(currentVersion)) {
-          if (config.verbose) {
-            console.log(`${depName}: Skipping invalid version ${currentVersion}`);
-          }
+          logger.verbose(`${depName}: Skipping invalid version ${currentVersion}`);
           return;
         }
         allDependencyChecks.push(
           getDependencyUpgrades(depName, currentVersion).then((res) => {
             if (res.length > 0) {
-              if (config.verbose) {
-                console.log(`${depName}: Upgrades = ${JSON.stringify(res)}`);
-              }
+              logger.verbose(`${depName}: Upgrades = ${JSON.stringify(res)}`);
               res.forEach((upgrade) => {
                 allDependencyUpgrades.push({
                   depType,
@@ -53,8 +51,8 @@ module.exports = {
                   newVersion: upgrade.version,
                 });
               });
-            } else if (config.verbose) {
-              console.log(`${depName}: No upgrades required`);
+            } else {
+              logger.verbose(`${depName}: No upgrades required`);
             }
             return Promise.resolve();
           }));
@@ -74,7 +72,7 @@ function getDependency(depName) {
 function getDependencyUpgrades(depName, currentVersion) {
   return getDependency(depName).then((res) => {
     if (!res.body.versions) {
-      console.error(`${depName} versions is null`);
+      logger.error(`${depName} versions is null`);
     }
     const allUpgrades = {};
     let workingVersion = currentVersion;

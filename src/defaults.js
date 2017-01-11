@@ -1,5 +1,5 @@
 module.exports = {
-  verbose: false,
+  logLevel: 'info',
   templates: {
     branchName: params => `renovate/${params.depName}-${params.newVersionMajor}.x`,
     commitMessage: params => `Update dependency ${params.depName} to version ${params.newVersion}`,
