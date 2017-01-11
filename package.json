@@ -1,6 +1,6 @@
 {
   "name": "renovate",
-  "description": "Keep npm dependencies up-to-date.",
+  "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "1.1.1",
   "main": "renovate.js",
   "scripts": {

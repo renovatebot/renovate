@@ -1,6 +1,6 @@
 # renovate
 
-Keep npm dependencies up-to-date.
+Keep npm dependencies up-to-date via Pull Requests
 
 ## Before you Start
 
