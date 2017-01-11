@@ -41,5 +41,5 @@ function matchAt(content, index, match) {
 
 // Replace oldString with newString at location index of content
 function replaceAt(content, index, oldString, newString) {
-  return content.substr(0, index) + newString + content.substr(index, oldString.length);
+  return content.substr(0, index) + newString + content.substr(index + oldString.length);
 }
