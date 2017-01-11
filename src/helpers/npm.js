@@ -2,65 +2,50 @@ const got = require('got');
 const semver = require('semver');
 const stable = require('semver-stable');
 
-let config = {};
 let logger = null;
 
-module.exports = {
-  init(setConfig) {
-    config = setConfig;
-    logger = config.logger;
-  },
-  getDependencies(packageContents) {
-    const allDependencies = [];
-    const dependencyTypes = ['dependencies', 'devDependencies'];
-    dependencyTypes.forEach((depType) => {
-      Object.keys(packageContents[depType]).forEach((depName) => {
-        allDependencies.push({
-          depType,
-          depName,
-          currentVersion: packageContents[depType][depName],
-        });
-      });
-    });
-    return allDependencies;
-  },
-  getAllDependencyUpgrades(packageContents) {
-    const allDependencyChecks = [];
-    const allDependencyUpgrades = [];
-    const dependencyTypes = ['dependencies', 'devDependencies'];
-    dependencyTypes.forEach((depType) => {
-      if (!packageContents[depType]) {
+module.exports = function npm(setLogger) {
+  logger = setLogger;
+  this.getAllDependencyUpgrades = getAllDependencyUpgrades;
+  return this;
+};
+
+function getAllDependencyUpgrades(packageContents) {
+  const allDependencyChecks = [];
+  const allDependencyUpgrades = [];
+  const dependencyTypes = ['dependencies', 'devDependencies'];
+  dependencyTypes.forEach((depType) => {
+    if (!packageContents[depType]) {
+      return;
+    }
+    Object.keys(packageContents[depType]).forEach((depName) => {
+      const currentVersion = packageContents[depType][depName];
+      if (!isValidVersion(currentVersion)) {
+        logger.verbose(`${depName}: Skipping invalid version ${currentVersion}`);
         return;
       }
-      Object.keys(packageContents[depType]).forEach((depName) => {
-        const currentVersion = packageContents[depType][depName];
-        if (!isValidVersion(currentVersion)) {
-          logger.verbose(`${depName}: Skipping invalid version ${currentVersion}`);
-          return;
-        }
-        allDependencyChecks.push(
-          getDependencyUpgrades(depName, currentVersion).then((res) => {
-            if (res.length > 0) {
-              logger.verbose(`${depName}: Upgrades = ${JSON.stringify(res)}`);
-              res.forEach((upgrade) => {
-                allDependencyUpgrades.push({
-                  depType,
-                  depName,
-                  currentVersion,
-                  upgradeType: upgrade.type,
-                  newVersion: upgrade.version,
-                });
+      allDependencyChecks.push(
+        getDependencyUpgrades(depName, currentVersion).then((res) => {
+          if (res.length > 0) {
+            logger.verbose(`${depName}: Upgrades = ${JSON.stringify(res)}`);
+            res.forEach((upgrade) => {
+              allDependencyUpgrades.push({
+                depType,
+                depName,
+                currentVersion,
+                upgradeType: upgrade.type,
+                newVersion: upgrade.version,
               });
-            } else {
-              logger.verbose(`${depName}: No upgrades required`);
-            }
-            return Promise.resolve();
-          }));
-      });
+            });
+          } else {
+            logger.verbose(`${depName}: No upgrades required`);
+          }
+          return Promise.resolve();
+        }));
     });
-    return Promise.all(allDependencyChecks).then(() => allDependencyUpgrades);
-  },
-};
+  });
+  return Promise.all(allDependencyChecks).then(() => allDependencyUpgrades);
+}
 
 function getDependency(depName) {
   // supports scoped packages, e.g. @user/package

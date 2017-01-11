@@ -1,41 +1,47 @@
 const ghGot = require('gh-got');
 
-let config = {};
+const config = {};
 let logger = null;
 
-module.exports = {
-  init,
+module.exports = function github(setLogger) {
+  logger = setLogger;
+  this.initRepo = initRepo;
   // Package File
-  getPackageFile,
-  getPackageFileContents,
-  writePackageFile,
+  this.getPackageFile = getPackageFile;
+  this.getPackageFileContents = getPackageFileContents;
+  this.writePackageFile = writePackageFile;
   // Branch
-  createBranch,
+  this.createBranch = createBranch;
   // PR
-  checkForClosedPr,
-  createPr,
-  getPr,
-  updatePr,
+  this.checkForClosedPr = checkForClosedPr;
+  this.createPr = createPr;
+  this.getPr = getPr;
+  this.updatePr = updatePr;
+  return this;
 };
 
 // Initialize GitHub by getting base branch and SHA
-function init(setConfig, repoName, packageFile) {
-  config = setConfig;
-  logger = config.logger;
+function initRepo(token, repoName) {
+  config.token = token;
   config.repoName = repoName;
-  config.packageFile = packageFile;
+
+  return getRepo()
+  .then(processRepo)
+  .catch((err) => {
+    logger.error(`GitHub init error: ${err}`);
+    throw err;
+  });
 
   function getRepo() {
+    logger.debug(`Getting repo ${repoName}`);
     return ghGot(`repos/${config.repoName}`, { token: config.token })
     .then(res => res.body);
   }
 
   function processRepo(repo) {
+    logger.debug(`Processing repo ${repoName}`);
     config.owner = repo.owner.login;
     config.defaultBranch = repo.default_branch;
-  }
-
-  function getRepoSHA() {
     return ghGot(`repos/${config.repoName}/git/refs/head`, {
       token: config.token,
     }).then((res) => {
@@ -50,14 +56,6 @@ function init(setConfig, repoName, packageFile) {
       return Promise.resolve();
     });
   }
-
-  return getRepo()
-  .then(processRepo)
-  .then(getRepoSHA)
-  .catch((err) => {
-    logger.error(`GitHub init error: ${err}`);
-    throw err;
-  });
 }
 
 // Package File
@@ -65,7 +63,8 @@ function getPackageFile(branchName) {
   return getFile(config.packageFile, branchName);
 }
 
-function getPackageFileContents() {
+function getPackageFileContents(packageFile) {
+  config.packageFile = packageFile;
   return getFileContents(config.packageFile);
 }
 

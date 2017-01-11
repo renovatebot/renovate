@@ -1,15 +1,13 @@
 const semver = require('semver');
-const configurator = require('./helpers/config');
 
-const config = configurator.init(process.argv);
-const github = require('./helpers/github');
-const npm = require('./helpers/npm');
-const packageJson = require('./helpers/packageJson')(config);
-
+// Initialize config
+const config = require('./helpers/config')();
+// Expose logger
 const logger = config.logger;
-
-// Initialize npm
-npm.init(config);
+// Initialize helpers
+const github = require('./helpers/github')(logger);
+const npm = require('./helpers/npm')(logger);
+const packageJson = require('./helpers/packageJson')(logger);
 
 // Initialize our promise chain
 let p = Promise.resolve();
@@ -20,8 +18,7 @@ config.repositories.forEach((repo) => {
     p = p.then(() => processRepoPackageFile(repo.name, packageFile));
   });
 });
-// eslint-disable-next-line promise/always-return
-p.then(() => {
+p.then(() => { // eslint-disable-line promise/always-return
   logger.info('Renovate finished');
 })
 .catch((error) => {
@@ -30,12 +27,14 @@ p.then(() => {
 
 // This function manages the queue per-package file
 function processRepoPackageFile(repoName, packageFile) {
-  return initGitHub(repoName, packageFile)
+  return initGitHubRepo(repoName)
+    .then(() => { // eslint-disable-line arrow-body-style
+      return packageFile;
+    })
     .then(getPackageFileContents)
     .then(determineUpgrades)
     .then(processUpgradesSequentially)
-    // eslint-disable-next-line promise/always-return
-    .then(() => {
+    .then(() => { // eslint-disable-line promise/always-return
       logger.info(`Repo ${repoName} ${packageFile} done`);
     })
     .catch((error) => {
@@ -43,14 +42,14 @@ function processRepoPackageFile(repoName, packageFile) {
     });
 }
 
-function initGitHub(repoName, packageFile) {
-  logger.info(`Initializing GitHub repo ${repoName}, ${packageFile}`);
-  return github.init(config, repoName, packageFile);
+function initGitHubRepo(repoName) {
+  logger.info(`Initializing GitHub repo ${repoName}`);
+  return github.initRepo(config.token, repoName);
 }
 
-function getPackageFileContents() {
-  logger.info('Getting package file contents');
-  return github.getPackageFileContents();
+function getPackageFileContents(packageFile) {
+  logger.info(`Getting ${packageFile} contents`);
+  return github.getPackageFileContents(packageFile);
 }
 
 function determineUpgrades(packageFileContents) {

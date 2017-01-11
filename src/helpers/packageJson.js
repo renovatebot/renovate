@@ -2,8 +2,8 @@ const _ = require('lodash');
 
 let logger = null;
 
-module.exports = function packageJson(config) {
-  logger = config.logger;
+module.exports = function packageJson(setLogger) {
+  logger = setLogger;
   this.setNewValue = setNewValue;
   return this;
 };
