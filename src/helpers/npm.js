@@ -4,11 +4,14 @@ const stable = require('semver-stable');
 
 let logger = null;
 
-module.exports = function npm(setLogger) {
-  logger = setLogger;
-  this.getAllDependencyUpgrades = getAllDependencyUpgrades;
-  return this;
+module.exports = {
+  setLogger,
+  getAllDependencyUpgrades,
 };
+
+function setLogger(l) {
+  logger = l;
+}
 
 function getAllDependencyUpgrades(packageContents) {
   const allDependencyChecks = [];
@@ -35,6 +38,7 @@ function getAllDependencyUpgrades(packageContents) {
                 currentVersion,
                 upgradeType: upgrade.type,
                 newVersion: upgrade.version,
+                newVersionMajor: semver.major(upgrade.version),
               });
             });
           } else {

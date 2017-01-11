@@ -1,67 +1,44 @@
-const semver = require('semver');
+const github = require('./helpers/github');
+const npm = require('./helpers/npm');
+const packageJson = require('./helpers/packageJson');
 
-// Initialize config
-const config = require('./helpers/config')();
-// Expose logger
-const logger = config.logger;
-// Initialize helpers
-const github = require('./helpers/github')(logger);
-const npm = require('./helpers/npm')(logger);
-const packageJson = require('./helpers/packageJson')(logger);
+let config = null;
+let logger = null;
 
-// Initialize our promise chain
-let p = Promise.resolve();
+module.exports = function init(setConfig) {
+  config = setConfig;
+  logger = config.logger;
 
-// Queue up each repo/package combination
-config.repositories.forEach((repo) => {
-  repo.packageFiles.forEach((packageFile) => {
-    p = p.then(() => processRepoPackageFile(repo.name, packageFile));
-  });
-});
-p.then(() => { // eslint-disable-line promise/always-return
-  logger.info('Renovate finished');
-})
-.catch((error) => {
-  logger.error(`Unexpected error: ${error}`);
-});
+  // Initialize helpers
+  github.setLogger(logger);
+  npm.setLogger(logger);
+  packageJson.setLogger(logger);
+
+  return processPackageFile;
+};
 
 // This function manages the queue per-package file
-function processRepoPackageFile(repoName, packageFile) {
-  return initGitHubRepo(repoName)
-    .then(() => { // eslint-disable-line arrow-body-style
-      return packageFile;
+function processPackageFile(repoName, packageFile) {
+  return github.initRepo(config.token, repoName)
+    .then(() => {
+      logger.info(`Processing ${repoName} ${packageFile}`);
+      return github.getPackageFileContents(packageFile);
     })
-    .then(getPackageFileContents)
-    .then(determineUpgrades)
+    .then(npm.getAllDependencyUpgrades)
     .then(processUpgradesSequentially)
     .then(() => { // eslint-disable-line promise/always-return
-      logger.info(`Repo ${repoName} ${packageFile} done`);
+      logger.info(`${repoName} ${packageFile} done`);
     })
     .catch((error) => {
       logger.error(`renovate caught error: ${error}`);
     });
 }
 
-function initGitHubRepo(repoName) {
-  logger.info(`Initializing GitHub repo ${repoName}`);
-  return github.initRepo(config.token, repoName);
-}
-
-function getPackageFileContents(packageFile) {
-  logger.info(`Getting ${packageFile} contents`);
-  return github.getPackageFileContents(packageFile);
-}
-
-function determineUpgrades(packageFileContents) {
-  logger.info('Determining required upgrades');
-  return npm.getAllDependencyUpgrades(packageFileContents);
-}
-
 function processUpgradesSequentially(upgrades) {
   if (Object.keys(upgrades).length) {
-    logger.info('Processing upgrades');
+    logger.verbose('Processing upgrades');
   } else {
-    logger.info('No upgrades to process');
+    logger.verbose('No upgrades to process');
   }
   logger.verbose(`All upgrades: ${JSON.stringify(upgrades)}`);
   // We are processing each upgrade sequentially for two major reasons:
@@ -71,52 +48,25 @@ function processUpgradesSequentially(upgrades) {
     (promise, upgrade) => promise.then(() => updateDependency(upgrade)), Promise.resolve());
 }
 
-function updateDependency({ upgradeType, depType, depName, currentVersion, newVersion }) {
-  const newVersionMajor = semver.major(newVersion);
-  const branchName = config.templates.branchName({
-    depType,
-    depName,
-    currentVersion,
-    newVersion,
-    newVersionMajor,
-  });
-  let prTitle = '';
-  if (upgradeType === 'pin') {
-    prTitle = config.templates.prTitlePin({
-      depType,
-      depName,
-      currentVersion,
-      newVersion,
-      newVersionMajor,
-    });
-  } else if (upgradeType === 'minor') {
+function updateDependency(upgrade) {
+  // Expand upgrade params
+  const depType = upgrade.depType;
+  const depName = upgrade.depName;
+  const newVersion = upgrade.newVersion;
+  // Use templates to generate strings
+  const branchName = config.templates.branchName(upgrade);
+  let prFunction = null;
+  if (upgrade.upgradeType === 'pin') {
+    prFunction = config.templates.prTitlePin;
+  } else if (upgrade.upgradeType === 'minor') {
     // Use same title for range or minor
-    prTitle = config.templates.prTitleMinor({
-      depType,
-      depName,
-      currentVersion,
-      newVersion,
-      newVersionMajor,
-    });
+    prFunction = config.templates.prTitleMinor;
   } else {
-    prTitle = config.templates.prTitleMajor({
-      depType,
-      depName,
-      currentVersion,
-      newVersion,
-      newVersionMajor,
-    });
+    prFunction = config.templates.prTitleMajor;
   }
-  const prBody = config.templates.prBody({
-    depName,
-    currentVersion,
-    newVersion,
-  });
-  const commitMessage = config.templates.commitMessage({
-    depName,
-    currentVersion,
-    newVersion,
-  });
+  const prTitle = prFunction(upgrade);
+  const prBody = config.templates.prBody(upgrade);
+  const commitMessage = config.templates.commitMessage(upgrade);
 
   // Check if same PR already existed and skip if so
   // This allows users to close an unwanted upgrade PR and not worry about seeing it raised again

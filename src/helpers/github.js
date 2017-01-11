@@ -3,22 +3,25 @@ const ghGot = require('gh-got');
 const config = {};
 let logger = null;
 
-module.exports = function github(setLogger) {
-  logger = setLogger;
-  this.initRepo = initRepo;
+module.exports = {
+  setLogger,
+  initRepo,
   // Package File
-  this.getPackageFile = getPackageFile;
-  this.getPackageFileContents = getPackageFileContents;
-  this.writePackageFile = writePackageFile;
+  getPackageFile,
+  getPackageFileContents,
+  writePackageFile,
   // Branch
-  this.createBranch = createBranch;
+  createBranch,
   // PR
-  this.checkForClosedPr = checkForClosedPr;
-  this.createPr = createPr;
-  this.getPr = getPr;
-  this.updatePr = updatePr;
-  return this;
+  checkForClosedPr,
+  createPr,
+  getPr,
+  updatePr,
 };
+
+function setLogger(l) {
+  logger = l;
+}
 
 // Initialize GitHub by getting base branch and SHA
 function initRepo(token, repoName) {

@@ -10,7 +10,7 @@ const logger = new (winston.Logger)({
 module.exports = function init() {
   // This function reads in all configs and merges them
   /* eslint-disable global-require */
-  const defaultConfig = require('../defaults');
+  const defaultConfig = require('./defaults');
   let customConfig = {};
   try {
     customConfig = require('../../config');
