@@ -1,5 +1,5 @@
 const semver = require('semver');
-const configurator = require('./helpers/configurator');
+const configurator = require('./helpers/config');
 
 const config = configurator.init(process.argv);
 const github = require('./helpers/github');
