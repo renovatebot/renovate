@@ -8,7 +8,6 @@ module.exports = {
   setLogger,
   extractDependencies,
   findUpgrades,
-  isValidVersion,
 };
 
 function setLogger(l) {
@@ -34,7 +33,6 @@ function findUpgrades(dependencies) {
   const allDependencyUpgrades = [];
   // We create an array of promises so that they can be executed in parallel
   return Promise.all(dependencies.reduce((promiseArray, dep) => {
-    const depType = dep.depType;
     const depName = dep.depName;
     const currentVersion = dep.currentVersion;
     promiseArray.push(getDependencyUpgrades(depName, currentVersion)
@@ -42,15 +40,7 @@ function findUpgrades(dependencies) {
       if (res.length > 0) {
         logger.verbose(`${depName}: Upgrades = ${JSON.stringify(res)}`);
         res.forEach((upgrade) => {
-          allDependencyUpgrades.push({
-            depType,
-            depName,
-            currentVersion,
-            upgradeType: upgrade.type,
-            newVersion: upgrade.version,
-            newVersionMajor: upgrade.versionMajor,
-            workingVersion: upgrade.workingVersion,
-          });
+          allDependencyUpgrades.push(Object.assign(dep, upgrade));
         });
       } else {
         logger.verbose(`${depName}: No upgrades required`);
@@ -71,6 +61,9 @@ function getDependency(depName) {
 }
 
 function getDependencyUpgrades(depName, currentVersion) {
+  if (!isValidVersion(currentVersion)) {
+    return [];
+  }
   return getDependency(depName).then((res) => {
     if (!res.body.versions) {
       logger.error(`${depName} versions is null`);
@@ -82,27 +75,27 @@ function getDependencyUpgrades(depName, currentVersion) {
       const maxSatisfying = semver.maxSatisfying(
         Object.keys(res.body.versions),
         currentVersion);
-      allUpgrades.pin = { type: 'pin', version: maxSatisfying };
+      allUpgrades.pin = { upgradeType: 'pin', newVersion: maxSatisfying };
       workingVersion = maxSatisfying;
     }
     const currentMajor = semver.major(workingVersion);
-    Object.keys(res.body.versions).forEach((version) => {
-      if (stable.is(workingVersion) && !stable.is(version)) {
+    Object.keys(res.body.versions).forEach((newVersion) => {
+      if (stable.is(workingVersion) && !stable.is(newVersion)) {
         // Ignore unstable versions, unless the current version is unstable
         return;
       }
-      if (semver.gt(version, workingVersion)) {
+      if (semver.gt(newVersion, workingVersion)) {
         // Group by major versions
-        const versionMajor = semver.major(version);
+        const newVersionMajor = semver.major(newVersion);
         if (
-          !allUpgrades[versionMajor] ||
-            semver.gt(version, allUpgrades[versionMajor].version)
+          !allUpgrades[newVersionMajor] ||
+            semver.gt(newVersion, allUpgrades[newVersionMajor].newVersion)
         ) {
-          const type = versionMajor > currentMajor ? 'major' : 'minor';
-          allUpgrades[versionMajor] = {
-            type,
-            version,
-            versionMajor,
+          const upgradeType = newVersionMajor > currentMajor ? 'major' : 'minor';
+          allUpgrades[newVersionMajor] = {
+            upgradeType,
+            newVersion,
+            newVersionMajor,
             workingVersion,
           };
         }
@@ -118,7 +111,7 @@ function getDependencyUpgrades(depName, currentVersion) {
 }
 
 function isRange(input) {
-  // Pinned versions also return true for semver.validRange
+  // Pinned `version`s also return true for semver.validRange
   // We need to check first that they're not 'valid' to get only ranges
   return !semver.valid(input) && semver.validRange(input);
 }
