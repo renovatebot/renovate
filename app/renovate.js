@@ -23,8 +23,8 @@ module.exports = function init(setConfig) {
 function processPackageFile(repoName, packageFile) {
   return github.initRepo(repoName)
     .then(() => github.getPackageFileContents(packageFile))
-    .then(npm.extractAllDependencies)
-    .then(npm.getAllUpgrades)
+    .then(npm.extractDependencies)
+    .then(npm.findUpgrades)
     .then(processUpgradesSequentially)
     .then(() => { // eslint-disable-line promise/always-return
       logger.info(`${repoName} ${packageFile} done`);

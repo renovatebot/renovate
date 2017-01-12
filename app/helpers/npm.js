@@ -6,8 +6,8 @@ let logger = null;
 
 module.exports = {
   setLogger,
-  extractAllDependencies,
-  getAllUpgrades,
+  extractDependencies,
+  findUpgrades,
   isValidVersion,
 };
 
@@ -16,23 +16,21 @@ function setLogger(l) {
 }
 
 // Returns an array of current dependencies
-function extractAllDependencies(packageJson) {
+function extractDependencies(packageJson) {
   // loop through dependency types
-  return ['dependencies', 'devDependencies'].reduce((deps, depType) => {
+  const depTypes = ['dependencies', 'devDependencies'];
+  return depTypes.reduce((allDeps, depType) => {
     // loop through each dependency within a type
     const depNames = Object.keys(packageJson[depType]) || [];
-    function getDep(depName) {
-      return {
-        depType,
-        depName,
-        currentVersion: packageJson[depType][depName],
-      };
-    }
-    return deps.concat(depNames.map(getDep));
+    return allDeps.concat(depNames.map(depName => ({
+      depType,
+      depName,
+      currentVersion: packageJson[depType][depName],
+    })));
   }, []);
 }
 
-function getAllUpgrades(dependencies) {
+function findUpgrades(dependencies) {
   const allDependencyUpgrades = [];
   // We create an array of promises so that they can be executed in parallel
   return Promise.all(dependencies.reduce((promiseArray, dep) => {
@@ -50,7 +48,7 @@ function getAllUpgrades(dependencies) {
             currentVersion,
             upgradeType: upgrade.type,
             newVersion: upgrade.version,
-            newVersionMajor: semver.major(upgrade.version),
+            newVersionMajor: upgrade.versionMajor,
             workingVersion: upgrade.workingVersion,
           });
         });
@@ -95,14 +93,16 @@ function getDependencyUpgrades(depName, currentVersion) {
       }
       if (semver.gt(version, workingVersion)) {
         // Group by major versions
-        const thisMajor = semver.major(version);
+        const versionMajor = semver.major(version);
         if (
-          !allUpgrades[thisMajor] ||
-            semver.gt(version, allUpgrades[thisMajor].version)
+          !allUpgrades[versionMajor] ||
+            semver.gt(version, allUpgrades[versionMajor].version)
         ) {
-          allUpgrades[thisMajor] = {
-            type: thisMajor > currentMajor ? 'major' : 'minor',
+          const type = versionMajor > currentMajor ? 'major' : 'minor';
+          allUpgrades[versionMajor] = {
+            type,
             version,
+            versionMajor,
             workingVersion,
           };
         }
