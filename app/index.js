@@ -1,7 +1,7 @@
 // Initialize config
-const config = require('./app/config/parser')();
+const config = require('./config/parser')();
 // Require main source
-const renovate = require('./app/renovate')(config);
+const renovate = require('./renovate')(config);
 // Expose logger
 const logger = config.logger;
 
