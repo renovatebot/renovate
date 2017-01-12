@@ -8,6 +8,7 @@ module.exports = {
   setLogger,
   extractDependencies,
   findUpgrades,
+  getUpgrades,
   isRange,
   isValidVersion,
 };

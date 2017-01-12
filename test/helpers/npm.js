@@ -21,14 +21,22 @@ describe('npm helper', () => {
         .should.eql(true);
     });
   });
+  describe('getUpgrades', () => {
+    it('return empty if invalid current version', () => {
+      npm.getUpgrades('foo', 'invalid', ['1.0.0', '1.0.1']).should.have.length(0);
+    });
+    it('return empty if no versions', () => {
+      npm.getUpgrades('foo', '1.0.0', null).should.have.length(0);
+    });
+  });
   describe('isRange', () => {
-    it('should reject simple semver', () => {
+    it('rejects simple semver', () => {
       npm.isRange('1.2.3').should.eql(false);
     });
-    it('should support tilde', () => {
+    it('accepts tilde', () => {
       npm.isRange('~1.2.3').should.eql(true);
     });
-    it('should support caret', () => {
+    it('accepts caret', () => {
       npm.isRange('^1.2.3').should.eql(true);
     });
   });
