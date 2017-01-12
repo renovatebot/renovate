@@ -4,7 +4,7 @@ const config = {};
 let logger = null;
 
 module.exports = {
-  setLogger,
+  init,
   initRepo,
   // Package File
   getPackageFile,
@@ -19,13 +19,13 @@ module.exports = {
   updatePr,
 };
 
-function setLogger(l) {
+function init(token, l) {
+  config.token = token;
   logger = l;
 }
 
 // Initialize GitHub by getting base branch and SHA
-function initRepo(token, repoName) {
-  config.token = token;
+function initRepo(repoName) {
   config.repoName = repoName;
 
   return getRepo()
@@ -67,6 +67,7 @@ function getPackageFile(branchName) {
 }
 
 function getPackageFileContents(packageFile) {
+  logger.debug(`Retrieving ${config.repoName} ${packageFile}`);
   config.packageFile = packageFile;
   return getFileContents(config.packageFile);
 }
