@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint .",
     "start": "node app",
-    "test": "eslint ."
+    "test": "mocha --recursive --reporter spec"
   },
   "repository": {
     "type": "git",
@@ -36,9 +36,11 @@
     "winston": "2.3.0"
   },
   "devDependencies": {
+    "chai": "3.5.0",
     "eslint": "3.13.1",
     "eslint-config-airbnb-base": "11.0.1",
     "eslint-plugin-import": "2.2.0",
-    "eslint-plugin-promise": "3.4.0"
+    "eslint-plugin-promise": "3.4.0",
+    "mocha": "3.2.0"
   }
 }

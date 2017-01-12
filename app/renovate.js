@@ -1,7 +1,7 @@
 const changelog = require('changelog');
 const github = require('./helpers/github');
 const npm = require('./helpers/npm');
-const packageJson = require('./helpers/packageJson');
+const packageJson = require('./helpers/package-json');
 
 let config = null;
 let logger = null;
