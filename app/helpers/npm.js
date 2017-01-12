@@ -50,7 +50,7 @@ function findUpgrades(dependencies) {
         return Promise.resolve();
       })
       .catch((error) => {
-        logger.error(`Error finding upgrades for ${depName}: ${error}`);
+        logger.error(`Error finding upgrades for ${dep.depName}: ${error}`);
       })
     );
   }, []))
@@ -70,47 +70,47 @@ function getUpgrades(depName, currentVersion, versions) {
     logger.verbose(`${depName} currentVersion is invalid`);
     return [];
   }
-    if (!versions) {
-      logger.verbose(`${depName} versions is null`);
-      return [];
+  if (!versions) {
+    logger.verbose(`${depName} versions is null`);
+    return [];
+  }
+  const allUpgrades = {};
+  let workingVersion = currentVersion;
+  // Check for a current range and pin it
+  if (isRange(currentVersion)) {
+    // Pin ranges to their maximum satisfying version
+    const maxSatisfying = semver.maxSatisfying(Object.keys(versions), currentVersion);
+    allUpgrades.pin = { upgradeType: 'pin', newVersion: maxSatisfying };
+    workingVersion = maxSatisfying;
+  }
+  // Loop through all possible versions
+  Object.keys(versions).forEach((newVersion) => {
+    if (stable.is(workingVersion) && !stable.is(newVersion)) {
+      // Ignore unstable versions, unless the current version is unstable
+      return;
     }
-    const allUpgrades = {};
-    let workingVersion = currentVersion;
-    // Check for a current range and pin it
-    if (isRange(currentVersion)) {
-      // Pin ranges to their maximum satisfying version
-      const maxSatisfying = semver.maxSatisfying(Object.keys(versions), currentVersion);
-      allUpgrades.pin = { upgradeType: 'pin', newVersion: maxSatisfying };
-      workingVersion = maxSatisfying;
-    }
-    // Loop through all possible versions
-    Object.keys(versions).forEach((newVersion) => {
-      if (stable.is(workingVersion) && !stable.is(newVersion)) {
-        // Ignore unstable versions, unless the current version is unstable
-        return;
+    if (semver.gt(newVersion, workingVersion)) {
+      // Group by major versions
+      const newVersionMajor = semver.major(newVersion);
+      // Save this, if it's a new major version or greater than the previous greatest
+      if (!allUpgrades[newVersionMajor] ||
+          semver.gt(newVersion, allUpgrades[newVersionMajor].newVersion)) {
+        const upgradeType = newVersionMajor > semver.major(workingVersion) ? 'major' : 'minor';
+        allUpgrades[newVersionMajor] = {
+          upgradeType,
+          newVersion,
+          newVersionMajor,
+          workingVersion,
+        };
       }
-      if (semver.gt(newVersion, workingVersion)) {
-        // Group by major versions
-        const newVersionMajor = semver.major(newVersion);
-        // Save this, if it's a new major version or greater than the previous greatest
-        if (!allUpgrades[newVersionMajor] ||
-            semver.gt(newVersion, allUpgrades[newVersionMajor].newVersion)) {
-          const upgradeType = newVersionMajor > semver.major(workingVersion) ? 'major' : 'minor';
-          allUpgrades[newVersionMajor] = {
-            upgradeType,
-            newVersion,
-            newVersionMajor,
-            workingVersion,
-          };
-        }
-      }
-    });
-    if (allUpgrades.pin && Object.keys(allUpgrades).length > 1) {
-      // Remove the pin if we found upgrades
-      delete allUpgrades.pin;
     }
-    // Return only the values - we don't need the keys anymore
-    return Object.keys(allUpgrades).map(key => allUpgrades[key]);
+  });
+  if (allUpgrades.pin && Object.keys(allUpgrades).length > 1) {
+    // Remove the pin if we found upgrades
+    delete allUpgrades.pin;
+  }
+  // Return only the values - we don't need the keys anymore
+  return Object.keys(allUpgrades).map(key => allUpgrades[key]);
 }
 
 function isRange(input) {
