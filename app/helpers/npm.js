@@ -111,7 +111,7 @@ function getUpgrades(depName, currentVersion, versions) {
 }
 
 function isRange(input) {
-  // Pinned `version`s also return true for semver.validRange
+  // Pinned versions also return true for semver.validRange
   // We need to check first that they're not 'valid' to get only ranges
   return (semver.valid(input) === null && semver.validRange(input) !== null);
 }
