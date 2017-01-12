@@ -33,7 +33,7 @@ function findUpgrades(dependencies) {
   const allDependencyUpgrades = [];
   // We create an array of promises so that they can be executed in parallel
   return Promise.all(dependencies.reduce((promises, dep) => {
-    promises.push(getDependencyUpgrades(dep.depName, dep.currentVersion)
+    promises.push(getUpgrades(dep.depName, dep.currentVersion)
     .then((res) => {
       if (res.length > 0) {
         logger.verbose(`${dep.depName}: Upgrades = ${JSON.stringify(res)}`);
@@ -51,33 +51,33 @@ function findUpgrades(dependencies) {
   .then(() => allDependencyUpgrades);
 }
 
-function getDependency(depName) {
+function getVersions(depName) {
   // supports scoped packages, e.g. @user/package
   return got(`https://registry.npmjs.org/${depName.replace('/', '%2F')}`, {
     json: true,
-  });
+  }).then(res => res.body.versions);
 }
 
-function getDependencyUpgrades(depName, currentVersion) {
+function getUpgrades(depName, currentVersion) {
   if (!isValidVersion(currentVersion)) {
     return [];
   }
-  return getDependency(depName).then((res) => {
-    if (!res.body.versions) {
+  return getVersions(depName).then((versions) => {
+    if (!versions) {
       logger.error(`${depName} versions is null`);
+      return [];
     }
     const allUpgrades = {};
     let workingVersion = currentVersion;
+    // Check for a current range and pin it
     if (isRange(currentVersion)) {
       // Pin ranges to their maximum satisfying version
-      const maxSatisfying = semver.maxSatisfying(
-        Object.keys(res.body.versions),
-        currentVersion);
+      const maxSatisfying = semver.maxSatisfying(Object.keys(versions), currentVersion);
       allUpgrades.pin = { upgradeType: 'pin', newVersion: maxSatisfying };
       workingVersion = maxSatisfying;
     }
-    const currentMajor = semver.major(workingVersion);
-    Object.keys(res.body.versions).forEach((newVersion) => {
+    // Loop through all possible versions
+    Object.keys(versions).forEach((newVersion) => {
       if (stable.is(workingVersion) && !stable.is(newVersion)) {
         // Ignore unstable versions, unless the current version is unstable
         return;
@@ -85,11 +85,10 @@ function getDependencyUpgrades(depName, currentVersion) {
       if (semver.gt(newVersion, workingVersion)) {
         // Group by major versions
         const newVersionMajor = semver.major(newVersion);
-        if (
-          !allUpgrades[newVersionMajor] ||
-            semver.gt(newVersion, allUpgrades[newVersionMajor].newVersion)
-        ) {
-          const upgradeType = newVersionMajor > currentMajor ? 'major' : 'minor';
+        // Save this, if it's a new major version or greater than the previous greatest
+        if (!allUpgrades[newVersionMajor] ||
+            semver.gt(newVersion, allUpgrades[newVersionMajor].newVersion)) {
+          const upgradeType = newVersionMajor > semver.major(workingVersion) ? 'major' : 'minor';
           allUpgrades[newVersionMajor] = {
             upgradeType,
             newVersion,
@@ -100,10 +99,10 @@ function getDependencyUpgrades(depName, currentVersion) {
       }
     });
     if (allUpgrades.pin && Object.keys(allUpgrades).length > 1) {
-      // Remove the pin
+      // Remove the pin if we found upgrades
       delete allUpgrades.pin;
     }
-    // Return only the values
+    // Return only the values - we don't need the keys anymore
     return Object.keys(allUpgrades).map(key => allUpgrades[key]);
   });
 }
