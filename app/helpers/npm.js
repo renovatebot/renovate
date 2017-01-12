@@ -34,26 +34,23 @@ function extractDependencies(packageJson) {
 function findUpgrades(dependencies) {
   const allDependencyUpgrades = [];
   // We create an array of promises so that they can be executed in parallel
-  return Promise.all(dependencies.reduce((promises, dep) => {
-    return promises.concat(
-      getVersions(dep.depName)
-      .then((versions) => getUpgrades(dep.depName, dep.currentVersion, versions))
-      .then((upgrades) => {
-        if (upgrades.length > 0) {
-          logger.verbose(`${dep.depName}: Upgrades = ${JSON.stringify(upgrades)}`);
-          upgrades.forEach((upgrade) => {
-            allDependencyUpgrades.push(Object.assign(dep, upgrade));
-          });
-        } else {
-          logger.verbose(`${dep.depName}: No upgrades required`);
-        }
-        return Promise.resolve();
-      })
-      .catch((error) => {
-        logger.error(`Error finding upgrades for ${dep.depName}: ${error}`);
-      })
-    );
-  }, []))
+  return Promise.all(dependencies.reduce((promises, dep) => promises.concat(
+    getVersions(dep.depName)
+    .then(versions => getUpgrades(dep.depName, dep.currentVersion, versions))
+    .then((upgrades) => {
+      if (upgrades.length > 0) {
+        logger.verbose(`${dep.depName}: Upgrades = ${JSON.stringify(upgrades)}`);
+        upgrades.forEach((upgrade) => {
+          allDependencyUpgrades.push(Object.assign(dep, upgrade));
+        });
+      } else {
+        logger.verbose(`${dep.depName}: No upgrades required`);
+      }
+      return Promise.resolve();
+    })
+    .catch((error) => {
+      logger.error(`Error finding upgrades for ${dep.depName}: ${error}`);
+    })), []))
   // Return the upgrade array once all Promises are complete
   .then(() => allDependencyUpgrades);
 }
