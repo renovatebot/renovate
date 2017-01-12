@@ -6,8 +6,9 @@ let logger = null;
 
 module.exports = {
   setLogger,
-  extractDependencies,
+  extractAllDependencies,
   getAllUpgrades,
+  isValidVersion,
 };
 
 function setLogger(l) {
@@ -15,20 +16,19 @@ function setLogger(l) {
 }
 
 // Returns an array of current dependencies
-function extractDependencies(contents) {
+function extractAllDependencies(packageJson) {
   // loop through dependency types
   return ['dependencies', 'devDependencies'].reduce((deps, depType) => {
     // loop through each dependency within a type
-    Object.keys(contents[depType] || []).forEach((depName) => {
-      const currentVersion = contents[depType][depName];
-      if (!isValidVersion(currentVersion)) {
-        // Right now this will include any github repositories
-        logger.verbose(`${depName}: Skipping invalid version ${currentVersion}`);
-        return;
-      }
-      deps.push({ depType, depName, currentVersion });
-    });
-    return deps;
+    const depNames = Object.keys(packageJson[depType]) || [];
+    function getDep(depName) {
+      return {
+        depType,
+        depName,
+        currentVersion: packageJson[depType][depName],
+      };
+    }
+    return deps.concat(depNames.map(getDep));
   }, []);
 }
 
