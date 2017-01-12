@@ -7,7 +7,7 @@
     "lint": "eslint app",
     "lint-fix": "eslint app --fix",
     "start": "node app",
-    "test": "istanbul cover _mocha test/**/*"
+    "test": "istanbul cover _mocha test"
   },
   "repository": {
     "type": "git",

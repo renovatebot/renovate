@@ -8,6 +8,7 @@ module.exports = {
   setLogger,
   extractDependencies,
   findUpgrades,
+  getUpgrades,
   isRange,
   isValidVersion,
 };
@@ -59,7 +60,7 @@ function getVersions(depName) {
   // supports scoped packages, e.g. @user/package
   return got(`https://registry.npmjs.org/${depName.replace('/', '%2F')}`, {
     json: true,
-  }).then(res => res.body.versions);
+  }).then(res => Object.keys(res.body.versions));
 }
 
 function getUpgrades(depName, currentVersion, versions) {
@@ -76,12 +77,12 @@ function getUpgrades(depName, currentVersion, versions) {
   // Check for a current range and pin it
   if (isRange(currentVersion)) {
     // Pin ranges to their maximum satisfying version
-    const maxSatisfying = semver.maxSatisfying(Object.keys(versions), currentVersion);
+    const maxSatisfying = semver.maxSatisfying(versions, currentVersion);
     allUpgrades.pin = { upgradeType: 'pin', newVersion: maxSatisfying };
     workingVersion = maxSatisfying;
   }
   // Loop through all possible versions
-  Object.keys(versions).forEach((newVersion) => {
+  versions.forEach((newVersion) => {
     if (stable.is(workingVersion) && !stable.is(newVersion)) {
       // Ignore unstable versions, unless the current version is unstable
       return;
