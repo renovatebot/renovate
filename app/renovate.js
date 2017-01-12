@@ -22,9 +22,7 @@ module.exports = function init(setConfig) {
 // This function manages the queue per-package file
 function processPackageFile(repoName, packageFile) {
   return github.initRepo(repoName)
-    .then(() => {
-      return github.getPackageFileContents(packageFile);
-    })
+    .then(() => github.getPackageFileContents(packageFile))
     .then(npm.getAllDependencyUpgrades)
     .then(processUpgradesSequentially)
     .then(() => { // eslint-disable-line promise/always-return
