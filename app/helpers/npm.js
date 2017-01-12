@@ -15,9 +15,9 @@ function setLogger(l) {
 }
 
 function extractDependencies(packageContents) {
+  // Return an array of current dependencies
   const dependencies = [];
-  const dependencyTypes = ['dependencies', 'devDependencies'];
-  dependencyTypes.forEach((depType) => {
+  ['dependencies', 'devDependencies'].forEach((depType) => {
     if (!packageContents[depType]) {
       return;
     }
