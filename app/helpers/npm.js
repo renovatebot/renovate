@@ -107,9 +107,9 @@ function getDependencyUpgrades(depName, currentVersion) {
 function isRange(input) {
   // Pinned versions also return true for semver.validRange
   // We need to check first that they're not 'valid' to get only ranges
-  return !semver.valid(input) && semver.validRange(input);
+  return (semver.valid(input) === null && semver.validRange(input) !== null);
 }
 
 function isValidVersion(input) {
-  return semver.valid(input) || semver.validRange(input);
+  return (semver.valid(input) || semver.validRange(input)) !== null;
 }
