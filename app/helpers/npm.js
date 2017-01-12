@@ -33,17 +33,15 @@ function findUpgrades(dependencies) {
   const allDependencyUpgrades = [];
   // We create an array of promises so that they can be executed in parallel
   return Promise.all(dependencies.reduce((promiseArray, dep) => {
-    const depName = dep.depName;
-    const currentVersion = dep.currentVersion;
-    promiseArray.push(getDependencyUpgrades(depName, currentVersion)
+    promiseArray.push(getDependencyUpgrades(dep.depName, dep.currentVersion)
     .then((res) => {
       if (res.length > 0) {
-        logger.verbose(`${depName}: Upgrades = ${JSON.stringify(res)}`);
+        logger.verbose(`${dep.depName}: Upgrades = ${JSON.stringify(res)}`);
         res.forEach((upgrade) => {
           allDependencyUpgrades.push(Object.assign(dep, upgrade));
         });
       } else {
-        logger.verbose(`${depName}: No upgrades required`);
+        logger.verbose(`${dep.depName}: No upgrades required`);
       }
       return Promise.resolve();
     }));
