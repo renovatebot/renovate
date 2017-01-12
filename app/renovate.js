@@ -11,7 +11,7 @@ module.exports = function init(setConfig) {
   logger = config.logger;
 
   // Initialize helpers
-  github.setLogger(logger);
+  github.init(config.token, logger);
   npm.setLogger(logger);
   packageJson.setLogger(logger);
   changelog.setGitHubToken(config.token);
@@ -21,12 +21,10 @@ module.exports = function init(setConfig) {
 
 // This function manages the queue per-package file
 function processPackageFile(repoName, packageFile) {
-  return github.initRepo(config.token, repoName)
-    .then(() => {
-      logger.info(`Processing ${repoName} ${packageFile}`);
-      return github.getPackageFileContents(packageFile);
-    })
-    .then(npm.getAllDependencyUpgrades)
+  return github.initRepo(repoName)
+    .then(() => github.getPackageFileContents(packageFile))
+    .then(npm.extractDependencies)
+    .then(npm.findUpgrades)
     .then(processUpgradesSequentially)
     .then(() => { // eslint-disable-line promise/always-return
       logger.info(`${repoName} ${packageFile} done`);
@@ -148,6 +146,10 @@ function updateDependency(upgrade) {
         currentSHA,
         newPackageContents,
         commitMessage);
+    })
+    .catch((error) => {
+      logger.error(`${depName} ensureCommit error: ${error}`);
+      throw error;
     });
   }
 
