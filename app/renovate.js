@@ -146,6 +146,10 @@ function updateDependency(upgrade) {
         currentSHA,
         newPackageContents,
         commitMessage);
+    })
+    .catch((error) => {
+      logger.error(`${depName} ensureCommit error: ${error}`);
+      throw error;
     });
   }
 

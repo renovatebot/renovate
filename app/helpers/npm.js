@@ -14,27 +14,22 @@ function setLogger(l) {
   logger = l;
 }
 
-function extractDependencies(packageContents) {
-  // Return an array of current dependencies
-  const dependencies = [];
-  ['dependencies', 'devDependencies'].forEach((depType) => {
-    if (!packageContents[depType]) {
-      return;
-    }
-    Object.keys(packageContents[depType]).forEach((depName) => {
-      const currentVersion = packageContents[depType][depName];
+// Returns an array of current dependencies
+function extractDependencies(contents) {
+  // loop through dependency types
+  return ['dependencies', 'devDependencies'].reduce((deps, depType) => {
+    // loop through each dependency within a type
+    Object.keys(contents[depType] || []).forEach((depName) => {
+      const currentVersion = contents[depType][depName];
       if (!isValidVersion(currentVersion)) {
+        // Right now this will include any github repositories
         logger.verbose(`${depName}: Skipping invalid version ${currentVersion}`);
         return;
       }
-      dependencies.push({
-        depType,
-        depName,
-        currentVersion,
-      });
+      deps.push({ depType, depName, currentVersion });
     });
-  });
-  return dependencies;
+    return deps;
+  }, []);
 }
 
 function getAllUpgrades(dependencies) {
