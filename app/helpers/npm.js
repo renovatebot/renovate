@@ -32,8 +32,8 @@ function extractDependencies(packageJson) {
 function findUpgrades(dependencies) {
   const allDependencyUpgrades = [];
   // We create an array of promises so that they can be executed in parallel
-  return Promise.all(dependencies.reduce((promiseArray, dep) => {
-    promiseArray.push(getDependencyUpgrades(dep.depName, dep.currentVersion)
+  return Promise.all(dependencies.reduce((promises, dep) => {
+    promises.push(getDependencyUpgrades(dep.depName, dep.currentVersion)
     .then((res) => {
       if (res.length > 0) {
         logger.verbose(`${dep.depName}: Upgrades = ${JSON.stringify(res)}`);
@@ -45,7 +45,7 @@ function findUpgrades(dependencies) {
       }
       return Promise.resolve();
     }));
-    return promiseArray;
+    return promises;
   }, []))
   // Return the upgrade array once all Promises are complete
   .then(() => allDependencyUpgrades);
