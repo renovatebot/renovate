@@ -34,10 +34,9 @@ function extractDependencies(packageJson) {
 function findUpgrades(dependencies) {
   const allDependencyUpgrades = [];
   // We create an array of promises so that they can be executed in parallel
-  return Promise.all(dependencies.reduce((promises, dep) => {
-    return promises.concat(
+  return Promise.all(dependencies.reduce((promises, dep) => promises.concat(
       getVersions(dep.depName)
-      .then((versions) => getUpgrades(dep.depName, dep.currentVersion, versions))
+      .then(versions => getUpgrades(dep.depName, dep.currentVersion, versions))
       .then((upgrades) => {
         if (upgrades.length > 0) {
           logger.verbose(`${dep.depName}: Upgrades = ${JSON.stringify(upgrades)}`);
@@ -50,10 +49,9 @@ function findUpgrades(dependencies) {
         return Promise.resolve();
       })
       .catch((error) => {
-        logger.error(`Error finding upgrades for ${depName}: ${error}`);
-      })
-    );
-  }, []))
+        logger.error(`Error finding upgrades for ${dep.depName}: ${error}`);
+      }),
+    ), []))
   // Return the upgrade array once all Promises are complete
   .then(() => allDependencyUpgrades);
 }
@@ -70,47 +68,47 @@ function getUpgrades(depName, currentVersion, versions) {
     logger.verbose(`${depName} currentVersion is invalid`);
     return [];
   }
-    if (!versions) {
-      logger.verbose(`${depName} versions is null`);
-      return [];
-    }
-    const allUpgrades = {};
-    let workingVersion = currentVersion;
+  if (!versions) {
+    logger.verbose(`${depName} versions is null`);
+    return [];
+  }
+  const allUpgrades = {};
+  let workingVersion = currentVersion;
     // Check for a current range and pin it
-    if (isRange(currentVersion)) {
+  if (isRange(currentVersion)) {
       // Pin ranges to their maximum satisfying version
-      const maxSatisfying = semver.maxSatisfying(Object.keys(versions), currentVersion);
-      allUpgrades.pin = { upgradeType: 'pin', newVersion: maxSatisfying };
-      workingVersion = maxSatisfying;
-    }
+    const maxSatisfying = semver.maxSatisfying(Object.keys(versions), currentVersion);
+    allUpgrades.pin = { upgradeType: 'pin', newVersion: maxSatisfying };
+    workingVersion = maxSatisfying;
+  }
     // Loop through all possible versions
-    Object.keys(versions).forEach((newVersion) => {
-      if (stable.is(workingVersion) && !stable.is(newVersion)) {
+  Object.keys(versions).forEach((newVersion) => {
+    if (stable.is(workingVersion) && !stable.is(newVersion)) {
         // Ignore unstable versions, unless the current version is unstable
-        return;
-      }
-      if (semver.gt(newVersion, workingVersion)) {
-        // Group by major versions
-        const newVersionMajor = semver.major(newVersion);
-        // Save this, if it's a new major version or greater than the previous greatest
-        if (!allUpgrades[newVersionMajor] ||
-            semver.gt(newVersion, allUpgrades[newVersionMajor].newVersion)) {
-          const upgradeType = newVersionMajor > semver.major(workingVersion) ? 'major' : 'minor';
-          allUpgrades[newVersionMajor] = {
-            upgradeType,
-            newVersion,
-            newVersionMajor,
-            workingVersion,
-          };
-        }
-      }
-    });
-    if (allUpgrades.pin && Object.keys(allUpgrades).length > 1) {
-      // Remove the pin if we found upgrades
-      delete allUpgrades.pin;
+      return;
     }
+    if (semver.gt(newVersion, workingVersion)) {
+        // Group by major versions
+      const newVersionMajor = semver.major(newVersion);
+        // Save this, if it's a new major version or greater than the previous greatest
+      if (!allUpgrades[newVersionMajor] ||
+            semver.gt(newVersion, allUpgrades[newVersionMajor].newVersion)) {
+        const upgradeType = newVersionMajor > semver.major(workingVersion) ? 'major' : 'minor';
+        allUpgrades[newVersionMajor] = {
+          upgradeType,
+          newVersion,
+          newVersionMajor,
+          workingVersion,
+        };
+      }
+    }
+  });
+  if (allUpgrades.pin && Object.keys(allUpgrades).length > 1) {
+      // Remove the pin if we found upgrades
+    delete allUpgrades.pin;
+  }
     // Return only the values - we don't need the keys anymore
-    return Object.keys(allUpgrades).map(key => allUpgrades[key]);
+  return Object.keys(allUpgrades).map(key => allUpgrades[key]);
 }
 
 function isRange(input) {

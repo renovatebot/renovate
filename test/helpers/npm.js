@@ -20,7 +20,7 @@ describe('npm helper', () => {
       extractedDependencies.every(dep => dep.depType && dep.depName && dep.currentVersion)
         .should.eql(true);
     });
-  })
+  });
   describe('isRange', () => {
     it('should reject simple semver', () => {
       npm.isRange('1.2.3').should.eql(false);
@@ -52,5 +52,5 @@ describe('npm helper', () => {
       npm.isValidVersion('singapore/renovate#master').should.eql(false);
       npm.isValidVersion('https://github.com/singapore/renovate.git').should.eql(false);
     });
-  })
+  });
 });

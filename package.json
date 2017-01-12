@@ -4,8 +4,8 @@
   "version": "1.1.2",
   "main": "app/index.js",
   "scripts": {
-    "lint": "eslint .",
-    "lint-fix": "eslint . --fix",
+    "lint": "eslint app",
+    "lint-fix": "eslint app --fix",
     "start": "node app",
     "test": "mocha --recursive --reporter spec"
   },
