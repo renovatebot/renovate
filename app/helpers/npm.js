@@ -8,6 +8,8 @@ module.exports = {
   setLogger,
   extractDependencies,
   findUpgrades,
+  isRange,
+  isValidVersion,
 };
 
 function setLogger(l) {
@@ -33,19 +35,24 @@ function findUpgrades(dependencies) {
   const allDependencyUpgrades = [];
   // We create an array of promises so that they can be executed in parallel
   return Promise.all(dependencies.reduce((promises, dep) => {
-    promises.push(getUpgrades(dep.depName, dep.currentVersion)
-    .then((res) => {
-      if (res.length > 0) {
-        logger.verbose(`${dep.depName}: Upgrades = ${JSON.stringify(res)}`);
-        res.forEach((upgrade) => {
-          allDependencyUpgrades.push(Object.assign(dep, upgrade));
-        });
-      } else {
-        logger.verbose(`${dep.depName}: No upgrades required`);
-      }
-      return Promise.resolve();
-    }));
-    return promises;
+    return promises.concat(
+      getVersions(dep.depName)
+      .then((versions) => getUpgrades(dep.depName, dep.currentVersion, versions))
+      .then((upgrades) => {
+        if (upgrades.length > 0) {
+          logger.verbose(`${dep.depName}: Upgrades = ${JSON.stringify(upgrades)}`);
+          upgrades.forEach((upgrade) => {
+            allDependencyUpgrades.push(Object.assign(dep, upgrade));
+          });
+        } else {
+          logger.verbose(`${dep.depName}: No upgrades required`);
+        }
+        return Promise.resolve();
+      })
+      .catch((error) => {
+        logger.error(`Error finding upgrades for ${depName}: ${error}`);
+      })
+    );
   }, []))
   // Return the upgrade array once all Promises are complete
   .then(() => allDependencyUpgrades);
@@ -58,13 +65,13 @@ function getVersions(depName) {
   }).then(res => res.body.versions);
 }
 
-function getUpgrades(depName, currentVersion) {
+function getUpgrades(depName, currentVersion, versions) {
   if (!isValidVersion(currentVersion)) {
+    logger.verbose(`${depName} currentVersion is invalid`);
     return [];
   }
-  return getVersions(depName).then((versions) => {
     if (!versions) {
-      logger.error(`${depName} versions is null`);
+      logger.verbose(`${depName} versions is null`);
       return [];
     }
     const allUpgrades = {};
@@ -104,15 +111,14 @@ function getUpgrades(depName, currentVersion) {
     }
     // Return only the values - we don't need the keys anymore
     return Object.keys(allUpgrades).map(key => allUpgrades[key]);
-  });
 }
 
 function isRange(input) {
   // Pinned `version`s also return true for semver.validRange
   // We need to check first that they're not 'valid' to get only ranges
-  return !semver.valid(input) && semver.validRange(input);
+  return (semver.valid(input) === null && semver.validRange(input) !== null);
 }
 
 function isValidVersion(input) {
-  return semver.valid(input) || semver.validRange(input);
+  return (semver.valid(input) || semver.validRange(input)) !== null;
 }

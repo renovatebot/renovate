@@ -39,8 +39,9 @@ function setNewValue(currentFileContent, depType, depName, newVersion) {
       }
     }
   }
+  // istanbul ignore if
   if (!newFileContent) {
-    throw new Error('Could not find old version');
+    throw new Error('Could not set new value');
   }
   return newFileContent;
 }

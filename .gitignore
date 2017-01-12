@@ -1,3 +1,5 @@
 /node_modules
 /config.js
 /npm-debug.log
+/coverage
+.DS_Store
