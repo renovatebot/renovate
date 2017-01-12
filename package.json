@@ -4,9 +4,10 @@
   "version": "1.1.2",
   "main": "app/index.js",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint app",
+    "lint-fix": "eslint app --fix",
     "start": "node app",
-    "test": "mocha --recursive --reporter spec"
+    "test": "istanbul cover _mocha test/**/*"
   },
   "repository": {
     "type": "git",
@@ -41,6 +42,7 @@
     "eslint-config-airbnb-base": "11.0.1",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-promise": "3.4.0",
+    "istanbul": "0.4.5",
     "mocha": "3.2.0"
   }
 }
