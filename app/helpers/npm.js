@@ -7,7 +7,7 @@ let logger = null;
 module.exports = {
   setLogger,
   extractDependencies,
-  getAllDependencyUpgrades,
+  getAllUpgrades,
 };
 
 function setLogger(l) {
@@ -37,36 +37,37 @@ function extractDependencies(packageContents) {
   return dependencies;
 }
 
-function getAllDependencyUpgrades(dependencies) {
+function getAllUpgrades(dependencies) {
   const allDependencyUpgrades = [];
-  const upgradeChecks =
-    dependencies.reduce((promiseArray, dep) => {
-      const depType = dep.depType;
-      const depName = dep.depName;
-      const currentVersion = dep.currentVersion;
-      promiseArray.push(getDependencyUpgrades(depName, currentVersion)
-      .then((res) => {
-        if (res.length > 0) {
-          logger.verbose(`${depName}: Upgrades = ${JSON.stringify(res)}`);
-          res.forEach((upgrade) => {
-            allDependencyUpgrades.push({
-              depType,
-              depName,
-              currentVersion,
-              upgradeType: upgrade.type,
-              newVersion: upgrade.version,
-              newVersionMajor: semver.major(upgrade.version),
-              workingVersion: upgrade.workingVersion,
-            });
+  // We create an array of promises so that they can be executed in parallel
+  return Promise.all(dependencies.reduce((promiseArray, dep) => {
+    const depType = dep.depType;
+    const depName = dep.depName;
+    const currentVersion = dep.currentVersion;
+    promiseArray.push(getDependencyUpgrades(depName, currentVersion)
+    .then((res) => {
+      if (res.length > 0) {
+        logger.verbose(`${depName}: Upgrades = ${JSON.stringify(res)}`);
+        res.forEach((upgrade) => {
+          allDependencyUpgrades.push({
+            depType,
+            depName,
+            currentVersion,
+            upgradeType: upgrade.type,
+            newVersion: upgrade.version,
+            newVersionMajor: semver.major(upgrade.version),
+            workingVersion: upgrade.workingVersion,
           });
-        } else {
-          logger.verbose(`${depName}: No upgrades required`);
-        }
-        return Promise.resolve();
-      }));
-      return promiseArray;
-    }, []);
-  return Promise.all(upgradeChecks).then(() => allDependencyUpgrades);
+        });
+      } else {
+        logger.verbose(`${depName}: No upgrades required`);
+      }
+      return Promise.resolve();
+    }));
+    return promiseArray;
+  }, []))
+  // Return the upgrade array once all Promises are complete
+  .then(() => allDependencyUpgrades);
 }
 
 function getDependency(depName) {

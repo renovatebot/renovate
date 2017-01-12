@@ -24,7 +24,7 @@ function processPackageFile(repoName, packageFile) {
   return github.initRepo(repoName)
     .then(() => github.getPackageFileContents(packageFile))
     .then(npm.extractDependencies)
-    .then(npm.getAllDependencyUpgrades)
+    .then(npm.getAllUpgrades)
     .then(processUpgradesSequentially)
     .then(() => { // eslint-disable-line promise/always-return
       logger.info(`${repoName} ${packageFile} done`);
