@@ -78,18 +78,22 @@ function updateDependency(upgrade) {
   const newVersion = upgrade.newVersion;
   // Use templates to generate strings
   const branchName = config.templates.branchName(upgrade);
+  let commitFunction = null;
   let prFunction = null;
   if (upgrade.upgradeType === 'pin') {
+    commitFunction = config.templates.commitMessagePin;
     prFunction = config.templates.prTitlePin;
   } else if (upgrade.upgradeType === 'minor') {
     // Use same title for range or minor
+    commitFunction = config.templates.commitMessage;
     prFunction = config.templates.prTitleMinor;
   } else {
+    commitFunction = config.templates.commitMessage;
     prFunction = config.templates.prTitleMajor;
   }
+  const commitMessage = commitFunction(upgrade);
   const prTitle = prFunction(upgrade);
   const prBody = config.templates.prBody(upgrade);
-  const commitMessage = config.templates.commitMessage(upgrade);
 
   // Check if same PR already existed and skip if so
   // This allows users to close an unwanted upgrade PR and not worry about seeing it raised again

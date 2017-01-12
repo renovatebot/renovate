@@ -3,6 +3,7 @@ module.exports = {
   templates: {
     branchName: params => `renovate/${params.depName}-${params.newVersionMajor}.x`,
     commitMessage: params => `Update dependency ${params.depName} to version ${params.newVersion}`,
+    commitMessagePin: params => `Pin dependency ${params.depName} to version ${params.newVersion}`,
     prBody: params => `This Pull Request updates dependency ${params.depName}` +
       ` from version ${params.currentVersion} to ${params.newVersion}
 
