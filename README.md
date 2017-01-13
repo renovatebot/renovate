@@ -6,6 +6,8 @@ Keep npm dependencies up-to-date via Pull Requests
 
 This script scans your repository package.json files, detects if any dependencies need version updating - or pinning - and if so then submits Pull Requests for each.
 
+This was inspired by the services at [Greenkeeper](https://greenkeeper.io) and [Doppins](https://doppins.com).
+
 ## Before you Start
 
 To run this script, you will need to select a GitHub user account for it to create branches and submit Pull Requests from. The account will need read/write access to push and update upgrade branches to GitHub, as well as raise Pull Requests.
