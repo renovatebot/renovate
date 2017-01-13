@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
 // Initialize config
-const config = require('./config/parser')();
+const configParser = require('./config/parser');
 // Require main source
 const renovate = require('./renovate');
+
+// Get global config
+const config = configParser.getGlobalConfig();
 
 // Initialize our promise chain
 let p = Promise.resolve();
@@ -11,7 +14,7 @@ let p = Promise.resolve();
 // Queue up each repo/package combination
 config.repositories.forEach((repo) => {
   repo.packageFiles.forEach((packageFile) => {
-    const cascadedConfig = getCascadedConfig(repo, packageFile);
+    const cascadedConfig = configParser.getCascadedConfig(repo, packageFile);
     p = p.then(() => renovate(repo.repository, packageFile.fileName, cascadedConfig));
   });
 });
@@ -21,11 +24,3 @@ p.then(() => { // eslint-disable-line promise/always-return
 .catch((error) => {
   config.logger.error(`Unexpected error: ${error}`);
 });
-
-function getCascadedConfig(repo, packageFile) {
-  const cascadedConfig = Object.assign({}, config, repo, packageFile);
-  delete cascadedConfig.repositories;
-  delete cascadedConfig.repository;
-  delete cascadedConfig.fileName;
-  return cascadedConfig;
-}

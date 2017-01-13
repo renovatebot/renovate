@@ -8,7 +8,14 @@ const logger = new (winston.Logger)({
 });
 logger.level = process.env.LOG_LEVEL || 'info';
 
-module.exports = function init() {
+module.exports = {
+  getGlobalConfig,
+  getCascadedConfig,
+};
+
+let config = null;
+
+function getGlobalConfig() {
   // This function reads in all configs and merges them
   /* eslint-disable global-require */
   const defaultConfig = require('./defaults');
@@ -36,7 +43,8 @@ module.exports = function init() {
       },
     ];
   }
-  const config = Object.assign({}, defaultConfig, customConfig, cliConfig);
+  // Set global config
+  config = Object.assign({}, defaultConfig, customConfig, cliConfig);
   // Set log level
   logger.level = config.logLevel;
 
@@ -67,6 +75,9 @@ module.exports = function init() {
   // Add logger to config
   config.logger = logger;
 
+  // Save default templates
+  config.defaultTemplates = defaultConfig.templates;
+
   // token must be defined
   if (typeof config.token === 'undefined') {
     logger.error('Error: A GitHub token must be configured');
@@ -76,6 +87,16 @@ module.exports = function init() {
   if (!config.repositories || config.repositories.length === 0) {
     logger.error('Error: At least one repository must be configured');
   }
-
   return config;
-};
+}
+
+function getCascadedConfig(repo, packageFile) {
+  const cascadedConfig = Object.assign({}, config, repo, packageFile);
+  // Fill in any missing templates with defaults
+  cascadedConfig.templates = Object.assign({}, config.defaultTemplates, cascadedConfig.templates);
+  // Remove unnecessary fields
+  delete cascadedConfig.repositories;
+  delete cascadedConfig.repository;
+  delete cascadedConfig.fileName;
+  return cascadedConfig;
+}
