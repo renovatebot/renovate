@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "main": "renovate.js",
   "scripts": {
     "lint": "eslint .",
@@ -23,7 +23,9 @@
     "url": "https://github.com/singapore/renovate/issues"
   },
   "homepage": "https://github.com/singapore/renovate#readme",
-  "engines" : { "node" : ">=6.9.0" },
+  "engines": {
+    "node": ">=6.9.0"
+  },
   "dependencies": {
     "gh-got": "5.0.0",
     "got": "6.7.1",
