@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Initialize config
 const config = require('./config/parser')();
 // Require main source
