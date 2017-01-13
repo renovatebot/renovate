@@ -6,6 +6,7 @@ const logger = new (winston.Logger)({
     new (winston.transports.Console)({ colorize: true }),
   ],
 });
+logger.level = process.env.LOG_LEVEL || 'info';
 
 module.exports = function init() {
   // This function reads in all configs and merges them
@@ -16,6 +17,7 @@ module.exports = function init() {
     customConfig = require('../../config'); // eslint-disable-line import/no-unresolved
   } catch (err) {
     // Do nothing
+    logger.verbose('No custom config found');
   }
   /* eslint-enable global-require */
   const cliConfig = {};
@@ -26,16 +28,18 @@ module.exports = function init() {
     cliConfig.token = process.env.RENOVATE_TOKEN;
   }
   // Check if repository name and package file are provided via CLI
-  const repoName = process.argv[2];
-  if (repoName) {
+  if (process.argv[2]) {
     cliConfig.repositories = [
       {
-        repository: repoName,
+        repository: process.argv[2],
         packageFiles: [process.argv[3] || 'package.json'],
       },
     ];
   }
   const config = Object.assign(defaultConfig, customConfig, cliConfig);
+  // Set log level
+  logger.level = config.logLevel;
+
   // First, convert any strings to objects
   config.repositories.forEach((repo, index) => {
     if (typeof repo === 'string') {
@@ -57,12 +61,10 @@ module.exports = function init() {
       return packageFile;
     });
   });
+  // Print config
+  logger.verbose(`config=${JSON.stringify(config)}`);
 
-  // Winston log level can be controlled via config or env
-  if (config.logLevel) {
-    logger.level = config.logLevel;
-  }
-  logger.verbose(config);
+  // Add logger to config
   config.logger = logger;
 
   // token must be defined
