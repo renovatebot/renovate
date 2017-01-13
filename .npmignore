@@ -1,0 +1,8 @@
+/node_modules
+/config.js
+/npm-debug.log
+/coverage
+/test
+.eslintrc.js
+circle.yml
+.DS_Store
