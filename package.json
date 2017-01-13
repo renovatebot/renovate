@@ -5,10 +5,13 @@
   "bin": "./app/index.js",
   "main": "app/index.js",
   "scripts": {
+    "eslint": "eslint app",
+    "eslint-fix": "eslint app --fix",
+    "istanbul": "istanbul cover _mocha test",
     "lint": "eslint app",
-    "lint-fix": "eslint app --fix",
+    "mocha": "mocha test",
     "start": "node app",
-    "test": "istanbul cover _mocha test"
+    "test": "npm run lint && npm run istanbul"
   },
   "repository": {
     "type": "git",
