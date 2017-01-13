@@ -126,7 +126,7 @@ function updateDependency(upgrade) {
       if (error.response.body.message !== 'Reference already exists') {
         // In this case it means we really do have a problem and can't continue
         logger.error(`Error creating branch: ${branchName}`);
-        logger.error(`Response body: ${error.response.body}`);
+        logger.error(`Response: ${JSON.stringify(error.response.body)}`);
         throw error;
       }
       // Otherwise we swallow this error and continue
