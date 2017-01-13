@@ -6,7 +6,11 @@ const packageJson = require('./helpers/package-json');
 let config = null;
 let logger = null;
 
-module.exports = function init(setConfig) {
+module.exports = processPackageFile;
+
+// This function manages the queue per-package file
+function processPackageFile(repoName, packageFile, setConfig) {
+  // Initialize globals
   config = setConfig;
   logger = config.logger;
 
@@ -16,11 +20,9 @@ module.exports = function init(setConfig) {
   packageJson.setLogger(logger);
   changelog.setGitHubToken(config.token);
 
-  return processPackageFile;
-};
+  logger.info(`Processing ${repoName} ${packageFile}`);
 
-// This function manages the queue per-package file
-function processPackageFile(repoName, packageFile) {
+  // Start the chain
   return github.initRepo(repoName)
     .then(() => github.getPackageFileContents(packageFile))
     .then(npm.extractDependencies)
