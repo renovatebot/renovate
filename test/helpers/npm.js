@@ -21,14 +21,56 @@ describe('npm helper', () => {
         .should.eql(true);
     });
   });
+  describe('getUpgrades', () => {
+    const testVersions = ['0.1.0', '1.0.0', '1.0.1', '1.1.0', '2.0.0-alpha1', '2.0.0', '2.0.1', '3.0.0', '3.1.0'];
+    it('return empty if invalid current version', () => {
+      npm.getUpgrades('foo', 'invalid', ['1.0.0', '1.0.1']).should.have.length(0);
+    });
+    it('return empty if no versions', () => {
+      npm.getUpgrades('foo', '1.0.0', null).should.have.length(0);
+    });
+    it('supports minor and major upgrades, including for ranges', () => {
+      const upgradeVersions = [
+        {
+          'newVersion': '1.1.0',
+          'newVersionMajor': 1,
+          'upgradeType': 'minor',
+          'workingVersion': '1.0.1',
+        },
+        {
+          'newVersion': '2.0.1',
+          'newVersionMajor': 2,
+          'upgradeType': 'major',
+          'workingVersion': '1.0.1',
+        },
+        {
+          'newVersion': '3.1.0',
+          'newVersionMajor': 3,
+          'upgradeType': 'major',
+          'workingVersion': '1.0.1',
+        },
+      ];
+      npm.getUpgrades('foo', '1.0.1', testVersions).should.eql(upgradeVersions);
+      npm.getUpgrades('foo', '~1.0.1', testVersions).should.eql(upgradeVersions);
+    });
+    it('supports pinning', () => {
+      const upgradeVersions = [
+        {
+          'newVersion': '3.1.0',
+          'upgradeType': 'pin',
+        },
+      ];
+      npm.getUpgrades('foo', '^3.0.0', testVersions).should.eql(upgradeVersions);
+    });
+  });
   describe('isRange', () => {
-    it('should reject simple semver', () => {
+    it('rejects simple semver', () => {
       npm.isRange('1.2.3').should.eql(false);
     });
-    it('should support tilde', () => {
+    it('accepts tilde', () => {
       npm.isRange('~1.2.3').should.eql(true);
     });
-    it('should support caret', () => {
+    it('accepts caret', () => {
       npm.isRange('^1.2.3').should.eql(true);
     });
   });
