@@ -23,7 +23,7 @@ function extractDependencies(packageJson) {
   const depTypes = ['dependencies', 'devDependencies'];
   return depTypes.reduce((allDeps, depType) => {
     // loop through each dependency within a type
-    const depNames = Object.keys(packageJson[depType]) || [];
+    const depNames = packageJson[depType] ? Object.keys(packageJson[depType]) : [];
     return allDeps.concat(depNames.map(depName => ({
       depType,
       depName,
