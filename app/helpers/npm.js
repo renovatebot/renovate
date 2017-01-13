@@ -42,7 +42,7 @@ function findUpgrades(dependencies) {
       if (upgrades.length > 0) {
         logger.verbose(`${dep.depName}: Upgrades = ${JSON.stringify(upgrades)}`);
         upgrades.forEach((upgrade) => {
-          allDependencyUpgrades.push(Object.assign(dep, upgrade));
+          allDependencyUpgrades.push(Object.assign({}, dep, upgrade));
         });
       } else {
         logger.verbose(`${dep.depName}: No upgrades required`);

@@ -11,8 +11,8 @@ module.exports = processPackageFile;
 // This function manages the queue per-package file
 function processPackageFile(repoName, packageFile, setConfig) {
   // Initialize globals
-  config = setConfig;
-  logger = config.logger;
+  logger = setConfig.logger;
+  config = Object.assign({}, setConfig);
 
   // Initialize helpers
   github.init(config.token, logger);

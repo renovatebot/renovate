@@ -36,7 +36,7 @@ module.exports = function init() {
       },
     ];
   }
-  const config = Object.assign(defaultConfig, customConfig, cliConfig);
+  const config = Object.assign({}, defaultConfig, customConfig, cliConfig);
   // Set log level
   logger.level = config.logLevel;
 
