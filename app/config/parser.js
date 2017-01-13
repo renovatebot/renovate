@@ -51,6 +51,15 @@ function getGlobalConfig() {
   .option('--labels <labels>', 'List of labels to apply')
   .option('--log-level <level>', 'Log Level')
   .option('--token <token>', 'GitHub Auth Token')
+  .on('--help', () => {
+    /* eslint-disable no-console */
+    console.log('  Examples:');
+    console.log('');
+    console.log('    $ renovate --token sp2jb5h7nsfjsg9s60v23b singapore/lint-condo');
+    console.log('    $ renovate --token sp2jb5h7nsfjsg9s60v23b singapore/lint-condo custom/location/package.json');
+    console.log('');
+    /* eslint-enable no-console */
+  })
   .action((repository, fileName) => {
     cliConfig.repositories = [
       {
@@ -81,12 +90,14 @@ function getGlobalConfig() {
 
   // token must be defined
   if (typeof config.token === 'undefined') {
-    logger.error('Error: A GitHub token must be configured');
+    logger.error('A GitHub token must be configured');
+    program.outputHelp();
     process.exit(1);
   }
   // We need at least one repository defined
   if (!config.repositories || config.repositories.length === 0) {
-    logger.error('Error: At least one repository must be configured');
+    logger.error('At least one repository must be configured');
+    program.outputHelp();
     process.exit(1);
   }
   // Convert any repository strings to objects
