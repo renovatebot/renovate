@@ -18,10 +18,9 @@ function setLogger(l) {
 }
 
 // Returns an array of current dependencies
-function extractDependencies(packageJson) {
+function extractDependencies(packageJson, sections) {
   // loop through dependency types
-  const depTypes = ['dependencies', 'devDependencies'];
-  return depTypes.reduce((allDeps, depType) => {
+  return sections.reduce((allDeps, depType) => {
     // loop through each dependency within a type
     const depNames = packageJson[depType] ? Object.keys(packageJson[depType]) : [];
     return allDeps.concat(depNames.map(depName => ({

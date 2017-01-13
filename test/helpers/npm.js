@@ -3,6 +3,8 @@ const fs = require('fs');
 const npm = require('../../app/helpers/npm');
 const winston = require('winston');
 
+const defaultTypes = ['dependencies', 'devDependencies'];
+
 chai.should();
 
 npm.setLogger(winston);
@@ -13,17 +15,17 @@ const input02Content = fs.readFileSync('./test/_fixtures/package.json/inputs/02.
 describe('npm helper', () => {
   describe('extractDependencies', () => {
     it('returns an array of correct length', () => {
-      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content));
+      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(10);
     });
     it('each element contains non-null depType, depName, currentVersion', () => {
-      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content));
+      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
       extractedDependencies.every(dep => dep.depType && dep.depName && dep.currentVersion)
         .should.eql(true);
     });
     it('supports null devDependencies', () => {
-      const extractedDependencies = npm.extractDependencies(JSON.parse(input02Content));
+      const extractedDependencies = npm.extractDependencies(JSON.parse(input02Content), defaultTypes);
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(6);
     });

@@ -25,6 +25,7 @@ p.then(() => { // eslint-disable-line promise/always-return
 function getCascadedConfig(repo, packageFile) {
   const cascadedConfig = Object.assign({}, config, repo, packageFile);
   delete cascadedConfig.repositories;
-  config.logger.verbose(`Cascaded config=${JSON.stringify(cascadedConfig)}`);
+  delete cascadedConfig.repository;
+  delete cascadedConfig.fileName;
   return cascadedConfig;
 }

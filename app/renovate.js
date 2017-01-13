@@ -25,7 +25,7 @@ function processPackageFile(repoName, packageFile, setConfig) {
   // Start the chain
   return github.initRepo(repoName)
     .then(() => github.getPackageFileContents(packageFile))
-    .then(npm.extractDependencies)
+    .then(contents => npm.extractDependencies(contents, config.depTypes))
     .then(npm.findUpgrades)
     .then(processUpgradesSequentially)
     .then(() => { // eslint-disable-line promise/always-return
