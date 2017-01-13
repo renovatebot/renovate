@@ -7,18 +7,25 @@ chai.should();
 
 npm.setLogger(winston);
 
-const inputContent = fs.readFileSync('./test/_fixtures/package.json/inputs/01.json', 'utf8');
+const input01Content = fs.readFileSync('./test/_fixtures/package.json/inputs/01.json', 'utf8');
+const input02Content = fs.readFileSync('./test/_fixtures/package.json/inputs/02.json', 'utf8');
 
 describe('npm helper', () => {
   describe('extractDependencies', () => {
-    const extractedDependencies = npm.extractDependencies(JSON.parse(inputContent));
     it('returns an array of correct length', () => {
+      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content));
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(10);
     });
     it('each element contains non-null depType, depName, currentVersion', () => {
+      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content));
       extractedDependencies.every(dep => dep.depType && dep.depName && dep.currentVersion)
         .should.eql(true);
+    });
+    it('supports null devDependencies', () => {
+      const extractedDependencies = npm.extractDependencies(JSON.parse(input02Content));
+      extractedDependencies.should.be.instanceof(Array);
+      extractedDependencies.should.have.length(6);
     });
   });
   describe('getUpgrades', () => {
