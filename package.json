@@ -8,10 +8,9 @@
     "eslint": "eslint app",
     "eslint-fix": "eslint app --fix",
     "istanbul": "istanbul cover _mocha test",
-    "lint": "eslint app",
     "mocha": "mocha test",
     "start": "node app",
-    "test": "npm run lint && npm run istanbul"
+    "test": "npm run eslint && npm run istanbul"
   },
   "repository": {
     "type": "git",
