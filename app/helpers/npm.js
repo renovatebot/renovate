@@ -78,7 +78,11 @@ function getUpgrades(depName, currentVersion, versions) {
   if (isRange(currentVersion)) {
     // Pin ranges to their maximum satisfying version
     const maxSatisfying = semver.maxSatisfying(versions, currentVersion);
-    allUpgrades.pin = { upgradeType: 'pin', newVersion: maxSatisfying };
+    allUpgrades.pin = {
+      upgradeType: 'pin',
+      newVersion: maxSatisfying,
+      newVersionMajor: semver.major(maxSatisfying),
+    };
     workingVersion = maxSatisfying;
   }
   // Loop through all possible versions

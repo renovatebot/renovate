@@ -64,6 +64,7 @@ describe('npm helper', () => {
       const upgradeVersions = [
         {
           'newVersion': '3.1.0',
+          'newVersionMajor': 3,
           'upgradeType': 'pin',
         },
       ];
