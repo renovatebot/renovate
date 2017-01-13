@@ -48,6 +48,7 @@ function getGlobalConfig() {
   program
   .arguments('[repository] [fileName]')
   .option('--dep-types <types>', 'List of dependency types')
+  .option('--ignore-deps <list>', 'List of dependencies to ignore')
   .option('--labels <labels>', 'List of labels to apply')
   .option('--log-level <level>', 'Log Level')
   .option('--token <token>', 'GitHub Auth Token')
@@ -72,6 +73,9 @@ function getGlobalConfig() {
 
   if (program.depTypes) {
     cliConfig.depTypes = program.depTypes.split(',');
+  }
+  if (program.ignoreDeps) {
+    cliConfig.ignoreDeps = program.ignoreDeps.split(',');
   }
   if (program.labels) {
     cliConfig.labels = program.labels.split(',');

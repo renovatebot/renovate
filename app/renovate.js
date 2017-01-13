@@ -26,6 +26,7 @@ function processPackageFile(repoName, packageFile, setConfig) {
   return github.initRepo(repoName)
     .then(() => github.getPackageFileContents(packageFile))
     .then(contents => npm.extractDependencies(contents, config.depTypes))
+    .then(filterIgnoredDependencies)
     .then(npm.findUpgrades)
     .then(processUpgradesSequentially)
     .then(() => { // eslint-disable-line promise/always-return
@@ -34,6 +35,11 @@ function processPackageFile(repoName, packageFile, setConfig) {
     .catch((error) => {
       logger.error(`renovate caught error: ${error}`);
     });
+}
+
+// Remove any dependencies that are on the ignore list
+function filterIgnoredDependencies(dependencies) {
+  return dependencies.filter(dependency => config.ignoreDeps.indexOf(dependency.depName) === -1);
 }
 
 function processUpgradesSequentially(upgrades) {

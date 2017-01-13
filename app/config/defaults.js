@@ -2,6 +2,7 @@ module.exports = {
   logLevel: 'info',
   depTypes: ['dependencies', 'devDependencies', 'optionalDependencies'],
   labels: [],
+  ignoreDeps: [],
   templates: {
     branchName: params => `renovate/${params.depName}-${params.newVersionMajor}.x`,
     commitMessage: params => `Update dependency ${params.depName} to version ${params.newVersion}`,
