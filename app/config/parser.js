@@ -27,12 +27,11 @@ module.exports = function init() {
   }
   // Check if repository name and package file are provided via CLI
   const repoName = process.argv[2];
-  const packageFile = process.argv[3] || 'package.json';
   if (repoName) {
     cliConfig.repositories = [
       {
-        name: repoName,
-        packageFiles: [packageFile],
+        repository: repoName,
+        packageFiles: [process.argv[3] || 'package.json'],
       },
     ];
   }
@@ -40,7 +39,7 @@ module.exports = function init() {
   // First, convert any strings to objects
   config.repositories.forEach((repo, index) => {
     if (typeof repo === 'string') {
-      config.repositories[index] = { name: repo };
+      config.repositories[index] = { repository: repo };
     }
   });
   // Add 'package.json' if missing
@@ -49,7 +48,15 @@ module.exports = function init() {
       config.repositories[index].packageFiles = ['package.json'];
     }
   });
-
+  // Expand format
+  config.repositories.forEach((repo, index) => {
+    config.repositories[index].packageFiles = repo.packageFiles.map((packageFile) => {
+      if (typeof packageFile === 'string') {
+        return { fileName: packageFile };
+      }
+      return packageFile;
+    });
+  });
 
   // Winston log level can be controlled via config or env
   if (config.logLevel) {

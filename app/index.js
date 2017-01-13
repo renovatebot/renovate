@@ -13,7 +13,7 @@ let p = Promise.resolve();
 // Queue up each repo/package combination
 config.repositories.forEach((repo) => {
   repo.packageFiles.forEach((packageFile) => {
-    p = p.then(() => renovate(repo.name, packageFile));
+    p = p.then(() => renovate(repo.repository, packageFile.fileName));
   });
 });
 p.then(() => { // eslint-disable-line promise/always-return
