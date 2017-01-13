@@ -48,7 +48,17 @@ function getGlobalConfig() {
   // Set log level
   logger.level = config.logLevel;
 
-  // First, convert any strings to objects
+  // token must be defined
+  if (typeof config.token === 'undefined') {
+    logger.error('Error: A GitHub token must be configured');
+    process.exit(1);
+  }
+  // We need at least one repository defined
+  if (!config.repositories || config.repositories.length === 0) {
+    logger.error('Error: At least one repository must be configured');
+    process.exit(1);
+  }
+  // Convert any repository strings to objects
   config.repositories.forEach((repo, index) => {
     if (typeof repo === 'string') {
       config.repositories[index] = { repository: repo };
@@ -60,7 +70,7 @@ function getGlobalConfig() {
       config.repositories[index].packageFiles = ['package.json'];
     }
   });
-  // Expand format
+  // Expand packageFile format
   config.repositories.forEach((repo, index) => {
     config.repositories[index].packageFiles = repo.packageFiles.map((packageFile) => {
       if (typeof packageFile === 'string') {
@@ -78,15 +88,6 @@ function getGlobalConfig() {
   // Save default templates
   config.defaultTemplates = defaultConfig.templates;
 
-  // token must be defined
-  if (typeof config.token === 'undefined') {
-    logger.error('Error: A GitHub token must be configured');
-    process.exit(1);
-  }
-  // We also need a repository
-  if (!config.repositories || config.repositories.length === 0) {
-    logger.error('Error: At least one repository must be configured');
-  }
   return config;
 }
 
