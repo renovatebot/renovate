@@ -3,6 +3,7 @@ module.exports = {
   depTypes: ['dependencies', 'devDependencies', 'optionalDependencies'],
   labels: [],
   ignoreDeps: [],
+  force: false,
   templates: {
     branchName: params => `renovate/${params.depName}-${params.newVersionMajor}.x`,
     commitMessage: params => `Update dependency ${params.depName} to version ${params.newVersion}`,

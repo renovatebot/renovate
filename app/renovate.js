@@ -104,7 +104,7 @@ function updateDependency(upgrade) {
   // Check if same PR already existed and skip if so
   // This allows users to close an unwanted upgrade PR and not worry about seeing it raised again
   return github.checkForClosedPr(branchName, prTitle).then((prExisted) => {
-    if (prExisted) {
+    if (prExisted && !config.force) {
       logger.verbose(`${depName}: Skipping due to existing PR found.`);
       return Promise.resolve();
     }

@@ -48,6 +48,7 @@ function getGlobalConfig() {
   program
   .arguments('[repository] [fileName]')
   .option('--dep-types <types>', 'List of dependency types')
+  .option('--force', 'Force creation of PRs')
   .option('--ignore-deps <list>', 'List of dependencies to ignore')
   .option('--labels <labels>', 'List of labels to apply')
   .option('--log-level <level>', 'Log Level')
@@ -73,6 +74,9 @@ function getGlobalConfig() {
 
   if (program.depTypes) {
     cliConfig.depTypes = program.depTypes.split(',');
+  }
+  if (program.force) {
+    cliConfig.force = true;
   }
   if (program.ignoreDeps) {
     cliConfig.ignoreDeps = program.ignoreDeps.split(',');
