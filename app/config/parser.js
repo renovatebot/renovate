@@ -27,12 +27,11 @@ module.exports = function init() {
   }
   // Check if repository name and package file are provided via CLI
   const repoName = process.argv[2];
-  const packageFile = process.argv[3] || 'package.json';
   if (repoName) {
     cliConfig.repositories = [
       {
         repository: repoName,
-        packageFiles: [packageFile],
+        packageFiles: [process.argv[3] || 'package.json'],
       },
     ];
   }
