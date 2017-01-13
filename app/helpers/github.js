@@ -12,6 +12,8 @@ module.exports = {
   writePackageFile,
   // Branch
   createBranch,
+  // issue
+  addLabels,
   // PR
   checkForClosedPr,
   createPr,
@@ -89,6 +91,20 @@ function createBranch(branchName) {
       ref: `refs/heads/${branchName}`,
       sha: config.baseSHA,
     },
+  });
+}
+
+// Issue
+
+function addLabels(issueNo, labels) {
+  logger.debug(`Adding labels ${labels} to #${issueNo}`);
+  return ghGot.post(`repos/${config.repoName}/issues/${issueNo}/labels`, {
+    token: config.token,
+    body: JSON.stringify(labels),
+  })
+  .catch((error) => {
+    logger.error(JSON.stringify(error));
+    throw error;
   });
 }
 

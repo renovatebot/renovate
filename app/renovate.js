@@ -161,7 +161,7 @@ function updateDependency(upgrade) {
     function createPr() {
       return github.createPr(branchName, prTitle, prBody).then((newPr) => {
         logger.info(`${depName}: Created PR #${newPr.number}`);
-        return Promise.resolve();
+        return newPr.number;
       });
     }
     // Update PR based on current state
@@ -175,7 +175,7 @@ function updateDependency(upgrade) {
     function processExistingPr(existingPr) {
       if (!existingPr) {
         // We need to create a new PR
-        return createPr();
+        return createPr().then(prNo => addLabels(prNo));
       }
       // Check if existing PR needs updating
       if (existingPr.title === prTitle && existingPr.body === prBody) {
@@ -184,6 +184,15 @@ function updateDependency(upgrade) {
       }
       // PR must need updating
       return updatePr(existingPr);
+    }
+
+    // Add labels to a PR
+    function addLabels(prNo) {
+      if (config.labels.length === 0) {
+        logger.silly(`No labels to add to ${prNo}`);
+        return Promise.resolve();
+      }
+      return github.addLabels(prNo, config.labels);
     }
 
     return github.getPr(branchName)
