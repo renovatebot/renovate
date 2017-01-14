@@ -1,22 +1,21 @@
 #!/usr/bin/env node
 
 const logger = require('./logger');
+const config = require('./config');
 
-// Initialize config
-const configParser = require('./config/parser');
 // Require main source
 const renovate = require('./renovate');
-
-// Get global config
-const config = configParser.getGlobalConfig();
 
 // Initialize our promise chain
 let p = Promise.resolve();
 
+// Get global config
+const globalConfig = config.getGlobalConfig();
+
 // Queue up each repo/package combination
-config.repositories.forEach((repo) => {
+globalConfig.repositories.forEach((repo) => {
   repo.packageFiles.forEach((packageFile) => {
-    const cascadedConfig = configParser.getCascadedConfig(repo, packageFile);
+    const cascadedConfig = config.getCascadedConfig(repo, packageFile);
     p = p.then(() => renovate(repo.repository, packageFile.fileName, cascadedConfig));
   });
 });
