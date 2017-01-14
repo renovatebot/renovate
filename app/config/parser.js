@@ -42,6 +42,9 @@ function getGlobalConfig() {
   if (process.env.RENOVATE_TOKEN) {
     envConfig.token = process.env.RENOVATE_TOKEN;
   }
+  if (process.env.RENOVATE_REPOS) {
+    envConfig.repositories = process.env.RENOVATE_REPOS.split(',');
+  }
 
   // Parse any CLI commands
   const cliConfig = {};
