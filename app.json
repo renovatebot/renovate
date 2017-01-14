@@ -35,7 +35,7 @@
     },
     "RENOVATE_FORCE": {
       "description": "Force creation of new PRs even if matching closed ones exist",
-      "value": false,
+      "value": "false",
       "required": false
     },
     "LOG_LEVEL": {
