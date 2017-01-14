@@ -14,6 +14,30 @@
     },
     "RENOVATE_REPOS": {
       "description": "A comma-separated list of repositories"
+    },
+    "LOG_LEVEL": {
+      "description": "Log level",
+      "default": "info"
+    },
+    "RENOVATE_DEP_TYPES": {
+      "description": "Dependency types in package.json to renovate",
+      "default": "dependencies,devDependencies,optionalDependencies"
+    },
+    "RENOVATE_FORCE": {
+      "description": "Force creation of new PRs even if matching closed ones exist",
+      "default": false
+    },
+    "RENOVATE_IGNORE_DEPS": {
+      "description": "Comma-separated list of dependency names to ignore",
+      "optional": true
+    },
+    "RENOVATE_LABELS": {
+      "description": "Comma-separated list of labels to add to new Pull Requests",
+      "optional": true
+    },
+    "RENOVATE_PACKAGE_FILES": {
+      "description": "Comma-separated list of package file paths to renovate",
+      "default": "package.json"
     }
   }
 }
