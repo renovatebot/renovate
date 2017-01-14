@@ -17,11 +17,13 @@
     },
     "RENOVATE_PACKAGE_FILES": {
       "description": "Comma-separated list of package file paths to renovate (no spaces)",
-      "value": "package.json"
+      "value": "package.json",
+      "optional": true
     },
     "RENOVATE_DEP_TYPES": {
       "description": "Comma-separated list of dependency types (no spaces)",
-      "value": "dependencies,devDependencies,optionalDependencies"
+      "value": "dependencies,devDependencies,optionalDependencies",
+      "optional": true
     },
     "RENOVATE_IGNORE_DEPS": {
       "description": "Comma-separated list of dependency names to ignore (no spaces)",
@@ -33,11 +35,13 @@
     },
     "RENOVATE_FORCE": {
       "description": "Force creation of new PRs even if matching closed ones exist",
-      "value": false
+      "value": false,
+      "optional": true
     },
     "LOG_LEVEL": {
       "description": "Log level",
-      "value": "info"
+      "value": "info",
+      "optional": true
     }
   }
 }
