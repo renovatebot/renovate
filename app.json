@@ -18,31 +18,30 @@
     "RENOVATE_PACKAGE_FILES": {
       "description": "Comma-separated list of package file paths to renovate (no spaces)",
       "value": "package.json",
-      "optional": true
+      "required": false
     },
     "RENOVATE_DEP_TYPES": {
-      "name": "dependency types",
       "description": "Comma-separated list of dependency types (no spaces)",
       "value": "dependencies,devDependencies,optionalDependencies",
-      "optional": true
+      "required": false
     },
     "RENOVATE_IGNORE_DEPS": {
       "description": "Comma-separated list of dependency names to ignore (no spaces)",
-      "optional": true
+      "required": false
     },
     "RENOVATE_LABELS": {
       "description": "Comma-separated list of labels to add to new Pull Requests (no spaces)",
-      "optional": true
+      "required": false
     },
     "RENOVATE_FORCE": {
       "description": "Force creation of new PRs even if matching closed ones exist",
       "value": false,
-      "optional": true
+      "required": false
     },
     "LOG_LEVEL": {
       "description": "Log level",
       "value": "info",
-      "optional": true
+      "required": false
     }
   }
 }
