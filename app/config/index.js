@@ -6,8 +6,8 @@ logger.debug('Generating config');
 // Get configs
 const defaultConfig = require('./default');
 const fileConfig = require('./file');
-const envConfig = require('./env');
 const cliConfig = require('./cli');
+const envConfig = require('./env');
 
 // Get global config
 const config = Object.assign({}, defaultConfig, fileConfig, envConfig, cliConfig);
