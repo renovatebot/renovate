@@ -8,6 +8,7 @@
     "update"
   ],
   "repository": "https://github.com/singapore/renovate",
+  "success_url": "https://scheduler.heroku.com/dashboard",
   "env": {
     "RENOVATE_TOKEN": {
       "description": "A GitHub Personal Access Token"
