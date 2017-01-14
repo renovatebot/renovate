@@ -13,31 +13,31 @@
       "description": "A GitHub Personal Access Token"
     },
     "RENOVATE_REPOS": {
-      "description": "A comma-separated list of repositories, e.g. singapore/repo1,singapore/repo2"
+      "description": "Comma-separated list of repositories, e.g. singapore/repo1,singapore/repo2 (no spaces)"
     },
-    "LOG_LEVEL": {
-      "description": "Log level",
-      "value": "info"
+    "RENOVATE_PACKAGE_FILES": {
+      "description": "Comma-separated list of package file paths to renovate (no spaces)",
+      "value": "package.json"
     },
     "RENOVATE_DEP_TYPES": {
-      "description": "Dependency types in package.json to renovate",
+      "description": "Comma-separated list of dependency types (no spaces)",
       "value": "dependencies,devDependencies,optionalDependencies"
+    },
+    "RENOVATE_IGNORE_DEPS": {
+      "description": "Comma-separated list of dependency names to ignore (no spaces)",
+      "optional": true
+    },
+    "RENOVATE_LABELS": {
+      "description": "Comma-separated list of labels to add to new Pull Requests (no spaces)",
+      "optional": true
     },
     "RENOVATE_FORCE": {
       "description": "Force creation of new PRs even if matching closed ones exist",
       "value": false
     },
-    "RENOVATE_IGNORE_DEPS": {
-      "description": "Comma-separated list of dependency names to ignore",
-      "optional": true
-    },
-    "RENOVATE_LABELS": {
-      "description": "Comma-separated list of labels to add to new Pull Requests",
-      "optional": true
-    },
-    "RENOVATE_PACKAGE_FILES": {
-      "description": "Comma-separated list of package file paths to renovate",
-      "value": "package.json"
+    "LOG_LEVEL": {
+      "description": "Log level",
+      "value": "info"
     }
   }
 }
