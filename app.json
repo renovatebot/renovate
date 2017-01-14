@@ -43,5 +43,10 @@
       "value": "info",
       "required": false
     }
+  },
+  "formation": {
+    "web": {
+      "quantity": 0
+    }
   }
 }
