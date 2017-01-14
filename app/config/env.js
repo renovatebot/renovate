@@ -2,8 +2,6 @@ const logger = require('winston');
 
 const config = {};
 
-console.log(JSON.stringify(process.env));
-
 if (process.env.RENOVATE_TOKEN) {
   config.token = process.env.RENOVATE_TOKEN;
 }
