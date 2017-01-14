@@ -30,7 +30,7 @@
       "required": false
     },
     "RENOVATE_LABELS": {
-      "description": "Comma-separated list of labels to add to PRs",
+      "description": "Comma-separated list of labels to add to created Pull Requests",
       "required": false
     },
     "RECREATE_PRS": {
