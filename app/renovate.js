@@ -25,6 +25,7 @@ function renovate(repoName, packageFile, setConfig) {
   // Start the chain
   return github.initRepo(repoName)
     .then(() => github.getPackageFileContents(packageFile))
+    .then(checkforRenovateConfig)
     .then(contents => npm.extractDependencies(contents, config.depTypes))
     .then(filterIgnoredDependencies)
     .then(npm.findUpgrades)
@@ -35,6 +36,15 @@ function renovate(repoName, packageFile, setConfig) {
     .catch((error) => {
       logger.error(`renovate caught error: ${error}`);
     });
+}
+
+function checkforRenovateConfig(packageContent) {
+  if (packageContent.renovate) {
+    logger.debug('Found renovate configuration in package file');
+    Object.assign(config, packageContent.renovate);
+    logger.debug(`Updated config: ${JSON.stringify(config)}`);
+  }
+  return packageContent;
 }
 
 // Remove any dependencies that are on the ignore list
