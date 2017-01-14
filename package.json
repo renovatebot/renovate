@@ -8,7 +8,7 @@
     "eslint-fix": "eslint app --fix",
     "istanbul": "istanbul cover _mocha test",
     "mocha": "mocha test",
-    "renovate": "node app/index.js",
+    "start": "node app/index.js",
     "test": "npm run eslint && npm run istanbul"
   },
   "repository": {
