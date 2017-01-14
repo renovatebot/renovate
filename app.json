@@ -14,6 +14,6 @@
     },
     "RENOVATE_REPOS": {
       "description": "A comma-separated list of repositories"
-    },
+    }
   }
 }
