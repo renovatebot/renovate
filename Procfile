@@ -1,2 +1,3 @@
-web: node bin/heroku-webserver.js
-renovate: node app
+web: node bin/heroku/web.js
+worker: node app/index.js
+clock: node bin/heroku/clock.js
