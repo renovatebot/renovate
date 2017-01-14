@@ -1,9 +1,6 @@
 const expect = require('chai').expect;
 const fs = require('fs');
 const packageJson = require('../../app/helpers/package-json');
-const winston = require('winston');
-
-packageJson.setLogger(winston);
 
 const inputContent = fs.readFileSync('./test/_fixtures/package.json/inputs/01.json', 'utf8');
 

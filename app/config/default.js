@@ -1,4 +1,6 @@
-module.exports = {
+const logger = require('winston');
+
+const config = {
   logLevel: 'info',
   depTypes: ['dependencies', 'devDependencies', 'optionalDependencies'],
   labels: [],
@@ -17,3 +19,7 @@ ${params.changelog}`,
     prTitlePin: params => `Pin dependency ${params.depName} to version ${params.newVersion}`,
   },
 };
+
+logger.debug(`Default config = ${JSON.stringify(config)}`);
+
+module.exports = config;

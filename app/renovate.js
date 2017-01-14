@@ -1,23 +1,20 @@
+const logger = require('winston');
 const changelog = require('changelog');
 const github = require('./helpers/github');
 const npm = require('./helpers/npm');
 const packageJson = require('./helpers/package-json');
 
 let config = null;
-let logger = null;
 
 module.exports = renovate;
 
 // This function manages the queue per-package file
 function renovate(repoName, packageFile, setConfig) {
   // Initialize globals
-  logger = setConfig.logger;
   config = Object.assign({}, setConfig);
 
   // Initialize helpers
-  github.init(config.token, logger);
-  npm.setLogger(logger);
-  packageJson.setLogger(logger);
+  github.init(config.token);
   changelog.setGitHubToken(config.token);
 
   logger.info(`Processing ${repoName} ${packageFile}`);

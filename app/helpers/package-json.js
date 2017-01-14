@@ -1,15 +1,10 @@
+const logger = require('winston');
 const _ = require('lodash');
 
-let logger = null;
 
 module.exports = {
-  setLogger,
   setNewValue,
 };
-
-function setLogger(l) {
-  logger = l;
-}
 
 function setNewValue(currentFileContent, depType, depName, newVersion) {
   logger.debug(`setNewValue: ${depType}.${depName} = ${newVersion}`);

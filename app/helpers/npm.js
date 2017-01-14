@@ -1,21 +1,15 @@
+const logger = require('winston');
 const got = require('got');
 const semver = require('semver');
 const stable = require('semver-stable');
 
-let logger = null;
-
 module.exports = {
-  setLogger,
   extractDependencies,
   findUpgrades,
   getUpgrades,
   isRange,
   isValidVersion,
 };
-
-function setLogger(l) {
-  logger = l;
-}
 
 // Returns an array of current dependencies
 function extractDependencies(packageJson, sections) {

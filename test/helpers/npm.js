@@ -7,8 +7,6 @@ const defaultTypes = ['dependencies', 'devDependencies'];
 
 chai.should();
 
-npm.setLogger(winston);
-
 const input01Content = fs.readFileSync('./test/_fixtures/package.json/inputs/01.json', 'utf8');
 const input02Content = fs.readFileSync('./test/_fixtures/package.json/inputs/02.json', 'utf8');
 
