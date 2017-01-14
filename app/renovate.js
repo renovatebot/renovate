@@ -1,12 +1,41 @@
-const logger = require('winston');
+// Third party
 const changelog = require('changelog');
+// Configure logging (winston)
+const logger = require('./logger');
+// Generate config
+const configParser = require('./config');
+// Helpers
 const github = require('./helpers/github');
 const npm = require('./helpers/npm');
 const packageJson = require('./helpers/package-json');
 
 let config = null;
 
-module.exports = renovate;
+module.exports = {
+  start,
+};
+
+function start() {
+  // Initialize our promise chain
+  let p = Promise.resolve();
+
+  // Get global config
+  const globalConfig = configParser.getGlobalConfig();
+
+  // Queue up each repo/package combination
+  globalConfig.repositories.forEach((repo) => {
+    repo.packageFiles.forEach((packageFile) => {
+      const cascadedConfig = configParser.getCascadedConfig(repo, packageFile);
+      p = p.then(() => renovate(repo.repository, packageFile.fileName, cascadedConfig));
+    });
+  });
+  p.then(() => { // eslint-disable-line promise/always-return
+    logger.info('Renovate finished');
+  })
+  .catch((error) => {
+    logger.error(`Unexpected error: ${error}`);
+  });
+}
 
 // This function manages the queue per-package file
 function renovate(repoName, packageFile, setConfig) {
