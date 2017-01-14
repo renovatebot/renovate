@@ -21,6 +21,7 @@
       "optional": true
     },
     "RENOVATE_DEP_TYPES": {
+      "name": "dependency types",
       "description": "Comma-separated list of dependency types (no spaces)",
       "value": "dependencies,devDependencies,optionalDependencies",
       "optional": true
