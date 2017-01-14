@@ -3,9 +3,8 @@ const logger = require('winston');
 const config = {
   logLevel: 'info',
   depTypes: ['dependencies', 'devDependencies', 'optionalDependencies'],
-  labels: [],
   ignoreDeps: [],
-  force: false,
+  labels: [],
   templates: {
     branchName: params => `renovate/${params.depName}-${params.newVersionMajor}.x`,
     commitMessage: params => `Update dependency ${params.depName} to version ${params.newVersion}`,
@@ -18,6 +17,7 @@ ${params.changelog}`,
     prTitleMinor: params => `Update dependency ${params.depName} to version ${params.newVersion}`,
     prTitlePin: params => `Pin dependency ${params.depName} to version ${params.newVersion}`,
   },
+  recreatePrs: false,
 };
 
 logger.debug(`Default config = ${JSON.stringify(config)}`);

@@ -6,11 +6,11 @@ const config = {};
 program
   .arguments('[repositories...]')
   .option('--dep-types <list>', 'List of dependency types', list)
-  .option('--force', 'Force creation of PRs')
   .option('--ignore-deps <list>', 'List of dependencies to ignore', list)
   .option('--labels <list>', 'List of labels to apply', list)
   .option('--log-level <level>', 'Log Level')
   .option('--package-files <list>', 'List of package.json file names', list)
+  .option('--recreate-prs', 'Recreate PRs if previously closed')
   .option('--token <token>', 'GitHub Auth Token')
   .on('--help', () => {
     /* eslint-disable no-console */
@@ -28,9 +28,6 @@ program
 
 if (program.depTypes) {
   config.depTypes = program.depTypes;
-}
-if (program.force) {
-  config.force = true;
 }
 if (program.ignoreDeps) {
   config.ignoreDeps = program.ignoreDeps;
@@ -53,6 +50,9 @@ if (program.packageFiles) {
     program.outputHelp();
     process.exit(1);
   }
+}
+if (program.recreatePrs) {
+  config.recreatePrs = true;
 }
 if (program.token) {
   config.token = program.token;
