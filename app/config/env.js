@@ -1,5 +1,4 @@
 const logger = require('winston');
-const program = require('commander');
 
 const config = {};
 
@@ -9,13 +8,13 @@ if (process.env.RENOVATE_REPOSITORIES) {
 if (process.env.RENOVATE_DEP_TYPES) {
   config.depTypes = list(process.env.RENOVATE_DEP_TYPES);
 }
-if (process.env.RENOVATE_FORCE) {
-  if (process.env.RENOVATE_FORCE === 'true') {
-    config.force = true;
-  } else if (process.env.RENOVATE_FORCE === 'false') {
-    config.force = false;
+if (process.env.RENOVATE_RECREATE_PRS) {
+  if (process.env.RENOVATE_RECREATE_PRS === 'true') {
+    config.recreatePrs = true;
+  } else if (process.env.RENOVATE_RECREATE_PRS === 'false') {
+    config.recreatePrs = false;
   } else {
-    logger.error('RENOVATE_FORCE must be true or false');
+    logger.error('RENOVATE_RECREATE_PRS must be true or false');
     process.exit(1);
   }
 }

@@ -33,8 +33,8 @@
       "description": "Comma-separated list of labels to add to new Pull Requests (no spaces)",
       "required": false
     },
-    "RENOVATE_FORCE": {
-      "description": "Force creation of new PRs even if matching closed ones exist",
+    "RECREATE_PRS": {
+      "description": "Recreate PRs even if matching ones were previously closed",
       "value": "false",
       "required": false
     },
