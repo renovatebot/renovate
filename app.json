@@ -13,24 +13,24 @@
       "description": "A GitHub Personal Access Token"
     },
     "RENOVATE_REPOS": {
-      "description": "Comma-separated list of repositories, e.g. singapore/repo1,singapore/repo2 (no spaces)"
+      "description": "Comma-separated list of repositories, e.g. singapore/repo1,singapore/repo2"
     },
     "RENOVATE_PACKAGE_FILES": {
-      "description": "Comma-separated list of package file paths to renovate (no spaces)",
+      "description": "Comma-separated list of package file paths to renovate",
       "value": "package.json",
       "required": false
     },
     "RENOVATE_DEP_TYPES": {
-      "description": "Comma-separated list of dependency types (no spaces)",
-      "value": "dependencies,devDependencies,optionalDependencies",
+      "description": "Comma-separated list of dependency types",
+      "value": "dependencies, devDependencies, optionalDependencies",
       "required": false
     },
     "RENOVATE_IGNORE_DEPS": {
-      "description": "Comma-separated list of dependency names to ignore (no spaces)",
+      "description": "Comma-separated list of dependency names to ignore",
       "required": false
     },
     "RENOVATE_LABELS": {
-      "description": "Comma-separated list of labels to add to new Pull Requests (no spaces)",
+      "description": "Comma-separated list of labels to add to new Pull Requests",
       "required": false
     },
     "RECREATE_PRS": {
