@@ -43,5 +43,5 @@ logger.debug(`Env config: ${JSON.stringify(config)}`);
 module.exports = config;
 
 function list(val) {
-  return val.split(',');
+  return val.split(',').map(el => el.trim());
 }
