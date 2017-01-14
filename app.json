@@ -26,11 +26,11 @@
       "required": false
     },
     "RENOVATE_IGNORE_DEPS": {
-      "description": "Comma-separated list of dependency names to ignore",
+      "description": "Comma-separated list of dependencies to ignore",
       "required": false
     },
     "RENOVATE_LABELS": {
-      "description": "Comma-separated list of labels to add to new Pull Requests",
+      "description": "Comma-separated list of labels to add to PRs",
       "required": false
     },
     "RECREATE_PRS": {
