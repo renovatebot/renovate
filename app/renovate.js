@@ -6,10 +6,10 @@ const packageJson = require('./helpers/package-json');
 let config = null;
 let logger = null;
 
-module.exports = processPackageFile;
+module.exports = renovate;
 
 // This function manages the queue per-package file
-function processPackageFile(repoName, packageFile, setConfig) {
+function renovate(repoName, packageFile, setConfig) {
   // Initialize globals
   logger = setConfig.logger;
   config = Object.assign({}, setConfig);
