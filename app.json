@@ -13,19 +13,19 @@
       "description": "A GitHub Personal Access Token"
     },
     "RENOVATE_REPOS": {
-      "description": "A comma-separated list of repositories"
+      "description": "A comma-separated list of repositories, e.g. singapore/repo1,singapore/repo2"
     },
     "LOG_LEVEL": {
       "description": "Log level",
-      "default": "info"
+      "value": "info"
     },
     "RENOVATE_DEP_TYPES": {
       "description": "Dependency types in package.json to renovate",
-      "default": "dependencies,devDependencies,optionalDependencies"
+      "value": "dependencies,devDependencies,optionalDependencies"
     },
     "RENOVATE_FORCE": {
       "description": "Force creation of new PRs even if matching closed ones exist",
-      "default": false
+      "value": false
     },
     "RENOVATE_IGNORE_DEPS": {
       "description": "Comma-separated list of dependency names to ignore",
@@ -37,7 +37,7 @@
     },
     "RENOVATE_PACKAGE_FILES": {
       "description": "Comma-separated list of package file paths to renovate",
-      "default": "package.json"
+      "value": "package.json"
     }
   }
 }
