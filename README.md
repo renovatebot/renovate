@@ -2,6 +2,8 @@
 
 Keep npm dependencies up-to-date via Pull Requests
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ## What does it do?
 
 This script scans your repository package.json files, detects if any dependencies need version updating - or pinning - and if so then submits Pull Requests for each.
