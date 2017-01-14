@@ -1,0 +1,19 @@
+{
+  "name": "Renovate",
+  "description": "Keep npm dependencies up-to-date with Pull Requests",
+  "keywords": [
+    "npm",
+    "package.json",
+    "dependencies",
+    "update"
+  ],
+  "repository": "https://github.com/singapore/renovate",
+  "env": {
+    "RENOVATE_TOKEN": {
+      "description": "A GitHub Personal Access Token"
+    },
+    "RENOVATE_REPOS": {
+      "description": "A comma-separated list of repositories"
+    },
+  }
+}
