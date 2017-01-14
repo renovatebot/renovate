@@ -1,14 +1,5 @@
-const winston = require('winston');
+const logger = require('winston');
 const program = require('commander');
-
-// Add the logger
-const logger = new (winston.Logger)({
-  transports: [
-    // colorize the output to the console
-    new (winston.transports.Console)({ colorize: true }),
-  ],
-});
-logger.level = process.env.LOG_LEVEL || 'info';
 
 module.exports = {
   getGlobalConfig,
@@ -91,8 +82,9 @@ function getGlobalConfig() {
     cliConfig.token = program.token;
   }
 
-  // Set global config
+  // Get global config
   config = Object.assign({}, defaultConfig, customConfig, envConfig, cliConfig);
+
   // Set log level
   logger.level = config.logLevel;
 
@@ -131,9 +123,6 @@ function getGlobalConfig() {
   });
   // Print config
   logger.verbose(`config=${JSON.stringify(config)}`);
-
-  // Add logger to config
-  config.logger = logger;
 
   return config;
 }

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+const logger = require('./logger');
+
 // Initialize config
 const configParser = require('./config/parser');
 // Require main source
@@ -19,8 +21,8 @@ config.repositories.forEach((repo) => {
   });
 });
 p.then(() => { // eslint-disable-line promise/always-return
-  config.logger.info('Renovate finished');
+  logger.info('Renovate finished');
 })
 .catch((error) => {
-  config.logger.error(`Unexpected error: ${error}`);
+  logger.error(`Unexpected error: ${error}`);
 });

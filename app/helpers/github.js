@@ -1,7 +1,7 @@
+const logger = require('winston');
 const ghGot = require('gh-got');
 
 const config = {};
-let logger = null;
 
 module.exports = {
   init,
@@ -21,9 +21,8 @@ module.exports = {
   updatePr,
 };
 
-function init(token, l) {
+function init(token) {
   config.token = token;
-  logger = l;
 }
 
 // Initialize GitHub by getting base branch and SHA
