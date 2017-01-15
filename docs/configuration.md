@@ -1,4 +1,6 @@
-# Configuration Methods
+# Configuration
+
+## Configuration Methods
 
 Configuration is supported via any or all of the below:
 - Configuration file
@@ -9,11 +11,11 @@ Configuration is supported via any or all of the below:
 The above are listed in reverse order of preference.
 i.e. `package.json` options will override, CLI, which overrides env, which overrides the config file, which overrides defaults.
 
-## Default Configuration
+### Default Configuration
 
 Default configuration can be found in [lib/config/default.js](../lib/config/default.js)
 
-## Configuration File
+### Configuration File
 
 You can override default configuration using a configuration file, with default name `config.js` in the working directory. If you need an alternate location or name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
 
@@ -44,7 +46,7 @@ module.exports = {
 }
 ```
 
-## CLI
+### CLI
 
 ```
 $ renovate --help
@@ -69,7 +71,7 @@ $ renovate --help
     $ renovate --token abc123 singapore/lint-condo singapore/package-test
 ```
 
-## package.json
+### package.json
 
 If you add configuration options to your `package.json` then these will override any other settings above.
 Obviously, you can't set repository or package file location with this method.
@@ -82,3 +84,7 @@ Obviously, you can't set repository or package file location with this method.
   ]
 }
 ```
+
+## Configuration Options
+
+Insert table here.

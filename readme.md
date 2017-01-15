@@ -24,7 +24,7 @@ You need to select a GitHub user for `renovate` to assume the identity of. It's 
 
 The script will need a GitHub Personal Access Token with "repo" permissions. You can find instructions for generating it here: https://help.github.com/articles/creating-an-access-token-for-command-line-use/
 
-This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md] for details.
+This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
 
 ## Usage
 
