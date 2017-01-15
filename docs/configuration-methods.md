@@ -1,6 +1,4 @@
-# Configuration
-
-## Types and Order
+# Configuration Methods
 
 Configuration is supported via any or all of the below:
 - Configuration file
