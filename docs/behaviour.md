@@ -75,6 +75,12 @@ Note: Branch names are configurable using the `templates` field.
 By default, the script does not create a new PR if it finds an identical one already closed. This allows users to close unwelcome upgrade PRs and worry about them being recreated every run. Typically this is most useful for major upgrades.
 This option is configurable.
 
+## Range handling
+
+`renovate` always pins dependencies, instead of updating ranges. Even if the project is using tilde ranges, why not pin them for consistency if you're also using `renovate` every day?
+
+Perhaps this will be made configurable in future once requirements are understood.
+
 ## Rebasing/updating Out-of-date Pull Requests
 
 It's often the case that dependency updates can't be merged immediately, and lag behind the base branch. It's also possible that even when updates are merged quickly, they cause merge conflicts with each other and require manual conflict resolution.
