@@ -87,7 +87,7 @@ Obviously, you can't set repository or package file location with this method.
 
 ## Configuration Options
 
-| Option              | Description                                             | Default value                                             | File                      | Environment              | CLI                       |
+| Option              | Description                                             | Default value                                             | File field                | Environment              | CLI                       |
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------|---------------------------|--------------------------|---------------------------|
 | Auth Token          | GitHub Personal Access Token                            |                                                           | `token`                   | `RENOVATE_TOKEN`         | `--token`                 |
 | Repositories        | List of Repositories                                    |                                                           | `repositories`            | `RENOVATE_REPOS`         | Space-delimited arguments |
