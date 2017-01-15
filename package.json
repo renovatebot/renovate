@@ -1,9 +1,9 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
-  "version": "2.2.0",
-  "bin": "./app/index.js",
-  "main": "app/index.js",
+  "version": "2.4.1",
+  "bin": "renovate.js",
+  "main": "lib/index.js",
   "scripts": {
     "eslint": "eslint --ignore-path .gitignore .",
     "eslint-fix": "eslint --ignore-path .gitignore --fix .",
