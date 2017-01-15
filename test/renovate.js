@@ -1,1 +1,1 @@
-const renovate = require('../app/renovate');
+const renovate = require('../lib/renovate');

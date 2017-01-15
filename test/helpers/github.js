@@ -1,1 +1,1 @@
-const github = require('../../app/helpers/github');
+const github = require('../../lib/helpers/github');

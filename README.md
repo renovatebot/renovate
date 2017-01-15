@@ -77,4 +77,4 @@ As you can hopefully infer from the above, it's possible to define multiple repo
 
 If you configure the token and at least one repository in your `config.js` then you don't need any CLI arguments and can just run `npm start`.
 
-It's also possible to change the string templates used for generating branch names, commit messages, and Pull Request titles and body. To override the defaults, copy/paste/edit the templates from `app/config/defaults.js` into your `config.js`. You must copy all of them, even if you only edit one.
+It's also possible to change the string templates used for generating branch names, commit messages, and Pull Request titles and body. To override the defaults, copy/paste/edit the templates from `lib/config/default.js` into your `config.js`. You must copy all of them, even if you only edit one.

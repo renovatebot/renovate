@@ -1,6 +1,6 @@
 const chai = require('chai');
 const fs = require('fs');
-const npm = require('../../app/helpers/npm');
+const npm = require('../../lib/helpers/npm');
 const winston = require('winston');
 
 const defaultTypes = ['dependencies', 'devDependencies'];
