@@ -5,8 +5,8 @@
   "bin": "renovate.js",
   "main": "lib/index.js",
   "scripts": {
-    "eslint": "eslint lib",
-    "eslint-fix": "eslint lib --fix",
+    "eslint": "eslint --ignore-path .gitignore .",
+    "eslint-fix": "eslint --ignore-path .gitignore --fix .",
     "istanbul": "istanbul cover _mocha test",
     "mocha": "mocha test",
     "start": "node renovate",

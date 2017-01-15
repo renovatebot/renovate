@@ -1,7 +1,6 @@
 const chai = require('chai');
 const fs = require('fs');
 const npm = require('../../lib/helpers/npm');
-const winston = require('winston');
 
 const defaultTypes = ['dependencies', 'devDependencies'];
 
@@ -13,17 +12,20 @@ const input02Content = fs.readFileSync('./test/_fixtures/package.json/inputs/02.
 describe('helpers/npm', () => {
   describe('.extractDependencies(packageJson, sections)', () => {
     it('returns an array of correct length', () => {
-      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
+      const extractedDependencies =
+        npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(10);
     });
     it('each element contains non-null depType, depName, currentVersion', () => {
-      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
+      const extractedDependencies =
+        npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
       extractedDependencies.every(dep => dep.depType && dep.depName && dep.currentVersion)
         .should.eql(true);
     });
     it('supports null devDependencies', () => {
-      const extractedDependencies = npm.extractDependencies(JSON.parse(input02Content), defaultTypes);
+      const extractedDependencies =
+        npm.extractDependencies(JSON.parse(input02Content), defaultTypes);
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(6);
     });
@@ -39,22 +41,22 @@ describe('helpers/npm', () => {
     it('supports minor and major upgrades, including for ranges', () => {
       const upgradeVersions = [
         {
-          'newVersion': '1.1.0',
-          'newVersionMajor': 1,
-          'upgradeType': 'minor',
-          'workingVersion': '1.0.1',
+          newVersion: '1.1.0',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          workingVersion: '1.0.1',
         },
         {
-          'newVersion': '2.0.1',
-          'newVersionMajor': 2,
-          'upgradeType': 'major',
-          'workingVersion': '1.0.1',
+          newVersion: '2.0.1',
+          newVersionMajor: 2,
+          upgradeType: 'major',
+          workingVersion: '1.0.1',
         },
         {
-          'newVersion': '3.1.0',
-          'newVersionMajor': 3,
-          'upgradeType': 'major',
-          'workingVersion': '1.0.1',
+          newVersion: '3.1.0',
+          newVersionMajor: 3,
+          upgradeType: 'major',
+          workingVersion: '1.0.1',
         },
       ];
       npm.getUpgrades('foo', '1.0.1', testVersions).should.eql(upgradeVersions);
@@ -63,9 +65,9 @@ describe('helpers/npm', () => {
     it('supports pinning', () => {
       const upgradeVersions = [
         {
-          'newVersion': '3.1.0',
-          'newVersionMajor': 3,
-          'upgradeType': 'pin',
+          newVersion: '3.1.0',
+          newVersionMajor: 3,
+          upgradeType: 'pin',
         },
       ];
       npm.getUpgrades('foo', '^3.0.0', testVersions).should.eql(upgradeVersions);
