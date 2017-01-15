@@ -48,5 +48,8 @@
     "web": {
       "quantity": 0
     }
-  }
+  },
+  "addons": [
+    "scheduler"
+  ]
 }
