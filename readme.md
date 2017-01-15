@@ -1,80 +1,52 @@
 # renovate
 
-Keep npm dependencies up-to-date via Pull Requests
+> Keep npm dependencies up-to-date
 
-## What does it do?
+##  Why
 
-This script scans your repository package.json files, detects if any dependencies need version updating - or pinning - and if so then submits Pull Requests for each.
+- Creates or updates Pull Requests for each dependency that needs updating
+- Supports multiple `package.json` files per repository
+- Supports multiple major versions per-dependency at once
+- Configurable via file, environment, CLI, and `package.json`
+- Self-hosted
 
-This was inspired by the services at [Greenkeeper](https://greenkeeper.io) and [Doppins](https://doppins.com).
+Inspired by the services at [Greenkeeper](https://greenkeeper.io) and [Doppins](https://doppins.com).
 
-## Before you Start
+## Install
 
-To run this script, you will need to select a GitHub user account for it to create branches and submit Pull Requests from. The account will need read/write access to push and update upgrade branches to GitHub, as well as raise Pull Requests.
+```
+$ npm install -g renovate
+```
 
-We recommend you consider using a "bot" account for this so that it's clear to other users of the repository that these are automated actions and not not confused with an actual team member's actions.
+## Authentication
+
+You need to select a GitHub user for `renovate` to assume the identity of. It's recommended that you use a dedicated "bot" account for this to avoid user confusion.
 
 The script will need a GitHub Personal Access Token with "repo" permissions. You can find instructions for generating it here: https://help.github.com/articles/creating-an-access-token-for-command-line-use/
 
-This token needs to be exposed via the environment variable `RENOVATE_TOKEN` or added to a configuration file.
+This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
 
-## Running the Script
+## Usage (CLI)
 
-To run the script from the command line, you will need Node.js version 6 or greater.
-
-First, install dependencies for this script by running `npm install`.
-
- The script can then be run like this:
-
-```sh
-npm start <username>/<repo> <path to package.json>
 ```
+$ renovate --help
 
-The `<path to package.json>` argument is optional, and is only needed if your `package.json` is located somewhere other than the root of the repository.
+  Usage: renovate [options] [repositories...]
 
-Example of running with default `package.json` location:
+  Options:
 
-```sh
-npm start foo/bar
+    -h, --help                  output usage information
+    -d, --dep-types <list>      List of dependency types
+    -i, --ignore-deps <list>    List of dependencies to ignore
+    -b, --labels <list>         List of labels to apply
+    -l, --log-level <level>     Log Level
+    -p, --package-files <list>  List of package.json file names
+    -r, --recreate-prs          Recreate PRs if previously closed
+    -t, --token <token>         GitHub Auth Token
+
+  Examples:
+
+    $ renovate --token abc123 singapore/lint-condo
+    $ renovate --token abc123 -l verbose singapore/lint-condo
+    $ renovate --token abc123 singapore/lint-condo singapore/package-test
 ```
-
-Example of running with a custom `package.json` location:
-
-```sh
-npm start foo/bar src/package.json
-```
-
-Note: as mentioned above, you need to expose the environment variable `RENOVATE_TOKEN`. One way of doing it is like this:
-
-```sh
-RENOVATE_TOKEN=JDSUW284HSJDSFKSUS22942H2H15KK npm start foo/bar
-```
-
-## Configuration file
-
-It's also possible to configure renovate with a `config.js` file in the working directory. Here is an example:
-
-```js
-module.exports = {
-  token: 'JDSUW284HSJDSFKSUS22942H2H15KK',
-  logLevel: 'verbose',
-  repositories: [
-    'foo/bar',
-    'foo/baz',
-    {
-      name: 'foo/lint',
-      packageFiles: [
-        'package.json',
-        'containers/build/package.json',
-      ],
-    },
-    'foo/package-go',
-  ],
-};
-```
-
-As you can hopefully infer from the above, it's possible to define multiple repositories as well as multiple package files per repository, and they will be processed in sequence.
-
-If you configure the token and at least one repository in your `config.js` then you don't need any CLI arguments and can just run `npm start`.
-
-It's also possible to change the string templates used for generating branch names, commit messages, and Pull Request titles and body. To override the defaults, copy/paste/edit the templates from `lib/config/default.js` into your `config.js`. You must copy all of them, even if you only edit one.
