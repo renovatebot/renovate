@@ -1,3 +1,11 @@
 machine:
   node:
     version: 6
+
+test:
+  pre:
+    - npm run eslint
+  override:
+    - npm run istanbul
+  post:
+    - bash <(curl -s https://codecov.io/bash)
