@@ -26,7 +26,7 @@ The script will need a GitHub Personal Access Token with "repo" permissions. You
 
 This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
 
-## Usage
+## Usage (CLI)
 
 ```
 $ renovate --help
@@ -50,5 +50,3 @@ $ renovate --help
     $ renovate --token abc123 -l verbose singapore/lint-condo
     $ renovate --token abc123 singapore/lint-condo singapore/package-test
 ```
-
-See also [Configuration Methods][docs/configuration-methods.md] and [Configuration Options](docs/configuration-options.md).
