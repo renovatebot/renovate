@@ -1,8 +1,11 @@
-/node_modules
-/config.js
-/npm-debug.log
 /coverage
 /test
-.eslintrc.js
-circle.yml
+node_modules
 .DS_Store
+.editorconfig
+.eslintrc.js
+.gitattributes
+.gitignore
+circle.yml
+config.js
+npm-debug.log
