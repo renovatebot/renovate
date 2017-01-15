@@ -10,8 +10,8 @@ chai.should();
 const input01Content = fs.readFileSync('./test/_fixtures/package.json/inputs/01.json', 'utf8');
 const input02Content = fs.readFileSync('./test/_fixtures/package.json/inputs/02.json', 'utf8');
 
-describe('npm helper', () => {
-  describe('extractDependencies', () => {
+describe('helpers/npm', () => {
+  describe('.extractDependencies(packageJson, sections)', () => {
     it('returns an array of correct length', () => {
       const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
       extractedDependencies.should.be.instanceof(Array);
@@ -28,7 +28,7 @@ describe('npm helper', () => {
       extractedDependencies.should.have.length(6);
     });
   });
-  describe('getUpgrades', () => {
+  describe('.getUpgrades(depName, currentVersion, versions)', () => {
     const testVersions = ['0.1.0', '1.0.0', '1.0.1', '1.1.0', '2.0.0-alpha1', '2.0.0', '2.0.1', '3.0.0', '3.1.0'];
     it('return empty if invalid current version', () => {
       npm.getUpgrades('foo', 'invalid', ['1.0.0', '1.0.1']).should.have.length(0);
@@ -71,7 +71,7 @@ describe('npm helper', () => {
       npm.getUpgrades('foo', '^3.0.0', testVersions).should.eql(upgradeVersions);
     });
   });
-  describe('isRange', () => {
+  describe('.isRange(input)', () => {
     it('rejects simple semver', () => {
       npm.isRange('1.2.3').should.eql(false);
     });
@@ -82,7 +82,7 @@ describe('npm helper', () => {
       npm.isRange('^1.2.3').should.eql(true);
     });
   });
-  describe('isValidVersion', () => {
+  describe('.isValidVersion(input)', () => {
     it('should support simple semver', () => {
       npm.isValidVersion('1.2.3').should.eql(true);
     });
