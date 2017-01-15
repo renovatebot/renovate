@@ -87,13 +87,14 @@ Obviously, you can't set repository or package file location with this method.
 
 ## Configuration Options
 
-| Option              | Description                                             | Default value                                             | File field                | Environment              | CLI                       |
+| Option | Description | Default value | File | Environment | CLI |
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------|---------------------------|--------------------------|---------------------------|
-| Auth Token          | GitHub Personal Access Token                            |                                                           | `token`                   | `RENOVATE_TOKEN`         | `--token`                 |
-| Repositories        | List of Repositories                                    |                                                           | `repositories`            | `RENOVATE_REPOS`         | Space-delimited arguments |
-| Package Files       | Package file location(s)                                | `package.json`                                            | `repository.packageFiles` | `RENOVATE_PACKAGE_FILES` | `--package-files`         |
-| Dependency Types    | Sections of package.json to renovate                    | `dependencies`, `devDependencies`, `optionalDependencies` | `depTypes`                | `RENOVATE_DEP_TYPES`     | `--dep-types`             |
-| Ignore Dependencies | Dependencies to be ignored                              |                                                           | `ignoreDeps`              | `RENOVATE_IGNORE_DEPS`   | `--ignore-deps`           |
-| Labels              | Labels to add to Pull Requests                          |                                                           | `labels`                  | `RENOVATE_LABELS`        | `--labels`                |
-| Recreate PRs        | Create New PRs even if same ones were previously closed | `false`                                                   | `recreatePrs`             | `RENOVATE_RECREATE_PRS`  | `--recreate-prs`          |
-| Log Level           | Log Level                                               | `info`                                                    | `logLevel`                | `LOG_LEVEL`              | `--log-level`             |
+| Auth Token | GitHub Personal Access Token |  | `token` | `RENOVATE_TOKEN` | `--token` |
+| Repositories | List of Repositories |  | `repositories` | `RENOVATE_REPOS` | Space-delimited arguments |
+| Package Files | Package file location(s) | `package.json` | `repository.packageFiles` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
+| Dependency Types | Sections of package.json to renovate | `dependencies`, `devDependencies`, `optionalDependencies` | `depTypes` | `RENOVATE_DEP_TYPES` | `--dep-types` |
+| Ignore Dependencies | Dependencies to be ignored |  | `ignoreDeps` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
+| Labels | Labels to add to Pull Requests |  | `labels` | `RENOVATE_LABELS` | `--labels` |
+| Recreate PRs | Create New PRs even if same ones were previously closed | `false` | `recreatePrs` | `RENOVATE_RECREATE_PRS` | `--recreate-prs` |
+| Log Level | Log Level | `info` | `logLevel` | `LOG_LEVEL` | `--log-level` |
+| Templates | String templates for commit, branch and PR | Multiple | `templates` |  |  |

@@ -50,3 +50,11 @@ $ renovate --help
     $ renovate --token abc123 -l verbose singapore/lint-condo
     $ renovate --token abc123 singapore/lint-condo singapore/package-test
 ```
+
+## Deployment
+
+See [deployment docs](docs/deploment.md) for details.
+
+## Behaviour
+
+See [behaviour docs](docs/behaviour.md) for details.
