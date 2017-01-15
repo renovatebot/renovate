@@ -2,14 +2,14 @@
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "2.3.0",
-  "bin": "./lib/index.js",
+  "bin": "renovate.js",
   "main": "lib/index.js",
   "scripts": {
     "eslint": "eslint lib",
     "eslint-fix": "eslint lib --fix",
     "istanbul": "istanbul cover _mocha test",
     "mocha": "mocha test",
-    "start": "node lib",
+    "start": "node renovate",
     "test": "npm run eslint && npm run istanbul"
   },
   "repository": {
