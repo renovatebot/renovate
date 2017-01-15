@@ -89,7 +89,7 @@ Obviously, you can't set repository or package file location with this method.
 
 | Option | Description | Default value | File | Environment | CLI |
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------|---------------------------|--------------------------|---------------------------|
-| Auth Token | GitHub Personal Access Token |  | `token` | `RENOVATE_TOKEN` | `--token` |
+| Auth Token | GitHub Personal Access Token |  | `token` | `GITHUB_TOKEN` | `--token` |
 | Repositories | List of Repositories |  | `repositories` | `RENOVATE_REPOS` | Space-delimited arguments |
 | Package Files | Package file location(s) | `package.json` | `repository.packageFiles` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | Dependency Types | Sections of package.json to renovate | `dependencies`, `devDependencies`, `optionalDependencies` | `depTypes` | `RENOVATE_DEP_TYPES` | `--dep-types` |

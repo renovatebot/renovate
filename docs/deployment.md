@@ -39,7 +39,7 @@ $ heroku ps:scale web=0
 You now need to set the token.
 
 ```
-$ heroku config:set RENOVATE_TOKEN=[YourGitHubToken]
+$ heroku config:set GITHUB_TOKEN=[YourGitHubToken]
 ```
 
 You should also set any other [Configuration Options](configuration.md) you need.
