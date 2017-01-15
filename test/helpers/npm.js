@@ -1,7 +1,6 @@
 const chai = require('chai');
 const fs = require('fs');
-const npm = require('../../app/helpers/npm');
-const winston = require('winston');
+const npm = require('../../lib/helpers/npm');
 
 const defaultTypes = ['dependencies', 'devDependencies'];
 
@@ -10,25 +9,28 @@ chai.should();
 const input01Content = fs.readFileSync('./test/_fixtures/package.json/inputs/01.json', 'utf8');
 const input02Content = fs.readFileSync('./test/_fixtures/package.json/inputs/02.json', 'utf8');
 
-describe('npm helper', () => {
-  describe('extractDependencies', () => {
+describe('helpers/npm', () => {
+  describe('.extractDependencies(packageJson, sections)', () => {
     it('returns an array of correct length', () => {
-      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
+      const extractedDependencies =
+        npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(10);
     });
     it('each element contains non-null depType, depName, currentVersion', () => {
-      const extractedDependencies = npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
+      const extractedDependencies =
+        npm.extractDependencies(JSON.parse(input01Content), defaultTypes);
       extractedDependencies.every(dep => dep.depType && dep.depName && dep.currentVersion)
         .should.eql(true);
     });
     it('supports null devDependencies', () => {
-      const extractedDependencies = npm.extractDependencies(JSON.parse(input02Content), defaultTypes);
+      const extractedDependencies =
+        npm.extractDependencies(JSON.parse(input02Content), defaultTypes);
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(6);
     });
   });
-  describe('getUpgrades', () => {
+  describe('.getUpgrades(depName, currentVersion, versions)', () => {
     const testVersions = ['0.1.0', '1.0.0', '1.0.1', '1.1.0', '2.0.0-alpha1', '2.0.0', '2.0.1', '3.0.0', '3.1.0'];
     it('return empty if invalid current version', () => {
       npm.getUpgrades('foo', 'invalid', ['1.0.0', '1.0.1']).should.have.length(0);
@@ -39,22 +41,22 @@ describe('npm helper', () => {
     it('supports minor and major upgrades, including for ranges', () => {
       const upgradeVersions = [
         {
-          'newVersion': '1.1.0',
-          'newVersionMajor': 1,
-          'upgradeType': 'minor',
-          'workingVersion': '1.0.1',
+          newVersion: '1.1.0',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          workingVersion: '1.0.1',
         },
         {
-          'newVersion': '2.0.1',
-          'newVersionMajor': 2,
-          'upgradeType': 'major',
-          'workingVersion': '1.0.1',
+          newVersion: '2.0.1',
+          newVersionMajor: 2,
+          upgradeType: 'major',
+          workingVersion: '1.0.1',
         },
         {
-          'newVersion': '3.1.0',
-          'newVersionMajor': 3,
-          'upgradeType': 'major',
-          'workingVersion': '1.0.1',
+          newVersion: '3.1.0',
+          newVersionMajor: 3,
+          upgradeType: 'major',
+          workingVersion: '1.0.1',
         },
       ];
       npm.getUpgrades('foo', '1.0.1', testVersions).should.eql(upgradeVersions);
@@ -63,15 +65,15 @@ describe('npm helper', () => {
     it('supports pinning', () => {
       const upgradeVersions = [
         {
-          'newVersion': '3.1.0',
-          'newVersionMajor': 3,
-          'upgradeType': 'pin',
+          newVersion: '3.1.0',
+          newVersionMajor: 3,
+          upgradeType: 'pin',
         },
       ];
       npm.getUpgrades('foo', '^3.0.0', testVersions).should.eql(upgradeVersions);
     });
   });
-  describe('isRange', () => {
+  describe('.isRange(input)', () => {
     it('rejects simple semver', () => {
       npm.isRange('1.2.3').should.eql(false);
     });
@@ -82,7 +84,7 @@ describe('npm helper', () => {
       npm.isRange('^1.2.3').should.eql(true);
     });
   });
-  describe('isValidVersion', () => {
+  describe('.isValidVersion(input)', () => {
     it('should support simple semver', () => {
       npm.isValidVersion('1.2.3').should.eql(true);
     });

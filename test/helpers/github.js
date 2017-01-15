@@ -1,1 +1,2 @@
-const github = require('../../app/helpers/github');
+// eslint-disable-next-line no-unused-vars
+const github = require('../../lib/helpers/github');

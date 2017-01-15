@@ -3,12 +3,13 @@
   "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "2.2.0",
   "bin": "./app/index.js",
+  "main": "app/index.js",
   "scripts": {
-    "eslint": "eslint app",
-    "eslint-fix": "eslint app --fix",
+    "eslint": "eslint --ignore-path .gitignore .",
+    "eslint-fix": "eslint --ignore-path .gitignore --fix .",
     "istanbul": "istanbul cover _mocha test",
     "mocha": "mocha test",
-    "start": "node app/index.js",
+    "start": "node renovate",
     "test": "npm run eslint && npm run istanbul"
   },
   "repository": {
@@ -32,7 +33,6 @@
   "dependencies": {
     "changelog": "singapore/changelog",
     "commander": "2.9.0",
-    "cron": "1.2.1",
     "gh-got": "5.0.0",
     "got": "6.7.1",
     "lodash": "4.17.4",

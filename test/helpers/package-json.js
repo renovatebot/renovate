@@ -1,11 +1,11 @@
 const expect = require('chai').expect;
 const fs = require('fs');
-const packageJson = require('../../app/helpers/package-json');
+const packageJson = require('../../lib/helpers/package-json');
 
 const inputContent = fs.readFileSync('./test/_fixtures/package.json/inputs/01.json', 'utf8');
 
-describe('package.json helper', () => {
-  describe('setNewValue', () => {
+describe('helpers/package-json', () => {
+  describe('.setNewValue(currentFileContent, depType, depName, newVersion)', () => {
     it('replaces a dependency value', () => {
       const outputContent = fs.readFileSync('./test/_fixtures/package.json/outputs/011.json', 'utf8');
       const testContent =
