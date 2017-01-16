@@ -31,7 +31,6 @@ $ git clone https://github.com/singapore/renovate
 $ cd renovate
 $ heroku create [app name]
 $ git push heroku master
-$ heroku ps:scale web=0
 ```
 
 ### Configuration
@@ -47,7 +46,7 @@ You should also set any other [Configuration Options](configuration.md) you need
 The app should now be ready for testing.
 
 ```
-$ heroku run node renovate [your/repo]
+$ heroku run renovate [your/repo]
 ```
 
 Once you've verified the script ran successfully, it's time to set it up for automatic scheduling.
@@ -56,6 +55,6 @@ $ heroku addons:create scheduler:standard
 $ heroku addons:open scheduler
 ```
 
-At this point you should have the Heroku Scheduler Dashboard open. Click "Add new job" and enter the same command as you ran previously (e.g. `node renovate [your/repo]`). Adjust the frequency to hourly if you prefer, then click Save.
+At this point you should have the Heroku Scheduler Dashboard open. Click "Add new job" and enter the same command as you ran previously (e.g. `renovate [your/repo]`). Adjust the frequency to hourly if you prefer, then click Save.
 
 You can run `heroku logs` to check execution logs. Consider adjusting the scripts log level if you have problems (info -> verbose -> debug -> silly).
