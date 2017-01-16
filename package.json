@@ -9,7 +9,7 @@
     "eslint-fix": "eslint --ignore-path .gitignore --fix .",
     "istanbul": "istanbul cover _mocha test",
     "mocha": "mocha test",
-    "start": "node renovate",
+    "renovate": "node renovate",
     "test": "npm run eslint && npm run istanbul"
   },
   "repository": {
