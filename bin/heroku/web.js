@@ -5,7 +5,8 @@ const port = process.env.PORT || '3000';
 
 const requestHandler = (request, response) => {
   // Redirect users to Heroku dashboard
-  response.writeHead(302, { Location: 'https://dashboard.heroku.com/apps' });
+  const appName = request.headers.host.split(':')[0].split('.')[0];
+  response.writeHead(302, { Location: `https://dashboard.heroku.com/apps/${appName}/logs` });
   response.end();
 };
 
