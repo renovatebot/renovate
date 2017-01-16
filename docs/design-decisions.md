@@ -1,4 +1,4 @@
-# Script Behaviour
+# Design Decisions
 
 This file documents the design choices as well as configuration options.
 

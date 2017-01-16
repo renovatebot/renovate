@@ -55,6 +55,6 @@ $ renovate --help
 
 See [deployment docs](docs/deploment.md) for details.
 
-## Behaviour
+## Design Decisions
 
-See [behaviour docs](docs/behaviour.md) for details.
+See [design decisions doc](docs/design-decisions.md) for details.
