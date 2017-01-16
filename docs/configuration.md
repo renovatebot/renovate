@@ -51,24 +51,25 @@ module.exports = {
 ```
 $ renovate --help
 
-  Usage: renovate [options] [repositories...]
+Usage: renovate [options] [repositories...]
 
-  Options:
+Options:
 
-    -h, --help                  output usage information
-    -d, --dep-types <list>      List of dependency types
-    -i, --ignore-deps <list>    List of dependencies to ignore
-    -b, --labels <list>         List of labels to apply
-    -l, --log-level <level>     Log Level
-    -p, --package-files <list>  List of package.json file names
-    -r, --recreate-prs          Recreate PRs if previously closed
-    -t, --token <token>         GitHub Auth Token
+  -h, --help                               output usage information
+  -d, --dep-types <list>                   List of dependency types
+  -i, --ignore-deps <list>                 List of dependencies to ignore
+  -b, --labels <list>                      List of labels to apply
+  -l, --log-level <level>                  Log Level
+  -p, --package-files <list>               List of package.json file names
+  -r, --recreate-closed <true/false>       Recreate PR even if same was previously closed
+  -r, --recreate-unmergeable <true/false>  Recreate PR if existing branch is unmergeable
+  -t, --token <token>                      GitHub Auth Token
 
-  Examples:
+Examples:
 
-    $ renovate --token abc123 singapore/lint-condo
-    $ renovate --token abc123 -l verbose singapore/lint-condo
-    $ renovate --token abc123 singapore/lint-condo singapore/package-test
+  $ renovate --token abc123 singapore/lint-condo
+  $ renovate --token abc123 -l verbose singapore/lint-condo
+  $ renovate --token abc123 singapore/lint-condo singapore/package-test
 ```
 
 ### package.json
@@ -95,6 +96,7 @@ Obviously, you can't set repository or package file location with this method.
 | Dependency Types | Sections of package.json to renovate | `dependencies`, `devDependencies`, `optionalDependencies` | `depTypes` | `RENOVATE_DEP_TYPES` | `--dep-types` |
 | Ignore Dependencies | Dependencies to be ignored |  | `ignoreDeps` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
 | Labels | Labels to add to Pull Requests |  | `labels` | `RENOVATE_LABELS` | `--labels` |
-| Recreate PRs | Create New PRs even if same ones were previously closed | `false` | `recreatePrs` | `RENOVATE_RECREATE_PRS` | `--recreate-prs` |
+| Recreate Closed | Create New PR even if same one was previously closed | `false` | `recreateClosed` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
+| Recreate Unmergeable | Close and recreate PR if existing one is unmergeable | `true` | `recreateUnmergeable` | `RENOVATE_RECREATE_UNMERGEABLE` | `--recreate-unmergeable` |
 | Log Level | Log Level | `info` | `logLevel` | `LOG_LEVEL` | `--log-level` |
 | Templates | String templates for commit, branch and PR | Multiple | `templates` |  |  |

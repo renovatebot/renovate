@@ -25,7 +25,8 @@ The following options apply per-package file:
 - Dependency Types
 - Ignored Dependencies
 - Labels
-- Recreate PRs
+- Recreate Closed
+- Recreate Unmergeable
 
 The following options apply per-repository:
 
@@ -74,6 +75,8 @@ Note: Branch names are configurable using the `templates` field.
 
 By default, the script does not create a new PR if it finds an identical one already closed. This allows users to close unwelcome upgrade PRs and worry about them being recreated every run. Typically this is most useful for major upgrades.
 This option is configurable.
+
+The script does however close and create a replacement PR if the previous one was in an unmergeable state. It skips this though if additional edits have been made to the branch by someone else. This option is also configurable.
 
 ## Range handling
 
