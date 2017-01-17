@@ -49,27 +49,30 @@ module.exports = {
 ### CLI
 
 ```
-$ renovate --help
+$ node renovate --help
 
-Usage: renovate [options] [repositories...]
+  Usage: renovate [options] [repositories...]
 
-Options:
+  Options:
 
-  -h, --help                               output usage information
-  -d, --dep-types <list>                   List of dependency types
-  -i, --ignore-deps <list>                 List of dependencies to ignore
-  -b, --labels <list>                      List of labels to apply
-  -l, --log-level <level>                  Log Level
-  -p, --package-files <list>               List of package.json file names
-  -r, --recreate-closed <true/false>       Recreate PR even if same was previously closed
-  -r, --recreate-unmergeable <true/false>  Recreate PR if existing branch is unmergeable
-  -t, --token <token>                      GitHub Auth Token
+    -h, --help                               output usage information
+    -t, --token <token>                      GitHub Auth Token
+    -p, --package-files <list>               List of package.json file names
+    -d, --dep-types <list>                   List of dependency types
+    -i, --ignore-deps <list>                 List of dependencies to ignore
+    -b, --labels <list>                      List of labels to apply
+    -r, --ignore-future [true/false]         Ignore versions tagged as "future"
+    -r, --ignore-unstable [true/false]       Ignore versions with unstable semver
+    -r, --respect-latest [true/false]        Ignore versions newer than dependency's "latest"
+    -r, --recreate-closed [true/false]       Recreate PR even if same was previously closed
+    -r, --recreate-unmergeable [true/false]  Recreate PR if existing branch is unmergeable
+    -l, --log-level <level>                  Log Level
 
-Examples:
+  Examples:
 
-  $ renovate --token abc123 singapore/lint-condo
-  $ renovate --token abc123 -l verbose singapore/lint-condo
-  $ renovate --token abc123 singapore/lint-condo singapore/package-test
+    $ renovate --token abc123 singapore/lint-condo
+    $ renovate --ignore-unstable=false -l verbose singapore/lint-condo
+    $ renovate singapore/lint-condo singapore/package-test
 ```
 
 ### package.json
@@ -90,12 +93,15 @@ Obviously, you can't set repository or package file location with this method.
 
 | Option | Description | Default value | File | Environment | CLI |
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------|---------------------------|--------------------------|---------------------------|
-| Auth Token | GitHub Personal Access Token |  | `token` | `GITHUB_TOKEN` | `--token` |
+| Token | GitHub Personal Access Token |  | `token` | `GITHUB_TOKEN` | `--token` |
 | Repositories | List of Repositories |  | `repositories` | `RENOVATE_REPOS` | Space-delimited arguments |
 | Package Files | Package file location(s) | `[]` | `repository.packageFiles` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | Dependency Types | Sections of package.json to renovate | `dependencies`, `devDependencies`, `optionalDependencies` | `depTypes` | `RENOVATE_DEP_TYPES` | `--dep-types` |
 | Ignore Dependencies | Dependencies to be ignored |  | `ignoreDeps` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
 | Labels | Labels to add to Pull Requests |  | `labels` | `RENOVATE_LABELS` | `--labels` |
+| Ignore Future | Ignore versions tagged as "future" | `true` | `ignoreFuture` | `RENOVATE_IGNORE_FUTURE` | `--ignore-future` |
+| Ignore Unstable | Ignore versions with unstable semver | `true` | `ignoreUnstable` | `RENOVATE_IGNORE_UNSTABLE` | `--ignore-unstable` |
+| Respect latest | Respect the "latest" tag in npm and don't upgrade past it | `true` | `respectLatest` | `RENOVATE_RESPECT_LATEST` | `--respect-latest` |
 | Recreate Closed | Create New PR even if same one was previously closed | `false` | `recreateClosed` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
 | Recreate Unmergeable | Close and recreate PR if existing one is unmergeable | `true` | `recreateUnmergeable` | `RENOVATE_RECREATE_UNMERGEABLE` | `--recreate-unmergeable` |
 | Log Level | Log Level | `info` | `logLevel` | `LOG_LEVEL` | `--log-level` |

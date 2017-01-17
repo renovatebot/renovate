@@ -4,24 +4,25 @@ const versionsHelper = require('../../lib/helpers/versions');
 chai.should();
 
 const qJson = require('../_fixtures/npm/01.json');
+const defaultConfig = require('../../lib/config/default');
 
 describe('helpers/versions', () => {
-  describe('.determineUpgrades(dep, currentVersion)', () => {
+  describe('.determineUpgrades(dep, currentVersion, defaultConfig)', () => {
     it('return empty if invalid current version', () => {
-      versionsHelper.determineUpgrades(qJson, 'invalid').should.have.length(0);
+      versionsHelper.determineUpgrades(qJson, 'invalid', defaultConfig).should.have.length(0);
     });
     it('return empty if null versions', () => {
       const testDep = {
         name: 'q',
       };
-      versionsHelper.determineUpgrades(testDep, '1.0.0').should.have.length(0);
+      versionsHelper.determineUpgrades(testDep, '1.0.0', defaultConfig).should.have.length(0);
     });
     it('return empty if empty versions', () => {
       const testDep = {
         name: 'q',
         versions: [],
       };
-      versionsHelper.determineUpgrades(testDep, '1.0.0', []).should.have.length(0);
+      versionsHelper.determineUpgrades(testDep, '1.0.0', defaultConfig).should.have.length(0);
     });
     it('supports minor and major upgrades for pinned versions', () => {
       const upgradeVersions = [
@@ -38,7 +39,7 @@ describe('helpers/versions', () => {
           workingVersion: '0.4.4',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '^0.4.0').should.eql(upgradeVersions);
+      versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig).should.eql(upgradeVersions);
     });
     it('supports minor and major upgrades for ranged versions', () => {
       const pinVersions = [
@@ -55,9 +56,36 @@ describe('helpers/versions', () => {
           workingVersion: '0.4.4',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '~0.4.0').should.eql(pinVersions);
+      versionsHelper.determineUpgrades(qJson, '~0.4.0', defaultConfig).should.eql(pinVersions);
     });
-    it('supports future versions', () => {
+    it('supports > latest versions if configured', () => {
+      const config = Object.assign({}, defaultConfig);
+      config.respectLatest = false;
+      const upgradeVersions = [
+        {
+          newVersion: '2.0.1',
+          newVersionMajor: 2,
+          upgradeType: 'major',
+          workingVersion: '1.4.1',
+        },
+      ];
+      versionsHelper.determineUpgrades(qJson, '1.4.1', config).should.eql(upgradeVersions);
+    });
+    it('supports future versions if configured', () => {
+      const config = Object.assign({}, defaultConfig);
+      config.ignoreFuture = false;
+      config.respectLatest = false;
+      const upgradeVersions = [
+        {
+          newVersion: '2.0.3',
+          newVersionMajor: 2,
+          upgradeType: 'major',
+          workingVersion: '1.4.1',
+        },
+      ];
+      versionsHelper.determineUpgrades(qJson, '1.4.1', config).should.eql(upgradeVersions);
+    });
+    it('supports future versions if already future', () => {
       const upgradeVersions = [
         {
           newVersion: '2.0.3',
@@ -65,7 +93,7 @@ describe('helpers/versions', () => {
           upgradeType: 'pin',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '^2.0.0').should.eql(upgradeVersions);
+      versionsHelper.determineUpgrades(qJson, '^2.0.0', defaultConfig).should.eql(upgradeVersions);
     });
   });
   describe('.isRange(input)', () => {

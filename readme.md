@@ -30,27 +30,30 @@ The simplest way is to expose it as `GITHUB_TOKEN`.
 ## Usage (CLI)
 
 ```
-$ renovate --help
+$ node renovate --help
 
-Usage: renovate [options] [repositories...]
+  Usage: renovate [options] [repositories...]
 
-Options:
+  Options:
 
-  -h, --help                               output usage information
-  -d, --dep-types <list>                   List of dependency types
-  -i, --ignore-deps <list>                 List of dependencies to ignore
-  -b, --labels <list>                      List of labels to apply
-  -l, --log-level <level>                  Log Level
-  -p, --package-files <list>               List of package.json file names
-  -r, --recreate-closed <true/false>       Recreate PR even if same was previously closed
-  -r, --recreate-unmergeable <true/false>  Recreate PR if existing branch is unmergeable
-  -t, --token <token>                      GitHub Auth Token
+    -h, --help                               output usage information
+    -t, --token <token>                      GitHub Auth Token
+    -p, --package-files <list>               List of package.json file names
+    -d, --dep-types <list>                   List of dependency types
+    -i, --ignore-deps <list>                 List of dependencies to ignore
+    -b, --labels <list>                      List of labels to apply
+    -r, --ignore-future [true/false]         Ignore versions tagged as "future"
+    -r, --ignore-unstable [true/false]       Ignore versions with unstable semver
+    -r, --respect-latest [true/false]        Ignore versions newer than dependency's "latest"
+    -r, --recreate-closed [true/false]       Recreate PR even if same was previously closed
+    -r, --recreate-unmergeable [true/false]  Recreate PR if existing branch is unmergeable
+    -l, --log-level <level>                  Log Level
 
-Examples:
+  Examples:
 
-  $ renovate --token abc123 singapore/lint-condo
-  $ renovate --token abc123 -l verbose singapore/lint-condo
-  $ renovate --token abc123 singapore/lint-condo singapore/package-test
+    $ renovate --token abc123 singapore/lint-condo
+    $ renovate --ignore-unstable=false -l verbose singapore/lint-condo
+    $ renovate singapore/lint-condo singapore/package-test
 ```
 
 ## Deployment
