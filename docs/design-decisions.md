@@ -84,12 +84,10 @@ The script does however close and create a replacement PR if the previous one wa
 
 Perhaps this will be made configurable in future once requirements are understood.
 
-## Rebasing/updating Out-of-date Pull Requests
+## Recreating Unmergeable Pull Requests
 
-It's often the case that dependency updates can't be merged immediately, and lag behind the base branch. It's also possible that even when updates are merged quickly, they cause merge conflicts with each other and require manual conflict resolution.
+With the default behaviour of one branch per dependency, it's often that case that one PR has merge conflicts after an adjacent dependency update is merged. Although GitHub has added a web interface for simple merge conflicts, this is still annoying to resolve manually.
 
-Right now, `renovate` doesn't do anything about these, although it keeps adding commits if new releases of the dependency are available. It's also important to note that rebasing and/or resolving conflicts in existing branches is not technically possible via the GitHub API.
+The default behaviour is that `renovate` will delete any unmergeable branches (which in turn closes the associated PR unmerged) and then recreate the branch and PR from the latest base commit. This means the same number of commits/builds as if you were resolving manually, however also means an increased number of Pull Requests because the old one gets closed and a new one created.
 
-Possible future behaviour:
-- It seems undesirable for most to keep rebasing renovate pull requests every time the base changes. This would cause a *lot* of CI builds in most cases
-- It seems desirable to "fix" an existing renovate PR if it is no longer mergeable
+Note: `renovate` will only do this if the original branch hasn't been modified by anyone else. Also, this behaviour can be disabled via configuration.
