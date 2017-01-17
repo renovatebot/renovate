@@ -4,24 +4,25 @@ const versionsHelper = require('../../lib/helpers/versions');
 chai.should();
 
 const qJson = require('../_fixtures/npm/01.json');
+const config = require('../../lib/config/default');
 
 describe('helpers/versions', () => {
-  describe('.determineUpgrades(dep, currentVersion)', () => {
+  describe('.determineUpgrades(dep, currentVersion, config)', () => {
     it('return empty if invalid current version', () => {
-      versionsHelper.determineUpgrades(qJson, 'invalid').should.have.length(0);
+      versionsHelper.determineUpgrades(qJson, 'invalid', config).should.have.length(0);
     });
     it('return empty if null versions', () => {
       const testDep = {
         name: 'q',
       };
-      versionsHelper.determineUpgrades(testDep, '1.0.0').should.have.length(0);
+      versionsHelper.determineUpgrades(testDep, '1.0.0', config).should.have.length(0);
     });
     it('return empty if empty versions', () => {
       const testDep = {
         name: 'q',
         versions: [],
       };
-      versionsHelper.determineUpgrades(testDep, '1.0.0', []).should.have.length(0);
+      versionsHelper.determineUpgrades(testDep, '1.0.0', config).should.have.length(0);
     });
     it('supports minor and major upgrades for pinned versions', () => {
       const upgradeVersions = [
@@ -38,7 +39,7 @@ describe('helpers/versions', () => {
           workingVersion: '0.4.4',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '^0.4.0').should.eql(upgradeVersions);
+      versionsHelper.determineUpgrades(qJson, '^0.4.0', config).should.eql(upgradeVersions);
     });
     it('supports minor and major upgrades for ranged versions', () => {
       const pinVersions = [
@@ -55,7 +56,7 @@ describe('helpers/versions', () => {
           workingVersion: '0.4.4',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '~0.4.0').should.eql(pinVersions);
+      versionsHelper.determineUpgrades(qJson, '~0.4.0', config).should.eql(pinVersions);
     });
     it('supports future versions', () => {
       const upgradeVersions = [
@@ -65,7 +66,7 @@ describe('helpers/versions', () => {
           upgradeType: 'pin',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '^2.0.0').should.eql(upgradeVersions);
+      versionsHelper.determineUpgrades(qJson, '^2.0.0', config).should.eql(upgradeVersions);
     });
   });
   describe('.isRange(input)', () => {
