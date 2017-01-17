@@ -5,12 +5,25 @@ chai.should();
 
 describe('helpers/versions', () => {
   describe('.determineUpgrades(depName, currentVersion, versions)', () => {
-    const testVersions = ['0.1.0', '1.0.0', '1.0.1', '1.1.0', '2.0.0-alpha1', '2.0.0', '2.0.1', '3.0.0', '3.1.0'];
+    const testVersions = {
+      '0.1.0': {},
+      '1.0.0': {},
+      '1.0.1': {},
+      '1.1.0': {},
+      '2.0.0-alpha1': {},
+      '2.0.0': {},
+      '2.0.1': {},
+      '3.0.0': {},
+      '3.1.0': {},
+    };
     it('return empty if invalid current version', () => {
-      versionsHelper.determineUpgrades('foo', 'invalid', ['1.0.0', '1.0.1']).should.have.length(0);
+      versionsHelper.determineUpgrades('foo', 'invalid', { '1.0.0': {} }).should.have.length(0);
     });
-    it('return empty if no versions', () => {
+    it('return empty if null versions', () => {
       versionsHelper.determineUpgrades('foo', '1.0.0', null).should.have.length(0);
+    });
+    it('return empty if empty versions', () => {
+      versionsHelper.determineUpgrades('foo', '1.0.0', []).should.have.length(0);
     });
     it('supports minor and major upgrades, including for ranges', () => {
       const upgradeVersions = [
