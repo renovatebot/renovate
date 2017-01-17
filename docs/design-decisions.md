@@ -2,6 +2,14 @@
 
 This file documents the design choices as well as configuration options.
 
+#### Stateless
+
+No state is needed on `renovate` or GitHub side apart from what you see publicly in GitHub (branches, Pull Requests). It therefore doesn't matter if you stop/restart the script and would even still work if you had it running from two different locations, as long as their configuration was the same.
+
+#### API only
+
+We were really happy to discover that everything we needed to do could be achieved with the GitHub API. Therefore there's no messy `git` commands and essentially no risk of repository corruption.
+
 ## Synchronous Operation
 
 The script current processes repositories, package files, and dependencies within them all synchronously.
