@@ -93,12 +93,15 @@ Obviously, you can't set repository or package file location with this method.
 
 | Option | Description | Default value | File | Environment | CLI |
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------|---------------------------|--------------------------|---------------------------|
-| Auth Token | GitHub Personal Access Token |  | `token` | `GITHUB_TOKEN` | `--token` |
+| Token | GitHub Personal Access Token |  | `token` | `GITHUB_TOKEN` | `--token` |
 | Repositories | List of Repositories |  | `repositories` | `RENOVATE_REPOS` | Space-delimited arguments |
 | Package Files | Package file location(s) | `[]` | `repository.packageFiles` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | Dependency Types | Sections of package.json to renovate | `dependencies`, `devDependencies`, `optionalDependencies` | `depTypes` | `RENOVATE_DEP_TYPES` | `--dep-types` |
 | Ignore Dependencies | Dependencies to be ignored |  | `ignoreDeps` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
 | Labels | Labels to add to Pull Requests |  | `labels` | `RENOVATE_LABELS` | `--labels` |
+| Ignore Future | Ignore versions tagged as "future" | `true` | `ignoreFuture` | `RENOVATE_IGNORE_FUTURE` | `--ignore-future` |
+| Ignore Unstable | Ignore versions with unstable semver | `true` | `ignoreUnstable` | `RENOVATE_IGNORE_UNSTABLE` | `--ignore-unstable` |
+| Respect latest | Respect the "latest" tag in npm and don't upgrade past it | `true` | `respectLatest` | `RENOVATE_RESPECT_LATEST` | `--respect-latest` |
 | Recreate Closed | Create New PR even if same one was previously closed | `false` | `recreateClosed` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
 | Recreate Unmergeable | Close and recreate PR if existing one is unmergeable | `true` | `recreateUnmergeable` | `RENOVATE_RECREATE_UNMERGEABLE` | `--recreate-unmergeable` |
 | Log Level | Log Level | `info` | `logLevel` | `LOG_LEVEL` | `--log-level` |
