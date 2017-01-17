@@ -5,7 +5,7 @@
 ##  Why
 
 - Creates or updates Pull Requests for each dependency that needs updating
-- Supports multiple `package.json` files per repository
+- Discovers and processes all `package.json` files in repository (supports monorepo architecture)
 - Supports multiple major versions per-dependency at once
 - Configurable via file, environment, CLI, and `package.json`
 - Self-hosted
@@ -25,6 +25,7 @@ You need to select a GitHub user for `renovate` to assume the identity of. It's 
 The script will need a GitHub Personal Access Token with "repo" permissions. You can find instructions for generating it here: https://help.github.com/articles/creating-an-access-token-for-command-line-use/
 
 This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
+The simplest way is to expose it as `GITHUB_TOKEN`.
 
 ## Usage (CLI)
 

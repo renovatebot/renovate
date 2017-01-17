@@ -36,6 +36,12 @@ The following options apply globally:
 
 - Log Level
 
+## Automatic discovery of package.json locations
+
+Default behaviour is to auto-discover all `package.json` locations in a repository and process them all.
+Doing so means that "monorepos" are supported by default.
+This can be overridden by the configuration option `packageFiles`, where you list the file paths manually (e.g. limit to just `package.json` in root of repository).
+
 ## Separate Branches per dependency
 
 `renovate` will maintain separate branches per-dependency. So if 20 dependencies need updating, there will be at least 20 branches/PRs. Although this may seem undesirable, it was considered even less desirable if all 20 were in the same Pull Request and it's up to the users to determine which dependency upgrade(s) caused the build to fail.

@@ -92,7 +92,7 @@ Obviously, you can't set repository or package file location with this method.
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------|---------------------------|--------------------------|---------------------------|
 | Auth Token | GitHub Personal Access Token |  | `token` | `GITHUB_TOKEN` | `--token` |
 | Repositories | List of Repositories |  | `repositories` | `RENOVATE_REPOS` | Space-delimited arguments |
-| Package Files | Package file location(s) | `package.json` | `repository.packageFiles` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
+| Package Files | Package file location(s) | `[]` | `repository.packageFiles` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | Dependency Types | Sections of package.json to renovate | `dependencies`, `devDependencies`, `optionalDependencies` | `depTypes` | `RENOVATE_DEP_TYPES` | `--dep-types` |
 | Ignore Dependencies | Dependencies to be ignored |  | `ignoreDeps` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
 | Labels | Labels to add to Pull Requests |  | `labels` | `RENOVATE_LABELS` | `--labels` |
