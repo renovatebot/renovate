@@ -6,10 +6,11 @@ Configuration is supported via any or all of the below:
 - Configuration file
 - Environment
 - CLI
-- `package.json` of target repository
+- `renovate.json` in target repository
+- `renovate` field of `package.json` in target repository
 
 The above are listed in reverse order of preference.
-i.e. `package.json` options will override, CLI, which overrides env, which overrides the config file, which overrides defaults.
+i.e. `package.json` settings will override `renovate.json` settings, CLI, which overrides env, which overrides the config file, which overrides defaults.
 
 ### Default Configuration
 
@@ -74,6 +75,11 @@ $ node renovate --help
     $ renovate --ignore-unstable=false -l verbose singapore/lint-condo
     $ renovate singapore/lint-condo singapore/package-test
 ```
+
+### renovate.json
+
+If you add a `renovate.json` file to the root of your repository, you can use this to override default settings.
+If you leave the `packageFiles` field empty then `renovate` will still auto-discover all `package.json` files in the repository.
 
 ### package.json
 
