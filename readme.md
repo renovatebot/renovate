@@ -41,7 +41,8 @@ $ node renovate --help
     -p, --package-files <list>               List of package.json file names
     -d, --dep-types <list>                   List of dependency types
     -i, --ignore-deps <list>                 List of dependencies to ignore
-    -b, --labels <list>                      List of labels to apply
+    -b, --labels <list>                      List of labels to add
+    -b, --assignees <list>                   List of assignees to add
     -r, --ignore-future [true/false]         Ignore versions tagged as "future"
     -r, --ignore-unstable [true/false]       Ignore versions with unstable semver
     -r, --respect-latest [true/false]        Ignore versions newer than dependency's "latest"

@@ -33,6 +33,10 @@ The following options apply per-package file:
 - Dependency Types
 - Ignored Dependencies
 - Labels
+- Assignees
+- Ignore Unstable
+- Ignore Future
+- Respect Latest
 - Recreate Closed
 - Recreate Unmergeable
 
