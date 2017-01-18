@@ -105,4 +105,4 @@ Obviously, you can't set repository or package file location with this method.
 | Recreate Closed | Create New PR even if same one was previously closed | `false` | `recreateClosed` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
 | Recreate Unmergeable | Close and recreate PR if existing one is unmergeable | `true` | `recreateUnmergeable` | `RENOVATE_RECREATE_UNMERGEABLE` | `--recreate-unmergeable` |
 | Log Level | Log Level | `info` | `logLevel` | `LOG_LEVEL` | `--log-level` |
-| Templates | String templates for commit, branch and PR | Multiple | `templates` |  |  |
+| Templates | Handlebars templates for commit, branch and PR | Multiple | `templates` |  |  |
