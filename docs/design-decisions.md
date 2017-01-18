@@ -54,7 +54,7 @@ This can be overridden by the configuration option `packageFiles`, where you lis
 
 `renovate` will maintain separate branches per-dependency. So if 20 dependencies need updating, there will be at least 20 branches/PRs. Although this may seem undesirable, it was considered even less desirable if all 20 were in the same Pull Request and it's up to the users to determine which dependency upgrade(s) caused the build to fail.
 
-However, it's still possible to override the default branch and PR name templates in such a way to produce a single branch for all dependencies. This needs to be done via configuration file. Here's an example configuration:
+However, it's still possible to override the default branch and PR name templates in such a way to produce a single branch for all dependencies. Here's an example configuration:
 
 ```javascript
 templates: {
@@ -64,7 +64,7 @@ templates: {
 },
 ```
 
-Perhaps it could be useful to make this a directly configurable option in future.
+This could be done via configuration file or inside `package.json`. Perhaps it could be useful to make this a directly configurable option in future.
 
 ## One PR per Major release
 
