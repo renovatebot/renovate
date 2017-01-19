@@ -30,6 +30,7 @@ The simplest way is to expose it as `GITHUB_TOKEN`.
 ## Usage
 
 ```
+
 $ node renovate --help
 
   Usage: renovate [options] [repositories...]
@@ -55,6 +56,8 @@ $ node renovate --help
     $ renovate --token abc123 singapore/lint-condo
     $ renovate --ignore-unstable=false -l verbose singapore/lint-condo
     $ renovate singapore/lint-condo singapore/package-test
+
+
 ```
 
 ## Deployment
