@@ -1,4 +1,4 @@
-const configMaster = require('../../lib/config/cli.js');
+const configDefinitions = require('../../lib/config/cli.js');
 
 describe('config/cli', () => {
   describe('.getCliName(definition)', () => {
@@ -6,7 +6,7 @@ describe('config/cli', () => {
       const option = {
         name: 'oneTwoThree',
       };
-      configMaster.getCliName(option).should.eql('--one-two-three');
+      configDefinitions.getCliName(option).should.eql('--one-two-three');
     });
   });
 });

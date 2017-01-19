@@ -4,7 +4,7 @@ const versionsHelper = require('../../lib/helpers/versions');
 chai.should();
 
 const qJson = require('../_fixtures/npm/01.json');
-const defaultConfig = require('../../lib/config/default');
+const defaultConfig = require('../../lib/config/defaults').getConfig();
 
 describe('helpers/versions', () => {
   describe('.determineUpgrades(dep, currentVersion, defaultConfig)', () => {
