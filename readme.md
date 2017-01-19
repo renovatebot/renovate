@@ -27,7 +27,7 @@ The script will need a GitHub Personal Access Token with "repo" permissions. You
 This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
 The simplest way is to expose it as `GITHUB_TOKEN`.
 
-## Usage (CLI)
+## Usage
 
 ```
 $ node renovate --help
