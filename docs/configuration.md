@@ -24,7 +24,7 @@ Using a configuration file gives you very granular configuration options. For in
 
 ```javascript
 module.exports = {
-  labels: ['defaults'],
+  labels: ['upgrade'],
   depTypes: ['dependencies', 'devDependencies'],
   repositories: [
     {
@@ -33,7 +33,7 @@ module.exports = {
         'package.json',
         {
           fileName: 'frontend/package.json',
-          labels: ['frontend']
+          labels: ['upgrade', 'frontend']
         },
       ],
     },
@@ -101,6 +101,7 @@ Obviously, you can't set repository or package file location with this method.
 | Option | Description | Default value | File | Environment | CLI |
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------|---------------------------|--------------------------|---------------------------|
 | Token | GitHub Personal Access Token |  | `token` | `GITHUB_TOKEN` | `--token` |
+| Enabled | Enable/Disable renovate for this repo or file | true | `enabled` | | |
 | Repositories | List of Repositories |  | `repositories` | `RENOVATE_REPOS` | Space-delimited arguments |
 | Package Files | Package file location(s) | `[]` | `repository.packageFiles` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | Dependency Types | Sections of package.json to renovate | `dependencies`, `devDependencies`, `optionalDependencies` | `depTypes` | `RENOVATE_DEP_TYPES` | `--dep-types` |
