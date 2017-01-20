@@ -105,7 +105,7 @@ Obviously, you can't set repository or package file location with this method.
 | token | GitHub Auth Token | string | null | GITHUB_TOKEN | --token |
 | repositories | GitHub repositories | list | [] | RENOVATE_REPOSITORIES |  |
 | packageFiles | Package file paths | list | [] | RENOVATE_PACKAGE_FILES | --package-files |
-| depTypes | Dependency types | list | ["dependencies","devDependencies","optionalDependencies"] | RENOVATE_DEP_TYPES | --dep-types |
+| depTypes | Dependency types | list | ["dependencies", "devDependencies", "optionalDependencies"] | RENOVATE_DEP_TYPES | --dep-types |
 | ignoreDeps | Dependencies to ignore | list | [] | RENOVATE_IGNORE_DEPS | --ignore-deps |
 | ignoreFuture | Ignore versions tagged as "future" | boolean | true | RENOVATE_IGNORE_FUTURE | --ignore-future |
 | ignoreUnstable | Ignore versions with unstable semver | boolean | true | RENOVATE_IGNORE_UNSTABLE | --ignore-unstable |
