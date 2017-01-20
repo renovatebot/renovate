@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
-  "version": "6.3.0",
+  "version": "6.3.1",
   "bin": "renovate.js",
   "main": "lib/index.js",
   "scripts": {
