@@ -99,7 +99,7 @@ Obviously, you can't set repository or package file location with this method.
 
 ## Configuration Options
 
-| Option | Description | Default value | File | Environment | CLI |
+| Name | Description | Default value | File | Environment | CLI |
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------|---------------------------|--------------------------|---------------------------|
 | Token | GitHub Personal Access Token |  | `token` | `GITHUB_TOKEN` | `--token` |
 | Enabled | Enable/Disable renovate for this repo or file | true | `enabled` | | |
