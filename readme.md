@@ -10,8 +10,6 @@
 - Configurable via file, environment, CLI, and `package.json`
 - Self-hosted
 
-Inspired by the services at [Greenkeeper](https://greenkeeper.io) and [Doppins](https://doppins.com).
-
 ## Install
 
 ```
