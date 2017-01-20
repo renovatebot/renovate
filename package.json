@@ -41,7 +41,7 @@
     "gh-got": "5.0.0",
     "got": "6.7.1",
     "handlebars": "4.0.6",
-    "json-stringify-pretty-compact": "^1.0.2",
+    "json-stringify-pretty-compact": "1.0.2",
     "lodash": "4.17.4",
     "semver": "5.3.0",
     "semver-stable": "2.0.4",
