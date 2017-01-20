@@ -45,7 +45,7 @@
     "lodash": "4.17.4",
     "semver": "5.3.0",
     "semver-stable": "2.0.4",
-    "winston": "2.3.0"
+    "winston": "2.3.1"
   },
   "devDependencies": {
     "chai": "3.5.0",
