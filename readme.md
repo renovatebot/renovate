@@ -27,7 +27,7 @@ The script will need a GitHub Personal Access Token with "repo" permissions. You
 This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
 The simplest way is to expose it as `GITHUB_TOKEN`.
 
-## Usage (CLI)
+## Usage
 
 ```
 $ node renovate --help
@@ -36,24 +36,25 @@ $ node renovate --help
 
   Options:
 
-    -h, --help                               output usage information
-    -t, --token <token>                      GitHub Auth Token
-    -p, --package-files <list>               List of package.json file names
-    -d, --dep-types <list>                   List of dependency types
-    -i, --ignore-deps <list>                 List of dependencies to ignore
-    -b, --labels <list>                      List of labels to add
-    -b, --assignees <list>                   List of assignees to add
-    -r, --ignore-future [true/false]         Ignore versions tagged as "future"
-    -r, --ignore-unstable [true/false]       Ignore versions with unstable semver
-    -r, --respect-latest [true/false]        Ignore versions newer than dependency's "latest"
-    -r, --recreate-closed [true/false]       Recreate PR even if same was previously closed
-    -r, --recreate-unmergeable [true/false]  Recreate PR if existing branch is unmergeable
-    -l, --log-level <level>                  Log Level
+    -h, --help                        output usage information
+    --enabled [boolean]               Enable or disable renovate
+    --token <string>                  GitHub Auth Token
+    --package-files <list>            Package file paths
+    --dep-types <list>                Dependency types
+    --ignore-deps <list>              Dependencies to ignore
+    --ignore-future [boolean]         Ignore versions tagged as "future"
+    --ignore-unstable [boolean]       Ignore versions with unstable semver
+    --respect-latest [boolean]        Ignore versions newer than npm "latest" version
+    --recreate-closed [boolean]       Recreate PRs even if same ones were closed previously
+    --recreate-unmergeable [boolean]  Close and recreate PR if it has a merge conflict
+    --labels <list>                   Labels to add to Pull Request
+    --assignees <list>                Assignees for Pull Request
+    --log-level <string>              Logging level
 
   Examples:
 
     $ renovate --token abc123 singapore/lint-condo
-    $ renovate --ignore-unstable=false -l verbose singapore/lint-condo
+    $ renovate --ignore-unstable=false --log-level verbose singapore/lint-condo
     $ renovate singapore/lint-condo singapore/package-test
 ```
 

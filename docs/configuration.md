@@ -56,24 +56,25 @@ $ node renovate --help
 
   Options:
 
-    -h, --help                               output usage information
-    -t, --token <token>                      GitHub Auth Token
-    -p, --package-files <list>               List of package.json file names
-    -d, --dep-types <list>                   List of dependency types
-    -i, --ignore-deps <list>                 List of dependencies to ignore
-    -b, --labels <list>                      List of labels to add
-    -b, --assignees <list>                   List of assignees to add
-    -r, --ignore-future [true/false]         Ignore versions tagged as "future"
-    -r, --ignore-unstable [true/false]       Ignore versions with unstable semver
-    -r, --respect-latest [true/false]        Ignore versions newer than dependency's "latest"
-    -r, --recreate-closed [true/false]       Recreate PR even if same was previously closed
-    -r, --recreate-unmergeable [true/false]  Recreate PR if existing branch is unmergeable
-    -l, --log-level <level>                  Log Level
+    -h, --help                        output usage information
+    --enabled [boolean]               Enable or disable renovate
+    --token <string>                  GitHub Auth Token
+    --package-files <list>            Package file paths
+    --dep-types <list>                Dependency types
+    --ignore-deps <list>              Dependencies to ignore
+    --ignore-future [boolean]         Ignore versions tagged as "future"
+    --ignore-unstable [boolean]       Ignore versions with unstable semver
+    --respect-latest [boolean]        Ignore versions newer than npm "latest" version
+    --recreate-closed [boolean]       Recreate PRs even if same ones were closed previously
+    --recreate-unmergeable [boolean]  Close and recreate PR if it has a merge conflict
+    --labels <list>                   Labels to add to Pull Request
+    --assignees <list>                Assignees for Pull Request
+    --log-level <string>              Logging level
 
   Examples:
 
     $ renovate --token abc123 singapore/lint-condo
-    $ renovate --ignore-unstable=false -l verbose singapore/lint-condo
+    $ renovate --ignore-unstable=false --log-level verbose singapore/lint-condo
     $ renovate singapore/lint-condo singapore/package-test
 ```
 
@@ -98,19 +99,23 @@ Obviously, you can't set repository or package file location with this method.
 
 ## Configuration Options
 
-| Option | Description | Default value | File | Environment | CLI |
-|---------------------|---------------------------------------------------------|-----------------------------------------------------------|---------------------------|--------------------------|---------------------------|
-| Token | GitHub Personal Access Token |  | `token` | `GITHUB_TOKEN` | `--token` |
-| Enabled | Enable/Disable renovate for this repo or file | true | `enabled` | | |
-| Repositories | List of Repositories |  | `repositories` | `RENOVATE_REPOS` | Space-delimited arguments |
-| Package Files | Package file location(s) | `[]` | `repository.packageFiles` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
-| Dependency Types | Sections of package.json to renovate | `dependencies`, `devDependencies`, `optionalDependencies` | `depTypes` | `RENOVATE_DEP_TYPES` | `--dep-types` |
-| Ignore Dependencies | Dependencies to be ignored |  | `ignoreDeps` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
-| Labels | Labels to add to Pull Requests |  | `labels` | `RENOVATE_LABELS` | `--labels` |
-| Ignore Future | Ignore versions tagged as "future" | `true` | `ignoreFuture` | `RENOVATE_IGNORE_FUTURE` | `--ignore-future` |
-| Ignore Unstable | Ignore versions with unstable semver | `true` | `ignoreUnstable` | `RENOVATE_IGNORE_UNSTABLE` | `--ignore-unstable` |
-| Respect latest | Respect the "latest" tag in npm and don't upgrade past it | `true` | `respectLatest` | `RENOVATE_RESPECT_LATEST` | `--respect-latest` |
-| Recreate Closed | Create New PR even if same one was previously closed | `false` | `recreateClosed` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
-| Recreate Unmergeable | Close and recreate PR if existing one is unmergeable | `true` | `recreateUnmergeable` | `RENOVATE_RECREATE_UNMERGEABLE` | `--recreate-unmergeable` |
-| Log Level | Log Level | `info` | `logLevel` | `LOG_LEVEL` | `--log-level` |
-| Templates | Handlebars templates for commit, branch and PR | Multiple | `templates` |  |  |
+| Name | Description | Type | Default value | Environment | CLI |
+|------|-------------|------|---------------|-------------|-----|
+| `enabled` | Enable or disable renovate | boolean | `true` | `RENOVATE_ENABLED` | `--enabled` |
+| `token` | GitHub Auth Token | string | `null` | `GITHUB_TOKEN` | `--token` |
+| `repositories` | GitHub repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
+| `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
+| `depTypes` | Dependency types | list | `["dependencies", "devDependencies", "optionalDependencies"]` | `RENOVATE_DEP_TYPES` | `--dep-types` |
+| `ignoreDeps` | Dependencies to ignore | list | `[]` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
+| `ignoreFuture` | Ignore versions tagged as "future" | boolean | `true` | `RENOVATE_IGNORE_FUTURE` | `--ignore-future` |
+| `ignoreUnstable` | Ignore versions with unstable semver | boolean | `true` | `RENOVATE_IGNORE_UNSTABLE` | `--ignore-unstable` |
+| `respectLatest` | Ignore versions newer than npm "latest" version | boolean | `true` | `RENOVATE_RESPECT_LATEST` | `--respect-latest` |
+| `recreateClosed` | Recreate PRs even if same ones were closed previously | boolean | `false` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
+| `recreateUnmergeable` | Close and recreate PR if it has a merge conflict | boolean | `true` | `RENOVATE_RECREATE_UNMERGEABLE` | `--recreate-unmergeable` |
+| `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` |  |  |
+| `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` |  |  |
+| `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}"` |  |  |
+| `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version {{currentVersion}} to {{newVersion}}\n\n{{changelog}}"` |  |  |
+| `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
+| `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
+| `logLevel` | Logging level | string | `"info"` | `LOG_LEVEL` | `--log-level` |

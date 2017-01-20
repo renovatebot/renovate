@@ -11,8 +11,10 @@
     "heroku-scheduler": "heroku addons:open scheduler",
     "istanbul": "istanbul cover _mocha test",
     "mocha": "mocha test",
+    "publish": "npm run update-docs && np",
     "renovate": "node renovate",
-    "test": "npm run eslint && npm run istanbul"
+    "test": "npm run eslint && npm run istanbul",
+    "update-docs": "bash bin/update-docs.sh"
   },
   "repository": {
     "type": "git",
@@ -34,6 +36,7 @@
   },
   "dependencies": {
     "changelog": "dylang/changelog#v1.2.0",
+    "clear-require": "1.0.1",
     "commander": "2.9.0",
     "gh-got": "5.0.0",
     "got": "6.7.1",
@@ -51,6 +54,7 @@
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-promise": "3.4.0",
     "istanbul": "0.4.5",
-    "mocha": "3.2.0"
+    "mocha": "3.2.0",
+    "np": "2.12.0"
   }
 }
