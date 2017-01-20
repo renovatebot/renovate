@@ -1,7 +1,7 @@
 const env = require('../../lib/config/env.js');
 
 describe('config/env', () => {
-  describe('.getConfig()', () => {
+  describe('.getConfig(env)', () => {
     it('returns empty env', () => {
       env.getConfig({}).should.eql({});
     });
