@@ -11,7 +11,7 @@
     "heroku-scheduler": "heroku addons:open scheduler",
     "istanbul": "istanbul cover _mocha test",
     "mocha": "mocha test",
-    "publish": "npm run update-docs && np",
+    "npm-publish": "npm run update-docs && np",
     "renovate": "node renovate",
     "test": "npm run eslint && npm run istanbul",
     "update-docs": "bash bin/update-docs.sh"
