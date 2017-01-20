@@ -37,6 +37,7 @@ $ node renovate --help
   Options:
 
     -h, --help                        output usage information
+    --enabled [boolean]               Enable or disable renovate
     --token <string>                  GitHub Auth Token
     --package-files <list>            Package file paths
     --dep-types <list>                Dependency types
