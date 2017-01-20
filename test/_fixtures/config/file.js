@@ -3,6 +3,18 @@ module.exports = {
   logLevel: 'verbose',
   repositories: [
     'singapore/lint-condo',
-    'singapore/renovate',
+    {
+      repository: 'singapore/renovate',
+      packageFiles: ['package2.json'],
+    },
+    {
+      repository: 'singapore/renovate',
+      packageFiles: [
+        {
+          fileName: 'package.json',
+          labels: ['a'],
+        },
+      ],
+    },
   ],
 };

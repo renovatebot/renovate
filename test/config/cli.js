@@ -1,4 +1,5 @@
 const cli = require('../../lib/config/cli.js');
+let argv = require('../_fixtures/config/argv');
 
 describe('config/cli', () => {
   describe('.getCliName(definition)', () => {
@@ -10,10 +11,6 @@ describe('config/cli', () => {
     });
   });
   describe('.getConfig(argv)', () => {
-    let argv = [
-      '/usr/local/bin/node',
-      '/Users/me/github/renovate/renovate',
-    ];
     it('returns empty argv', () => {
       cli.getConfig(argv).should.eql({});
     });
