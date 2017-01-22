@@ -21,16 +21,15 @@ describe('config/index', () => {
       const env = {};
       const argv = defaultArgv.concat(['--token=abc', 'foo']);
       configParser.parseConfigs(env, argv);
-      const config = configParser.getGlobalConfig();
-      should.exist(config.token);
-      should.exist(config.repositories);
-      should.exist(config.recreateClosed);
+      const repos = configParser.getRepositories();
+      should.exist(repos);
+      repos.should.have.length(1);
+      repos[0].repository.should.eql('foo');
     });
     it('gets cascaded config', () => {
       const env = { RENOVATE_CONFIG_FILE: 'test/_fixtures/config/file.js' };
       configParser.parseConfigs(env, defaultArgv);
-      const config = configParser.getGlobalConfig();
-      const repo = config.repositories.pop();
+      const repo = configParser.getRepositories().pop();
       should.exist(repo);
       const cascadedConfig = configParser.getCascadedConfig(repo, null);
       should.exist(cascadedConfig.token);
