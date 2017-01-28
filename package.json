@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "changelog": "dylang/changelog#v1.2.0",
-    "clear-require": "1.0.1",
+    "clear-require": "2.0.0",
     "commander": "2.9.0",
     "gh-got": "5.0.0",
     "got": "6.7.1",
