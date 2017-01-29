@@ -8,7 +8,7 @@ No state is needed on `renovate` or GitHub side apart from what you see publicly
 
 #### API only
 
-We were really happy to discover that everything we needed to do could be achieved with the GitHub API. Therefore there's no messy `git` commands and essentially no risk of repository corruption.
+So far, nothing we need to do requires git itself. e.g. we do not need to perform a git clone of the entire repository. Therefore, all operations are performed via the API.
 
 ## Synchronous Operation
 
@@ -92,18 +92,16 @@ Note: Branch names are configurable using the `templates` field.
 By default, the script does not create a new PR if it finds an identical one already closed. This allows users to close unwelcome upgrade PRs and worry about them being recreated every run. Typically this is most useful for major upgrades.
 This option is configurable.
 
-The script does however close and create a replacement PR if the previous one was in an unmergeable state. It skips this though if additional edits have been made to the branch by someone else. This option is also configurable.
-
 ## Range handling
 
 `renovate` always pins dependencies, instead of updating ranges. Even if the project is using tilde ranges, why not pin them for consistency if you're also using `renovate` every day?
 
 Perhaps this will be made configurable in future once requirements are understood.
 
-## Recreating Unmergeable Pull Requests
+## Rebasing Unmergeable Pull Requests
 
-With the default behaviour of one branch per dependency, it's often that case that one PR has merge conflicts after an adjacent dependency update is merged. Although GitHub has added a web interface for simple merge conflicts, this is still annoying to resolve manually.
+With the default behaviour of one branch per dependency, it's often that case that a PR gets merge conflicts after an adjacent dependency update is merged. Although GitHub has added a web interface for simple merge conflicts, this is still annoying to resolve manually.
 
-The default behaviour is that `renovate` will delete any unmergeable branches (which in turn closes the associated PR unmerged) and then recreate the branch and PR from the latest base commit. This means the same number of commits/builds as if you were resolving manually, however also means an increased number of Pull Requests because the old one gets closed and a new one created.
+`renovate` will rebase any unmergeable branches and add the latest necessary commit on top of the most recent `master` commit.
 
-Note: `renovate` will only do this if the original branch hasn't been modified by anyone else. Also, this behaviour can be disabled via configuration.
+Note: `renovate` will only do this if the original branch hasn't been modified by anyone else.
