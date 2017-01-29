@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/singapore/renovate.png?label=ready&title=Ready)](https://waffle.io/singapore/renovate)
 # renovate
 
 > Keep npm dependencies up-to-date
