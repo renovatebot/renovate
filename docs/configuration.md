@@ -58,6 +58,7 @@ $ node renovate --help
 
     -h, --help                   output usage information
     --enabled [boolean]          Enable or disable renovate
+    --onboarding [boolean]       Require a Configuration PR first
     --token <string>             GitHub Auth Token
     --package-files <list>       Package file paths
     --dep-types <list>           Dependency types
@@ -101,6 +102,7 @@ Obviously, you can't set repository or package file location with this method.
 | Name | Description | Type | Default value | Environment | CLI |
 |------|-------------|------|---------------|-------------|-----|
 | `enabled` | Enable or disable renovate | boolean | `true` | `RENOVATE_ENABLED` | `--enabled` |
+| `onboarding` | Require a Configuration PR first | boolean | `true` | `RENOVATE_ONBOARDING` | `--onboarding` |
 | `token` | GitHub Auth Token | string | `null` | `GITHUB_TOKEN` | `--token` |
 | `repositories` | GitHub repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
 | `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |

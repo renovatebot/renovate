@@ -36,6 +36,7 @@ $ node renovate --help
 
     -h, --help                   output usage information
     --enabled [boolean]          Enable or disable renovate
+    --onboarding [boolean]       Require a Configuration PR first
     --token <string>             GitHub Auth Token
     --package-files <list>       Package file paths
     --dep-types <list>           Dependency types
@@ -55,9 +56,11 @@ $ node renovate --help
     $ renovate singapore/lint-condo singapore/package-test
 ```
 
+Note: The first time you run `renovate` on a repository, it will not upgrade any dependencies. Instead, it will create a PR called 'Configure Renovate' and commit a default `renovate.json` file to the repository. This PR can be close unmerged if the default settings are fine for you. Also, this behaviour can be disabled if you first disable the `onboarding` setting before running.
+
 ## Deployment
 
-See [deployment docs](docs/deploment.md) for details.
+See [deployment docs](docs/deployment.md) for details.
 
 ## Design Decisions
 
