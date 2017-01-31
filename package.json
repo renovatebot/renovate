@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/singapore/renovate#readme",
   "engines": {
-    "node": ">=6.9.0"
+    "node": ">=7.4.0"
   },
   "dependencies": {
     "changelog": "dylang/changelog#v1.2.0",
