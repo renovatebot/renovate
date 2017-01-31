@@ -37,7 +37,8 @@ $ node renovate --help
     -h, --help                   output usage information
     --enabled [boolean]          Enable or disable renovate
     --onboarding [boolean]       Require a Configuration PR first
-    --token <string>             GitHub Auth Token
+    --platform <string>          Platform type of repository
+    --token <string>             Repository Auth Token
     --package-files <list>       Package file paths
     --dep-types <list>           Dependency types
     --ignore-deps <list>         Dependencies to ignore
