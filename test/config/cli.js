@@ -1,4 +1,4 @@
-const cli = require('../../lib/config/cli.js');
+const cli = require('../../dist/config/cli.js');
 let argv = require('../_fixtures/config/argv');
 
 describe('config/cli', () => {
@@ -8,6 +8,13 @@ describe('config/cli', () => {
         name: 'oneTwoThree',
       };
       cli.getCliName(option).should.eql('--one-two-three');
+    });
+    it('generates returns empty if CLI false', () => {
+      const option = {
+        name: 'oneTwoThree',
+        cli: false,
+      };
+      cli.getCliName(option).should.eql('');
     });
   });
   describe('.getConfig(argv)', () => {

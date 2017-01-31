@@ -1,5 +1,5 @@
 const fs = require('fs');
-const packageJson = require('../../lib/helpers/package-json');
+const packageJson = require('../../dist/helpers/package-json');
 
 const defaultTypes = ['dependencies', 'devDependencies', 'optionalDependencies'];
 

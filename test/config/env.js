@@ -1,4 +1,4 @@
-const env = require('../../lib/config/env.js');
+const env = require('../../dist/config/env.js');
 
 describe('config/env', () => {
   describe('.getConfig(env)', () => {
@@ -32,6 +32,13 @@ describe('config/env', () => {
     });
   });
   describe('.getEnvName(definition)', () => {
+    it('returns empty', () => {
+      const option = {
+        name: 'foo',
+        env: false,
+      };
+      env.getEnvName(option).should.eql('');
+    });
     it('returns existing env', () => {
       const option = {
         name: 'foo',

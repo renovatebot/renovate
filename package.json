@@ -2,8 +2,8 @@
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "8.0.0",
-  "bin": "renovate.js",
-  "main": "lib/index.js",
+  "bin": "dist/renovate.js",
+  "main": "dist/index.js",
   "scripts": {
     "eslint": "eslint --ignore-path .gitignore .",
     "eslint-fix": "eslint --ignore-path .gitignore --fix .",
@@ -12,8 +12,12 @@
     "istanbul": "istanbul cover _mocha test",
     "mocha": "mocha test",
     "npm-publish": "npm run update-docs && np",
-    "renovate": "node renovate",
+    "prepublish": "npm run transpile",
+    "pretest": "npm run transpile",
+    "start": "node dist/renovate",
+    "start-raw": "node --harmony-async-await lib/renovate",
     "test": "npm run eslint && npm run istanbul",
+    "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
     "update-docs": "bash bin/update-docs.sh"
   },
   "repository": {
@@ -50,14 +54,23 @@
     "winston": "2.3.1"
   },
   "devDependencies": {
+    "babel-cli": "6.22.2",
+    "babel-plugin-transform-async-to-generator": "6.22.0",
     "chai": "3.5.0",
     "eslint": "3.14.1",
     "eslint-config-airbnb-base": "11.0.1",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-promise": "3.4.0",
     "istanbul": "0.4.5",
+    "mkdirp": "0.5.1",
     "mocha": "3.2.0",
-    "np": "2.12.0"
+    "np": "2.12.0",
+    "rimraf": "2.5.4"
+  },
+  "babel": {
+    "plugins": [
+      "transform-async-to-generator"
+    ]
   },
   "renovate": {
     "labels": [
