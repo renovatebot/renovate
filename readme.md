@@ -47,6 +47,7 @@ $ node renovate --help
     --recreate-closed [boolean]  Recreate PRs even if same ones were closed previously
     --labels <list>              Labels to add to Pull Request
     --assignees <list>           Assignees for Pull Request
+    --reviewers <list>           Requested reviewers for Pull Requests
     --log-level <string>         Logging level
 
   Examples:

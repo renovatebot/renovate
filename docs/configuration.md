@@ -69,6 +69,7 @@ $ node renovate --help
     --recreate-closed [boolean]  Recreate PRs even if same ones were closed previously
     --labels <list>              Labels to add to Pull Request
     --assignees <list>           Assignees for Pull Request
+    --reviewers <list>           Requested reviewers for Pull Requests
     --log-level <string>         Logging level
 
   Examples:
@@ -118,4 +119,5 @@ Obviously, you can't set repository or package file location with this method.
 | `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version {{currentVersion}} to {{newVersion}}\n\n{{changelog}}"` |  |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
+| `reviewers` | Requested reviewers for Pull Requests | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
 | `logLevel` | Logging level | string | `"info"` | `LOG_LEVEL` | `--log-level` |
