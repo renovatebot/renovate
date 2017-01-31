@@ -59,7 +59,8 @@ $ node renovate --help
     -h, --help                   output usage information
     --enabled [boolean]          Enable or disable renovate
     --onboarding [boolean]       Require a Configuration PR first
-    --token <string>             GitHub Auth Token
+    --platform <string>          Platform type of repository
+    --token <string>             Repository Auth Token
     --package-files <list>       Package file paths
     --dep-types <list>           Dependency types
     --ignore-deps <list>         Dependencies to ignore
@@ -104,7 +105,8 @@ Obviously, you can't set repository or package file location with this method.
 |------|-------------|------|---------------|-------------|-----|
 | `enabled` | Enable or disable renovate | boolean | `true` | `RENOVATE_ENABLED` | `--enabled` |
 | `onboarding` | Require a Configuration PR first | boolean | `true` | `RENOVATE_ONBOARDING` | `--onboarding` |
-| `token` | GitHub Auth Token | string | `null` | `GITHUB_TOKEN` | `--token` |
+| `platform` | Platform type of repository | string | `"github"` | `RENOVATE_PLATFORM` | `--platform` |
+| `token` | Repository Auth Token | string | `null` | `RENOVATE_TOKEN` | `--token` |
 | `repositories` | GitHub repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
 | `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | `depTypes` | Dependency types | list | `["dependencies", "devDependencies", "optionalDependencies"]` | `RENOVATE_DEP_TYPES` | `--dep-types` |

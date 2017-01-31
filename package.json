@@ -43,6 +43,7 @@
     "clear-require": "2.0.0",
     "commander": "2.9.0",
     "gh-got": "5.0.0",
+    "gl-got": "0.0.1",
     "got": "6.7.1",
     "handlebars": "4.0.6",
     "json-stringify-pretty-compact": "1.0.2",

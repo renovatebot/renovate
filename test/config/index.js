@@ -6,7 +6,7 @@ describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     it('throws for no token', () => {
       const env = {};
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('A GitHub token must be configured');
+      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
     });
     it('supports token in env', () => {
       const env = { GITHUB_TOKEN: 'abc' };
