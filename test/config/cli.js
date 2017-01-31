@@ -1,4 +1,4 @@
-const cli = require('../../lib/config/cli.js');
+const cli = require('../../dist/config/cli.js');
 let argv = require('../_fixtures/config/argv');
 
 describe('config/cli', () => {

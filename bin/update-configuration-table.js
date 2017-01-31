@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 const stringify = require('json-stringify-pretty-compact');
 
-const definitions = require('../lib/config/definitions');
-const defaultsParser = require('../lib/config/defaults');
-const cliParser = require('../lib/config/cli');
-const envParser = require('../lib/config/env');
+const definitions = require('../src/config/definitions');
+const defaultsParser = require('../src/config/defaults');
+const cliParser = require('../src/config/cli');
+const envParser = require('../src/config/env');
 
 /* eslint-disable no-console */
 // Print table header

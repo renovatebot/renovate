@@ -14,7 +14,7 @@ i.e. `package.json` settings will override `renovate.json` settings, CLI, which 
 
 ### Default Configuration
 
-Default configuration can be found in [lib/config/default.js](../lib/config/default.js)
+Default configuration can be found in [src/config/default.js](../src/config/default.js)
 
 ### Configuration File
 
