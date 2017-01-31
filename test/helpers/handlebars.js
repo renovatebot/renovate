@@ -1,4 +1,4 @@
-const handlebars = require('../../lib/helpers/handlebars');
+const handlebars = require('../../dist/helpers/handlebars');
 
 const template = 'renovate/{{ depName }}-{{ newVersionMajor }}.x';
 const upgrade = {

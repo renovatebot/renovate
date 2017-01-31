@@ -1,4 +1,4 @@
-const file = require('../../lib/config/file.js');
+const file = require('../../dist/config/file.js');
 const customConfig = require('../_fixtures/config/file');
 
 describe('config/file', () => {

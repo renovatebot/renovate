@@ -1,4 +1,4 @@
-const configParser = require('../../lib/config/index.js');
+const configParser = require('../../dist/config/index.js');
 const defaultArgv = require('../_fixtures/config/argv');
 const should = require('chai').should();
 

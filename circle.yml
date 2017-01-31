@@ -1,6 +1,6 @@
 machine:
   node:
-    version: 6
+    version: 6.9
 
 test:
   pre:
