@@ -32,6 +32,13 @@ describe('config/env', () => {
     });
   });
   describe('.getEnvName(definition)', () => {
+    it('returns empty', () => {
+      const option = {
+        name: 'foo',
+        env: false,
+      };
+      env.getEnvName(option).should.eql('');
+    });
     it('returns existing env', () => {
       const option = {
         name: 'foo',

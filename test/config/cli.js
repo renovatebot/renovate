@@ -9,6 +9,13 @@ describe('config/cli', () => {
       };
       cli.getCliName(option).should.eql('--one-two-three');
     });
+    it('generates returns empty if CLI false', () => {
+      const option = {
+        name: 'oneTwoThree',
+        cli: false,
+      };
+      cli.getCliName(option).should.eql('');
+    });
   });
   describe('.getConfig(argv)', () => {
     it('returns empty argv', () => {
