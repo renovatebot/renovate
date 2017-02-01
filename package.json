@@ -15,6 +15,7 @@
     "prepublish": "npm run transpile",
     "pretest": "npm run transpile",
     "start": "node dist/renovate",
+    "start-babel": "babel-node lib/renovate",
     "start-raw": "node --harmony-async-await lib/renovate",
     "test": "npm run eslint && npm run istanbul",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
