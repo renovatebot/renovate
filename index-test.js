@@ -440,6 +440,12 @@ describe('reactElementToJSXString(ReactElement)', () => {
 </div>`);
   });
 
+  it('reactElementToJSXString(<div type={Symbol("test")}/>)', () => {
+    expect(
+      reactElementToJSXString(<div type={Symbol('test')}/>)
+    ).toEqual('<div type={Symbol(test)} />');
+  });
+
   it('reactElementToJSXString(<div aprop="test" ref="yes" />', () => {
     expect(
       reactElementToJSXString(<div aprop="test" ref="yes" />)
