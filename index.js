@@ -146,6 +146,10 @@ got \`${typeof Element}\``
       return `"${propValue}"`;
     }
 
+    if (typeof propValue === 'symbol') {
+      return `{${propValue.toString()}}`;
+    }
+
     return `{${formatValue(propValue, inline, lvl)}}`;
   }
 
