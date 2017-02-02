@@ -13,7 +13,7 @@ Before you submit any code, it's recommended that you raise an issue first if yo
 
 After you have cloned the project, first check that it's running OK locally.
 
-First, note that `renovate` supports node versions 6 and above. It is written using async/await so either needs `babel` transpilation for node 6, or a harmony flag for node 7.
+`renovate` supports node versions 6 and above. It is written using async/await so either needs `babel` transpilation for node 6, or a harmony flag for node 7.
 
 If running in node 6, you need to run a transpiled version of the code. You can do this without an explicit transpilation step by running `npm run start-babel`.
 Examples:
