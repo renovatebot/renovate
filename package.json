@@ -20,7 +20,7 @@
     "start-raw": "node --harmony-async-await lib/renovate",
     "test": "npm run eslint && npm run istanbul",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
-    "update-docs": "bash bin/update-docs.sh"
+    "update-docs": "npm run build && bash bin/update-docs.sh"
   },
   "repository": {
     "type": "git",
