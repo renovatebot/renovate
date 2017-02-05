@@ -60,6 +60,7 @@ $ node renovate --help
     --enabled [boolean]          Enable or disable renovate
     --onboarding [boolean]       Require a Configuration PR first
     --platform <string>          Platform type of repository
+    --endpoint <string>          Custom endpoint to use
     --token <string>             Repository Auth Token
     --package-files <list>       Package file paths
     --dep-types <list>           Dependency types
@@ -106,6 +107,7 @@ Obviously, you can't set repository or package file location with this method.
 | `enabled` | Enable or disable renovate | boolean | `true` | `RENOVATE_ENABLED` | `--enabled` |
 | `onboarding` | Require a Configuration PR first | boolean | `true` | `RENOVATE_ONBOARDING` | `--onboarding` |
 | `platform` | Platform type of repository | string | `"github"` | `RENOVATE_PLATFORM` | `--platform` |
+| `endpoint` | Custom endpoint to use | string | `null` | `RENOVATE_ENDPOINT` | `--endpoint` |
 | `token` | Repository Auth Token | string | `null` | `RENOVATE_TOKEN` | `--token` |
 | `repositories` | GitHub repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
 | `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |

@@ -38,6 +38,7 @@ $ node renovate --help
     --enabled [boolean]          Enable or disable renovate
     --onboarding [boolean]       Require a Configuration PR first
     --platform <string>          Platform type of repository
+    --endpoint <string>          Custom endpoint to use
     --token <string>             Repository Auth Token
     --package-files <list>       Package file paths
     --dep-types <list>           Dependency types
