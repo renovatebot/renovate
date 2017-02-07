@@ -1,6 +1,6 @@
-const versionsHelper = require('../../dist/helpers/versions');
+const versionsHelper = require('../../lib/helpers/versions');
 const qJson = require('../_fixtures/npm/01.json');
-const defaultConfig = require('../../dist/config/defaults').getConfig();
+const defaultConfig = require('../../lib/config/defaults').getConfig();
 
 describe('helpers/versions', () => {
   describe('.determineUpgrades(dep, currentVersion, defaultConfig)', () => {
