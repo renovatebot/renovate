@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
-  "version": "8.2.7",
+  "version": "8.4.1",
   "bin": "dist/renovate.js",
   "main": "dist/index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "start-raw": "node --harmony-async-await lib/renovate",
     "test": "npm run eslint && npm run istanbul",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
-    "update-docs": "bash bin/update-docs.sh"
+    "update-docs": "npm run build && bash bin/update-docs.sh"
   },
   "repository": {
     "type": "git",
@@ -61,8 +61,8 @@
     "babel-cli": "6.22.2",
     "babel-plugin-transform-async-to-generator": "6.22.0",
     "chai": "3.5.0",
-    "eslint": "3.14.1",
-    "eslint-config-airbnb-base": "11.0.1",
+    "eslint": "3.15.0",
+    "eslint-config-airbnb-base": "11.1.0",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-promise": "3.4.0",
     "istanbul": "0.4.5",
