@@ -1,4 +1,4 @@
-const env = require('../../dist/config/env.js');
+const env = require('../../lib/config/env.js');
 
 describe('config/env', () => {
   describe('.getConfig(env)', () => {

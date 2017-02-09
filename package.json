@@ -10,15 +10,13 @@
     "eslint-fix": "eslint --ignore-path .gitignore --fix .",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "istanbul": "istanbul cover _mocha test",
-    "mocha": "mocha test",
     "npm-publish": "npm run update-docs && np",
     "prepublish": "npm run build",
-    "pretest": "npm run build",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node --harmony-async-await lib/renovate",
-    "test": "npm run eslint && npm run istanbul",
+    "test": "npm run eslint && npm run jest",
+    "jest": "jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
     "update-docs": "npm run build && bash bin/update-docs.sh"
   },
@@ -41,12 +39,13 @@
     "node": ">=6.9.0"
   },
   "dependencies": {
+    "babel-jest": "18.0.0",
     "changelog": "dylang/changelog#v1.2.0",
-    "clear-require": "2.0.0",
     "commander": "2.9.0",
     "gh-got": "5.0.0",
     "got": "6.7.1",
     "handlebars": "4.0.6",
+    "jest": "18.1.0",
     "json-stringify-pretty-compact": "1.0.2",
     "lodash": "4.17.4",
     "registry-auth-token": "3.1.0",
@@ -63,9 +62,7 @@
     "eslint-config-airbnb-base": "11.1.0",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-promise": "3.4.1",
-    "istanbul": "0.4.5",
     "mkdirp": "0.5.1",
-    "mocha": "3.2.0",
     "np": "2.12.0",
     "rimraf": "2.5.4"
   },
@@ -73,6 +70,19 @@
     "plugins": [
       "transform-async-to-generator"
     ]
+  },
+  "jest": {
+    "coverageDirectory": "./coverage",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
+    "coverageReporters": [
+      "json",
+      "lcov",
+      "text-summary"
+    ],
+    "setupTestFrameworkScriptFile": "./test/chai.js"
   },
   "renovate": {
     "labels": [
