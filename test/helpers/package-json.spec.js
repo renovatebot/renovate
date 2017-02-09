@@ -51,5 +51,10 @@ describe('helpers/package-json', () => {
         packageJson.setNewValue(input01Content, 'devDependencies', 'angular-sanitize', '1.6.1');
       testContent.should.equal(outputContent);
     });
+    it('handles the case where the desired version is already supported', () => {
+      const testContent =
+        packageJson.setNewValue(input01Content, 'devDependencies', 'angular-touch', '1.5.8');
+      testContent.should.equal(input01Content);
+    });
   });
 });

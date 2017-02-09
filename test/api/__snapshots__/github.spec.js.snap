@@ -1,0 +1,634 @@
+exports[`api/github addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
+Array [
+  Array [
+    "repos/some/repo/issues/42/assignees",
+    Object {
+      "body": Object {
+        "assignees": Array [
+          "someuser",
+          "someotheruser",
+        ],
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github addLabels(issueNo, labels) should add the given labels to the issue 1`] = `
+Array [
+  Array [
+    "repos/some/repo/issues/42/labels",
+    Object {
+      "body": "[\"foo\",\"bar\"]",
+    },
+  ],
+]
+`;
+
+exports[`api/github addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `
+Array [
+  Array [
+    "repos/some/repo/pulls/42/requested_reviewers",
+    Object {
+      "body": Object {
+        "reviewers": Array [
+          "someuser",
+          "someotheruser",
+        ],
+      },
+      "headers": Object {
+        "accept": "application/vnd.github.black-cat-preview+json",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github branchExists(branchName) should propagate unknown errors 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+]
+`;
+
+exports[`api/github branchExists(branchName) should return false if a 404 is returned 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+]
+`;
+
+exports[`api/github branchExists(branchName) should return false if a non-200 response is returned 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+]
+`;
+
+exports[`api/github branchExists(branchName) should return true if the branch exists 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+]
+`;
+
+exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1111",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/package.json",
+  ],
+]
+`;
+
+exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 2`] = `
+Array [
+  Array [
+    "repos/some/repo/git/blobs",
+    Object {
+      "body": Object {
+        "content": "aGVsbG8gd29ybGQ=",
+        "encoding": "base64",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees",
+    Object {
+      "body": Object {
+        "base_tree": "2222",
+        "tree": Array [
+          Object {
+            "mode": "100644",
+            "path": "package.json",
+            "sha": "3333",
+            "type": "blob",
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/commits",
+    Object {
+      "body": Object {
+        "message": "my other commit message",
+        "parents": Array [
+          "1111",
+        ],
+        "tree": "4444",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/refs",
+    Object {
+      "body": Object {
+        "ref": "refs/heads/package.json",
+        "sha": "5555",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 3`] = `Array []`;
+
+exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1111",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/package.json",
+  ],
+]
+`;
+
+exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 2`] = `
+Array [
+  Array [
+    "repos/some/repo/git/blobs",
+    Object {
+      "body": Object {
+        "content": "aGVsbG8gd29ybGQ=",
+        "encoding": "base64",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees",
+    Object {
+      "body": Object {
+        "base_tree": "2222",
+        "tree": Array [
+          Object {
+            "mode": "100644",
+            "path": "package.json",
+            "sha": "3333",
+            "type": "blob",
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/commits",
+    Object {
+      "body": Object {
+        "message": "my commit message",
+        "parents": Array [
+          "1111",
+        ],
+        "tree": "4444",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 3`] = `
+Array [
+  Array [
+    "repos/some/repo/git/refs/heads/package.json",
+    Object {
+      "body": Object {
+        "force": true,
+        "sha": "5555",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github createPr(branchName, title, body) should create and return a PR object 1`] = `
+Object {
+  "displayNumber": "Pull Request #123",
+  "number": 123,
+}
+`;
+
+exports[`api/github createPr(branchName, title, body) should create and return a PR object 2`] = `
+Array [
+  Array [
+    "repos/some/repo/pulls",
+    Object {
+      "body": Object {
+        "base": "master",
+        "body": "Hello world",
+        "head": "some-branch",
+        "title": "The Title",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github findFilePaths(fileName) should return the files matching the fileName 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "search/code?q=repo:some/repo+filename:package.json",
+  ],
+]
+`;
+
+exports[`api/github findFilePaths(fileName) should return the files matching the fileName 2`] = `
+Array [
+  "package.json",
+  "src/app/package.json",
+  "src/otherapp/package.json",
+]
+`;
+
+exports[`api/github findPr(branchName, prTitle, state) should return a PR object 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/pulls?head=theowner:master&state=all",
+  ],
+]
+`;
+
+exports[`api/github findPr(branchName, prTitle, state) should return a PR object 2`] = `
+Object {
+  "displayNumber": "Pull Request #42",
+  "number": 42,
+  "state": "open",
+  "title": "PR Title",
+}
+`;
+
+exports[`api/github findPr(branchName, prTitle, state) should return null if no PR's are found 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/pulls?head=theowner:master&state=all",
+  ],
+]
+`;
+
+exports[`api/github findPr(branchName, prTitle, state) should set the isClosed attribute of the PR to true if the PR is closed 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/pulls?head=theowner:master&state=all",
+  ],
+]
+`;
+
+exports[`api/github findPr(branchName, prTitle, state) should set the isClosed attribute of the PR to true if the PR is closed 2`] = `
+Object {
+  "displayNumber": "Pull Request #42",
+  "isClosed": true,
+  "number": 42,
+  "state": "closed",
+  "title": "PR Title",
+}
+`;
+
+exports[`api/github getBranchPr(branchName) should return null if no PR exists 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
+  ],
+]
+`;
+
+exports[`api/github getBranchPr(branchName) should return the PR object 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
+  ],
+  Array [
+    "repos/some/repo/pulls/91",
+  ],
+]
+`;
+
+exports[`api/github getBranchPr(branchName) should return the PR object 2`] = `
+Object {
+  "additions": 1,
+  "base": Object {
+    "sha": "1234",
+  },
+  "canRebase": true,
+  "commits": 1,
+  "deletions": 1,
+  "displayNumber": "Pull Request #91",
+  "number": 91,
+}
+`;
+
+exports[`api/github getFile(filePatch, branchName) should return the encoded file content 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
+]
+`;
+
+exports[`api/github getFileContent(filePatch, branchName) should return null if GitHub returns a 404 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
+]
+`;
+
+exports[`api/github getFileContent(filePatch, branchName) should return the encoded file content 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
+]
+`;
+
+exports[`api/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
+]
+`;
+
+exports[`api/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 2`] = `
+Object {
+  "hello": "world",
+}
+`;
+
+exports[`api/github getPr(prNo) should return a PR object - 0 1`] = `
+Object {
+  "base": Object {
+    "sha": "1234",
+  },
+  "displayNumber": "Pull Request #1",
+  "isClosed": true,
+  "number": 1,
+  "state": "closed",
+}
+`;
+
+exports[`api/github getPr(prNo) should return a PR object - 1 1`] = `
+Object {
+  "base": Object {
+    "sha": "1234",
+  },
+  "displayNumber": "Pull Request #1",
+  "isUnmergeable": true,
+  "mergeable_state": "dirty",
+  "number": 1,
+  "state": "open",
+}
+`;
+
+exports[`api/github getPr(prNo) should return a PR object - 2 1`] = `
+Object {
+  "base": Object {
+    "sha": "5678",
+  },
+  "displayNumber": "Pull Request #1",
+  "isStale": true,
+  "number": 1,
+  "state": "open",
+}
+`;
+
+exports[`api/github initRepo should initialise the config for the repo - 0 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+]
+`;
+
+exports[`api/github initRepo should initialise the config for the repo - 0 2`] = `
+Object {
+  "baseCommitSHA": "1234",
+  "baseTreeSHA": "5678",
+  "defaultBranch": "master",
+  "owner": "theowner",
+  "repoName": "some/repo",
+}
+`;
+
+exports[`api/github initRepo should initialise the config for the repo - 1 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+]
+`;
+
+exports[`api/github initRepo should initialise the config for the repo - 1 2`] = `
+Object {
+  "baseCommitSHA": "1234",
+  "baseTreeSHA": "5678",
+  "defaultBranch": "master",
+  "owner": "theowner",
+  "repoName": "some/repo",
+}
+`;
+
+exports[`api/github initRepo should initialise the config for the repo - 2 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+]
+`;
+
+exports[`api/github initRepo should initialise the config for the repo - 2 2`] = `
+Object {
+  "baseCommitSHA": "1234",
+  "baseTreeSHA": "5678",
+  "defaultBranch": "master",
+  "owner": "theowner",
+  "repoName": "some/repo",
+}
+`;
+
+exports[`api/github updatePr(prNo, title, body) should update the PR 1`] = `
+Array [
+  Array [
+    "repos/some/repo/pulls/1234",
+    Object {
+      "body": Object {
+        "body": "Hello world again",
+        "title": "The New Title",
+      },
+    },
+  ],
+]
+`;
