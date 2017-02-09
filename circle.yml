@@ -3,9 +3,5 @@ machine:
     version: 6.9
 
 test:
-  pre:
-    - npm run eslint
-  override:
-    - npm run istanbul
   post:
     - bash <(curl -s https://codecov.io/bash)
