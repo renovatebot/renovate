@@ -1,9 +1,15 @@
-const configParser = require('../../dist/config/index.js');
-const defaultArgv = require('../_fixtures/config/argv');
+const argv = require('../_fixtures/config/argv');
 const should = require('chai').should();
 
 describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
+    let configParser;
+    let defaultArgv;
+    beforeEach(() => {
+      jest.resetModules();
+      configParser = require('../../lib/config/index.js');
+      defaultArgv = argv();
+    });
     it('throws for no token', () => {
       const env = {};
       configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
@@ -14,13 +20,13 @@ describe('config/index', () => {
     });
     it('supports token in CLI options', () => {
       const env = {};
-      const argv = defaultArgv.concat(['--token=abc']);
-      configParser.parseConfigs.bind(configParser, env, argv).should.throw('At least one repository must be configured');
+      defaultArgv = defaultArgv.concat(['--token=abc']);
+      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
     });
     it('supports repositories in CLI', () => {
       const env = {};
-      const argv = defaultArgv.concat(['--token=abc', 'foo']);
-      configParser.parseConfigs(env, argv);
+      defaultArgv = defaultArgv.concat(['--token=abc', 'foo']);
+      configParser.parseConfigs(env, defaultArgv);
       const repos = configParser.getRepositories();
       should.exist(repos);
       repos.should.have.length(1);
