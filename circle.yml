@@ -2,7 +2,7 @@ machine:
   environment:
     PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
   node:
-    version: 6
+    version: 6.9
 
 dependencies:
   override:
@@ -11,9 +11,7 @@ dependencies:
     - ~/.cache/yarn
 
 test:
-  pre:
-    - yarn run eslint
   override:
-    - yarn run istanbul
+    - yarn test
   post:
     - bash <(curl -s https://codecov.io/bash)

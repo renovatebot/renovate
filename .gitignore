@@ -2,4 +2,5 @@
 /config.js
 /npm-debug.log
 /coverage
+/dist
 .DS_Store

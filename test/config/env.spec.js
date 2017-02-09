@@ -27,11 +27,18 @@ describe('config/env', () => {
       env.getConfig(envParam).should.eql({ labels: ['a', 'b', 'c'] });
     });
     it('supports string', () => {
-      const envParam = { GITHUB_TOKEN: 'a' };
+      const envParam = { RENOVATE_TOKEN: 'a' };
       env.getConfig(envParam).should.eql({ token: 'a' });
     });
   });
   describe('.getEnvName(definition)', () => {
+    it('returns empty', () => {
+      const option = {
+        name: 'foo',
+        env: false,
+      };
+      env.getEnvName(option).should.eql('');
+    });
     it('returns existing env', () => {
       const option = {
         name: 'foo',

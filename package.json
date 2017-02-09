@@ -1,20 +1,24 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
-  "version": "7.3.0",
-  "bin": "renovate.js",
-  "main": "lib/index.js",
+  "version": "8.6.1",
+  "bin": "dist/renovate.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "npm run transpile",
     "eslint": "eslint --ignore-path .gitignore .",
     "eslint-fix": "eslint --ignore-path .gitignore --fix .",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "istanbul": "istanbul cover _mocha test",
-    "mocha": "mocha test",
     "npm-publish": "npm run update-docs && np",
-    "renovate": "node renovate",
-    "test": "npm run eslint && npm run istanbul",
-    "update-docs": "bash bin/update-docs.sh"
+    "prepublish": "npm run build",
+    "start": "node dist/renovate",
+    "start-babel": "babel-node lib/renovate",
+    "start-raw": "node --harmony-async-await lib/renovate",
+    "test": "npm run eslint && npm run jest",
+    "jest": "jest",
+    "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
+    "update-docs": "npm run build && bash bin/update-docs.sh"
   },
   "repository": {
     "type": "git",
@@ -35,30 +39,58 @@
     "node": ">=6.9.0"
   },
   "dependencies": {
+    "babel-jest": "18.0.0",
     "changelog": "dylang/changelog#v1.2.0",
-    "clear-require": "1.0.1",
     "commander": "2.9.0",
     "gh-got": "5.0.0",
     "got": "6.7.1",
     "handlebars": "4.0.6",
+    "jest": "18.1.0",
     "json-stringify-pretty-compact": "1.0.2",
     "lodash": "4.17.4",
+    "registry-auth-token": "3.1.0",
+    "registry-url": "3.1.0",
     "semver": "5.3.0",
     "semver-stable": "2.0.4",
+    "tmp": "0.0.31",
     "winston": "2.3.1"
   },
   "devDependencies": {
+    "babel-cli": "6.22.2",
+    "babel-plugin-transform-async-to-generator": "6.22.0",
     "chai": "3.5.0",
-    "eslint": "3.14.0",
-    "eslint-config-airbnb-base": "11.0.1",
+    "eslint": "3.15.0",
+    "eslint-config-airbnb-base": "11.1.0",
     "eslint-plugin-import": "2.2.0",
-    "eslint-plugin-promise": "3.4.0",
-    "istanbul": "0.4.5",
-    "mocha": "3.2.0",
-    "np": "2.12.0"
+    "eslint-plugin-promise": "3.4.1",
+    "mkdirp": "0.5.1",
+    "np": "2.12.0",
+    "rimraf": "2.5.4"
+  },
+  "babel": {
+    "plugins": [
+      "transform-async-to-generator"
+    ]
+  },
+  "jest": {
+    "coverageDirectory": "./coverage",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
+    "coverageReporters": [
+      "json",
+      "lcov",
+      "text-summary"
+    ],
+    "setupTestFrameworkScriptFile": "./test/chai.js"
   },
   "renovate": {
-    "labels": ["ready"],
-    "assignees": ["rarkins"]
+    "labels": [
+      "ready"
+    ],
+    "assignees": [
+      "rarkins"
+    ]
   }
 }
