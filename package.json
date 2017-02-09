@@ -52,6 +52,7 @@
     "registry-url": "3.1.0",
     "semver": "5.3.0",
     "semver-stable": "2.0.4",
+    "tmp": "0.0.31",
     "winston": "2.3.1"
   },
   "devDependencies": {
