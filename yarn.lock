@@ -1325,6 +1325,13 @@ gh-got@5.0.0:
     got "^6.2.0"
     is-plain-obj "^1.1.0"
 
+gl-got@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/gl-got/-/gl-got-6.0.0.tgz#6abbaa8cd07464eb4064cdeb9fcacb5e7251e1b1"
+  dependencies:
+    got "^6.2.0"
+    is-plain-obj "^1.1.0"
+
 glob-base@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/glob-base/-/glob-base-0.3.0.tgz#dbb164f6221b1c0b1ccf82aea328b497df0ea3c4"
