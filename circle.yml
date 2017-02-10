@@ -6,9 +6,9 @@ machine:
 
 dependencies:
   pre:
-    - npm install -g yarn
-  override:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
     - yarn --version
+  override:
     - yarn install --frozen-lockfile
   cache_directories:
     - ~/.cache/yarn
