@@ -6,7 +6,7 @@ machine:
 
 dependencies:
   override:
-    - yarn install --freeze-lockfile
+    - yarn --frozen-lockfile install
   cache_directories:
     - ~/.cache/yarn
 
