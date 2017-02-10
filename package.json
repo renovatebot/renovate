@@ -10,7 +10,7 @@
     "eslint-fix": "eslint --ignore-path .gitignore --fix .",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "npm-publish": "npm run update-docs && np && npm install",
+    "npm-publish": "npm run update-docs && np && yarn install",
     "prepublish": "npm run build",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
