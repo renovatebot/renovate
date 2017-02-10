@@ -5,6 +5,8 @@ machine:
     version: 6.9
 
 dependencies:
+  pre:
+    - npm install -g yarn
   override:
     - yarn --version
     - yarn install --frozen-lockfile
