@@ -1,7 +1,20 @@
 machine:
+  environment:
+    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
   node:
     version: 6.9
 
+dependencies:
+  pre:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - yarn --version
+  override:
+    - yarn install --frozen-lockfile
+  cache_directories:
+    - ~/.cache/yarn
+
 test:
+  override:
+    - yarn test
   post:
     - bash <(curl -s https://codecov.io/bash)
