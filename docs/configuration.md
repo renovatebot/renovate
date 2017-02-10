@@ -51,6 +51,35 @@ module.exports = {
 
 ```
 $ node renovate --help
+
+  Usage: renovate [options] [repositories...]
+
+  Options:
+
+    -h, --help                    output usage information
+    --enabled [boolean]           Enable or disable renovate
+    --onboarding [boolean]        Require a Configuration PR first
+    --platform <string>           Platform type of repository
+    --endpoint <string>           Custom GitHub or GitLab endpoint to use
+    --token <string>              Repository Auth Token
+    --package-files <list>        Package file paths
+    --dep-types <list>            Dependency types
+    --ignore-deps <list>          Dependencies to ignore
+    --ignore-future [boolean]     Ignore versions tagged as "future"
+    --ignore-unstable [boolean]   Ignore versions with unstable semver
+    --respect-latest [boolean]    Ignore versions newer than npm "latest" version
+    --recreate-closed [boolean]   Recreate PRs even if same ones were closed previously
+    --rebase-stale-prs [boolean]  Rebase stale PRs
+    --labels <list>               Labels to add to Pull Request
+    --assignees <list>            Assignees for Pull Request
+    --reviewers <list>            Requested reviewers for Pull Requests
+    --log-level <string>          Logging level
+
+  Examples:
+
+    $ renovate --token abc123 singapore/lint-condo
+    $ renovate --ignore-unstable=false --log-level verbose singapore/lint-condo
+    $ renovate singapore/lint-condo singapore/package-test
 ```
 
 ### renovate.json
@@ -79,7 +108,7 @@ Obviously, you can't set repository or package file location with this method.
 | `enabled` | Enable or disable renovate | boolean | `true` | `RENOVATE_ENABLED` | `--enabled` |
 | `onboarding` | Require a Configuration PR first | boolean | `true` | `RENOVATE_ONBOARDING` | `--onboarding` |
 | `platform` | Platform type of repository | string | `"github"` | `RENOVATE_PLATFORM` | `--platform` |
-| `endpoint` | Custom endpoint to use | string | `null` | `RENOVATE_ENDPOINT` | `--endpoint` |
+| `endpoint` | Custom GitHub or GitLab endpoint to use | string | `null` | `RENOVATE_ENDPOINT` | `--endpoint` |
 | `token` | Repository Auth Token | string | `null` | `RENOVATE_TOKEN` | `--token` |
 | `repositories` | GitHub repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
 | `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
