@@ -122,7 +122,7 @@ Obviously, you can't set repository or package file location with this method.
 | `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` |  |  |
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` |  |  |
 | `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}"` |  |  |
-| `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version {{currentVersion}} to {{newVersion}}\n\n{{changelog}}"` |  |  |
+| `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` |  |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
 | `reviewers` | Requested reviewers for Pull Requests | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
