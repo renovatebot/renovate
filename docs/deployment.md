@@ -40,6 +40,7 @@ You now need to set the token.
 ```
 $ heroku config:set GITHUB_TOKEN=[YourGitHubToken]
 ```
+(or use `GITLAB_TOKEN` if appropriate)
 
 You should also set any other [Configuration Options](configuration.md) you need.
 

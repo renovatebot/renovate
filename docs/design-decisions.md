@@ -4,17 +4,18 @@ This file documents the design choices as well as configuration options.
 
 #### Stateless
 
-No state is needed on `renovate` or GitHub side apart from what you see publicly in GitHub (branches, Pull Requests). It therefore doesn't matter if you stop/restart the script and would even still work if you had it running from two different locations, as long as their configuration was the same.
+No state storage is needed on `renovate` or GitHub/GitLab apart from what you see publicly in GitHub (branches, Pull Requests). It therefore doesn't matter if you stop/restart the script and would even still work if you had it running from two different locations, as long as their configuration was the same.
 
 #### API only
 
-So far, nothing we need to do requires git itself. e.g. we do not need to perform a git clone of the entire repository. Therefore, all operations are performed via the API.
+So far, nothing we need to do requires git directly. e.g. we do not need to perform a git clone of the entire repository. Therefore, all operations are performed via the API.
 
 ## Synchronous Operation
 
 The script current processes repositories, package files, and dependencies within them all synchronously.
-- Greatly reduces chance of hitting GitHub API limits
-- Implicitly enables any feature that results in multiple commits in the same branch
+
+- Greatly reduces chance of hitting simultaneous API rate limits
+- Implicitly enables any configuration that results in multiple commits in the same branch
 - Simplifies logging
 
 Note: Initial queries to NPM are done in parallel.
@@ -43,12 +44,16 @@ The following options apply per-package file:
 The following options apply per-repository:
 
 - Token
+- Platform
+- Endpoint
 
 The following options apply globally:
 
 - Log Level
 
 ## Automatic discovery of package.json locations
+
+Note: GitHub only.
 
 Default behaviour is to auto-discover all `package.json` locations in a repository and process them all.
 Doing so means that "monorepos" are supported by default.
@@ -99,6 +104,8 @@ This option is configurable.
 Perhaps this will be made configurable in future once requirements are understood.
 
 ## Rebasing Unmergeable Pull Requests
+
+Note: GitHub only. GitLab does not expose enough low level git API to allow this.
 
 With the default behaviour of one branch per dependency, it's often that case that a PR gets merge conflicts after an adjacent dependency update is merged. Although GitHub has added a web interface for simple merge conflicts, this is still annoying to resolve manually.
 

@@ -9,6 +9,7 @@
 - Supports multiple major versions per-dependency at once
 - Configurable via file, environment, CLI, and `package.json`
 - Supports `yarn.lock` files
+- Supports GitHub and GitLab
 - Self-hosted
 
 ## Install
@@ -19,12 +20,14 @@ $ npm install -g renovate
 
 ## Authentication
 
-You need to select a GitHub user for `renovate` to assume the identity of. It's recommended that you use a dedicated "bot" account for this to avoid user confusion.
+You need to select a repository user for `renovate` to assume the identity of, and generate a Personal Access Token. It's recommended that you use a dedicated "bot" account for this to avoid user confusion.
 
-The script will need a GitHub Personal Access Token with "repo" permissions. You can find instructions for generating it here: https://help.github.com/articles/creating-an-access-token-for-command-line-use/
+You can find instructions for GitHub here (select "repo" permissions): https://help.github.com/articles/creating-an-access-token-for-command-line-use/
+
+You can find instructions for GitLab here: https://docs.gitlab.com/ee/api/README.html#personal-access-tokens
 
 This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
-The simplest way is to expose it as `GITHUB_TOKEN`.
+The simplest way is to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN`.
 
 ## Usage
 
@@ -61,7 +64,7 @@ $ node renovate --help
     $ renovate singapore/lint-condo singapore/package-test
 ```
 
-Note: The first time you run `renovate` on a repository, it will not upgrade any dependencies. Instead, it will create a PR called 'Configure Renovate' and commit a default `renovate.json` file to the repository. This PR can be close unmerged if the default settings are fine for you. Also, this behaviour can be disabled if you first disable the `onboarding` setting before running.
+Note: The first time you run `renovate` on a repository, it will not upgrade any dependencies. Instead, it will create a Pull Request (Merge Request if GitLab) called 'Configure Renovate' and commit a default `renovate.json` file to the repository. This PR can be close unmerged if the default settings are fine for you. Also, this behaviour can be disabled if you set the `onboarding` configuration option to `false` before running.
 
 ## Deployment
 
