@@ -1,6 +1,6 @@
 module.exports = {
   token: 'abcdefg',
-  logLevel: 'verbose',
+  logLevel: 'error',
   repositories: [
     'singapore/lint-condo',
     {

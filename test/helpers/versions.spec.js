@@ -91,6 +91,32 @@ describe('helpers/versions', () => {
       ];
       versionsHelper.determineUpgrades(qJson, '^2.0.0', defaultConfig).should.eql(upgradeVersions);
     });
+    it('should ignore unstable versions if the current version is stable', () => {
+      versionsHelper.determineUpgrades({
+        name: 'amazing-package',
+        versions: {
+          '1.0.0': {},
+          '1.1.0-beta': {},
+        },
+      }, '1.0.0', defaultConfig).should.eql([]);
+    });
+    it('should allow unstable versions if the current version is unstable', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '1.1.0-beta',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          workingVersion: '1.0.0-beta',
+        },
+      ];
+      versionsHelper.determineUpgrades({
+        name: 'amazing-package',
+        versions: {
+          '1.0.0-beta': {},
+          '1.1.0-beta': {},
+        },
+      }, '1.0.0-beta', defaultConfig).should.eql(upgradeVersions);
+    });
   });
   describe('.isRange(input)', () => {
     it('rejects simple semver', () => {
