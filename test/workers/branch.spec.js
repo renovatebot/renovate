@@ -3,7 +3,6 @@ const branchWorker = require('../../lib/workers/branch');
 describe('workers/branch', () => {
   describe('useBaseBranch(branchName, config)', () => {
     let config;
-    // const branchName = 'renovate/foo';
     beforeEach(() => {
       config = {
         api: {
@@ -12,49 +11,56 @@ describe('workers/branch', () => {
       };
     });
     it('returns false if no PR', async () => {
-      config.api.getBranchPr.mockReturnValueOnce(null);
+      config.api.getBranchPr.mockReturnValue(null);
       expect(await branchWorker.useBaseBranch('', config)).toBe(false);
     });
-    /*
-    it('returns false if unmergeable and cannot rebase', () => {
-      const pr = {
+    it('returns false if does not need rebaseing', async () => {
+      config.api.getBranchPr.mockReturnValue({
+        isUnmergeable: false,
+      });
+      expect(await branchWorker.useBaseBranch('', config)).toBe(false);
+    });
+    it('returns false if unmergeable and cannot rebase', async () => {
+      config.api.getBranchPr.mockReturnValue({
         isUnmergeable: true,
         canRebase: false,
-      };
-      branchWorker.useBaseBranch(pr, {}).should.eql(false);
+      });
+      expect(await branchWorker.useBaseBranch('', config)).toBe(false);
     });
-    it('returns true if unmergeable and can rebase', () => {
-      const pr = {
+    it('returns true if unmergeable and can rebase', async () => {
+      config.api.getBranchPr.mockReturnValue({
         isUnmergeable: true,
         canRebase: true,
-      };
-      branchWorker.useBaseBranch(pr, {}).should.eql(true);
+      });
+      expect(await branchWorker.useBaseBranch('', config)).toBe(true);
     });
-    it('returns false if stale but not configured to rebase', () => {
-      const pr = {
+    it('returns false if stale but not configured to rebase', async () => {
+      config.api.getBranchPr.mockReturnValue({
+        isUnmergeable: false,
         isStale: true,
         canRebase: true,
-      };
+      });
       config.rebaseStalePrs = false;
-      branchWorker.useBaseBranch(pr, config).should.eql(false);
+      expect(await branchWorker.useBaseBranch('', config)).toBe(false);
     });
-    it('returns false if stale but cannot rebase', () => {
-      const pr = {
+    it('returns false if stale but cannot rebase', async () => {
+      config.api.getBranchPr.mockReturnValueOnce({
+        isUnmergeable: false,
         isStale: true,
         canRebase: false,
-      };
+      });
       config.rebaseStalePrs = true;
-      branchWorker.useBaseBranch(pr, config).should.eql(false);
+      expect(await branchWorker.useBaseBranch('', config)).toBe(false);
     });
-    it('returns true if stale and rebase stale configured', () => {
-      const pr = {
+    it('returns true if stale and can rebase', async () => {
+      config.api.getBranchPr.mockReturnValueOnce({
+        isUnmergeable: false,
         isStale: true,
         canRebase: true,
-      };
+      });
       config.rebaseStalePrs = true;
-      branchWorker.useBaseBranch(pr, config).should.eql(true);
+      expect(await branchWorker.useBaseBranch('', config)).toBe(true);
     });
-    */
   });
   describe('getYarnLockFile(packageJson, config)', () => {
     let config;
