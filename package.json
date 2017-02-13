@@ -43,7 +43,7 @@
     "changelog": "dylang/changelog#v1.2.0",
     "commander": "2.9.0",
     "gh-got": "5.0.0",
-    "gl-got": "6.0.0",
+    "gl-got": "6.0.1",
     "got": "6.7.1",
     "handlebars": "4.0.6",
     "jest": "18.1.0",
