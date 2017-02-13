@@ -65,6 +65,20 @@ describe('workers/branch', () => {
       expect(await branchWorker.useBaseBranch('', config)).toBe(true);
     });
   });
+  describe('getParentBranch(branchName, config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        api: {
+          branchExists: jest.fn(),
+        },
+      };
+    });
+    it('returns undefined if branch does not exist', async () => {
+      config.api.branchExists.mockReturnValue(false);
+      expect(await branchWorker.getParentBranch('', config)).toBe(undefined);
+    });
+  });
   describe('getYarnLockFile(packageJson, config)', () => {
     let config;
     beforeEach(() => {
