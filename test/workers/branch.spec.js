@@ -1,4 +1,7 @@
 const branchWorker = require('../../lib/workers/branch');
+const yarnHelper = require('../../lib/helpers/yarn');
+
+jest.mock('../../lib/helpers/yarn');
 
 describe('workers/branch', () => {
   describe('useBaseBranch(branchName, config)', () => {
@@ -75,6 +78,17 @@ describe('workers/branch', () => {
     it('returns null if no existing yarn.lock', async () => {
       config.api.getFileContent.mockReturnValueOnce(false);
       expect(await branchWorker.getYarnLockFile('', config)).toBe(null);
+    });
+    it('returns yarn.lock file', async () => {
+      config.api.getFileContent.mockReturnValueOnce('Existing yarn.lock');
+      config.api.getFileContent.mockReturnValueOnce(null); // npmrc
+      config.api.getFileContent.mockReturnValueOnce(null); // yarnrc
+      yarnHelper.generateLockFile.mockReturnValueOnce('New yarn.lock');
+      const yarnLockFile = {
+        name: 'yarn.lock',
+        contents: 'New yarn.lock',
+      };
+      expect(await branchWorker.getYarnLockFile('', config)).toMatchObject(yarnLockFile);
     });
   });
 });
