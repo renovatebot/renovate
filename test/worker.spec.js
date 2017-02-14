@@ -3,11 +3,15 @@ const worker = require('../lib/worker');
 const branchWorker = require('../lib/workers/branch');
 const prWorker = require('../lib/workers/pr');
 const defaultConfig = require('../lib/config/defaults').getConfig();
+const npmApi = require('../lib/api/npm');
+const versionsHelper = require('../lib/helpers/versions');
 
 logger.remove(logger.transports.Console);
 
 jest.mock('../lib/workers/branch');
 jest.mock('../lib/workers/pr');
+jest.mock('../lib/api/npm');
+jest.mock('../lib/helpers/versions');
 
 describe('worker', () => {
   describe('updateDependency(upgrade)', () => {
@@ -67,6 +71,38 @@ describe('worker', () => {
     it('handles non-zero upgrades', async () => {
       await worker.processUpgradesSequentially(config, [{}, {}]);
       expect(worker.updateDependency.mock.calls.length).toBe(2);
+    });
+  });
+  describe('findUpgrades(dependencies, config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {};
+      worker.updateDependency = jest.fn();
+    });
+    it('handles null', async () => {
+      const allUpgrades = await worker.findUpgrades([], config);
+      expect(allUpgrades).toMatchObject([]);
+    });
+    it('handles one dep', async () => {
+      const dep = {
+        depName: 'foo',
+        currentVersion: '1.0.0',
+      };
+      const upgrade = { newVersion: '1.1.0' };
+      npmApi.getDependency = jest.fn(() => ({}));
+      versionsHelper.determineUpgrades = jest.fn(() => [upgrade]);
+      const allUpgrades = await worker.findUpgrades([dep], config);
+      expect(allUpgrades).toMatchObject([Object.assign({}, dep, upgrade)]);
+    });
+    it('handles no upgrades', async () => {
+      const dep = {
+        depName: 'foo',
+        currentVersion: '1.0.0',
+      };
+      npmApi.getDependency = jest.fn(() => ({}));
+      versionsHelper.determineUpgrades = jest.fn(() => []);
+      const allUpgrades = await worker.findUpgrades([dep], config);
+      expect(allUpgrades).toMatchObject([]);
     });
   });
 });
