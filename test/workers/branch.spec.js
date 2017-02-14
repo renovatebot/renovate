@@ -4,38 +4,44 @@ const yarnHelper = require('../../lib/helpers/yarn');
 jest.mock('../../lib/helpers/yarn');
 
 describe('workers/branch', () => {
-  describe('useBaseBranch(branchName, config)', () => {
+  describe('getParentBranch(branchName, config)', () => {
     let config;
+    const branchName = 'foo';
     beforeEach(() => {
       config = {
         api: {
+          branchExists: jest.fn(() => true),
           getBranchPr: jest.fn(),
         },
       };
     });
-    it('returns false if no PR', async () => {
+    it('returns undefined if branch does not exist', async () => {
+      config.api.branchExists.mockReturnValue(false);
+      expect(await branchWorker.getParentBranch(branchName, config)).toBe(undefined);
+    });
+    it('returns branchName if no PR', async () => {
       config.api.getBranchPr.mockReturnValue(null);
-      expect(await branchWorker.useBaseBranch('', config)).toBe(false);
+      expect(await branchWorker.getParentBranch(branchName, config)).toBe(branchName);
     });
     it('returns false if does not need rebaseing', async () => {
       config.api.getBranchPr.mockReturnValue({
         isUnmergeable: false,
       });
-      expect(await branchWorker.useBaseBranch('', config)).toBe(false);
+      expect(await branchWorker.getParentBranch(branchName, config)).toBe(branchName);
     });
     it('returns false if unmergeable and cannot rebase', async () => {
       config.api.getBranchPr.mockReturnValue({
         isUnmergeable: true,
         canRebase: false,
       });
-      expect(await branchWorker.useBaseBranch('', config)).toBe(false);
+      expect(await branchWorker.getParentBranch(branchName, config)).toBe(branchName);
     });
     it('returns true if unmergeable and can rebase', async () => {
       config.api.getBranchPr.mockReturnValue({
         isUnmergeable: true,
         canRebase: true,
       });
-      expect(await branchWorker.useBaseBranch('', config)).toBe(true);
+      expect(await branchWorker.getParentBranch(branchName, config)).toBe(undefined);
     });
     it('returns false if stale but not configured to rebase', async () => {
       config.api.getBranchPr.mockReturnValue({
@@ -44,7 +50,7 @@ describe('workers/branch', () => {
         canRebase: true,
       });
       config.rebaseStalePrs = false;
-      expect(await branchWorker.useBaseBranch('', config)).toBe(false);
+      expect(await branchWorker.getParentBranch(branchName, config)).toBe(branchName);
     });
     it('returns false if stale but cannot rebase', async () => {
       config.api.getBranchPr.mockReturnValueOnce({
@@ -53,7 +59,7 @@ describe('workers/branch', () => {
         canRebase: false,
       });
       config.rebaseStalePrs = true;
-      expect(await branchWorker.useBaseBranch('', config)).toBe(false);
+      expect(await branchWorker.getParentBranch(branchName, config)).toBe(branchName);
     });
     it('returns true if stale and can rebase', async () => {
       config.api.getBranchPr.mockReturnValueOnce({
@@ -62,21 +68,7 @@ describe('workers/branch', () => {
         canRebase: true,
       });
       config.rebaseStalePrs = true;
-      expect(await branchWorker.useBaseBranch('', config)).toBe(true);
-    });
-  });
-  describe('getParentBranch(branchName, config)', () => {
-    let config;
-    beforeEach(() => {
-      config = {
-        api: {
-          branchExists: jest.fn(),
-        },
-      };
-    });
-    it('returns undefined if branch does not exist', async () => {
-      config.api.branchExists.mockReturnValue(false);
-      expect(await branchWorker.getParentBranch('', config)).toBe(undefined);
+      expect(await branchWorker.getParentBranch(branchName, config)).toBe(undefined);
     });
   });
   describe('getYarnLockFile(packageJson, config)', () => {
