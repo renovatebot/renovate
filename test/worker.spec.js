@@ -54,4 +54,19 @@ describe('worker', () => {
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
   });
+  describe('processUpgradesSequentially(baseConfig, upgrades)', () => {
+    let config;
+    beforeEach(() => {
+      config = {};
+      worker.updateDependency = jest.fn();
+    });
+    it('handles zero upgrades', async () => {
+      await worker.processUpgradesSequentially(config, []);
+      expect(worker.updateDependency.mock.calls.length).toBe(0);
+    });
+    it('handles non-zero upgrades', async () => {
+      await worker.processUpgradesSequentially(config, [{}, {}]);
+      expect(worker.updateDependency.mock.calls.length).toBe(2);
+    });
+  });
 });
