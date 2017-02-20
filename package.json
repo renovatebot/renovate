@@ -60,7 +60,7 @@
     "babel-cli": "6.23.0",
     "babel-plugin-transform-async-to-generator": "6.22.0",
     "chai": "3.5.0",
-    "eslint": "3.15.0",
+    "eslint": "3.16.0",
     "eslint-config-airbnb-base": "11.1.0",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-promise": "3.4.2",
