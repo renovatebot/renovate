@@ -1,3 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
 exports[`api/github addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
 Array [
   Array [
@@ -19,7 +21,7 @@ Array [
   Array [
     "repos/some/repo/issues/42/labels",
     Object {
-      "body": "[\"foo\",\"bar\"]",
+      "body": "[\\"foo\\",\\"bar\\"]",
     },
   ],
 ]
