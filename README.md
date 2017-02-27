@@ -131,7 +131,7 @@ yarn build:watch
 Decide if this is a `patch`, `minor` or `major` release, look at http://semver.org/
 
 ```sh
-yarn release [major|minor|patch|x.x.x]
+npm run release [major|minor|patch|x.x.x]
 ```
 
 ## Thanks
