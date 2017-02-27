@@ -34,6 +34,7 @@
     "eslint-plugin-jasmine": "^2.2.0",
     "eslint-plugin-react": "^6.10.0",
     "expect": "^1.14.0",
+    "json": "^9.0.4",
     "mocha": "^3.2.0",
     "react": "^15.4.2",
     "react-addons-test-utils": "^15.4.2",
