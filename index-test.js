@@ -103,6 +103,28 @@ describe('reactElementToJSXString(ReactElement)', () => {
  />`);
   });
 
+  it('reactElementToJSXString(<div a="1" obj={{hello: \'world\'}}/>)', () => {
+    expect(
+      reactElementToJSXString(<div a="1" obj={{hello: 'world'}}/>)
+    ).toEqual(`<div
+  a="1"
+  obj={{
+    hello: 'world'
+  }}
+/>`);
+  });
+
+  it('reactElementToJSXString(<div obj={{hello: \'world\'}} a="1"/>)', () => {
+    expect(
+      reactElementToJSXString(<div obj={{hello: 'world'}} a="1"/>)
+    ).toEqual(`<div
+  a="1"
+  obj={{
+    hello: 'world'
+  }}
+/>`);
+  });
+
   it('reactElementToJSXString(<div obj={{hello: [1, 2], world: {nested: true}}}/>)', () => {
     expect(
       reactElementToJSXString(<div obj={{hello: [1, 2], world: {nested: true}}}/>)
@@ -653,5 +675,77 @@ describe('reactElementToJSXString(ReactElement)', () => {
     expect(
       reactElementToJSXString(<DisplayNamePrecedence />)
     ).toEqual('<This should take precedence />');
+  });
+
+  // maxInlineAttributesLineLength tests
+  // Validate two props will stay inline if their length is less than the option
+  it('reactElementToJSXString(<div aprop="1" bprop="2" />, { maxInlineAttributesLineLength: 100 }))', () => {
+    expect(
+      reactElementToJSXString(<div aprop="1" bprop="2" />, {maxInlineAttributesLineLength: 100})
+    ).toEqual('<div aprop="1" bprop="2" />');
+  });
+  // Validate one prop will go to new line if length is greater than option. One prop is a special case since
+  // the old logic operated on whether or not two or more attributes were present. Making sure this overrides
+  // that older logic
+  it('reactElementToJSXString(<div aprop="1"/>, { maxInlineAttributesLineLength: 5 }))', () => {
+    expect(
+      reactElementToJSXString(<div aprop="1"/>, {maxInlineAttributesLineLength: 5})
+    ).toEqual(`<div
+  aprop="1"
+/>`);
+  });
+  // Validate two props will go be multiline if their length is greater than the given option
+  it('reactElementToJSXString(<div aprop="1" bprop="2" />, { maxInlineAttributesLineLength: 10 }))', () => {
+    expect(
+      reactElementToJSXString(<div aprop="1" bprop="2" />, {maxInlineAttributesLineLength: 10})
+    ).toEqual(`<div
+  aprop="1"
+  bprop="2"
+/>`);
+  });
+
+  // Same tests as above but with elements that have children. The closing braces for elements with children and without children
+  // run through different code paths so we have both sets of test to specify the behavior of both when this option is present
+  it('reactElementToJSXString(<div aprop="1" bprop="2">content</div>, { maxInlineAttributesLineLength: 100 }))', () => {
+    expect(
+      reactElementToJSXString(<div aprop="1" bprop="2">content</div>, {maxInlineAttributesLineLength: 100})
+    ).toEqual(`<div aprop="1" bprop="2">
+  content
+</div>`);
+  });
+  it('reactElementToJSXString(<div aprop="1">content</div>, { maxInlineAttributesLineLength: 5 }))', () => {
+    expect(
+      reactElementToJSXString(<div aprop="1">content</div>, {maxInlineAttributesLineLength: 5})
+    ).toEqual(`<div
+  aprop="1"
+>
+  content
+</div>`);
+  });
+  it('reactElementToJSXString(<div aprop="1" bprop="2">content</div>, { maxInlineAttributesLineLength: 10 }))', () => {
+    expect(
+      reactElementToJSXString(<div aprop="1" bprop="2">content</div>, {maxInlineAttributesLineLength: 10})
+    ).toEqual(`<div
+  aprop="1"
+  bprop="2"
+>
+  content
+</div>`);
+  });
+
+  // Multi-level inline attribute test
+  it('reactElementToJSXString(<div><div>content</div></div>, { maxInlineAttributesLineLength: 24 }))', () => {
+    expect(
+      reactElementToJSXString(<div aprop="1" bprop="2"><div cprop="3" dprop="4">content</div></div>, {
+        maxInlineAttributesLineLength: 24,
+      })
+    ).toEqual(`<div aprop="1" bprop="2">
+  <div
+    cprop="3"
+    dprop="4"
+  >
+    content
+  </div>
+</div>`);
   });
 });

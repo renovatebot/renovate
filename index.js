@@ -14,6 +14,7 @@ export default function reactElementToJSXString(
     showFunctions = false,
     tabStop = 2,
     useBooleanShorthandSyntax = true,
+    maxInlineAttributesLineLength,
   } = {}
 ) {
   const getDisplayName = displayName || getDefaultDisplayName;
@@ -52,6 +53,8 @@ got \`${typeof Element}\``
       .concat(props)
       .filter(({name}) => filterProps.indexOf(name) === -1);
 
+    let outMultilineAttr = out;
+    let outInlineAttr = out;
     let containsMultilineAttr = false;
     attributes.forEach(attribute => {
       let isMultilineAttr = false;
@@ -63,21 +66,24 @@ got \`${typeof Element}\``
         containsMultilineAttr = true;
       }
 
-      if ((attributes.length === 1 || inline) && !isMultilineAttr) {
-        out += ' ';
-      } else {
-        out += `\n${spacer(lvl + 1, tabStop)}`;
-      }
+      outInlineAttr += ' ';
+      outMultilineAttr += `\n${spacer(lvl + 1, tabStop)}`;
 
       if (useBooleanShorthandSyntax && attribute.value === '{true}') {
-        out += `${attribute.name}`;
+        outInlineAttr += `${attribute.name}`;
+        outMultilineAttr += `${attribute.name}`;
       } else {
-        out += `${attribute.name}=${attribute.value}`;
+        outInlineAttr += `${attribute.name}=${attribute.value}`;
+        outMultilineAttr += `${attribute.name}=${attribute.value}`;
       }
     });
 
-    if ((attributes.length > 1 || containsMultilineAttr) && !inline) {
-      out += `\n${spacer(lvl, tabStop)}`;
+    outMultilineAttr += `\n${spacer(lvl, tabStop)}`;
+
+    if (shouldRenderMultilineAttr(attributes, outInlineAttr, containsMultilineAttr, inline, lvl)) {
+      out = outMultilineAttr;
+    } else {
+      out = outInlineAttr;
     }
 
     if (children.length > 0) {
@@ -103,7 +109,7 @@ got \`${typeof Element}\``
       }
       out += `</${tagName}>`;
     } else {
-      if (attributes.length <= 1) {
+      if (!isInlineAttributeTooLong(attributes, outInlineAttr, lvl)) {
         out += ' ';
       }
 
@@ -111,6 +117,20 @@ got \`${typeof Element}\``
     }
 
     return out;
+  }
+
+  function shouldRenderMultilineAttr(attributes, inlineAttributeString, containsMultilineAttr, inline, lvl) {
+    return (isInlineAttributeTooLong(attributes, inlineAttributeString, lvl) || containsMultilineAttr) && !inline;
+  }
+
+  function isInlineAttributeTooLong(attributes, inlineAttributeString, lvl) {
+    if (typeof maxInlineAttributesLineLength === 'undefined') {
+      // For backwards compatibility, if the new option is undefined, use previous logic to determine
+      // whether or not to render multiline attributes based on the number of attributes
+      return attributes.length > 1;
+    } else {
+      return spacer(lvl, tabStop).length + inlineAttributeString.length > maxInlineAttributesLineLength;
+    }
   }
 
   function formatProps(props, defaultProps, inline, lvl) {
