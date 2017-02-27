@@ -1,3 +1,13 @@
+<a name="6.2.0"></a>
+# [6.2.0](https://github.com/algolia/react-element-to-jsx-string/compare/v6.0.0...v6.2.0) (2017-02-27)
+
+
+### Features
+
+* **inline attributes:** Allow formatting attribute on the same line ([da72176](https://github.com/algolia/react-element-to-jsx-string/commit/da72176))
+
+
+
 <a name="6.0.0"></a>
 # [6.0.0](https://github.com/algolia/react-element-to-jsx-string/compare/v5.0.7...v6.0.0) (2017-01-03)
 
