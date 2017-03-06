@@ -1,3 +1,8 @@
+<a name="6.3.0"></a>
+# [6.3.0](https://github.com/algolia/react-element-to-jsx-string/compare/v6.2.0...v6.3.0) (2017-03-06)
+
+
+
 <a name="6.2.0"></a>
 # [6.2.0](https://github.com/algolia/react-element-to-jsx-string/compare/v6.0.0...v6.2.0) (2017-02-27)
 
