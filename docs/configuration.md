@@ -56,24 +56,25 @@ $ node renovate --help
 
   Options:
 
-    -h, --help                    output usage information
-    --enabled [boolean]           Enable or disable renovate
-    --onboarding [boolean]        Require a Configuration PR first
-    --platform <string>           Platform type of repository
-    --endpoint <string>           Custom endpoint to use
-    --token <string>              Repository Auth Token
-    --package-files <list>        Package file paths
-    --dep-types <list>            Dependency types
-    --ignore-deps <list>          Dependencies to ignore
-    --ignore-future [boolean]     Ignore versions tagged as "future"
-    --ignore-unstable [boolean]   Ignore versions with unstable semver
-    --respect-latest [boolean]    Ignore versions newer than npm "latest" version
-    --recreate-closed [boolean]   Recreate PRs even if same ones were closed previously
-    --rebase-stale-prs [boolean]  Rebase stale PRs
-    --labels <list>               Labels to add to Pull Request
-    --assignees <list>            Assignees for Pull Request
-    --reviewers <list>            Requested reviewers for Pull Requests
-    --log-level <string>          Logging level
+    -h, --help                               output usage information
+    --enabled [boolean]                      Enable or disable renovate
+    --onboarding [boolean]                   Require a Configuration PR first
+    --platform <string>                      Platform type of repository
+    --endpoint <string>                      Custom endpoint to use
+    --token <string>                         Repository Auth Token
+    --package-files <list>                   Package file paths
+    --dep-types <list>                       Dependency types
+    --ignore-deps <list>                     Dependencies to ignore
+    --ignore-future [boolean]                Ignore versions tagged as "future"
+    --ignore-unstable [boolean]              Ignore versions with unstable semver
+    --respect-latest [boolean]               Ignore versions newer than npm "latest" version
+    --recreate-closed [boolean]              Recreate PRs even if same ones were closed previously
+    --rebase-stale-prs [boolean]             Rebase stale PRs
+    --labels <list>                          Labels to add to Pull Request
+    --assignees <list>                       Assignees for Pull Request
+    --reviewers <list>                       Requested reviewers for Pull Requests
+    --gitlab-remove-source-branch [boolean]  Remove source branch on merge
+    --log-level <string>                     Logging level
 
   Examples:
 
@@ -126,4 +127,5 @@ Obviously, you can't set repository or package file location with this method.
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
 | `reviewers` | Requested reviewers for Pull Requests | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
+| `gitlabRemoveSourceBranch` | Remove source branch on merge | boolean | `true` | `RENOVATE_GITLAB_REMOVE_SOURCE_BRANCH` | `--gitlab-remove-source-branch` |
 | `logLevel` | Logging level | string | `"info"` | `LOG_LEVEL` | `--log-level` |
