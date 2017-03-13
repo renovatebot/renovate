@@ -51,10 +51,10 @@ $ node renovate --help
     --ignore-unstable [boolean]   Ignore versions with unstable semver
     --respect-latest [boolean]    Ignore versions newer than npm "latest" version
     --recreate-closed [boolean]   Recreate PRs even if same ones were closed previously
-    --rebase-stale-prs [boolean]  Rebase stale PRs
+    --rebase-stale-prs [boolean]  Rebase stale PRs (GitHub only)
     --labels <list>               Labels to add to Pull Request
     --assignees <list>            Assignees for Pull Request
-    --reviewers <list>            Requested reviewers for Pull Requests
+    --reviewers <list>            Requested reviewers for Pull Requests (GitHub only)
     --log-level <string>          Logging level
 
   Examples:
