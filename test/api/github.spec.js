@@ -263,8 +263,8 @@ describe('api/github', () => {
     });
     [
       { number: 1, state: 'closed', base: { sha: '1234' } },
-      { number: 1, state: 'open', mergeable_state: 'dirty', base: { sha: '1234' } },
-      { number: 1, state: 'open', base: { sha: '5678' } },
+      { number: 1, state: 'open', mergeable_state: 'dirty', base: { sha: '1234' }, commits: 1 },
+      { number: 1, state: 'open', base: { sha: '5678' }, commits: 1 },
     ].forEach((body, i) => {
       it(`should return a PR object - ${i}`, async () => {
         await initRepo('some/repo', 'token');
@@ -274,6 +274,52 @@ describe('api/github', () => {
         const pr = await github.getPr(1234);
         expect(pr).toMatchSnapshot();
       });
+    });
+    it('should return a rebaseable PR despite multiple commits', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          number: 1,
+          state: 'open',
+          mergeable_state: 'dirty',
+          base: { sha: '1234' },
+          commits: 2,
+        },
+      }));
+      ghGot.mockImplementationOnce(() => ({
+        body: [{
+          author: {
+            login: 'foo',
+          },
+        }],
+      }));
+      const pr = await github.getPr(1234);
+      expect(pr).toMatchSnapshot();
+    });
+    it('should return an unrebaseable PR if multiple authors', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          number: 1,
+          state: 'open',
+          mergeable_state: 'dirty',
+          base: { sha: '1234' },
+          commits: 2,
+        },
+      }));
+      ghGot.mockImplementationOnce(() => ({
+        body: [{
+          author: {
+            login: 'foo',
+          },
+        }, {
+          author: {
+            login: 'bar',
+          },
+        }],
+      }));
+      const pr = await github.getPr(1234);
+      expect(pr).toMatchSnapshot();
     });
   });
   describe('updatePr(prNo, title, body)', () => {
