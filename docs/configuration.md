@@ -69,10 +69,10 @@ $ node renovate --help
     --ignore-unstable [boolean]   Ignore versions with unstable semver
     --respect-latest [boolean]    Ignore versions newer than npm "latest" version
     --recreate-closed [boolean]   Recreate PRs even if same ones were closed previously
-    --rebase-stale-prs [boolean]  Rebase stale PRs
+    --rebase-stale-prs [boolean]  Rebase stale PRs (GitHub only)
     --labels <list>               Labels to add to Pull Request
     --assignees <list>            Assignees for Pull Request
-    --reviewers <list>            Requested reviewers for Pull Requests
+    --reviewers <list>            Requested reviewers for Pull Requests (GitHub only)
     --log-level <string>          Logging level
 
   Examples:
@@ -110,7 +110,7 @@ Obviously, you can't set repository or package file location with this method.
 | `platform` | Platform type of repository | string | `"github"` | `RENOVATE_PLATFORM` | `--platform` |
 | `endpoint` | Custom endpoint to use | string | `null` | `RENOVATE_ENDPOINT` | `--endpoint` |
 | `token` | Repository Auth Token | string | `null` | `RENOVATE_TOKEN` | `--token` |
-| `repositories` | GitHub repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
+| `repositories` | List of Repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
 | `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | `depTypes` | Dependency types | list | `["dependencies", "devDependencies", "optionalDependencies"]` | `RENOVATE_DEP_TYPES` | `--dep-types` |
 | `ignoreDeps` | Dependencies to ignore | list | `[]` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
@@ -118,12 +118,12 @@ Obviously, you can't set repository or package file location with this method.
 | `ignoreUnstable` | Ignore versions with unstable semver | boolean | `true` | `RENOVATE_IGNORE_UNSTABLE` | `--ignore-unstable` |
 | `respectLatest` | Ignore versions newer than npm "latest" version | boolean | `true` | `RENOVATE_RESPECT_LATEST` | `--respect-latest` |
 | `recreateClosed` | Recreate PRs even if same ones were closed previously | boolean | `false` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
-| `rebaseStalePrs` | Rebase stale PRs | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
+| `rebaseStalePrs` | Rebase stale PRs (GitHub only) | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
 | `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` |  |  |
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` |  |  |
 | `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}"` |  |  |
 | `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` |  |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
-| `reviewers` | Requested reviewers for Pull Requests | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
+| `reviewers` | Requested reviewers for Pull Requests (GitHub only) | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
 | `logLevel` | Logging level | string | `"info"` | `LOG_LEVEL` | `--log-level` |
