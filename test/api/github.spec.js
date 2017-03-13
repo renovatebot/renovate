@@ -275,6 +275,52 @@ describe('api/github', () => {
         expect(pr).toMatchSnapshot();
       });
     });
+    it('should return a rebaseable PR despite multiple commits', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          number: 1,
+          state: 'open',
+          mergeable_state: 'dirty',
+          base: { sha: '1234' },
+          commits: 2,
+        },
+      }));
+      ghGot.mockImplementationOnce(() => ({
+        body: [{
+          author: {
+            login: 'foo',
+          },
+        }],
+      }));
+      const pr = await github.getPr(1234);
+      expect(pr).toMatchSnapshot();
+    });
+    it('should return an unrebaseable PR if multiple authors', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          number: 1,
+          state: 'open',
+          mergeable_state: 'dirty',
+          base: { sha: '1234' },
+          commits: 2,
+        },
+      }));
+      ghGot.mockImplementationOnce(() => ({
+        body: [{
+          author: {
+            login: 'foo',
+          },
+        }, {
+          author: {
+            login: 'bar',
+          },
+        }],
+      }));
+      const pr = await github.getPr(1234);
+      expect(pr).toMatchSnapshot();
+    });
   });
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {

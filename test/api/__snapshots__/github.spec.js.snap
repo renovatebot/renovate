@@ -553,6 +553,35 @@ Object {
 }
 `;
 
+exports[`api/github getPr(prNo) should return a rebaseable PR despite multiple commits 1`] = `
+Object {
+  "base": Object {
+    "sha": "1234",
+  },
+  "canRebase": true,
+  "commits": 2,
+  "displayNumber": "Pull Request #1",
+  "isUnmergeable": true,
+  "mergeable_state": "dirty",
+  "number": 1,
+  "state": "open",
+}
+`;
+
+exports[`api/github getPr(prNo) should return an unrebaseable PR if multiple authors 1`] = `
+Object {
+  "base": Object {
+    "sha": "1234",
+  },
+  "commits": 2,
+  "displayNumber": "Pull Request #1",
+  "isUnmergeable": true,
+  "mergeable_state": "dirty",
+  "number": 1,
+  "state": "open",
+}
+`;
+
 exports[`api/github initRepo should initialise the config for the repo - 0 1`] = `
 Array [
   Array [
