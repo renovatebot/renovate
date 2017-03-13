@@ -529,6 +529,8 @@ Object {
   "base": Object {
     "sha": "1234",
   },
+  "canRebase": true,
+  "commits": 1,
   "displayNumber": "Pull Request #1",
   "isUnmergeable": true,
   "mergeable_state": "dirty",
@@ -542,6 +544,8 @@ Object {
   "base": Object {
     "sha": "5678",
   },
+  "canRebase": true,
+  "commits": 1,
   "displayNumber": "Pull Request #1",
   "isStale": true,
   "number": 1,

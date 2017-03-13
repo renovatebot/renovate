@@ -263,8 +263,8 @@ describe('api/github', () => {
     });
     [
       { number: 1, state: 'closed', base: { sha: '1234' } },
-      { number: 1, state: 'open', mergeable_state: 'dirty', base: { sha: '1234' } },
-      { number: 1, state: 'open', base: { sha: '5678' } },
+      { number: 1, state: 'open', mergeable_state: 'dirty', base: { sha: '1234' }, commits: 1 },
+      { number: 1, state: 'open', base: { sha: '5678' }, commits: 1 },
     ].forEach((body, i) => {
       it(`should return a PR object - ${i}`, async () => {
         await initRepo('some/repo', 'token');
