@@ -55,6 +55,7 @@ $ node renovate --help
     --labels <list>               Labels to add to Pull Request
     --assignees <list>            Assignees for Pull Request
     --reviewers <list>            Requested reviewers for Pull Requests (GitHub only)
+    --pinVersions [boolean]       Convert ranged versions to a pinned version
     --log-level <string>          Logging level
 
   Examples:

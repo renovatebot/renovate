@@ -114,6 +114,7 @@ describe('workers/branch', () => {
       config.depName = 'dummy';
       config.currentVersion = '1.0.0';
       config.newVersion = '1.1.0';
+      config.newVersionRange = '1.1.0';
     });
     it('returns if new content matches old', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
