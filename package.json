@@ -65,7 +65,7 @@
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-promise": "3.5.0",
     "mkdirp": "0.5.1",
-    "np": "2.12.0",
+    "np": "2.13.0",
     "rimraf": "2.6.1"
   },
   "babel": {
