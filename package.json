@@ -47,7 +47,7 @@
     "got": "6.7.1",
     "handlebars": "4.0.6",
     "jest": "19.0.2",
-    "json-stringify-pretty-compact": "1.0.2",
+    "json-stringify-pretty-compact": "1.0.3",
     "lodash": "4.17.4",
     "registry-auth-token": "3.1.0",
     "registry-url": "3.1.0",
