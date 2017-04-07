@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
-  "version": "8.9.0",
+  "version": "8.9.3",
   "bin": "dist/renovate.js",
   "main": "dist/index.js",
   "scripts": {
@@ -47,7 +47,7 @@
     "got": "6.7.1",
     "handlebars": "4.0.6",
     "jest": "19.0.2",
-    "json-stringify-pretty-compact": "1.0.2",
+    "json-stringify-pretty-compact": "1.0.3",
     "lodash": "4.17.4",
     "registry-auth-token": "3.1.0",
     "registry-url": "3.1.0",
@@ -60,12 +60,12 @@
     "babel-cli": "6.24.0",
     "babel-plugin-transform-async-to-generator": "6.22.0",
     "chai": "3.5.0",
-    "eslint": "3.17.1",
-    "eslint-config-airbnb-base": "11.1.1",
+    "eslint": "3.18.0",
+    "eslint-config-airbnb-base": "11.1.2",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-promise": "3.5.0",
     "mkdirp": "0.5.1",
-    "np": "2.12.0",
+    "np": "2.13.1",
     "rimraf": "2.6.1"
   },
   "babel": {
