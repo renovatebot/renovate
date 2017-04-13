@@ -26,13 +26,15 @@ describe('helpers/versions', () => {
           newVersion: '0.9.7',
           newVersionMajor: 0,
           upgradeType: 'minor',
-          workingVersion: '0.4.0',
+          changeLogFromVersion: '0.4.0',
+          changeLogToVersion: '0.9.7',
         },
         {
           newVersion: '1.4.1',
           newVersionMajor: 1,
           upgradeType: 'major',
-          workingVersion: '0.4.0',
+          changeLogFromVersion: '0.4.0',
+          changeLogToVersion: '1.4.1',
         },
       ];
       expect(versionsHelper.determineUpgrades(qJson, '0.4.0', defaultConfig)).toEqual(upgradeVersions);
@@ -43,13 +45,15 @@ describe('helpers/versions', () => {
           newVersion: '0.9.7',
           newVersionMajor: 0,
           upgradeType: 'minor',
-          workingVersion: '0.4.4',
+          changeLogFromVersion: '0.4.4',
+          changeLogToVersion: '0.9.7',
         },
         {
           newVersion: '1.4.1',
           newVersionMajor: 1,
           upgradeType: 'major',
-          workingVersion: '0.4.4',
+          changeLogFromVersion: '0.4.4',
+          changeLogToVersion: '1.4.1',
         },
       ];
       versionsHelper.determineUpgrades(qJson, '~0.4.0', defaultConfig).should.eql(pinVersions);
@@ -60,7 +64,8 @@ describe('helpers/versions', () => {
           newVersion: '1.4.1',
           newVersionMajor: 1,
           upgradeType: 'major',
-          workingVersion: '0.9.7',
+          changeLogFromVersion: '0.9.7',
+          changeLogToVersion: '1.4.1',
         },
       ];
       expect(versionsHelper.determineUpgrades(qJson, '~0.9.0', defaultConfig)).toEqual(pinVersions);
@@ -71,7 +76,8 @@ describe('helpers/versions', () => {
           newVersion: '1.4.1',
           newVersionMajor: 1,
           upgradeType: 'minor',
-          workingVersion: '1.0.1',
+          changeLogFromVersion: '1.0.1',
+          changeLogToVersion: '1.4.1',
         },
       ];
       expect(versionsHelper.determineUpgrades(qJson, '~1.0.0', defaultConfig)).toEqual(upgradeVersions);
@@ -97,7 +103,8 @@ describe('helpers/versions', () => {
           newVersion: '1.4.1',
           newVersionMajor: 1,
           upgradeType: 'minor',
-          workingVersion: '1.3.0',
+          changeLogFromVersion: '1.3.0',
+          changeLogToVersion: '1.4.1',
         },
       ];
       expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', defaultConfig)).toEqual(upgradeVersions);
@@ -108,7 +115,8 @@ describe('helpers/versions', () => {
           newVersion: '~1.4.0',
           newVersionMajor: 1,
           upgradeType: 'minor',
-          workingVersion: '1.3.0',
+          changeLogFromVersion: '1.3.0',
+          changeLogToVersion: '1.4.1',
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -121,32 +129,36 @@ describe('helpers/versions', () => {
           newVersion: '~0.9.0',
           newVersionMajor: 0,
           upgradeType: 'minor',
-          workingVersion: '0.7.2',
+          changeLogFromVersion: '0.7.2',
+          changeLogToVersion: '0.9.7',
         },
         {
           newVersion: '~1.4.0',
           newVersionMajor: 1,
           upgradeType: 'major',
-          workingVersion: '0.7.2',
+          changeLogFromVersion: '0.7.2',
+          changeLogToVersion: '1.4.1',
         },
       ];
       const config = Object.assign({}, defaultConfig);
       config.pinVersions = false;
       expect(versionsHelper.determineUpgrades(qJson, '~0.7.0', config)).toEqual(upgradeVersions);
     });
-    it('upgrades multiple tilde ranges without pinning', () => {
+    it('upgrades multiple caret ranges without pinning', () => {
       const upgradeVersions = [
         {
           newVersion: '^0.9.0',
           newVersionMajor: 0,
           upgradeType: 'minor',
-          workingVersion: '0.7.2',
+          changeLogFromVersion: '0.7.2',
+          changeLogToVersion: '0.9.7',
         },
         {
           newVersion: '^1.0.0',
           newVersionMajor: 1,
           upgradeType: 'major',
-          workingVersion: '0.7.2',
+          changeLogFromVersion: '0.7.2',
+          changeLogToVersion: '1.4.1',
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -163,19 +175,21 @@ describe('helpers/versions', () => {
       config.pinVersions = false;
       expect(versionsHelper.determineUpgrades(qJson, '>= 0.7.0', config)).toHaveLength(0);
     });
-    it('upgrades multiple tilde ranges without pinning', () => {
+    it('upgrades less than equal ranges without pinning', () => {
       const upgradeVersions = [
         {
           newVersion: '<= 0.9.7',
           newVersionMajor: 0,
           upgradeType: 'minor',
-          workingVersion: '0.7.2',
+          changeLogFromVersion: '0.7.2',
+          changeLogToVersion: '0.9.7',
         },
         {
           newVersion: '<= 1.4.1',
           newVersionMajor: 1,
           upgradeType: 'major',
-          workingVersion: '0.7.2',
+          changeLogFromVersion: '0.7.2',
+          changeLogToVersion: '1.4.1',
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -190,7 +204,8 @@ describe('helpers/versions', () => {
           newVersion: '2.0.1',
           newVersionMajor: 2,
           upgradeType: 'major',
-          workingVersion: '1.4.1',
+          changeLogFromVersion: '1.4.1',
+          changeLogToVersion: '2.0.1',
         },
       ];
       versionsHelper.determineUpgrades(qJson, '1.4.1', config).should.eql(upgradeVersions);
@@ -204,7 +219,8 @@ describe('helpers/versions', () => {
           newVersion: '2.0.3',
           newVersionMajor: 2,
           upgradeType: 'major',
-          workingVersion: '1.4.1',
+          changeLogFromVersion: '1.4.1',
+          changeLogToVersion: '2.0.3',
         },
       ];
       versionsHelper.determineUpgrades(qJson, '1.4.1', config).should.eql(upgradeVersions);
@@ -234,7 +250,8 @@ describe('helpers/versions', () => {
           newVersion: '1.1.0-beta',
           newVersionMajor: 1,
           upgradeType: 'minor',
-          workingVersion: '1.0.0-beta',
+          changeLogFromVersion: '1.0.0-beta',
+          changeLogToVersion: '1.1.0-beta',
         },
       ];
       versionsHelper.determineUpgrades({
