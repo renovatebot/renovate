@@ -56,25 +56,26 @@ $ node renovate --help
 
   Options:
 
-    -h, --help                    output usage information
-    --enabled [boolean]           Enable or disable renovate
-    --onboarding [boolean]        Require a Configuration PR first
-    --platform <string>           Platform type of repository
-    --endpoint <string>           Custom endpoint to use
-    --token <string>              Repository Auth Token
-    --package-files <list>        Package file paths
-    --dep-types <list>            Dependency types
-    --ignore-deps <list>          Dependencies to ignore
-    --ignore-future [boolean]     Ignore versions tagged as "future"
-    --ignore-unstable [boolean]   Ignore versions with unstable semver
-    --respect-latest [boolean]    Ignore versions newer than npm "latest" version
-    --recreate-closed [boolean]   Recreate PRs even if same ones were closed previously
-    --rebase-stale-prs [boolean]  Rebase stale PRs (GitHub only)
-    --labels <list>               Labels to add to Pull Request
-    --assignees <list>            Assignees for Pull Request
-    --reviewers <list>            Requested reviewers for Pull Requests (GitHub only)
-    --pin-versions [boolean]      Convert ranged versions in package.json to pinned versions
-    --log-level <string>          Logging level
+    -h, --help                      output usage information
+    --enabled [boolean]             Enable or disable renovate
+    --onboarding [boolean]          Require a Configuration PR first
+    --platform <string>             Platform type of repository
+    --endpoint <string>             Custom endpoint to use
+    --token <string>                Repository Auth Token
+    --package-files <list>          Package file paths
+    --dep-types <list>              Dependency types
+    --ignore-deps <list>            Dependencies to ignore
+    --ignore-future [boolean]       Ignore versions tagged as "future"
+    --ignore-unstable [boolean]     Ignore versions with unstable semver
+    --respect-latest [boolean]      Ignore versions newer than npm "latest" version
+    --recreate-closed [boolean]     Recreate PRs even if same ones were closed previously
+    --rebase-stale-prs [boolean]    Rebase stale PRs (GitHub only)
+    --maintain-yarn-lock [boolean]  Keep yarn.lock updated in base branch (no monorepo support)
+    --labels <list>                 Labels to add to Pull Request
+    --assignees <list>              Assignees for Pull Request
+    --reviewers <list>              Requested reviewers for Pull Requests (GitHub only)
+    --pin-versions [boolean]        Convert ranged versions in package.json to pinned versions
+    --log-level <string>            Logging level
 
   Examples:
 
@@ -124,6 +125,11 @@ Obviously, you can't set repository or package file location with this method.
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` |  |  |
 | `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` |  |  |
 | `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` |  |  |
+| `maintainYarnLock` | Keep yarn.lock updated in base branch (no monorepo support) | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
+| `yarnMaintenanceBranchName` | Branch name template when maintaining yarn.lock | string | `"renovate/yarn-lock"` |  |  |
+| `yarnMaintenanceCommitMessage` | Commit message template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
+| `yarnMaintenancePrTitle` | Pull Request title template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
+| `yarnMaintenancePrBody` | Pull Request body template when maintaining yarn.lock | string | `"This PR regenerates yarn.lock files based on the existing `package.json` files."` |  |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
 | `reviewers` | Requested reviewers for Pull Requests (GitHub only) | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
