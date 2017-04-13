@@ -27,12 +27,14 @@ describe('helpers/versions', () => {
           newVersionMajor: 0,
           upgradeType: 'minor',
           changeLogFromVersion: '0.4.4',
+          changeLogToVersion: '0.9.7',
         },
         {
           newVersion: '1.4.1',
           newVersionMajor: 1,
           upgradeType: 'major',
           changeLogFromVersion: '0.4.4',
+          changeLogToVersion: '1.4.1',
         },
       ];
       versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig).should.eql(upgradeVersions);
@@ -44,12 +46,14 @@ describe('helpers/versions', () => {
           newVersionMajor: 0,
           upgradeType: 'minor',
           changeLogFromVersion: '0.4.4',
+          changeLogToVersion: '0.9.7',
         },
         {
           newVersion: '1.4.1',
           newVersionMajor: 1,
           upgradeType: 'major',
           changeLogFromVersion: '0.4.4',
+          changeLogToVersion: '1.4.1',
         },
       ];
       versionsHelper.determineUpgrades(qJson, '~0.4.0', defaultConfig).should.eql(pinVersions);
@@ -63,6 +67,7 @@ describe('helpers/versions', () => {
           newVersionMajor: 2,
           upgradeType: 'major',
           changeLogFromVersion: '1.4.1',
+          changeLogToVersion: '2.0.1',
         },
       ];
       versionsHelper.determineUpgrades(qJson, '1.4.1', config).should.eql(upgradeVersions);
@@ -77,6 +82,7 @@ describe('helpers/versions', () => {
           newVersionMajor: 2,
           upgradeType: 'major',
           changeLogFromVersion: '1.4.1',
+          changeLogToVersion: '2.0.3',
         },
       ];
       versionsHelper.determineUpgrades(qJson, '1.4.1', config).should.eql(upgradeVersions);
@@ -107,6 +113,7 @@ describe('helpers/versions', () => {
           newVersionMajor: 1,
           upgradeType: 'minor',
           changeLogFromVersion: '1.0.0-beta',
+          changeLogToVersion: '1.1.0-beta',
         },
       ];
       versionsHelper.determineUpgrades({
