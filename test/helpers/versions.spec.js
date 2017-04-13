@@ -20,24 +20,24 @@ describe('helpers/versions', () => {
       };
       versionsHelper.determineUpgrades(testDep, '1.0.0', defaultConfig).should.have.length(0);
     });
-    it('supports minor and major upgrades for pinned versions', () => {
+    it('supports minor and major upgrades for tilde ranges', () => {
       const upgradeVersions = [
         {
           newVersion: '0.9.7',
           newVersionMajor: 0,
           upgradeType: 'minor',
-          changeLogFromVersion: '0.4.0',
+          changeLogFromVersion: '0.4.4',
           changeLogToVersion: '0.9.7',
         },
         {
           newVersion: '1.4.1',
           newVersionMajor: 1,
           upgradeType: 'major',
-          changeLogFromVersion: '0.4.0',
+          changeLogFromVersion: '0.4.4',
           changeLogToVersion: '1.4.1',
         },
       ];
-      expect(versionsHelper.determineUpgrades(qJson, '0.4.0', defaultConfig)).toEqual(upgradeVersions);
+      versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig).should.eql(upgradeVersions);
     });
     it('supports minor and major upgrades for ranged versions', () => {
       const pinVersions = [
