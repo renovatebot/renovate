@@ -109,6 +109,18 @@ describe('helpers/versions', () => {
       ];
       expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', defaultConfig)).toEqual(upgradeVersions);
     });
+    it('upgrades .x minor ranges', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '1.4.1',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          changeLogFromVersion: '1.3.0',
+          changeLogToVersion: '1.4.1',
+        },
+      ];
+      expect(versionsHelper.determineUpgrades(qJson, '1.3.x', defaultConfig)).toEqual(upgradeVersions);
+    });
     it('upgrades tilde ranges without pinning', () => {
       const upgradeVersions = [
         {
@@ -122,6 +134,62 @@ describe('helpers/versions', () => {
       const config = Object.assign({}, defaultConfig);
       config.pinVersions = false;
       expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', config)).toEqual(upgradeVersions);
+    });
+    it('upgrades .x major ranges without pinning', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '1.x',
+          newVersionMajor: 1,
+          upgradeType: 'major',
+          changeLogFromVersion: '0.9.7',
+          changeLogToVersion: '1.4.1',
+        },
+      ];
+      const config = Object.assign({}, defaultConfig);
+      config.pinVersions = false;
+      expect(versionsHelper.determineUpgrades(qJson, '0.x', config)).toEqual(upgradeVersions);
+    });
+    it('upgrades .x minor ranges without pinning', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '1.4.x',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          changeLogFromVersion: '1.3.0',
+          changeLogToVersion: '1.4.1',
+        },
+      ];
+      const config = Object.assign({}, defaultConfig);
+      config.pinVersions = false;
+      expect(versionsHelper.determineUpgrades(qJson, '1.3.x', config)).toEqual(upgradeVersions);
+    });
+    it('upgrades shorthand major ranges without pinning', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '1',
+          newVersionMajor: 1,
+          upgradeType: 'major',
+          changeLogFromVersion: '0.9.7',
+          changeLogToVersion: '1.4.1',
+        },
+      ];
+      const config = Object.assign({}, defaultConfig);
+      config.pinVersions = false;
+      expect(versionsHelper.determineUpgrades(qJson, '0', config)).toEqual(upgradeVersions);
+    });
+    it('upgrades shorthand minor ranges without pinning', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '1.4',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          changeLogFromVersion: '1.3.0',
+          changeLogToVersion: '1.4.1',
+        },
+      ];
+      const config = Object.assign({}, defaultConfig);
+      config.pinVersions = false;
+      expect(versionsHelper.determineUpgrades(qJson, '1.3', config)).toEqual(upgradeVersions);
     });
     it('upgrades multiple tilde ranges without pinning', () => {
       const upgradeVersions = [
