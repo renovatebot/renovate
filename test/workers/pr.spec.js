@@ -65,6 +65,7 @@ describe('workers/pr', () => {
       config.depName = 'dummy';
       config.currentVersion = '1.0.0';
       config.newVersion = '1.1.0';
+      config.newVersionRange = '1.1.0';
       config.api.getBranchPr = jest.fn(() => existingPr);
       config.api.updatePr = jest.fn();
       const pr = await prWorker.ensurePr(config);
@@ -74,6 +75,7 @@ describe('workers/pr', () => {
       config.depName = 'dummy';
       config.currentVersion = '1.0.0';
       config.newVersion = '1.2.0';
+      config.newVersionRange = '1.2.0';
       config.api.getBranchPr = jest.fn(() => existingPr);
       config.api.updatePr = jest.fn();
       const pr = await prWorker.ensurePr(config);

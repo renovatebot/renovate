@@ -76,7 +76,7 @@ describe('worker', () => {
   describe('findUpgrades(dependencies, config)', () => {
     let config;
     beforeEach(() => {
-      config = {};
+      config = Object.assign({}, defaultConfig);
       worker.updateDependency = jest.fn();
     });
     it('handles null', async () => {
@@ -92,6 +92,18 @@ describe('worker', () => {
       npmApi.getDependency = jest.fn(() => ({}));
       versionsHelper.determineUpgrades = jest.fn(() => [upgrade]);
       const allUpgrades = await worker.findUpgrades([dep], config);
+      expect(allUpgrades).toMatchObject([Object.assign({}, dep, upgrade)]);
+    });
+    it('handles one ranged dep when not pinning', async () => {
+      const dep = {
+        depName: 'foo',
+        currentVersion: '1.0.0',
+      };
+      const upgrade = { newVersion: '1.1.0' };
+      npmApi.getDependency = jest.fn(() => ({}));
+      versionsHelper.determineRangeUpgrades = jest.fn(() => [upgrade]);
+      const modifiedConfig = Object.assign({}, config, { pinVersions: false });
+      const allUpgrades = await worker.findUpgrades([dep], modifiedConfig);
       expect(allUpgrades).toMatchObject([Object.assign({}, dep, upgrade)]);
     });
     it('handles no upgrades', async () => {
