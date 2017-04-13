@@ -26,16 +26,16 @@ describe('helpers/versions', () => {
           newVersion: '0.9.7',
           newVersionMajor: 0,
           upgradeType: 'minor',
-          workingVersion: '0.4.4',
+          workingVersion: '0.4.0',
         },
         {
           newVersion: '1.4.1',
           newVersionMajor: 1,
           upgradeType: 'major',
-          workingVersion: '0.4.4',
+          workingVersion: '0.4.0',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig).should.eql(upgradeVersions);
+      expect(versionsHelper.determineUpgrades(qJson, '0.4.0', defaultConfig)).toEqual(upgradeVersions);
     });
     it('supports minor and major upgrades for ranged versions', () => {
       const pinVersions = [
@@ -53,6 +53,54 @@ describe('helpers/versions', () => {
         },
       ];
       versionsHelper.determineUpgrades(qJson, '~0.4.0', defaultConfig).should.eql(pinVersions);
+    });
+    it('ignores pinning for ranges when other upgrade exists', () => {
+      const pinVersions = [
+        {
+          newVersion: '1.4.1',
+          newVersionMajor: 1,
+          upgradeType: 'major',
+          workingVersion: '0.9.7',
+        },
+      ];
+      expect(versionsHelper.determineUpgrades(qJson, '~0.9.0', defaultConfig)).toEqual(pinVersions);
+    });
+    it('upgrades minor ranged versions', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '1.4.1',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          workingVersion: '1.0.1',
+        },
+      ];
+      expect(versionsHelper.determineUpgrades(qJson, '~1.0.0', defaultConfig)).toEqual(upgradeVersions);
+    });
+    it('pins minor ranged versions', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '1.4.1',
+          newVersionMajor: 1,
+          upgradeType: 'pin',
+        },
+      ];
+      expect(versionsHelper.determineUpgrades(qJson, '^1.0.0', defaultConfig)).toEqual(upgradeVersions);
+    });
+    it('ignores minor ranged versions when not pinning', () => {
+      const noPinConfig = Object.assign({}, defaultConfig);
+      noPinConfig.pinVersions = false;
+      expect(versionsHelper.determineUpgrades(qJson, '^1.0.0', noPinConfig)).toHaveLength(0);
+    });
+    it('upgrades tilde ranges', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '1.4.1',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          workingVersion: '1.3.0',
+        },
+      ];
+      expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', defaultConfig)).toEqual(upgradeVersions);
     });
     it('supports > latest versions if configured', () => {
       const config = Object.assign({}, defaultConfig);
