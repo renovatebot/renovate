@@ -73,6 +73,7 @@ $ node renovate --help
     --labels <list>               Labels to add to Pull Request
     --assignees <list>            Assignees for Pull Request
     --reviewers <list>            Requested reviewers for Pull Requests (GitHub only)
+    --pin-versions [boolean]      Convert ranged versions in package.json to pinned versions
     --log-level <string>          Logging level
 
   Examples:
@@ -121,9 +122,10 @@ Obviously, you can't set repository or package file location with this method.
 | `rebaseStalePrs` | Rebase stale PRs (GitHub only) | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
 | `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` |  |  |
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` |  |  |
-| `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}"` |  |  |
+| `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` |  |  |
 | `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` |  |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
 | `reviewers` | Requested reviewers for Pull Requests (GitHub only) | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
+| `pinVersions` | Convert ranged versions in package.json to pinned versions | boolean | `true` | `RENOVATE_PIN_VERSIONS` | `--pin-versions` |
 | `logLevel` | Logging level | string | `"info"` | `LOG_LEVEL` | `--log-level` |
