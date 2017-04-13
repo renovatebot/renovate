@@ -62,6 +62,7 @@ $ node renovate --help
     --platform <string>             Platform type of repository
     --endpoint <string>             Custom endpoint to use
     --token <string>                Repository Auth Token
+    --autodiscover [boolean]        Autodiscover all repositories
     --package-files <list>          Package file paths
     --dep-types <list>              Dependency types
     --ignore-deps <list>            Dependencies to ignore
@@ -112,6 +113,7 @@ Obviously, you can't set repository or package file location with this method.
 | `platform` | Platform type of repository | string | `"github"` | `RENOVATE_PLATFORM` | `--platform` |
 | `endpoint` | Custom endpoint to use | string | `null` | `RENOVATE_ENDPOINT` | `--endpoint` |
 | `token` | Repository Auth Token | string | `null` | `RENOVATE_TOKEN` | `--token` |
+| `autodiscover` | Autodiscover all repositories | boolean | `false` | `RENOVATE_AUTODISCOVER` | `--autodiscover` |
 | `repositories` | List of Repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
 | `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | `depTypes` | Dependency types | list | `["dependencies", "devDependencies", "optionalDependencies"]` | `RENOVATE_DEP_TYPES` | `--dep-types` |
