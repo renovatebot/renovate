@@ -70,10 +70,11 @@ $ node renovate --help
     --respect-latest [boolean]      Ignore versions newer than npm "latest" version
     --recreate-closed [boolean]     Recreate PRs even if same ones were closed previously
     --rebase-stale-prs [boolean]    Rebase stale PRs (GitHub only)
+    --maintain-yarn-lock [boolean]  Keep yarn.lock updated in base branch (no monorepo support)
     --labels <list>                 Labels to add to Pull Request
     --assignees <list>              Assignees for Pull Request
     --reviewers <list>              Requested reviewers for Pull Requests (GitHub only)
-    --maintain-yarn-lock [boolean]  Keep yarn.lock updated in main branch (no monorepo support)
+    --pin-versions [boolean]        Convert ranged versions in package.json to pinned versions
     --log-level <string>            Logging level
 
   Examples:
@@ -122,10 +123,15 @@ Obviously, you can't set repository or package file location with this method.
 | `rebaseStalePrs` | Rebase stale PRs (GitHub only) | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
 | `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` |  |  |
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` |  |  |
-| `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}"` |  |  |
+| `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` |  |  |
 | `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` |  |  |
+| `maintainYarnLock` | Keep yarn.lock updated in base branch (no monorepo support) | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
+| `yarnMaintenanceBranchName` | Branch name template when maintaining yarn.lock | string | `"renovate/yarn-lock"` |  |  |
+| `yarnMaintenanceCommitMessage` | Commit message template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
+| `yarnMaintenancePrTitle` | Pull Request title template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
+| `yarnMaintenancePrBody` | Pull Request body template when maintaining yarn.lock | string | `"This PR regenerates yarn.lock files based on the existing `package.json` files."` |  |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
 | `reviewers` | Requested reviewers for Pull Requests (GitHub only) | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
-| `maintainYarnLock` | Keep yarn.lock updated in main branch (no monorepo support) | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
+| `pinVersions` | Convert ranged versions in package.json to pinned versions | boolean | `true` | `RENOVATE_PIN_VERSIONS` | `--pin-versions` |
 | `logLevel` | Logging level | string | `"info"` | `LOG_LEVEL` | `--log-level` |
