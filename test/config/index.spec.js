@@ -10,31 +10,49 @@ describe('config/index', () => {
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
     });
-    it('throws for no token', () => {
+    it('throws for no token', async () => {
       const env = {};
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
+      let err;
+      try {
+        await configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('At least one repository must be configured');
     });
-    it('supports token in env', () => {
+    it('supports token in env', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
+      let err;
+      try {
+        await configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('At least one repository must be configured');
     });
-    it('supports token in CLI options', () => {
-      const env = {};
+    it('supports token in CLI options', async () => {
       defaultArgv = defaultArgv.concat(['--token=abc']);
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
+      const env = { GITHUB_TOKEN: 'abc' };
+      let err;
+      try {
+        await configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('At least one repository must be configured');
     });
-    it('supports repositories in CLI', () => {
+    it('supports repositories in CLI', async () => {
       const env = {};
       defaultArgv = defaultArgv.concat(['--token=abc', 'foo']);
-      configParser.parseConfigs(env, defaultArgv);
+      await configParser.parseConfigs(env, defaultArgv);
       const repos = configParser.getRepositories();
       should.exist(repos);
       repos.should.have.length(1);
       repos[0].repository.should.eql('foo');
     });
-    it('gets cascaded config', () => {
+    it('gets cascaded config', async () => {
       const env = { RENOVATE_CONFIG_FILE: 'test/_fixtures/config/file.js' };
-      configParser.parseConfigs(env, defaultArgv);
+      await configParser.parseConfigs(env, defaultArgv);
       const repo = configParser.getRepositories().pop();
       should.exist(repo);
       const cascadedConfig = configParser.getCascadedConfig(repo, null);
