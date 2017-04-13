@@ -14,7 +14,7 @@
     "prepublish": "npm run build",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
-    "start-raw": "node --harmony-async-await lib/renovate",
+    "start-raw": "node lib/renovate",
     "test": "npm run eslint && npm run jest",
     "jest": "jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
