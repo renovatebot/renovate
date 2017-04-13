@@ -102,6 +102,19 @@ describe('helpers/versions', () => {
       ];
       expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', defaultConfig)).toEqual(upgradeVersions);
     });
+    it('upgrades tilde ranges without pinning', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '~1.4.0',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          workingVersion: '1.3.0',
+        },
+      ];
+      const config = Object.assign({}, defaultConfig);
+      config.pinVersions = false;
+      expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', config)).toEqual(upgradeVersions);
+    });
     it('supports > latest versions if configured', () => {
       const config = Object.assign({}, defaultConfig);
       config.respectLatest = false;
