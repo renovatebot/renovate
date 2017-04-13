@@ -129,6 +129,7 @@ describe('helpers/versions', () => {
           upgradeType: 'minor',
           changeLogFromVersion: '1.3.0',
           changeLogToVersion: '1.4.1',
+          isRange: true,
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -143,6 +144,7 @@ describe('helpers/versions', () => {
           upgradeType: 'major',
           changeLogFromVersion: '0.9.7',
           changeLogToVersion: '1.4.1',
+          isRange: true,
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -157,6 +159,7 @@ describe('helpers/versions', () => {
           upgradeType: 'minor',
           changeLogFromVersion: '1.3.0',
           changeLogToVersion: '1.4.1',
+          isRange: true,
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -171,6 +174,7 @@ describe('helpers/versions', () => {
           upgradeType: 'major',
           changeLogFromVersion: '0.9.7',
           changeLogToVersion: '1.4.1',
+          isRange: true,
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -185,6 +189,7 @@ describe('helpers/versions', () => {
           upgradeType: 'minor',
           changeLogFromVersion: '1.3.0',
           changeLogToVersion: '1.4.1',
+          isRange: true,
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -199,6 +204,7 @@ describe('helpers/versions', () => {
           upgradeType: 'minor',
           changeLogFromVersion: '0.7.2',
           changeLogToVersion: '0.9.7',
+          isRange: true,
         },
         {
           newVersion: '~1.4.0',
@@ -206,6 +212,7 @@ describe('helpers/versions', () => {
           upgradeType: 'major',
           changeLogFromVersion: '0.7.2',
           changeLogToVersion: '1.4.1',
+          isRange: true,
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -220,6 +227,7 @@ describe('helpers/versions', () => {
           upgradeType: 'minor',
           changeLogFromVersion: '0.7.2',
           changeLogToVersion: '0.9.7',
+          isRange: true,
         },
         {
           newVersion: '^1.0.0',
@@ -227,6 +235,7 @@ describe('helpers/versions', () => {
           upgradeType: 'major',
           changeLogFromVersion: '0.7.2',
           changeLogToVersion: '1.4.1',
+          isRange: true,
         },
       ];
       const config = Object.assign({}, defaultConfig);
@@ -251,6 +260,7 @@ describe('helpers/versions', () => {
           upgradeType: 'minor',
           changeLogFromVersion: '0.7.2',
           changeLogToVersion: '0.9.7',
+          isRange: true,
         },
         {
           newVersion: '<= 1.4.1',
@@ -258,6 +268,7 @@ describe('helpers/versions', () => {
           upgradeType: 'major',
           changeLogFromVersion: '0.7.2',
           changeLogToVersion: '1.4.1',
+          isRange: true,
         },
       ];
       const config = Object.assign({}, defaultConfig);
