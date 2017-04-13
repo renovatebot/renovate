@@ -93,9 +93,8 @@ describe('helpers/versions', () => {
       expect(versionsHelper.determineUpgrades(qJson, '^1.0.0', defaultConfig)).toEqual(upgradeVersions);
     });
     it('ignores minor ranged versions when not pinning', () => {
-      const noPinConfig = Object.assign({}, defaultConfig);
-      noPinConfig.pinVersions = false;
-      expect(versionsHelper.determineUpgrades(qJson, '^1.0.0', noPinConfig)).toHaveLength(0);
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
+      expect(versionsHelper.determineUpgrades(qJson, '^1.0.0', config)).toHaveLength(0);
     });
     it('upgrades tilde ranges', () => {
       const upgradeVersions = [
@@ -132,8 +131,7 @@ describe('helpers/versions', () => {
           isRange: true,
         },
       ];
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', config)).toEqual(upgradeVersions);
     });
     it('upgrades .x major ranges without pinning', () => {
@@ -147,8 +145,7 @@ describe('helpers/versions', () => {
           isRange: true,
         },
       ];
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '0.x', config)).toEqual(upgradeVersions);
     });
     it('upgrades .x minor ranges without pinning', () => {
@@ -162,8 +159,7 @@ describe('helpers/versions', () => {
           isRange: true,
         },
       ];
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '1.3.x', config)).toEqual(upgradeVersions);
     });
     it('upgrades shorthand major ranges without pinning', () => {
@@ -177,8 +173,7 @@ describe('helpers/versions', () => {
           isRange: true,
         },
       ];
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '0', config)).toEqual(upgradeVersions);
     });
     it('upgrades shorthand minor ranges without pinning', () => {
@@ -192,8 +187,7 @@ describe('helpers/versions', () => {
           isRange: true,
         },
       ];
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '1.3', config)).toEqual(upgradeVersions);
     });
     it('upgrades multiple tilde ranges without pinning', () => {
@@ -215,8 +209,7 @@ describe('helpers/versions', () => {
           isRange: true,
         },
       ];
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '~0.7.0', config)).toEqual(upgradeVersions);
     });
     it('upgrades multiple caret ranges without pinning', () => {
@@ -238,18 +231,15 @@ describe('helpers/versions', () => {
           isRange: true,
         },
       ];
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '^0.7.0', config)).toEqual(upgradeVersions);
     });
     it('ignores complex ranges when not pinning', () => {
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '^0.7.0 || ^0.8.0', config)).toHaveLength(0);
     });
     it('returns nothing for greater than ranges', () => {
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '>= 0.7.0', config)).toHaveLength(0);
     });
     it('upgrades less than equal ranges without pinning', () => {
@@ -271,8 +261,7 @@ describe('helpers/versions', () => {
           isRange: true,
         },
       ];
-      const config = Object.assign({}, defaultConfig);
-      config.pinVersions = false;
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '<= 0.7.2', config)).toEqual(upgradeVersions);
     });
     it('supports > latest versions if configured', () => {
