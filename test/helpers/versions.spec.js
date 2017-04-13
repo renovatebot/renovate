@@ -134,6 +134,30 @@ describe('helpers/versions', () => {
       config.pinVersions = false;
       expect(versionsHelper.determineUpgrades(qJson, '~0.7.0', config)).toEqual(upgradeVersions);
     });
+    it('upgrades multiple tilde ranges without pinning', () => {
+      const upgradeVersions = [
+        {
+          newVersion: '^0.9.0',
+          newVersionMajor: 0,
+          upgradeType: 'minor',
+          workingVersion: '0.7.2',
+        },
+        {
+          newVersion: '^1.0.0',
+          newVersionMajor: 1,
+          upgradeType: 'major',
+          workingVersion: '0.7.2',
+        },
+      ];
+      const config = Object.assign({}, defaultConfig);
+      config.pinVersions = false;
+      expect(versionsHelper.determineUpgrades(qJson, '^0.7.0', config)).toEqual(upgradeVersions);
+    });
+    it('ignores complex ranges when not pinning', () => {
+      const config = Object.assign({}, defaultConfig);
+      config.pinVersions = false;
+      expect(versionsHelper.determineUpgrades(qJson, '^0.7.0 || ^0.8.0', config)).toHaveLength(0);
+    });
     it('supports > latest versions if configured', () => {
       const config = Object.assign({}, defaultConfig);
       config.respectLatest = false;
