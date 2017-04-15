@@ -59,17 +59,15 @@ describe('worker', () => {
     });
   });
   describe('processUpgradesSequentially(baseConfig, upgrades)', () => {
-    let config;
     beforeEach(() => {
-      config = {};
       worker.updateDependency = jest.fn();
     });
     it('handles zero upgrades', async () => {
-      await worker.processUpgradesSequentially(config, []);
+      await worker.processUpgradesSequentially([]);
       expect(worker.updateDependency.mock.calls.length).toBe(0);
     });
     it('handles non-zero upgrades', async () => {
-      await worker.processUpgradesSequentially(config, [{}, {}]);
+      await worker.processUpgradesSequentially([{}, {}]);
       expect(worker.updateDependency.mock.calls.length).toBe(2);
     });
   });
@@ -103,6 +101,38 @@ describe('worker', () => {
       versionsHelper.determineUpgrades = jest.fn(() => []);
       const allUpgrades = await worker.findUpgrades([dep], config);
       expect(allUpgrades).toMatchObject([]);
+    });
+  });
+  describe('assignDepConfigs(inputConfig, deps)', () => {
+    let config;
+    let deps;
+    beforeEach(() => {
+      config = {};
+      deps = [];
+    });
+    it('handles empty deps', () => {
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchObject([]);
+    });
+    it('handles string deps', () => {
+      config.foo = 'bar';
+      config.depTypes = ['dependencies', 'devDependencies'];
+      deps.push({
+        depName: 'a',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
+    it('handles multiple deps', () => {
+      config.foo = 'bar';
+      deps.push({
+        depName: 'a',
+      });
+      deps.push({
+        depName: 'b',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
     });
   });
 });
