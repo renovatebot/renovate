@@ -1,5 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`worker assignDepConfigs(inputConfig, deps) handles depType config with override 1`] = `
+Array [
+  Object {
+    "config": Object {
+      "depType": "dependencies",
+      "foo": "beta",
+    },
+    "depName": "a",
+    "depType": "dependencies",
+  },
+]
+`;
+
+exports[`worker assignDepConfigs(inputConfig, deps) handles depType config without override 1`] = `
+Array [
+  Object {
+    "config": Object {
+      "alpha": "beta",
+      "depType": "dependencies",
+      "foo": "bar",
+    },
+    "depName": "a",
+    "depType": "dependencies",
+  },
+]
+`;
+
 exports[`worker assignDepConfigs(inputConfig, deps) handles multiple deps 1`] = `
 Array [
   Object {
