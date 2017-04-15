@@ -85,6 +85,8 @@ $ node renovate --help
     --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
     --maintain-yarn-lock [boolean]       Keep yarn.lock updated in base branch (no monorepo support)
+    --group-name <string>                Human understandable name for the dependency group
+    --group-slug <string>                Slug to use for group (e.g. in branch name). Will be calculated from groupName if null
     --labels <list>                      Labels to add to Pull Request
     --assignees <list>                   Assignees for Pull Request
     --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
@@ -145,6 +147,12 @@ Obviously, you can't set repository or package file location with this method.
 | `yarnMaintenanceCommitMessage` | Commit message template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
 | `yarnMaintenancePrTitle` | Pull Request title template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
 | `yarnMaintenancePrBody` | Pull Request body template when maintaining yarn.lock | string | `"This PR regenerates yarn.lock files based on the existing `package.json` files."` |  |  |
+| `groupName` | Human understandable name for the dependency group | string | `null` | `RENOVATE_GROUP_NAME` | `--group-name` |
+| `groupSlug` | Slug to use for group (e.g. in branch name). Will be calculated from groupName if null | string | `null` | `RENOVATE_GROUP_SLUG` | `--group-slug` |
+| `groupBranchName` | Branch name template for the group | string | `"renovate/{{groupSlug}}"` |  |  |
+| `groupCommitMessage` | Group commit message | string | `"Renovate {{groupName}} packages"` |  |  |
+| `groupPrTitle` | Pull Request title template for the group | string | `"Renovate {{groupName}} packages"` |  |  |
+| `groupPrBody` | Pull Request body template for the group | string | `"This PR renovates the package group \"{{groupName}}\"."` |  |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
 | `reviewers` | Requested reviewers for Pull Requests (GitHub only) | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |

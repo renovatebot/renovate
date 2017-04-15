@@ -54,6 +54,8 @@ $ node renovate --help
     --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
     --maintain-yarn-lock [boolean]       Keep yarn.lock updated in base branch (no monorepo support)
+    --group-name <string>                Human understandable name for the dependency group
+    --group-slug <string>                Slug to use for group (e.g. in branch name). Will be calculated from groupName if null
     --labels <list>                      Labels to add to Pull Request
     --assignees <list>                   Assignees for Pull Request
     --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
