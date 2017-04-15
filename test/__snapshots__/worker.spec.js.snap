@@ -68,3 +68,16 @@ Array [
   },
 ]
 `;
+
+exports[`worker assignDepConfigs(inputConfig, deps) package config overrides depType and general config 1`] = `
+Array [
+  Object {
+    "config": Object {
+      "depType": "dependencies",
+      "foo": "gamma",
+    },
+    "depName": "a",
+    "depType": "dependencies",
+  },
+]
+`;
