@@ -206,6 +206,27 @@ describe('worker', () => {
       const updatedDeps = worker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
+    it('handles regex package config', () => {
+      config.foo = 'bar';
+      config.packages = [{
+        packageName: 'eslint.*',
+        labels: ['eslint'],
+      }];
+      deps.push({
+        depName: 'eslint',
+      });
+      deps.push({
+        depName: 'eslint-foo',
+      });
+      deps.push({
+        depName: 'a',
+      });
+      deps.push({
+        depName: 'also-eslint',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
   });
   describe('getDepTypeConfig(depTypes, depTypeName)', () => {
     it('handles empty depTypes', () => {
