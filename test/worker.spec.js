@@ -58,16 +58,16 @@ describe('worker', () => {
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
   });
-  describe('processUpgradesSequentially(baseConfig, upgrades)', () => {
+  describe('processUpgrades(baseConfig, upgrades)', () => {
     beforeEach(() => {
       worker.updateDependency = jest.fn();
     });
     it('handles zero upgrades', async () => {
-      await worker.processUpgradesSequentially([]);
+      await worker.processUpgrades([]);
       expect(worker.updateDependency.mock.calls.length).toBe(0);
     });
     it('handles non-zero upgrades', async () => {
-      await worker.processUpgradesSequentially([{}, {}]);
+      await worker.processUpgrades([{}, {}]);
       expect(worker.updateDependency.mock.calls.length).toBe(2);
     });
   });
