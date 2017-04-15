@@ -150,8 +150,9 @@ Obviously, you can't set repository or package file location with this method.
 | `groupName` | Human understandable name for the dependency group | string | `null` | `RENOVATE_GROUP_NAME` | `--group-name` |
 | `groupSlug` | Slug to use for group (e.g. in branch name). Will be calculated from groupName if null | string | `null` | `RENOVATE_GROUP_SLUG` | `--group-slug` |
 | `groupBranchName` | Branch name template for the group | string | `"renovate/{{groupSlug}}"` |  |  |
-| `groupPrTitle` | Pull Request title template for the group | string | `"Renovate {{groupName}}"` |  |  |
-| `groupPrBody` | Pull Request body template for the group | string | `"This PR renovates the group {{groupName}}."` |  |  |
+| `groupCommitMessage` | Group commit message | string | `"Renovate {{groupName}} packages"` |  |  |
+| `groupPrTitle` | Pull Request title template for the group | string | `"Renovate {{groupName}} packages"` |  |  |
+| `groupPrBody` | Pull Request body template for the group | string | `"This PR renovates the package group \"{{groupName}}\"."` |  |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
 | `reviewers` | Requested reviewers for Pull Requests (GitHub only) | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
