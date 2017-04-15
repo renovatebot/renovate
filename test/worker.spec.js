@@ -160,6 +160,18 @@ describe('worker', () => {
       const updatedDeps = worker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
+    it('handles package config', () => {
+      config.foo = 'bar';
+      config.packages = [{
+        packageName: 'a',
+        labels: ['renovate'],
+      }];
+      deps.push({
+        depName: 'a',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
   });
   describe('getDepTypeConfig(depTypes, depTypeName)', () => {
     it('handles empty depTypes', () => {

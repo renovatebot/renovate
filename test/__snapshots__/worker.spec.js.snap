@@ -44,6 +44,20 @@ Array [
 ]
 `;
 
+exports[`worker assignDepConfigs(inputConfig, deps) handles package config 1`] = `
+Array [
+  Object {
+    "config": Object {
+      "foo": "bar",
+      "labels": Array [
+        "renovate",
+      ],
+    },
+    "depName": "a",
+  },
+]
+`;
+
 exports[`worker assignDepConfigs(inputConfig, deps) handles string deps 1`] = `
 Array [
   Object {
