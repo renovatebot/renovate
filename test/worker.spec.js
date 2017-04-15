@@ -160,6 +160,73 @@ describe('worker', () => {
       const updatedDeps = worker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
+    it('handles package config', () => {
+      config.foo = 'bar';
+      config.packages = [{
+        packageName: 'a',
+        labels: ['renovate'],
+      }];
+      deps.push({
+        depName: 'a',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
+    it('package config overrides depType and general config', () => {
+      config.foo = 'bar';
+      config.depTypes = [{
+        depType: 'dependencies',
+        foo: 'beta',
+      }];
+      config.packages = [{
+        packageName: 'a',
+        foo: 'gamma',
+      }];
+      deps.push({
+        depName: 'a',
+        depType: 'dependencies',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
+    it('nested package config overrides depType and general config', () => {
+      config.foo = 'bar';
+      config.depTypes = [{
+        depType: 'dependencies',
+        foo: 'beta',
+        packages: [{
+          packageName: 'a',
+          foo: 'gamma',
+        }],
+      }];
+      deps.push({
+        depName: 'a',
+        depType: 'dependencies',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
+    it('handles regex package config', () => {
+      config.foo = 'bar';
+      config.packages = [{
+        packageName: 'eslint.*',
+        labels: ['eslint'],
+      }];
+      deps.push({
+        depName: 'eslint',
+      });
+      deps.push({
+        depName: 'eslint-foo',
+      });
+      deps.push({
+        depName: 'a',
+      });
+      deps.push({
+        depName: 'also-eslint',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
   });
   describe('getDepTypeConfig(depTypes, depTypeName)', () => {
     it('handles empty depTypes', () => {
