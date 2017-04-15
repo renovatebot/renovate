@@ -39,6 +39,32 @@ describe('helpers/versions', () => {
       ];
       versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig).should.eql(upgradeVersions);
     });
+    it('disables major release separation (major)', () => {
+      const config = Object.assign({}, defaultConfig, { separateMajorReleases: false });
+      const upgradeVersions = [
+        {
+          newVersion: '1.4.1',
+          newVersionMajor: 1,
+          upgradeType: 'major',
+          changeLogFromVersion: '0.4.4',
+          changeLogToVersion: '1.4.1',
+        },
+      ];
+      versionsHelper.determineUpgrades(qJson, '^0.4.0', config).should.eql(upgradeVersions);
+    });
+    it('disables major release separation (minor)', () => {
+      const config = Object.assign({}, defaultConfig, { separateMajorReleases: false });
+      const upgradeVersions = [
+        {
+          newVersion: '1.4.1',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          changeLogFromVersion: '1.0.0',
+          changeLogToVersion: '1.4.1',
+        },
+      ];
+      versionsHelper.determineUpgrades(qJson, '1.0.0', config).should.eql(upgradeVersions);
+    });
     it('supports minor and major upgrades for ranged versions', () => {
       const pinVersions = [
         {
