@@ -135,4 +135,40 @@ describe('worker', () => {
       expect(updatedDeps).toMatchSnapshot();
     });
   });
+  describe('getDepTypeConfig(depTypes, depTypeName)', () => {
+    it('handles empty depTypes', () => {
+      const depTypeConfig = worker.getDepTypeConfig([], 'dependencies');
+      expect(depTypeConfig).toMatchObject({});
+    });
+    it('handles all strings', () => {
+      const depTypes = ['dependencies', 'devDependencies'];
+      const depTypeConfig = worker.getDepTypeConfig(depTypes, 'dependencies');
+      expect(depTypeConfig).toMatchObject({});
+    });
+    it('handles missed object', () => {
+      const depTypes = [
+        'dependencies',
+        {
+          depType: 'devDependencies',
+          foo: 'bar',
+        },
+      ];
+      const depTypeConfig = worker.getDepTypeConfig(depTypes, 'dependencies');
+      expect(depTypeConfig).toMatchObject({});
+    });
+    it('handles hit object', () => {
+      const depTypes = [
+        {
+          depType: 'dependencies',
+          foo: 'bar',
+        },
+        'devDependencies',
+      ];
+      const depTypeConfig = worker.getDepTypeConfig(depTypes, 'dependencies');
+      const expectedResult = {
+        foo: 'bar',
+      };
+      expect(depTypeConfig).toMatchObject(expectedResult);
+    });
+  });
 });
