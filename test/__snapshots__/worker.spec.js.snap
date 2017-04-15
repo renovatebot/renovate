@@ -4,7 +4,6 @@ exports[`worker assignDepConfigs(inputConfig, deps) handles depType config with 
 Array [
   Object {
     "config": Object {
-      "depType": "dependencies",
       "foo": "beta",
     },
     "depName": "a",
@@ -18,7 +17,6 @@ Array [
   Object {
     "config": Object {
       "alpha": "beta",
-      "depType": "dependencies",
       "foo": "bar",
     },
     "depName": "a",
@@ -69,11 +67,22 @@ Array [
 ]
 `;
 
+exports[`worker assignDepConfigs(inputConfig, deps) nested package config overrides depType and general config 1`] = `
+Array [
+  Object {
+    "config": Object {
+      "foo": "gamma",
+    },
+    "depName": "a",
+    "depType": "dependencies",
+  },
+]
+`;
+
 exports[`worker assignDepConfigs(inputConfig, deps) package config overrides depType and general config 1`] = `
 Array [
   Object {
     "config": Object {
-      "depType": "dependencies",
       "foo": "gamma",
     },
     "depName": "a",

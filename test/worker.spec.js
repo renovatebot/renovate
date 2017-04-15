@@ -189,6 +189,23 @@ describe('worker', () => {
       const updatedDeps = worker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
+    it('nested package config overrides depType and general config', () => {
+      config.foo = 'bar';
+      config.depTypes = [{
+        depType: 'dependencies',
+        foo: 'beta',
+        packages: [{
+          packageName: 'a',
+          foo: 'gamma',
+        }],
+      }];
+      deps.push({
+        depName: 'a',
+        depType: 'dependencies',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
   });
   describe('getDepTypeConfig(depTypes, depTypeName)', () => {
     it('handles empty depTypes', () => {
