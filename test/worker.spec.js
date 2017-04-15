@@ -26,35 +26,35 @@ describe('worker', () => {
     });
     it('returns immediately if closed PR found', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
-      await worker.updateBranch(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
     it('does not return immediately if recreateClosed true', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
       config.recreateClosed = true;
-      await worker.updateBranch(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('pins', async () => {
       config.upgradeType = 'pin';
-      await worker.updateBranch(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('majors', async () => {
       config.upgradeType = 'major';
-      await worker.updateBranch(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('minors', async () => {
       config.upgradeType = 'minor';
-      await worker.updateBranch(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('handles errors', async () => {
       config.api.checkForClosedPr = jest.fn(() => {
         throw new Error('oops');
       });
-      await worker.updateBranch(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
   });
