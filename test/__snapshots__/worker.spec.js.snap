@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`worker assignDepConfigs(inputConfig, deps) handles multiple deps 1`] = `
+Array [
+  Object {
+    "config": Object {
+      "foo": "bar",
+    },
+    "depName": "a",
+  },
+  Object {
+    "config": Object {
+      "foo": "bar",
+    },
+    "depName": "b",
+  },
+]
+`;
+
+exports[`worker assignDepConfigs(inputConfig, deps) handles string deps 1`] = `
+Array [
+  Object {
+    "config": Object {
+      "foo": "bar",
+    },
+    "depName": "a",
+  },
+]
+`;
