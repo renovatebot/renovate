@@ -206,10 +206,52 @@ describe('worker', () => {
       const updatedDeps = worker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
-    it('handles regex package config', () => {
+    it('handles regex package pattern', () => {
       config.foo = 'bar';
       config.packages = [{
-        packageName: 'eslint.*',
+        packagePattern: 'eslint',
+        labels: ['eslint'],
+      }];
+      deps.push({
+        depName: 'eslint',
+      });
+      deps.push({
+        depName: 'eslint-foo',
+      });
+      deps.push({
+        depName: 'a',
+      });
+      deps.push({
+        depName: 'also-eslint',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
+    it('handles regex wildcard package pattern', () => {
+      config.foo = 'bar';
+      config.packages = [{
+        packagePattern: '^eslint',
+        labels: ['eslint'],
+      }];
+      deps.push({
+        depName: 'eslint',
+      });
+      deps.push({
+        depName: 'eslint-foo',
+      });
+      deps.push({
+        depName: 'a',
+      });
+      deps.push({
+        depName: 'also-eslint',
+      });
+      const updatedDeps = worker.assignDepConfigs(config, deps);
+      expect(updatedDeps).toMatchSnapshot();
+    });
+    it('handles non-regex package name', () => {
+      config.foo = 'bar';
+      config.packages = [{
+        packageName: 'eslint',
         labels: ['eslint'],
       }];
       deps.push({
