@@ -26,56 +26,56 @@ describe('worker', () => {
     });
     it('returns immediately if closed PR found', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
-      await worker.updateDependency(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
     it('does not return immediately if recreateClosed true', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
       config.recreateClosed = true;
-      await worker.updateDependency(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('pins', async () => {
       config.upgradeType = 'pin';
-      await worker.updateDependency(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('majors', async () => {
       config.upgradeType = 'major';
-      await worker.updateDependency(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('minors', async () => {
       config.upgradeType = 'minor';
-      await worker.updateDependency(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('handles errors', async () => {
       config.api.checkForClosedPr = jest.fn(() => {
         throw new Error('oops');
       });
-      await worker.updateDependency(config);
+      await worker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
   });
-  describe('processUpgrades(baseConfig, upgrades)', () => {
+  describe('processUpgrades(upgrades)', () => {
     beforeEach(() => {
-      worker.updateDependency = jest.fn();
+      worker.updateBranch = jest.fn();
     });
     it('handles zero upgrades', async () => {
       await worker.processUpgrades([]);
-      expect(worker.updateDependency.mock.calls.length).toBe(0);
+      expect(worker.updateBranch.mock.calls.length).toBe(0);
     });
     it('handles non-zero upgrades', async () => {
-      await worker.processUpgrades([{}, {}]);
-      expect(worker.updateDependency.mock.calls.length).toBe(2);
+      await worker.processUpgrades([{ branchName: 'a' }, { branchName: 'b' }]);
+      expect(worker.updateBranch.mock.calls.length).toBe(2);
     });
   });
   describe('findUpgrades(dependencies, config)', () => {
     let config;
     beforeEach(() => {
       config = {};
-      worker.updateDependency = jest.fn();
+      worker.updateBranch = jest.fn();
     });
     it('handles null', async () => {
       const allUpgrades = await worker.findUpgrades([], config);
