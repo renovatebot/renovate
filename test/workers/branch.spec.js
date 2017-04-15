@@ -136,7 +136,7 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       branchWorker.getYarnLockFile.mockReturnValueOnce('non null response');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
-      await branchWorker.ensureBranch(config);
+      await branchWorker.ensureBranch([config]);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(branchWorker.getYarnLockFile.mock.calls.length).toBe(1);
