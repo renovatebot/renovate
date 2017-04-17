@@ -84,7 +84,7 @@ $ node renovate --help
     --respect-latest [boolean]           Ignore versions newer than npm "latest" version
     --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
-    --maintain-yarn-lock [boolean]       Keep yarn.lock updated in base branch (no monorepo support)
+    --maintain-yarn-lock [boolean]       Keep yarn.lock files updated in base branch
     --group-name <string>                Human understandable name for the dependency group
     --group-slug <string>                Slug to use for group (e.g. in branch name). Will be calculated from groupName if null
     --labels <list>                      Labels to add to Pull Request
@@ -142,7 +142,7 @@ Obviously, you can't set repository or package file location with this method.
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` |  |  |
 | `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` |  |  |
 | `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` |  |  |
-| `maintainYarnLock` | Keep yarn.lock updated in base branch (no monorepo support) | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
+| `maintainYarnLock` | Keep yarn.lock files updated in base branch | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
 | `yarnMaintenanceBranchName` | Branch name template when maintaining yarn.lock | string | `"renovate/yarn-lock"` |  |  |
 | `yarnMaintenanceCommitMessage` | Commit message template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
 | `yarnMaintenancePrTitle` | Pull Request title template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
