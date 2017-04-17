@@ -106,6 +106,7 @@ describe('workers/branch', () => {
       config = Object.assign({}, defaultConfig);
       config.api = {};
       config.api.getFileContent = jest.fn();
+      config.api.branchExists = jest.fn();
       config.api.commitFilesToBranch = jest.fn();
       config.api.getFileContent.mockReturnValueOnce('old content');
       config.depName = 'dummy';
@@ -115,6 +116,7 @@ describe('workers/branch', () => {
     it('returns if new content matches old', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('old content');
+      config.api.branchExists.mockReturnValueOnce(false);
       await branchWorker.ensureBranch([config]);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
