@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "onboarding": true,
+  "platform": "github",
+  "packageFiles": [],
+  "depTypes": ["dependencies", "devDependencies", "optionalDependencies"],
+  "ignoreDeps": [],
+  "ignoreFuture": true,
+  "ignoreUnstable": true,
+  "respectLatest": true,
+  "recreateClosed": false,
+  "branchName": "renovate/{{depName}}-{{newVersionMajor}}.x",
+  "commitMessage": "Update dependency {{depName}} to version {{newVersion}}",
+  "prTitle": "{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}",
+  "prBody": "This Pull Request updates dependency {{depName}} from version {{currentVersion}} to {{newVersion}}\n\n{{changelog}}",
+  "labels": [],
+  "assignees": [],
+  "reviewers": [],
+  "logLevel": "info"
+}
