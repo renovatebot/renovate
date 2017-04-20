@@ -5,10 +5,16 @@ describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser;
     let defaultArgv;
+    let ghGot;
+    let glGot;
     beforeEach(() => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
+      jest.mock('gh-got');
+      jest.mock('gl-got');
+      ghGot = require('gh-got');
+      glGot = require('gl-got');
     });
     it('throws for no token', async () => {
       const env = {};
@@ -40,6 +46,37 @@ describe('config/index', () => {
         err = e;
       }
       expect(err.message).toBe('At least one repository must be configured');
+    });
+    it('autodiscovers github platform', async () => {
+      const env = { GITHUB_TOKEN: 'abc' };
+      defaultArgv = defaultArgv.concat(['--autodiscover']);
+      ghGot.mockImplementationOnce(() => ({
+        body: [
+          {
+            full_name: 'a/b',
+          },
+          {
+            full_name: 'c/d',
+          },
+        ],
+      }));
+      await configParser.parseConfigs(env, defaultArgv);
+      expect(ghGot.mock.calls.length).toBe(1);
+      expect(glGot.mock.calls.length).toBe(0);
+    });
+    it('autodiscovers gitlab platform', async () => {
+      const env = { GITLAB_TOKEN: 'abc' };
+      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=gitlab']);
+      glGot.mockImplementationOnce(() => ({
+        body: [
+          {
+            path_with_namespace: 'a/b',
+          },
+        ],
+      }));
+      await configParser.parseConfigs(env, defaultArgv);
+      expect(ghGot.mock.calls.length).toBe(0);
+      expect(glGot.mock.calls.length).toBe(1);
     });
     it('errors for unknown platform', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
