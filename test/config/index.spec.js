@@ -1,5 +1,10 @@
 const argv = require('../_fixtures/config/argv');
 const should = require('chai').should();
+const githubApi = require('../../lib/api/github');
+const gitlabApi = require('../../lib/api/gitlab');
+
+githubApi.getRepos = jest.fn();
+gitlabApi.getRepos = jest.fn();
 
 describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
@@ -9,6 +14,21 @@ describe('config/index', () => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
+    });
+    it('autodiscovers github repos', async () => {
+      const env = {};
+      defaultArgv = defaultArgv.concat(['--autodiscover']);
+      await configParser.parseConfigs(env, defaultArgv);
+    });
+    it('autodiscovers gitlab repos', async () => {
+      const env = {};
+      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=gitlab']);
+      await configParser.parseConfigs(env, defaultArgv);
+    });
+    it('errors for unknown platform', async () => {
+      const env = {};
+      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=foo']);
+      await configParser.parseConfigs(env, defaultArgv);
     });
     it('throws for no token', async () => {
       const env = {};
