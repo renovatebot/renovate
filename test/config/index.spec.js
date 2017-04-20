@@ -52,7 +52,7 @@ describe('config/index', () => {
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('autodiscovers gitlab repos', async () => {
-      const env = { GITHUB_TOKEN: 'abc' };
+      const env = { GITLAB_TOKEN: 'abc' };
       defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=gitlab']);
       await configParser.parseConfigs(env, defaultArgv);
     });
