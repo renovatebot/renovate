@@ -43,6 +43,11 @@ describe('api/github', () => {
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
+    it('should support a custom endpoint', async () => {
+      const repos = await getRepos('sometoken', 'someendpoint');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(repos).toMatchSnapshot();
+    });
   });
 
   async function initRepo(...args) {
