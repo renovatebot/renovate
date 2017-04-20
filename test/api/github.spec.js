@@ -21,6 +21,8 @@ describe('api/github', () => {
           login: 'theowner',
         },
         default_branch: 'master',
+        allow_rebase_merge: true,
+        allow_squash_merge: true,
       },
     }));
     // getBranchCommit
