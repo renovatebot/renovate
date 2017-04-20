@@ -53,9 +53,8 @@ $ node renovate --help
     --respect-latest [boolean]           Ignore versions newer than npm "latest" version
     --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
-    --pr-creation <string>               When to create the PR for a branch
+    --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
     --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, patch, minor or any
-    --pr-merge-method <string>           Method of merging to perform. GitHub: merge, squash, rebase.
     --maintain-yarn-lock [boolean]       Keep yarn.lock files updated in base branch
     --group-name <string>                Human understandable name for the dependency group
     --group-slug <string>                Slug to use for group (e.g. in branch name). Will be calculated from groupName if null
