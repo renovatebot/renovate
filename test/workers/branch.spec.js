@@ -1,7 +1,7 @@
 const branchWorker = require('../../lib/workers/branch');
+const yarnHelper = require('../../lib/helpers/yarn');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 const packageJsonHelper = require('../../lib/helpers/package-json');
-const yarnHelper = require('../../lib/helpers/yarn');
 
 jest.mock('../../lib/helpers/yarn');
 jest.mock('../../lib/helpers/package-json');
@@ -74,7 +74,7 @@ describe('workers/branch', () => {
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(undefined);
     });
   });
-  describe('(config)', () => {
+  describe('ensureBranch(config)', () => {
     let config;
     beforeEach(() => {
       packageJsonHelper.setNewValue = jest.fn();
