@@ -204,6 +204,28 @@ describe('api/github', () => {
       expect(pr).toMatchSnapshot();
     });
   });
+  describe('getBranchStatus(branchName)', () => {
+    it('should return true', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          state: true,
+        },
+      }));
+      const res = await github.getBranchStatus('somebranch');
+      expect(res).toEqual(true);
+    });
+    it('should return false', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          state: false,
+        },
+      }));
+      const res = await github.getBranchStatus('somebranch');
+      expect(res).toEqual(false);
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo('some/repo', 'token');
