@@ -1,8 +1,13 @@
 const versionsHelper = require('../../lib/helpers/versions');
 const qJson = require('../_fixtures/npm/01.json');
-const defaultConfig = require('../../lib/config/defaults').getConfig();
+
+let defaultConfig;
 
 describe('helpers/versions', () => {
+  beforeEach(() => {
+    defaultConfig = require('../../lib/config/defaults').getConfig();
+  });
+
   describe('.determineUpgrades(dep, currentVersion, defaultConfig)', () => {
     it('return empty if invalid current version', () => {
       versionsHelper.determineUpgrades(qJson, 'invalid', defaultConfig).should.have.length(0);
@@ -38,6 +43,10 @@ describe('helpers/versions', () => {
         },
       ];
       versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig).should.eql(upgradeVersions);
+    });
+    it('returns only one update if grouping', () => {
+      defaultConfig.groupName = 'somegroup';
+      expect(versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig)).toMatchSnapshot();
     });
     it('disables major release separation (major)', () => {
       const config = Object.assign({}, defaultConfig, { separateMajorReleases: false });
