@@ -290,6 +290,10 @@ describe('helpers/versions', () => {
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '<= 0.7.2', config)).toEqual(upgradeVersions);
     });
+    it('rejects less than ranges without pinning', () => {
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
+      expect(versionsHelper.determineUpgrades(qJson, '< 0.7.2', config)).toEqual([]);
+    });
     it('supports > latest versions if configured', () => {
       const config = Object.assign({}, defaultConfig);
       config.respectLatest = false;
