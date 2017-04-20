@@ -13,9 +13,14 @@ describe('workers/pr', () => {
     let pr;
     beforeEach(() => {
       config = Object.assign({}, defaultConfig);
-      pr = {};
+      pr = {
+        head: {
+          ref: 'somebranch',
+        },
+      };
       config.api = {
         mergePr: jest.fn(),
+        getBranchStatus: jest.fn(),
       };
     });
     it('should not automerge if not configured', async () => {
@@ -25,8 +30,16 @@ describe('workers/pr', () => {
     it('should automerge if any and pr is mergeable', async () => {
       config.automerge = 'any';
       pr.mergeable = true;
+      config.api.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(config.api.mergePr.mock.calls.length).toBe(1);
+    });
+    it('should not automerge if any and pr is mergeable but branch status is not success', async () => {
+      config.automerge = 'any';
+      pr.mergeable = true;
+      config.api.getBranchStatus.mockReturnValueOnce('pending');
+      await prWorker.checkAutoMerge(pr, config);
+      expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if any and pr is mergeable but unstable', async () => {
       config.automerge = 'any';
@@ -45,6 +58,7 @@ describe('workers/pr', () => {
       config.automerge = 'minor';
       config.upgradeType = 'minor';
       pr.mergeable = true;
+      config.api.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(config.api.mergePr.mock.calls.length).toBe(1);
     });
