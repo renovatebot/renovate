@@ -1,5 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) returns both updates if automerging minor 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.4.4",
+    "changeLogToVersion": "0.9.7",
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "upgradeType": "minor",
+  },
+  Object {
+    "changeLogFromVersion": "0.4.4",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) returns only one update if automerging any 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.4.4",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
 exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) returns only one update if grouping 1`] = `
 Array [
   Object {

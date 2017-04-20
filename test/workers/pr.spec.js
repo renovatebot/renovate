@@ -8,6 +8,68 @@ const getChangeLog = jest.fn();
 getChangeLog.mockReturnValue('Mocked changelog');
 
 describe('workers/pr', () => {
+  describe('checkAutoMerge(pr, config)', () => {
+    let config;
+    let pr;
+    beforeEach(() => {
+      config = Object.assign({}, defaultConfig);
+      pr = {
+        head: {
+          ref: 'somebranch',
+        },
+      };
+      config.api = {
+        mergePr: jest.fn(),
+        getBranchStatus: jest.fn(),
+      };
+    });
+    it('should not automerge if not configured', async () => {
+      await prWorker.checkAutoMerge(pr, config);
+      expect(config.api.mergePr.mock.calls.length).toBe(0);
+    });
+    it('should automerge if any and pr is mergeable', async () => {
+      config.automerge = 'any';
+      pr.mergeable = true;
+      config.api.getBranchStatus.mockReturnValueOnce('success');
+      await prWorker.checkAutoMerge(pr, config);
+      expect(config.api.mergePr.mock.calls.length).toBe(1);
+    });
+    it('should not automerge if any and pr is mergeable but branch status is not success', async () => {
+      config.automerge = 'any';
+      pr.mergeable = true;
+      config.api.getBranchStatus.mockReturnValueOnce('pending');
+      await prWorker.checkAutoMerge(pr, config);
+      expect(config.api.mergePr.mock.calls.length).toBe(0);
+    });
+    it('should not automerge if any and pr is mergeable but unstable', async () => {
+      config.automerge = 'any';
+      pr.mergeable = true;
+      pr.mergeable_state = 'unstable';
+      await prWorker.checkAutoMerge(pr, config);
+      expect(config.api.mergePr.mock.calls.length).toBe(0);
+    });
+    it('should not automerge if any and pr is unmergeable', async () => {
+      config.automerge = 'any';
+      pr.mergeable = false;
+      await prWorker.checkAutoMerge(pr, config);
+      expect(config.api.mergePr.mock.calls.length).toBe(0);
+    });
+    it('should automerge if minor and upgradeType is minor', async () => {
+      config.automerge = 'minor';
+      config.upgradeType = 'minor';
+      pr.mergeable = true;
+      config.api.getBranchStatus.mockReturnValueOnce('success');
+      await prWorker.checkAutoMerge(pr, config);
+      expect(config.api.mergePr.mock.calls.length).toBe(1);
+    });
+    it('should not automerge if minor and upgradeType is major', async () => {
+      config.automerge = 'minor';
+      config.upgradeType = 'major';
+      pr.mergeable = true;
+      await prWorker.checkAutoMerge(pr, config);
+      expect(config.api.mergePr.mock.calls.length).toBe(0);
+    });
+  });
   describe('ensurePr(config)', () => {
     let config;
     let existingPr;
