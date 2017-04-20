@@ -49,7 +49,7 @@ describe('config/index', () => {
     });
     it('autodiscovers github platform', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
-      defaultArgv = defaultArgv.concat(['--autodiscover']);
+      defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);
       ghGot.mockImplementationOnce(() => ({
         body: [
           {
@@ -66,7 +66,7 @@ describe('config/index', () => {
     });
     it('autodiscovers gitlab platform', async () => {
       const env = { GITLAB_TOKEN: 'abc' };
-      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=gitlab']);
+      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=gitlab', '--token=abc']);
       glGot.mockImplementationOnce(() => ({
         body: [
           {
