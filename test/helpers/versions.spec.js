@@ -1,8 +1,13 @@
 const versionsHelper = require('../../lib/helpers/versions');
 const qJson = require('../_fixtures/npm/01.json');
-const defaultConfig = require('../../lib/config/defaults').getConfig();
+
+let defaultConfig;
 
 describe('helpers/versions', () => {
+  beforeEach(() => {
+    defaultConfig = require('../../lib/config/defaults').getConfig();
+  });
+
   describe('.determineUpgrades(dep, currentVersion, defaultConfig)', () => {
     it('return empty if invalid current version', () => {
       versionsHelper.determineUpgrades(qJson, 'invalid', defaultConfig).should.have.length(0);
@@ -38,6 +43,36 @@ describe('helpers/versions', () => {
         },
       ];
       versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig).should.eql(upgradeVersions);
+    });
+    it('returns only one update if grouping', () => {
+      defaultConfig.groupName = 'somegroup';
+      expect(versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig)).toMatchSnapshot();
+    });
+    it('disables major release separation (major)', () => {
+      const config = Object.assign({}, defaultConfig, { separateMajorReleases: false });
+      const upgradeVersions = [
+        {
+          newVersion: '1.4.1',
+          newVersionMajor: 1,
+          upgradeType: 'major',
+          changeLogFromVersion: '0.4.4',
+          changeLogToVersion: '1.4.1',
+        },
+      ];
+      versionsHelper.determineUpgrades(qJson, '^0.4.0', config).should.eql(upgradeVersions);
+    });
+    it('disables major release separation (minor)', () => {
+      const config = Object.assign({}, defaultConfig, { separateMajorReleases: false });
+      const upgradeVersions = [
+        {
+          newVersion: '1.4.1',
+          newVersionMajor: 1,
+          upgradeType: 'minor',
+          changeLogFromVersion: '1.0.0',
+          changeLogToVersion: '1.4.1',
+        },
+      ];
+      versionsHelper.determineUpgrades(qJson, '1.0.0', config).should.eql(upgradeVersions);
     });
     it('supports minor and major upgrades for ranged versions', () => {
       const pinVersions = [
@@ -263,6 +298,10 @@ describe('helpers/versions', () => {
       ];
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
       expect(versionsHelper.determineUpgrades(qJson, '<= 0.7.2', config)).toEqual(upgradeVersions);
+    });
+    it('rejects less than ranges without pinning', () => {
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
+      expect(versionsHelper.determineUpgrades(qJson, '< 0.7.2', config)).toEqual([]);
     });
     it('supports > latest versions if configured', () => {
       const config = Object.assign({}, defaultConfig);

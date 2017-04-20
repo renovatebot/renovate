@@ -29,6 +29,32 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
     });
+    it('should return null if waiting for success', async () => {
+      config.api.getBranchStatus = jest.fn(() => 'failed');
+      config.prCreation = 'status-success';
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toBe(null);
+    });
+    it('should create PR if success', async () => {
+      config.api.getBranchStatus = jest.fn(() => 'success');
+      config.api.getBranchPr = jest.fn();
+      config.prCreation = 'status-success';
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+    });
+    it('should return null if waiting for not pending', async () => {
+      config.api.getBranchStatus = jest.fn(() => 'pending');
+      config.prCreation = 'not-pending';
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toBe(null);
+    });
+    it('should create PR if no longer pending', async () => {
+      config.api.getBranchStatus = jest.fn(() => 'failed');
+      config.api.getBranchPr = jest.fn();
+      config.prCreation = 'not-pending';
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+    });
     it('should create new branch if none exists', async () => {
       config.api.getBranchPr = jest.fn();
       const pr = await prWorker.ensurePr(config);

@@ -56,27 +56,31 @@ $ node renovate --help
 
   Options:
 
-    -h, --help                      output usage information
-    --enabled [boolean]             Enable or disable renovate
-    --onboarding [boolean]          Require a Configuration PR first
-    --platform <string>             Platform type of repository
-    --endpoint <string>             Custom endpoint to use
-    --token <string>                Repository Auth Token
-    --autodiscover [boolean]        Autodiscover all repositories
-    --package-files <list>          Package file paths
-    --dep-types <list>              Dependency types
-    --ignore-deps <list>            Dependencies to ignore
-    --ignore-future [boolean]       Ignore versions tagged as "future"
-    --ignore-unstable [boolean]     Ignore versions with unstable semver
-    --respect-latest [boolean]      Ignore versions newer than npm "latest" version
-    --recreate-closed [boolean]     Recreate PRs even if same ones were closed previously
-    --rebase-stale-prs [boolean]    Rebase stale PRs (GitHub only)
-    --maintain-yarn-lock [boolean]  Keep yarn.lock updated in base branch (no monorepo support)
-    --labels <list>                 Labels to add to Pull Request
-    --assignees <list>              Assignees for Pull Request
-    --reviewers <list>              Requested reviewers for Pull Requests (GitHub only)
-    --pin-versions [boolean]        Convert ranged versions in package.json to pinned versions
-    --log-level <string>            Logging level
+    -h, --help                           output usage information
+    --enabled [boolean]                  Enable or disable renovate
+    --onboarding [boolean]               Require a Configuration PR first
+    --platform <string>                  Platform type of repository
+    --endpoint <string>                  Custom endpoint to use
+    --token <string>                     Repository Auth Token
+    --autodiscover [boolean]             Autodiscover all repositories
+    --package-files <list>               Package file paths
+    --dep-types <list>                   Dependency types
+    --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches
+    --ignore-deps <list>                 Dependencies to ignore
+    --ignore-future [boolean]            Ignore versions tagged as "future"
+    --ignore-unstable [boolean]          Ignore versions with unstable semver
+    --respect-latest [boolean]           Ignore versions newer than npm "latest" version
+    --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
+    --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
+    --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
+    --maintain-yarn-lock [boolean]       Keep yarn.lock files updated in base branch
+    --group-name <string>                Human understandable name for the dependency group
+    --group-slug <string>                Slug to use for group (e.g. in branch name). Will be calculated from groupName if null
+    --labels <list>                      Labels to add to Pull Request
+    --assignees <list>                   Assignees for Pull Request
+    --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
+    --pin-versions [boolean]             Convert ranged versions in package.json to pinned versions
+    --log-level <string>                 Logging level
 
   Examples:
 
@@ -117,21 +121,29 @@ Obviously, you can't set repository or package file location with this method.
 | `repositories` | List of Repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
 | `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | `depTypes` | Dependency types | list | `["dependencies", "devDependencies", "optionalDependencies"]` | `RENOVATE_DEP_TYPES` | `--dep-types` |
+| `separateMajorReleases` | If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches | boolean | `true` | `RENOVATE_SEPARATE_MAJOR_RELEASES` | `--separate-major-releases` |
 | `ignoreDeps` | Dependencies to ignore | list | `[]` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
 | `ignoreFuture` | Ignore versions tagged as "future" | boolean | `true` | `RENOVATE_IGNORE_FUTURE` | `--ignore-future` |
 | `ignoreUnstable` | Ignore versions with unstable semver | boolean | `true` | `RENOVATE_IGNORE_UNSTABLE` | `--ignore-unstable` |
 | `respectLatest` | Ignore versions newer than npm "latest" version | boolean | `true` | `RENOVATE_RESPECT_LATEST` | `--respect-latest` |
 | `recreateClosed` | Recreate PRs even if same ones were closed previously | boolean | `false` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
 | `rebaseStalePrs` | Rebase stale PRs (GitHub only) | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
+| `prCreation` | When to create the PR for a branch. Values: immediate, not-pending, status-success. | string | `"immediate"` | `RENOVATE_PR_CREATION` | `--pr-creation` |
 | `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` |  |  |
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` |  |  |
 | `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` |  |  |
 | `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` |  |  |
-| `maintainYarnLock` | Keep yarn.lock updated in base branch (no monorepo support) | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
+| `maintainYarnLock` | Keep yarn.lock files updated in base branch | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
 | `yarnMaintenanceBranchName` | Branch name template when maintaining yarn.lock | string | `"renovate/yarn-lock"` |  |  |
 | `yarnMaintenanceCommitMessage` | Commit message template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
 | `yarnMaintenancePrTitle` | Pull Request title template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
 | `yarnMaintenancePrBody` | Pull Request body template when maintaining yarn.lock | string | `"This PR regenerates yarn.lock files based on the existing `package.json` files."` |  |  |
+| `groupName` | Human understandable name for the dependency group | string | `null` | `RENOVATE_GROUP_NAME` | `--group-name` |
+| `groupSlug` | Slug to use for group (e.g. in branch name). Will be calculated from groupName if null | string | `null` | `RENOVATE_GROUP_SLUG` | `--group-slug` |
+| `groupBranchName` | Branch name template for the group | string | `"renovate/{{groupSlug}}"` |  |  |
+| `groupCommitMessage` | Group commit message | string | `"Renovate {{groupName}} packages"` |  |  |
+| `groupPrTitle` | Pull Request title template for the group | string | `"Renovate {{groupName}} packages"` |  |  |
+| `groupPrBody` | Pull Request body template for the group | string | `"This PR renovates the package group \"{{groupName}}\"."` |  |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
 | `reviewers` | Requested reviewers for Pull Requests (GitHub only) | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |

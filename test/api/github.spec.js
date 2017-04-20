@@ -120,14 +120,57 @@ describe('api/github', () => {
     });
   });
   describe('branchExists(branchName)', () => {
-    it('should return true if the branch exists', async () => {
+    it('should return true if the branch exists (one result)', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
         statusCode: 200,
+        body: {
+          ref: 'refs/heads/thebranchname',
+        },
       }));
       const exists = await github.branchExists('thebranchname');
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(exists).toBe(true);
+    });
+    it('should return true if the branch exists (multiple results)', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        statusCode: 200,
+        body: [{
+          ref: 'refs/heads/notthebranchname',
+        }, {
+          ref: 'refs/heads/thebranchname',
+        }],
+      }));
+      const exists = await github.branchExists('thebranchname');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(exists).toBe(true);
+    });
+    it('should return false if the branch does not exist (one result)', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        statusCode: 200,
+        body: {
+          ref: 'refs/heads/notthebranchname',
+        },
+      }));
+      const exists = await github.branchExists('thebranchname');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(exists).toBe(false);
+    });
+    it('should return false if the branch does not exist (multiple results)', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        statusCode: 200,
+        body: [{
+          ref: 'refs/heads/notthebranchname',
+        }, {
+          ref: 'refs/heads/alsonotthebranchname',
+        }],
+      }));
+      const exists = await github.branchExists('thebranchname');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(exists).toBe(false);
     });
     it('should return false if a non-200 response is returned', async () => {
       await initRepo('some/repo', 'token');
@@ -191,6 +234,28 @@ describe('api/github', () => {
       const pr = await github.getBranchPr('somebranch');
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
+    });
+  });
+  describe('getBranchStatus(branchName)', () => {
+    it('should return true', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          state: true,
+        },
+      }));
+      const res = await github.getBranchStatus('somebranch');
+      expect(res).toEqual(true);
+    });
+    it('should return false', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          state: false,
+        },
+      }));
+      const res = await github.getBranchStatus('somebranch');
+      expect(res).toEqual(false);
     });
   });
   describe('addAssignees(issueNo, assignees)', () => {
@@ -471,6 +536,9 @@ describe('api/github', () => {
       // branchExists
       ghGot.mockImplementationOnce(() => ({
         statusCode: 200,
+        body: {
+          ref: 'refs/heads/package.json',
+        },
       }));
       const files = [{
         name: 'package.json',

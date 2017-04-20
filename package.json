@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
-  "version": "8.11.0",
+  "version": "8.18.1",
   "bin": "dist/renovate.js",
   "main": "dist/index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "prepublish": "npm run build",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
-    "start-raw": "node --harmony-async-await lib/renovate",
+    "start-raw": "node lib/renovate",
     "test": "npm run eslint && npm run jest",
     "jest": "jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
@@ -66,7 +66,7 @@
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-promise": "3.5.0",
     "mkdirp": "0.5.1",
-    "np": "2.13.1",
+    "np": "2.13.2",
     "rimraf": "2.6.1"
   },
   "babel": {

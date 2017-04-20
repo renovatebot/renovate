@@ -97,7 +97,58 @@ Array [
 ]
 `;
 
-exports[`api/github branchExists(branchName) should return true if the branch exists 1`] = `
+exports[`api/github branchExists(branchName) should return false if the branch does not exist (multiple results) 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+]
+`;
+
+exports[`api/github branchExists(branchName) should return false if the branch does not exist (one result) 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+]
+`;
+
+exports[`api/github branchExists(branchName) should return true if the branch exists (multiple results) 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+]
+`;
+
+exports[`api/github branchExists(branchName) should return true if the branch exists (one result) 1`] = `
 Array [
   Array [
     "repos/some/repo",
