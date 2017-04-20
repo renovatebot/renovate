@@ -15,21 +15,6 @@ describe('config/index', () => {
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
     });
-    it('autodiscovers github repos', async () => {
-      const env = {};
-      defaultArgv = defaultArgv.concat(['--autodiscover']);
-      await configParser.parseConfigs(env, defaultArgv);
-    });
-    it('autodiscovers gitlab repos', async () => {
-      const env = {};
-      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=gitlab']);
-      await configParser.parseConfigs(env, defaultArgv);
-    });
-    it('errors for unknown platform', async () => {
-      const env = {};
-      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=foo']);
-      await configParser.parseConfigs(env, defaultArgv);
-    });
     it('throws for no token', async () => {
       const env = {};
       let err;
@@ -60,6 +45,21 @@ describe('config/index', () => {
         err = e;
       }
       expect(err.message).toBe('At least one repository must be configured');
+    });
+    it('autodiscovers github repos', async () => {
+      const env = { GITHUB_TOKEN: 'abc' };
+      defaultArgv = defaultArgv.concat(['--autodiscover']);
+      await configParser.parseConfigs(env, defaultArgv);
+    });
+    it('autodiscovers gitlab repos', async () => {
+      const env = { GITHUB_TOKEN: 'abc' };
+      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=gitlab']);
+      await configParser.parseConfigs(env, defaultArgv);
+    });
+    it('errors for unknown platform', async () => {
+      const env = { GITHUB_TOKEN: 'abc' };
+      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=foo']);
+      await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports repositories in CLI', async () => {
       const env = {};
