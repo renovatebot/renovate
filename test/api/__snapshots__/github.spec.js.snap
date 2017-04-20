@@ -652,6 +652,7 @@ Object {
   "baseCommitSHA": "1234",
   "baseTreeSHA": "5678",
   "defaultBranch": "master",
+  "mergeMethod": "rebase",
   "owner": "theowner",
   "repoName": "some/repo",
 }
@@ -676,6 +677,7 @@ Object {
   "baseCommitSHA": "1234",
   "baseTreeSHA": "5678",
   "defaultBranch": "master",
+  "mergeMethod": "rebase",
   "owner": "theowner",
   "repoName": "some/repo",
 }
@@ -700,9 +702,53 @@ Object {
   "baseCommitSHA": "1234",
   "baseTreeSHA": "5678",
   "defaultBranch": "master",
+  "mergeMethod": "rebase",
   "owner": "theowner",
   "repoName": "some/repo",
 }
+`;
+
+exports[`api/github initRepo should merge 1`] = `
+Object {
+  "baseCommitSHA": "1234",
+  "baseTreeSHA": "5678",
+  "defaultBranch": "master",
+  "mergeMethod": "merge",
+  "owner": "theowner",
+  "repoName": "some/repo",
+}
+`;
+
+exports[`api/github initRepo should squash 1`] = `
+Object {
+  "baseCommitSHA": "1234",
+  "baseTreeSHA": "5678",
+  "defaultBranch": "master",
+  "mergeMethod": "squash",
+  "owner": "theowner",
+  "repoName": "some/repo",
+}
+`;
+
+exports[`api/github mergePr(prNo) should merge the PR 1`] = `
+Array [
+  Array [
+    "repos/some/repo/pulls/1234/merge",
+    Object {
+      "body": Object {
+        "merge_method": "rebase",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github mergePr(prNo) should merge the PR 2`] = `
+Array [
+  Array [
+    "repos/some/repo/git/refs/heads/someref",
+  ],
+]
 `;
 
 exports[`api/github updatePr(prNo, title, body) should update the PR 1`] = `

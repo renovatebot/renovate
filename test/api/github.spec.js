@@ -21,6 +21,8 @@ describe('api/github', () => {
           login: 'theowner',
         },
         default_branch: 'master',
+        allow_rebase_merge: true,
+        allow_squash_merge: true,
       },
     }));
     // getBranchCommit
@@ -67,6 +69,74 @@ describe('api/github', () => {
         err = e;
       }
       expect(err.message).toBe('No token found for GitHub repository some/repo');
+    });
+    it('should squash', async () => {
+      async function squashInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+            allow_rebase_merge: false,
+            allow_squash_merge: true,
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getCommitTree
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            tree: {
+              sha: '5678',
+            },
+          },
+        }));
+        return github.initRepo(...args);
+      }
+      const config = await squashInitRepo('some/repo', 'token');
+      expect(config).toMatchSnapshot();
+    });
+    it('should merge', async () => {
+      async function mergeInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+            allow_rebase_merge: false,
+            allow_squash_merge: false,
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getCommitTree
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            tree: {
+              sha: '5678',
+            },
+          },
+        }));
+        return github.initRepo(...args);
+      }
+      const config = await mergeInitRepo('some/repo', 'token');
+      expect(config).toMatchSnapshot();
     });
   });
   describe('findFilePaths(fileName)', () => {
@@ -392,6 +462,20 @@ describe('api/github', () => {
       await initRepo('some/repo', 'token');
       await github.updatePr(1234, 'The New Title', 'Hello world again');
       expect(ghGot.patch.mock.calls).toMatchSnapshot();
+    });
+  });
+  describe('mergePr(prNo)', () => {
+    it('should merge the PR', async () => {
+      await initRepo('some/repo', 'token');
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      await github.mergePr(pr);
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
     });
   });
   describe('getFile(filePatch, branchName)', () => {

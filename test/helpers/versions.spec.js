@@ -48,6 +48,14 @@ describe('helpers/versions', () => {
       defaultConfig.groupName = 'somegroup';
       expect(versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig)).toMatchSnapshot();
     });
+    it('returns only one update if automerging any', () => {
+      defaultConfig.automerge = 'any';
+      expect(versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig)).toMatchSnapshot();
+    });
+    it('returns both updates if automerging minor', () => {
+      defaultConfig.automerge = 'minor';
+      expect(versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig)).toMatchSnapshot();
+    });
     it('disables major release separation (major)', () => {
       const config = Object.assign({}, defaultConfig, { separateMajorReleases: false });
       const upgradeVersions = [
