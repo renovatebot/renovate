@@ -12,7 +12,6 @@ module.exports = {
       'prettier',
     ],
     'rules': {
-      // 'arrow-parens': 0,
       'no-use-before-define': 0,
       'no-restricted-syntax': 0,
       'no-await-in-loop': 0,
