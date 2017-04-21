@@ -12,7 +12,6 @@
     "heroku-scheduler": "heroku addons:open scheduler",
     "npm-publish": "npm run update-docs && np && yarn install",
     "prepublish": "npm run build",
-    "prettier": "prettier --single-quote --trailing-comma es5 --write '{lib,test}/**/*.js'",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node lib/renovate",
