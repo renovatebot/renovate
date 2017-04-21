@@ -10,11 +10,15 @@ const envParser = require('../lib/config/env');
 // Print table header
 console.log('## Configuration Options');
 console.log('');
-console.log('| Name | Description | Type | Default value | Environment | CLI |');
-console.log('|------|-------------|------|---------------|-------------|-----|');
+console.log(
+  '| Name | Description | Type | Default value | Environment | CLI |',
+);
+console.log(
+  '|------|-------------|------|---------------|-------------|-----|',
+);
 
 const options = definitions.getOptions();
-options.forEach((option) => {
+options.forEach(option => {
   let optionDefault = defaultsParser.getDefault(option);
   if (optionDefault !== '') {
     optionDefault = `\`${stringify(optionDefault)}\``;
@@ -27,6 +31,8 @@ options.forEach((option) => {
   if (cliName.length) {
     cliName = `\`${cliName}\``;
   }
-  console.log(`| \`${option.name}\` | ${option.description} | ${option.type} | ${optionDefault} | ${envName} | ${cliName} |`);
+  console.log(
+    `| \`${option.name}\` | ${option.description} | ${option.type} | ${optionDefault} | ${envName} | ${cliName} |`,
+  );
 });
 /* eslint-enable no-console */
