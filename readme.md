@@ -44,6 +44,7 @@ $ node renovate --help
     --platform <string>                  Platform type of repository
     --endpoint <string>                  Custom endpoint to use
     --token <string>                     Repository Auth Token
+    --autodiscover [boolean]             Autodiscover all repositories
     --package-files <list>               Package file paths
     --dep-types <list>                   Dependency types
     --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches

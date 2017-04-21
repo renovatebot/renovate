@@ -13,6 +13,43 @@ describe('api/github', () => {
     ghGot = require('gh-got');
   });
 
+  async function getRepos(...args) {
+    // repo info
+    ghGot.mockImplementationOnce(() => ({
+      body: [
+        {
+          full_name: 'a/b',
+        },
+        {
+          full_name: 'c/d',
+        },
+      ],
+    }));
+    return github.getRepos(...args);
+  }
+
+  describe('getRepos', () => {
+    it('should throw an error if no token is provided', async () => {
+      let err;
+      try {
+        await github.getRepos();
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('No token found for getRepos');
+    });
+    it('should return an array of repos', async () => {
+      const repos = await getRepos('sometoken');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(repos).toMatchSnapshot();
+    });
+    it('should support a custom endpoint', async () => {
+      const repos = await getRepos('sometoken', 'someendpoint');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(repos).toMatchSnapshot();
+    });
+  });
+
   async function initRepo(...args) {
     // repo info
     ghGot.mockImplementationOnce(() => ({
