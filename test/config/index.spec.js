@@ -10,7 +10,7 @@ describe('config/index', () => {
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
     });
-    it('throws for invalid platform', async () => {
+    it('throws for invalid platform', () => {
       const env = {};
       defaultArgv.push('--platform=foo');
       let err;
@@ -21,7 +21,7 @@ describe('config/index', () => {
       }
       expect(err.message).toBe('Unsupported platform: foo.');
     });
-    it('throws for no GitHub token', async () => {
+    it('throws for no GitHub token', () => {
       const env = {};
       let err;
       try {
@@ -31,7 +31,7 @@ describe('config/index', () => {
       }
       expect(err.message).toBe('You need to supply a GitHub token.');
     });
-    it('throws for no GitLab token', async () => {
+    it('throws for no GitLab token', () => {
       const env = { RENOVATE_PLATFORM: 'gitlab' };
       let err;
       try {
@@ -41,7 +41,7 @@ describe('config/index', () => {
       }
       expect(err.message).toBe('You need to supply a GitLab token.');
     });
-    it('supports token in env', async () => {
+    it('supports token in env', () => {
       const env = { GITHUB_TOKEN: 'abc' };
       let err;
       try {
@@ -51,7 +51,7 @@ describe('config/index', () => {
       }
       expect(err.message).toBe('At least one repository must be configured');
     });
-    it('supports token in CLI options', async () => {
+    it('supports token in CLI options', () => {
       defaultArgv = defaultArgv.concat(['--token=abc']);
       const env = {};
       let err;
@@ -62,7 +62,7 @@ describe('config/index', () => {
       }
       expect(err.message).toBe('At least one repository must be configured');
     });
-    it('supports repositories in CLI', async () => {
+    it('supports repositories in CLI', () => {
       const env = {};
       defaultArgv = defaultArgv.concat(['--token=abc', 'foo']);
       configParser.parseConfigs(env, defaultArgv);
@@ -71,7 +71,7 @@ describe('config/index', () => {
       repos.should.have.length(1);
       repos[0].repository.should.eql('foo');
     });
-    it('gets cascaded config', async () => {
+    it('gets cascaded config', () => {
       const env = { RENOVATE_CONFIG_FILE: 'test/_fixtures/config/file.js' };
       configParser.parseConfigs(env, defaultArgv);
       const repo = configParser.getRepositories().pop();
