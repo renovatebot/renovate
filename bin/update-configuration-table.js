@@ -11,10 +11,10 @@ const envParser = require('../lib/config/env');
 console.log('## Configuration Options');
 console.log('');
 console.log(
-  '| Name | Description | Type | Default value | Environment | CLI |',
+  '| Name | Description | Type | Default value | Environment | CLI |'
 );
 console.log(
-  '|------|-------------|------|---------------|-------------|-----|',
+  '|------|-------------|------|---------------|-------------|-----|'
 );
 
 const options = definitions.getOptions();
@@ -32,7 +32,7 @@ options.forEach(option => {
     cliName = `\`${cliName}\``;
   }
   console.log(
-    `| \`${option.name}\` | ${option.description} | ${option.type} | ${optionDefault} | ${envName} | ${cliName} |`,
+    `| \`${option.name}\` | ${option.description} | ${option.type} | ${optionDefault} | ${envName} | ${cliName} |`
   );
 });
 /* eslint-enable no-console */

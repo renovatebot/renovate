@@ -21,13 +21,13 @@ describe('workers/branch', () => {
     it('returns undefined if branch does not exist', async () => {
       config.api.branchExists.mockReturnValue(false);
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
-        undefined,
+        undefined
       );
     });
     it('returns branchName if no PR', async () => {
       config.api.getBranchPr.mockReturnValue(null);
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
-        branchName,
+        branchName
       );
     });
     it('returns false if does not need rebaseing', async () => {
@@ -35,7 +35,7 @@ describe('workers/branch', () => {
         isUnmergeable: false,
       });
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
-        branchName,
+        branchName
       );
     });
     it('returns false if unmergeable and cannot rebase', async () => {
@@ -44,7 +44,7 @@ describe('workers/branch', () => {
         canRebase: false,
       });
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
-        branchName,
+        branchName
       );
     });
     it('returns true if unmergeable and can rebase', async () => {
@@ -53,7 +53,7 @@ describe('workers/branch', () => {
         canRebase: true,
       });
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
-        undefined,
+        undefined
       );
     });
     it('returns false if stale but not configured to rebase', async () => {
@@ -64,7 +64,7 @@ describe('workers/branch', () => {
       });
       config.rebaseStalePrs = false;
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
-        branchName,
+        branchName
       );
     });
     it('returns false if stale but cannot rebase', async () => {
@@ -75,7 +75,7 @@ describe('workers/branch', () => {
       });
       config.rebaseStalePrs = true;
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
-        branchName,
+        branchName
       );
     });
     it('returns true if stale and can rebase', async () => {
@@ -86,7 +86,7 @@ describe('workers/branch', () => {
       });
       config.rebaseStalePrs = true;
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
-        undefined,
+        undefined
       );
     });
   });

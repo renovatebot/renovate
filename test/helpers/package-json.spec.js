@@ -11,7 +11,7 @@ const defaultTypes = [
 function readFixture(fixture) {
   return fs.readFileSync(
     path.resolve(__dirname, `../_fixtures/package-json/${fixture}`),
-    'utf8',
+    'utf8'
   );
 }
 
@@ -23,7 +23,7 @@ describe('helpers/package-json', () => {
     it('returns an array of correct length', () => {
       const extractedDependencies = packageJson.extractDependencies(
         JSON.parse(input01Content),
-        defaultTypes,
+        defaultTypes
       );
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(10);
@@ -31,7 +31,7 @@ describe('helpers/package-json', () => {
     it('each element contains non-null depType, depName, currentVersion', () => {
       const extractedDependencies = packageJson.extractDependencies(
         JSON.parse(input01Content),
-        defaultTypes,
+        defaultTypes
       );
       extractedDependencies
         .every(dep => dep.depType && dep.depName && dep.currentVersion)
@@ -40,7 +40,7 @@ describe('helpers/package-json', () => {
     it('supports null devDependencies', () => {
       const extractedDependencies = packageJson.extractDependencies(
         JSON.parse(input02Content),
-        defaultTypes,
+        defaultTypes
       );
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(6);
@@ -53,7 +53,7 @@ describe('helpers/package-json', () => {
         input01Content,
         'dependencies',
         'cheerio',
-        '0.22.1',
+        '0.22.1'
       );
       testContent.should.equal(outputContent);
     });
@@ -63,7 +63,7 @@ describe('helpers/package-json', () => {
         input01Content,
         'devDependencies',
         'angular-touch',
-        '1.6.1',
+        '1.6.1'
       );
       testContent.should.equal(outputContent);
     });
@@ -73,7 +73,7 @@ describe('helpers/package-json', () => {
         input01Content,
         'devDependencies',
         'angular-sanitize',
-        '1.6.1',
+        '1.6.1'
       );
       testContent.should.equal(outputContent);
     });
@@ -82,7 +82,7 @@ describe('helpers/package-json', () => {
         input01Content,
         'devDependencies',
         'angular-touch',
-        '1.5.8',
+        '1.5.8'
       );
       testContent.should.equal(input01Content);
     });
