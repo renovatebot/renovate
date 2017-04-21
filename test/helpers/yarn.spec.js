@@ -21,7 +21,7 @@ describe('generateLockFile(newPackageJson, npmrcContent, yarnrcContent)', () => 
     const yarnLock = await yarnHelper.generateLockFile(
       'package-json-contents',
       'npmrc-contents',
-      'yarnrc-contents',
+      'yarnrc-contents'
     );
     expect(tmp.dirSync.mock.calls.length).toEqual(1);
     expect(fs.writeFileSync.mock.calls.length).toEqual(3);
@@ -51,7 +51,7 @@ describe('getLockFile(packageJson, config)', () => {
       contents: 'New yarn.lock',
     };
     expect(await yarnHelper.getLockFile('package.json', '', api)).toMatchObject(
-      yarnLockFile,
+      yarnLockFile
     );
   });
 });

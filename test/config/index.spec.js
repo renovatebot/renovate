@@ -56,7 +56,7 @@ describe('config/index', () => {
         err = e;
       }
       expect(err.message).toBe(
-        'At least one repository must be configured, or use --autodiscover',
+        'At least one repository must be configured, or use --autodiscover'
       );
     });
     it('supports token in CLI options', async () => {
@@ -69,7 +69,7 @@ describe('config/index', () => {
         err = e;
       }
       expect(err.message).toBe(
-        'At least one repository must be configured, or use --autodiscover',
+        'At least one repository must be configured, or use --autodiscover'
       );
     });
     it('autodiscovers github platform', async () => {

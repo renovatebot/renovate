@@ -111,7 +111,7 @@ describe('api/github', () => {
         err = e;
       }
       expect(err.message).toBe(
-        'No token found for GitHub repository some/repo',
+        'No token found for GitHub repository some/repo'
       );
     });
     it('should squash', async () => {
@@ -277,7 +277,7 @@ describe('api/github', () => {
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
-        }),
+        })
       );
       const exists = await github.branchExists('thebranchname');
       expect(ghGot.mock.calls).toMatchSnapshot();
@@ -286,7 +286,7 @@ describe('api/github', () => {
     it('should propagate unknown errors', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() =>
-        Promise.reject(new Error('Something went wrong')),
+        Promise.reject(new Error('Something went wrong'))
       );
       let err;
       try {
@@ -432,7 +432,7 @@ describe('api/github', () => {
       const pr = await github.createPr(
         'some-branch',
         'The Title',
-        'Hello world',
+        'Hello world'
       );
       expect(pr).toMatchSnapshot();
       expect(ghGot.post.mock.calls).toMatchSnapshot();
@@ -667,7 +667,7 @@ describe('api/github', () => {
       await github.commitFilesToBranch(
         'package.json',
         files,
-        'my commit message',
+        'my commit message'
       );
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(ghGot.post.mock.calls).toMatchSnapshot();
@@ -687,7 +687,7 @@ describe('api/github', () => {
       await github.commitFilesToBranch(
         'package.json',
         files,
-        'my other commit message',
+        'my other commit message'
       );
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(ghGot.post.mock.calls).toMatchSnapshot();

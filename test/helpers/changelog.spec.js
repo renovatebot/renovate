@@ -18,7 +18,7 @@ describe('helpers/changelog', () => {
     it('returns header if generated markdown is valid', async () => {
       changelog.markdown.mockReturnValueOnce('dummy');
       expect(await getChangeLog('renovate', '1.0.0', '2.0.0')).toBe(
-        '### Changelog\n\ndummy',
+        '### Changelog\n\ndummy'
       );
     });
     it('returns empty if error thrown', async () => {
