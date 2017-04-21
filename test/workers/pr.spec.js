@@ -149,6 +149,44 @@ describe('workers/pr', () => {
       expect(config.api.addAssignees.mock.calls.length).toBe(1);
       expect(config.api.addReviewers.mock.calls.length).toBe(1);
     });
+    it('should not add assignees and reviewers to new PR if automerging any', async () => {
+      config.api.getBranchPr = jest.fn();
+      config.api.addAssignees = jest.fn();
+      config.api.addReviewers = jest.fn();
+      config.assignees = ['bar'];
+      config.reviewers = ['baz'];
+      config.automerge = 'any';
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(config.api.addAssignees.mock.calls.length).toBe(0);
+      expect(config.api.addReviewers.mock.calls.length).toBe(0);
+    });
+    it('should not add assignees and reviewers to new PR if automerging minor', async () => {
+      config.api.getBranchPr = jest.fn();
+      config.api.addAssignees = jest.fn();
+      config.api.addReviewers = jest.fn();
+      config.assignees = ['bar'];
+      config.reviewers = ['baz'];
+      config.upgradeType = 'minor';
+      config.automerge = 'minor';
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(config.api.addAssignees.mock.calls.length).toBe(0);
+      expect(config.api.addReviewers.mock.calls.length).toBe(0);
+    });
+    it('should add assignees and reviewers to new PR if automerging minor and its major', async () => {
+      config.api.getBranchPr = jest.fn();
+      config.api.addAssignees = jest.fn();
+      config.api.addReviewers = jest.fn();
+      config.assignees = ['bar'];
+      config.reviewers = ['baz'];
+      config.upgradeType = 'major';
+      config.automerge = 'minor';
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(config.api.addAssignees.mock.calls.length).toBe(1);
+      expect(config.api.addReviewers.mock.calls.length).toBe(1);
+    });
     it('should return unmodified existing PR', async () => {
       config.depName = 'dummy';
       config.currentVersion = '1.0.0';
