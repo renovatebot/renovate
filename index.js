@@ -1,4 +1,5 @@
-import React, {isValidElement as isElement} from 'react';
+import React from 'react';
+import {isElement} from 'react-dom/test-utils';
 import collapse from 'collapse-white-space';
 import isPlainObject from 'is-plain-object';
 import stringify from 'stringify-object';

@@ -3,7 +3,7 @@
 
 import React from 'react';
 import expect from 'expect';
-import {createRenderer} from 'react-addons-test-utils';
+import {createRenderer} from 'react-test-renderer/shallow';
 import reactElementToJSXString from './index';
 import AnonymousStatelessComponent from './AnonymousStatelessComponent';
 
