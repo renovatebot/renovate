@@ -10,20 +10,26 @@ describe('helpers/versions', () => {
 
   describe('.determineUpgrades(dep, currentVersion, defaultConfig)', () => {
     it('return empty if invalid current version', () => {
-      versionsHelper.determineUpgrades(qJson, 'invalid', defaultConfig).should.have.length(0);
+      versionsHelper
+        .determineUpgrades(qJson, 'invalid', defaultConfig)
+        .should.have.length(0);
     });
     it('return empty if null versions', () => {
       const testDep = {
         name: 'q',
       };
-      versionsHelper.determineUpgrades(testDep, '1.0.0', defaultConfig).should.have.length(0);
+      versionsHelper
+        .determineUpgrades(testDep, '1.0.0', defaultConfig)
+        .should.have.length(0);
     });
     it('return empty if empty versions', () => {
       const testDep = {
         name: 'q',
         versions: [],
       };
-      versionsHelper.determineUpgrades(testDep, '1.0.0', defaultConfig).should.have.length(0);
+      versionsHelper
+        .determineUpgrades(testDep, '1.0.0', defaultConfig)
+        .should.have.length(0);
     });
     it('supports minor and major upgrades for tilde ranges', () => {
       const upgradeVersions = [
@@ -42,22 +48,32 @@ describe('helpers/versions', () => {
           changeLogToVersion: '1.4.1',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig).should.eql(upgradeVersions);
+      versionsHelper
+        .determineUpgrades(qJson, '^0.4.0', defaultConfig)
+        .should.eql(upgradeVersions);
     });
     it('returns only one update if grouping', () => {
       defaultConfig.groupName = 'somegroup';
-      expect(versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig)).toMatchSnapshot();
+      expect(
+        versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig),
+      ).toMatchSnapshot();
     });
     it('returns only one update if automerging any', () => {
       defaultConfig.automerge = 'any';
-      expect(versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig)).toMatchSnapshot();
+      expect(
+        versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig),
+      ).toMatchSnapshot();
     });
     it('returns both updates if automerging minor', () => {
       defaultConfig.automerge = 'minor';
-      expect(versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig)).toMatchSnapshot();
+      expect(
+        versionsHelper.determineUpgrades(qJson, '^0.4.0', defaultConfig),
+      ).toMatchSnapshot();
     });
     it('disables major release separation (major)', () => {
-      const config = Object.assign({}, defaultConfig, { separateMajorReleases: false });
+      const config = Object.assign({}, defaultConfig, {
+        separateMajorReleases: false,
+      });
       const upgradeVersions = [
         {
           newVersion: '1.4.1',
@@ -67,10 +83,14 @@ describe('helpers/versions', () => {
           changeLogToVersion: '1.4.1',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '^0.4.0', config).should.eql(upgradeVersions);
+      versionsHelper
+        .determineUpgrades(qJson, '^0.4.0', config)
+        .should.eql(upgradeVersions);
     });
     it('disables major release separation (minor)', () => {
-      const config = Object.assign({}, defaultConfig, { separateMajorReleases: false });
+      const config = Object.assign({}, defaultConfig, {
+        separateMajorReleases: false,
+      });
       const upgradeVersions = [
         {
           newVersion: '1.4.1',
@@ -80,7 +100,9 @@ describe('helpers/versions', () => {
           changeLogToVersion: '1.4.1',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '1.0.0', config).should.eql(upgradeVersions);
+      versionsHelper
+        .determineUpgrades(qJson, '1.0.0', config)
+        .should.eql(upgradeVersions);
     });
     it('supports minor and major upgrades for ranged versions', () => {
       const pinVersions = [
@@ -99,7 +121,9 @@ describe('helpers/versions', () => {
           changeLogToVersion: '1.4.1',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '~0.4.0', defaultConfig).should.eql(pinVersions);
+      versionsHelper
+        .determineUpgrades(qJson, '~0.4.0', defaultConfig)
+        .should.eql(pinVersions);
     });
     it('ignores pinning for ranges when other upgrade exists', () => {
       const pinVersions = [
@@ -111,7 +135,9 @@ describe('helpers/versions', () => {
           changeLogToVersion: '1.4.1',
         },
       ];
-      expect(versionsHelper.determineUpgrades(qJson, '~0.9.0', defaultConfig)).toEqual(pinVersions);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '~0.9.0', defaultConfig),
+      ).toEqual(pinVersions);
     });
     it('upgrades minor ranged versions', () => {
       const upgradeVersions = [
@@ -123,7 +149,9 @@ describe('helpers/versions', () => {
           changeLogToVersion: '1.4.1',
         },
       ];
-      expect(versionsHelper.determineUpgrades(qJson, '~1.0.0', defaultConfig)).toEqual(upgradeVersions);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '~1.0.0', defaultConfig),
+      ).toEqual(upgradeVersions);
     });
     it('pins minor ranged versions', () => {
       const upgradeVersions = [
@@ -133,11 +161,15 @@ describe('helpers/versions', () => {
           upgradeType: 'pin',
         },
       ];
-      expect(versionsHelper.determineUpgrades(qJson, '^1.0.0', defaultConfig)).toEqual(upgradeVersions);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '^1.0.0', defaultConfig),
+      ).toEqual(upgradeVersions);
     });
     it('ignores minor ranged versions when not pinning', () => {
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '^1.0.0', config)).toHaveLength(0);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '^1.0.0', config),
+      ).toHaveLength(0);
     });
     it('upgrades tilde ranges', () => {
       const upgradeVersions = [
@@ -149,7 +181,9 @@ describe('helpers/versions', () => {
           changeLogToVersion: '1.4.1',
         },
       ];
-      expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', defaultConfig)).toEqual(upgradeVersions);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '~1.3.0', defaultConfig),
+      ).toEqual(upgradeVersions);
     });
     it('upgrades .x minor ranges', () => {
       const upgradeVersions = [
@@ -161,7 +195,9 @@ describe('helpers/versions', () => {
           changeLogToVersion: '1.4.1',
         },
       ];
-      expect(versionsHelper.determineUpgrades(qJson, '1.3.x', defaultConfig)).toEqual(upgradeVersions);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '1.3.x', defaultConfig),
+      ).toEqual(upgradeVersions);
     });
     it('upgrades tilde ranges without pinning', () => {
       const upgradeVersions = [
@@ -175,7 +211,9 @@ describe('helpers/versions', () => {
         },
       ];
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', config)).toEqual(upgradeVersions);
+      expect(versionsHelper.determineUpgrades(qJson, '~1.3.0', config)).toEqual(
+        upgradeVersions,
+      );
     });
     it('upgrades .x major ranges without pinning', () => {
       const upgradeVersions = [
@@ -189,7 +227,9 @@ describe('helpers/versions', () => {
         },
       ];
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '0.x', config)).toEqual(upgradeVersions);
+      expect(versionsHelper.determineUpgrades(qJson, '0.x', config)).toEqual(
+        upgradeVersions,
+      );
     });
     it('upgrades .x minor ranges without pinning', () => {
       const upgradeVersions = [
@@ -203,7 +243,9 @@ describe('helpers/versions', () => {
         },
       ];
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '1.3.x', config)).toEqual(upgradeVersions);
+      expect(versionsHelper.determineUpgrades(qJson, '1.3.x', config)).toEqual(
+        upgradeVersions,
+      );
     });
     it('upgrades shorthand major ranges without pinning', () => {
       const upgradeVersions = [
@@ -217,7 +259,9 @@ describe('helpers/versions', () => {
         },
       ];
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '0', config)).toEqual(upgradeVersions);
+      expect(versionsHelper.determineUpgrades(qJson, '0', config)).toEqual(
+        upgradeVersions,
+      );
     });
     it('upgrades shorthand minor ranges without pinning', () => {
       const upgradeVersions = [
@@ -231,7 +275,9 @@ describe('helpers/versions', () => {
         },
       ];
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '1.3', config)).toEqual(upgradeVersions);
+      expect(versionsHelper.determineUpgrades(qJson, '1.3', config)).toEqual(
+        upgradeVersions,
+      );
     });
     it('upgrades multiple tilde ranges without pinning', () => {
       const upgradeVersions = [
@@ -253,7 +299,9 @@ describe('helpers/versions', () => {
         },
       ];
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '~0.7.0', config)).toEqual(upgradeVersions);
+      expect(versionsHelper.determineUpgrades(qJson, '~0.7.0', config)).toEqual(
+        upgradeVersions,
+      );
     });
     it('upgrades multiple caret ranges without pinning', () => {
       const upgradeVersions = [
@@ -275,15 +323,21 @@ describe('helpers/versions', () => {
         },
       ];
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '^0.7.0', config)).toEqual(upgradeVersions);
+      expect(versionsHelper.determineUpgrades(qJson, '^0.7.0', config)).toEqual(
+        upgradeVersions,
+      );
     });
     it('ignores complex ranges when not pinning', () => {
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '^0.7.0 || ^0.8.0', config)).toHaveLength(0);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '^0.7.0 || ^0.8.0', config),
+      ).toHaveLength(0);
     });
     it('returns nothing for greater than ranges', () => {
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '>= 0.7.0', config)).toHaveLength(0);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '>= 0.7.0', config),
+      ).toHaveLength(0);
     });
     it('upgrades less than equal ranges without pinning', () => {
       const upgradeVersions = [
@@ -305,11 +359,15 @@ describe('helpers/versions', () => {
         },
       ];
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '<= 0.7.2', config)).toEqual(upgradeVersions);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '<= 0.7.2', config),
+      ).toEqual(upgradeVersions);
     });
     it('rejects less than ranges without pinning', () => {
       const config = Object.assign({}, defaultConfig, { pinVersions: false });
-      expect(versionsHelper.determineUpgrades(qJson, '< 0.7.2', config)).toEqual([]);
+      expect(
+        versionsHelper.determineUpgrades(qJson, '< 0.7.2', config),
+      ).toEqual([]);
     });
     it('supports > latest versions if configured', () => {
       const config = Object.assign({}, defaultConfig);
@@ -323,7 +381,9 @@ describe('helpers/versions', () => {
           changeLogToVersion: '2.0.1',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '1.4.1', config).should.eql(upgradeVersions);
+      versionsHelper
+        .determineUpgrades(qJson, '1.4.1', config)
+        .should.eql(upgradeVersions);
     });
     it('supports future versions if configured', () => {
       const config = Object.assign({}, defaultConfig);
@@ -338,7 +398,9 @@ describe('helpers/versions', () => {
           changeLogToVersion: '2.0.3',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '1.4.1', config).should.eql(upgradeVersions);
+      versionsHelper
+        .determineUpgrades(qJson, '1.4.1', config)
+        .should.eql(upgradeVersions);
     });
     it('supports future versions if already future', () => {
       const upgradeVersions = [
@@ -348,16 +410,24 @@ describe('helpers/versions', () => {
           upgradeType: 'pin',
         },
       ];
-      versionsHelper.determineUpgrades(qJson, '^2.0.0', defaultConfig).should.eql(upgradeVersions);
+      versionsHelper
+        .determineUpgrades(qJson, '^2.0.0', defaultConfig)
+        .should.eql(upgradeVersions);
     });
     it('should ignore unstable versions if the current version is stable', () => {
-      versionsHelper.determineUpgrades({
-        name: 'amazing-package',
-        versions: {
-          '1.0.0': {},
-          '1.1.0-beta': {},
-        },
-      }, '1.0.0', defaultConfig).should.eql([]);
+      versionsHelper
+        .determineUpgrades(
+          {
+            name: 'amazing-package',
+            versions: {
+              '1.0.0': {},
+              '1.1.0-beta': {},
+            },
+          },
+          '1.0.0',
+          defaultConfig,
+        )
+        .should.eql([]);
     });
     it('should allow unstable versions if the current version is unstable', () => {
       const upgradeVersions = [
@@ -369,13 +439,19 @@ describe('helpers/versions', () => {
           changeLogToVersion: '1.1.0-beta',
         },
       ];
-      versionsHelper.determineUpgrades({
-        name: 'amazing-package',
-        versions: {
-          '1.0.0-beta': {},
-          '1.1.0-beta': {},
-        },
-      }, '1.0.0-beta', defaultConfig).should.eql(upgradeVersions);
+      versionsHelper
+        .determineUpgrades(
+          {
+            name: 'amazing-package',
+            versions: {
+              '1.0.0-beta': {},
+              '1.1.0-beta': {},
+            },
+          },
+          '1.0.0-beta',
+          defaultConfig,
+        )
+        .should.eql(upgradeVersions);
     });
   });
   describe('.isRange(input)', () => {
@@ -406,8 +482,12 @@ describe('helpers/versions', () => {
     });
     it('should reject github repositories', () => {
       versionsHelper.isValidVersion('singapore/renovate').should.eql(false);
-      versionsHelper.isValidVersion('singapore/renovate#master').should.eql(false);
-      versionsHelper.isValidVersion('https://github.com/singapore/renovate.git').should.eql(false);
+      versionsHelper
+        .isValidVersion('singapore/renovate#master')
+        .should.eql(false);
+      versionsHelper
+        .isValidVersion('https://github.com/singapore/renovate.git')
+        .should.eql(false);
     });
   });
   describe('.isPastLatest(dep, version)', () => {

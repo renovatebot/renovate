@@ -18,8 +18,11 @@ describe('generateLockFile(newPackageJson, npmrcContent, yarnrcContent)', () => 
     stderror: '',
   }));
   it('generates lock files', async () => {
-    const yarnLock =
-      await yarnHelper.generateLockFile('package-json-contents', 'npmrc-contents', 'yarnrc-contents');
+    const yarnLock = await yarnHelper.generateLockFile(
+      'package-json-contents',
+      'npmrc-contents',
+      'yarnrc-contents',
+    );
     expect(tmp.dirSync.mock.calls.length).toEqual(1);
     expect(fs.writeFileSync.mock.calls.length).toEqual(3);
     expect(fs.readFileSync.mock.calls.length).toEqual(1);
@@ -47,7 +50,9 @@ describe('getLockFile(packageJson, config)', () => {
       name: 'yarn.lock',
       contents: 'New yarn.lock',
     };
-    expect(await yarnHelper.getLockFile('package.json', '', api)).toMatchObject(yarnLockFile);
+    expect(await yarnHelper.getLockFile('package.json', '', api)).toMatchObject(
+      yarnLockFile,
+    );
   });
 });
 
@@ -69,14 +74,18 @@ describe('maintainLockFile(inputConfig)', () => {
   });
   it('returns null if contents match', async () => {
     config.api.getFileContent.mockReturnValueOnce('oldYarnLockContent');
-    yarnHelper.getLockFile.mockReturnValueOnce({ contents: 'oldYarnLockContent' });
+    yarnHelper.getLockFile.mockReturnValueOnce({
+      contents: 'oldYarnLockContent',
+    });
     const yarnLock = await yarnHelper.maintainLockFile(config);
     expect(config.api.getFileContent.mock.calls.length).toBe(2);
     expect(yarnLock).toEqual(null);
   });
   it('returns new yarn lock if contents differ', async () => {
     config.api.getFileContent.mockReturnValueOnce('oldYarnLockContent');
-    yarnHelper.getLockFile.mockReturnValueOnce({ contents: 'newYarnLockContent' });
+    yarnHelper.getLockFile.mockReturnValueOnce({
+      contents: 'newYarnLockContent',
+    });
     const yarnLock = await yarnHelper.maintainLockFile(config);
     expect(config.api.getFileContent.mock.calls.length).toBe(2);
     expect(yarnLock).toEqual({ contents: 'newYarnLockContent' });

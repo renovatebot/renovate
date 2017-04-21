@@ -4,15 +4,18 @@ module.exports = {
     },
     'extends': [
       'airbnb-base',
+      'prettier',
     ],
     'plugins': [
-        'import',
-        'promise',
+      'import',
+      'promise',
+      'prettier',
     ],
     'rules': {
       'no-use-before-define': 0,
       'no-restricted-syntax': 0,
       'no-await-in-loop': 0,
+      'prettier/prettier': ['error', { 'trailingComma': 'all', 'singleQuote': true }],
       'promise/always-return': 'error',
       'promise/no-return-wrap': 'error',
       'promise/param-names': 'error',

@@ -84,7 +84,12 @@ describe('api/github', () => {
   describe('initRepo', () => {
     [
       [undefined, ['mytoken'], 'mytoken', undefined],
-      [undefined, ['mytoken', 'https://my.custom.endpoint/'], 'mytoken', 'https://my.custom.endpoint/'],
+      [
+        undefined,
+        ['mytoken', 'https://my.custom.endpoint/'],
+        'mytoken',
+        'https://my.custom.endpoint/',
+      ],
       ['myenvtoken', [], 'myenvtoken', undefined],
     ].forEach(([envToken, args, token, endpoint], i) => {
       it(`should initialise the config for the repo - ${i}`, async () => {
@@ -105,7 +110,9 @@ describe('api/github', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('No token found for GitHub repository some/repo');
+      expect(err.message).toBe(
+        'No token found for GitHub repository some/repo',
+      );
     });
     it('should squash', async () => {
       async function squashInitRepo(...args) {
@@ -182,10 +189,13 @@ describe('api/github', () => {
       ghGot.mockImplementationOnce(() => ({
         body: {
           items: [
-              { name: 'package.json', path: '/package.json' },
-              { name: 'package.json.something-else', path: 'some-dir/package.json.some-thing-else' },
-              { name: 'package.json', path: 'src/app/package.json' },
-              { name: 'package.json', path: 'src/otherapp/package.json' },
+            { name: 'package.json', path: '/package.json' },
+            {
+              name: 'package.json.something-else',
+              path: 'some-dir/package.json.some-thing-else',
+            },
+            { name: 'package.json', path: 'src/app/package.json' },
+            { name: 'package.json', path: 'src/otherapp/package.json' },
           ],
         },
       }));
@@ -211,11 +221,14 @@ describe('api/github', () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
         statusCode: 200,
-        body: [{
-          ref: 'refs/heads/notthebranchname',
-        }, {
-          ref: 'refs/heads/thebranchname',
-        }],
+        body: [
+          {
+            ref: 'refs/heads/notthebranchname',
+          },
+          {
+            ref: 'refs/heads/thebranchname',
+          },
+        ],
       }));
       const exists = await github.branchExists('thebranchname');
       expect(ghGot.mock.calls).toMatchSnapshot();
@@ -237,11 +250,14 @@ describe('api/github', () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
         statusCode: 200,
-        body: [{
-          ref: 'refs/heads/notthebranchname',
-        }, {
-          ref: 'refs/heads/alsonotthebranchname',
-        }],
+        body: [
+          {
+            ref: 'refs/heads/notthebranchname',
+          },
+          {
+            ref: 'refs/heads/alsonotthebranchname',
+          },
+        ],
       }));
       const exists = await github.branchExists('thebranchname');
       expect(ghGot.mock.calls).toMatchSnapshot();
@@ -258,16 +274,20 @@ describe('api/github', () => {
     });
     it('should return false if a 404 is returned', async () => {
       await initRepo('some/repo', 'token');
-      ghGot.mockImplementationOnce(() => Promise.reject({
-        statusCode: 404,
-      }));
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        }),
+      );
       const exists = await github.branchExists('thebranchname');
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(exists).toBe(false);
     });
     it('should propagate unknown errors', async () => {
       await initRepo('some/repo', 'token');
-      ghGot.mockImplementationOnce(() => Promise.reject(new Error('Something went wrong')));
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject(new Error('Something went wrong')),
+      );
       let err;
       try {
         await github.branchExists('thebranchname');
@@ -291,9 +311,7 @@ describe('api/github', () => {
     it('should return the PR object', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
-        body: [
-            { number: 91 },
-        ],
+        body: [{ number: 91 }],
       }));
       ghGot.mockImplementationOnce(() => ({
         body: {
@@ -358,15 +376,13 @@ describe('api/github', () => {
     it('should return a PR object', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
-        body: [
-            { title: 'PR Title', state: 'open', number: 42 },
-        ],
+        body: [{ title: 'PR Title', state: 'open', number: 42 }],
       }));
       const pr = await github.findPr('master', 'PR Title');
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
     });
-    it('should return null if no PR\'s are found', async () => {
+    it("should return null if no PR's are found", async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
         body: [],
@@ -378,9 +394,7 @@ describe('api/github', () => {
     it('should set the isClosed attribute of the PR to true if the PR is closed', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
-        body: [
-            { title: 'PR Title', state: 'closed', number: 42 },
-        ],
+        body: [{ title: 'PR Title', state: 'closed', number: 42 }],
       }));
       const pr = await github.findPr('master');
       expect(ghGot.mock.calls).toMatchSnapshot();
@@ -397,9 +411,9 @@ describe('api/github', () => {
         await initRepo('some/repo', 'token');
         ghGot.mockImplementationOnce(() => ({
           body: [
-              { title: 'foo', head: { label: 'theowner:some-branch' } },
-              { title: 'bar', head: { label: 'theowner:some-other-branch' } },
-              { title: 'baz', head: { label: 'theowner:some-branch' } },
+            { title: 'foo', head: { label: 'theowner:some-branch' } },
+            { title: 'bar', head: { label: 'theowner:some-other-branch' } },
+            { title: 'baz', head: { label: 'theowner:some-branch' } },
           ],
         }));
         const res = await github.checkForClosedPr(branch, title);
@@ -415,7 +429,11 @@ describe('api/github', () => {
           number: 123,
         },
       }));
-      const pr = await github.createPr('some-branch', 'The Title', 'Hello world');
+      const pr = await github.createPr(
+        'some-branch',
+        'The Title',
+        'Hello world',
+      );
       expect(pr).toMatchSnapshot();
       expect(ghGot.post.mock.calls).toMatchSnapshot();
     });
@@ -435,7 +453,13 @@ describe('api/github', () => {
     });
     [
       { number: 1, state: 'closed', base: { sha: '1234' } },
-      { number: 1, state: 'open', mergeable_state: 'dirty', base: { sha: '1234' }, commits: 1 },
+      {
+        number: 1,
+        state: 'open',
+        mergeable_state: 'dirty',
+        base: { sha: '1234' },
+        commits: 1,
+      },
       { number: 1, state: 'open', base: { sha: '5678' }, commits: 1 },
     ].forEach((body, i) => {
       it(`should return a PR object - ${i}`, async () => {
@@ -459,11 +483,13 @@ describe('api/github', () => {
         },
       }));
       ghGot.mockImplementationOnce(() => ({
-        body: [{
-          author: {
-            login: 'foo',
+        body: [
+          {
+            author: {
+              login: 'foo',
+            },
           },
-        }],
+        ],
       }));
       const pr = await github.getPr(1234);
       expect(pr).toMatchSnapshot();
@@ -480,15 +506,18 @@ describe('api/github', () => {
         },
       }));
       ghGot.mockImplementationOnce(() => ({
-        body: [{
-          author: {
-            login: 'foo',
+        body: [
+          {
+            author: {
+              login: 'foo',
+            },
           },
-        }, {
-          author: {
-            login: 'bar',
+          {
+            author: {
+              login: 'bar',
+            },
           },
-        }],
+        ],
       }));
       const pr = await github.getPr(1234);
       expect(pr).toMatchSnapshot();
@@ -629,11 +658,17 @@ describe('api/github', () => {
           ref: 'refs/heads/package.json',
         },
       }));
-      const files = [{
-        name: 'package.json',
-        contents: 'hello world',
-      }];
-      await github.commitFilesToBranch('package.json', files, 'my commit message');
+      const files = [
+        {
+          name: 'package.json',
+          contents: 'hello world',
+        },
+      ];
+      await github.commitFilesToBranch(
+        'package.json',
+        files,
+        'my commit message',
+      );
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(ghGot.post.mock.calls).toMatchSnapshot();
       expect(ghGot.patch.mock.calls).toMatchSnapshot();
@@ -643,11 +678,17 @@ describe('api/github', () => {
       ghGot.mockImplementationOnce(() => ({
         statusCode: 404,
       }));
-      const files = [{
-        name: 'package.json',
-        contents: 'hello world',
-      }];
-      await github.commitFilesToBranch('package.json', files, 'my other commit message');
+      const files = [
+        {
+          name: 'package.json',
+          contents: 'hello world',
+        },
+      ];
+      await github.commitFilesToBranch(
+        'package.json',
+        files,
+        'my other commit message',
+      );
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(ghGot.post.mock.calls).toMatchSnapshot();
       expect(ghGot.patch.mock.calls).toMatchSnapshot();

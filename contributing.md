@@ -13,7 +13,9 @@ Before you submit any code, it's recommended that you raise an issue first if yo
 
 After you have cloned the project, first check that it's running OK locally.
 
-`renovate` supports node versions 6 and above. It is written using async/await so either needs `babel` transpilation for node 6, or a harmony flag for node 7.
+First you will need to install dependencies. We use [yarn](https://github.com/yarnpkg/yarn) so run `yarn` instead of `npm install`.
+
+`renovate` supports node versions 6.9 and above. It is written using async/await so needs `babel` transpilation for node 6.
 
 If running in node 6, you need to run a transpiled version of the code. You can do this without an explicit transpilation step by running `yarn run start-babel`.
 Examples:
@@ -29,10 +31,12 @@ If running on node 7, you can run just like the above, but use the `yarn run sta
 ## Adding configuration options
 
 We wish to keep backwards-compatibility as often as possible, as well as make the code configurable, so most new functionality should be controllable via configuration options.
-Please see [Cofiguration docs](docs/configuration.md) for a list of current options.
+Please see [Configuration docs](docs/configuration.md) for a list of current options.
 
 If you wish to add one, add it to `lib/config/definitions.js` and then run `yarn run update-docs`.
 
 ## Running tests
 
-You can run `yarn test` locally to test your code. We don't have 100% coverage so new tests are desirable. We also run Continuous Integration using CircleCI.
+You can run `yarn test` locally to test your code. We also run Continuous Integration using CircleCI.
+
+We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule in `eslint` then it can be fixed by running `yarn run eslint-fix`;

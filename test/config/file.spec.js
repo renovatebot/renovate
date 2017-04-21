@@ -9,7 +9,9 @@ describe('config/file', () => {
     });
     it('parses custom config file', () => {
       const configFile = path.resolve(__dirname, '../_fixtures/config/file.js');
-      file.getConfig({ RENOVATE_CONFIG_FILE: configFile }).should.eql(customConfig);
+      file
+        .getConfig({ RENOVATE_CONFIG_FILE: configFile })
+        .should.eql(customConfig);
     });
   });
 });

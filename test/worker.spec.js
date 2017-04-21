@@ -136,10 +136,12 @@ describe('worker', () => {
     });
     it('handles depType config without override', () => {
       config.foo = 'bar';
-      config.depTypes = [{
-        depType: 'dependencies',
-        alpha: 'beta',
-      }];
+      config.depTypes = [
+        {
+          depType: 'dependencies',
+          alpha: 'beta',
+        },
+      ];
       deps.push({
         depName: 'a',
         depType: 'dependencies',
@@ -149,10 +151,12 @@ describe('worker', () => {
     });
     it('handles depType config with override', () => {
       config.foo = 'bar';
-      config.depTypes = [{
-        depType: 'dependencies',
-        foo: 'beta',
-      }];
+      config.depTypes = [
+        {
+          depType: 'dependencies',
+          foo: 'beta',
+        },
+      ];
       deps.push({
         depName: 'a',
         depType: 'dependencies',
@@ -162,10 +166,12 @@ describe('worker', () => {
     });
     it('handles package config', () => {
       config.foo = 'bar';
-      config.packages = [{
-        packageName: 'a',
-        labels: ['renovate'],
-      }];
+      config.packages = [
+        {
+          packageName: 'a',
+          labels: ['renovate'],
+        },
+      ];
       deps.push({
         depName: 'a',
       });
@@ -174,14 +180,18 @@ describe('worker', () => {
     });
     it('package config overrides depType and general config', () => {
       config.foo = 'bar';
-      config.depTypes = [{
-        depType: 'dependencies',
-        foo: 'beta',
-      }];
-      config.packages = [{
-        packageName: 'a',
-        foo: 'gamma',
-      }];
+      config.depTypes = [
+        {
+          depType: 'dependencies',
+          foo: 'beta',
+        },
+      ];
+      config.packages = [
+        {
+          packageName: 'a',
+          foo: 'gamma',
+        },
+      ];
       deps.push({
         depName: 'a',
         depType: 'dependencies',
@@ -191,14 +201,18 @@ describe('worker', () => {
     });
     it('nested package config overrides depType and general config', () => {
       config.foo = 'bar';
-      config.depTypes = [{
-        depType: 'dependencies',
-        foo: 'beta',
-        packages: [{
-          packageName: 'a',
-          foo: 'gamma',
-        }],
-      }];
+      config.depTypes = [
+        {
+          depType: 'dependencies',
+          foo: 'beta',
+          packages: [
+            {
+              packageName: 'a',
+              foo: 'gamma',
+            },
+          ],
+        },
+      ];
       deps.push({
         depName: 'a',
         depType: 'dependencies',
@@ -208,10 +222,12 @@ describe('worker', () => {
     });
     it('handles regex package pattern', () => {
       config.foo = 'bar';
-      config.packages = [{
-        packagePattern: 'eslint',
-        labels: ['eslint'],
-      }];
+      config.packages = [
+        {
+          packagePattern: 'eslint',
+          labels: ['eslint'],
+        },
+      ];
       deps.push({
         depName: 'eslint',
       });
@@ -229,10 +245,12 @@ describe('worker', () => {
     });
     it('handles regex wildcard package pattern', () => {
       config.foo = 'bar';
-      config.packages = [{
-        packagePattern: '^eslint',
-        labels: ['eslint'],
-      }];
+      config.packages = [
+        {
+          packagePattern: '^eslint',
+          labels: ['eslint'],
+        },
+      ];
       deps.push({
         depName: 'eslint',
       });
@@ -250,10 +268,12 @@ describe('worker', () => {
     });
     it('handles non-regex package name', () => {
       config.foo = 'bar';
-      config.packages = [{
-        packageName: 'eslint',
-        labels: ['eslint'],
-      }];
+      config.packages = [
+        {
+          packageName: 'eslint',
+          labels: ['eslint'],
+        },
+      ];
       deps.push({
         depName: 'eslint',
       });

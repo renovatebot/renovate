@@ -55,7 +55,9 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('At least one repository must be configured, or use --autodiscover');
+      expect(err.message).toBe(
+        'At least one repository must be configured, or use --autodiscover',
+      );
     });
     it('supports token in CLI options', async () => {
       defaultArgv = defaultArgv.concat(['--token=abc']);
@@ -66,7 +68,9 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('At least one repository must be configured, or use --autodiscover');
+      expect(err.message).toBe(
+        'At least one repository must be configured, or use --autodiscover',
+      );
     });
     it('autodiscovers github platform', async () => {
       const env = {};
@@ -87,7 +91,11 @@ describe('config/index', () => {
     });
     it('autodiscovers gitlab platform', async () => {
       const env = {};
-      defaultArgv = defaultArgv.concat(['--autodiscover', '--platform=gitlab', '--token=abc']);
+      defaultArgv = defaultArgv.concat([
+        '--autodiscover',
+        '--platform=gitlab',
+        '--token=abc',
+      ]);
       glGot.mockImplementationOnce(() => ({
         body: [
           {
