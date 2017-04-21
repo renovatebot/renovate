@@ -39,11 +39,24 @@ module.exports = {
     },
     {
       repository: 'singapore/repo2',
-      depTypes: ['dependencies', 'devDependencies', 'optionalDependencies'],
+      depTypes: [
+        'dependencies',
+        'devDependencies',
+        {
+          depType: 'optionalDependencies',
+          labels: ['renovate', 'optional'],
+        },
+      ],
       labels: ['renovate'],
     },
     'singapore/repo3',
-  ]
+  ],
+  packages: [
+    {
+      package: 'jquery',
+      labels: ['jquery', 'uhoh'],
+    },
+  ],
 }
 ```
 
