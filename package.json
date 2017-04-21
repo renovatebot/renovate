@@ -5,20 +5,20 @@
   "bin": "dist/renovate.js",
   "main": "dist/index.js",
   "scripts": {
-    "build": "npm run transpile",
+    "build": "yarn run transpile",
     "eslint": "eslint --ignore-path .gitignore .",
     "eslint-fix": "eslint --ignore-path .gitignore --fix .",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "npm-publish": "npm run update-docs && np && yarn install",
-    "prepublish": "npm run build",
+    "npm-publish": "yarn run update-docs && np && yarn install",
+    "prepublish": "yarn run build",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node lib/renovate",
-    "test": "npm run eslint && npm run jest",
+    "test": "yarn run eslint && yarn run jest",
     "jest": "jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
-    "update-docs": "npm run build && bash bin/update-docs.sh"
+    "update-docs": "yarn run build && bash bin/update-docs.sh"
   },
   "repository": {
     "type": "git",
