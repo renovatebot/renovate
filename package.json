@@ -12,6 +12,7 @@
     "heroku-scheduler": "heroku addons:open scheduler",
     "npm-publish": "npm run update-docs && np && yarn install",
     "prepublish": "npm run build",
+    "prettier": "prettier --single-quote --trailing-comma es5 --write 'lib/**/*.js'",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node lib/renovate",
@@ -67,6 +68,7 @@
     "eslint-plugin-promise": "3.5.0",
     "mkdirp": "0.5.1",
     "np": "2.13.2",
+    "prettier": "1.2.2",
     "rimraf": "2.6.1"
   },
   "babel": {
