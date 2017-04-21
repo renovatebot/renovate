@@ -1,2 +1,2 @@
-renovate: npm run start-raw
+renovate: yarn run start-raw
 web: node bin/heroku/web.js
