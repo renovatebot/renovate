@@ -10,18 +10,57 @@ describe('config/index', () => {
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
     });
-    it('throws for no token', () => {
+    it('throws for invalid platform', () => {
       const env = {};
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
+      defaultArgv.push('--platform=foo');
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('Unsupported platform: foo.');
+    });
+    it('throws for no GitHub token', () => {
+      const env = {};
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('You need to supply a GitHub token.');
+    });
+    it('throws for no GitLab token', () => {
+      const env = { RENOVATE_PLATFORM: 'gitlab' };
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('You need to supply a GitLab token.');
     });
     it('supports token in env', () => {
       const env = { GITHUB_TOKEN: 'abc' };
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('At least one repository must be configured');
     });
     it('supports token in CLI options', () => {
-      const env = {};
       defaultArgv = defaultArgv.concat(['--token=abc']);
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
+      const env = {};
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('At least one repository must be configured');
     });
     it('supports repositories in CLI', () => {
       const env = {};
