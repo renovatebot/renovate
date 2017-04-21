@@ -633,6 +633,36 @@ Object {
 }
 `;
 
+exports[`api/github getRepos should return an array of repos 1`] = `
+Array [
+  Array [
+    "user/repos",
+  ],
+]
+`;
+
+exports[`api/github getRepos should return an array of repos 2`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
+
+exports[`api/github getRepos should support a custom endpoint 1`] = `
+Array [
+  Array [
+    "user/repos",
+  ],
+]
+`;
+
+exports[`api/github getRepos should support a custom endpoint 2`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
+
 exports[`api/github initRepo should initialise the config for the repo - 0 1`] = `
 Array [
   Array [
