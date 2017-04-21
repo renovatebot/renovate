@@ -24,7 +24,7 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('At least one repository must be configured');
+      expect(err.message).toBe('At least one repository must be configured, or use --autodiscover');
     });
     it('supports token in env', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
@@ -34,7 +34,7 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('At least one repository must be configured');
+      expect(err.message).toBe('At least one repository must be configured, or use --autodiscover');
     });
     it('supports token in CLI options', async () => {
       defaultArgv = defaultArgv.concat(['--token=abc']);
@@ -45,7 +45,7 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('At least one repository must be configured');
+      expect(err.message).toBe('At least one repository must be configured, or use --autodiscover');
     });
     it('autodiscovers github platform', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
