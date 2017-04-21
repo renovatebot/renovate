@@ -9,21 +9,62 @@ describe('config/index', () => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
+      jest.mock('gh-got');
+      jest.mock('gl-got');
     });
-    it('throws for no token', () => {
+    it('throws for invalid platform', async () => {
       const env = {};
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
+      defaultArgv.push('--platform=foo');
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('Unsupported platform: foo.');
     });
-    it('supports token in env', () => {
+    it('throws for no GitHub token', async () => {
+      const env = {};
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('You need to supply a GitHub token.');
+    });
+    it('throws for no GitLab token', async () => {
+      const env = { RENOVATE_PLATFORM: 'gitlab' };
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('You need to supply a GitLab token.');
+    });
+    it('supports token in env', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('At least one repository must be configured');
     });
-    it('supports token in CLI options', () => {
-      const env = {};
+    it('supports token in CLI options', async () => {
       defaultArgv = defaultArgv.concat(['--token=abc']);
-      configParser.parseConfigs.bind(configParser, env, defaultArgv).should.throw('At least one repository must be configured');
+      const env = {};
+      let err;
+      try {
+        configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('At least one repository must be configured');
     });
-    it('supports repositories in CLI', () => {
+    it('supports repositories in CLI', async () => {
       const env = {};
       defaultArgv = defaultArgv.concat(['--token=abc', 'foo']);
       configParser.parseConfigs(env, defaultArgv);
@@ -32,7 +73,7 @@ describe('config/index', () => {
       repos.should.have.length(1);
       repos[0].repository.should.eql('foo');
     });
-    it('gets cascaded config', () => {
+    it('gets cascaded config', async () => {
       const env = { RENOVATE_CONFIG_FILE: 'test/_fixtures/config/file.js' };
       configParser.parseConfigs(env, defaultArgv);
       const repo = configParser.getRepositories().pop();
