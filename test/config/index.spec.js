@@ -9,8 +9,6 @@ describe('config/index', () => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
-      jest.mock('gh-got');
-      jest.mock('gl-got');
     });
     it('throws for invalid platform', async () => {
       const env = {};
