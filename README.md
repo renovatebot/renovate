@@ -86,6 +86,13 @@ console.log(reactElementToJSXString(<div a="1" b="2">Hello, world!</div>));
 
   If false, functions bodies are replaced with `function noRefCheck() {}`.
 
+**options.functionValue: function, default `(fn) => fn`**
+
+  Allows you to override the default formatting of function values.
+
+  `functionValue` receives the original function reference as input
+  and should send any value as output.
+
 **options.tabStop: number, default 2**
 
   Provide a different number of columns for indentation.

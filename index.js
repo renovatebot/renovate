@@ -7,12 +7,15 @@ import sortobject from 'sortobject';
 import traverse from 'traverse';
 import {fill} from 'lodash';
 
+const defaultFunctionValue = fn => fn;
+
 export default function reactElementToJSXString(
   ReactElement, {
     displayName,
     filterProps = [],
     showDefaultProps = true,
     showFunctions = false,
+    functionValue = defaultFunctionValue,
     tabStop = 2,
     useBooleanShorthandSyntax = true,
     maxInlineAttributesLineLength,
@@ -190,12 +193,21 @@ got \`${typeof Element}\``
     return typeof value;
   }
 
+  function isFunction (value) {
+    return typeof value === 'function';
+  }
+
   function formatValue(value, inline, lvl) {
     const wrapper = '__reactElementToJSXString__Wrapper__';
+    if (isFunction(value)) {
+      return functionValue(
+        showFunctions === false && functionValue === defaultFunctionValue ?
+          function noRefCheck() {} : // eslint-disable-line prefer-arrow-callback
+          value
+      );
+    }
 
-    if (typeof value === 'function' && !showFunctions) {
-      return function noRefCheck() {};
-    } else if (isElement(value)) {
+    if (isElement(value)) {
       // we use this delimiter hack in cases where the react element is a property
       // of an object from a root prop
       // i.e.
