@@ -1,16 +1,17 @@
 import React from 'react';
-import {isElement} from 'react-dom/test-utils';
+import { isElement } from 'react-dom/test-utils';
 import collapse from 'collapse-white-space';
 import isPlainObject from 'is-plain-object';
 import stringify from 'stringify-object';
 import sortobject from 'sortobject';
 import traverse from 'traverse';
-import {fill} from 'lodash';
+import { fill } from 'lodash';
 
 const defaultFunctionValue = fn => fn;
 
 export default function reactElementToJSXString(
-  ReactElement, {
+  ReactElement,
+  {
     displayName,
     filterProps = [],
     showDefaultProps = true,
@@ -23,14 +24,18 @@ export default function reactElementToJSXString(
 ) {
   const getDisplayName = displayName || getDefaultDisplayName;
 
-  return toJSXString({ReactElement});
+  return toJSXString({ ReactElement });
 
-  function toJSXString({ReactElement: Element = null, lvl = 0, inline = false}) {
+  function toJSXString({
+    ReactElement: Element = null,
+    lvl = 0,
+    inline = false,
+  }) {
     if (typeof Element === 'string' || typeof Element === 'number') {
       return Element;
     } else if (!isElement(Element)) {
       throw new Error(
-`react-element-to-jsx-string: Expected a ReactElement,
+        `react-element-to-jsx-string: Expected a ReactElement,
 got \`${typeof Element}\``
       );
     }
@@ -38,24 +43,32 @@ got \`${typeof Element}\``
     const tagName = getDisplayName(Element);
 
     let out = `<${tagName}`;
-    const props = formatProps(Element.props, getDefaultProps(Element), inline, lvl);
+    const props = formatProps(
+      Element.props,
+      getDefaultProps(Element),
+      inline,
+      lvl
+    );
     let attributes = [];
-    const children = React.Children.toArray(Element.props.children)
-    .filter(onlyMeaningfulChildren);
+    const children = React.Children
+      .toArray(Element.props.children)
+      .filter(onlyMeaningfulChildren);
 
     if (Element.ref !== null) {
       attributes.push(getJSXAttribute('ref', Element.ref, inline, lvl));
     }
 
-    if (Element.key !== null &&
+    if (
+      Element.key !== null &&
       // React automatically add key=".X" when there are some children
-      !(/^\./).test(Element.key)) {
+      !/^\./.test(Element.key)
+    ) {
       attributes.push(getJSXAttribute('key', Element.key, inline, lvl));
     }
 
     attributes = attributes
       .concat(props)
-      .filter(({name}) => filterProps.indexOf(name) === -1);
+      .filter(({ name }) => filterProps.indexOf(name) === -1);
 
     let outMultilineAttr = out;
     let outInlineAttr = out;
@@ -84,7 +97,15 @@ got \`${typeof Element}\``
 
     outMultilineAttr += `\n${spacer(lvl, tabStop)}`;
 
-    if (shouldRenderMultilineAttr(attributes, outInlineAttr, containsMultilineAttr, inline, lvl)) {
+    if (
+      shouldRenderMultilineAttr(
+        attributes,
+        outInlineAttr,
+        containsMultilineAttr,
+        inline,
+        lvl
+      )
+    ) {
       out = outMultilineAttr;
     } else {
       out = outInlineAttr;
@@ -102,10 +123,9 @@ got \`${typeof Element}\``
         out += children;
       } else {
         out += children
-        .reduce(mergePlainStringChildren, [])
-        .map(
-          recurse({lvl, inline})
-        ).join(`\n${spacer(lvl, tabStop)}`);
+          .reduce(mergePlainStringChildren, [])
+          .map(recurse({ lvl, inline }))
+          .join(`\n${spacer(lvl, tabStop)}`);
       }
       if (!inline) {
         out += '\n';
@@ -123,8 +143,18 @@ got \`${typeof Element}\``
     return out;
   }
 
-  function shouldRenderMultilineAttr(attributes, inlineAttributeString, containsMultilineAttr, inline, lvl) {
-    return (isInlineAttributeTooLong(attributes, inlineAttributeString, lvl) || containsMultilineAttr) && !inline;
+  function shouldRenderMultilineAttr(
+    attributes,
+    inlineAttributeString,
+    containsMultilineAttr,
+    inline,
+    lvl
+  ) {
+    return (
+      (isInlineAttributeTooLong(attributes, inlineAttributeString, lvl) ||
+        containsMultilineAttr) &&
+      !inline
+    );
   }
 
   function isInlineAttributeTooLong(attributes, inlineAttributeString, lvl) {
@@ -133,21 +163,26 @@ got \`${typeof Element}\``
       // whether or not to render multiline attributes based on the number of attributes
       return attributes.length > 1;
     } else {
-      return spacer(lvl, tabStop).length + inlineAttributeString.length > maxInlineAttributesLineLength;
+      return (
+        spacer(lvl, tabStop).length + inlineAttributeString.length >
+        maxInlineAttributesLineLength
+      );
     }
   }
 
   function formatProps(props, defaultProps, inline, lvl) {
-    let formatted = Object
-      .keys(props)
-      .filter(noChildren);
+    let formatted = Object.keys(props).filter(noChildren);
 
     if (useBooleanShorthandSyntax) {
-      formatted = formatted.filter(key => noFalse(props[key], defaultProps[key]));
+      formatted = formatted.filter(key =>
+        noFalse(props[key], defaultProps[key])
+      );
     }
 
     if (!showDefaultProps) {
-      formatted = formatted.filter(key => defaultProps[key] ? defaultProps[key] !== props[key] : true);
+      formatted = formatted.filter(
+        key => (defaultProps[key] ? defaultProps[key] !== props[key] : true)
+      );
     }
 
     return formatted
@@ -193,7 +228,7 @@ got \`${typeof Element}\``
     return typeof value;
   }
 
-  function isFunction (value) {
+  function isFunction(value) {
     return typeof value === 'function';
   }
 
@@ -201,9 +236,9 @@ got \`${typeof Element}\``
     const wrapper = '__reactElementToJSXString__Wrapper__';
     if (isFunction(value)) {
       return functionValue(
-        showFunctions === false && functionValue === defaultFunctionValue ?
-          function noRefCheck() {} : // eslint-disable-line prefer-arrow-callback
-          value
+        showFunctions === false && functionValue === defaultFunctionValue
+          ? function noRefCheck() {} // eslint-disable-line prefer-arrow-callback
+          : value
       );
     }
 
@@ -215,7 +250,10 @@ got \`${typeof Element}\``
       //   // <div a={{b: <div />}} />
       // we then remove the whole wrapping
       // otherwise, the element would be surrounded by quotes: <div a={{b: '<div />'}} />
-      return `<${wrapper}>${toJSXString({ReactElement: value, inline: true})}</${wrapper}>`;
+      return `<${wrapper}>${toJSXString({
+        ReactElement: value,
+        inline: true,
+      })}</${wrapper}>`;
     } else if (isPlainObject(value) || Array.isArray(value)) {
       return `<${wrapper}>${stringifyObject(value, inline, lvl)}</${wrapper}>`;
     }
@@ -223,8 +261,8 @@ got \`${typeof Element}\``
     return value;
   }
 
-  function recurse({lvl, inline}) {
-    return Element => toJSXString({ReactElement: Element, lvl, inline});
+  function recurse({ lvl, inline }) {
+    return Element => toJSXString({ ReactElement: Element, lvl, inline });
   }
 
   function stringifyObject(obj, inline, lvl) {
@@ -257,11 +295,13 @@ got \`${typeof Element}\``
 }
 
 function getDefaultDisplayName(ReactElement) {
-  return ReactElement.type.displayName ||
+  return (
+    ReactElement.type.displayName ||
     ReactElement.type.name || // function name
-    (typeof ReactElement.type === 'function' ? // function without a name, you should provide one
-      'No Display Name' :
-      ReactElement.type);
+    (typeof ReactElement.type === 'function' // function without a name, you should provide one
+      ? 'No Display Name'
+      : ReactElement.type)
+  );
 }
 
 function getDefaultProps(ReactElement) {
@@ -297,5 +337,10 @@ function noFalse(propValue, defaultValue) {
 }
 
 function onlyMeaningfulChildren(children) {
-  return children !== true && children !== false && children !== null && children !== '';
+  return (
+    children !== true &&
+    children !== false &&
+    children !== null &&
+    children !== ''
+  );
 }

@@ -3,20 +3,20 @@
 
 import React from 'react';
 import expect from 'expect';
-import {createRenderer} from 'react-test-renderer/shallow';
+import { createRenderer } from 'react-test-renderer/shallow';
 import reactElementToJSXString from './index';
 import AnonymousStatelessComponent from './AnonymousStatelessComponent';
 
 class TestComponent extends React.Component {}
 
 function NamedStatelessComponent(props) {
-  const {children} = props;
+  const { children } = props;
   return <div>{children}</div>;
 }
 
 class DefaultPropsComponent extends React.Component {}
 
-DefaultPropsComponent.defaultProps = {test: 'test', boolean: true};
+DefaultPropsComponent.defaultProps = { test: 'test', boolean: true };
 
 class DisplayNamePrecedence extends React.Component {}
 
@@ -24,111 +24,114 @@ DisplayNamePrecedence.displayName = 'This should take precedence';
 
 describe('reactElementToJSXString(ReactElement)', () => {
   it('reactElementToJSXString(<TestComponent/>)', () => {
-    expect(
-      reactElementToJSXString(<TestComponent/>)
-    ).toEqual('<TestComponent />');
+    expect(reactElementToJSXString(<TestComponent />)).toEqual(
+      '<TestComponent />'
+    );
   });
 
   it('reactElementToJSXString(<NamedStatelessComponent/>)', () => {
-    expect(
-      reactElementToJSXString(<NamedStatelessComponent/>)
-      ).toEqual('<NamedStatelessComponent />');
+    expect(reactElementToJSXString(<NamedStatelessComponent />)).toEqual(
+      '<NamedStatelessComponent />'
+    );
   });
 
   it('reactElementToJSXString(<AnonymousStatelessComponent/>)', () => {
-    expect(
-      reactElementToJSXString(<AnonymousStatelessComponent/>)
-      ).toEqual('<No Display Name />');
+    expect(reactElementToJSXString(<AnonymousStatelessComponent />)).toEqual(
+      '<No Display Name />'
+    );
   });
 
   it('reactElementToJSXString(<AnonymousStatelessComponent/>) with a displayName', () => {
     AnonymousStatelessComponent.displayName = 'I have a name!';
 
-    expect(
-      reactElementToJSXString(<AnonymousStatelessComponent/>)
-      ).toEqual('<I have a name! />');
+    expect(reactElementToJSXString(<AnonymousStatelessComponent />)).toEqual(
+      '<I have a name! />'
+    );
 
     delete AnonymousStatelessComponent.displayName;
   });
 
-  it('reactElementToJSXString(React.createElement(\'div\'))', () => {
-    expect(
-      reactElementToJSXString(React.createElement('div'))
-    ).toEqual('<div />');
+  it("reactElementToJSXString(React.createElement('div'))", () => {
+    expect(reactElementToJSXString(React.createElement('div'))).toEqual(
+      '<div />'
+    );
   });
 
   it('reactElementToJSXString(<div/>)', () => {
-    expect(
-      reactElementToJSXString(<div/>)
-    ).toEqual('<div />');
+    expect(reactElementToJSXString(<div />)).toEqual('<div />');
   });
 
   it('reactElementToJSXString(<div fn={() => {}}/>)', () => {
-    expect(
-      reactElementToJSXString(<div fn={() => {}}/>)
-    ).toEqual('<div fn={function noRefCheck() {}} />');
+    expect(reactElementToJSXString(<div fn={() => {}} />)).toEqual(
+      '<div fn={function noRefCheck() {}} />'
+    );
   });
 
   it('reactElementToJSXString(<div fn={function hello(){}}/>)', () => {
-    expect(
-      reactElementToJSXString(<div fn={function hello() {}}/>)
-    ).toEqual('<div fn={function noRefCheck() {}} />');
+    expect(reactElementToJSXString(<div fn={function hello() {}} />)).toEqual(
+      '<div fn={function noRefCheck() {}} />'
+    );
   });
 
   it('reactElementToJSXString(<div co={<div a="1" />} />)', () => {
-    expect(
-      reactElementToJSXString(<div co={<div a="1" />}/>)
-    ).toEqual('<div co={<div a="1" />} />');
+    expect(reactElementToJSXString(<div co={<div a="1" />} />)).toEqual(
+      '<div co={<div a="1" />} />'
+    );
   });
 
   it('reactElementToJSXString(<div re={/^Hello world$/} />)', () => {
-    expect(
-      reactElementToJSXString(<div re={/^Hello world$/}/>)
-    ).toEqual('<div re={/^Hello world$/} />');
+    expect(reactElementToJSXString(<div re={/^Hello world$/} />)).toEqual(
+      '<div re={/^Hello world$/} />'
+    );
   });
 
   it('reactElementToJSXString(<div int={8}/>)', () => {
-    expect(
-      reactElementToJSXString(<div int={8}/>)
-    ).toEqual('<div int={8} />');
+    expect(reactElementToJSXString(<div int={8} />)).toEqual('<div int={8} />');
   });
 
-  it('reactElementToJSXString(<div obj={{hello: \'world\'}}/>)', () => {
-    expect(
-      reactElementToJSXString(<div obj={{hello: 'world'}}/>)
-    ).toEqual(`<div
+  it("reactElementToJSXString(<div obj={{hello: 'world'}}/>)", () => {
+    expect(reactElementToJSXString(<div obj={{ hello: 'world' }} />)).toEqual(
+      `<div
   obj={{
     hello: 'world'
   }}
- />`);
+ />`
+    );
   });
 
   it('reactElementToJSXString(<div a="1" obj={{hello: \'world\'}}/>)', () => {
     expect(
-      reactElementToJSXString(<div a="1" obj={{hello: 'world'}}/>)
-    ).toEqual(`<div
+      reactElementToJSXString(<div a="1" obj={{ hello: 'world' }} />)
+    ).toEqual(
+      `<div
   a="1"
   obj={{
     hello: 'world'
   }}
-/>`);
+/>`
+    );
   });
 
   it('reactElementToJSXString(<div obj={{hello: \'world\'}} a="1"/>)', () => {
     expect(
-      reactElementToJSXString(<div obj={{hello: 'world'}} a="1"/>)
-    ).toEqual(`<div
+      reactElementToJSXString(<div obj={{ hello: 'world' }} a="1" />)
+    ).toEqual(
+      `<div
   a="1"
   obj={{
     hello: 'world'
   }}
-/>`);
+/>`
+    );
   });
 
   it('reactElementToJSXString(<div obj={{hello: [1, 2], world: {nested: true}}}/>)', () => {
     expect(
-      reactElementToJSXString(<div obj={{hello: [1, 2], world: {nested: true}}}/>)
-    ).toEqual(`<div
+      reactElementToJSXString(
+        <div obj={{ hello: [1, 2], world: { nested: true } }} />
+      )
+    ).toEqual(
+      `<div
   obj={{
     hello: [
       1,
@@ -138,123 +141,123 @@ describe('reactElementToJSXString(ReactElement)', () => {
       nested: true
     }
   }}
- />`);
+ />`
+    );
   });
 
   it('reactElementToJSXString(<div></div>)', () => {
-    expect(
-      reactElementToJSXString(<div></div>)
-    ).toEqual('<div />');
+    expect(reactElementToJSXString(<div />)).toEqual('<div />');
   });
 
   it('reactElementToJSXString(<div z="3" a="1" b="2"/>)', () => {
     /* eslint react/jsx-sort-props: 0 */
-    expect(
-      reactElementToJSXString(<div z="3" a="1" b="2"/>)
-    ).toEqual(
-`<div
+    expect(reactElementToJSXString(<div z="3" a="1" b="2" />)).toEqual(
+      `<div
   a="1"
   b="2"
   z="3"
-/>`);
+/>`
+    );
   });
 
   it('reactElementToJSXString(<div a="1">Hello</div>)', () => {
-    expect(
-      reactElementToJSXString(<div a="1">Hello</div>)
-    ).toEqual(
-`<div a="1">
+    expect(reactElementToJSXString(<div a="1">Hello</div>)).toEqual(
+      `<div a="1">
   Hello
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div a="1" b="5">Hello</div>)', () => {
-    expect(
-      reactElementToJSXString(<div a="1" b="5">Hello</div>)
-    ).toEqual(
-`<div
+    expect(reactElementToJSXString(<div a="1" b="5">Hello</div>)).toEqual(
+      `<div
   a="1"
   b="5"
 >
   Hello
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div>Hello</div>)', () => {
-    expect(
-      reactElementToJSXString(<div>Hello</div>)
-    ).toEqual(
-`<div>
+    expect(reactElementToJSXString(<div>Hello</div>)).toEqual(
+      `<div>
   Hello
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div>Hello</div>, {tabStop: 4})', () => {
-    expect(
-      reactElementToJSXString(<div>Hello</div>, {tabStop: 4})
-    ).toEqual(
-`<div>
+    expect(reactElementToJSXString(<div>Hello</div>, { tabStop: 4 })).toEqual(
+      `<div>
     Hello
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div><div>Hello</div></div>)', () => {
-    expect(
-      reactElementToJSXString(<div><div>Hello</div></div>)
-    ).toEqual(
-`<div>
+    expect(reactElementToJSXString(<div><div>Hello</div></div>)).toEqual(
+      `<div>
   <div>
     Hello
   </div>
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div><div>Hello</div></div>, {tabStop: 4})', () => {
     expect(
-      reactElementToJSXString(<div><div>Hello</div></div>, {tabStop: 4})
+      reactElementToJSXString(<div><div>Hello</div></div>, { tabStop: 4 })
     ).toEqual(
-`<div>
+      `<div>
     <div>
         Hello
     </div>
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div a="1" b="2"><div>Hello</div></div>)', () => {
     expect(
       reactElementToJSXString(<div a="1" b="2"><div>Hello</div></div>)
     ).toEqual(
-`<div
+      `<div
   a="1"
   b="2"
 >
   <div>
     Hello
   </div>
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div a="1" b="2"><div>Hello</div></div>, {tabStop: 4})', () => {
     expect(
-      reactElementToJSXString(<div a="1" b="2"><div>Hello</div></div>, {tabStop: 4})
+      reactElementToJSXString(<div a="1" b="2"><div>Hello</div></div>, {
+        tabStop: 4,
+      })
     ).toEqual(
-`<div
+      `<div
     a="1"
     b="2"
 >
     <div>
         Hello
     </div>
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div a={{a: "1", b: {c: "3"}}}><div b={{c: {d: "4"}}}>Hello</div></div>)', () => {
     expect(
       reactElementToJSXString(
-        <div a={{a: '1', b: {c: '3'}}}><div b={{c: {d: '4'}}}>Hello</div></div>,
+        <div a={{ a: '1', b: { c: '3' } }}>
+          <div b={{ c: { d: '4' } }}>Hello</div>
+        </div>
       )
     ).toEqual(
-`<div
+      `<div
   a={{
     a: '1',
     b: {
@@ -271,7 +274,8 @@ describe('reactElementToJSXString(ReactElement)', () => {
   >
     Hello
   </div>
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString()', () => {
@@ -287,43 +291,40 @@ describe('reactElementToJSXString(ReactElement)', () => {
   });
 
   it('ignores object keys order (sortobject)', () => {
-    expect(
-      reactElementToJSXString(<div o={{a: 1, b: 2}}/>)
-    ).toEqual(
-      reactElementToJSXString(<div o={{b: 2, a: 1}}/>)
+    expect(reactElementToJSXString(<div o={{ a: 1, b: 2 }} />)).toEqual(
+      reactElementToJSXString(<div o={{ b: 2, a: 1 }} />)
     );
   });
 
   it('reactElementToJSXString(<div a={null} />', () => {
-    expect(
-      reactElementToJSXString(<div a={null} />)
-    ).toEqual(
+    expect(reactElementToJSXString(<div a={null} />)).toEqual(
       reactElementToJSXString(<div a={null} />)
     );
   });
 
   it('reactElementToJSXString(<div a={undefined} />', () => {
-    expect(
-      reactElementToJSXString(<div a={undefined} />)
-    ).toEqual(
+    expect(reactElementToJSXString(<div a={undefined} />)).toEqual(
       reactElementToJSXString(<div a={undefined} />)
     );
   });
 
   it('reactElementToJSXString(<div a={{b: function hello() {}}} />', () => {
     expect(
-      reactElementToJSXString(<div a={{b: function hello() {}}} />)
-    ).toEqual(`<div
+      reactElementToJSXString(<div a={{ b: function hello() {} }} />)
+    ).toEqual(
+      `<div
   a={{
     b: function noRefCheck() {}
   }}
- />`);
+ />`
+    );
   });
 
   it('reactElementToJSXString(<div a={{b: {c: {d: <div />, e: null}}}} />', () => {
     expect(
-      reactElementToJSXString(<div a={{b: {c: {d: <div />, e: null}}}} />)
-    ).toEqual(`<div
+      reactElementToJSXString(<div a={{ b: { c: { d: <div />, e: null } } }} />)
+    ).toEqual(
+      `<div
   a={{
     b: {
       c: {
@@ -332,92 +333,93 @@ describe('reactElementToJSXString(ReactElement)', () => {
       }
     }
   }}
- />`);
+ />`
+    );
   });
 
   it('reactElementToJSXString(<div a={{b: {}}} />', () => {
-    expect(
-      reactElementToJSXString(<div a={{b: {}}} />)
-    ).toEqual(`<div
+    expect(reactElementToJSXString(<div a={{ b: {} }} />)).toEqual(
+      `<div
   a={{
     b: {}
   }}
- />`);
+ />`
+    );
   });
 
   it('reactElementToJSXString(<div a={{}} />', () => {
-    expect(
-      reactElementToJSXString(<div a={{}} />)
-    ).toEqual('<div a={{}} />');
+    expect(reactElementToJSXString(<div a={{}} />)).toEqual('<div a={{}} />');
   });
 
   it('reactElementToJSXString(<div><span /><span /></div>)', () => {
-    expect(
-      reactElementToJSXString(<div><span /><span /></div>)
-    ).toEqual(`<div>
+    expect(reactElementToJSXString(<div><span /><span /></div>)).toEqual(
+      `<div>
   <span />
   <span />
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div>foo<div /></div>)', () => {
-    expect(
-      reactElementToJSXString(<div>foo<div /></div>)
-    ).toEqual(`<div>
+    expect(reactElementToJSXString(<div>foo<div /></div>)).toEqual(
+      `<div>
   foo
   <div />
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div a={[1, 2, 3, 4]} />', () => {
-    expect(
-      reactElementToJSXString(<div a={[1, 2, 3, 4]} />)
-    ).toEqual(`<div
+    expect(reactElementToJSXString(<div a={[1, 2, 3, 4]} />)).toEqual(
+      `<div
   a={[
     1,
     2,
     3,
     4
   ]}
- />`);
+ />`
+    );
   });
 
-  it('reactElementToJSXString(<div a={[{Hello: \', world!\'}]} />)', () => {
+  it("reactElementToJSXString(<div a={[{Hello: ', world!'}]} />)", () => {
     expect(
-      reactElementToJSXString(<div a={[{Hello: ', world!'}]} />)
-    ).toEqual(`<div
+      reactElementToJSXString(<div a={[{ Hello: ', world!' }]} />)
+    ).toEqual(
+      `<div
   a={[
     {
       Hello: ', world!'
     }
   ]}
- />`);
+ />`
+    );
   });
 
   it('reactElementToJSXString(<div a={[{}]} />', () => {
-    expect(
-      reactElementToJSXString(<div a={[{}]} />)
-    ).toEqual(`<div
+    expect(reactElementToJSXString(<div a={[{}]} />)).toEqual(
+      `<div
   a={[
     {}
   ]}
- />`);
+ />`
+    );
   });
 
   it('reactElementToJSXString(<div a={[]} />', () => {
-    expect(
-      reactElementToJSXString(<div a={[]} />)
-    ).toEqual('<div a={[]} />');
+    expect(reactElementToJSXString(<div a={[]} />)).toEqual('<div a={[]} />');
   });
 
   it('reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />', () => {
     expect(
       reactElementToJSXString(<div a={[<div key="0"><span /></div>]} />)
-    ).toEqual(`<div
+    ).toEqual(
+      `<div
   a={[
     <div key="0"><span /></div>
   ]}
- />`);
+ />`
+    );
   });
 
   it('reactElementToJSXString(decorator(<span />)', () => {
@@ -438,11 +440,11 @@ describe('reactElementToJSXString(ReactElement)', () => {
     const NestedSpan = myDecorator(<span />);
     const renderer = createRenderer();
     renderer.render(<NestedSpan />);
-    expect(
-      reactElementToJSXString(renderer.getRenderOutput())
-    ).toEqual(`<div>
+    expect(reactElementToJSXString(renderer.getRenderOutput())).toEqual(
+      `<div>
   <span />
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div>Hello {this.props.name}</div>', () => {
@@ -455,34 +457,35 @@ describe('reactElementToJSXString(ReactElement)', () => {
     const renderer = createRenderer();
     renderer.render(<InlineProps name="John" />);
     const actualElement = renderer.getRenderOutput();
-    expect(reactElementToJSXString(actualElement))
-      .toEqual(
-`<div>
+    expect(reactElementToJSXString(actualElement)).toEqual(
+      `<div>
   Hello John
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div type={Symbol("test")}/>)', () => {
-    expect(
-      reactElementToJSXString(<div type={Symbol('test')}/>)
-    ).toEqual('<div type={Symbol(test)} />');
+    expect(reactElementToJSXString(<div type={Symbol('test')} />)).toEqual(
+      '<div type={Symbol(test)} />'
+    );
   });
 
   it('reactElementToJSXString(<div aprop="test" ref="yes" />', () => {
-    expect(
-      reactElementToJSXString(<div aprop="test" ref="yes" />)
-    ).toEqual(
-`<div
+    expect(reactElementToJSXString(<div aprop="test" ref="yes" />)).toEqual(
+      `<div
   ref="yes"
   aprop="test"
-/>`);
+/>`
+    );
   });
 
   it('reactElementToJSXString(<div aprop="a" ref="yes"><span ref="wee" zprop="z"/></div>', () => {
     expect(
-      reactElementToJSXString(<div aprop="a" ref="yes"><span ref="wee" zprop="z"/></div>)
+      reactElementToJSXString(
+        <div aprop="a" ref="yes"><span ref="wee" zprop="z" /></div>
+      )
     ).toEqual(
-`<div
+      `<div
   ref="yes"
   aprop="a"
 >
@@ -490,89 +493,79 @@ describe('reactElementToJSXString(ReactElement)', () => {
     ref="wee"
     zprop="z"
   />
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<div aprop="test" key="yes" />', () => {
-    expect(
-      reactElementToJSXString(<div aprop="test" key="yes" />)
-    ).toEqual(
-`<div
+    expect(reactElementToJSXString(<div aprop="test" key="yes" />)).toEqual(
+      `<div
   key="yes"
   aprop="test"
-/>`);
+/>`
+    );
   });
 
   it('reactElementToJSXString(<div>\\n  {null}\\n</div>', () => {
-    const element = <div>
-  {null}
-</div>;
+    const element = (
+      <div>
+        {null}
+      </div>
+    );
 
     expect(reactElementToJSXString(element)).toEqual('<div />');
   });
 
   it('reactElementToJSXString(<div>{true}</div>)', () => {
-    expect(
-      reactElementToJSXString(<div>{true}</div>)
-    ).toEqual('<div />');
+    expect(reactElementToJSXString(<div>{true}</div>)).toEqual('<div />');
   });
 
   it('reactElementToJSXString(<div>{false}</div>)', () => {
-    expect(
-      reactElementToJSXString(<div>{false}</div>)
-    ).toEqual('<div />');
-  });
-
-  it('reactElementToJSXString(<div>{false}</div>)', () => {
-    expect(
-      reactElementToJSXString(<div>
-        {false}
-</div>)
-    ).toEqual(
-      reactElementToJSXString(<div></div>)
-    );
+    expect(reactElementToJSXString(<div>{false}</div>)).toEqual('<div />');
   });
 
   it('reactElementToJSXString(<div>\n{false}\n</div>)', () => {
     expect(
-      reactElementToJSXString(<div>
-{false}
-</div>)
+      reactElementToJSXString(
+        <div>
+          {false}
+        </div>
+      )
     ).toEqual('<div />');
   });
 
   it('reactElementToJSXString(<div> {false} </div>)', () => {
-    expect(
-      reactElementToJSXString(<div> {false} </div>)
-    ).toEqual('<div>\n    \n</div>');
+    expect(reactElementToJSXString(<div> {false} </div>)).toEqual(
+      '<div>\n    \n</div>'
+    );
   });
 
   it('reactElementToJSXString(<div>{null}</div>)', () => {
-    expect(
-      reactElementToJSXString(<div>{null}</div>)
-    ).toEqual('<div />');
+    expect(reactElementToJSXString(<div>{null}</div>)).toEqual('<div />');
   });
 
   it('reactElementToJSXString(<div>{123}</div>)', () => {
-    expect(
-      reactElementToJSXString(<div>{123}</div>)
-    ).toEqual(`<div>
+    expect(reactElementToJSXString(<div>{123}</div>)).toEqual(
+      `<div>
   123
-</div>`);
+</div>`
+    );
   });
 
-  it('reactElementToJSXString(<div>{\'\'}</div>)', () => {
-    expect(
-      reactElementToJSXString(<div>{''}</div>)
-    ).toEqual(reactElementToJSXString(<div/>));
+  it("reactElementToJSXString(<div>{''}</div>)", () => {
+    expect(reactElementToJSXString(<div>{''}</div>)).toEqual(
+      reactElementToJSXString(<div />)
+    );
   });
 
   it('reactElementToJSXString(<div>String with {1} js expression</div>)', () => {
     expect(
       reactElementToJSXString(<div>String with {1} js number</div>)
-    ).toEqual(`<div>
+    ).toEqual(
+      `<div>
   String with 1 js number
-</div>`);
+</div>`
+    );
   });
 
   it('reactElementToJSXString(<TestComponent />, { displayName: toUpper })', () => {
@@ -583,51 +576,63 @@ describe('reactElementToJSXString(ReactElement)', () => {
     ).toEqual('<TESTCOMPONENT />');
   });
 
-  it('reactElementToJSXString(<TestComponent />, { filterProps: [\'key\', \'className\'] })', () => {
+  it("reactElementToJSXString(<TestComponent />, { filterProps: ['key', 'className'] })", () => {
     expect(
-      reactElementToJSXString(<TestComponent a="b" key="aKey" className="aClass" />, {
-        filterProps: ['key', 'className'],
-      })
+      reactElementToJSXString(
+        <TestComponent a="b" key="aKey" className="aClass" />,
+        {
+          filterProps: ['key', 'className'],
+        }
+      )
     ).toEqual('<TestComponent a="b" />');
   });
 
   it('reactElementToJSXString(<TestComponent />, { useBooleanShorthandSyntax: false })', () => {
     expect(
-      reactElementToJSXString(<TestComponent testTrue={true} testFalse={false} />, {
-        useBooleanShorthandSyntax: false,
-      })
+      reactElementToJSXString(
+        <TestComponent testTrue={true} testFalse={false} />,
+        {
+          useBooleanShorthandSyntax: false,
+        }
+      )
     ).toEqual(
-`<TestComponent
+      `<TestComponent
   testFalse={false}
   testTrue={true}
-/>`);
+/>`
+    );
   });
 
   it('should render default props', () => {
-    expect(
-      reactElementToJSXString(<DefaultPropsComponent />)
-    ).toEqual(
-`<DefaultPropsComponent
+    expect(reactElementToJSXString(<DefaultPropsComponent />)).toEqual(
+      `<DefaultPropsComponent
   boolean
   test="test"
-/>`);
+/>`
+    );
   });
 
   it('should not render default props if "showDefaultProps" option is false', () => {
     expect(
-      reactElementToJSXString(<DefaultPropsComponent />, {showDefaultProps: false})
+      reactElementToJSXString(<DefaultPropsComponent />, {
+        showDefaultProps: false,
+      })
     ).toEqual('<DefaultPropsComponent />');
   });
 
   it('should render props that differ from their defaults if "showDefaultProps" option is false', () => {
     expect(
-      reactElementToJSXString(<DefaultPropsComponent test="foo" />, {showDefaultProps: false})
+      reactElementToJSXString(<DefaultPropsComponent test="foo" />, {
+        showDefaultProps: false,
+      })
     ).toEqual('<DefaultPropsComponent test="foo" />');
   });
 
   it('should render boolean props if value is `false`, default is `true` and "showDefaultProps" is false', () => {
     expect(
-      reactElementToJSXString(<DefaultPropsComponent boolean={false} />, {showDefaultProps: false})
+      reactElementToJSXString(<DefaultPropsComponent boolean={false} />, {
+        showDefaultProps: false,
+      })
     ).toEqual('<DefaultPropsComponent boolean={false} />');
   });
 
@@ -641,47 +646,55 @@ describe('reactElementToJSXString(ReactElement)', () => {
 
   it('reactElementToJSXString(<div co={{a: <div a="1" />}} />, { displayName: toUpper })', () => {
     expect(
-      reactElementToJSXString(<div co={{a: <div a="1" />}} />, {
+      reactElementToJSXString(<div co={{ a: <div a="1" /> }} />, {
         displayName: element => element.type.toUpperCase(),
       })
-    ).toEqual(`<DIV
+    ).toEqual(
+      `<DIV
   co={{
     a: <DIV a="1" />
   }}
- />`);
+ />`
+    );
   });
   it('should omit true as value', () => {
     expect(
-      reactElementToJSXString(<div primary={true} />)  // eslint-disable-line react/jsx-boolean-value
+      reactElementToJSXString(<div primary={true} />) // eslint-disable-line react/jsx-boolean-value
     ).toEqual('<div primary />');
   });
   it('should omit attributes with false as value', () => {
     expect(
-      reactElementToJSXString(<div primary={false} />)  // eslint-disable-line react/jsx-boolean-value
+      reactElementToJSXString(<div primary={false} />) // eslint-disable-line react/jsx-boolean-value
     ).toEqual('<div />');
   });
 
   it('should return the actual functions when "showFunctions" is true', () => {
     expect(
-      reactElementToJSXString(<div fn={() => 'value'}/>, {showFunctions: true})
-    ).toEqual(`<div
+      reactElementToJSXString(<div fn={() => 'value'} />, {
+        showFunctions: true,
+      })
+    ).toEqual(
+      `<div
   fn={function fn() {
         return 'value';
       }}
- />`);
+ />`
+    );
   });
 
   it('reactElementToJSXString(<DisplayNamePrecedence />)', () => {
-    expect(
-      reactElementToJSXString(<DisplayNamePrecedence />)
-    ).toEqual('<This should take precedence />');
+    expect(reactElementToJSXString(<DisplayNamePrecedence />)).toEqual(
+      '<This should take precedence />'
+    );
   });
 
   // maxInlineAttributesLineLength tests
   // Validate two props will stay inline if their length is less than the option
   it('reactElementToJSXString(<div aprop="1" bprop="2" />, { maxInlineAttributesLineLength: 100 }))', () => {
     expect(
-      reactElementToJSXString(<div aprop="1" bprop="2" />, {maxInlineAttributesLineLength: 100})
+      reactElementToJSXString(<div aprop="1" bprop="2" />, {
+        maxInlineAttributesLineLength: 100,
+      })
     ).toEqual('<div aprop="1" bprop="2" />');
   });
   // Validate one prop will go to new line if length is greater than option. One prop is a special case since
@@ -689,78 +702,106 @@ describe('reactElementToJSXString(ReactElement)', () => {
   // that older logic
   it('reactElementToJSXString(<div aprop="1"/>, { maxInlineAttributesLineLength: 5 }))', () => {
     expect(
-      reactElementToJSXString(<div aprop="1"/>, {maxInlineAttributesLineLength: 5})
-    ).toEqual(`<div
+      reactElementToJSXString(<div aprop="1" />, {
+        maxInlineAttributesLineLength: 5,
+      })
+    ).toEqual(
+      `<div
   aprop="1"
-/>`);
+/>`
+    );
   });
   // Validate two props will go be multiline if their length is greater than the given option
   it('reactElementToJSXString(<div aprop="1" bprop="2" />, { maxInlineAttributesLineLength: 10 }))', () => {
     expect(
-      reactElementToJSXString(<div aprop="1" bprop="2" />, {maxInlineAttributesLineLength: 10})
-    ).toEqual(`<div
+      reactElementToJSXString(<div aprop="1" bprop="2" />, {
+        maxInlineAttributesLineLength: 10,
+      })
+    ).toEqual(
+      `<div
   aprop="1"
   bprop="2"
-/>`);
+/>`
+    );
   });
 
   // Same tests as above but with elements that have children. The closing braces for elements with children and without children
   // run through different code paths so we have both sets of test to specify the behavior of both when this option is present
   it('reactElementToJSXString(<div aprop="1" bprop="2">content</div>, { maxInlineAttributesLineLength: 100 }))', () => {
     expect(
-      reactElementToJSXString(<div aprop="1" bprop="2">content</div>, {maxInlineAttributesLineLength: 100})
-    ).toEqual(`<div aprop="1" bprop="2">
+      reactElementToJSXString(<div aprop="1" bprop="2">content</div>, {
+        maxInlineAttributesLineLength: 100,
+      })
+    ).toEqual(
+      `<div aprop="1" bprop="2">
   content
-</div>`);
+</div>`
+    );
   });
   it('reactElementToJSXString(<div aprop="1">content</div>, { maxInlineAttributesLineLength: 5 }))', () => {
     expect(
-      reactElementToJSXString(<div aprop="1">content</div>, {maxInlineAttributesLineLength: 5})
-    ).toEqual(`<div
+      reactElementToJSXString(<div aprop="1">content</div>, {
+        maxInlineAttributesLineLength: 5,
+      })
+    ).toEqual(
+      `<div
   aprop="1"
 >
   content
-</div>`);
+</div>`
+    );
   });
   it('reactElementToJSXString(<div aprop="1" bprop="2">content</div>, { maxInlineAttributesLineLength: 10 }))', () => {
     expect(
-      reactElementToJSXString(<div aprop="1" bprop="2">content</div>, {maxInlineAttributesLineLength: 10})
-    ).toEqual(`<div
+      reactElementToJSXString(<div aprop="1" bprop="2">content</div>, {
+        maxInlineAttributesLineLength: 10,
+      })
+    ).toEqual(
+      `<div
   aprop="1"
   bprop="2"
 >
   content
-</div>`);
+</div>`
+    );
   });
 
   // Multi-level inline attribute test
   it('reactElementToJSXString(<div><div>content</div></div>, { maxInlineAttributesLineLength: 24 }))', () => {
     expect(
-      reactElementToJSXString(<div aprop="1" bprop="2"><div cprop="3" dprop="4">content</div></div>, {
-        maxInlineAttributesLineLength: 24,
-      })
-    ).toEqual(`<div aprop="1" bprop="2">
+      reactElementToJSXString(
+        <div aprop="1" bprop="2"><div cprop="3" dprop="4">content</div></div>,
+        {
+          maxInlineAttributesLineLength: 24,
+        }
+      )
+    ).toEqual(
+      `<div aprop="1" bprop="2">
   <div
     cprop="3"
     dprop="4"
   >
     content
   </div>
-</div>`);
+</div>`
+    );
   });
   it('should return functionValue result when it returns a string', () => {
     expect(
-      reactElementToJSXString(<div fn={() => 'value'}/>, {showFunctions: true, functionValue: () => '...'})
-  ).toEqual('<div fn={...} />');
+      reactElementToJSXString(<div fn={() => 'value'} />, {
+        showFunctions: true,
+        functionValue: () => '...',
+      })
+    ).toEqual('<div fn={...} />');
   });
   it('sends the original fn to functionValue', () => {
     const fn = () => {};
     const functionValue = receivedFn => expect(receivedFn).toBe(fn);
-    reactElementToJSXString(<div fn={fn} />, {functionValue});
+    reactElementToJSXString(<div fn={fn} />, { functionValue });
   });
   it('should return noRefCheck when "showFunctions" is false and "functionValue" is not provided', () => {
-    expect(
-      reactElementToJSXString(<div fn={() => {}}/>)
-    ).toEqual('<div fn={function noRefCheck() {}} />');
+    expect(reactElementToJSXString(<div fn={() => {}} />)).toEqual(
+      '<div fn={function noRefCheck() {}} />'
+    );
   });
 });

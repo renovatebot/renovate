@@ -4,12 +4,19 @@
   "description": "Turn a ReactElement into the corresponding JSX string.",
   "main": "index-dist.js",
   "scripts": {
+    "precommit": "lint-staged",
     "prepublish": "npm run build",
     "build": "babel index.js -o index-dist.js",
     "build:watch": "babel index.js -o index-dist.js -w",
     "test": "mocha --opts mocha.opts && eslint .",
     "test:watch": "mocha --opts mocha.opts --watch --reporter min",
     "release": "./release.sh"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write --single-quote --trailing-comma es5",
+      "git add"
+    ]
   },
   "author": {
     "name": "Algolia, Inc.",
@@ -18,28 +25,33 @@
   "license": "MIT",
   "repository": "algolia/react-element-to-jsx-string",
   "devDependencies": {
-    "babel-cli": "^6.23.0",
-    "babel-eslint": "^7.1.1",
+    "babel-cli": "^6.24.1",
+    "babel-eslint": "^7.2.3",
     "babel-plugin-lodash": "^3.2.11",
-    "babel-preset-es2015": "^6.22.0",
-    "babel-preset-react": "^6.23.0",
-    "babel-preset-stage-2": "^6.22.0",
-    "babel-register": "^6.23.0",
-    "conventional-changelog-cli": "^1.2.0",
-    "doctoc": "^1.2.0",
-    "eslint": "^3.16.1",
-    "eslint-config-algolia": "^6.0.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-register": "^6.24.1",
+    "conventional-changelog-cli": "^1.3.1",
+    "doctoc": "^1.3.0",
+    "eslint": "^3.19.0",
+    "eslint-config-algolia": "^7.0.2",
+    "eslint-config-prettier": "^1.7.0",
     "eslint-import-resolver-webpack": "^0.8.1",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jasmine": "^2.2.0",
-    "eslint-plugin-react": "^6.10.0",
+    "eslint-plugin-jest": "^19.0.1",
+    "eslint-plugin-react": "^6.10.3",
     "expect": "^1.14.0",
-    "json": "^9.0.4",
+    "husky": "^0.13.3",
+    "json": "^9.0.6",
+    "lint-staged": "^3.4.0",
     "mocha": "^3.2.0",
+    "prettier": "^1.2.2",
     "react": "^15.4.2",
     "react-dom": "^15.5.4",
     "react-test-renderer": "^15.5.4",
-    "webpack": "^1.14.0"
+    "webpack": "^2.4.1"
   },
   "peerDependencies": {
     "react": "^0.14.8 || ^15.0.1"
@@ -49,7 +61,7 @@
     "is-plain-object": "^2.0.1",
     "lodash": "^4.17.4",
     "sortobject": "^1.0.0",
-    "stringify-object": "^3.1.0",
+    "stringify-object": "^3.2.0",
     "traverse": "^0.6.6"
   }
 }
