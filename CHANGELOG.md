@@ -1,3 +1,14 @@
+<a name="6.4.0"></a>
+# [6.4.0](https://github.com/algolia/react-element-to-jsx-string/compare/v6.3.0...v6.4.0) (2017-04-24)
+
+
+### Features
+
+* **functionValue:** format functions output the way you want ([460e0cc](https://github.com/algolia/react-element-to-jsx-string/commit/460e0cc))
+* **React:** support 15.5+ ([1a99024](https://github.com/algolia/react-element-to-jsx-string/commit/1a99024))
+
+
+
 <a name="6.3.0"></a>
 # [6.3.0](https://github.com/algolia/react-element-to-jsx-string/compare/v6.2.0...v6.3.0) (2017-03-06)
 
