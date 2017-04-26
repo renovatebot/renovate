@@ -68,7 +68,7 @@ $ node renovate --help
   Examples:
 
     $ renovate --token abc123 singapore/lint-condo
-    $ renovate --ignore-unstable=false --log-level verbose singapore/lint-condo
+    $ renovate --labels=renovate,dependency --ignore-unstable=false --log-level verbose singapore/lint-condo
     $ renovate singapore/lint-condo singapore/package-test
 ```
 

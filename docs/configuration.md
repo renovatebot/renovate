@@ -14,7 +14,7 @@ i.e. `package.json` settings will override `renovate.json` settings, CLI, which 
 
 ### Default Configuration
 
-Default configuration can be found in [lib/config/definitions.js](../lib/config/definitions.js)
+Default configuration values can be found in [lib/config/definitions.js](../lib/config/definitions.js)
 
 ### Configuration File
 
@@ -99,9 +99,11 @@ $ node renovate --help
   Examples:
 
     $ renovate --token abc123 singapore/lint-condo
-    $ renovate --ignore-unstable=false --log-level verbose singapore/lint-condo
+    $ renovate --labels=renovate,dependency --ignore-unstable=false --log-level verbose singapore/lint-condo
     $ renovate singapore/lint-condo singapore/package-test
 ```
+
+To configure any `<list>` items, separate with commas. E.g. `renovate --labels=renovate,dependency`.
 
 ### renovate.json
 
