@@ -2507,9 +2507,9 @@ normalize-path@^2.0.1:
   dependencies:
     remove-trailing-separator "^1.0.1"
 
-np@2.13.2:
-  version "2.13.2"
-  resolved "https://registry.yarnpkg.com/np/-/np-2.13.2.tgz#73464a0b858a5d31645dcf0e9a2d9491df51a842"
+np@2.13.3:
+  version "2.13.3"
+  resolved "https://registry.yarnpkg.com/np/-/np-2.13.3.tgz#56f0350cac6fbcfcbf8cc879ba9428a7c8d69346"
   dependencies:
     any-observable "^0.2.0"
     chalk "^1.1.3"
@@ -2522,7 +2522,7 @@ np@2.13.2:
     meow "^3.7.0"
     read-pkg-up "^2.0.0"
     rxjs "^5.0.0-beta.9"
-    semver "^5.1.0"
+    semver "^5.2.0"
     split "^1.0.0"
     stream-to-observable "^0.2.0"
     update-notifier "^2.1.0"
@@ -2970,7 +2970,7 @@ repeating@^2.0.0:
   dependencies:
     is-finite "^1.0.0"
 
-request@2.79.0, request@^2.79.0:
+request@2.79.0:
   version "2.79.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.79.0.tgz#4dfe5bf6be8b8cdc37fcf93e04b65577722710de"
   dependencies:
@@ -2995,7 +2995,7 @@ request@2.79.0, request@^2.79.0:
     tunnel-agent "~0.4.1"
     uuid "^3.0.0"
 
-request@^2.81.0:
+request@^2.79.0, request@^2.81.0:
   version "2.81.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.81.0.tgz#c6928946a0e06c5f8d6f8a9333469ffda46298a0"
   dependencies:
@@ -3143,7 +3143,7 @@ semver-utils@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/semver-utils/-/semver-utils-1.1.1.tgz#27d92fec34d27cfa42707d3b40d025ae9855f2df"
 
-"semver@2 || 3 || 4 || 5", semver@5.3.0, semver@^5.0.1, semver@^5.0.3, semver@^5.1.0, semver@^5.3.0:
+"semver@2 || 3 || 4 || 5", semver@5.3.0, semver@^5.0.1, semver@^5.0.3, semver@^5.1.0, semver@^5.2.0, semver@^5.3.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.3.0.tgz#9b2ce5d3de02d17c6012ad326aa6b4d0cf54f94f"
 
