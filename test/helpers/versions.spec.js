@@ -1,5 +1,6 @@
 const versionsHelper = require('../../lib/helpers/versions');
 const qJson = require('../_fixtures/npm/01.json');
+const helmetJson = require('../_fixtures/npm/02.json');
 
 let defaultConfig;
 
@@ -452,6 +453,28 @@ describe('helpers/versions', () => {
           defaultConfig
         )
         .should.eql(upgradeVersions);
+    });
+    it('should treat zero zero tilde ranges as 0.0.x', () => {
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
+      expect(
+        versionsHelper.determineUpgrades(helmetJson, '~0.0.34', config)
+      ).toEqual([]);
+    });
+    it('should treat zero zero caret ranges as pinned', () => {
+      const config = Object.assign({}, defaultConfig, { pinVersions: false });
+      const upgradeVersions = [
+        {
+          newVersion: '^0.0.35',
+          newVersionMajor: 0,
+          upgradeType: 'minor',
+          changeLogFromVersion: '0.0.34',
+          changeLogToVersion: '0.0.35',
+          isRange: true,
+        },
+      ];
+      expect(
+        versionsHelper.determineUpgrades(helmetJson, '^0.0.34', config)
+      ).toEqual(upgradeVersions);
     });
   });
   describe('.isRange(input)', () => {
