@@ -146,21 +146,21 @@ Obviously, you can't set repository or package file location with this method.
 | `rebaseStalePrs` | Rebase stale PRs (GitHub only) | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
 | `prCreation` | When to create the PR for a branch. Values: immediate, not-pending, status-success. | string | `"immediate"` | `RENOVATE_PR_CREATION` | `--pr-creation` |
 | `automerge` | What types of upgrades to merge to base branch automatically. Values: none, minor or any | string | `"none"` | `RENOVATE_AUTOMERGE` | `--automerge` |
-| `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` |  |  |
-| `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` |  |  |
-| `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` |  |  |
-| `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` |  |  |
+| `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` | `RENOVATE_BRANCH_NAME` |  |
+| `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` | `RENOVATE_COMMIT_MESSAGE` |  |
+| `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` | `RENOVATE_PR_TITLE` |  |
+| `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` | `RENOVATE_PR_BODY` |  |
 | `maintainYarnLock` | Keep yarn.lock files updated in base branch | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
-| `yarnMaintenanceBranchName` | Branch name template when maintaining yarn.lock | string | `"renovate/yarn-lock"` |  |  |
-| `yarnMaintenanceCommitMessage` | Commit message template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
-| `yarnMaintenancePrTitle` | Pull Request title template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` |  |  |
-| `yarnMaintenancePrBody` | Pull Request body template when maintaining yarn.lock | string | `"This PR regenerates yarn.lock files based on the existing `package.json` files."` |  |  |
+| `yarnMaintenanceBranchName` | Branch name template when maintaining yarn.lock | string | `"renovate/yarn-lock"` | `RENOVATE_YARN_MAINTENANCE_BRANCH_NAME` |  |
+| `yarnMaintenanceCommitMessage` | Commit message template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` | `RENOVATE_YARN_MAINTENANCE_COMMIT_MESSAGE` |  |
+| `yarnMaintenancePrTitle` | Pull Request title template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` | `RENOVATE_YARN_MAINTENANCE_PR_TITLE` |  |
+| `yarnMaintenancePrBody` | Pull Request body template when maintaining yarn.lock | string | `"This PR regenerates yarn.lock files based on the existing `package.json` files."` | `RENOVATE_YARN_MAINTENANCE_PR_BODY` |  |
 | `groupName` | Human understandable name for the dependency group | string | `null` | `RENOVATE_GROUP_NAME` | `--group-name` |
 | `groupSlug` | Slug to use for group (e.g. in branch name). Will be calculated from groupName if null | string | `null` | `RENOVATE_GROUP_SLUG` | `--group-slug` |
-| `groupBranchName` | Branch name template for the group | string | `"renovate/{{groupSlug}}"` |  |  |
-| `groupCommitMessage` | Group commit message | string | `"Renovate {{groupName}} packages"` |  |  |
-| `groupPrTitle` | Pull Request title template for the group | string | `"Renovate {{groupName}} packages"` |  |  |
-| `groupPrBody` | Pull Request body template for the group | string | `"This PR renovates the package group \"{{groupName}}\"."` |  |  |
+| `groupBranchName` | Branch name template for the group | string | `"renovate/{{groupSlug}}"` | `RENOVATE_GROUP_BRANCH_NAME` |  |
+| `groupCommitMessage` | Group commit message | string | `"Renovate {{groupName}} packages"` | `RENOVATE_GROUP_COMMIT_MESSAGE` |  |
+| `groupPrTitle` | Pull Request title template for the group | string | `"Renovate {{groupName}} packages"` | `RENOVATE_GROUP_PR_TITLE` |  |
+| `groupPrBody` | Pull Request body template for the group | string | `"This PR renovates the package group \"{{groupName}}\"."` | `RENOVATE_GROUP_PR_BODY` |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
 | `reviewers` | Requested reviewers for Pull Requests (GitHub only) | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
