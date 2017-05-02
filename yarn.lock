@@ -2508,9 +2508,9 @@ normalize-path@^2.0.1:
   dependencies:
     remove-trailing-separator "^1.0.1"
 
-np@2.14.0:
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/np/-/np-2.14.0.tgz#68bbac755c84705442d399e71c005de0551c1ed9"
+np@2.14.1:
+  version "2.14.1"
+  resolved "https://registry.yarnpkg.com/np/-/np-2.14.1.tgz#5ccb94a84cba12a5d198e73494ba65ef7f6356e8"
   dependencies:
     any-observable "^0.2.0"
     chalk "^1.1.3"
