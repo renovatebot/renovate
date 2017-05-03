@@ -2163,9 +2163,9 @@ json-stable-stringify@^1.0.0, json-stable-stringify@^1.0.1:
   dependencies:
     jsonify "~0.0.0"
 
-json-stringify-pretty-compact@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/json-stringify-pretty-compact/-/json-stringify-pretty-compact-1.0.3.tgz#f7e349404d35f0b3ee07a2f96213f3a1ae9e92f7"
+json-stringify-pretty-compact@1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/json-stringify-pretty-compact/-/json-stringify-pretty-compact-1.0.4.tgz#d5161131be27fd9748391360597fcca250c6c5ce"
 
 json-stringify-safe@~5.0.1:
   version "5.0.1"
