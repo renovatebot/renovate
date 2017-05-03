@@ -45,7 +45,7 @@
     "gh-got": "5.0.0",
     "gl-got": "6.0.2",
     "got": "6.7.1",
-    "handlebars": "4.0.6",
+    "handlebars": "4.0.8",
     "jest": "19.0.2",
     "json-stringify-pretty-compact": "1.0.3",
     "lodash": "4.17.4",
