@@ -31,8 +31,6 @@ options.forEach(option => {
   if (cliName.length) {
     cliName = `\`${cliName}\``;
   }
-  console.log(
-    `| \`${option.name}\` | ${option.description} | ${option.type} | ${optionDefault} | ${envName} | ${cliName} |`
-  );
+  console.log(`| \`${option.name}\` | ${option.description} | ${option.type} | ${optionDefault} | ${envName} | ${cliName} |`);
 });
 /* eslint-enable no-console */
