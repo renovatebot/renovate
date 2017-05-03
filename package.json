@@ -68,7 +68,7 @@
     "eslint-plugin-prettier": "2.0.1",
     "eslint-plugin-promise": "3.5.0",
     "mkdirp": "0.5.1",
-    "np": "2.13.3",
+    "np": "2.14.1",
     "prettier": "1.2.2",
     "rimraf": "2.6.1"
   },
