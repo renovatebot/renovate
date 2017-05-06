@@ -39,7 +39,7 @@
     "node": ">=6.9.0"
   },
   "dependencies": {
-    "babel-jest": "19.0.0",
+    "babel-jest": "20.0.0",
     "changelog": "dylang/changelog#v1.2.0",
     "commander": "2.9.0",
     "gh-got": "5.0.0",
