@@ -63,7 +63,7 @@
     "chai": "3.5.0",
     "eslint": "3.19.0",
     "eslint-config-airbnb-base": "11.1.3",
-    "eslint-config-prettier": "1.7.0",
+    "eslint-config-prettier": "2.0.0",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-prettier": "2.0.1",
     "eslint-plugin-promise": "3.5.0",
