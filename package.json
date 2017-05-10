@@ -46,7 +46,7 @@
     "gl-got": "6.0.2",
     "got": "6.7.1",
     "handlebars": "4.0.8",
-    "jest": "19.0.2",
+    "jest": "20.0.0",
     "json-stringify-pretty-compact": "1.0.4",
     "lodash": "4.17.4",
     "registry-auth-token": "3.3.1",
