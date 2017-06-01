@@ -414,8 +414,8 @@ babylon@7.0.0-beta.8:
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.8.tgz#2bdc5ae366041442c27e068cce6f0d7c06ea9949"
 
 babylon@^6.11.0, babylon@^6.13.0, babylon@^6.15.0:
-  version "6.17.1"
-  resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.17.1.tgz#17f14fddf361b695981fe679385e4f1c01ebd86f"
+  version "6.17.2"
+  resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.17.2.tgz#201d25ef5f892c41bae49488b08db0dd476e9f5c"
 
 balanced-match@^0.4.1:
   version "0.4.2"
@@ -2551,9 +2551,9 @@ normalize-path@^2.0.1:
   dependencies:
     remove-trailing-separator "^1.0.1"
 
-np@2.14.1:
-  version "2.14.1"
-  resolved "https://registry.yarnpkg.com/np/-/np-2.14.1.tgz#5ccb94a84cba12a5d198e73494ba65ef7f6356e8"
+np@2.15.0:
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/np/-/np-2.15.0.tgz#6591811523f9a92f7ab1c47b3a9e57955a1c751c"
   dependencies:
     any-observable "^0.2.0"
     chalk "^1.1.3"
