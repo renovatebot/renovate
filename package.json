@@ -44,7 +44,7 @@
     "commander": "2.9.0",
     "gh-got": "5.0.0",
     "gl-got": "6.0.2",
-    "got": "6.7.1",
+    "got": "7.0.0",
     "handlebars": "4.0.8",
     "jest": "20.0.4",
     "json-stringify-pretty-compact": "1.0.4",
