@@ -135,6 +135,24 @@ describe('workers/branch', () => {
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(2);
     });
+    it('throws an error if no yarn lock generation possible', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      yarnHelper.getLockFile.mockImplementationOnce(() => {
+        throw new Error('yarn not found');
+      });
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      let err;
+      try {
+        await branchWorker.ensureBranch([config]);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('Could not generate new yarn.lock file');
+      expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
+    });
     it('maintains lock files if needing updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       yarnHelper.maintainLockFile.mockReturnValueOnce('non null response');
@@ -150,6 +168,25 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       config.upgradeType = 'maintainYarnLock';
       await branchWorker.ensureBranch([config]);
+      expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
+      expect(yarnHelper.getLockFile.mock.calls.length).toBe(0);
+      expect(yarnHelper.maintainLockFile.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
+    });
+    it('throws error if cannot maintain yarn.lock file', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      config.upgradeType = 'maintainYarnLock';
+      yarnHelper.maintainLockFile.mockImplementationOnce(() => {
+        throw new Error('yarn not found');
+      });
+      let err;
+      try {
+        await branchWorker.ensureBranch([config]);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('Could not maintain yarn.lock file');
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(0);
