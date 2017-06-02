@@ -46,8 +46,7 @@ $ node renovate --help
     --endpoint <string>                  Custom endpoint to use
     --token <string>                     Repository Auth Token
     --autodiscover [boolean]             Autodiscover all repositories
-    --github-app [boolean]               Run as a GitHub app
-    --github-app-id <integer>            GitHub App Id
+    --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
     --github-app-key <string>            GitHub App Private Key (.pem file contents)
     --package-files <list>               Package file paths
     --dep-types <list>                   Dependency types
