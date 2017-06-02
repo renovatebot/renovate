@@ -563,6 +563,55 @@ Object {
 }
 `;
 
+exports[`api/github getInstallationRepositories should return an array of repositories 1`] = `
+Array [
+  Array [
+    "installation/repositories",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "token sometoken",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github getInstallationRepositories should return an array of repositories 2`] = `
+Object {
+  "repositories": Array [
+    "a",
+    "b",
+  ],
+  "total_count": 2,
+}
+`;
+
+exports[`api/github getInstallationToken should return an installation token 1`] = `Array []`;
+
+exports[`api/github getInstallationToken should return an installation token 2`] = `"aUserToken"`;
+
+exports[`api/github getInstallations should return an array of installations 1`] = `
+Array [
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github getInstallations should return an array of installations 2`] = `
+Array [
+  "a",
+  "b",
+]
+`;
+
 exports[`api/github getPr(prNo) should return a PR object - 0 1`] = `
 Object {
   "base": Object {

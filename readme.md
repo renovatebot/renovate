@@ -46,6 +46,8 @@ $ node renovate --help
     --endpoint <string>                  Custom endpoint to use
     --token <string>                     Repository Auth Token
     --autodiscover [boolean]             Autodiscover all repositories
+    --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
+    --github-app-key <string>            GitHub App Private Key (.pem file contents)
     --package-files <list>               Package file paths
     --dep-types <list>                   Dependency types
     --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches
