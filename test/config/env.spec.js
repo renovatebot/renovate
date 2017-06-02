@@ -30,6 +30,10 @@ describe('config/env', () => {
       const envParam = { RENOVATE_TOKEN: 'a' };
       env.getConfig(envParam).should.eql({ token: 'a' });
     });
+    it('supports integer', () => {
+      const envParam = { RENOVATE_GITHUB_APP_ID: 5 };
+      env.getConfig(envParam).should.eql({ githubAppId: 5 });
+    });
   });
   describe('.getEnvName(definition)', () => {
     it('returns empty', () => {

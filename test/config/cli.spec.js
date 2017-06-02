@@ -60,6 +60,10 @@ describe('config/cli', () => {
       argv.push('--token=a');
       cli.getConfig(argv).should.eql({ token: 'a' });
     });
+    it('supports integer', () => {
+      argv.push('--github-app-id=5');
+      cli.getConfig(argv).should.eql({ githubAppId: 5 });
+    });
     it('supports repositories', () => {
       argv.push('foo');
       argv.push('bar');

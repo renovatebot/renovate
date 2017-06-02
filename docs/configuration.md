@@ -76,6 +76,8 @@ $ node renovate --help
     --endpoint <string>                  Custom endpoint to use
     --token <string>                     Repository Auth Token
     --autodiscover [boolean]             Autodiscover all repositories
+    --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
+    --github-app-key <string>            GitHub App Private Key (.pem file contents)
     --package-files <list>               Package file paths
     --dep-types <list>                   Dependency types
     --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches
@@ -134,6 +136,8 @@ Obviously, you can't set repository or package file location with this method.
 | `endpoint` | Custom endpoint to use | string | `null` | `RENOVATE_ENDPOINT` | `--endpoint` |
 | `token` | Repository Auth Token | string | `null` | `RENOVATE_TOKEN` | `--token` |
 | `autodiscover` | Autodiscover all repositories | boolean | `false` | `RENOVATE_AUTODISCOVER` | `--autodiscover` |
+| `githubAppId` | GitHub App ID (enables GitHub App functionality if set) | integer | `undefined` | `RENOVATE_GITHUB_APP_ID` | `--github-app-id` |
+| `githubAppKey` | GitHub App Private Key (.pem file contents) | string | `null` | `RENOVATE_GITHUB_APP_KEY` | `--github-app-key` |
 | `repositories` | List of Repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
 | `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
 | `depTypes` | Dependency types | list | `["dependencies", "devDependencies", "optionalDependencies"]` | `RENOVATE_DEP_TYPES` | `--dep-types` |
