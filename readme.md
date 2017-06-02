@@ -8,7 +8,7 @@
 - Discovers and processes all `package.json` files in repository (supports monorepo architecture)
 - Supports multiple major versions per-dependency at once
 - Configurable via file, environment, CLI, and `package.json`
-- Supports `yarn.lock` files
+- Supports `yarn.lock` and `package-lock.json` files
 - Supports GitHub and GitLab
 - Self-hosted
 
