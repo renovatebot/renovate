@@ -2,7 +2,7 @@
 
 > Keep npm dependencies up-to-date
 
-##  Why
+## Why
 
 - Creates or updates Pull Requests for each dependency that needs updating
 - Discovers and processes all `package.json` files in repository (supports monorepo architecture)
@@ -11,6 +11,10 @@
 - Supports `yarn.lock` and `package-lock.json` files
 - Supports GitHub and GitLab
 - Self-hosted
+
+## GitHub App
+
+Renovate is now supported as a free GitHub app. Go to https://github.com/apps/renovate to enable it now.
 
 ## Install
 
