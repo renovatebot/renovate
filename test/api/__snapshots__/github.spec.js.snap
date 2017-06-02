@@ -563,6 +563,10 @@ Object {
 }
 `;
 
+exports[`api/github getInstallationToken should return an installation token 1`] = `Array []`;
+
+exports[`api/github getInstallationToken should return an installation token 2`] = `"aUserToken"`;
+
 exports[`api/github getInstallations should return an array of installations 1`] = `
 Array [
   Array [

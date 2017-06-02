@@ -36,6 +36,34 @@ describe('api/github', () => {
     });
   });
 
+  describe('getInstallationToken', () => {
+    it('should return an installation token', async () => {
+      ghGot.post.mockImplementationOnce(() => ({
+        body: {
+          token: 'aUserToken',
+        },
+      }));
+      const installationToken = await github.getInstallationToken(
+        'sometoken',
+        123456
+      );
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(installationToken).toMatchSnapshot();
+    });
+    it('should return an error if given one', async () => {
+      ghGot.post.mockImplementationOnce(() => {
+        throw new Error('error');
+      });
+      let err;
+      try {
+        await github.getInstallationToken('sometoken', 123456);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('error');
+    });
+  });
+
   async function getRepos(...args) {
     // repo info
     ghGot.mockImplementationOnce(() => ({
