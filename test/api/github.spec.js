@@ -64,6 +64,34 @@ describe('api/github', () => {
     });
   });
 
+  describe('getInstallationRepositories', () => {
+    it('should return an array of repositories', async () => {
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          total_count: 2,
+          repositories: ['a', 'b'],
+        },
+      }));
+      const repositories = await github.getInstallationRepositories(
+        'sometoken'
+      );
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(repositories).toMatchSnapshot();
+    });
+    it('should return an error if given one', async () => {
+      ghGot.mockImplementationOnce(() => {
+        throw new Error('error');
+      });
+      let err;
+      try {
+        await github.getInstallationRepositories('sometoken');
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('error');
+    });
+  });
+
   async function getRepos(...args) {
     // repo info
     ghGot.mockImplementationOnce(() => ({
