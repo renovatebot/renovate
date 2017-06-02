@@ -9,7 +9,7 @@
 - Supports multiple major versions per-dependency at once
 - Configurable via file, environment, CLI, and `package.json`
 - Supports `yarn.lock` files
-- Supports GitHub and GitLab (v3 API)
+- Supports GitHub and GitLab
 - Self-hosted
 
 ## Install
@@ -25,7 +25,6 @@ You need to select a repository user for `renovate` to assume the identity of, a
 You can find instructions for GitHub here (select "repo" permissions): https://help.github.com/articles/creating-an-access-token-for-command-line-use/
 
 You can find instructions for GitLab here: https://docs.gitlab.com/ee/api/README.html#personal-access-tokens
-Please note that currently only GitLab API v3 is supported and not v4.
 
 This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
 The simplest way is to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN`.
