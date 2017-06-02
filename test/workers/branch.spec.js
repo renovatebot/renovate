@@ -137,7 +137,7 @@ describe('workers/branch', () => {
     });
     it('throws an error if no yarn lock generation possible', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
-      yarnHelper.getLockFile = jest.fn(() => {
+      yarnHelper.getLockFile.mockImplementationOnce(() => {
         throw new Error('yarn not found');
       });
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
@@ -177,10 +177,9 @@ describe('workers/branch', () => {
     it('throws error if cannot maintain yarn.lock file', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       config.upgradeType = 'maintainYarnLock';
-      yarnHelper.maintainLockFile = jest.fn(() => {
+      yarnHelper.maintainLockFile.mockImplementationOnce(() => {
         throw new Error('yarn not found');
       });
-      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       let err;
       try {
         await branchWorker.ensureBranch([config]);
