@@ -1,4 +1,5 @@
 const branchWorker = require('../../lib/workers/branch');
+const npmHelper = require('../../lib/helpers/npm');
 const yarnHelper = require('../../lib/helpers/yarn');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 const packageJsonHelper = require('../../lib/helpers/package-json');
@@ -95,6 +96,7 @@ describe('workers/branch', () => {
     beforeEach(() => {
       packageJsonHelper.setNewValue = jest.fn();
       branchWorker.getParentBranch = jest.fn();
+      npmHelper.getLockFile = jest.fn();
       yarnHelper.getLockFile = jest.fn();
       yarnHelper.maintainLockFile = jest.fn();
       config = Object.assign({}, defaultConfig);
@@ -114,14 +116,16 @@ describe('workers/branch', () => {
       await branchWorker.ensureBranch([config]);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(0);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(0);
     });
-    it('commits one file if no yarn lock found', async () => {
+    it('commits one file if no yarn lock or package-lock.json found', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       await branchWorker.ensureBranch([config]);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(1);
     });
@@ -132,8 +136,32 @@ describe('workers/branch', () => {
       await branchWorker.ensureBranch([config]);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(2);
+    });
+    it('commits two files if package lock found', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      npmHelper.getLockFile.mockReturnValueOnce('non null response');
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      await branchWorker.ensureBranch([config]);
+      expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(2);
+    });
+    it('commits three files if yarn lock and package lock found', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      npmHelper.getLockFile.mockReturnValueOnce('non null response');
+      yarnHelper.getLockFile.mockReturnValueOnce('non null response');
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      await branchWorker.ensureBranch([config]);
+      expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(3);
     });
     it('throws an error if no yarn lock generation possible', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
@@ -151,6 +179,26 @@ describe('workers/branch', () => {
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(0);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
+    });
+    it('throws an error if no package lock generation possible', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      npmHelper.getLockFile.mockImplementationOnce(() => {
+        throw new Error('no package lock generated');
+      });
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      let err;
+      try {
+        await branchWorker.ensureBranch([config]);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('Could not generate new package-lock.json file');
+      expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('maintains lock files if needing updates', async () => {
@@ -161,6 +209,7 @@ describe('workers/branch', () => {
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(0);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(0);
       expect(yarnHelper.maintainLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(1);
     });
@@ -171,6 +220,7 @@ describe('workers/branch', () => {
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(0);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(0);
       expect(yarnHelper.maintainLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
@@ -190,6 +240,7 @@ describe('workers/branch', () => {
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(0);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(0);
       expect(yarnHelper.maintainLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
