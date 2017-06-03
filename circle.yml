@@ -17,8 +17,8 @@ test:
   pre:
     - echo "Checking that docs are up-to-date"
     - npm run update-docs
-    - git diff-index --quiet HEAD -- || exit 1
   override:
+    - git diff-index --quiet HEAD -- || git status && exit 1
     - yarn test
   post:
     - bash <(curl -s https://codecov.io/bash)
