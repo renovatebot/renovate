@@ -675,6 +675,50 @@ describe('api/github', () => {
       expect(ghGot.delete.mock.calls).toHaveLength(0);
     });
   });
+  describe('mergePr(prNo)', () => {
+    beforeEach(async () => {
+      async function guessInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getCommitTree
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            tree: {
+              sha: '5678',
+            },
+          },
+        }));
+        return github.initRepo(...args);
+      }
+      await guessInitRepo('some/repo', 'token');
+    });
+    it('should try squash first', async () => {
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      await github.mergePr(pr);
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toHaveLength(1);
+    });
+  });
   describe('getFile(filePatch, branchName)', () => {
     it('should return the encoded file content', async () => {
       await initRepo('some/repo', 'token');

@@ -819,6 +819,19 @@ Object {
 }
 `;
 
+exports[`api/github mergePr(prNo) should try squash first 1`] = `
+Array [
+  Array [
+    "repos/some/repo/pulls/1234/merge",
+    Object {
+      "body": Object {
+        "merge_method": "squash",
+      },
+    },
+  ],
+]
+`;
+
 exports[`api/github updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Array [
