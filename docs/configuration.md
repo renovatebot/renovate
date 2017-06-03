@@ -91,6 +91,7 @@ $ node renovate --help
     --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, minor or any
     --yarn-cache-folder <string>         Location of yarn cache folder to use. Set to empty string to disable
     --maintain-yarn-lock [boolean]       Keep yarn.lock files updated in base branch
+    --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
     --group-name <string>                Human understandable name for the dependency group
     --group-slug <string>                Slug to use for group (e.g. in branch name). Will be calculated from groupName if null
     --labels <list>                      Labels to add to Pull Request
@@ -161,6 +162,7 @@ Obviously, you can't set repository or package file location with this method.
 | `yarnMaintenanceCommitMessage` | Commit message template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` | `RENOVATE_YARN_MAINTENANCE_COMMIT_MESSAGE` |  |
 | `yarnMaintenancePrTitle` | Pull Request title template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` | `RENOVATE_YARN_MAINTENANCE_PR_TITLE` |  |
 | `yarnMaintenancePrBody` | Pull Request body template when maintaining yarn.lock | string | `"This PR regenerates yarn.lock files based on the existing `package.json` files."` | `RENOVATE_YARN_MAINTENANCE_PR_BODY` |  |
+| `lazyGrouping` | Use group names only when multiple dependencies upgraded | boolean | `true` | `RENOVATE_LAZY_GROUPING` | `--lazy-grouping` |
 | `groupName` | Human understandable name for the dependency group | string | `null` | `RENOVATE_GROUP_NAME` | `--group-name` |
 | `groupSlug` | Slug to use for group (e.g. in branch name). Will be calculated from groupName if null | string | `null` | `RENOVATE_GROUP_SLUG` | `--group-slug` |
 | `groupBranchName` | Branch name template for the group | string | `"renovate/{{groupSlug}}"` | `RENOVATE_GROUP_BRANCH_NAME` |  |
