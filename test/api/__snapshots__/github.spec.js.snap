@@ -808,6 +808,17 @@ Object {
 }
 `;
 
+exports[`api/github initRepo should rebase 1`] = `
+Object {
+  "baseCommitSHA": "1234",
+  "baseTreeSHA": "5678",
+  "defaultBranch": "master",
+  "mergeMethod": "rebase",
+  "owner": "theowner",
+  "repoName": "some/repo",
+}
+`;
+
 exports[`api/github initRepo should squash 1`] = `
 Object {
   "baseCommitSHA": "1234",
@@ -817,19 +828,6 @@ Object {
   "owner": "theowner",
   "repoName": "some/repo",
 }
-`;
-
-exports[`api/github mergePr(prNo) should try squash first 1`] = `
-Array [
-  Array [
-    "repos/some/repo/pulls/1234/merge",
-    Object {
-      "body": Object {
-        "merge_method": "squash",
-      },
-    },
-  ],
-]
 `;
 
 exports[`api/github updatePr(prNo, title, body) should update the PR 1`] = `
