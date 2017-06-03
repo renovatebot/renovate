@@ -139,6 +139,7 @@ describe('api/github', () => {
         default_branch: 'master',
         allow_rebase_merge: true,
         allow_squash_merge: true,
+        allow_merge_commit: true,
       },
     }));
     // getBranchCommit
@@ -193,7 +194,7 @@ describe('api/github', () => {
         'No token found for GitHub repository some/repo'
       );
     });
-    it('should squash', async () => {
+    it('should rebase', async () => {
       async function squashInitRepo(...args) {
         // repo info
         ghGot.mockImplementationOnce(() => ({
@@ -202,8 +203,9 @@ describe('api/github', () => {
               login: 'theowner',
             },
             default_branch: 'master',
-            allow_rebase_merge: false,
+            allow_rebase_merge: true,
             allow_squash_merge: true,
+            allow_merge_commit: true,
           },
         }));
         // getBranchCommit
@@ -227,6 +229,41 @@ describe('api/github', () => {
       const config = await squashInitRepo('some/repo', 'token');
       expect(config).toMatchSnapshot();
     });
+    it('should squash', async () => {
+      async function mergeInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+            allow_rebase_merge: false,
+            allow_squash_merge: true,
+            allow_merge_commit: true,
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getCommitTree
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            tree: {
+              sha: '5678',
+            },
+          },
+        }));
+        return github.initRepo(...args);
+      }
+      const config = await mergeInitRepo('some/repo', 'token');
+      expect(config).toMatchSnapshot();
+    });
     it('should merge', async () => {
       async function mergeInitRepo(...args) {
         // repo info
@@ -238,6 +275,39 @@ describe('api/github', () => {
             default_branch: 'master',
             allow_rebase_merge: false,
             allow_squash_merge: false,
+            allow_merge_commit: true,
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getCommitTree
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            tree: {
+              sha: '5678',
+            },
+          },
+        }));
+        return github.initRepo(...args);
+      }
+      const config = await mergeInitRepo('some/repo', 'token');
+      expect(config).toMatchSnapshot();
+    });
+    it('should not guess at merge', async () => {
+      async function mergeInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
           },
         }));
         // getBranchCommit
@@ -619,8 +689,121 @@ describe('api/github', () => {
         },
       };
       await github.mergePr(pr);
-      expect(ghGot.put.mock.calls).toMatchSnapshot();
-      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toHaveLength(1);
+      expect(ghGot.delete.mock.calls).toHaveLength(1);
+    });
+  });
+  describe('mergePr(prNo)', () => {
+    it('should handle merge error', async () => {
+      await initRepo('some/repo', 'token');
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      ghGot.put.mockImplementationOnce(() => {
+        throw new Error('merge error');
+      });
+      await github.mergePr(pr);
+      expect(ghGot.put.mock.calls).toHaveLength(1);
+      expect(ghGot.delete.mock.calls).toHaveLength(0);
+    });
+  });
+  describe('mergePr(prNo) - autodetection', () => {
+    beforeEach(async () => {
+      async function guessInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getCommitTree
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            tree: {
+              sha: '5678',
+            },
+          },
+        }));
+        return github.initRepo(...args);
+      }
+      await guessInitRepo('some/repo', 'token');
+      ghGot.put = jest.fn();
+    });
+    it('should try rebase first', async () => {
+      const pr = {
+        number: 1235,
+        head: {
+          ref: 'someref',
+        },
+      };
+      await github.mergePr(pr);
+      expect(ghGot.put.mock.calls).toHaveLength(1);
+      expect(ghGot.delete.mock.calls).toHaveLength(1);
+    });
+    it('should try squash after rebase', async () => {
+      const pr = {
+        number: 1236,
+        head: {
+          ref: 'someref',
+        },
+      };
+      ghGot.put.mockImplementationOnce(() => {
+        throw new Error('no rebasing allowed');
+      });
+      await github.mergePr(pr);
+      expect(ghGot.put.mock.calls).toHaveLength(2);
+      expect(ghGot.delete.mock.calls).toHaveLength(1);
+    });
+    it('should try merge after squash', async () => {
+      const pr = {
+        number: 1237,
+        head: {
+          ref: 'someref',
+        },
+      };
+      ghGot.put.mockImplementationOnce(() => {
+        throw new Error('no rebasing allowed');
+      });
+      ghGot.put.mockImplementationOnce(() => {
+        throw new Error('no squashing allowed');
+      });
+      await github.mergePr(pr);
+      expect(ghGot.put.mock.calls).toHaveLength(3);
+      expect(ghGot.delete.mock.calls).toHaveLength(1);
+    });
+    it('should give up', async () => {
+      const pr = {
+        number: 1237,
+        head: {
+          ref: 'someref',
+        },
+      };
+      ghGot.put.mockImplementationOnce(() => {
+        throw new Error('no rebasing allowed');
+      });
+      ghGot.put.mockImplementationOnce(() => {
+        throw new Error('no squashing allowed');
+      });
+      ghGot.put.mockImplementationOnce(() => {
+        throw new Error('no merging allowed');
+      });
+      await github.mergePr(pr);
+      expect(ghGot.put.mock.calls).toHaveLength(3);
+      expect(ghGot.delete.mock.calls).toHaveLength(0);
     });
   });
   describe('getFile(filePatch, branchName)', () => {
