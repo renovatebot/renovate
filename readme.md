@@ -64,6 +64,7 @@ $ node renovate --help
     --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, minor or any
     --yarn-cache-folder <string>         Location of yarn cache folder to use. Set to empty string to disable
     --maintain-yarn-lock [boolean]       Keep yarn.lock files updated in base branch
+    --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
     --group-name <string>                Human understandable name for the dependency group
     --group-slug <string>                Slug to use for group (e.g. in branch name). Will be calculated from groupName if null
     --labels <list>                      Labels to add to Pull Request
