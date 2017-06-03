@@ -17,7 +17,8 @@ test:
   pre:
     - npm run update-docs
   override:
-    - git diff-index --quiet HEAD -- || echo "There are uncommitted changes" && git status && exit 1
-    - yarn test
+    - yarn run test-dirty
+    - yarn run eslint
+    - yarn run jest
   post:
     - bash <(curl -s https://codecov.io/bash)
