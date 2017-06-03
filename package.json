@@ -70,7 +70,7 @@
     "eslint-plugin-promise": "3.5.0",
     "mkdirp": "0.5.1",
     "np": "2.15.0",
-    "prettier": "1.4.1",
+    "prettier": "1.4.2",
     "rimraf": "2.6.1"
   },
   "babel": {
