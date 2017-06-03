@@ -89,6 +89,7 @@ $ node renovate --help
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
     --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
     --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, minor or any
+    --yarn-cache-folder <string>         Location of yarn cache folder to use. Set to empty string to disable
     --maintain-yarn-lock [boolean]       Keep yarn.lock files updated in base branch
     --group-name <string>                Human understandable name for the dependency group
     --group-slug <string>                Slug to use for group (e.g. in branch name). Will be calculated from groupName if null
@@ -154,6 +155,7 @@ Obviously, you can't set repository or package file location with this method.
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` | `RENOVATE_COMMIT_MESSAGE` |  |
 | `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` | `RENOVATE_PR_TITLE` |  |
 | `prBody` | Pull Request body template | string | `"This Pull Request updates dependency {{depName}} from version `{{currentVersion}}` to `{{newVersion}}`\n\n{{changelog}}"` | `RENOVATE_PR_BODY` |  |
+| `yarnCacheFolder` | Location of yarn cache folder to use. Set to empty string to disable | string | `"/tmp/yarn-cache"` | `RENOVATE_YARN_CACHE_FOLDER` | `--yarn-cache-folder` |
 | `maintainYarnLock` | Keep yarn.lock files updated in base branch | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
 | `yarnMaintenanceBranchName` | Branch name template when maintaining yarn.lock | string | `"renovate/yarn-lock"` | `RENOVATE_YARN_MAINTENANCE_BRANCH_NAME` |  |
 | `yarnMaintenanceCommitMessage` | Commit message template when maintaining yarn.lock | string | `"Renovate yarn.lock file"` | `RENOVATE_YARN_MAINTENANCE_COMMIT_MESSAGE` |  |
