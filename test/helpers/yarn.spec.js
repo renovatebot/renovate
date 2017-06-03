@@ -22,7 +22,7 @@ describe('generateLockFile(newPackageJson, npmrcContent, yarnrcContent)', () => 
       'package-json-contents',
       'npmrc-contents',
       'yarnrc-contents',
-      '/tmp/yarn-cache',
+      '/tmp/yarn-cache'
     );
     expect(tmp.dirSync.mock.calls.length).toEqual(1);
     expect(fs.writeFileSync.mock.calls.length).toEqual(3);
