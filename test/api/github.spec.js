@@ -139,6 +139,7 @@ describe('api/github', () => {
         default_branch: 'master',
         allow_rebase_merge: true,
         allow_squash_merge: true,
+        allow_merge_commit: true,
       },
     }));
     // getBranchCommit
@@ -204,6 +205,7 @@ describe('api/github', () => {
             default_branch: 'master',
             allow_rebase_merge: false,
             allow_squash_merge: true,
+            allow_merge_commit: true,
           },
         }));
         // getBranchCommit
@@ -238,6 +240,39 @@ describe('api/github', () => {
             default_branch: 'master',
             allow_rebase_merge: false,
             allow_squash_merge: false,
+            allow_merge_commit: true,
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getCommitTree
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            tree: {
+              sha: '5678',
+            },
+          },
+        }));
+        return github.initRepo(...args);
+      }
+      const config = await mergeInitRepo('some/repo', 'token');
+      expect(config).toMatchSnapshot();
+    });
+    it('should not guess at merge', async () => {
+      async function mergeInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
           },
         }));
         // getBranchCommit
