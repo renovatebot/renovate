@@ -16,8 +16,9 @@ dependencies:
 test:
   pre:
     - npm run update-docs
-  override:
-    - git diff-index --quiet HEAD -- || (echo "There are uncommitted changes" && git status && exit 1)
+    - git diff-index --quiet HEAD -- || exit 1
+    - git status
+override:
     - yarn test
   post:
     - bash <(curl -s https://codecov.io/bash)
