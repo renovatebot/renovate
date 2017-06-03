@@ -654,8 +654,25 @@ describe('api/github', () => {
         },
       };
       await github.mergePr(pr);
-      expect(ghGot.put.mock.calls).toMatchSnapshot();
-      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toHaveLength(1);
+      expect(ghGot.delete.mock.calls).toHaveLength(1);
+    });
+  });
+  describe('mergePr(prNo)', () => {
+    it('should handle merge error', async () => {
+      await initRepo('some/repo', 'token');
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      ghGot.put.mockImplementationOnce(() => {
+        throw new Error('merge error');
+      });
+      await github.mergePr(pr);
+      expect(ghGot.put.mock.calls).toHaveLength(1);
+      expect(ghGot.delete.mock.calls).toHaveLength(0);
     });
   });
   describe('getFile(filePatch, branchName)', () => {

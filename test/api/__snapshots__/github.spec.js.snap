@@ -819,27 +819,6 @@ Object {
 }
 `;
 
-exports[`api/github mergePr(prNo) should merge the PR 1`] = `
-Array [
-  Array [
-    "repos/some/repo/pulls/1234/merge",
-    Object {
-      "body": Object {
-        "merge_method": "rebase",
-      },
-    },
-  ],
-]
-`;
-
-exports[`api/github mergePr(prNo) should merge the PR 2`] = `
-Array [
-  Array [
-    "repos/some/repo/git/refs/heads/someref",
-  ],
-]
-`;
-
 exports[`api/github updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Array [
