@@ -16,9 +16,8 @@ dependencies:
 test:
   pre:
     - npm run update-docs
-    - git diff-index --quiet HEAD -- || exit 1
-    - git status
 override:
+    - git diff-index --quiet HEAD -- || exit 1
     - yarn test
   post:
     - bash <(curl -s https://codecov.io/bash)
