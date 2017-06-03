@@ -15,7 +15,7 @@
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node lib/renovate",
-    "test-dirty": "git diff --exit-code || git status && exit 1",
+    "test-dirty": "[[ $(git diff --shortstat 2> /dev/null | tail -n1) != '' ]] && exit 1",
     "test": "yarn run eslint && yarn run jest",
     "jest": "jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
