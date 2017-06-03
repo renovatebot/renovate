@@ -14,6 +14,10 @@ dependencies:
     - ~/.cache/yarn
 
 test:
+  pre:
+    - echo "Checking that docs are up-to-date"
+    - npm run update-docs
+    - git diff-index --quiet HEAD -- || exit 1
   override:
     - yarn test
   post:
