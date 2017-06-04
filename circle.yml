@@ -16,7 +16,7 @@ dependencies:
 test:
   pre:
     - echo "Making sure docs are up-to-date"
-    - npm run run update-docs
+    - npm run update-docs
     - npm run test-dirty
   override:
     - npm test
