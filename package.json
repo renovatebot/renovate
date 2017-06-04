@@ -36,7 +36,8 @@
   },
   "homepage": "https://github.com/singapore/renovate#readme",
   "engines": {
-    "node": ">=6.9.0"
+    "node": ">=6.9.0",
+    "npm": "5"
   },
   "dependencies": {
     "babel-jest": "20.0.3",
