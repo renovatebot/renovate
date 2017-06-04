@@ -540,6 +540,23 @@ Array [
 ]
 `;
 
+exports[`api/github getFileJson(filePatch, branchName) should return null if invalid JSON 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/commits/1234",
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
+]
+`;
+
 exports[`api/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 1`] = `
 Array [
   Array [
