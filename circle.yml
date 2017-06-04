@@ -15,7 +15,7 @@ dependencies:
 
 test:
   pre:
-    - npm run update-docs
+    - yarn run update-docs
   override:
     - yarn run test-dirty
     - yarn run eslint
