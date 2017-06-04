@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`api/npm should fetch package info from npm 1`] = `
+Array [
+  "https://npm.mycustomregistry.com/foobar",
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.npm.install-v1+json",
+    },
+    "json": true,
+  },
+]
+`;
+
+exports[`api/npm should send an authorization header if provided 1`] = `
+Array [
+  "https://npm.mycustomregistry.com/foobar",
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.npm.install-v1+json",
+      "authorization": "Basic 1234",
+    },
+    "json": true,
+  },
+]
+`;

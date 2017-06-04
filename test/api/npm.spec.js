@@ -17,10 +17,7 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobar');
     expect(res).toMatchObject({ some: 'data' });
     const call = got.mock.calls[0];
-    expect(call).toMatchObject([
-      'https://npm.mycustomregistry.com/foobar',
-      { json: true, headers: {} },
-    ]);
+    expect(call).toMatchSnapshot();
   });
   it('should send an authorization header if provided', async () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
@@ -32,14 +29,6 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobar');
     expect(res).toMatchObject({ some: 'data' });
     const call = got.mock.calls[0];
-    expect(call).toMatchObject([
-      'https://npm.mycustomregistry.com/foobar',
-      {
-        json: true,
-        headers: {
-          authorization: 'Basic 1234',
-        },
-      },
-    ]);
+    expect(call).toMatchSnapshot();
   });
 });
