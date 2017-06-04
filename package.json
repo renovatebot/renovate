@@ -6,20 +6,19 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "yarn run transpile",
-    "eslint": "eslint --ignore-path .gitignore .",
-    "eslint-fix": "eslint --ignore-path .gitignore --fix .",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "npm-publish": "yarn run update-docs && np && yarn install",
+    "lint-fix": "eslint --ignore-path .gitignore --fix .",
     "prepublish": "yarn run build",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
-    "test": "yarn run eslint && yarn run jest",
-    "jest": "jest",
+    "test-lint": "eslint --ignore-path .gitignore .",
+    "test-unit": "jest",
+    "test": "yarn run test-dirty && yarn run test-lint && yarn run test-unit",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
-    "update-docs": "yarn run build && bash bin/update-docs.sh"
+    "update-docs": "bash bin/update-docs.sh"
   },
   "repository": {
     "type": "git",
