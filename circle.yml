@@ -15,8 +15,10 @@ dependencies:
 
 test:
   pre:
-    - yarn run update-docs
+    - echo "Making sure docs are up-to-date"
+    - npm run update-docs
+    - npm run test-dirty
   override:
-    - yarn test
+    - npm test
   post:
     - bash <(curl -s https://codecov.io/bash)
