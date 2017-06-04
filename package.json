@@ -99,6 +99,16 @@
     "assignees": [
       "rarkins"
     ],
-    "automerge": "minor"
+    "automerge": "minor",
+    "packages": [
+      {
+	      "packagePattern": "jest",
+	      "groupName": "jest"
+	    },
+	    {
+	      "packagePattern": "eslint",
+	      "groupName": "eslint"
+	    }  
+    ]
   }
 }
