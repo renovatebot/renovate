@@ -40,14 +40,12 @@
     "npm": "5"
   },
   "dependencies": {
-    "babel-jest": "20.0.3",
     "changelog": "dylang/changelog#v1.2.0",
     "commander": "2.9.0",
     "gh-got": "5.0.0",
     "gl-got": "6.0.2",
     "got": "7.0.0",
     "handlebars": "4.0.10",
-    "jest": "20.0.4",
     "json-stringify-pretty-compact": "1.0.4",
     "jsonwebtoken": "7.4.1",
     "lodash": "4.17.4",
@@ -62,6 +60,7 @@
   "devDependencies": {
     "babel-cli": "6.24.1",
     "babel-plugin-transform-async-to-generator": "6.24.1",
+    "babel-jest": "20.0.3",
     "chai": "4.0.1",
     "eslint": "3.19.0",
     "eslint-config-airbnb-base": "11.2.0",
@@ -69,6 +68,7 @@
     "eslint-plugin-import": "2.3.0",
     "eslint-plugin-prettier": "2.1.1",
     "eslint-plugin-promise": "3.5.0",
+    "jest": "20.0.4",
     "mkdirp": "0.5.1",
     "np": "2.15.0",
     "prettier": "1.4.2",
