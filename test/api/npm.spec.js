@@ -19,6 +19,14 @@ describe('api/npm', () => {
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
   });
+  it('should return null if lookup fails', async () => {
+    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
+    got.mockImplementation(() => {
+      throw new Error('not found');
+    });
+    const res = await npm.getDependency('foobar');
+    expect(res).toBeNull();
+  });
   it('should send an authorization header if provided', async () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     registryAuthToken.mockImplementation(() => ({
