@@ -14,7 +14,11 @@ dependencies:
     - ~/.cache/yarn
 
 test:
+  pre:
+    - yarn run update-docs
   override:
-    - yarn test
+    - yarn run test-dirty
+    - yarn run eslint
+    - yarn run jest
   post:
     - bash <(curl -s https://codecov.io/bash)
