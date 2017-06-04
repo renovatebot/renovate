@@ -1,5 +1,4 @@
 const yarnHelper = require('../../lib/helpers/yarn');
-const defaultConfig = require('../../lib/config/defaults').getConfig();
 
 jest.mock('fs');
 jest.mock('child_process');
@@ -60,7 +59,7 @@ describe('getLockFile(packageJson, config)', () => {
 describe('maintainLockFile(inputConfig)', () => {
   let config;
   beforeEach(() => {
-    config = Object.assign({}, defaultConfig);
+    config = {};
     config.packageFile = 'package.json';
     config.api = {
       getFileContent: jest.fn(),
