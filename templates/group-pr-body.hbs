@@ -1,1 +1,10 @@
 This PR renovates the package group "{{groupName}}".
+
+### Changelogs
+{{#each changelogs}}
+<details>
+  <summary>{{this.depName}}</summary>
+
+{{this.log}}
+</details>
+{{/each}}
