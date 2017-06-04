@@ -17,8 +17,6 @@ test:
   pre:
     - yarn run update-docs
   override:
-    - yarn run test-dirty
-    - yarn run eslint
-    - yarn run jest
+    - yarn test
   post:
     - bash <(curl -s https://codecov.io/bash)
