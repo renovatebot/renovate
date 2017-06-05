@@ -81,7 +81,7 @@ describe('workers/pr', () => {
       existingPr = {
         title: 'Update dependency dummy to version 1.1.0',
         body:
-          'This Pull Request updates dependency dummy from version `1.0.0` to `1.1.0`\n\n',
+          'This Pull Request updates dependency dummy from version `1.0.0` to `1.1.0`\n\nNo changelog available',
         displayNumber: 'Existing PR',
       };
     });
@@ -206,7 +206,7 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr([config]);
       const updatedPr = Object.assign(existingPr, {
         body:
-          'This Pull Request updates dependency dummy from version `1.0.0` to `1.2.0`\n\n',
+          'This Pull Request updates dependency dummy from version `1.0.0` to `1.2.0`\n\nNo changelog available',
       });
       expect(pr).toMatchObject(updatedPr);
     });
