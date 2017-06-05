@@ -1,6 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`api/npm should fetch package info from npm 1`] = `
+Object {
+  "versions": Object {
+    "0.0.1": Object {},
+  },
+}
+`;
+
+exports[`api/npm should fetch package info from npm 2`] = `
 Array [
   "https://npm.mycustomregistry.com/foobar",
   Object {
@@ -13,6 +21,14 @@ Array [
 `;
 
 exports[`api/npm should send an authorization header if provided 1`] = `
+Object {
+  "versions": Object {
+    "0.0.1": Object {},
+  },
+}
+`;
+
+exports[`api/npm should send an authorization header if provided 2`] = `
 Array [
   "https://npm.mycustomregistry.com/foobar",
   Object {
