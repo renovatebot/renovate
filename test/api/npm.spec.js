@@ -30,6 +30,14 @@ describe('api/npm', () => {
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
   });
+  it('should cache package info from npm', async () => {
+    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
+    got.mockImplementation(() => Promise.resolve(npmResponse));
+    const res1 = await npm.getDependency('foobar');
+    const res2 = await npm.getDependency('foobar');
+    expect(res1).toEqual(res2);
+    expect(got.mock.calls.length).toEqual(1);
+  });
   it('should return null if lookup fails', async () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => {
