@@ -7,13 +7,24 @@ jest.mock('registry-url');
 jest.mock('registry-auth-token');
 jest.mock('got');
 
+const npmResponse = {
+  body: {
+    versions: {
+      '0.0.1': {
+        foo: 1,
+      },
+    },
+  },
+};
+
 describe('api/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    npm.resetCache();
   });
   it('should fetch package info from npm', async () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
-    got.mockImplementation(() => Promise.resolve({ body: { some: 'data' } }));
+    got.mockImplementation(() => Promise.resolve(npmResponse));
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
     const call = got.mock.calls[0];
@@ -33,7 +44,7 @@ describe('api/npm', () => {
       type: 'Basic',
       token: '1234',
     }));
-    got.mockImplementation(() => Promise.resolve({ body: { some: 'data' } }));
+    got.mockImplementation(() => Promise.resolve(npmResponse));
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
     const call = got.mock.calls[0];

@@ -2,7 +2,9 @@
 
 exports[`api/npm should fetch package info from npm 1`] = `
 Object {
-  "some": "data",
+  "versions": Object {
+    "0.0.1": Object {},
+  },
 }
 `;
 
@@ -20,7 +22,9 @@ Array [
 
 exports[`api/npm should send an authorization header if provided 1`] = `
 Object {
-  "some": "data",
+  "versions": Object {
+    "0.0.1": Object {},
+  },
 }
 `;
 
