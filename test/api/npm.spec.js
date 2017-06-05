@@ -15,7 +15,7 @@ describe('api/npm', () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => Promise.resolve({ body: { some: 'data' } }));
     const res = await npm.getDependency('foobar');
-    expect(res).toMatchObject({ some: 'data' });
+    expect(res).toMatchSnapshot();
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
   });
@@ -35,7 +35,7 @@ describe('api/npm', () => {
     }));
     got.mockImplementation(() => Promise.resolve({ body: { some: 'data' } }));
     const res = await npm.getDependency('foobar');
-    expect(res).toMatchObject({ some: 'data' });
+    expect(res).toMatchSnapshot();
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
   });
