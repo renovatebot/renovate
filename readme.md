@@ -10,11 +10,11 @@
 - Configurable via file, environment, CLI, and `package.json`
 - Supports `yarn.lock` and `package-lock.json` files
 - Supports GitHub and GitLab
-- Self-hosted
+- Open source and can be self-hosted
 
 ## GitHub App
 
-Renovate is now supported as a free GitHub app. Go to https://github.com/apps/renovate to enable it now.
+Renovate is now available as a free GitHub "App". Go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to enable it now.
 
 ## Install
 
@@ -84,8 +84,12 @@ Note: The first time you run `renovate` on a repository, it will not upgrade any
 
 ## Deployment
 
-See [deployment docs](docs/deployment.md) for details.
+See [deployment docs](https://github.com/singapore/renovate/blob/master/docs/deployment.md) for details.
+
+## Configuration
+
+The [Configuration](https://github.com/singapore/renovate/blob/master/docs/configuration.md) and [Configuration FAQ](https://github.com/singapore/renovate/blob/master/docs/faq.md) documents should be helpful.
 
 ## Design Decisions
 
-See [design decisions doc](docs/design-decisions.md) for details.
+See [design decisions doc](https://github.com/singapore/renovate/blob/master/docs/design-decisions.md) for details.
