@@ -531,6 +531,8 @@ describe('api/github', () => {
       await github.mergeBranch('thebranchname', 'branch-push');
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
       expect(ghGot.delete.mock.calls).toMatchSnapshot();
     });
     it('should throw if branch-push merge throws', async () => {
@@ -555,6 +557,43 @@ describe('api/github', () => {
       expect(e).toMatchSnapshot();
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should perform a branch-merge-commit merge', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      await github.mergeBranch('thebranchname', 'branch-merge-commit');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should throw if branch-merge-commit throws', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.post.mockImplementationOnce(() => {
+        throw new Error('branch-push failed');
+      });
+      let e;
+      try {
+        await github.mergeBranch('thebranchname', 'branch-merge-commit');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
       expect(ghGot.delete.mock.calls).toMatchSnapshot();
     });
   });
