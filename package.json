@@ -38,7 +38,8 @@
   "homepage": "https://github.com/singapore/renovate#readme",
   "engines": {
     "node": ">=6.9.0",
-    "npm": "5"
+    "npm": "5",
+    "yarn": "0.24.5"
   },
   "dependencies": {
     "changelog": "dylang/changelog#v1.2.0",
