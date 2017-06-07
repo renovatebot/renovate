@@ -809,6 +809,37 @@ Array [
 ]
 `;
 
+exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 1`] = `[Error: branch-push failed]`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 2`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+]
+`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 3`] = `
+Array [
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+    Object {
+      "body": Object {
+        "sha": "1235",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 4`] = `Array []`;
+
 exports[`api/github updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Array [

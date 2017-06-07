@@ -533,6 +533,30 @@ describe('api/github', () => {
       expect(ghGot.patch.mock.calls).toMatchSnapshot();
       expect(ghGot.delete.mock.calls).toMatchSnapshot();
     });
+    it('should throw if branch-push merge throws', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      ghGot.patch.mockImplementationOnce(() => {
+        throw new Error('branch-push failed');
+      });
+      let e;
+      try {
+        await github.mergeBranch('thebranchname', 'branch-push');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+    });
   });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
