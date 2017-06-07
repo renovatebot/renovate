@@ -152,7 +152,7 @@ Obviously, you can't set repository or package file location with this method.
 | `rebaseStalePrs` | Rebase stale PRs (GitHub only) | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
 | `prCreation` | When to create the PR for a branch. Values: immediate, not-pending, status-success. | string | `"immediate"` | `RENOVATE_PR_CREATION` | `--pr-creation` |
 | `automerge` | What types of upgrades to merge to base branch automatically. Values: none, minor or any | string | `"none"` | `RENOVATE_AUTOMERGE` | `--automerge` |
-| `automergeWhen` | When to automerge - "branch" or "pr". Branch is GitHub-only | string | `"pr"` | `RENOVATE_AUTOMERGE_WHEN` | `--automerge-when` |
+| `automergeType` | When to automerge - "branch-commit", "branch-merge" or "pr". Branch support is GitHub-only | string | `"pr"` | `RENOVATE_AUTOMERGE_TYPE` | `--automerge-type` |
 | `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` | `RENOVATE_BRANCH_NAME` |  |
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` | `RENOVATE_COMMIT_MESSAGE` |  |
 | `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` | `RENOVATE_PR_TITLE` |  |
