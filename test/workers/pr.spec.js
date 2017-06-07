@@ -170,5 +170,20 @@ describe('workers/pr', () => {
       });
       expect(pr).toMatchObject(updatedPr);
     });
+    it('should create PR if branch automerging failed', async () => {
+      config.automergeEnabled = true;
+      config.automergeType = 'branch-push';
+      config.api.getBranchStatus.mockReturnValueOnce('failed');
+      config.api.getBranchPr = jest.fn();
+      const pr = await prWorker.ensurePr([config]);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+    });
+    it('should return null if branch automerging not failed', async () => {
+      config.automergeEnabled = true;
+      config.automergeType = 'branch-push';
+      config.api.getBranchStatus.mockReturnValueOnce('pending');
+      const pr = await prWorker.ensurePr([config]);
+      expect(pr).toBe(null);
+    });
   });
 });
