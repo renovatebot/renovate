@@ -150,14 +150,6 @@ describe('api/github', () => {
         },
       },
     }));
-    // getCommitTree
-    ghGot.mockImplementationOnce(() => ({
-      body: {
-        tree: {
-          sha: '5678',
-        },
-      },
-    }));
     return github.initRepo(...args);
   }
 
@@ -216,14 +208,6 @@ describe('api/github', () => {
             },
           },
         }));
-        // getCommitTree
-        ghGot.mockImplementationOnce(() => ({
-          body: {
-            tree: {
-              sha: '5678',
-            },
-          },
-        }));
         return github.initRepo(...args);
       }
       const config = await squashInitRepo('some/repo', 'token');
@@ -248,14 +232,6 @@ describe('api/github', () => {
           body: {
             object: {
               sha: '1234',
-            },
-          },
-        }));
-        // getCommitTree
-        ghGot.mockImplementationOnce(() => ({
-          body: {
-            tree: {
-              sha: '5678',
             },
           },
         }));
@@ -286,14 +262,6 @@ describe('api/github', () => {
             },
           },
         }));
-        // getCommitTree
-        ghGot.mockImplementationOnce(() => ({
-          body: {
-            tree: {
-              sha: '5678',
-            },
-          },
-        }));
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo('some/repo', 'token');
@@ -315,14 +283,6 @@ describe('api/github', () => {
           body: {
             object: {
               sha: '1234',
-            },
-          },
-        }));
-        // getCommitTree
-        ghGot.mockImplementationOnce(() => ({
-          body: {
-            tree: {
-              sha: '5678',
             },
           },
         }));
@@ -699,7 +659,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
-      expect(ghGot.mock.calls).toHaveLength(4);
+      expect(ghGot.mock.calls).toHaveLength(3);
     });
   });
   describe('mergePr(prNo)', () => {
@@ -717,7 +677,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
-      expect(ghGot.mock.calls).toHaveLength(3);
+      expect(ghGot.mock.calls).toHaveLength(2);
     });
   });
   describe('mergePr(prNo) - autodetection', () => {
@@ -737,14 +697,6 @@ describe('api/github', () => {
           body: {
             object: {
               sha: '1234',
-            },
-          },
-        }));
-        // getCommitTree
-        ghGot.mockImplementationOnce(() => ({
-          body: {
-            tree: {
-              sha: '5678',
             },
           },
         }));
@@ -771,7 +723,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
-      expect(ghGot.mock.calls).toHaveLength(4);
+      expect(ghGot.mock.calls).toHaveLength(3);
     });
     it('should try squash after rebase', async () => {
       const pr = {
@@ -786,7 +738,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(2);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
-      expect(ghGot.mock.calls).toHaveLength(4);
+      expect(ghGot.mock.calls).toHaveLength(3);
     });
     it('should try merge after squash', async () => {
       const pr = {
@@ -804,7 +756,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
-      expect(ghGot.mock.calls).toHaveLength(4);
+      expect(ghGot.mock.calls).toHaveLength(3);
     });
     it('should give up', async () => {
       const pr = {
@@ -825,7 +777,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
-      expect(ghGot.mock.calls).toHaveLength(3);
+      expect(ghGot.mock.calls).toHaveLength(2);
     });
   });
   describe('getFile(filePatch, branchName)', () => {
