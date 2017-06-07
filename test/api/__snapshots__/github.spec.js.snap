@@ -55,9 +55,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -70,9 +67,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -89,9 +83,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -104,9 +95,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -123,9 +111,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -138,9 +123,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -157,9 +139,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -172,9 +151,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -248,9 +224,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -352,9 +325,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "search/code?q=repo:some/repo+filename:package.json",
   ],
 ]
@@ -375,9 +345,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/pulls?head=theowner:master&state=all",
@@ -403,9 +370,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "repos/some/repo/pulls?head=theowner:master&state=all",
   ],
 ]
@@ -418,9 +382,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/pulls?head=theowner:master&state=all",
@@ -447,9 +408,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
   ],
 ]
@@ -462,9 +420,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
@@ -498,9 +453,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "repos/some/repo/contents/package.json?ref=master",
   ],
 ]
@@ -513,9 +465,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
@@ -532,9 +481,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "repos/some/repo/contents/package.json?ref=master",
   ],
 ]
@@ -549,9 +495,6 @@ Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
-    "repos/some/repo/git/commits/1234",
-  ],
-  Array [
     "repos/some/repo/contents/package.json?ref=master",
   ],
 ]
@@ -564,9 +507,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1234",
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
@@ -737,16 +677,12 @@ Array [
   Array [
     "repos/some/repo/git/refs/heads/master",
   ],
-  Array [
-    "repos/some/repo/git/commits/1234",
-  ],
 ]
 `;
 
 exports[`api/github initRepo should initialise the config for the repo - 0 2`] = `
 Object {
   "baseCommitSHA": "1234",
-  "baseTreeSHA": "5678",
   "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
@@ -762,16 +698,12 @@ Array [
   Array [
     "repos/some/repo/git/refs/heads/master",
   ],
-  Array [
-    "repos/some/repo/git/commits/1234",
-  ],
 ]
 `;
 
 exports[`api/github initRepo should initialise the config for the repo - 1 2`] = `
 Object {
   "baseCommitSHA": "1234",
-  "baseTreeSHA": "5678",
   "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
@@ -787,16 +719,12 @@ Array [
   Array [
     "repos/some/repo/git/refs/heads/master",
   ],
-  Array [
-    "repos/some/repo/git/commits/1234",
-  ],
 ]
 `;
 
 exports[`api/github initRepo should initialise the config for the repo - 2 2`] = `
 Object {
   "baseCommitSHA": "1234",
-  "baseTreeSHA": "5678",
   "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
@@ -807,7 +735,6 @@ Object {
 exports[`api/github initRepo should merge 1`] = `
 Object {
   "baseCommitSHA": "1234",
-  "baseTreeSHA": "5678",
   "defaultBranch": "master",
   "mergeMethod": "merge",
   "owner": "theowner",
@@ -818,7 +745,6 @@ Object {
 exports[`api/github initRepo should not guess at merge 1`] = `
 Object {
   "baseCommitSHA": "1234",
-  "baseTreeSHA": "5678",
   "defaultBranch": "master",
   "owner": "theowner",
   "repoName": "some/repo",
@@ -828,7 +754,6 @@ Object {
 exports[`api/github initRepo should rebase 1`] = `
 Object {
   "baseCommitSHA": "1234",
-  "baseTreeSHA": "5678",
   "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
@@ -839,7 +764,6 @@ Object {
 exports[`api/github initRepo should squash 1`] = `
 Object {
   "baseCommitSHA": "1234",
-  "baseTreeSHA": "5678",
   "defaultBranch": "master",
   "mergeMethod": "squash",
   "owner": "theowner",
