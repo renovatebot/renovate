@@ -13,7 +13,7 @@ Array [
   "https://npm.mycustomregistry.com/foobar",
   Object {
     "headers": Object {
-      "accept": "application/vnd.npm.install-v1+json",
+      "accept": "application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*",
     },
     "json": true,
   },
@@ -33,7 +33,7 @@ Array [
   "https://npm.mycustomregistry.com/foobar",
   Object {
     "headers": Object {
-      "accept": "application/vnd.npm.install-v1+json",
+      "accept": "application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*",
       "authorization": "Basic 1234",
     },
     "json": true,
