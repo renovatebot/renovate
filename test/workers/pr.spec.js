@@ -77,6 +77,7 @@ describe('workers/pr', () => {
       config = Object.assign({}, defaultConfig);
       config.api = {
         createPr: jest.fn(() => ({ displayNumber: 'New Pull Request' })),
+        getBranchStatus: jest.fn(),
       };
       existingPr = {
         title: 'Update dependency dummy to version 1.1.0',
