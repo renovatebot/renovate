@@ -407,6 +407,52 @@ describe('api/github', () => {
       expect(err.message).toBe('Something went wrong');
     });
   });
+  describe('isBranchStale(branchName)', () => {
+    it('should return false if same SHA as master', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      // getCommitDetails - same as master
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          parents: [
+            {
+              sha: '1234',
+            },
+          ],
+        },
+      }));
+      expect(await github.isBranchStale('thebranchname')).toBe(false);
+    });
+    it('should return true if SHA different from master', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      // getCommitDetails - different
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          parents: [
+            {
+              sha: '12345678',
+            },
+          ],
+        },
+      }));
+      expect(await github.isBranchStale('thebranchname')).toBe(true);
+    });
+  });
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       await initRepo('some/repo', 'token');
