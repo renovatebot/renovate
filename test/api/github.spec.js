@@ -682,6 +682,14 @@ describe('api/github', () => {
   describe('mergePr(prNo)', () => {
     it('should merge the PR', async () => {
       await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
       const pr = {
         number: 1234,
         head: {
@@ -691,6 +699,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
+      expect(ghGot.mock.calls).toHaveLength(4);
     });
   });
   describe('mergePr(prNo)', () => {
@@ -708,6 +717,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
+      expect(ghGot.mock.calls).toHaveLength(3);
     });
   });
   describe('mergePr(prNo) - autodetection', () => {
@@ -738,6 +748,14 @@ describe('api/github', () => {
             },
           },
         }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1235',
+            },
+          },
+        }));
         return github.initRepo(...args);
       }
       await guessInitRepo('some/repo', 'token');
@@ -753,6 +771,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
+      expect(ghGot.mock.calls).toHaveLength(4);
     });
     it('should try squash after rebase', async () => {
       const pr = {
@@ -767,6 +786,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(2);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
+      expect(ghGot.mock.calls).toHaveLength(4);
     });
     it('should try merge after squash', async () => {
       const pr = {
@@ -784,6 +804,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
+      expect(ghGot.mock.calls).toHaveLength(4);
     });
     it('should give up', async () => {
       const pr = {
@@ -804,6 +825,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
+      expect(ghGot.mock.calls).toHaveLength(3);
     });
   });
   describe('getFile(filePatch, branchName)', () => {
