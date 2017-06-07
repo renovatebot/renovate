@@ -102,6 +102,7 @@
       "rarkins"
     ],
     "automerge": "minor",
+    "rebaseStalePrs": true,
     "packages": [
       {
         "packagePattern": "jest",
