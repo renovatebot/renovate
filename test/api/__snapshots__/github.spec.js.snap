@@ -921,6 +921,27 @@ exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-pu
 
 exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 6`] = `Array []`;
 
+exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 1`] = `[Error: Unsupported branch merge type: wrong-merge-type]`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 2`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+]
+`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 3`] = `Array []`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 4`] = `Array []`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 5`] = `Array []`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 6`] = `Array []`;
+
 exports[`api/github updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Array [

@@ -596,6 +596,21 @@ describe('api/github', () => {
       expect(ghGot.put.mock.calls).toMatchSnapshot();
       expect(ghGot.delete.mock.calls).toMatchSnapshot();
     });
+    it('should throw if unknown merge type', async () => {
+      await initRepo('some/repo', 'token');
+      let e;
+      try {
+        await github.mergeBranch('thebranchname', 'wrong-merge-type');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+    });
   });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
