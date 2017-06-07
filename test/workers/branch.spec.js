@@ -58,15 +58,15 @@ describe('workers/branch', () => {
         undefined
       );
     });
-    it('returns branchNAme if automerge branch-push and not stale', async () => {
-      config.automerge = 'minor';
+    it('returns branchName if automerge branch-push and not stale', async () => {
+      config.automergeEnabled = true;
       config.automergeType = 'branch-push';
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
         branchName
       );
     });
     it('returns undefined if automerge branch-push and stale', async () => {
-      config.automerge = 'minor';
+      config.automergeEnabled = true;
       config.automergeType = 'branch-push';
       config.api.isBranchStale.mockReturnValueOnce(true);
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
@@ -106,7 +106,6 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
-      config.autoMerge = 'none';
       expect(await branchWorker.ensureBranch([config])).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
@@ -118,7 +117,7 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
-      config.automerge = 'minor';
+      config.automergeEnabled = true;
       config.automergeType = 'pr';
       expect(await branchWorker.ensureBranch([config])).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
