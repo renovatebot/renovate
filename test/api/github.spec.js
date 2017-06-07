@@ -506,6 +506,34 @@ describe('api/github', () => {
       expect(res).toEqual(false);
     });
   });
+  describe('mergeBranch(branchName, mergeType)', () => {
+    it('should perform a branch-push merge', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      ghGot.patch.mockImplementationOnce();
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      // deleteBranch
+      ghGot.delete.mockImplementationOnce();
+      await github.mergeBranch('thebranchname', 'branch-push');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo('some/repo', 'token');

@@ -771,6 +771,44 @@ Object {
 }
 `;
 
+exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-push merge 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+]
+`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-push merge 2`] = `
+Array [
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+    Object {
+      "body": Object {
+        "sha": "1235",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-push merge 3`] = `
+Array [
+  Array [
+    "repos/some/repo/git/refs/heads/thebranchname",
+  ],
+]
+`;
+
 exports[`api/github updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Array [
