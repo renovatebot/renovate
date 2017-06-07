@@ -1,5 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) disables major release separation (major) 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.4.4",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) disables major release separation (minor) 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.0.0",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "minor",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) ignores pinning for ranges when other upgrade exists 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.9.7",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) pins minor ranged versions 1`] = `
+Array [
+  Object {
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "pin",
+  },
+]
+`;
+
 exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) returns both updates if automerging minor 1`] = `
 Array [
   Object {
@@ -39,6 +85,267 @@ Array [
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) should allow unstable versions if the current version is unstable 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.0.0-beta",
+    "changeLogToVersion": "1.1.0-beta",
+    "newVersion": "1.1.0-beta",
+    "newVersionMajor": 1,
+    "upgradeType": "minor",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) should treat zero zero caret ranges as pinned 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.0.34",
+    "changeLogToVersion": "0.0.35",
+    "isRange": true,
+    "newVersion": "^0.0.35",
+    "newVersionMajor": 0,
+    "upgradeType": "minor",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports > latest versions if configured 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.4.1",
+    "changeLogToVersion": "2.0.1",
+    "newVersion": "2.0.1",
+    "newVersionMajor": 2,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports future versions if already future 1`] = `
+Array [
+  Object {
+    "newVersion": "2.0.3",
+    "newVersionMajor": 2,
+    "upgradeType": "pin",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports future versions if configured 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.4.1",
+    "changeLogToVersion": "2.0.3",
+    "newVersion": "2.0.3",
+    "newVersionMajor": 2,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports minor and major upgrades for ranged versions 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.4.4",
+    "changeLogToVersion": "0.9.7",
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "upgradeType": "minor",
+  },
+  Object {
+    "changeLogFromVersion": "0.4.4",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports minor and major upgrades for tilde ranges 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.4.4",
+    "changeLogToVersion": "0.9.7",
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "upgradeType": "minor",
+  },
+  Object {
+    "changeLogFromVersion": "0.4.4",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades .x major ranges without pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.9.7",
+    "changeLogToVersion": "1.4.1",
+    "isRange": true,
+    "newVersion": "1.x",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades .x minor ranges 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.3.0",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "minor",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades .x minor ranges without pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.3.0",
+    "changeLogToVersion": "1.4.1",
+    "isRange": true,
+    "newVersion": "1.4.x",
+    "newVersionMajor": 1,
+    "upgradeType": "minor",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades less than equal ranges without pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.7.2",
+    "changeLogToVersion": "0.9.7",
+    "isRange": true,
+    "newVersion": "<= 0.9.7",
+    "newVersionMajor": 0,
+    "upgradeType": "minor",
+  },
+  Object {
+    "changeLogFromVersion": "0.7.2",
+    "changeLogToVersion": "1.4.1",
+    "isRange": true,
+    "newVersion": "<= 1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades minor ranged versions 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.0.1",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "minor",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades multiple caret ranges without pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.7.2",
+    "changeLogToVersion": "0.9.7",
+    "isRange": true,
+    "newVersion": "^0.9.0",
+    "newVersionMajor": 0,
+    "upgradeType": "minor",
+  },
+  Object {
+    "changeLogFromVersion": "0.7.2",
+    "changeLogToVersion": "1.4.1",
+    "isRange": true,
+    "newVersion": "^1.0.0",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades multiple tilde ranges without pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.7.2",
+    "changeLogToVersion": "0.9.7",
+    "isRange": true,
+    "newVersion": "~0.9.0",
+    "newVersionMajor": 0,
+    "upgradeType": "minor",
+  },
+  Object {
+    "changeLogFromVersion": "0.7.2",
+    "changeLogToVersion": "1.4.1",
+    "isRange": true,
+    "newVersion": "~1.4.0",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades shorthand major ranges without pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.9.7",
+    "changeLogToVersion": "1.4.1",
+    "isRange": true,
+    "newVersion": "1",
+    "newVersionMajor": 1,
+    "upgradeType": "major",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades shorthand minor ranges without pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.3.0",
+    "changeLogToVersion": "1.4.1",
+    "isRange": true,
+    "newVersion": "1.4",
+    "newVersionMajor": 1,
+    "upgradeType": "minor",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades tilde ranges 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.3.0",
+    "changeLogToVersion": "1.4.1",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "upgradeType": "minor",
+  },
+]
+`;
+
+exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades tilde ranges without pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.3.0",
+    "changeLogToVersion": "1.4.1",
+    "isRange": true,
+    "newVersion": "~1.4.0",
+    "newVersionMajor": 1,
+    "upgradeType": "minor",
   },
 ]
 `;
