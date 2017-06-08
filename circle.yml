@@ -6,7 +6,7 @@ machine:
 
 dependencies:
   pre:
-    - npm install -g yarn@`grep yarn package.json | sed 's/    "yarn": "//' | sed 's/"//'`
+    - npm install -g yarn@0.24.6
     - yarn --version
   override:
     - yarn install --frozen-lockfile
