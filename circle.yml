@@ -1,6 +1,7 @@
 machine:
   environment:
     PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
+    YARN_VERSION: 0.24.5
   node:
     version: 6.9
 
