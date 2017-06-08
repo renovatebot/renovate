@@ -44,7 +44,7 @@
   "dependencies": {
     "changelog": "dylang/changelog#v1.2.0",
     "commander": "2.9.0",
-    "gh-got": "5.0.0",
+    "gh-got": "6.0.0",
     "gl-got": "6.0.2",
     "got": "7.0.0",
     "handlebars": "4.0.10",
