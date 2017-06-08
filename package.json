@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
-  "version": "8.30.4",
+  "version": "8.31.0",
   "bin": "dist/renovate.js",
   "main": "dist/index.js",
   "scripts": {
@@ -44,7 +44,7 @@
   "dependencies": {
     "changelog": "dylang/changelog#v1.2.0",
     "commander": "2.9.0",
-    "gh-got": "5.0.0",
+    "gh-got": "6.0.0",
     "gl-got": "6.0.2",
     "got": "7.0.0",
     "handlebars": "4.0.10",
