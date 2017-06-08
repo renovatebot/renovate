@@ -6,7 +6,7 @@ machine:
 
 dependencies:
   pre:
-    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - npm install -g yarn@$(grep yarn package.json | sed 's/    "yarn": "//' | sed 's/"//')
     - yarn --version
   override:
     - yarn install --frozen-lockfile
