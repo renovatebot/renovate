@@ -407,6 +407,52 @@ describe('api/github', () => {
       expect(err.message).toBe('Something went wrong');
     });
   });
+  describe('isBranchStale(branchName)', () => {
+    it('should return false if same SHA as master', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      // getCommitDetails - same as master
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          parents: [
+            {
+              sha: '1234',
+            },
+          ],
+        },
+      }));
+      expect(await github.isBranchStale('thebranchname')).toBe(false);
+    });
+    it('should return true if SHA different from master', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      // getCommitDetails - different
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          parents: [
+            {
+              sha: '12345678',
+            },
+          ],
+        },
+      }));
+      expect(await github.isBranchStale('thebranchname')).toBe(true);
+    });
+  });
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       await initRepo('some/repo', 'token');
@@ -458,6 +504,112 @@ describe('api/github', () => {
       }));
       const res = await github.getBranchStatus('somebranch');
       expect(res).toEqual(false);
+    });
+  });
+  describe('mergeBranch(branchName, mergeType)', () => {
+    it('should perform a branch-push merge', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      ghGot.patch.mockImplementationOnce();
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      // deleteBranch
+      ghGot.delete.mockImplementationOnce();
+      await github.mergeBranch('thebranchname', 'branch-push');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should throw if branch-push merge throws', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      ghGot.patch.mockImplementationOnce(() => {
+        throw new Error('branch-push failed');
+      });
+      let e;
+      try {
+        await github.mergeBranch('thebranchname', 'branch-push');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should perform a branch-merge-commit merge', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      await github.mergeBranch('thebranchname', 'branch-merge-commit');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should throw if branch-merge-commit throws', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.post.mockImplementationOnce(() => {
+        throw new Error('branch-push failed');
+      });
+      let e;
+      try {
+        await github.mergeBranch('thebranchname', 'branch-merge-commit');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should throw if unknown merge type', async () => {
+      await initRepo('some/repo', 'token');
+      let e;
+      try {
+        await github.mergeBranch('thebranchname', 'wrong-merge-type');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(ghGot.patch.mock.calls).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+      expect(ghGot.put.mock.calls).toMatchSnapshot();
+      expect(ghGot.delete.mock.calls).toMatchSnapshot();
     });
   });
   describe('addAssignees(issueNo, assignees)', () => {
@@ -708,6 +860,14 @@ describe('api/github', () => {
             },
           },
         }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1235',
+            },
+          },
+        }));
         return github.initRepo(...args);
       }
       await guessInitRepo('some/repo', 'token');
@@ -723,7 +883,6 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
-      expect(ghGot.mock.calls).toHaveLength(3);
     });
     it('should try squash after rebase', async () => {
       const pr = {
@@ -738,7 +897,6 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(2);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
-      expect(ghGot.mock.calls).toHaveLength(3);
     });
     it('should try merge after squash', async () => {
       const pr = {
@@ -756,7 +914,6 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
-      expect(ghGot.mock.calls).toHaveLength(3);
     });
     it('should give up', async () => {
       const pr = {
@@ -777,7 +934,6 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
-      expect(ghGot.mock.calls).toHaveLength(2);
     });
   });
   describe('getFile(filePatch, branchName)', () => {

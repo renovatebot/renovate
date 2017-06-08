@@ -89,6 +89,7 @@ $ node renovate --help
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
     --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
     --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, minor or any
+    --automerge-type <string>            How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only
     --yarn-cache-folder <string>         Location of yarn cache folder to use. Set to empty string to disable
     --maintain-yarn-lock [boolean]       Keep yarn.lock files updated in base branch
     --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
@@ -152,6 +153,7 @@ Obviously, you can't set repository or package file location with this method.
 | `rebaseStalePrs` | Rebase stale PRs (GitHub only) | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
 | `prCreation` | When to create the PR for a branch. Values: immediate, not-pending, status-success. | string | `"immediate"` | `RENOVATE_PR_CREATION` | `--pr-creation` |
 | `automerge` | What types of upgrades to merge to base branch automatically. Values: none, minor or any | string | `"none"` | `RENOVATE_AUTOMERGE` | `--automerge` |
+| `automergeType` | How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only | string | `"pr"` | `RENOVATE_AUTOMERGE_TYPE` | `--automerge-type` |
 | `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` | `RENOVATE_BRANCH_NAME` |  |
 | `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` | `RENOVATE_COMMIT_MESSAGE` |  |
 | `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` | `RENOVATE_PR_TITLE` |  |

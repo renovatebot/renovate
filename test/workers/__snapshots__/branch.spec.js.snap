@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/branch ensureBranch(config) automerges successful branches 1`] = `
+Object {
+  "calls": Array [
+    Array [
+      "renovate/dummy-1.x",
+      "branch-push",
+    ],
+  ],
+  "instances": Array [
+    Object {
+      "branchExists": [Function],
+      "commitFilesToBranch": [Function],
+      "getBranchStatus": [Function],
+      "getFileContent": [Function],
+      "mergeBranch": [Function],
+    },
+  ],
+}
+`;
+
+exports[`workers/branch ensureBranch(config) throws if automerge throws 1`] = `[Error: automerge failed]`;
+
+exports[`workers/branch ensureBranch(config) throws if automerge throws 2`] = `
+Object {
+  "calls": Array [
+    Array [
+      "renovate/dummy-1.x",
+      "branch-push",
+    ],
+  ],
+  "instances": Array [
+    Object {
+      "branchExists": [Function],
+      "commitFilesToBranch": [Function],
+      "getBranchStatus": [Function],
+      "getFileContent": [Function],
+      "mergeBranch": [Function],
+    },
+  ],
+}
+`;

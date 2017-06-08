@@ -19,7 +19,7 @@
     "test-dirty": "git diff --exit-code",
     "test": "npm run lint && npm run jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
-    "update-docs": "bash bin/update-docs.sh"
+    "update-docs": "npm run transpile && bash bin/update-docs.sh"
   },
   "repository": {
     "type": "git",

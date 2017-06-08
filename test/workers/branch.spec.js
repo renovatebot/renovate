@@ -16,6 +16,8 @@ describe('workers/branch', () => {
         api: {
           branchExists: jest.fn(() => true),
           getBranchPr: jest.fn(),
+          getBranchStatus: jest.fn(),
+          isBranchStale: jest.fn(() => false),
         },
       };
     });
@@ -31,7 +33,7 @@ describe('workers/branch', () => {
         branchName
       );
     });
-    it('returns false if does not need rebaseing', async () => {
+    it('returns branchName if does not need rebaseing', async () => {
       config.api.getBranchPr.mockReturnValue({
         isUnmergeable: false,
       });
@@ -39,7 +41,7 @@ describe('workers/branch', () => {
         branchName
       );
     });
-    it('returns false if unmergeable and cannot rebase', async () => {
+    it('returns branchName if unmergeable and cannot rebase', async () => {
       config.api.getBranchPr.mockReturnValue({
         isUnmergeable: true,
         canRebase: false,
@@ -48,7 +50,7 @@ describe('workers/branch', () => {
         branchName
       );
     });
-    it('returns true if unmergeable and can rebase', async () => {
+    it('returns undefined if unmergeable and can rebase', async () => {
       config.api.getBranchPr.mockReturnValue({
         isUnmergeable: true,
         canRebase: true,
@@ -57,35 +59,17 @@ describe('workers/branch', () => {
         undefined
       );
     });
-    it('returns false if stale but not configured to rebase', async () => {
-      config.api.getBranchPr.mockReturnValue({
-        isUnmergeable: false,
-        isStale: true,
-        canRebase: true,
-      });
-      config.rebaseStalePrs = false;
+    it('returns branchName if automerge branch-push and not stale', async () => {
+      config.automergeEnabled = true;
+      config.automergeType = 'branch-push';
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
         branchName
       );
     });
-    it('returns false if stale but cannot rebase', async () => {
-      config.api.getBranchPr.mockReturnValueOnce({
-        isUnmergeable: false,
-        isStale: true,
-        canRebase: false,
-      });
-      config.rebaseStalePrs = true;
-      expect(await branchWorker.getParentBranch(branchName, config)).toBe(
-        branchName
-      );
-    });
-    it('returns true if stale and can rebase', async () => {
-      config.api.getBranchPr.mockReturnValueOnce({
-        isUnmergeable: false,
-        isStale: true,
-        canRebase: true,
-      });
-      config.rebaseStalePrs = true;
+    it('returns undefined if automerge branch-push and stale', async () => {
+      config.automergeEnabled = true;
+      config.automergeType = 'branch-push';
+      config.api.isBranchStale.mockReturnValueOnce(true);
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
         undefined
       );
@@ -105,15 +89,17 @@ describe('workers/branch', () => {
       config.api.branchExists = jest.fn();
       config.api.commitFilesToBranch = jest.fn();
       config.api.getFileContent.mockReturnValueOnce('old content');
+      config.api.getBranchStatus = jest.fn();
       config.depName = 'dummy';
       config.currentVersion = '1.0.0';
       config.newVersion = '1.1.0';
+      config.newVersionMajor = 1;
     });
     it('returns if new content matches old', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('old content');
       config.api.branchExists.mockReturnValueOnce(false);
-      await branchWorker.ensureBranch([config]);
+      expect(await branchWorker.ensureBranch([config])).toBe(false);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(npmHelper.getLockFile.mock.calls.length).toBe(0);
@@ -122,8 +108,81 @@ describe('workers/branch', () => {
     it('commits one file if no yarn lock or package-lock.json found', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
-      await branchWorker.ensureBranch([config]);
+      config.api.branchExists.mockReturnValueOnce(true);
+      expect(await branchWorker.ensureBranch([config])).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(1);
+    });
+    it('returns true if automerging pr', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      config.api.branchExists.mockReturnValueOnce(true);
+      config.automergeEnabled = true;
+      config.automergeType = 'pr';
+      expect(await branchWorker.ensureBranch([config])).toBe(true);
+      expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(1);
+    });
+    it('automerges successful branches', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      config.api.branchExists.mockReturnValueOnce(true);
+      config.api.getBranchStatus.mockReturnValueOnce('success');
+      config.api.mergeBranch = jest.fn();
+      config.automergeEnabled = true;
+      config.automergeType = 'branch-push';
+      expect(await branchWorker.ensureBranch([config])).toBe(true);
+      expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(config.api.getBranchStatus.mock.calls.length).toBe(1);
+      expect(config.api.mergeBranch.mock).toMatchSnapshot();
+      expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(1);
+    });
+    it('skips automerge if status not success', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      config.api.branchExists.mockReturnValueOnce(true);
+      config.api.getBranchStatus.mockReturnValueOnce('pending');
+      config.api.mergeBranch = jest.fn();
+      config.automergeEnabled = true;
+      config.automergeType = 'branch-push';
+      expect(await branchWorker.ensureBranch([config])).toBe(true);
+      expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(config.api.getBranchStatus.mock.calls.length).toBe(1);
+      expect(config.api.mergeBranch.mock.calls.length).toBe(0);
+      expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
+      expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(1);
+    });
+    it('throws if automerge throws', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      config.api.branchExists.mockReturnValueOnce(true);
+      config.api.getBranchStatus.mockReturnValueOnce('success');
+      config.automergeEnabled = true;
+      config.automergeType = 'branch-push';
+      config.api.mergeBranch = jest.fn(() => {
+        throw new Error('automerge failed');
+      });
+      let e;
+      try {
+        await branchWorker.ensureBranch([config]);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+      expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
+      expect(config.api.getBranchStatus.mock.calls.length).toBe(1);
+      expect(config.api.mergeBranch.mock).toMatchSnapshot();
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(npmHelper.getLockFile.mock.calls.length).toBe(1);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
