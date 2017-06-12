@@ -11,18 +11,19 @@ describe('helpers/changelog', () => {
     it('returns empty if fromVersion equals newVersion', async () => {
       expect(await getChangeLog('renovate', '1.0.0', '1.0.0')).toBe('');
     });
-    it('returns empty if generated markdown is null', async () => {
-      changelog.markdown.mockReturnValueOnce(null);
+    it('returns empty if generated json is null', async () => {
+      changelog.generate.mockReturnValueOnce(null);
       expect(await getChangeLog('renovate', '1.0.0', '2.0.0')).toBe('');
     });
     it('returns header if generated markdown is valid', async () => {
+      changelog.generate.mockReturnValueOnce({});
       changelog.markdown.mockReturnValueOnce('dummy');
       expect(await getChangeLog('renovate', '1.0.0', '2.0.0')).toBe(
         '### Changelog\n\ndummy'
       );
     });
     it('returns empty if error thrown', async () => {
-      changelog.markdown = jest.fn(() => {
+      changelog.generate = jest.fn(() => {
         throw new Error('foo');
       });
       expect(await getChangeLog('renovate', '1.0.0', '2.0.0')).toBe('');
