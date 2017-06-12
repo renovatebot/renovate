@@ -42,7 +42,7 @@
     "yarn": "0.24.6"
   },
   "dependencies": {
-    "changelog": "1.2.1",
+    "changelog": "1.3.0",
     "commander": "2.9.0",
     "gh-got": "6.0.0",
     "gl-got": "6.0.2",
