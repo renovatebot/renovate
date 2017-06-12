@@ -13,7 +13,7 @@ This PR renovates the package group "{{groupName}}".
 {{#each log.logJSON.versions}}
 #### {{this.version}}
 {{#each this.changes}}
--   [`{{this.shortSha}}`]({{log.logJSON.project.repository}}/commit/{{this.sha}})`{{this.message}}`
+-   [`{{this.shortSha}}`]({{this.commitUrl}}){{this.message}}
 {{/each}}
 {{/each}}
 
