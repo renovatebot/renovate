@@ -1,11 +1,13 @@
 const logger = require('winston');
 const prWorker = require('../../lib/workers/pr');
+const changelogHelper = require('../../lib/helpers/changelog');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 
 logger.remove(logger.transports.Console);
 
-const getChangeLog = jest.fn();
-getChangeLog.mockReturnValue('Mocked changelog');
+jest.mock('../../lib/helpers/changelog');
+changelogHelper.getChangeLog = jest.fn();
+changelogHelper.getChangeLog.mockReturnValue('Mocked changelog');
 
 describe('workers/pr', () => {
   describe('checkAutoMerge(pr, config)', () => {
