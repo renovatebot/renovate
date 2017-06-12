@@ -1,19 +1,19 @@
 This PR renovates the package group "{{groupName}}".
 
-{{#each upgrades}}
--   {{this.depName}}: from `{{this.currentVersion}}` to `{{this.newVersion}}`
+{{#each upgrades as |upgrade|}}
+-   [{{upgrade.depName}}]({{upgrade.repositoryUrl}}): from `{{upgrade.currentVersion}}` to `{{upgrade.newVersion}}`
 {{/each}}
 
 ### Commits
 
-{{#each changelogs as |log|}}
+{{#each upgrades as |upgrade|}}
 <details>
-<summary>{{log.depName}}</summary>
+<summary>{{upgrade.depName}}</summary>
 
-{{#each log.logJSON.versions}}
-#### {{this.version}}
-{{#each this.changes}}
--   [`{{this.shortSha}}`]({{this.commitUrl}}){{this.message}}
+{{#each upgrade.releases as |release|}}
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [`{{commit.shortSha}}`]({{commit.url}}){{commit.message}}
 {{/each}}
 {{/each}}
 
