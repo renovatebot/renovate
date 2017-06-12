@@ -1,1 +1,22 @@
 This PR renovates the package group "{{groupName}}".
+
+{{#each upgrades}}
+-   {{this.depName}}: from `{{this.currentVersion}}` to `{{this.newVersion}}`
+{{/each}}
+
+### Commits
+
+{{#each changelogs}}
+<details>
+<summary>{{this.depName}}</summary>
+
+{{#each this.logJSON.versions}}
+#### {{this.version}}
+{{#each this.changes}}
+-   `{{this.message}}`
+{{/each}}
+
+{{/each}}
+
+</details>
+{{/each}}
