@@ -6,16 +6,15 @@ This PR renovates the package group "{{groupName}}".
 
 ### Commits
 
-{{#each changelogs}}
+{{#each changelogs as |log|}}
 <details>
-<summary>{{this.depName}}</summary>
+<summary>{{log.depName}}</summary>
 
-{{#each this.logJSON.versions}}
+{{#each log.logJSON.versions}}
 #### {{this.version}}
 {{#each this.changes}}
--   `{{this.message}}`
+-   [`{{this.shortSha}}`]({{log.logJSON.project.repository}}/commit/{{this.sha}})`{{this.message}}`
 {{/each}}
-
 {{/each}}
 
 </details>
