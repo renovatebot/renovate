@@ -1,12 +1,11 @@
-{{#each upgrades as |upgrade|}}
-This Pull Request updates dependency [{{upgrade.depName}}]({{upgrade.repositoryUrl}}) from version `{{upgrade.currentVersion}}` to `{{upgrade.newVersion}}`
+This Pull Request updates dependency [{{depName}}]({{repositoryUrl}}) from version `{{currentVersion}}` to `{{newVersion}}`
 
 ### Commits
 
 <details>
-<summary>{{upgrade.githubName}}</summary>
+<summary>{{githubName}}</summary>
 
-{{#each upgrade.releases as |release|}}
+{{#each releases as |release|}}
 #### {{release.version}}
 {{#each release.commits as |commit|}}
 -   [`{{commit.shortSha}}`]({{commit.url}}){{commit.message}}
@@ -14,7 +13,6 @@ This Pull Request updates dependency [{{upgrade.depName}}]({{upgrade.repositoryU
 {{/each}}
 
 </details>
-{{/each}}
 
 <br />
 <br />
