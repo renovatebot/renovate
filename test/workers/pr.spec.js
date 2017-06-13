@@ -8,6 +8,22 @@ logger.remove(logger.transports.Console);
 jest.mock('../../lib/helpers/changelog');
 changelogHelper.getChangeLog = jest.fn();
 changelogHelper.getChangeLog.mockReturnValue('Mocked changelog');
+changelogHelper.getChangeLogJSON = jest.fn();
+changelogHelper.getChangeLogJSON.mockReturnValue({
+  project: {},
+  versions: [
+    {
+      date: new Date('2017-01-01'),
+      changes: [
+        {
+          date: new Date('2017-01-01'),
+          sha: 'abcdefghijklmnopqrstuvwxyz',
+          message: 'foo\nbar',
+        },
+      ],
+    },
+  ],
+});
 
 describe('workers/pr', () => {
   describe('checkAutoMerge(pr, config)', () => {
