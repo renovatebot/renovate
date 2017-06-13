@@ -88,8 +88,7 @@ describe('workers/pr', () => {
       };
       existingPr = {
         title: 'Update dependency dummy to version 1.1.0',
-        body:
-          `This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from version \`1.0.0\` to \`1.1.0\`
+        body: `This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from version \`1.0.0\` to \`1.1.0\`
 
 ### Commits
 
