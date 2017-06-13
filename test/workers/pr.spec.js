@@ -22,7 +22,7 @@ changelogHelper.getChangeLogJSON.mockReturnValue({
         {
           date: new Date('2017-01-01'),
           sha: 'abcdefghijklmnopqrstuvwxyz',
-          message: 'foo\nbar',
+          message: 'foo #3\nbar',
         },
       ],
     },
@@ -96,7 +96,7 @@ describe('workers/pr', () => {
 <summary>renovateapp/dummy</summary>
 
 #### 1.1.0
--   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz)foo
+-   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz)foo [#3](https://github.com/renovateapp/dummy/issues/3)
 
 </details>
 
