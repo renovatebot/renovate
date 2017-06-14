@@ -68,7 +68,7 @@
     "eslint-config-airbnb-base": "11.2.0",
     "eslint-config-prettier": "2.1.1",
     "eslint-plugin-import": "2.3.0",
-    "eslint-plugin-prettier": "2.1.1",
+    "eslint-plugin-prettier": "2.1.2",
     "eslint-plugin-promise": "3.5.0",
     "jest": "20.0.4",
     "mkdirp": "0.5.1",
