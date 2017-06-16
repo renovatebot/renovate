@@ -48,6 +48,7 @@
     "gl-got": "6.0.2",
     "got": "7.0.0",
     "handlebars": "4.0.10",
+    "ini": "1.3.4",
     "json-stringify-pretty-compact": "1.0.4",
     "jsonwebtoken": "7.4.1",
     "lodash": "4.17.4",
