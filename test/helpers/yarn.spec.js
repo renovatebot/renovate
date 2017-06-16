@@ -69,7 +69,7 @@ describe('maintainLockFile(inputConfig)', () => {
   });
   it('returns null if no file to maintain', async () => {
     const yarnLock = await yarnHelper.maintainLockFile(config);
-    expect(config.api.getFileContent.mock.calls.length).toBe(2);
+    expect(config.api.getFileContent.mock.calls.length).toBe(3);
     expect(yarnLock).toEqual(null);
   });
   it('returns null if contents match', async () => {
