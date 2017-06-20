@@ -8,7 +8,7 @@
     "build": "npm run transpile",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "jest": "jest",
+    "jest": "LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --ignore-path .gitignore --fix .",
     "lint": "eslint --ignore-path .gitignore .",
     "np": "np",
@@ -42,6 +42,7 @@
     "yarn": "0.24.6"
   },
   "dependencies": {
+    "bunyan": "1.8.10",
     "changelog": "1.3.0",
     "commander": "2.9.0",
     "gh-got": "6.0.0",
@@ -57,8 +58,7 @@
     "semver": "5.3.0",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.1",
-    "tmp": "0.0.31",
-    "winston": "2.3.1"
+    "tmp": "0.0.31"
   },
   "devDependencies": {
     "babel-cli": "6.24.1",

@@ -1,9 +1,6 @@
-const logger = require('winston');
 const prWorker = require('../../lib/workers/pr');
 const changelogHelper = require('../../lib/helpers/changelog');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
-
-logger.remove(logger.transports.Console);
 
 jest.mock('../../lib/helpers/changelog');
 changelogHelper.getChangeLog = jest.fn();

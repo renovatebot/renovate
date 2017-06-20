@@ -1,12 +1,9 @@
-const logger = require('winston');
 const worker = require('../lib/worker');
 const branchWorker = require('../lib/workers/branch');
 const prWorker = require('../lib/workers/pr');
 const defaultConfig = require('../lib/config/defaults').getConfig();
 const npmApi = require('../lib/api/npm');
 const versionsHelper = require('../lib/helpers/versions');
-
-logger.remove(logger.transports.Console);
 
 jest.mock('../lib/workers/branch');
 jest.mock('../lib/workers/pr');
