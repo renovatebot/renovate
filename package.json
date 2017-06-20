@@ -8,7 +8,7 @@
     "build": "npm run transpile",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "jest": "jest",
+    "jest": "LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --ignore-path .gitignore --fix .",
     "lint": "eslint --ignore-path .gitignore .",
     "np": "np",
