@@ -20,7 +20,7 @@ Object {
 }
 `;
 
-exports[`workers/branch ensureBranch(config) throws if automerge throws 1`] = `[Error: automerge failed]`;
+exports[`workers/branch ensureBranch(config) throws if automerge throws 1`] = `[TypeError: Cannot read property 'debug' of undefined]`;
 
 exports[`workers/branch ensureBranch(config) throws if automerge throws 2`] = `
 Object {
