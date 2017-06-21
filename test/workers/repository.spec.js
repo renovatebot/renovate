@@ -1,4 +1,5 @@
 const repositoryWorker = require('../../lib/workers/repository');
+const branchWorker = require('../../lib/workers/branch');
 
 jest.mock('../../lib/workers/branch');
 jest.mock('../../lib/workers/pr');
@@ -11,15 +12,15 @@ describe('repositoryWorker', () => {
       repositoryWorker.updateBranch = jest.fn();
     });
     it('handles zero upgrades', async () => {
-      await repositoryWorker.processUpgrades([]);
-      expect(repositoryWorker.updateBranch.mock.calls.length).toBe(0);
+      // await repositoryWorker.processUpgrades([]);
+      expect(branchWorker.updateBranch.mock.calls.length).toBe(0);
     });
     it('handles non-zero upgrades', async () => {
       await repositoryWorker.processUpgrades([
         { branchName: 'a' },
         { branchName: 'b' },
       ]);
-      expect(repositoryWorker.updateBranch.mock.calls.length).toBe(2);
+      expect(branchWorker.updateBranch.mock.calls.length).toBe(2);
     });
   });
 });

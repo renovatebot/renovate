@@ -40,7 +40,7 @@ describe('helpers/changelog', () => {
         throw new Error('foo');
       });
       expect(
-        await changelogHelper.getChangeLog('renovate', '1.0.0', '2.0.0')
+        await changelogHelper.getChangeLog('renovate', '1.0.0', '2.0.0', logger)
       ).toBe('No changelog available');
     });
   });
