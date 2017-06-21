@@ -195,3 +195,15 @@ Array [
   },
 ]
 `;
+
+exports[`packageFileWorker processPackageFile(config) returns extracts dependencies for each depType 1`] = `
+Array [
+  Array [
+    Object {},
+    Array [
+      "dependencies",
+      "devDependencies",
+    ],
+  ],
+]
+`;

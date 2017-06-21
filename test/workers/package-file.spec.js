@@ -1,6 +1,14 @@
 const packageFileWorker = require('../../lib/workers/package-file');
 const npmApi = require('../../lib/api/npm');
 const versionsHelper = require('../../lib/helpers/versions');
+const packageJsonHelper = require('../../lib/helpers/package-json');
+const bunyan = require('bunyan');
+
+const logger = bunyan.createLogger({
+  name: 'test',
+  stream: process.stdout,
+  level: 'fatal',
+});
 
 jest.mock('../../lib/workers/branch');
 jest.mock('../../lib/workers/pr');
@@ -8,6 +16,46 @@ jest.mock('../../lib/api/npm');
 jest.mock('../../lib/helpers/versions');
 
 describe('packageFileWorker', () => {
+  describe('processPackageFile(config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        api: {
+          getFileJson: jest.fn(),
+        },
+        logger,
+      };
+    });
+    it('returns empty array if no file content', async () => {
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns empty array if config disabled', async () => {
+      config.api.getFileJson.mockReturnValueOnce({
+        renovate: {
+          enabled: false,
+        },
+      });
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns extracts dependencies for each depType', async () => {
+      config.api.getFileJson.mockReturnValueOnce({});
+      config.depTypes = [
+        'dependencies',
+        {
+          depType: 'devDependencies',
+          foo: 'bar',
+        },
+      ];
+      packageJsonHelper.extractDependencies = jest.fn(() => []);
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toEqual([]);
+      expect(
+        packageJsonHelper.extractDependencies.mock.calls
+      ).toMatchSnapshot();
+    });
+  });
   describe('findUpgrades(dependencies, config)', () => {
     let config;
     beforeEach(() => {
