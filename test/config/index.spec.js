@@ -1,5 +1,4 @@
 const argv = require('../_fixtures/config/argv');
-const should = require('chai').should();
 
 describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
@@ -149,24 +148,6 @@ describe('config/index', () => {
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(1);
       expect(glGot.mock.calls.length).toBe(0);
-    });
-    it('supports repositories in CLI', async () => {
-      const env = {};
-      defaultArgv = defaultArgv.concat(['--token=abc', 'foo']);
-      await configParser.parseConfigs(env, defaultArgv);
-      const repos = configParser.getRepositories();
-      should.exist(repos);
-      repos.should.have.length(1);
-      repos[0].repository.should.eql('foo');
-    });
-    it('gets cascaded config', async () => {
-      const env = { RENOVATE_CONFIG_FILE: 'test/_fixtures/config/file.js' };
-      await configParser.parseConfigs(env, defaultArgv);
-      const repo = configParser.getRepositories().pop();
-      should.exist(repo);
-      const cascadedConfig = configParser.getCascadedConfig(repo, null);
-      should.exist(cascadedConfig.token);
-      should.exist(cascadedConfig.recreateClosed);
     });
   });
 });

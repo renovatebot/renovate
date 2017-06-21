@@ -35,7 +35,7 @@ changelogHelper.getChangeLogJSON.mockReturnValue({
 });
 
 describe('workers/pr', () => {
-  describe('checkAutoMerge(pr, config)', () => {
+  describe('checkAutoMerge(pr, config, logger)', () => {
     let config;
     let pr;
     beforeEach(() => {
@@ -51,34 +51,34 @@ describe('workers/pr', () => {
       };
     });
     it('should not automerge if not configured', async () => {
-      await prWorker.checkAutoMerge(pr, config);
+      await prWorker.checkAutoMerge(pr, config, logger);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automergeEnabled = true;
       pr.mergeable = true;
       config.api.getBranchStatus.mockReturnValueOnce('success');
-      await prWorker.checkAutoMerge(pr, config);
+      await prWorker.checkAutoMerge(pr, config, logger);
       expect(config.api.mergePr.mock.calls.length).toBe(1);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automergeEnabled = true;
       pr.mergeable = true;
       config.api.getBranchStatus.mockReturnValueOnce('pending');
-      await prWorker.checkAutoMerge(pr, config);
+      await prWorker.checkAutoMerge(pr, config, logger);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automergeEnabled = true;
       pr.mergeable = true;
       pr.mergeable_state = 'unstable';
-      await prWorker.checkAutoMerge(pr, config);
+      await prWorker.checkAutoMerge(pr, config, logger);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automergeEnabled = true;
       pr.mergeable = false;
-      await prWorker.checkAutoMerge(pr, config);
+      await prWorker.checkAutoMerge(pr, config, logger);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
   });
