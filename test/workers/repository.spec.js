@@ -1,4 +1,4 @@
-const packagesWorker = require('../../lib/workers/packages');
+const repositoryWorker = require('../../lib/workers/repository');
 const branchWorker = require('../../lib/workers/branch');
 const prWorker = require('../../lib/workers/pr');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
@@ -10,7 +10,7 @@ jest.mock('../../lib/workers/pr');
 jest.mock('../../lib/api/npm');
 jest.mock('../../lib/helpers/versions');
 
-describe('packagesWorker', () => {
+describe('repositoryWorker', () => {
   describe('updateDependency(upgrade)', () => {
     let config;
     beforeEach(() => {
@@ -23,62 +23,62 @@ describe('packagesWorker', () => {
     });
     it('returns immediately if closed PR found', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
-      await packagesWorker.updateBranch([config]);
+      await repositoryWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
     it('does not return immediately if recreateClosed true', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
       config.recreateClosed = true;
-      await packagesWorker.updateBranch([config]);
+      await repositoryWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('pins', async () => {
       config.upgradeType = 'pin';
-      await packagesWorker.updateBranch([config]);
+      await repositoryWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('majors', async () => {
       config.upgradeType = 'major';
-      await packagesWorker.updateBranch([config]);
+      await repositoryWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('minors', async () => {
       config.upgradeType = 'minor';
-      await packagesWorker.updateBranch([config]);
+      await repositoryWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('handles errors', async () => {
       config.api.checkForClosedPr = jest.fn(() => {
         throw new Error('oops');
       });
-      await packagesWorker.updateBranch([config]);
+      await repositoryWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
   });
   describe('processUpgrades(upgrades)', () => {
     beforeEach(() => {
-      packagesWorker.updateBranch = jest.fn();
+      repositoryWorker.updateBranch = jest.fn();
     });
     it('handles zero upgrades', async () => {
-      await packagesWorker.processUpgrades([]);
-      expect(packagesWorker.updateBranch.mock.calls.length).toBe(0);
+      await repositoryWorker.processUpgrades([]);
+      expect(repositoryWorker.updateBranch.mock.calls.length).toBe(0);
     });
     it('handles non-zero upgrades', async () => {
-      await packagesWorker.processUpgrades([
+      await repositoryWorker.processUpgrades([
         { branchName: 'a' },
         { branchName: 'b' },
       ]);
-      expect(packagesWorker.updateBranch.mock.calls.length).toBe(2);
+      expect(repositoryWorker.updateBranch.mock.calls.length).toBe(2);
     });
   });
   describe('findUpgrades(dependencies, config)', () => {
     let config;
     beforeEach(() => {
       config = {};
-      packagesWorker.updateBranch = jest.fn();
+      repositoryWorker.updateBranch = jest.fn();
     });
     it('handles null', async () => {
-      const allUpgrades = await packagesWorker.findUpgrades([], config);
+      const allUpgrades = await repositoryWorker.findUpgrades([], config);
       expect(allUpgrades).toMatchObject([]);
     });
     it('handles one dep', async () => {
@@ -89,7 +89,7 @@ describe('packagesWorker', () => {
       const upgrade = { newVersion: '1.1.0' };
       npmApi.getDependency = jest.fn(() => ({}));
       versionsHelper.determineUpgrades = jest.fn(() => [upgrade]);
-      const allUpgrades = await packagesWorker.findUpgrades([dep], config);
+      const allUpgrades = await repositoryWorker.findUpgrades([dep], config);
       expect(allUpgrades).toMatchObject([Object.assign({}, dep, upgrade)]);
     });
     it('handles no upgrades', async () => {
@@ -99,7 +99,7 @@ describe('packagesWorker', () => {
       };
       npmApi.getDependency = jest.fn(() => ({}));
       versionsHelper.determineUpgrades = jest.fn(() => []);
-      const allUpgrades = await packagesWorker.findUpgrades([dep], config);
+      const allUpgrades = await repositoryWorker.findUpgrades([dep], config);
       expect(allUpgrades).toMatchObject([]);
     });
   });
@@ -111,7 +111,7 @@ describe('packagesWorker', () => {
       deps = [];
     });
     it('handles empty deps', () => {
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchObject([]);
     });
     it('handles string deps', () => {
@@ -120,7 +120,7 @@ describe('packagesWorker', () => {
       deps.push({
         depName: 'a',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles multiple deps', () => {
@@ -131,7 +131,7 @@ describe('packagesWorker', () => {
       deps.push({
         depName: 'b',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles depType config without override', () => {
@@ -146,7 +146,7 @@ describe('packagesWorker', () => {
         depName: 'a',
         depType: 'dependencies',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles depType config with override', () => {
@@ -161,7 +161,7 @@ describe('packagesWorker', () => {
         depName: 'a',
         depType: 'dependencies',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles package config', () => {
@@ -175,7 +175,7 @@ describe('packagesWorker', () => {
       deps.push({
         depName: 'a',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('package config overrides depType and general config', () => {
@@ -196,7 +196,7 @@ describe('packagesWorker', () => {
         depName: 'a',
         depType: 'dependencies',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('nested package config overrides depType and general config', () => {
@@ -217,7 +217,7 @@ describe('packagesWorker', () => {
         depName: 'a',
         depType: 'dependencies',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles regex package pattern', () => {
@@ -240,7 +240,7 @@ describe('packagesWorker', () => {
       deps.push({
         depName: 'also-eslint',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles regex wildcard package pattern', () => {
@@ -263,7 +263,7 @@ describe('packagesWorker', () => {
       deps.push({
         depName: 'also-eslint',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles non-regex package name', () => {
@@ -286,18 +286,21 @@ describe('packagesWorker', () => {
       deps.push({
         depName: 'also-eslint',
       });
-      const updatedDeps = packagesWorker.assignDepConfigs(config, deps);
+      const updatedDeps = repositoryWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
   });
   describe('getDepTypeConfig(depTypes, depTypeName)', () => {
     it('handles empty depTypes', () => {
-      const depTypeConfig = packagesWorker.getDepTypeConfig([], 'dependencies');
+      const depTypeConfig = repositoryWorker.getDepTypeConfig(
+        [],
+        'dependencies'
+      );
       expect(depTypeConfig).toMatchObject({});
     });
     it('handles all strings', () => {
       const depTypes = ['dependencies', 'devDependencies'];
-      const depTypeConfig = packagesWorker.getDepTypeConfig(
+      const depTypeConfig = repositoryWorker.getDepTypeConfig(
         depTypes,
         'dependencies'
       );
@@ -311,7 +314,7 @@ describe('packagesWorker', () => {
           foo: 'bar',
         },
       ];
-      const depTypeConfig = packagesWorker.getDepTypeConfig(
+      const depTypeConfig = repositoryWorker.getDepTypeConfig(
         depTypes,
         'dependencies'
       );
@@ -325,7 +328,7 @@ describe('packagesWorker', () => {
         },
         'devDependencies',
       ];
-      const depTypeConfig = packagesWorker.getDepTypeConfig(
+      const depTypeConfig = repositoryWorker.getDepTypeConfig(
         depTypes,
         'dependencies'
       );
