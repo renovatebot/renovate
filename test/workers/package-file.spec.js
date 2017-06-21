@@ -19,12 +19,11 @@ describe('packageFileWorker', () => {
   describe('processPackageFile(config)', () => {
     let config;
     beforeEach(() => {
-      config = {
-        api: {
-          getFileJson: jest.fn(),
-        },
-        logger,
+      config = require('../../lib/config/defaults').getConfig();
+      config.api = {
+        getFileJson: jest.fn(),
       };
+      config.logger = logger;
     });
     it('returns empty array if no file content', async () => {
       const res = await packageFileWorker.processPackageFile(config);
