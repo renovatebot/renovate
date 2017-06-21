@@ -291,7 +291,7 @@ describe('packageFileWorker', () => {
       packageJsonHelper.extractDependencies = jest.fn(() => []);
       config = require('../../lib/config/defaults').getConfig();
       config.api = {
-        getFileJson: jest.fn(),
+        getFileJson: jest.fn(() => ({})),
       };
       config.logger = logger;
     });
@@ -309,7 +309,6 @@ describe('packageFileWorker', () => {
       expect(res).toEqual([]);
     });
     it('extracts dependencies for each depType', async () => {
-      config.api.getFileJson.mockReturnValueOnce({});
       config.depTypes = [
         'dependencies',
         {
@@ -324,7 +323,6 @@ describe('packageFileWorker', () => {
       ).toMatchSnapshot();
     });
     it('filters dependencies', async () => {
-      config.api.getFileJson.mockReturnValueOnce({});
       packageJsonHelper.extractDependencies.mockReturnValueOnce([
         {
           depName: 'a',
