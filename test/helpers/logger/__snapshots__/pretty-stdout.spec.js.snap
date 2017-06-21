@@ -1,0 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`helpers/logger/pretty-stdout getDetails(rec) supports a config 1`] = `
+"       {\\"a\\": \\"b\\", \\"d\\": [\\"e\\", \\"f\\"]}
+"
+`;

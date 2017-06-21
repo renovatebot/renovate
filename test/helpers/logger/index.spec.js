@@ -1,4 +1,4 @@
-const loggerHelper = require('../../lib/helpers/logger');
+const loggerHelper = require('../../../lib/helpers/logger');
 
 describe('helpers/logger', () => {
   describe('configSerializer(config)', () => {
