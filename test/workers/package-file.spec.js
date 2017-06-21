@@ -37,6 +37,18 @@ describe('packageFileWorker', () => {
       const allUpgrades = await packageFileWorker.findUpgrades([dep], config);
       expect(allUpgrades).toMatchObject([Object.assign({}, dep, upgrade)]);
     });
+    it('handles no return', async () => {
+      const dep = {
+        depName: 'foo',
+        currentVersion: '1.0.0',
+      };
+      const upgrade = { newVersion: '1.1.0' };
+      npmApi.getDependency = jest.fn(() => ({}));
+      npmApi.getDependency.mockReturnValueOnce(null);
+      versionsHelper.determineUpgrades = jest.fn(() => [upgrade]);
+      const allUpgrades = await packageFileWorker.findUpgrades([dep], config);
+      expect(allUpgrades).toMatchObject([]);
+    });
     it('handles no upgrades', async () => {
       const dep = {
         depName: 'foo',
@@ -295,7 +307,8 @@ describe('packageFileWorker', () => {
       };
       config.logger = logger;
     });
-    it('returns empty array if no file content', async () => {
+    it('returns empty array if no package content', async () => {
+      config.api.getFileJson.mockReturnValueOnce(null);
       const res = await packageFileWorker.processPackageFile(config);
       expect(res).toEqual([]);
     });
@@ -333,6 +346,11 @@ describe('packageFileWorker', () => {
       const res = await packageFileWorker.processPackageFile(config);
       expect(res).toHaveLength(1);
       expect(res).toMatchSnapshot();
+    });
+    it('maintains yarn.lock', async () => {
+      config.maintainYarnLock = true;
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toHaveLength(1);
     });
   });
 });
