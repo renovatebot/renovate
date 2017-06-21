@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/index .getRepoConfig(config, index) handles object repos 1`] = `
+Object {
+  "global": "b",
+  "repoField": "g",
+  "repository": "e/f",
+}
+`;
+
+exports[`config/index .getRepoConfig(config, index) massages string repos 1`] = `
+Object {
+  "global": "b",
+  "repository": "c/d",
+}
+`;

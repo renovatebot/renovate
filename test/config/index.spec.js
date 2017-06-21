@@ -149,5 +149,37 @@ describe('config/index', () => {
       expect(ghGot.mock.calls.length).toBe(1);
       expect(glGot.mock.calls.length).toBe(0);
     });
+    it('adds a log file', async () => {
+      const env = { GITHUB_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
+      defaultArgv = defaultArgv.concat(['--autodiscover']);
+      ghGot.mockImplementationOnce(() => ({
+        body: [],
+      }));
+      await configParser.parseConfigs(env, defaultArgv);
+      expect(ghGot.mock.calls.length).toBe(1);
+      expect(glGot.mock.calls.length).toBe(0);
+    });
+  });
+  describe('.getRepoConfig(config, index)', () => {
+    let configParser;
+    beforeEach(() => {
+      configParser = require('../../lib/config/index.js');
+    });
+    const config = {
+      global: 'b',
+      repositories: [
+        'c/d',
+        {
+          repository: 'e/f',
+          repoField: 'g',
+        },
+      ],
+    };
+    it('massages string repos', () => {
+      expect(configParser.getRepoConfig(config, 0)).toMatchSnapshot();
+    });
+    it('handles object repos', () => {
+      expect(configParser.getRepoConfig(config, 1)).toMatchSnapshot();
+    });
   });
 });
