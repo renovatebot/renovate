@@ -16,45 +16,6 @@ jest.mock('../../lib/api/npm');
 jest.mock('../../lib/helpers/versions');
 
 describe('packageFileWorker', () => {
-  describe('processPackageFile(config)', () => {
-    let config;
-    beforeEach(() => {
-      config = require('../../lib/config/defaults').getConfig();
-      config.api = {
-        getFileJson: jest.fn(),
-      };
-      config.logger = logger;
-    });
-    it('returns empty array if no file content', async () => {
-      const res = await packageFileWorker.processPackageFile(config);
-      expect(res).toEqual([]);
-    });
-    it('returns empty array if config disabled', async () => {
-      config.api.getFileJson.mockReturnValueOnce({
-        renovate: {
-          enabled: false,
-        },
-      });
-      const res = await packageFileWorker.processPackageFile(config);
-      expect(res).toEqual([]);
-    });
-    it('returns extracts dependencies for each depType', async () => {
-      config.api.getFileJson.mockReturnValueOnce({});
-      config.depTypes = [
-        'dependencies',
-        {
-          depType: 'devDependencies',
-          foo: 'bar',
-        },
-      ];
-      packageJsonHelper.extractDependencies = jest.fn(() => []);
-      const res = await packageFileWorker.processPackageFile(config);
-      expect(res).toEqual([]);
-      expect(
-        packageJsonHelper.extractDependencies.mock.calls
-      ).toMatchSnapshot();
-    });
-  });
   describe('findUpgrades(dependencies, config)', () => {
     let config;
     beforeEach(() => {
@@ -320,6 +281,60 @@ describe('packageFileWorker', () => {
         foo: 'bar',
       };
       expect(depTypeConfig).toMatchObject(expectedResult);
+    });
+  });
+  describe('processPackageFile(config)', () => {
+    let config;
+    beforeEach(() => {
+      packageFileWorker.assignDepConfigs = jest.fn(() => []);
+      packageFileWorker.findUpgrades = jest.fn(() => []);
+      packageJsonHelper.extractDependencies = jest.fn(() => []);
+      config = require('../../lib/config/defaults').getConfig();
+      config.api = {
+        getFileJson: jest.fn(),
+      };
+      config.logger = logger;
+    });
+    it('returns empty array if no file content', async () => {
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns empty array if config disabled', async () => {
+      config.api.getFileJson.mockReturnValueOnce({
+        renovate: {
+          enabled: false,
+        },
+      });
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toEqual([]);
+    });
+    it('extracts dependencies for each depType', async () => {
+      config.api.getFileJson.mockReturnValueOnce({});
+      config.depTypes = [
+        'dependencies',
+        {
+          depType: 'devDependencies',
+          foo: 'bar',
+        },
+      ];
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toEqual([]);
+      expect(
+        packageJsonHelper.extractDependencies.mock.calls
+      ).toMatchSnapshot();
+    });
+    it('filters dependencies', async () => {
+      config.api.getFileJson.mockReturnValueOnce({});
+      packageJsonHelper.extractDependencies.mockReturnValueOnce([
+        {
+          depName: 'a',
+        },
+      ]);
+      packageFileWorker.assignDepConfigs.mockReturnValueOnce(['a']);
+      packageFileWorker.findUpgrades.mockReturnValueOnce(['a']);
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toHaveLength(1);
+      expect(res).toMatchSnapshot();
     });
   });
 });

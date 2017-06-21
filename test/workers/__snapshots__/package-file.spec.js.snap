@@ -196,7 +196,7 @@ Array [
 ]
 `;
 
-exports[`packageFileWorker processPackageFile(config) returns extracts dependencies for each depType 1`] = `
+exports[`packageFileWorker processPackageFile(config) extracts dependencies for each depType 1`] = `
 Array [
   Array [
     Object {},
@@ -205,5 +205,11 @@ Array [
       "devDependencies",
     ],
   ],
+]
+`;
+
+exports[`packageFileWorker processPackageFile(config) filters dependencies 1`] = `
+Array [
+  "a",
 ]
 `;
