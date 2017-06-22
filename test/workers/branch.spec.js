@@ -333,8 +333,8 @@ describe('workers/branch', () => {
       config.api = {
         checkForClosedPr: jest.fn(),
       };
-      branchWorker.ensureBranch = jest.fn();
-      prWorker.ensurePr = jest.fn();
+      branchWorker.ensureBranch = jest.fn(() => true);
+      prWorker.ensurePr = jest.fn(() => true);
     });
     it('returns immediately if closed PR found', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
