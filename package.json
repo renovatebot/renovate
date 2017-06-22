@@ -59,6 +59,7 @@
     "semver": "5.3.0",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.1",
+    "showdown": "1.7.1",
     "tmp": "0.0.31",
     "traverse": "0.6.6"
   },
