@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`api/gitlab getRepos should return an array of repos 1`] = `
+Array [
+  Array [
+    "projects",
+  ],
+]
+`;
+
+exports[`api/gitlab getRepos should return an array of repos 2`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
+
+exports[`api/gitlab getRepos should support a custom endpoint 1`] = `
+Array [
+  Array [
+    "projects",
+  ],
+]
+`;
+
+exports[`api/gitlab getRepos should support a custom endpoint 2`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
