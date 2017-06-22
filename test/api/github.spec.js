@@ -1,3 +1,11 @@
+const bunyan = require('bunyan');
+
+const logger = bunyan.createLogger({
+  name: 'test',
+  stream: process.stdout,
+  level: 'fatal',
+});
+
 describe('api/github', () => {
   let github;
   let ghGot;
@@ -174,6 +182,9 @@ describe('api/github', () => {
         expect(process.env.GITHUB_TOKEN).toBe(token);
         expect(process.env.GITHUB_ENDPOINT).toBe(endpoint);
       });
+    });
+    it('uses provided logger', async () => {
+      await initRepo('some/repo', 'some_token', 'an_endpoint', logger);
     });
     it('should throw an error if no token is provided', async () => {
       let err;
