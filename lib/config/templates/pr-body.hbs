@@ -9,7 +9,7 @@ This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates dependency [{{depN
 {{#each releases as |release|}}
 #### {{release.version}}
 {{#each release.commits as |commit|}}
--   [`{{commit.shortSha}}`]({{commit.url}}){{commit.message}}
+-   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}
 {{/each}}
 {{/each}}
 
