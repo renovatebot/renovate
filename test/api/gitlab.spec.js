@@ -21,22 +21,21 @@ describe('api/gitlab', () => {
     glGot = require('gl-got');
   });
 
-  async function getRepos(...args) {
-    // repo info
-    glGot.mockImplementationOnce(() => ({
-      body: [
-        {
-          path_with_namespace: 'a/b',
-        },
-        {
-          path_with_namespace: 'c/d',
-        },
-      ],
-    }));
-    return gitlab.getRepos(...args);
-  }
-
   describe('getRepos', () => {
+    async function getRepos(...args) {
+      // repo info
+      glGot.mockImplementationOnce(() => ({
+        body: [
+          {
+            path_with_namespace: 'a/b',
+          },
+          {
+            path_with_namespace: 'c/d',
+          },
+        ],
+      }));
+      return gitlab.getRepos(...args);
+    }
     it('should throw an error if no token is provided', async () => {
       let err;
       try {
