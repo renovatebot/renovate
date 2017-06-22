@@ -170,4 +170,39 @@ describe('api/gitlab', () => {
       expect(files).toEqual(['package.json']);
     });
   });
+  describe('branchExists(branchName)', () => {
+    it('should return true if 200 OK', async () => {
+      glGot.mockImplementationOnce(() => ({ statusCode: 200 }));
+      const branchExists = await gitlab.branchExists('foo');
+      expect(branchExists).toBe(true);
+    });
+    it('should return false if not 200 OK', async () => {
+      glGot.mockImplementationOnce(() => ({ statusCode: 500 }));
+      const branchExists = await gitlab.branchExists('foo');
+      expect(branchExists).toBe(false);
+    });
+    it('should return false if 404 error received', async () => {
+      glGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      const branchExists = await gitlab.branchExists('foo');
+      expect(branchExists).toBe(false);
+    });
+    it('should return error if non-404 error thrown', async () => {
+      glGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 500,
+        })
+      );
+      let e;
+      try {
+        await gitlab.branchExists('foo');
+      } catch (err) {
+        e = err;
+      }
+      expect(e.statusCode).toBe(500);
+    });
+  });
 });
