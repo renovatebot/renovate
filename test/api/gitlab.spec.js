@@ -163,4 +163,11 @@ describe('api/gitlab', () => {
       expect(config).toMatchSnapshot();
     });
   });
+  describe('findFilePaths(fileName)', () => {
+    it('should return the fileName', async () => {
+      await initRepo('some/repo', 'token');
+      const files = await gitlab.findFilePaths('package.json');
+      expect(files).toEqual(['package.json']);
+    });
+  });
 });
