@@ -22,8 +22,10 @@ describe('workers/branch', () => {
     const branchName = 'foo';
     beforeEach(() => {
       config = {
+        platform: 'github',
         api: {
           branchExists: jest.fn(() => true),
+          deleteBranch: jest.fn(),
           getBranchPr: jest.fn(),
           getBranchStatus: jest.fn(),
           isBranchStale: jest.fn(() => false),
@@ -67,6 +69,17 @@ describe('workers/branch', () => {
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
         undefined
       );
+    });
+    it('returns undefined if unmergeable and can rebase (gitlab)', async () => {
+      config.platform = 'gitlab';
+      config.api.getBranchPr.mockReturnValue({
+        isUnmergeable: true,
+        canRebase: true,
+      });
+      expect(await branchWorker.getParentBranch(branchName, config)).toBe(
+        undefined
+      );
+      expect(config.api.deleteBranch.mock.calls.length).toBe(1);
     });
     it('returns branchName if automerge branch-push and not stale', async () => {
       config.automergeEnabled = true;
