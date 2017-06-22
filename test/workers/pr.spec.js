@@ -223,5 +223,10 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr([config], logger);
       expect(pr).toBe(null);
     });
+    it('handles duplicate upgrades', async () => {
+      config.api.getBranchPr = jest.fn();
+      const pr = await prWorker.ensurePr([config, config], logger);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+    });
   });
 });

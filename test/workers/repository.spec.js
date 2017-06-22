@@ -4,6 +4,8 @@ const branchWorker = require('../../lib/workers/branch');
 jest.mock('../../lib/workers/branch');
 jest.mock('../../lib/workers/pr');
 jest.mock('../../lib/api/npm');
+jest.mock('../../lib/api/github');
+jest.mock('../../lib/api/gitlab');
 jest.mock('../../lib/helpers/versions');
 
 describe('repositoryWorker', () => {

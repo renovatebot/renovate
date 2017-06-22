@@ -1,0 +1,118 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`api/gitlab getRepos should return an array of repos 1`] = `
+Array [
+  Array [
+    "projects",
+  ],
+]
+`;
+
+exports[`api/gitlab getRepos should return an array of repos 2`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
+
+exports[`api/gitlab getRepos should support a custom endpoint 1`] = `
+Array [
+  Array [
+    "projects",
+  ],
+]
+`;
+
+exports[`api/gitlab getRepos should support a custom endpoint 2`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
+
+exports[`api/gitlab initRepo should initialise the config for the repo - 0 1`] = `
+Array [
+  Array [
+    "projects/owned",
+  ],
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;
+
+exports[`api/gitlab initRepo should initialise the config for the repo - 0 2`] = `
+Object {
+  "apiVersion": "v3",
+  "defaultBranch": "master",
+  "email": "a@b.com",
+  "repoName": "some%2Frepo",
+}
+`;
+
+exports[`api/gitlab initRepo should initialise the config for the repo - 1 1`] = `
+Array [
+  Array [
+    "projects/owned",
+  ],
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;
+
+exports[`api/gitlab initRepo should initialise the config for the repo - 1 2`] = `
+Object {
+  "apiVersion": "v3",
+  "defaultBranch": "master",
+  "email": "a@b.com",
+  "repoName": "some%2Frepo",
+}
+`;
+
+exports[`api/gitlab initRepo should initialise the config for the repo - 2 1`] = `
+Array [
+  Array [
+    "projects/owned",
+  ],
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;
+
+exports[`api/gitlab initRepo should initialise the config for the repo - 2 2`] = `
+Object {
+  "apiVersion": "v3",
+  "defaultBranch": "master",
+  "email": "a@b.com",
+  "repoName": "some%2Frepo",
+}
+`;
+
+exports[`api/gitlab initRepo should use api v4 1`] = `
+Object {
+  "apiVersion": "v4",
+  "defaultBranch": "master",
+  "email": "a@b.com",
+  "repoName": "some%2Frepo",
+}
+`;
+
+exports[`api/gitlab initRepo uses provided logger 1`] = `
+Object {
+  "apiVersion": "v3",
+  "defaultBranch": "master",
+  "email": "a@b.com",
+  "repoName": "some%2Frepo",
+}
+`;

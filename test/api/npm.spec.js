@@ -58,4 +58,7 @@ describe('api/npm', () => {
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
   });
+  it('sets .npmrc', () => {
+    npm.setNpmrc('input');
+  });
 });
