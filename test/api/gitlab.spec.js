@@ -1,3 +1,11 @@
+const bunyan = require('bunyan');
+
+const logger = bunyan.createLogger({
+  name: 'test',
+  stream: process.stdout,
+  level: 'fatal',
+});
+
 describe('api/gitlab', () => {
   let gitlab;
   let glGot;
@@ -59,6 +67,100 @@ describe('api/gitlab', () => {
       const repos = await getRepos('sometoken', 'someendpoint');
       expect(glGot.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
+    });
+  });
+
+  async function initRepo(...args) {
+    // projects/owned
+    glGot.mockImplementationOnce();
+    // projects/${config.repoName
+    glGot.mockImplementationOnce(() => ({
+      body: {
+        default_branch: 'master',
+      },
+    }));
+    // user
+    glGot.mockImplementationOnce(() => ({
+      body: {
+        email: 'a@b.com',
+      },
+    }));
+    return gitlab.initRepo(...args);
+  }
+
+  describe('initRepo', () => {
+    [
+      [undefined, ['mytoken'], 'mytoken', undefined],
+      [
+        undefined,
+        ['mytoken', 'https://my.custom.endpoint/'],
+        'mytoken',
+        'https://my.custom.endpoint/',
+      ],
+      ['myenvtoken', [], 'myenvtoken', undefined],
+    ].forEach(([envToken, args, token, endpoint], i) => {
+      it(`should initialise the config for the repo - ${i}`, async () => {
+        if (envToken !== undefined) {
+          process.env.GITLAB_TOKEN = envToken;
+        }
+        const config = await initRepo('some/repo', ...args);
+        expect(glGot.mock.calls).toMatchSnapshot();
+        expect(config).toMatchSnapshot();
+        expect(process.env.GITLAB_TOKEN).toBe(token);
+        expect(process.env.GITLAB_ENDPOINT).toBe(endpoint);
+      });
+    });
+    it('uses provided logger', async () => {
+      const config = await initRepo(
+        'some/repo',
+        'some_token',
+        'an_endpoint',
+        logger
+      );
+      expect(config).toMatchSnapshot();
+    });
+    it('should throw an error if no token is provided', async () => {
+      let err;
+      try {
+        await gitlab.initRepo('some/repo');
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe(
+        'No token found for GitLab repository some/repo'
+      );
+    });
+    it('should throw an error if receiving an error', async () => {
+      glGot.mockImplementation(() => {
+        throw new Error('always error');
+      });
+      let err;
+      try {
+        await gitlab.initRepo('some/repo', 'sometoken');
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('always error');
+    });
+    it('should use api v4', async () => {
+      // projects/owned
+      glGot.mockImplementationOnce(() => {
+        throw new Error('any error');
+      });
+      // projects/${config.repoName
+      glGot.mockImplementationOnce(() => ({
+        body: {
+          default_branch: 'master',
+        },
+      }));
+      // user
+      glGot.mockImplementationOnce(() => ({
+        body: {
+          email: 'a@b.com',
+        },
+      }));
+      const config = await initRepo('some/repo', 'some_token');
+      expect(config).toMatchSnapshot();
     });
   });
 });
