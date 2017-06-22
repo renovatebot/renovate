@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`worker assignDepConfigs(inputConfig, deps) handles depType config with override 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles depType config with override 1`] = `
 Array [
   Object {
     "config": Object {
@@ -12,7 +12,7 @@ Array [
 ]
 `;
 
-exports[`worker assignDepConfigs(inputConfig, deps) handles depType config without override 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles depType config without override 1`] = `
 Array [
   Object {
     "config": Object {
@@ -25,7 +25,7 @@ Array [
 ]
 `;
 
-exports[`worker assignDepConfigs(inputConfig, deps) handles multiple deps 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles multiple deps 1`] = `
 Array [
   Object {
     "config": Object {
@@ -42,7 +42,7 @@ Array [
 ]
 `;
 
-exports[`worker assignDepConfigs(inputConfig, deps) handles non-regex package name 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles non-regex package name 1`] = `
 Array [
   Object {
     "config": Object {
@@ -74,7 +74,7 @@ Array [
 ]
 `;
 
-exports[`worker assignDepConfigs(inputConfig, deps) handles package config 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles package config 1`] = `
 Array [
   Object {
     "config": Object {
@@ -88,7 +88,7 @@ Array [
 ]
 `;
 
-exports[`worker assignDepConfigs(inputConfig, deps) handles regex package pattern 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles regex package pattern 1`] = `
 Array [
   Object {
     "config": Object {
@@ -126,7 +126,7 @@ Array [
 ]
 `;
 
-exports[`worker assignDepConfigs(inputConfig, deps) handles regex wildcard package pattern 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles regex wildcard package pattern 1`] = `
 Array [
   Object {
     "config": Object {
@@ -161,7 +161,7 @@ Array [
 ]
 `;
 
-exports[`worker assignDepConfigs(inputConfig, deps) handles string deps 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles string deps 1`] = `
 Array [
   Object {
     "config": Object {
@@ -172,7 +172,7 @@ Array [
 ]
 `;
 
-exports[`worker assignDepConfigs(inputConfig, deps) nested package config overrides depType and general config 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) nested package config overrides depType and general config 1`] = `
 Array [
   Object {
     "config": Object {
@@ -184,7 +184,7 @@ Array [
 ]
 `;
 
-exports[`worker assignDepConfigs(inputConfig, deps) package config overrides depType and general config 1`] = `
+exports[`packageFileWorker assignDepConfigs(inputConfig, deps) package config overrides depType and general config 1`] = `
 Array [
   Object {
     "config": Object {
@@ -193,5 +193,23 @@ Array [
     "depName": "a",
     "depType": "dependencies",
   },
+]
+`;
+
+exports[`packageFileWorker processPackageFile(config) extracts dependencies for each depType 1`] = `
+Array [
+  Array [
+    Object {},
+    Array [
+      "dependencies",
+      "devDependencies",
+    ],
+  ],
+]
+`;
+
+exports[`packageFileWorker processPackageFile(config) filters dependencies 1`] = `
+Array [
+  "a",
 ]
 `;

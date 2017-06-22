@@ -1,5 +1,4 @@
 const argv = require('../_fixtures/config/argv');
-const should = require('chai').should();
 
 describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
@@ -150,23 +149,37 @@ describe('config/index', () => {
       expect(ghGot.mock.calls.length).toBe(1);
       expect(glGot.mock.calls.length).toBe(0);
     });
-    it('supports repositories in CLI', async () => {
-      const env = {};
-      defaultArgv = defaultArgv.concat(['--token=abc', 'foo']);
+    it('adds a log file', async () => {
+      const env = { GITHUB_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
+      defaultArgv = defaultArgv.concat(['--autodiscover']);
+      ghGot.mockImplementationOnce(() => ({
+        body: [],
+      }));
       await configParser.parseConfigs(env, defaultArgv);
-      const repos = configParser.getRepositories();
-      should.exist(repos);
-      repos.should.have.length(1);
-      repos[0].repository.should.eql('foo');
+      expect(ghGot.mock.calls.length).toBe(1);
+      expect(glGot.mock.calls.length).toBe(0);
     });
-    it('gets cascaded config', async () => {
-      const env = { RENOVATE_CONFIG_FILE: 'test/_fixtures/config/file.js' };
-      await configParser.parseConfigs(env, defaultArgv);
-      const repo = configParser.getRepositories().pop();
-      should.exist(repo);
-      const cascadedConfig = configParser.getCascadedConfig(repo, null);
-      should.exist(cascadedConfig.token);
-      should.exist(cascadedConfig.recreateClosed);
+  });
+  describe('.getRepoConfig(config, index)', () => {
+    let configParser;
+    beforeEach(() => {
+      configParser = require('../../lib/config/index.js');
+    });
+    const config = {
+      global: 'b',
+      repositories: [
+        'c/d',
+        {
+          repository: 'e/f',
+          repoField: 'g',
+        },
+      ],
+    };
+    it('massages string repos', () => {
+      expect(configParser.getRepoConfig(config, 0)).toMatchSnapshot();
+    });
+    it('handles object repos', () => {
+      expect(configParser.getRepoConfig(config, 1)).toMatchSnapshot();
     });
   });
 });

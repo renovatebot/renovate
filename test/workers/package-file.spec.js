@@ -1,81 +1,29 @@
-const worker = require('../lib/worker');
-const branchWorker = require('../lib/workers/branch');
-const prWorker = require('../lib/workers/pr');
-const defaultConfig = require('../lib/config/defaults').getConfig();
-const npmApi = require('../lib/api/npm');
-const versionsHelper = require('../lib/helpers/versions');
+const packageFileWorker = require('../../lib/workers/package-file');
+const npmApi = require('../../lib/api/npm');
+const versionsHelper = require('../../lib/helpers/versions');
+const packageJsonHelper = require('../../lib/helpers/package-json');
+const bunyan = require('bunyan');
 
-jest.mock('../lib/workers/branch');
-jest.mock('../lib/workers/pr');
-jest.mock('../lib/api/npm');
-jest.mock('../lib/helpers/versions');
+const logger = bunyan.createLogger({
+  name: 'test',
+  stream: process.stdout,
+  level: 'fatal',
+});
 
-describe('worker', () => {
-  describe('updateDependency(upgrade)', () => {
-    let config;
-    beforeEach(() => {
-      config = Object.assign({}, defaultConfig);
-      config.api = {
-        checkForClosedPr: jest.fn(),
-      };
-      branchWorker.ensureBranch = jest.fn();
-      prWorker.ensurePr = jest.fn();
-    });
-    it('returns immediately if closed PR found', async () => {
-      config.api.checkForClosedPr.mockReturnValue(true);
-      await worker.updateBranch([config]);
-      expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
-    });
-    it('does not return immediately if recreateClosed true', async () => {
-      config.api.checkForClosedPr.mockReturnValue(true);
-      config.recreateClosed = true;
-      await worker.updateBranch([config]);
-      expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
-    });
-    it('pins', async () => {
-      config.upgradeType = 'pin';
-      await worker.updateBranch([config]);
-      expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
-    });
-    it('majors', async () => {
-      config.upgradeType = 'major';
-      await worker.updateBranch([config]);
-      expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
-    });
-    it('minors', async () => {
-      config.upgradeType = 'minor';
-      await worker.updateBranch([config]);
-      expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
-    });
-    it('handles errors', async () => {
-      config.api.checkForClosedPr = jest.fn(() => {
-        throw new Error('oops');
-      });
-      await worker.updateBranch([config]);
-      expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
-    });
-  });
-  describe('processUpgrades(upgrades)', () => {
-    beforeEach(() => {
-      worker.updateBranch = jest.fn();
-    });
-    it('handles zero upgrades', async () => {
-      await worker.processUpgrades([]);
-      expect(worker.updateBranch.mock.calls.length).toBe(0);
-    });
-    it('handles non-zero upgrades', async () => {
-      await worker.processUpgrades([{ branchName: 'a' }, { branchName: 'b' }]);
-      expect(worker.updateBranch.mock.calls.length).toBe(2);
-    });
-  });
+jest.mock('../../lib/workers/branch');
+jest.mock('../../lib/workers/pr');
+jest.mock('../../lib/api/npm');
+jest.mock('../../lib/helpers/versions');
+
+describe('packageFileWorker', () => {
   describe('findUpgrades(dependencies, config)', () => {
     let config;
     beforeEach(() => {
       config = {};
-      worker.updateBranch = jest.fn();
+      packageFileWorker.updateBranch = jest.fn();
     });
     it('handles null', async () => {
-      const allUpgrades = await worker.findUpgrades([], config);
+      const allUpgrades = await packageFileWorker.findUpgrades([], config);
       expect(allUpgrades).toMatchObject([]);
     });
     it('handles one dep', async () => {
@@ -86,8 +34,20 @@ describe('worker', () => {
       const upgrade = { newVersion: '1.1.0' };
       npmApi.getDependency = jest.fn(() => ({}));
       versionsHelper.determineUpgrades = jest.fn(() => [upgrade]);
-      const allUpgrades = await worker.findUpgrades([dep], config);
+      const allUpgrades = await packageFileWorker.findUpgrades([dep], config);
       expect(allUpgrades).toMatchObject([Object.assign({}, dep, upgrade)]);
+    });
+    it('handles no return', async () => {
+      const dep = {
+        depName: 'foo',
+        currentVersion: '1.0.0',
+      };
+      const upgrade = { newVersion: '1.1.0' };
+      npmApi.getDependency = jest.fn(() => ({}));
+      npmApi.getDependency.mockReturnValueOnce(null);
+      versionsHelper.determineUpgrades = jest.fn(() => [upgrade]);
+      const allUpgrades = await packageFileWorker.findUpgrades([dep], config);
+      expect(allUpgrades).toMatchObject([]);
     });
     it('handles no upgrades', async () => {
       const dep = {
@@ -96,7 +56,7 @@ describe('worker', () => {
       };
       npmApi.getDependency = jest.fn(() => ({}));
       versionsHelper.determineUpgrades = jest.fn(() => []);
-      const allUpgrades = await worker.findUpgrades([dep], config);
+      const allUpgrades = await packageFileWorker.findUpgrades([dep], config);
       expect(allUpgrades).toMatchObject([]);
     });
   });
@@ -108,7 +68,7 @@ describe('worker', () => {
       deps = [];
     });
     it('handles empty deps', () => {
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchObject([]);
     });
     it('handles string deps', () => {
@@ -117,7 +77,7 @@ describe('worker', () => {
       deps.push({
         depName: 'a',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles multiple deps', () => {
@@ -128,7 +88,7 @@ describe('worker', () => {
       deps.push({
         depName: 'b',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles depType config without override', () => {
@@ -143,7 +103,7 @@ describe('worker', () => {
         depName: 'a',
         depType: 'dependencies',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles depType config with override', () => {
@@ -158,7 +118,7 @@ describe('worker', () => {
         depName: 'a',
         depType: 'dependencies',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles package config', () => {
@@ -172,7 +132,7 @@ describe('worker', () => {
       deps.push({
         depName: 'a',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('package config overrides depType and general config', () => {
@@ -193,7 +153,7 @@ describe('worker', () => {
         depName: 'a',
         depType: 'dependencies',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('nested package config overrides depType and general config', () => {
@@ -214,7 +174,7 @@ describe('worker', () => {
         depName: 'a',
         depType: 'dependencies',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles regex package pattern', () => {
@@ -237,7 +197,7 @@ describe('worker', () => {
       deps.push({
         depName: 'also-eslint',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles regex wildcard package pattern', () => {
@@ -260,7 +220,7 @@ describe('worker', () => {
       deps.push({
         depName: 'also-eslint',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
     it('handles non-regex package name', () => {
@@ -283,18 +243,24 @@ describe('worker', () => {
       deps.push({
         depName: 'also-eslint',
       });
-      const updatedDeps = worker.assignDepConfigs(config, deps);
+      const updatedDeps = packageFileWorker.assignDepConfigs(config, deps);
       expect(updatedDeps).toMatchSnapshot();
     });
   });
   describe('getDepTypeConfig(depTypes, depTypeName)', () => {
     it('handles empty depTypes', () => {
-      const depTypeConfig = worker.getDepTypeConfig([], 'dependencies');
+      const depTypeConfig = packageFileWorker.getDepTypeConfig(
+        [],
+        'dependencies'
+      );
       expect(depTypeConfig).toMatchObject({});
     });
     it('handles all strings', () => {
       const depTypes = ['dependencies', 'devDependencies'];
-      const depTypeConfig = worker.getDepTypeConfig(depTypes, 'dependencies');
+      const depTypeConfig = packageFileWorker.getDepTypeConfig(
+        depTypes,
+        'dependencies'
+      );
       expect(depTypeConfig).toMatchObject({});
     });
     it('handles missed object', () => {
@@ -305,7 +271,10 @@ describe('worker', () => {
           foo: 'bar',
         },
       ];
-      const depTypeConfig = worker.getDepTypeConfig(depTypes, 'dependencies');
+      const depTypeConfig = packageFileWorker.getDepTypeConfig(
+        depTypes,
+        'dependencies'
+      );
       expect(depTypeConfig).toMatchObject({});
     });
     it('handles hit object', () => {
@@ -316,11 +285,72 @@ describe('worker', () => {
         },
         'devDependencies',
       ];
-      const depTypeConfig = worker.getDepTypeConfig(depTypes, 'dependencies');
+      const depTypeConfig = packageFileWorker.getDepTypeConfig(
+        depTypes,
+        'dependencies'
+      );
       const expectedResult = {
         foo: 'bar',
       };
       expect(depTypeConfig).toMatchObject(expectedResult);
+    });
+  });
+  describe('processPackageFile(config)', () => {
+    let config;
+    beforeEach(() => {
+      packageFileWorker.assignDepConfigs = jest.fn(() => []);
+      packageFileWorker.findUpgrades = jest.fn(() => []);
+      packageJsonHelper.extractDependencies = jest.fn(() => []);
+      config = require('../../lib/config/defaults').getConfig();
+      config.api = {
+        getFileJson: jest.fn(() => ({})),
+      };
+      config.logger = logger;
+    });
+    it('returns empty array if no package content', async () => {
+      config.api.getFileJson.mockReturnValueOnce(null);
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns empty array if config disabled', async () => {
+      config.api.getFileJson.mockReturnValueOnce({
+        renovate: {
+          enabled: false,
+        },
+      });
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toEqual([]);
+    });
+    it('extracts dependencies for each depType', async () => {
+      config.depTypes = [
+        'dependencies',
+        {
+          depType: 'devDependencies',
+          foo: 'bar',
+        },
+      ];
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toEqual([]);
+      expect(
+        packageJsonHelper.extractDependencies.mock.calls
+      ).toMatchSnapshot();
+    });
+    it('filters dependencies', async () => {
+      packageJsonHelper.extractDependencies.mockReturnValueOnce([
+        {
+          depName: 'a',
+        },
+      ]);
+      packageFileWorker.assignDepConfigs.mockReturnValueOnce(['a']);
+      packageFileWorker.findUpgrades.mockReturnValueOnce(['a']);
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toHaveLength(1);
+      expect(res).toMatchSnapshot();
+    });
+    it('maintains yarn.lock', async () => {
+      config.maintainYarnLock = true;
+      const res = await packageFileWorker.processPackageFile(config);
+      expect(res).toHaveLength(1);
     });
   });
 });

@@ -4,3 +4,4 @@
 /coverage
 /dist
 .DS_Store
+*.log

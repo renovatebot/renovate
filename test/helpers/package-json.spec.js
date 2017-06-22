@@ -1,6 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const packageJson = require('../../lib/helpers/package-json');
+const bunyan = require('bunyan');
+
+const logger = bunyan.createLogger({
+  name: 'test',
+  stream: process.stdout,
+  level: 'fatal',
+});
 
 const defaultTypes = [
   'dependencies',
@@ -46,14 +53,15 @@ describe('helpers/package-json', () => {
       extractedDependencies.should.have.length(6);
     });
   });
-  describe('.setNewValue(currentFileContent, depType, depName, newVersion)', () => {
+  describe('.setNewValue(currentFileContent, depType, depName, newVersion, logger)', () => {
     it('replaces a dependency value', () => {
       const outputContent = readFixture('outputs/011.json');
       const testContent = packageJson.setNewValue(
         input01Content,
         'dependencies',
         'cheerio',
-        '0.22.1'
+        '0.22.1',
+        logger
       );
       testContent.should.equal(outputContent);
     });
@@ -63,7 +71,8 @@ describe('helpers/package-json', () => {
         input01Content,
         'devDependencies',
         'angular-touch',
-        '1.6.1'
+        '1.6.1',
+        logger
       );
       testContent.should.equal(outputContent);
     });
@@ -73,7 +82,8 @@ describe('helpers/package-json', () => {
         input01Content,
         'devDependencies',
         'angular-sanitize',
-        '1.6.1'
+        '1.6.1',
+        logger
       );
       testContent.should.equal(outputContent);
     });
@@ -82,7 +92,8 @@ describe('helpers/package-json', () => {
         input01Content,
         'devDependencies',
         'angular-touch',
-        '1.5.8'
+        '1.5.8',
+        logger
       );
       testContent.should.equal(input01Content);
     });
