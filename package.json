@@ -71,7 +71,7 @@
     "eslint": "4.0.0",
     "eslint-config-airbnb-base": "11.2.0",
     "eslint-config-prettier": "2.2.0",
-    "eslint-plugin-import": "2.5.0",
+    "eslint-plugin-import": "2.6.0",
     "eslint-plugin-prettier": "2.1.2",
     "eslint-plugin-promise": "3.5.0",
     "jest": "20.0.4",
