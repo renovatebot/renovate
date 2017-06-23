@@ -25,7 +25,7 @@ describe('workers/repository/onboarding', () => {
       expect(config.api.findPr.mock.calls.length).toBe(0);
     });
     it('returns complete if renovate onboarded', async () => {
-      config.renovateOnboarded = true;
+      config.renovateJsonPresent = true;
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual('complete');
       expect(config.api.findPr.mock.calls.length).toBe(0);

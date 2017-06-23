@@ -25,7 +25,7 @@ describe('workers/repository/merge-renovate-json', () => {
       config.api.getFileJson.mockReturnValueOnce({ foo: 1 });
       const returnConfig = await mergeRenovateJson(config);
       expect(returnConfig.foo).toBe(1);
-      expect(returnConfig.renovateOnboarded).toBe(true);
+      expect(returnConfig.renovateJsonPresent).toBe(true);
     });
   });
 });
