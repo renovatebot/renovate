@@ -60,13 +60,26 @@ describe('workers/repository/onboarding', () => {
       };
     });
     it('should commit files and create PR', async () => {
+      config.platform = 'github';
       await onboarding.onboardRepository(config);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(config.api.createPr.mock.calls.length).toBe(1);
+      expect(
+        config.api.createPr.mock.calls[0][2].indexOf('Pull Request')
+      ).not.toBe(-1);
+      expect(
+        config.api.createPr.mock.calls[0][2].indexOf('Merge Request')
+      ).toBe(-1);
     });
     it('should adapt for gitlab phrasing', async () => {
+      config.platform = 'gitlab';
       await onboarding.onboardRepository(config);
-      expect(config.api.createPr.mock.calls[0][0]).toMatchSnapshot();
+      expect(config.api.createPr.mock.calls[0][2].indexOf('Pull Request')).toBe(
+        -1
+      );
+      expect(
+        config.api.createPr.mock.calls[0][2].indexOf('Merge Request')
+      ).not.toBe(-1);
     });
   });
 });
