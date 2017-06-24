@@ -1,4 +1,5 @@
 const repositoryWorker = require('../../lib/workers/repository');
+const packageFileWorker = require('../../lib/workers/package-file');
 const logger = require('../_fixtures/logger');
 
 const githubApi = require('../../lib/api/github');
@@ -8,6 +9,7 @@ const npmApi = require('../../lib/api/npm');
 jest.mock('../../lib/api/github');
 jest.mock('../../lib/api/gitlab');
 jest.mock('../../lib/api/npm');
+jest.mock('../../lib/workers/package-file');
 
 describe('workers/repository', () => {
   describe('initApis(config)', () => {
@@ -155,5 +157,53 @@ describe('workers/repository', () => {
       expect(res).toMatchObject(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
+  });
+  describe('determineRepoUpgrades(config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        logger,
+      };
+    });
+    it('returns empty array if no packageFiles', async () => {
+      config.packageFiles = [];
+      const upgrades = await repositoryWorker.determineRepoUpgrades(config);
+      expect(upgrades.length).toBe(0);
+    });
+    it('returns empty array if none found', async () => {
+      config.packageFiles = [
+        'package.json',
+        {
+          packageFile: 'backend/package.json',
+        },
+      ];
+      packageFileWorker.processPackageFile.mockReturnValue([]);
+      const upgrades = await repositoryWorker.determineRepoUpgrades(config);
+      expect(upgrades.length).toBe(0);
+    });
+    it('returns array if upgrades found', async () => {
+      config.packageFiles = [
+        'package.json',
+        {
+          packageFile: 'backend/package.json',
+        },
+        {
+          fileName: 'frontend/package.json',
+        },
+      ];
+      packageFileWorker.processPackageFile.mockReturnValueOnce(['a']);
+      packageFileWorker.processPackageFile.mockReturnValueOnce(['b', 'c']);
+      const upgrades = await repositoryWorker.determineRepoUpgrades(config);
+      expect(upgrades.length).toBe(3);
+    });
+  });
+  describe('groupUpgradesByBranch(upgrades, logger)', () => {
+    // TODO
+  });
+  describe('updateBranchesSequentially(branchUpgrades, logger)', () => {
+    // TODO
+  });
+  describe('processRepo(repoConfig)', () => {
+    // TODO
   });
 });
