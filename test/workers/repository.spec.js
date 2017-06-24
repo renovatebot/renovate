@@ -1,7 +1,49 @@
 const repositoryWorker = require('../../lib/workers/repository');
 const logger = require('../_fixtures/logger');
 
+const githubApi = require('../../lib/api/github');
+const gitlabApi = require('../../lib/api/gitlab');
+const npmApi = require('../../lib/api/npm');
+
+jest.mock('../../lib/api/github');
+jest.mock('../../lib/api/gitlab');
+jest.mock('../../lib/api/npm');
+
 describe('workers/repository', () => {
+  describe('initApis(config)', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+    it('returns github api', async () => {
+      const config = { platform: 'github' };
+      const res = await repositoryWorker.initApis(config);
+      expect(res.platform).toEqual('github');
+      expect(githubApi.initRepo.mock.calls.length).toBe(1);
+      expect(gitlabApi.initRepo.mock.calls.length).toBe(0);
+      expect(npmApi.setNpmrc.mock.calls.length).toBe(1);
+    });
+    it('returns gitlab api', async () => {
+      const config = { platform: 'gitlab' };
+      const res = await repositoryWorker.initApis(config);
+      expect(res.platform).toEqual('gitlab');
+      expect(githubApi.initRepo.mock.calls.length).toBe(0);
+      expect(gitlabApi.initRepo.mock.calls.length).toBe(1);
+      expect(npmApi.setNpmrc.mock.calls.length).toBe(1);
+    });
+    it('throws if unknown platform', async () => {
+      const config = { platform: 'foo' };
+      let e;
+      try {
+        await repositoryWorker.initApis(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toMatchSnapshot();
+      expect(githubApi.initRepo.mock.calls.length).toBe(0);
+      expect(gitlabApi.initRepo.mock.calls.length).toBe(0);
+      expect(npmApi.setNpmrc.mock.calls.length).toBe(0);
+    });
+  });
   describe('mergeRenovateJson(config)', () => {
     let config;
     beforeEach(() => {
