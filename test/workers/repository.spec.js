@@ -64,6 +64,40 @@ describe('workers/repository', () => {
       expect(returnConfig.renovateJsonPresent).toBe(true);
     });
   });
+  describe('onboardRepository(config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        api: {
+          commitFilesToBranch: jest.fn(),
+          createPr: jest.fn(() => ({ displayNumber: 1 })),
+        },
+        logger,
+      };
+    });
+    it('should commit files and create PR', async () => {
+      config.platform = 'github';
+      await repositoryWorker.onboardRepository(config);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(config.api.createPr.mock.calls.length).toBe(1);
+      expect(
+        config.api.createPr.mock.calls[0][2].indexOf('Pull Request')
+      ).not.toBe(-1);
+      expect(
+        config.api.createPr.mock.calls[0][2].indexOf('Merge Request')
+      ).toBe(-1);
+    });
+    it('should adapt for gitlab phrasing', async () => {
+      config.platform = 'gitlab';
+      await repositoryWorker.onboardRepository(config);
+      expect(config.api.createPr.mock.calls[0][2].indexOf('Pull Request')).toBe(
+        -1
+      );
+      expect(
+        config.api.createPr.mock.calls[0][2].indexOf('Merge Request')
+      ).not.toBe(-1);
+    });
+  });
   describe('getOnboardingStatus(config)', () => {
     let config;
     beforeEach(() => {
@@ -106,38 +140,20 @@ describe('workers/repository', () => {
       expect(config.api.findPr.mock.calls.length).toBe(1);
     });
   });
-  describe('onboardRepository(config)', () => {
-    let config;
-    beforeEach(() => {
-      config = {
+  describe('detectPackageFiles(config)', () => {
+    it('adds package files to object', async () => {
+      const config = {
         api: {
-          commitFilesToBranch: jest.fn(),
-          createPr: jest.fn(() => ({ displayNumber: 1 })),
+          findFilePaths: jest.fn(() => [
+            'package.json',
+            'backend/package.json',
+          ]),
         },
         logger,
       };
-    });
-    it('should commit files and create PR', async () => {
-      config.platform = 'github';
-      await repositoryWorker.onboardRepository(config);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(config.api.createPr.mock.calls.length).toBe(1);
-      expect(
-        config.api.createPr.mock.calls[0][2].indexOf('Pull Request')
-      ).not.toBe(-1);
-      expect(
-        config.api.createPr.mock.calls[0][2].indexOf('Merge Request')
-      ).toBe(-1);
-    });
-    it('should adapt for gitlab phrasing', async () => {
-      config.platform = 'gitlab';
-      await repositoryWorker.onboardRepository(config);
-      expect(config.api.createPr.mock.calls[0][2].indexOf('Pull Request')).toBe(
-        -1
-      );
-      expect(
-        config.api.createPr.mock.calls[0][2].indexOf('Merge Request')
-      ).not.toBe(-1);
+      const res = await repositoryWorker.detectPackageFiles(config);
+      expect(res).toMatchObject(config);
+      expect(res.packageFiles).toMatchSnapshot();
     });
   });
 });

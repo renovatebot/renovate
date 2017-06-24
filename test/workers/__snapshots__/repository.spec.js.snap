@@ -1,3 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository detectPackageFiles(config) adds package files to object 1`] = `
+Array [
+  "package.json",
+  "backend/package.json",
+]
+`;
+
 exports[`workers/repository initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
