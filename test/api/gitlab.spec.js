@@ -414,4 +414,18 @@ describe('api/gitlab', () => {
       expect(pr).toMatchSnapshot();
     });
   });
+  describe('updatePr(prNo, title, body)', () => {
+    jest.resetAllMocks();
+    it('updates the PR', async () => {
+      await gitlab.updatePr();
+      expect(glGot.put.mock.calls.length).toEqual(1);
+    });
+  });
+  describe('mergePr(pr)', () => {
+    jest.resetAllMocks();
+    it('merges the PR', async () => {
+      await gitlab.mergePr({ number: 1 });
+      expect(glGot.put.mock.calls.length).toEqual(1);
+    });
+  });
 });
