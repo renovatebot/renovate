@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/workers/index processes repositories 1`] = `
+Array [
+  Array [
+    Object {
+      "foo": 1,
+      "repositories": Array [
+        "a",
+        "b",
+      ],
+    },
+    0,
+  ],
+  Array [
+    Object {
+      "foo": 1,
+      "repositories": Array [
+        "a",
+        "b",
+      ],
+    },
+    1,
+  ],
+]
+`;
