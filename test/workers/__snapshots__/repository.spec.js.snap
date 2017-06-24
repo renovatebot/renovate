@@ -51,6 +51,36 @@ Object {
 }
 `;
 
+exports[`workers/repository groupUpgradesByBranch(upgrades, logger) groups if same compiled group name 1`] = `
+Object {
+  "foo": Array [
+    Object {
+      "branchName": "foo",
+      "version": "2.0.0",
+    },
+  ],
+  "renovate/my-group": Array [
+    Object {
+      "branchName": "bar-{{version}}",
+      "commitMessage": undefined,
+      "groupBranchName": "renovate/my-group",
+      "groupName": "My Group",
+      "groupSlug": "my-group",
+      "prBody": undefined,
+      "prTitle": undefined,
+      "version": "1.1.0",
+    },
+    Object {
+      "branchName": "foo",
+      "groupBranchName": "renovate/{{groupSlug}}",
+      "groupName": "My Group",
+      "groupSlug": "my-group",
+      "version": "1.1.0",
+    },
+  ],
+}
+`;
+
 exports[`workers/repository groupUpgradesByBranch(upgrades, logger) returns one branch if one input 1`] = `
 Object {
   "foo-1.1.0": Array [
