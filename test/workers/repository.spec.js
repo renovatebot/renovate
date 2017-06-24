@@ -238,6 +238,28 @@ describe('workers/repository', () => {
       expect(Object.keys(res).length).toBe(3);
       expect(res).toMatchSnapshot();
     });
+    it('groups if same compiled branch names', async () => {
+      const upgrades = [
+        {
+          branchName: 'foo',
+          version: '1.1.0',
+        },
+        {
+          branchName: 'foo',
+          version: '2.0.0',
+        },
+        {
+          branchName: 'bar-{{version}}',
+          version: '1.1.0',
+        },
+      ];
+      const res = await repositoryWorker.groupUpgradesByBranch(
+        upgrades,
+        logger
+      );
+      expect(Object.keys(res).length).toBe(2);
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('updateBranchesSequentially(branchUpgrades, logger)', () => {
     // TODO

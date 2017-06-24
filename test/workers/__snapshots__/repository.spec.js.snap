@@ -30,6 +30,27 @@ Object {
 }
 `;
 
+exports[`workers/repository groupUpgradesByBranch(upgrades, logger) groups if same compiled branch names 1`] = `
+Object {
+  "bar-1.1.0": Array [
+    Object {
+      "branchName": "bar-{{version}}",
+      "version": "1.1.0",
+    },
+  ],
+  "foo": Array [
+    Object {
+      "branchName": "foo",
+      "version": "2.0.0",
+    },
+    Object {
+      "branchName": "foo",
+      "version": "1.1.0",
+    },
+  ],
+}
+`;
+
 exports[`workers/repository groupUpgradesByBranch(upgrades, logger) returns one branch if one input 1`] = `
 Object {
   "foo-1.1.0": Array [
