@@ -198,7 +198,46 @@ describe('workers/repository', () => {
     });
   });
   describe('groupUpgradesByBranch(upgrades, logger)', () => {
-    // TODO
+    it('returns empty object if no input array', async () => {
+      const res = await repositoryWorker.groupUpgradesByBranch([], logger);
+      expect(res).toEqual({});
+    });
+    it('returns one branch if one input', async () => {
+      const upgrades = [
+        {
+          branchName: 'foo-{{version}}',
+          version: '1.1.0',
+        },
+      ];
+      const res = await repositoryWorker.groupUpgradesByBranch(
+        upgrades,
+        logger
+      );
+      expect(Object.keys(res).length).toBe(1);
+      expect(res).toMatchSnapshot();
+    });
+    it('does not group if different compiled branch names', async () => {
+      const upgrades = [
+        {
+          branchName: 'foo-{{version}}',
+          version: '1.1.0',
+        },
+        {
+          branchName: 'foo-{{version}}',
+          version: '2.0.0',
+        },
+        {
+          branchName: 'bar-{{version}}',
+          version: '1.1.0',
+        },
+      ];
+      const res = await repositoryWorker.groupUpgradesByBranch(
+        upgrades,
+        logger
+      );
+      expect(Object.keys(res).length).toBe(3);
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('updateBranchesSequentially(branchUpgrades, logger)', () => {
     // TODO
