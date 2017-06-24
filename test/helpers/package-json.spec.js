@@ -1,13 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const packageJson = require('../../lib/helpers/package-json');
-const bunyan = require('bunyan');
-
-const logger = bunyan.createLogger({
-  name: 'test',
-  stream: process.stdout,
-  level: 'fatal',
-});
+const logger = require('../_fixtures/logger');
 
 const defaultTypes = [
   'dependencies',

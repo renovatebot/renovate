@@ -2,13 +2,7 @@ const packageFileWorker = require('../../lib/workers/package-file');
 const npmApi = require('../../lib/api/npm');
 const versionsHelper = require('../../lib/helpers/versions');
 const packageJsonHelper = require('../../lib/helpers/package-json');
-const bunyan = require('bunyan');
-
-const logger = bunyan.createLogger({
-  name: 'test',
-  stream: process.stdout,
-  level: 'fatal',
-});
+const logger = require('../_fixtures/logger');
 
 jest.mock('../../lib/workers/branch');
 jest.mock('../../lib/workers/pr');

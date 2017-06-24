@@ -1,11 +1,5 @@
 const mergeRenovateJson = require('../../../lib/workers/repository/merge-renovate-json');
-const bunyan = require('bunyan');
-
-const logger = bunyan.createLogger({
-  name: 'test',
-  stream: process.stdout,
-  level: 'fatal',
-});
+const logger = require('../../_fixtures/logger');
 
 describe('workers/repository/merge-renovate-json', () => {
   describe('mergeRenovateJson(config)', () => {

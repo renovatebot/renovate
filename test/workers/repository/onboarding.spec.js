@@ -1,11 +1,7 @@
 const onboarding = require('../../../lib/workers/repository/onboarding');
-const bunyan = require('bunyan');
+const logger = require('../../_fixtures/logger');
 
-const logger = bunyan.createLogger({
-  name: 'test',
-  stream: process.stdout,
-  level: 'fatal',
-});
+jest.mock('../../../lib/api/github');
 
 describe('workers/repository/onboarding', () => {
   describe('getOnboardingStatus(config)', () => {
@@ -13,38 +9,40 @@ describe('workers/repository/onboarding', () => {
     beforeEach(() => {
       config = {
         api: {
+          commitFilesToBranch: jest.fn(),
+          createPr: jest.fn(() => ({ displayNumber: 1 })),
           findPr: jest.fn(),
         },
         logger,
       };
     });
-    it('returns complete if onboarding is false', async () => {
+    it('returns true if onboarding is false', async () => {
       config.onboarding = false;
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual('complete');
+      expect(res).toEqual(true);
       expect(config.api.findPr.mock.calls.length).toBe(0);
     });
     it('returns complete if renovate onboarded', async () => {
       config.renovateJsonPresent = true;
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual('complete');
+      expect(res).toEqual(true);
       expect(config.api.findPr.mock.calls.length).toBe(0);
     });
     it('returns complete if pr and pr is closed', async () => {
       config.api.findPr.mockReturnValueOnce({ isClosed: true });
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual('complete');
+      expect(res).toEqual(true);
       expect(config.api.findPr.mock.calls.length).toBe(1);
     });
     it('returns in progres if pr and pr is not closed', async () => {
       config.api.findPr.mockReturnValueOnce({});
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual('in progress');
+      expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
     });
     it('returns none if no pr', async () => {
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual('none');
+      expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
     });
   });
