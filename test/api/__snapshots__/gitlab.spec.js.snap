@@ -106,6 +106,17 @@ Object {
 }
 `;
 
+exports[`api/gitlab getPr(prNo) returns the PR 1`] = `
+Object {
+  "body": "a merge request",
+  "description": "a merge request",
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "number": 12345,
+}
+`;
+
 exports[`api/gitlab getRepos should return an array of repos 1`] = `
 Array [
   Array [

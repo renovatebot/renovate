@@ -394,4 +394,17 @@ describe('api/gitlab', () => {
       expect(glGot.post.mock.calls).toMatchSnapshot();
     });
   });
+  describe('getPr(prNo)', () => {
+    it('returns the PR', async () => {
+      glGot.mockReturnValueOnce({
+        body: {
+          id: 1,
+          iid: 12345,
+          description: 'a merge request',
+        },
+      });
+      const pr = await gitlab.getPr(12345);
+      expect(pr).toMatchSnapshot();
+    });
+  });
 });
