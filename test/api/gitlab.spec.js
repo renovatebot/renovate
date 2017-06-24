@@ -494,4 +494,26 @@ describe('api/gitlab', () => {
       expect(res).toBe(null);
     });
   });
+  describe('createFile(branchName, filePath, fileContents, message)', () => {
+    it('creates file with v4', async () => {
+      await gitlab.createFile('some-branch', 'some-path', 'some-contents', 'some-message');
+      expect(glGot.post.mock.calls).toMatchSnapshot();
+      expect(glGot.post.mock.calls[0][1].body.file_path).not.toBeDefined();
+    });
+    it('creates file with v3', async () => {
+      glGot.mockReturnValueOnce({
+        body: {},
+      });
+      glGot.mockReturnValueOnce({
+        body: {},
+      });
+      glGot.mockReturnValueOnce({
+        body: {},
+      });
+      await gitlab.initRepo('some-repo', 'some-token');
+      await gitlab.createFile('some-branch', 'some-path', 'some-contents', 'some-message');
+      expect(glGot.post.mock.calls).toMatchSnapshot();
+      expect(glGot.post.mock.calls[0][1].body.file_path).toBeDefined();
+    });
+  });
 });

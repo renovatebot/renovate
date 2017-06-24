@@ -24,6 +24,39 @@ Array [
 ]
 `;
 
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) creates file with v3 1`] = `
+Array [
+  Array [
+    "projects/some-repo/repository/files",
+    Object {
+      "body": Object {
+        "branch_name": "some-branch",
+        "commit_message": "some-message",
+        "content": "c29tZS1jb250ZW50cw==",
+        "encoding": "base64",
+        "file_path": "some-path",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) creates file with v4 1`] = `
+Array [
+  Array [
+    "projects/undefined/repository/files/some-path",
+    Object {
+      "body": Object {
+        "branch": "some-branch",
+        "commit_message": "some-message",
+        "content": "c29tZS1jb250ZW50cw==",
+        "encoding": "base64",
+      },
+    },
+  ],
+]
+`;
+
 exports[`api/gitlab createPr(branchName, title, body) returns the PR 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
