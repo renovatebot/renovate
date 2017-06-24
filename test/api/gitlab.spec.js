@@ -243,6 +243,45 @@ describe('api/gitlab', () => {
       expect(pr).toMatchSnapshot();
     });
   });
+  describe('getBranchStatus(branchName)', () => {
+    beforeEach(() => {
+      glGot.mockReturnValueOnce({
+        body: {
+          commit: {
+            id: 1,
+          },
+        },
+      });
+    });
+    it('returns pending if no results', async () => {
+      glGot.mockReturnValueOnce({
+        body: [],
+      });
+      const res = await gitlab.getBranchStatus('some-branch');
+      expect(res).toEqual('pending');
+    });
+    it('returns success if all are success', async () => {
+      glGot.mockReturnValueOnce({
+        body: [{ status: 'success' }, { status: 'success' }],
+      });
+      const res = await gitlab.getBranchStatus('some-branch');
+      expect(res).toEqual('success');
+    });
+    it('returns failure if any are failed', async () => {
+      glGot.mockReturnValueOnce({
+        body: [{ status: 'success' }, { status: 'failed' }],
+      });
+      const res = await gitlab.getBranchStatus('some-branch');
+      expect(res).toEqual('failure');
+    });
+    it('returns custom statuses', async () => {
+      glGot.mockReturnValueOnce({
+        body: [{ status: 'success' }, { status: 'foo' }],
+      });
+      const res = await gitlab.getBranchStatus('some-branch');
+      expect(res).toEqual('foo');
+    });
+  });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       glGot.delete = jest.fn();
@@ -315,6 +354,31 @@ describe('api/gitlab', () => {
       });
       const pr = await gitlab.findPr('some-branch');
       expect(pr.number).toBe(2);
+    });
+  });
+  describe('checkForClosedPr(branchName, prTitle)', () => {
+    it('returns true if pr exists', async () => {
+      glGot.mockReturnValueOnce({
+        body: [
+          {
+            source_branch: 'some-branch',
+            id: 1,
+          },
+          {
+            source_branch: 'some-branch',
+            id: 2,
+          },
+        ],
+      });
+      const res = await gitlab.checkForClosedPr('some-branch');
+      expect(res).toBe(true);
+    });
+    it('returns false if pr does not exist', async () => {
+      glGot.mockReturnValueOnce({
+        body: [],
+      });
+      const res = await gitlab.checkForClosedPr('some-branch');
+      expect(res).toBe(false);
     });
   });
 });
