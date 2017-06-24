@@ -68,7 +68,7 @@
     "babel-jest": "20.0.3",
     "babel-plugin-transform-async-to-generator": "6.24.1",
     "chai": "4.0.2",
-    "eslint": "4.0.0",
+    "eslint": "4.1.0",
     "eslint-config-airbnb-base": "11.2.0",
     "eslint-config-prettier": "2.2.0",
     "eslint-plugin-import": "2.6.0",
