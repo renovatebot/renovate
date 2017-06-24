@@ -461,4 +461,30 @@ describe('api/gitlab', () => {
       expect(glGot.mock.calls[3][0].indexOf('file_path')).not.toBe(-1);
     });
   });
+  describe('getFileContent(filePath, branchName)', () => {
+    it('gets the file', async () => {
+      glGot.mockReturnValueOnce({
+        body: {
+          content: 'foo',
+        },
+      });
+      const res = await gitlab.getFileContent('some-path', 'some-branch');
+      expect(res).toMatchSnapshot();
+    });
+    it('returns null for 404', async () => {
+      glGot.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
+      const res = await gitlab.getFileContent('some-path', 'some-branch');
+      expect(res).toBe(null);
+    });
+    it('throws error for non-404', async () => {
+      glGot.mockImplementationOnce(() => Promise.reject({ statusCode: 403 }));
+      let e;
+      try {
+        await gitlab.getFileContent('some-path', 'some-branch');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+    });
+  });
 });

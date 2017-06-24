@@ -119,6 +119,14 @@ exports[`api/gitlab getFile(filePath, branchName) gets the file with v3 2`] = `"
 
 exports[`api/gitlab getFile(filePath, branchName) gets the file with v4 by default 1`] = `"foo"`;
 
+exports[`api/gitlab getFileContent(filePath, branchName) gets the file 1`] = `"~�"`;
+
+exports[`api/gitlab getFileContent(filePath, branchName) throws error for non-404 1`] = `
+Object {
+  "statusCode": 403,
+}
+`;
+
 exports[`api/gitlab getPr(prNo) returns the PR 1`] = `
 Object {
   "body": "a merge request",
