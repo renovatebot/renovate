@@ -428,4 +428,37 @@ describe('api/gitlab', () => {
       expect(glGot.put.mock.calls.length).toEqual(1);
     });
   });
+  describe('getFile(filePath, branchName)', () => {
+    it('gets the file with v4 by default', async () => {
+      glGot.mockReturnValueOnce({
+        body: {
+          content: 'foo',
+        },
+      });
+      const res = await gitlab.getFile('some-path', 'some-branch');
+      expect(res).toMatchSnapshot();
+      expect(glGot.mock.calls[0][0].indexOf('file_path')).toBe(-1);
+    });
+    it('gets the file with v3', async () => {
+      glGot.mockReturnValueOnce({
+        body: {},
+      });
+      glGot.mockReturnValueOnce({
+        body: {},
+      });
+      glGot.mockReturnValueOnce({
+        body: {},
+      });
+      glGot.mockReturnValueOnce({
+        body: {
+          content: 'foo',
+        },
+      });
+      const config = await gitlab.initRepo('some-repo', 'some-token');
+      expect(config).toMatchSnapshot();
+      const res = await gitlab.getFile('some-path', 'some-branch');
+      expect(res).toMatchSnapshot();
+      expect(glGot.mock.calls[3][0].indexOf('file_path')).not.toBe(-1);
+    });
+  });
 });

@@ -106,6 +106,19 @@ Object {
 }
 `;
 
+exports[`api/gitlab getFile(filePath, branchName) gets the file with v3 1`] = `
+Object {
+  "apiVersion": "v3",
+  "defaultBranch": undefined,
+  "email": undefined,
+  "repoName": "some-repo",
+}
+`;
+
+exports[`api/gitlab getFile(filePath, branchName) gets the file with v3 2`] = `"foo"`;
+
+exports[`api/gitlab getFile(filePath, branchName) gets the file with v4 by default 1`] = `"foo"`;
+
 exports[`api/gitlab getPr(prNo) returns the PR 1`] = `
 Object {
   "body": "a merge request",
