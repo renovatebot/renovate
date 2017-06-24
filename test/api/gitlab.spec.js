@@ -496,7 +496,12 @@ describe('api/gitlab', () => {
   });
   describe('createFile(branchName, filePath, fileContents, message)', () => {
     it('creates file with v4', async () => {
-      await gitlab.createFile('some-branch', 'some-path', 'some-contents', 'some-message');
+      await gitlab.createFile(
+        'some-branch',
+        'some-path',
+        'some-contents',
+        'some-message'
+      );
       expect(glGot.post.mock.calls).toMatchSnapshot();
       expect(glGot.post.mock.calls[0][1].body.file_path).not.toBeDefined();
     });
@@ -511,9 +516,46 @@ describe('api/gitlab', () => {
         body: {},
       });
       await gitlab.initRepo('some-repo', 'some-token');
-      await gitlab.createFile('some-branch', 'some-path', 'some-contents', 'some-message');
+      await gitlab.createFile(
+        'some-branch',
+        'some-path',
+        'some-contents',
+        'some-message'
+      );
       expect(glGot.post.mock.calls).toMatchSnapshot();
       expect(glGot.post.mock.calls[0][1].body.file_path).toBeDefined();
+    });
+    describe('updateFile(branchName, filePath, fileContents, message)', () => {
+      it('creates file with v4', async () => {
+        await gitlab.updateFile(
+          'some-branch',
+          'some-path',
+          'some-contents',
+          'some-message'
+        );
+        expect(glGot.put.mock.calls).toMatchSnapshot();
+        expect(glGot.put.mock.calls[0][1].body.file_path).not.toBeDefined();
+      });
+      it('creates file with v3', async () => {
+        glGot.mockReturnValueOnce({
+          body: {},
+        });
+        glGot.mockReturnValueOnce({
+          body: {},
+        });
+        glGot.mockReturnValueOnce({
+          body: {},
+        });
+        await gitlab.initRepo('some-repo', 'some-token');
+        await gitlab.updateFile(
+          'some-branch',
+          'some-path',
+          'some-contents',
+          'some-message'
+        );
+        expect(glGot.put.mock.calls).toMatchSnapshot();
+        expect(glGot.put.mock.calls[0][1].body.file_path).toBeDefined();
+      });
     });
   });
 });
