@@ -1,5 +1,85 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`api/gitlab addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42?assignee_id=someuser",
+  ],
+]
+`;
+
+exports[`api/gitlab addAssignees(issueNo, assignees) should log error if more than one assignee 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42?assignee_id=someuser",
+  ],
+]
+`;
+
+exports[`api/gitlab addLabels(issueNo, labels) should add the given labels to the issue 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42?labels=foo,bar",
+  ],
+]
+`;
+
+exports[`api/gitlab getBranch returns a branch 1`] = `"foo"`;
+
+exports[`api/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
+Array [
+  Array [
+    "projects/owned",
+  ],
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?state=opened",
+  ],
+]
+`;
+
+exports[`api/gitlab getBranchPr(branchName) should return the PR object 1`] = `
+Array [
+  Array [
+    "projects/owned",
+  ],
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?state=opened",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests/undefined",
+  ],
+  Array [
+    "projects/some%2Frepo/repository/branches/undefined",
+  ],
+]
+`;
+
+exports[`api/gitlab getBranchPr(branchName) should return the PR object 2`] = `
+Object {
+  "additions": 1,
+  "base": Object {
+    "sha": "1234",
+  },
+  "body": undefined,
+  "commits": 1,
+  "deletions": 1,
+  "displayNumber": "Merge Request #undefined",
+  "number": undefined,
+}
+`;
+
 exports[`api/gitlab getRepos should return an array of repos 1`] = `
 Array [
   Array [

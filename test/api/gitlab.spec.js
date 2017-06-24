@@ -198,4 +198,123 @@ describe('api/gitlab', () => {
       expect(e.statusCode).toBe(500);
     });
   });
+  describe('getBranch', () => {
+    it('returns a branch', async () => {
+      glGot.mockReturnValueOnce({ body: 'foo' });
+      const branch = await gitlab.getBranch('branch-name');
+      expect(branch).toMatchSnapshot();
+    });
+    it('nulls on error', async () => {
+      glGot.mockImplementationOnce(() => {
+        throw new Error('not found');
+      });
+      const branch = await gitlab.getBranch('branch-name');
+      expect(branch).toBe(null);
+    });
+  });
+  describe('getBranchPr(branchName)', () => {
+    it('should return null if no PR exists', async () => {
+      await initRepo('some/repo', 'token');
+      glGot.mockImplementationOnce(() => ({
+        body: [],
+      }));
+      const pr = await gitlab.getBranchPr('somebranch');
+      expect(glGot.mock.calls).toMatchSnapshot();
+      expect(pr).toBe(null);
+    });
+    it('should return the PR object', async () => {
+      await initRepo('some/repo', 'token');
+      glGot.mockImplementationOnce(() => ({
+        body: [{ number: 91, source_branch: 'somebranch' }],
+      }));
+      glGot.mockImplementationOnce(() => ({
+        body: {
+          number: 91,
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          base: {
+            sha: '1234',
+          },
+        },
+      }));
+      const pr = await gitlab.getBranchPr('somebranch');
+      expect(glGot.mock.calls).toMatchSnapshot();
+      expect(pr).toMatchSnapshot();
+    });
+  });
+  describe('deleteBranch(branchName)', () => {
+    it('should send delete', async () => {
+      glGot.delete = jest.fn();
+      await gitlab.deleteBranch('some-branch');
+      expect(glGot.delete.mock.calls.length).toBe(1);
+    });
+  });
+  describe('addAssignees(issueNo, assignees)', () => {
+    it('should add the given assignees to the issue', async () => {
+      await initRepo('some/repo', 'token');
+      await gitlab.addAssignees(42, ['someuser']);
+      expect(glGot.put.mock.calls).toMatchSnapshot();
+    });
+    it('should log error if more than one assignee', async () => {
+      await initRepo('some/repo', 'token');
+      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
+      expect(glGot.put.mock.calls).toMatchSnapshot();
+    });
+  });
+  describe('addReviewers(issueNo, reviewers)', () => {
+    it('should add the given reviewers to the PR', async () => {
+      await initRepo('some/repo', 'token');
+      await gitlab.addReviewers(42, ['someuser', 'someotheruser']);
+    });
+  });
+  describe('addLabels(issueNo, labels)', () => {
+    it('should add the given labels to the issue', async () => {
+      await initRepo('some/repo', 'token');
+      await gitlab.addLabels(42, ['foo', 'bar']);
+      expect(glGot.put.mock.calls).toMatchSnapshot();
+    });
+  });
+  describe('findPr(branchName, prTitle, state)', () => {
+    it('returns null if no results', async () => {
+      glGot.mockReturnValueOnce({
+        body: [],
+      });
+      const pr = await gitlab.findPr('some-branch');
+      expect(pr).toBe(null);
+    });
+    it('returns null if no matching titles', async () => {
+      glGot.mockReturnValueOnce({
+        body: [
+          {
+            source_branch: 'some-branch',
+            id: 1,
+          },
+          {
+            source_branch: 'some-branch',
+            id: 2,
+            title: 'foo',
+          },
+        ],
+      });
+      const pr = await gitlab.findPr('some-branch', 'some-title');
+      expect(pr).toBe(null);
+    });
+    it('returns last result if multiple match', async () => {
+      glGot.mockReturnValueOnce({
+        body: [
+          {
+            source_branch: 'some-branch',
+            id: 1,
+          },
+          {
+            source_branch: 'some-branch',
+            id: 2,
+          },
+        ],
+      });
+      const pr = await gitlab.findPr('some-branch');
+      expect(pr.number).toBe(2);
+    });
+  });
 });
