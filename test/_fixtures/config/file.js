@@ -11,7 +11,7 @@ module.exports = {
       repository: 'singapore/renovate',
       packageFiles: [
         {
-          fileName: 'package.json',
+          packageFile: 'package.json',
           labels: ['a'],
         },
       ],

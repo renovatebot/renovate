@@ -32,7 +32,7 @@ module.exports = {
       packageFiles: [
         'package.json',
         {
-          fileName: 'frontend/package.json',
+          packageFile: 'frontend/package.json',
           labels: ['upgrade', 'frontend']
         },
       ],
