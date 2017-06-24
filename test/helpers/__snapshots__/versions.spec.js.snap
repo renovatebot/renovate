@@ -45,6 +45,7 @@ Array [
 exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) pins minor ranged versions 1`] = `
 Array [
   Object {
+    "isPin": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "upgradeType": "pin",
@@ -149,6 +150,7 @@ Array [
 exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports future versions if already future 1`] = `
 Array [
   Object {
+    "isPin": true,
     "newVersion": "2.0.3",
     "newVersionMajor": 2,
     "upgradeType": "pin",
