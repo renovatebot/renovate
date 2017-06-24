@@ -24,6 +24,32 @@ Array [
 ]
 `;
 
+exports[`api/gitlab createPr(branchName, title, body) returns the PR 1`] = `
+Object {
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "number": 1,
+}
+`;
+
+exports[`api/gitlab createPr(branchName, title, body) returns the PR 2`] = `
+Array [
+  Array [
+    "projects/undefined/merge_requests",
+    Object {
+      "body": Object {
+        "description": "the-body",
+        "remove_source_branch": true,
+        "source_branch": "some-branch",
+        "target_branch": undefined,
+        "title": "some-title",
+      },
+    },
+  ],
+]
+`;
+
 exports[`api/gitlab getBranch returns a branch 1`] = `"foo"`;
 
 exports[`api/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
