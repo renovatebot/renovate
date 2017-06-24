@@ -365,4 +365,47 @@ describe('workers/branch', () => {
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
   });
+  describe('removeStandaloneBranches(upgrades)', () => {
+    it('deletes standalone branch names', async () => {
+      const api = {
+        deleteBranch: jest.fn(),
+      };
+      const upgrades = [
+        {
+          branchName: 'foo',
+          groupBranchName: 'what',
+          api,
+          logger,
+        },
+        {
+          branchName: 'bar',
+          groupBranchName: 'what',
+          api,
+          logger,
+        },
+      ];
+      await branchWorker.removeStandaloneBranches(upgrades);
+      expect(upgrades).toMatchSnapshot();
+    });
+    it('handles errors', async () => {
+      const upgrades = [
+        {
+          branchName: 'foo',
+          api: {
+            deleteBranch: jest.fn(() => {
+              throw new Error('deletion error');
+            }),
+          },
+          logger,
+        },
+        {
+          branchName: 'bar',
+          groupBranchName: 'what',
+          api: null,
+          logger,
+        },
+      ];
+      await branchWorker.removeStandaloneBranches(upgrades);
+    });
+  });
 });

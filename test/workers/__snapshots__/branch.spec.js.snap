@@ -41,3 +41,40 @@ Object {
   ],
 }
 `;
+
+exports[`workers/branch removeStandaloneBranches(upgrades) deletes standalone branch names 1`] = `
+Array [
+  Object {
+    "api": Object {
+      "deleteBranch": [Function],
+    },
+    "branchName": "what",
+    "groupBranchName": "what",
+    "logger": Object {
+      "child": [Function],
+      "debug": [Function],
+      "error": [Function],
+      "fatal": [Function],
+      "info": [Function],
+      "trace": [Function],
+      "warn": [Function],
+    },
+  },
+  Object {
+    "api": Object {
+      "deleteBranch": [Function],
+    },
+    "branchName": "what",
+    "groupBranchName": "what",
+    "logger": Object {
+      "child": [Function],
+      "debug": [Function],
+      "error": [Function],
+      "fatal": [Function],
+      "info": [Function],
+      "trace": [Function],
+      "warn": [Function],
+    },
+  },
+]
+`;
