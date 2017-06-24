@@ -1,5 +1,6 @@
 const repositoryWorker = require('../../lib/workers/repository');
 const packageFileWorker = require('../../lib/workers/package-file');
+const branchWorker = require('../../lib/workers/branch');
 const logger = require('../_fixtures/logger');
 
 const githubApi = require('../../lib/api/github');
@@ -9,6 +10,7 @@ const npmApi = require('../../lib/api/npm');
 jest.mock('../../lib/api/github');
 jest.mock('../../lib/api/gitlab');
 jest.mock('../../lib/api/npm');
+jest.mock('../../lib/workers/branch');
 jest.mock('../../lib/workers/package-file');
 
 describe('workers/repository', () => {
@@ -288,7 +290,22 @@ describe('workers/repository', () => {
     });
   });
   describe('updateBranchesSequentially(branchUpgrades, logger)', () => {
-    // TODO
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+    it('handles empty case', async () => {
+      await repositoryWorker.updateBranchesSequentially({}, logger);
+      expect(branchWorker.updateBranch.mock.calls.length).toBe(0);
+    });
+    it('updates branches', async () => {
+      const branchUpgrades = {
+        foo: {},
+        bar: {},
+        baz: {},
+      };
+      await repositoryWorker.updateBranchesSequentially(branchUpgrades, logger);
+      expect(branchWorker.updateBranch.mock.calls.length).toBe(3);
+    });
   });
   describe('processRepo(repoConfig)', () => {
     // TODO
