@@ -401,6 +401,13 @@ describe('api/gitlab', () => {
           id: 1,
           iid: 12345,
           description: 'a merge request',
+          state: 'merged',
+          merge_status: 'cannot_be_merged',
+        },
+      });
+      glGot.mockReturnValueOnce({
+        body: {
+          commit: {},
         },
       });
       const pr = await gitlab.getPr(12345);
