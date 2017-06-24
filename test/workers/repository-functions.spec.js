@@ -14,6 +14,36 @@ jest.mock('../../lib/workers/branch');
 jest.mock('../../lib/workers/package-file');
 
 describe('workers/repository', () => {
+  describe('setNpmrc(config)', () => {
+    it('Skips if npmrc not found', async () => {
+      const config = {
+        api: {
+          getFileContent: jest.fn(),
+        },
+      };
+      await repositoryWorker.setNpmrc(config);
+    });
+    it('Parses if npmrc found', async () => {
+      const config = {
+        api: {
+          getFileContent: jest.fn(() => 'a = b'),
+        },
+        logger,
+      };
+      await repositoryWorker.setNpmrc(config);
+    });
+    it('Catches errors', async () => {
+      const config = {
+        api: {
+          getFileContent: jest.fn(() => {
+            throw new Error('file error');
+          }),
+        },
+        logger,
+      };
+      await repositoryWorker.setNpmrc(config);
+    });
+  });
   describe('initApis(config)', () => {
     beforeEach(() => {
       jest.resetAllMocks();
