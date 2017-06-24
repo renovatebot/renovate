@@ -487,4 +487,11 @@ describe('api/gitlab', () => {
       expect(e).toMatchSnapshot();
     });
   });
+  describe('getFileJson(filePath, branchName)', () => {
+    it('returns null for 404', async () => {
+      glGot.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
+      const res = await gitlab.getFileJson('some-path', 'some-branch');
+      expect(res).toBe(null);
+    });
+  });
 });
