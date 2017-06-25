@@ -111,10 +111,6 @@
       {
         "packagePattern": "jest",
         "groupName": "jest"
-      },
-      {
-        "packagePattern": "eslint",
-        "groupName": "eslint"
       }
     ]
   }
