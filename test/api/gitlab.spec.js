@@ -557,5 +557,27 @@ describe('api/gitlab', () => {
         expect(glGot.put.mock.calls[0][1].body.file_path).toBeDefined();
       });
     });
+    describe('createBranch(branchName)', () => {
+      it('creates file with v4', async () => {
+        await gitlab.createBranch('some-branch');
+        expect(glGot.post.mock.calls).toMatchSnapshot();
+        expect(glGot.post.mock.calls[0][1].body.branch_name).not.toBeDefined();
+      });
+      it('creates file with v3', async () => {
+        glGot.mockReturnValueOnce({
+          body: {},
+        });
+        glGot.mockReturnValueOnce({
+          body: {},
+        });
+        glGot.mockReturnValueOnce({
+          body: {},
+        });
+        await gitlab.initRepo('some-repo', 'some-token');
+        await gitlab.createBranch('some-branch');
+        expect(glGot.post.mock.calls).toMatchSnapshot();
+        expect(glGot.post.mock.calls[0][1].body.branch_name).toBeDefined();
+      });
+    });
   });
 });

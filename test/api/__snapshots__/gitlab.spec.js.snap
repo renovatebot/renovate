@@ -24,6 +24,34 @@ Array [
 ]
 `;
 
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) createBranch(branchName) creates file with v3 1`] = `
+Array [
+  Array [
+    "projects/some-repo/repository/branches",
+    Object {
+      "body": Object {
+        "branch_name": "some-branch",
+        "ref": undefined,
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) createBranch(branchName) creates file with v4 1`] = `
+Array [
+  Array [
+    "projects/undefined/repository/branches",
+    Object {
+      "body": Object {
+        "branch": "some-branch",
+        "ref": undefined,
+      },
+    },
+  ],
+]
+`;
+
 exports[`api/gitlab createFile(branchName, filePath, fileContents, message) creates file with v3 1`] = `
 Array [
   Array [
