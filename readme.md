@@ -1,6 +1,8 @@
 # renovate
 
-> Keep npm dependencies up-to-date
+Keep npm dependencies up-to-date.
+
+[![codecov](https://codecov.io/gh/singapore/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/singapore/renovate)
 
 ## Why
 
