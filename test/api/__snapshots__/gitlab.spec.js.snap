@@ -1,5 +1,242 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`api/gitlab addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42?assignee_id=someuser",
+  ],
+]
+`;
+
+exports[`api/gitlab addAssignees(issueNo, assignees) should log error if more than one assignee 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42?assignee_id=someuser",
+  ],
+]
+`;
+
+exports[`api/gitlab addLabels(issueNo, labels) should add the given labels to the issue 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42?labels=foo,bar",
+  ],
+]
+`;
+
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) createBranch(branchName) creates file with v3 1`] = `
+Array [
+  Array [
+    "projects/some-repo/repository/branches",
+    Object {
+      "body": Object {
+        "branch_name": "some-branch",
+        "ref": undefined,
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) createBranch(branchName) creates file with v4 1`] = `
+Array [
+  Array [
+    "projects/undefined/repository/branches",
+    Object {
+      "body": Object {
+        "branch": "some-branch",
+        "ref": undefined,
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) creates file with v3 1`] = `
+Array [
+  Array [
+    "projects/some-repo/repository/files",
+    Object {
+      "body": Object {
+        "branch_name": "some-branch",
+        "commit_message": "some-message",
+        "content": "c29tZS1jb250ZW50cw==",
+        "encoding": "base64",
+        "file_path": "some-path",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) creates file with v4 1`] = `
+Array [
+  Array [
+    "projects/undefined/repository/files/some-path",
+    Object {
+      "body": Object {
+        "branch": "some-branch",
+        "commit_message": "some-message",
+        "content": "c29tZS1jb250ZW50cw==",
+        "encoding": "base64",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) updateFile(branchName, filePath, fileContents, message) creates file with v3 1`] = `
+Array [
+  Array [
+    "projects/some-repo/repository/files",
+    Object {
+      "body": Object {
+        "branch_name": "some-branch",
+        "commit_message": "some-message",
+        "content": "c29tZS1jb250ZW50cw==",
+        "encoding": "base64",
+        "file_path": "some-path",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) updateFile(branchName, filePath, fileContents, message) creates file with v4 1`] = `
+Array [
+  Array [
+    "projects/undefined/repository/files/some-path",
+    Object {
+      "body": Object {
+        "branch": "some-branch",
+        "commit_message": "some-message",
+        "content": "c29tZS1jb250ZW50cw==",
+        "encoding": "base64",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/gitlab createPr(branchName, title, body) returns the PR 1`] = `
+Object {
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "number": 1,
+}
+`;
+
+exports[`api/gitlab createPr(branchName, title, body) returns the PR 2`] = `
+Array [
+  Array [
+    "projects/undefined/merge_requests",
+    Object {
+      "body": Object {
+        "description": "the-body",
+        "remove_source_branch": true,
+        "source_branch": "some-branch",
+        "target_branch": undefined,
+        "title": "some-title",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/gitlab getBranch returns a branch 1`] = `"foo"`;
+
+exports[`api/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
+Array [
+  Array [
+    "projects/owned",
+  ],
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?state=opened",
+  ],
+]
+`;
+
+exports[`api/gitlab getBranchPr(branchName) should return the PR object 1`] = `
+Array [
+  Array [
+    "projects/owned",
+  ],
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?state=opened",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests/undefined",
+  ],
+  Array [
+    "projects/some%2Frepo/repository/branches/undefined",
+  ],
+]
+`;
+
+exports[`api/gitlab getBranchPr(branchName) should return the PR object 2`] = `
+Object {
+  "additions": 1,
+  "base": Object {
+    "sha": "1234",
+  },
+  "body": undefined,
+  "commits": 1,
+  "deletions": 1,
+  "displayNumber": "Merge Request #undefined",
+  "number": undefined,
+}
+`;
+
+exports[`api/gitlab getFile(filePath, branchName) gets the file with v3 1`] = `
+Object {
+  "apiVersion": "v3",
+  "defaultBranch": undefined,
+  "email": undefined,
+  "repoName": "some-repo",
+}
+`;
+
+exports[`api/gitlab getFile(filePath, branchName) gets the file with v3 2`] = `"foo"`;
+
+exports[`api/gitlab getFile(filePath, branchName) gets the file with v4 by default 1`] = `"foo"`;
+
+exports[`api/gitlab getFileContent(filePath, branchName) gets the file 1`] = `"~�"`;
+
+exports[`api/gitlab getFileContent(filePath, branchName) throws error for non-404 1`] = `
+Object {
+  "statusCode": 403,
+}
+`;
+
+exports[`api/gitlab getPr(prNo) returns the PR 1`] = `
+Object {
+  "body": "a merge request",
+  "canRebase": true,
+  "description": "a merge request",
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "isClosed": true,
+  "isUnmergeable": true,
+  "merge_status": "cannot_be_merged",
+  "number": 12345,
+  "state": "merged",
+}
+`;
+
 exports[`api/gitlab getRepos should return an array of repos 1`] = `
 Array [
   Array [
