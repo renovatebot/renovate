@@ -5,13 +5,7 @@ const yarnHelper = require('../../lib/helpers/yarn');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 const packageJsonHelper = require('../../lib/helpers/package-json');
 
-const bunyan = require('bunyan');
-
-const logger = bunyan.createLogger({
-  name: 'test',
-  stream: process.stdout,
-  level: 'fatal',
-});
+const logger = require('../_fixtures/logger');
 
 jest.mock('../../lib/helpers/yarn');
 jest.mock('../../lib/helpers/package-json');
@@ -333,41 +327,85 @@ describe('workers/branch', () => {
       config.api = {
         checkForClosedPr: jest.fn(),
       };
+      config.logger = logger;
       branchWorker.ensureBranch = jest.fn(() => true);
       prWorker.ensurePr = jest.fn(() => true);
     });
     it('returns immediately if closed PR found', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
-      await branchWorker.updateBranch([config], logger);
+      await branchWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
     it('does not return immediately if recreateClosed true', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
       config.recreateClosed = true;
-      await branchWorker.updateBranch([config], logger);
+      await branchWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('pins', async () => {
       config.upgradeType = 'pin';
-      await branchWorker.updateBranch([config], logger);
+      await branchWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('majors', async () => {
       config.upgradeType = 'major';
-      await branchWorker.updateBranch([config], logger);
+      await branchWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('minors', async () => {
       config.upgradeType = 'minor';
-      await branchWorker.updateBranch([config], logger);
+      await branchWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('handles errors', async () => {
       config.api.checkForClosedPr = jest.fn(() => {
         throw new Error('oops');
       });
-      await branchWorker.updateBranch([config], logger);
+      await branchWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
+    });
+  });
+  describe('removeStandaloneBranches(upgrades)', () => {
+    it('deletes standalone branch names', async () => {
+      const api = {
+        deleteBranch: jest.fn(),
+      };
+      const upgrades = [
+        {
+          branchName: 'foo',
+          groupBranchName: 'what',
+          api,
+          logger,
+        },
+        {
+          branchName: 'bar',
+          groupBranchName: 'what',
+          api,
+          logger,
+        },
+      ];
+      await branchWorker.removeStandaloneBranches(upgrades);
+      expect(upgrades).toMatchSnapshot();
+    });
+    it('handles errors', async () => {
+      const upgrades = [
+        {
+          branchName: 'foo',
+          api: {
+            deleteBranch: jest.fn(() => {
+              throw new Error('deletion error');
+            }),
+          },
+          logger,
+        },
+        {
+          branchName: 'bar',
+          groupBranchName: 'what',
+          api: null,
+          logger,
+        },
+      ];
+      await branchWorker.removeStandaloneBranches(upgrades);
     });
   });
 });

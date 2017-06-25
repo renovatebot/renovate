@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`helpers/platform getApi(platform) throws error 1`] = `[Error: Unknown platform: foo]`;

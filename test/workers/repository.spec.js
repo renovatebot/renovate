@@ -1,28 +1,33 @@
 const repositoryWorker = require('../../lib/workers/repository');
-const branchWorker = require('../../lib/workers/branch');
+const logger = require('../_fixtures/logger');
 
-jest.mock('../../lib/workers/branch');
-jest.mock('../../lib/workers/pr');
-jest.mock('../../lib/api/npm');
-jest.mock('../../lib/api/github');
-jest.mock('../../lib/api/gitlab');
-jest.mock('../../lib/helpers/versions');
+repositoryWorker.initApis = jest.fn(input => input);
+repositoryWorker.mergeRenovateJson = jest.fn(input => input);
+repositoryWorker.getOnboardingStatus = jest.fn(() => true);
+repositoryWorker.detectPackageFiles = jest.fn(input => input);
 
-describe('repositoryWorker', () => {
-  describe('processUpgrades(upgrades)', () => {
+describe('workers/repository', () => {
+  describe('processRepo', () => {
+    let config;
     beforeEach(() => {
-      repositoryWorker.updateBranch = jest.fn();
+      config = {
+        logger,
+        packageFiles: [],
+      };
     });
-    it('handles zero upgrades', async () => {
-      // await repositoryWorker.processUpgrades([]);
-      expect(branchWorker.updateBranch.mock.calls.length).toBe(0);
+    it('returns early if repo is not onboarded', async () => {
+      repositoryWorker.getOnboardingStatus.mockReturnValueOnce(false);
+      await repositoryWorker.processRepo(config);
     });
-    it('handles non-zero upgrades', async () => {
-      await repositoryWorker.processUpgrades([
-        { branchName: 'a' },
-        { branchName: 'b' },
-      ]);
-      expect(branchWorker.updateBranch.mock.calls.length).toBe(2);
+    it('detects package files if none configured', async () => {
+      repositoryWorker.getOnboardingStatus.mockReturnValueOnce(true);
+      await repositoryWorker.processRepo(config);
+    });
+    it('swallows errors', async () => {
+      repositoryWorker.initApis.mockImplementationOnce(() => {
+        throw new Error('bad init');
+      });
+      await repositoryWorker.processRepo(config);
     });
   });
 });

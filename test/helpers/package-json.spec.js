@@ -1,101 +1,21 @@
-const fs = require('fs');
-const path = require('path');
-const packageJson = require('../../lib/helpers/package-json');
-const bunyan = require('bunyan');
+const platformHelper = require('../../lib/helpers/platform');
 
-const logger = bunyan.createLogger({
-  name: 'test',
-  stream: process.stdout,
-  level: 'fatal',
-});
-
-const defaultTypes = [
-  'dependencies',
-  'devDependencies',
-  'optionalDependencies',
-];
-
-function readFixture(fixture) {
-  return fs.readFileSync(
-    path.resolve(__dirname, `../_fixtures/package-json/${fixture}`),
-    'utf8'
-  );
-}
-
-const input01Content = readFixture('inputs/01.json');
-const input02Content = readFixture('inputs/02.json');
-
-describe('helpers/package-json', () => {
-  describe('.extractDependencies(packageJson, sections)', () => {
-    it('returns an array of correct length', () => {
-      const extractedDependencies = packageJson.extractDependencies(
-        JSON.parse(input01Content),
-        defaultTypes
-      );
-      extractedDependencies.should.be.instanceof(Array);
-      extractedDependencies.should.have.length(10);
+describe('helpers/platform', () => {
+  describe('getApi(platform)', () => {
+    it('returns github', () => {
+      platformHelper.getApi('github');
     });
-    it('each element contains non-null depType, depName, currentVersion', () => {
-      const extractedDependencies = packageJson.extractDependencies(
-        JSON.parse(input01Content),
-        defaultTypes
-      );
-      extractedDependencies
-        .every(dep => dep.depType && dep.depName && dep.currentVersion)
-        .should.eql(true);
+    it('returns gitlab', () => {
+      platformHelper.getApi('gitlab');
     });
-    it('supports null devDependencies', () => {
-      const extractedDependencies = packageJson.extractDependencies(
-        JSON.parse(input02Content),
-        defaultTypes
-      );
-      extractedDependencies.should.be.instanceof(Array);
-      extractedDependencies.should.have.length(6);
-    });
-  });
-  describe('.setNewValue(currentFileContent, depType, depName, newVersion, logger)', () => {
-    it('replaces a dependency value', () => {
-      const outputContent = readFixture('outputs/011.json');
-      const testContent = packageJson.setNewValue(
-        input01Content,
-        'dependencies',
-        'cheerio',
-        '0.22.1',
-        logger
-      );
-      testContent.should.equal(outputContent);
-    });
-    it('replaces only the first instance of a value', () => {
-      const outputContent = readFixture('outputs/012.json');
-      const testContent = packageJson.setNewValue(
-        input01Content,
-        'devDependencies',
-        'angular-touch',
-        '1.6.1',
-        logger
-      );
-      testContent.should.equal(outputContent);
-    });
-    it('replaces only the second instance of a value', () => {
-      const outputContent = readFixture('outputs/013.json');
-      const testContent = packageJson.setNewValue(
-        input01Content,
-        'devDependencies',
-        'angular-sanitize',
-        '1.6.1',
-        logger
-      );
-      testContent.should.equal(outputContent);
-    });
-    it('handles the case where the desired version is already supported', () => {
-      const testContent = packageJson.setNewValue(
-        input01Content,
-        'devDependencies',
-        'angular-touch',
-        '1.5.8',
-        logger
-      );
-      testContent.should.equal(input01Content);
+    it('throws error', () => {
+      let e;
+      try {
+        platformHelper.getApi('foo');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
     });
   });
 });

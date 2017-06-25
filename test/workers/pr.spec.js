@@ -2,13 +2,7 @@ const prWorker = require('../../lib/workers/pr');
 const changelogHelper = require('../../lib/helpers/changelog');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 
-const bunyan = require('bunyan');
-
-const logger = bunyan.createLogger({
-  name: 'test',
-  stream: process.stdout,
-  level: 'fatal',
-});
+const logger = require('../_fixtures/logger');
 
 jest.mock('../../lib/helpers/changelog');
 changelogHelper.getChangeLog = jest.fn();

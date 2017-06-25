@@ -1,12 +1,6 @@
 const changelog = require('changelog');
 const changelogHelper = require('../../lib/helpers/changelog');
-const bunyan = require('bunyan');
-
-const logger = bunyan.createLogger({
-  name: 'test',
-  stream: process.stdout,
-  level: 'fatal',
-});
+const logger = require('../_fixtures/logger');
 
 jest.mock('changelog');
 
