@@ -582,12 +582,7 @@ describe('api/gitlab', () => {
     describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
       it('creates branch', async () => {
         glGot.mockReturnValueOnce({ statusCode: 404 });
-        await gitlab.commitFilesToBranch(
-          'some-branch',
-          [],
-          'some-message',
-          'parent-branch'
-        );
+        await gitlab.commitFilesToBranch('some-branch', [], 'some-message');
       });
       it('does not create branch and updates file', async () => {
         glGot.mockReturnValueOnce({ statusCode: 200 });
