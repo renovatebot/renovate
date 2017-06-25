@@ -47,7 +47,7 @@
     "changelog": "1.3.0",
     "commander": "2.10.0",
     "gh-got": "6.0.0",
-    "gl-got": "6.0.2",
+    "gl-got": "7.0.0",
     "got": "7.0.0",
     "handlebars": "4.0.10",
     "ini": "1.3.4",
