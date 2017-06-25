@@ -579,5 +579,48 @@ describe('api/gitlab', () => {
         expect(glGot.post.mock.calls[0][1].body.branch_name).toBeDefined();
       });
     });
+    describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
+      it('creates branch', async () => {
+        glGot.mockReturnValueOnce({ statusCode: 404 });
+        await gitlab.commitFilesToBranch(
+          'some-branch',
+          [],
+          'some-message',
+          'parent-branch'
+        );
+      });
+      it('does not create branch and updates file', async () => {
+        glGot.mockReturnValueOnce({ statusCode: 200 });
+        glGot.mockReturnValueOnce({
+          body: {
+            content: 'hello',
+          },
+        });
+        const file = {
+          name: 'foo',
+          contents: 'bar',
+        };
+        await gitlab.commitFilesToBranch(
+          'some-branch',
+          [file],
+          'some-message',
+          'parent-branch'
+        );
+      });
+      it('does not create branch and creates file', async () => {
+        glGot.mockReturnValueOnce({ statusCode: 200 });
+        glGot.mockReturnValueOnce(Promise.reject({ statusCode: 404 }));
+        const file = {
+          name: 'foo',
+          contents: 'bar',
+        };
+        await gitlab.commitFilesToBranch(
+          'some-branch',
+          [file],
+          'some-message',
+          'parent-branch'
+        );
+      });
+    });
   });
 });
