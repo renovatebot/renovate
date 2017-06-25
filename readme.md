@@ -2,7 +2,9 @@
 
 Keep npm dependencies up-to-date.
 
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/singapore/renovate/master/license)
 [![codecov](https://codecov.io/gh/singapore/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/singapore/renovate)
+
 
 ## Why
 
