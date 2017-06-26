@@ -160,13 +160,15 @@ describe('config/index', () => {
       expect(glGot.mock.calls.length).toBe(0);
     });
   });
-  describe('.getRepoConfig(config, index)', () => {
+  describe('.(config, index)', () => {
     let configParser;
     beforeEach(() => {
       configParser = require('../../lib/config/index.js');
     });
     const config = {
-      global: 'b',
+      githubAppKey: 'foo',
+      maintainYarnLock: true,
+      foo: 'bar',
       repositories: [
         'c/d',
         {
@@ -176,10 +178,20 @@ describe('config/index', () => {
       ],
     };
     it('massages string repos', () => {
-      expect(configParser.getRepoConfig(config, 0)).toMatchSnapshot();
+      const res = configParser.getRepoConfig(config, 0);
+      expect(res.githubAppKey).not.toBeDefined();
+      expect(res.maintainYarnLock).toBeDefined();
+      expect(res.logger).toBeDefined();
+      delete res.logger;
+      expect(res).toMatchSnapshot();
     });
     it('handles object repos', () => {
-      expect(configParser.getRepoConfig(config, 1)).toMatchSnapshot();
+      const res = configParser.getRepoConfig(config, 1);
+      expect(res.githubAppKey).not.toBeDefined();
+      expect(res.maintainYarnLock).toBeDefined();
+      expect(res.logger).toBeDefined();
+      delete res.logger;
+      expect(res).toMatchSnapshot();
     });
   });
 });

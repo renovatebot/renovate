@@ -1,8 +1,9 @@
-const indexWorker = require('../../lib/workers/index');
+const globalWorker = require('../../lib/workers/global');
 const repositoryWorker = require('../../lib/workers/repository');
 const configParser = require('../../lib/config');
+const logger = require('../_fixtures/logger');
 
-describe('lib/workers/index', () => {
+describe('lib/workers/global', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     configParser.parseConfigs = jest.fn();
@@ -13,7 +14,7 @@ describe('lib/workers/index', () => {
     configParser.parseConfigs.mockReturnValueOnce({
       repositories: [],
     });
-    await indexWorker.start();
+    await globalWorker.start();
   });
   it('processes repositories', async () => {
     configParser.parseConfigs.mockReturnValueOnce({
@@ -22,8 +23,9 @@ describe('lib/workers/index', () => {
     });
     configParser.getRepoConfig.mockReturnValue({
       repository: 'foo',
+      logger,
     });
-    await indexWorker.start();
+    await globalWorker.start();
     expect(configParser.parseConfigs.mock.calls.length).toBe(1);
     expect(configParser.getRepoConfig.mock.calls).toMatchSnapshot();
     expect(repositoryWorker.processRepo.mock.calls.length).toBe(2);
@@ -32,6 +34,6 @@ describe('lib/workers/index', () => {
     configParser.parseConfigs.mockImplementationOnce(() => {
       throw new Error('a');
     });
-    await indexWorker.start();
+    await globalWorker.start();
   });
 });

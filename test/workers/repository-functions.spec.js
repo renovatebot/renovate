@@ -120,6 +120,7 @@ describe('workers/repository', () => {
       expect(
         config.api.createPr.mock.calls[0][2].indexOf('Merge Request')
       ).toBe(-1);
+      expect(config.api.commitFilesToBranch.mock.calls).toMatchSnapshot();
     });
     it('should adapt for gitlab phrasing', async () => {
       config.platform = 'gitlab';
