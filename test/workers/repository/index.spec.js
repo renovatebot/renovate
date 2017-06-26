@@ -16,7 +16,7 @@ apis.mergeRenovateJson = jest.fn(input => input);
 apis.detectPackageFiles = jest.fn(input => input);
 
 describe('workers/repository', () => {
-  describe('processRepo', () => {
+  describe('renovateRepository', () => {
     let config;
     beforeEach(() => {
       config = {
@@ -26,11 +26,11 @@ describe('workers/repository', () => {
     });
     it('returns early if repo is not onboarded', async () => {
       onboarding.getOnboardingStatus.mockReturnValueOnce(false);
-      await repositoryWorker.processRepo(config);
+      await repositoryWorker.renovateRepository(config);
     });
     it('detects package files if none configured', async () => {
       onboarding.getOnboardingStatus.mockReturnValueOnce(true);
-      await repositoryWorker.processRepo(config);
+      await repositoryWorker.renovateRepository(config);
     });
     it('calls branchWorker', async () => {
       onboarding.getOnboardingStatus.mockReturnValueOnce(true);
@@ -39,14 +39,14 @@ describe('workers/repository', () => {
         bar: {},
         baz: {},
       });
-      await repositoryWorker.processRepo(config);
+      await repositoryWorker.renovateRepository(config);
       expect(branchWorker.updateBranch.mock.calls.length).toBe(3);
     });
     it('swallows errors', async () => {
       apis.initApis.mockImplementationOnce(() => {
         throw new Error('bad init');
       });
-      await repositoryWorker.processRepo(config);
+      await repositoryWorker.renovateRepository(config);
     });
   });
 });
