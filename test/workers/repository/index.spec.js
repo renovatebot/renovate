@@ -7,8 +7,8 @@ const logger = require('../../_fixtures/logger');
 jest.mock('../../../lib/workers/repository/onboarding');
 
 apis.initApis = jest.fn(input => input);
-repositoryWorker.mergeRenovateJson = jest.fn(input => input);
-repositoryWorker.detectPackageFiles = jest.fn(input => input);
+apis.mergeRenovateJson = jest.fn(input => input);
+apis.detectPackageFiles = jest.fn(input => input);
 
 describe('workers/repository', () => {
   describe('processRepo', () => {

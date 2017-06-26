@@ -1,12 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository detectPackageFiles(config) adds package files to object 1`] = `
-Array [
-  "package.json",
-  "backend/package.json",
-]
-`;
-
 exports[`workers/repository groupUpgradesByBranch(upgrades, logger) does not group if different compiled branch names 1`] = `
 Object {
   "bar-1.1.0": Array [

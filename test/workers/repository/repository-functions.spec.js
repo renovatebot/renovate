@@ -7,42 +7,6 @@ jest.mock('../../../lib/workers/branch');
 jest.mock('../../../lib/workers/package-file');
 
 describe('workers/repository', () => {
-  describe('mergeRenovateJson(config)', () => {
-    let config;
-    beforeEach(() => {
-      config = {
-        api: {
-          getFileJson: jest.fn(),
-        },
-        logger,
-      };
-    });
-    it('returns same config if no renovate.json found', async () => {
-      expect(await repositoryWorker.mergeRenovateJson(config)).toEqual(config);
-    });
-    it('returns extended config if renovate.json found', async () => {
-      config.api.getFileJson.mockReturnValueOnce({ foo: 1 });
-      const returnConfig = await repositoryWorker.mergeRenovateJson(config);
-      expect(returnConfig.foo).toBe(1);
-      expect(returnConfig.renovateJsonPresent).toBe(true);
-    });
-  });
-  describe('detectPackageFiles(config)', () => {
-    it('adds package files to object', async () => {
-      const config = {
-        api: {
-          findFilePaths: jest.fn(() => [
-            'package.json',
-            'backend/package.json',
-          ]),
-        },
-        logger,
-      };
-      const res = await repositoryWorker.detectPackageFiles(config);
-      expect(res).toMatchObject(config);
-      expect(res.packageFiles).toMatchSnapshot();
-    });
-  });
   describe('determineRepoUpgrades(config)', () => {
     let config;
     beforeEach(() => {
