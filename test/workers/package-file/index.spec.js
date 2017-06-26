@@ -1,7 +1,7 @@
 const packageFileWorker = require('../../../lib/workers/package-file');
 const npmApi = require('../../../lib/api/npm');
 const versionsHelper = require('../../../lib/helpers/versions');
-const packageJsonHelper = require('../../../lib/helpers/package-json');
+const packageJson = require('../../../lib/workers/package-file/package-json');
 const logger = require('../../_fixtures/logger');
 
 jest.mock('../../../lib/workers/branch');
@@ -294,7 +294,7 @@ describe('packageFileWorker', () => {
     beforeEach(() => {
       packageFileWorker.assignDepConfigs = jest.fn(() => []);
       packageFileWorker.findUpgrades = jest.fn(() => []);
-      packageJsonHelper.extractDependencies = jest.fn(() => []);
+      packageJson.extractDependencies = jest.fn(() => []);
       config = require('../../../lib/config/defaults').getConfig();
       config.api = {
         getFileJson: jest.fn(() => ({})),
@@ -325,12 +325,10 @@ describe('packageFileWorker', () => {
       ];
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toEqual([]);
-      expect(
-        packageJsonHelper.extractDependencies.mock.calls
-      ).toMatchSnapshot();
+      expect(packageJson.extractDependencies.mock.calls).toMatchSnapshot();
     });
     it('filters dependencies', async () => {
-      packageJsonHelper.extractDependencies.mockReturnValueOnce([
+      packageJson.extractDependencies.mockReturnValueOnce([
         {
           depName: 'a',
         },
