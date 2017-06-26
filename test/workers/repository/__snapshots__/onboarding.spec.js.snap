@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/workers/repository/onboarding onboardRepository(config) should commit files and create PR 1`] = `
+Array [
+  Array [
+    "renovate/configure",
+    Array [
+      Object {
+        "contents": "{
+  \\"enabled\\": true,
+  \\"packageFiles\\": [],
+  \\"depTypes\\": [\\"dependencies\\", \\"devDependencies\\", \\"optionalDependencies\\"],
+  \\"pinVersions\\": true,
+  \\"separateMajorReleases\\": true,
+  \\"ignoreDeps\\": [],
+  \\"rebaseStalePrs\\": false,
+  \\"prCreation\\": \\"immediate\\",
+  \\"automerge\\": \\"none\\",
+  \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
+  \\"commitMessage\\": \\"Update dependency {{depName}} to version {{newVersion}}\\",
+  \\"maintainYarnLock\\": false,
+  \\"labels\\": [],
+  \\"assignees\\": [],
+  \\"reviewers\\": []
+}
+",
+        "name": "renovate.json",
+      },
+    ],
+    "Add renovate.json",
+  ],
+]
+`;

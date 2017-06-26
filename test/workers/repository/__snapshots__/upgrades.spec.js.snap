@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/upgrades groupUpgradesByBranch(upgrades, logger) does not group if different compiled branch names 1`] = `
+Object {
+  "bar-1.1.0": Array [
+    Object {
+      "branchName": "bar-{{version}}",
+      "version": "1.1.0",
+    },
+  ],
+  "foo-1.1.0": Array [
+    Object {
+      "branchName": "foo-{{version}}",
+      "version": "1.1.0",
+    },
+  ],
+  "foo-2.0.0": Array [
+    Object {
+      "branchName": "foo-{{version}}",
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/upgrades groupUpgradesByBranch(upgrades, logger) groups if same compiled branch names 1`] = `
+Object {
+  "bar-1.1.0": Array [
+    Object {
+      "branchName": "bar-{{version}}",
+      "version": "1.1.0",
+    },
+  ],
+  "foo": Array [
+    Object {
+      "branchName": "foo",
+      "version": "2.0.0",
+    },
+    Object {
+      "branchName": "foo",
+      "version": "1.1.0",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/upgrades groupUpgradesByBranch(upgrades, logger) groups if same compiled group name 1`] = `
+Object {
+  "foo": Array [
+    Object {
+      "branchName": "foo",
+      "version": "2.0.0",
+    },
+  ],
+  "renovate/my-group": Array [
+    Object {
+      "branchName": "bar-{{version}}",
+      "commitMessage": undefined,
+      "groupBranchName": "renovate/my-group",
+      "groupName": "My Group",
+      "groupSlug": "my-group",
+      "prBody": undefined,
+      "prTitle": undefined,
+      "version": "1.1.0",
+    },
+    Object {
+      "branchName": "foo",
+      "groupBranchName": "renovate/{{groupSlug}}",
+      "groupName": "My Group",
+      "groupSlug": "my-group",
+      "version": "1.1.0",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/upgrades groupUpgradesByBranch(upgrades, logger) returns one branch if one input 1`] = `
+Object {
+  "foo-1.1.0": Array [
+    Object {
+      "branchName": "foo-{{version}}",
+      "version": "1.1.0",
+    },
+  ],
+}
+`;
