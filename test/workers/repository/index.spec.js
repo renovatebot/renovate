@@ -1,7 +1,9 @@
-const repositoryWorker = require('../../lib/workers/repository');
-const logger = require('../_fixtures/logger');
+const repositoryWorker = require('../../../lib/workers/repository/index');
+const apis = require('../../../lib/workers/repository/apis');
 
-repositoryWorker.initApis = jest.fn(input => input);
+const logger = require('../../_fixtures/logger');
+
+apis.initApis = jest.fn(input => input);
 repositoryWorker.mergeRenovateJson = jest.fn(input => input);
 repositoryWorker.getOnboardingStatus = jest.fn(() => true);
 repositoryWorker.detectPackageFiles = jest.fn(input => input);
@@ -24,7 +26,7 @@ describe('workers/repository', () => {
       await repositoryWorker.processRepo(config);
     });
     it('swallows errors', async () => {
-      repositoryWorker.initApis.mockImplementationOnce(() => {
+      apis.initApis.mockImplementationOnce(() => {
         throw new Error('bad init');
       });
       await repositoryWorker.processRepo(config);

@@ -92,8 +92,6 @@ Object {
 }
 `;
 
-exports[`workers/repository initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
-
 exports[`workers/repository onboardRepository(config) should commit files and create PR 1`] = `
 Array [
   Array [

@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/apis initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
