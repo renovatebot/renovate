@@ -38,6 +38,7 @@ describe('helpers/github-app', () => {
     const config = {
       githubAppId: 123,
       githubAppKey: 'some_key',
+      repositories: [],
     };
     beforeEach(() => {
       githubAppHelper.generateJwt = jest.fn();
