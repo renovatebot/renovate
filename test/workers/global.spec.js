@@ -1,6 +1,7 @@
 const globalWorker = require('../../lib/workers/global');
 const repositoryWorker = require('../../lib/workers/repository');
 const configParser = require('../../lib/config');
+const logger = require('../_fixtures/logger');
 
 describe('lib/workers/global', () => {
   beforeEach(() => {
@@ -22,6 +23,7 @@ describe('lib/workers/global', () => {
     });
     configParser.getRepoConfig.mockReturnValue({
       repository: 'foo',
+      logger,
     });
     await globalWorker.start();
     expect(configParser.parseConfigs.mock.calls.length).toBe(1);

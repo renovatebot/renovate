@@ -181,12 +181,16 @@ describe('config/index', () => {
       const res = configParser.getRepoConfig(config, 0);
       expect(res.githubAppKey).not.toBeDefined();
       expect(res.maintainYarnLock).toBeDefined();
+      expect(res.logger).toBeDefined();
+      delete res.logger;
       expect(res).toMatchSnapshot();
     });
     it('handles object repos', () => {
       const res = configParser.getRepoConfig(config, 1);
       expect(res.githubAppKey).not.toBeDefined();
       expect(res.maintainYarnLock).toBeDefined();
+      expect(res.logger).toBeDefined();
+      delete res.logger;
       expect(res).toMatchSnapshot();
     });
   });
