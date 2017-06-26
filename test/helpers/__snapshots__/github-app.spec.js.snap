@@ -1,5 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`helpers/github-app getRepositories returns filtered list of repos 1`] = `
+Array [
+  Object {
+    "repository": "a/b",
+    "token": "token_a",
+  },
+  Object {
+    "repository": "d/f",
+    "token": "token_d",
+  },
+]
+`;
+
 exports[`helpers/github-app getRepositories returns list of repos 1`] = `
 Array [
   Object {

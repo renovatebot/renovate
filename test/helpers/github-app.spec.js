@@ -38,6 +38,7 @@ describe('helpers/github-app', () => {
     const config = {
       githubAppId: 123,
       githubAppKey: 'some_key',
+      repositories: [],
     };
     beforeEach(() => {
       githubAppHelper.generateJwt = jest.fn();
@@ -88,6 +89,36 @@ describe('helpers/github-app', () => {
         },
       ]);
       const results = await githubAppHelper.getRepositories(config);
+      expect(results).toMatchSnapshot();
+    });
+    it('returns filtered list of repos', async () => {
+      ghApi.getInstallations.mockImplementationOnce(() => [
+        { id: 567 },
+        { id: 568 },
+      ]);
+      githubAppHelper.getUserRepositories.mockImplementationOnce(() => [
+        {
+          repository: 'a/b',
+          token: 'token_a',
+        },
+        {
+          repository: 'a/c',
+          token: 'token_a',
+        },
+      ]);
+      githubAppHelper.getUserRepositories.mockImplementationOnce(() => [
+        {
+          repository: 'd/e',
+          token: 'token_d',
+        },
+        {
+          repository: 'd/f',
+          token: 'token_d',
+        },
+      ]);
+      config.repositories = ['a/b', 'd/f', 'x/y'];
+      const results = await githubAppHelper.getRepositories(config);
+      expect(results.length).toBe(2);
       expect(results).toMatchSnapshot();
     });
   });
