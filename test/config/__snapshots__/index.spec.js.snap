@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`config/index .(config, index) handles object repos 1`] = `
+exports[`config/index getRepoConfig(config, index) handles object repos 1`] = `
 Object {
   "foo": "bar",
   "maintainYarnLock": true,
@@ -9,7 +9,7 @@ Object {
 }
 `;
 
-exports[`config/index .(config, index) massages string repos 1`] = `
+exports[`config/index getRepoConfig(config, index) massages string repos 1`] = `
 Object {
   "foo": "bar",
   "maintainYarnLock": true,

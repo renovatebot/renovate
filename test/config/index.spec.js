@@ -160,7 +160,7 @@ describe('config/index', () => {
       expect(glGot.mock.calls.length).toBe(0);
     });
   });
-  describe('.(config, index)', () => {
+  describe('getRepoConfig(config, index)', () => {
     let configParser;
     beforeEach(() => {
       configParser = require('../../lib/config/index.js');

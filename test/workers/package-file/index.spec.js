@@ -1,13 +1,13 @@
 const packageFileWorker = require('../../../lib/workers/package-file');
 const npmApi = require('../../../lib/api/npm');
-const versionsHelper = require('../../../lib/helpers/versions');
+const versionsHelper = require('../../../lib/workers/package/versions');
 const packageJson = require('../../../lib/workers/package-file/package-json');
 const logger = require('../../_fixtures/logger');
 
 jest.mock('../../../lib/workers/branch');
 jest.mock('../../../lib/workers/pr');
 jest.mock('../../../lib/api/npm');
-jest.mock('../../../lib/helpers/versions');
+jest.mock('../../../lib/workers/package/versions');
 
 describe('packageFileWorker', () => {
   describe('findUpgrades(dependencies, config)', () => {

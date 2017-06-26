@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
-const packageJson = require('../../lib/helpers/package-json');
-const logger = require('../_fixtures/logger');
+const packageJson = require('../../../lib/helpers/package-json');
+const logger = require('../../_fixtures/logger');
 
 function readFixture(fixture) {
   return fs.readFileSync(
-    path.resolve(__dirname, `../_fixtures/package-json/${fixture}`),
+    path.resolve(__dirname, `../../_fixtures/package-json/${fixture}`),
     'utf8'
   );
 }

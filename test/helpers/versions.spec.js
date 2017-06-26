@@ -1,10 +1,10 @@
-const versionsHelper = require('../../lib/helpers/versions');
+const versionsHelper = require('../../lib/workers/package/versions');
 const qJson = require('../_fixtures/npm/01.json');
 const helmetJson = require('../_fixtures/npm/02.json');
 
 let defaultConfig;
 
-describe('helpers/versions', () => {
+describe('workers/package/versions', () => {
   beforeEach(() => {
     defaultConfig = require('../../lib/config/defaults').getConfig();
   });
