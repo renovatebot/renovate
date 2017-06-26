@@ -1,4 +1,4 @@
-const renovateWorker = require('../lib/workers');
+const renovateWorker = require('../lib/workers/global');
 
 renovateWorker.start = jest.fn();
 

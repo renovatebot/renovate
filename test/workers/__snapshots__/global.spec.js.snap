@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/workers/index processes repositories 1`] = `
+exports[`lib/workers/global processes repositories 1`] = `
 Array [
   Array [
     Object {
