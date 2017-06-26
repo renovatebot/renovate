@@ -1,11 +1,13 @@
 const repositoryWorker = require('../../../lib/workers/repository/index');
 const apis = require('../../../lib/workers/repository/apis');
+const onboarding = require('../../../lib/workers/repository/onboarding');
 
 const logger = require('../../_fixtures/logger');
 
+jest.mock('../../../lib/workers/repository/onboarding');
+
 apis.initApis = jest.fn(input => input);
 repositoryWorker.mergeRenovateJson = jest.fn(input => input);
-repositoryWorker.getOnboardingStatus = jest.fn(() => true);
 repositoryWorker.detectPackageFiles = jest.fn(input => input);
 
 describe('workers/repository', () => {
@@ -18,11 +20,11 @@ describe('workers/repository', () => {
       };
     });
     it('returns early if repo is not onboarded', async () => {
-      repositoryWorker.getOnboardingStatus.mockReturnValueOnce(false);
+      onboarding.getOnboardingStatus.mockReturnValueOnce(false);
       await repositoryWorker.processRepo(config);
     });
     it('detects package files if none configured', async () => {
-      repositoryWorker.getOnboardingStatus.mockReturnValueOnce(true);
+      onboarding.getOnboardingStatus.mockReturnValueOnce(true);
       await repositoryWorker.processRepo(config);
     });
     it('swallows errors', async () => {
