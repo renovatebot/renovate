@@ -178,7 +178,7 @@ describe('config/index', () => {
       ],
     };
     it('massages string repos', () => {
-      const res = configParser.getRepoConfig(config, 0);
+      const res = configParser.getRepositoryConfig(config, 0);
       expect(res.githubAppKey).not.toBeDefined();
       expect(res.maintainYarnLock).toBeDefined();
       expect(res.logger).toBeDefined();
@@ -186,7 +186,7 @@ describe('config/index', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles object repos', () => {
-      const res = configParser.getRepoConfig(config, 1);
+      const res = configParser.getRepositoryConfig(config, 1);
       expect(res.githubAppKey).not.toBeDefined();
       expect(res.maintainYarnLock).toBeDefined();
       expect(res.logger).toBeDefined();

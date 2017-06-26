@@ -7,8 +7,8 @@ describe('lib/workers/global', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     configParser.parseConfigs = jest.fn();
-    configParser.getRepoConfig = jest.fn();
-    repositoryWorker.processRepo = jest.fn();
+    configParser.getRepositoryConfig = jest.fn();
+    repositoryWorker.renovateRepository = jest.fn();
   });
   it('handles zero repos', async () => {
     configParser.parseConfigs.mockReturnValueOnce({
@@ -21,14 +21,14 @@ describe('lib/workers/global', () => {
       foo: 1,
       repositories: ['a', 'b'],
     });
-    configParser.getRepoConfig.mockReturnValue({
+    configParser.getRepositoryConfig.mockReturnValue({
       repository: 'foo',
       logger,
     });
     await globalWorker.start();
     expect(configParser.parseConfigs.mock.calls.length).toBe(1);
-    expect(configParser.getRepoConfig.mock.calls).toMatchSnapshot();
-    expect(repositoryWorker.processRepo.mock.calls.length).toBe(2);
+    expect(configParser.getRepositoryConfig.mock.calls).toMatchSnapshot();
+    expect(repositoryWorker.renovateRepository.mock.calls.length).toBe(2);
   });
   it('catches errors', async () => {
     configParser.parseConfigs.mockImplementationOnce(() => {
