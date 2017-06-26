@@ -3,10 +3,12 @@ const branchWorker = require('../../../lib/workers/branch');
 
 const apis = require('../../../lib/workers/repository/apis');
 const onboarding = require('../../../lib/workers/repository/onboarding');
+const upgrades = require('../../../lib/workers/repository/upgrades');
 
 const logger = require('../../_fixtures/logger');
 
 jest.mock('../../../lib/workers/repository/onboarding');
+jest.mock('../../../lib/workers/repository/upgrades');
 jest.mock('../../../lib/workers/branch');
 
 apis.initApis = jest.fn(input => input);
@@ -30,29 +32,21 @@ describe('workers/repository', () => {
       onboarding.getOnboardingStatus.mockReturnValueOnce(true);
       await repositoryWorker.processRepo(config);
     });
+    it('calls branchWorker', async () => {
+      onboarding.getOnboardingStatus.mockReturnValueOnce(true);
+      upgrades.groupUpgradesByBranch.mockReturnValueOnce({
+        foo: {},
+        bar: {},
+        baz: {},
+      });
+      await repositoryWorker.processRepo(config);
+      expect(branchWorker.updateBranch.mock.calls.length).toBe(3);
+    });
     it('swallows errors', async () => {
       apis.initApis.mockImplementationOnce(() => {
         throw new Error('bad init');
       });
       await repositoryWorker.processRepo(config);
-    });
-  });
-  describe('updateBranchesSequentially(branchUpgrades, logger)', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-    it('handles empty case', async () => {
-      await repositoryWorker.updateBranchesSequentially({}, logger);
-      expect(branchWorker.updateBranch.mock.calls.length).toBe(0);
-    });
-    it('updates branches', async () => {
-      const branchUpgrades = {
-        foo: {},
-        bar: {},
-        baz: {},
-      };
-      await repositoryWorker.updateBranchesSequentially(branchUpgrades, logger);
-      expect(branchWorker.updateBranch.mock.calls.length).toBe(3);
     });
   });
 });
