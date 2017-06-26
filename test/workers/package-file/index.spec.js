@@ -1,13 +1,13 @@
-const packageFileWorker = require('../../lib/workers/package-file');
-const npmApi = require('../../lib/api/npm');
-const versionsHelper = require('../../lib/helpers/versions');
-const packageJsonHelper = require('../../lib/helpers/package-json');
-const logger = require('../_fixtures/logger');
+const packageFileWorker = require('../../../lib/workers/package-file');
+const npmApi = require('../../../lib/api/npm');
+const versionsHelper = require('../../../lib/helpers/versions');
+const packageJsonHelper = require('../../../lib/helpers/package-json');
+const logger = require('../../_fixtures/logger');
 
-jest.mock('../../lib/workers/branch');
-jest.mock('../../lib/workers/pr');
-jest.mock('../../lib/api/npm');
-jest.mock('../../lib/helpers/versions');
+jest.mock('../../../lib/workers/branch');
+jest.mock('../../../lib/workers/pr');
+jest.mock('../../../lib/api/npm');
+jest.mock('../../../lib/helpers/versions');
 
 describe('packageFileWorker', () => {
   describe('findUpgrades(dependencies, config)', () => {
@@ -295,7 +295,7 @@ describe('packageFileWorker', () => {
       packageFileWorker.assignDepConfigs = jest.fn(() => []);
       packageFileWorker.findUpgrades = jest.fn(() => []);
       packageJsonHelper.extractDependencies = jest.fn(() => []);
-      config = require('../../lib/config/defaults').getConfig();
+      config = require('../../../lib/config/defaults').getConfig();
       config.api = {
         getFileJson: jest.fn(() => ({})),
       };
