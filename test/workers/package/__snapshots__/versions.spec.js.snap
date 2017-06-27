@@ -3,6 +3,15 @@
 exports[`workers/package/versions .determineUpgrades(npmDep, config) disables major release separation (major) 1`] = `
 Array [
   Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "upgradeType": "pin",
+  },
+  Object {
     "automergeEnabled": false,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
@@ -39,6 +48,15 @@ Array [
     "newVersionMajor": 1,
     "upgradeType": "major",
   },
+  Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "upgradeType": "pin",
+  },
 ]
 `;
 
@@ -46,6 +64,8 @@ exports[`workers/package/versions .determineUpgrades(npmDep, config) pins minor 
 Array [
   Object {
     "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
     "isPin": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
@@ -74,11 +94,29 @@ Array [
     "newVersionMajor": 1,
     "upgradeType": "major",
   },
+  Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "upgradeType": "pin",
+  },
 ]
 `;
 
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns only one update if automerging any 1`] = `
 Array [
+  Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "upgradeType": "pin",
+  },
   Object {
     "automergeEnabled": true,
     "changeLogFromVersion": "0.4.4",
@@ -93,6 +131,15 @@ Array [
 
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns only one update if grouping 1`] = `
 Array [
+  Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "upgradeType": "pin",
+  },
   Object {
     "automergeEnabled": false,
     "changeLogFromVersion": "0.4.4",
@@ -152,6 +199,8 @@ exports[`workers/package/versions .determineUpgrades(npmDep, config) supports fu
 Array [
   Object {
     "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
     "isPin": true,
     "newVersion": "2.0.3",
     "newVersionMajor": 2,
@@ -194,6 +243,15 @@ Array [
     "newVersionMajor": 1,
     "upgradeType": "major",
   },
+  Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "upgradeType": "pin",
+  },
 ]
 `;
 
@@ -216,6 +274,15 @@ Array [
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "upgradeType": "major",
+  },
+  Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "upgradeType": "pin",
   },
 ]
 `;
@@ -245,6 +312,15 @@ Array [
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "upgradeType": "minor",
+  },
+  Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "1.3.0",
+    "newVersionMajor": 1,
+    "upgradeType": "pin",
   },
 ]
 `;
@@ -299,6 +375,15 @@ Array [
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "upgradeType": "minor",
+  },
+  Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "1.0.1",
+    "newVersionMajor": 1,
+    "upgradeType": "pin",
   },
 ]
 `;
@@ -393,6 +478,15 @@ Array [
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "upgradeType": "minor",
+  },
+  Object {
+    "automergeEnabled": true,
+    "groupName": "Pin Dependencies",
+    "groupPrTitle": "{{groupName}}",
+    "isPin": true,
+    "newVersion": "1.3.0",
+    "newVersionMajor": 1,
+    "upgradeType": "pin",
   },
 ]
 `;
