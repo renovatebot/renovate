@@ -64,7 +64,6 @@ module.exports = {
 
 ```
 $ node renovate --help
- INFO: Renovate starting
 
   Usage: renovate [options] [repositories...]
 
