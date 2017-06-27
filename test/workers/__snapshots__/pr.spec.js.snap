@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`workers/pr ensurePr(upgrades, logger) should return unmodified existing PR 1`] = `Array []`;
