@@ -15,6 +15,10 @@ const npmResponse = {
         foo: 1,
       },
     },
+    repository: {
+      type: 'git',
+      url: 'git://github.com/renovateapp/dummy.git',
+    },
   },
 };
 
@@ -27,6 +31,17 @@ describe('api/npm', () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => Promise.resolve(npmResponse));
     const res = await npm.getDependency('foobar', logger);
+    expect(res).toMatchSnapshot();
+    const call = got.mock.calls[0];
+    expect(call).toMatchSnapshot();
+  });
+  it('should use homepage', async () => {
+    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
+    const npmResponseHomepage = Object.assign({}, npmResponse);
+    npmResponseHomepage.body.repository.url = '';
+    npmResponseHomepage.body.homepage = 'https://google.com';
+    got.mockImplementationOnce(() => Promise.resolve(npmResponseHomepage));
+    const res = await npm.getDependency('foobarhome', logger);
     expect(res).toMatchSnapshot();
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();

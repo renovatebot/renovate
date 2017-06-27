@@ -2,6 +2,10 @@
 
 exports[`api/npm should fetch package info from npm 1`] = `
 Object {
+  "dist-tags": undefined,
+  "homepage": undefined,
+  "name": undefined,
+  "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {
     "0.0.1": Object {},
   },
@@ -12,9 +16,7 @@ exports[`api/npm should fetch package info from npm 2`] = `
 Array [
   "https://npm.mycustomregistry.com/foobar",
   Object {
-    "headers": Object {
-      "accept": "application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*",
-    },
+    "headers": Object {},
     "json": true,
   },
 ]
@@ -22,6 +24,10 @@ Array [
 
 exports[`api/npm should send an authorization header if provided 1`] = `
 Object {
+  "dist-tags": undefined,
+  "homepage": "https://google.com",
+  "name": undefined,
+  "repositoryUrl": "https://google.com",
   "versions": Object {
     "0.0.1": Object {},
   },
@@ -33,9 +39,30 @@ Array [
   "https://npm.mycustomregistry.com/foobar",
   Object {
     "headers": Object {
-      "accept": "application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*",
       "authorization": "Basic 1234",
     },
+    "json": true,
+  },
+]
+`;
+
+exports[`api/npm should use homepage 1`] = `
+Object {
+  "dist-tags": undefined,
+  "homepage": "https://google.com",
+  "name": undefined,
+  "repositoryUrl": "https://google.com",
+  "versions": Object {
+    "0.0.1": Object {},
+  },
+}
+`;
+
+exports[`api/npm should use homepage 2`] = `
+Array [
+  "https://npm.mycustomregistry.com/foobarhome",
+  Object {
+    "headers": Object {},
     "json": true,
   },
 ]

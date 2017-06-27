@@ -183,6 +183,7 @@ describe('workers/pr', () => {
       config.isGitHub = true;
       config.currentVersion = '1.0.0';
       config.newVersion = '1.1.0';
+      config.repositoryUrl = 'https://github.com/renovateapp/dummy';
       config.api.getBranchPr = jest.fn(() => existingPr);
       config.api.updatePr = jest.fn();
       const pr = await prWorker.ensurePr([config], logger);
