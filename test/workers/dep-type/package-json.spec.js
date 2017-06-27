@@ -39,13 +39,21 @@ describe('helpers/package-json', () => {
         .every(dep => dep.depType && dep.depName && dep.currentVersion)
         .should.eql(true);
     });
-    it('supports null devDependencies', () => {
+    it('supports null devDependencies indirect', () => {
       const extractedDependencies = packageJson.extractDependencies(
         JSON.parse(input02Content),
         'dependencies'
       );
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(6);
+    });
+    it('supports null', () => {
+      const extractedDependencies = packageJson.extractDependencies(
+        JSON.parse(input02Content),
+        'fooDependencies'
+      );
+      extractedDependencies.should.be.instanceof(Array);
+      extractedDependencies.should.have.length(0);
     });
   });
 });
