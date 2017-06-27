@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/workers/dep-type/index getDepConfig(depTypeConfig, dep) applies only one rule 1`] = `undefined`;

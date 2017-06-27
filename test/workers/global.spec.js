@@ -1,7 +1,6 @@
 const globalWorker = require('../../lib/workers/global');
 const repositoryWorker = require('../../lib/workers/repository');
 const configParser = require('../../lib/config');
-const logger = require('../_fixtures/logger');
 
 describe('lib/workers/global', () => {
   beforeEach(() => {
@@ -21,13 +20,8 @@ describe('lib/workers/global', () => {
       foo: 1,
       repositories: ['a', 'b'],
     });
-    configParser.getRepositoryConfig.mockReturnValue({
-      repository: 'foo',
-      logger,
-    });
     await globalWorker.start();
     expect(configParser.parseConfigs.mock.calls.length).toBe(1);
-    expect(configParser.getRepositoryConfig.mock.calls).toMatchSnapshot();
     expect(repositoryWorker.renovateRepository.mock.calls.length).toBe(2);
   });
   it('catches errors', async () => {
