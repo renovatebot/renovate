@@ -1,11 +1,11 @@
 const packageJson = require('../../../lib/workers/dep-type/package-json');
 const pkgWorker = require('../../../lib/workers/package/index');
 const depTypeWorker = require('../../../lib/workers/dep-type/index');
-// const configParser = require('../../../lib/config');
+
+const logger = require('../../_fixtures/logger');
 
 jest.mock('../../../lib/workers/dep-type/package-json');
 jest.mock('../../../lib/workers/package/index');
-jest.mock('../../../lib/config');
 
 pkgWorker.findUpgrades = jest.fn(() => ['a']);
 
@@ -38,6 +38,40 @@ describe('lib/workers/dep-type/index', () => {
       ]);
       const res = await depTypeWorker.findUpgrades({}, config);
       expect(res).toHaveLength(2);
+    });
+  });
+  describe('getDepConfig(depTypeConfig, dep)', () => {
+    const depTypeConfig = {
+      foo: 'bar',
+      logger,
+      packages: [
+        {
+          packageName: 'a',
+          x: 2,
+        },
+        {
+          packagePattern: 'a',
+          y: 2,
+        },
+      ],
+    };
+    it('applies only one rule', () => {
+      const dep = {
+        depName: 'a',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBe(2);
+      expect(res.y).toBeUndefined();
+      expect(res.packages).toBeUndefined();
+    });
+    it('applies the second rule', () => {
+      const dep = {
+        depName: 'abc',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBeUndefined();
+      expect(res.y).toBe(2);
+      expect(res.packages).toBeUndefined();
     });
   });
 });
