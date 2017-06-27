@@ -1,10 +1,10 @@
-const versions = require('../../../lib/workers/package/versions');
+const versions = require('../../../lib/workers/dependency/versions');
 const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
 
 let config;
 
-describe('workers/package/versions', () => {
+describe('workers/dependency/versions', () => {
   beforeEach(() => {
     config = require('../../../lib/config/defaults').getConfig();
   });

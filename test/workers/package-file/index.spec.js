@@ -1,19 +1,23 @@
-const packageFileWorker = require('../../../lib/workers/package-file');
+const packageFileWorker = require('../../../lib/workers/dependency-file');
 const npmApi = require('../../../lib/api/npm');
-const versionsHelper = require('../../../lib/workers/package/versions');
-const packageJson = require('../../../lib/workers/package-file/package-json');
+const versionsHelper = require('../../../lib/workers/dependency/versions');
+const packageJson = require('../../../lib/workers/dep-type/package-json');
 const logger = require('../../_fixtures/logger');
 
 jest.mock('../../../lib/workers/branch');
 jest.mock('../../../lib/workers/pr');
 jest.mock('../../../lib/api/npm');
-jest.mock('../../../lib/workers/package/versions');
+jest.mock('../../../lib/workers/dependency/versions');
 
 describe('packageFileWorker', () => {
-  describe('findUpgrades(dependencies, config)', () => {
+  describe('findUpgrades(config)', () => {
     let config;
     beforeEach(() => {
-      config = {};
+      config = {
+        api: {
+          getFileJson: jest.fn(),
+        },
+      };
       packageFileWorker.updateBranch = jest.fn();
     });
     it('handles null', async () => {
@@ -289,7 +293,7 @@ describe('packageFileWorker', () => {
       expect(depTypeConfig).toMatchObject(expectedResult);
     });
   });
-  describe('findPackageFileUpgrades(config)', () => {
+  describe('getUpgrades(config)', () => {
     let config;
     beforeEach(() => {
       packageFileWorker.assignDepConfigs = jest.fn(() => []);
@@ -303,7 +307,7 @@ describe('packageFileWorker', () => {
     });
     it('returns empty array if no package content', async () => {
       config.api.getFileJson.mockReturnValueOnce(null);
-      const res = await packageFileWorker.findPackageFileUpgrades(config);
+      const res = await packageFileWorker.findUpgrades(config);
       expect(res).toEqual([]);
     });
     it('returns empty array if config disabled', async () => {
@@ -312,7 +316,7 @@ describe('packageFileWorker', () => {
           enabled: false,
         },
       });
-      const res = await packageFileWorker.findPackageFileUpgrades(config);
+      const res = await packageFileWorker.findUpgrades(config);
       expect(res).toEqual([]);
     });
     it('extracts dependencies for each depType', async () => {
@@ -323,7 +327,7 @@ describe('packageFileWorker', () => {
           foo: 'bar',
         },
       ];
-      const res = await packageFileWorker.findPackageFileUpgrades(config);
+      const res = await packageFileWorker.findUpgrades(config);
       expect(res).toEqual([]);
       expect(packageJson.extractDependencies.mock.calls).toMatchSnapshot();
     });
@@ -335,13 +339,13 @@ describe('packageFileWorker', () => {
       ]);
       packageFileWorker.assignDepConfigs.mockReturnValueOnce(['a']);
       packageFileWorker.findUpgrades.mockReturnValueOnce(['a']);
-      const res = await packageFileWorker.findPackageFileUpgrades(config);
+      const res = await packageFileWorker.findUpgrades(config);
       expect(res).toHaveLength(1);
       expect(res).toMatchSnapshot();
     });
     it('maintains yarn.lock', async () => {
       config.maintainYarnLock = true;
-      const res = await packageFileWorker.findPackageFileUpgrades(config);
+      const res = await packageFileWorker.findUpgrades(config);
       expect(res).toHaveLength(1);
     });
   });

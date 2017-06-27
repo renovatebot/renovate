@@ -1,8 +1,8 @@
 const upgrades = require('../../../lib/workers/repository/upgrades');
-const packageFileWorker = require('../../../lib/workers/package-file');
+const packageFileWorker = require('../../../lib/workers/dependency-file');
 const logger = require('../../_fixtures/logger');
 
-jest.mock('../../../lib/workers/package-file');
+jest.mock('../../../lib/workers/dependency-file');
 
 describe('workers/repository/upgrades', () => {
   describe('determineRepoUpgrades(config)', () => {
@@ -24,7 +24,7 @@ describe('workers/repository/upgrades', () => {
           packageFile: 'backend/package.json',
         },
       ];
-      packageFileWorker.findPackageFileUpgrades.mockReturnValue([]);
+      packageFileWorker.findUpgrades.mockReturnValue([]);
       const res = await upgrades.determineRepoUpgrades(config);
       expect(res.length).toBe(0);
     });
@@ -38,8 +38,8 @@ describe('workers/repository/upgrades', () => {
           fileName: 'frontend/package.json',
         },
       ];
-      packageFileWorker.findPackageFileUpgrades.mockReturnValueOnce(['a']);
-      packageFileWorker.findPackageFileUpgrades.mockReturnValueOnce(['b', 'c']);
+      packageFileWorker.findUpgrades.mockReturnValueOnce(['a']);
+      packageFileWorker.findUpgrades.mockReturnValueOnce(['b', 'c']);
       const res = await upgrades.determineRepoUpgrades(config);
       expect(res.length).toBe(3);
     });

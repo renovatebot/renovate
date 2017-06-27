@@ -156,7 +156,7 @@ Array [
 ]
 `;
 
-exports[`packageFileWorker findPackageFileUpgrades(config) extracts dependencies for each depType 1`] = `
+exports[`packageFileWorker getUpgrades(config) extracts dependencies for each depType 1`] = `
 Array [
   Array [
     Object {},
@@ -168,7 +168,7 @@ Array [
 ]
 `;
 
-exports[`packageFileWorker findPackageFileUpgrades(config) filters dependencies 1`] = `
+exports[`packageFileWorker getUpgrades(config) filters dependencies 1`] = `
 Array [
   "a",
 ]
