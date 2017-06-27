@@ -3,11 +3,9 @@
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles depType config with override 1`] = `
 Array [
   Object {
-    "config": Object {
-      "foo": "beta",
-    },
     "depName": "a",
     "depType": "dependencies",
+    "foo": "beta",
   },
 ]
 `;
@@ -15,12 +13,10 @@ Array [
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles depType config without override 1`] = `
 Array [
   Object {
-    "config": Object {
-      "alpha": "beta",
-      "foo": "bar",
-    },
+    "alpha": "beta",
     "depName": "a",
     "depType": "dependencies",
+    "foo": "bar",
   },
 ]
 `;
@@ -28,16 +24,12 @@ Array [
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles multiple deps 1`] = `
 Array [
   Object {
-    "config": Object {
-      "foo": "bar",
-    },
     "depName": "a",
+    "foo": "bar",
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-    },
     "depName": "b",
+    "foo": "bar",
   },
 ]
 `;
@@ -45,31 +37,23 @@ Array [
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles non-regex package name 1`] = `
 Array [
   Object {
-    "config": Object {
-      "foo": "bar",
-      "labels": Array [
-        "eslint",
-      ],
-    },
     "depName": "eslint",
+    "foo": "bar",
+    "labels": Array [
+      "eslint",
+    ],
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-    },
     "depName": "eslint-foo",
+    "foo": "bar",
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-    },
     "depName": "a",
+    "foo": "bar",
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-    },
     "depName": "also-eslint",
+    "foo": "bar",
   },
 ]
 `;
@@ -77,13 +61,11 @@ Array [
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles package config 1`] = `
 Array [
   Object {
-    "config": Object {
-      "foo": "bar",
-      "labels": Array [
-        "renovate",
-      ],
-    },
     "depName": "a",
+    "foo": "bar",
+    "labels": Array [
+      "renovate",
+    ],
   },
 ]
 `;
@@ -91,37 +73,29 @@ Array [
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles regex package pattern 1`] = `
 Array [
   Object {
-    "config": Object {
-      "foo": "bar",
-      "labels": Array [
-        "eslint",
-      ],
-    },
     "depName": "eslint",
+    "foo": "bar",
+    "labels": Array [
+      "eslint",
+    ],
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-      "labels": Array [
-        "eslint",
-      ],
-    },
     "depName": "eslint-foo",
+    "foo": "bar",
+    "labels": Array [
+      "eslint",
+    ],
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-    },
     "depName": "a",
+    "foo": "bar",
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-      "labels": Array [
-        "eslint",
-      ],
-    },
     "depName": "also-eslint",
+    "foo": "bar",
+    "labels": Array [
+      "eslint",
+    ],
   },
 ]
 `;
@@ -129,34 +103,26 @@ Array [
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles regex wildcard package pattern 1`] = `
 Array [
   Object {
-    "config": Object {
-      "foo": "bar",
-      "labels": Array [
-        "eslint",
-      ],
-    },
     "depName": "eslint",
+    "foo": "bar",
+    "labels": Array [
+      "eslint",
+    ],
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-      "labels": Array [
-        "eslint",
-      ],
-    },
     "depName": "eslint-foo",
+    "foo": "bar",
+    "labels": Array [
+      "eslint",
+    ],
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-    },
     "depName": "a",
+    "foo": "bar",
   },
   Object {
-    "config": Object {
-      "foo": "bar",
-    },
     "depName": "also-eslint",
+    "foo": "bar",
   },
 ]
 `;
@@ -164,10 +130,8 @@ Array [
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) handles string deps 1`] = `
 Array [
   Object {
-    "config": Object {
-      "foo": "bar",
-    },
     "depName": "a",
+    "foo": "bar",
   },
 ]
 `;
@@ -175,11 +139,9 @@ Array [
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) nested package config overrides depType and general config 1`] = `
 Array [
   Object {
-    "config": Object {
-      "foo": "gamma",
-    },
     "depName": "a",
     "depType": "dependencies",
+    "foo": "gamma",
   },
 ]
 `;
@@ -187,11 +149,9 @@ Array [
 exports[`packageFileWorker assignDepConfigs(inputConfig, deps) package config overrides depType and general config 1`] = `
 Array [
   Object {
-    "config": Object {
-      "foo": "gamma",
-    },
     "depName": "a",
     "depType": "dependencies",
+    "foo": "gamma",
   },
 ]
 `;
