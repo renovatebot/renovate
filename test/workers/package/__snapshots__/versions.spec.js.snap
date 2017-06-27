@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) disables major release separation (major) 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) disables major release separation (major) 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -14,7 +14,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) disables major release separation (minor) 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) disables major release separation (minor) 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -28,7 +28,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) ignores pinning for ranges when other upgrade exists 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -42,7 +42,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) pins minor ranged versions 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) pins minor ranged versions 1`] = `
 Array [
   Object {
     "automergeEnabled": true,
@@ -54,7 +54,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) returns both updates if automerging minor 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns both updates if automerging minor 1`] = `
 Array [
   Object {
     "automergeEnabled": true,
@@ -77,7 +77,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) returns only one update if automerging any 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns only one update if automerging any 1`] = `
 Array [
   Object {
     "automergeEnabled": true,
@@ -91,7 +91,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) returns only one update if grouping 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns only one update if grouping 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -105,7 +105,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) should allow unstable versions if the current version is unstable 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) should allow unstable versions if the current version is unstable 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -119,7 +119,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) should treat zero zero caret ranges as pinned 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) should treat zero zero caret ranges as pinned 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -134,7 +134,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports > latest versions if configured 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) supports > latest versions if configured 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -148,7 +148,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports future versions if already future 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) supports future versions if already future 1`] = `
 Array [
   Object {
     "automergeEnabled": true,
@@ -160,7 +160,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports future versions if configured 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) supports future versions if configured 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -174,7 +174,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports minor and major upgrades for ranged versions 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) supports minor and major upgrades for ranged versions 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -197,7 +197,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) supports minor and major upgrades for tilde ranges 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) supports minor and major upgrades for tilde ranges 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -220,7 +220,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades .x major ranges without pinning 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades .x major ranges without pinning 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -235,7 +235,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades .x minor ranges 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades .x minor ranges 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -249,7 +249,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades .x minor ranges without pinning 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades .x minor ranges without pinning 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -264,7 +264,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades less than equal ranges without pinning 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades less than equal ranges without pinning 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -289,7 +289,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades minor ranged versions 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades minor ranged versions 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -303,7 +303,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades multiple caret ranges without pinning 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades multiple caret ranges without pinning 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -328,7 +328,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades multiple tilde ranges without pinning 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades multiple tilde ranges without pinning 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -353,7 +353,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades shorthand major ranges without pinning 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades shorthand major ranges without pinning 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -368,7 +368,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades shorthand minor ranges without pinning 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades shorthand minor ranges without pinning 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -383,7 +383,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades tilde ranges 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades tilde ranges 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
@@ -397,7 +397,7 @@ Array [
 ]
 `;
 
-exports[`helpers/versions .determineUpgrades(dep, currentVersion, defaultConfig) upgrades tilde ranges without pinning 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades tilde ranges without pinning 1`] = `
 Array [
   Object {
     "automergeEnabled": false,
