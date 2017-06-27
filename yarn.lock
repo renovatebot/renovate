@@ -1442,6 +1442,10 @@ gh-got@6.0.0:
     got "^7.0.0"
     is-plain-obj "^1.1.0"
 
+github-url-from-git@1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/github-url-from-git/-/github-url-from-git-1.5.0.tgz#f985fedcc0a9aa579dc88d7aff068d55cc6251a0"
+
 gl-got@7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/gl-got/-/gl-got-7.0.0.tgz#f0183d81aace8c3b77dcea13812837b6506cb0bb"
