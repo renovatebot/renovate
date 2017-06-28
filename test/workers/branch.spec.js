@@ -16,7 +16,6 @@ describe('workers/branch', () => {
     const branchName = 'foo';
     beforeEach(() => {
       config = {
-        isGitHub: true,
         api: {
           branchExists: jest.fn(() => true),
           deleteBranch: jest.fn(),
