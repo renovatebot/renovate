@@ -47,9 +47,29 @@ describe('getLockFile(packageJson, config)', () => {
       name: 'package-lock.json',
       contents: 'New package-lock.json',
     };
-    expect(await npmHelper.getLockFile('package.json', '', api)).toMatchObject(
-      packageLockFile
-    );
+    expect(
+      await npmHelper.getLockFile('package.json', '', api, '5.0.4')
+    ).toMatchObject(packageLockFile);
+  });
+  it('throws if no npm', async () => {
+    api.getFileContent.mockReturnValueOnce('Existing package-lock.json');
+    let e;
+    try {
+      await npmHelper.getLockFile('package.json', '', api, '');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toMatchSnapshot();
+  });
+  it('throws if wrong npm version', async () => {
+    api.getFileContent.mockReturnValueOnce('Existing package-lock.json');
+    let e;
+    try {
+      await npmHelper.getLockFile('package.json', '', api, '4.0.0');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toMatchSnapshot();
   });
 });
 
