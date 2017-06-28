@@ -24,7 +24,7 @@ describe('packageFileWorker', () => {
       config.enabled = false;
       config.api.getFileJson.mockReturnValueOnce({});
       const res = await packageFileWorker.findUpgrades(config);
-      expect(config.api.getFileJson.mock.calls[0][1]).toBe(null);
+      expect(config.api.getFileJson.mock.calls[0][1]).toBeUndefined();
       expect(res).toEqual([]);
     });
     it('uses onboarding branch', async () => {
