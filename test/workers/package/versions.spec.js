@@ -14,6 +14,10 @@ describe('workers/package/versions', () => {
       config.currentVersion = 'invalid';
       versions.determineUpgrades(qJson, config).should.have.length(0);
     });
+    it('return empty if using a known tag', () => {
+      config.currentVersion = 'next';
+      versions.determineUpgrades(qJson, config).should.have.length(0);
+    });
     it('return empty if null versions', () => {
       config.currentVersion = '1.0.0';
       const testDep = {
