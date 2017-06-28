@@ -298,7 +298,7 @@ describe('api/github', () => {
     });
   });
   describe('findFilePaths(fileName)', () => {
-    it('should return default value if none found', async () => {
+    it('should return empty array if none found', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
         body: {
@@ -307,7 +307,7 @@ describe('api/github', () => {
       }));
       const files = await github.findFilePaths('package.json');
       expect(ghGot.mock.calls).toMatchSnapshot();
-      expect(files).toMatchObject(['package.json']);
+      expect(files.length).toBe(0);
     });
     it('should return the files matching the fileName', async () => {
       await initRepo('some/repo', 'token');

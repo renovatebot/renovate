@@ -176,10 +176,10 @@ describe('api/gitlab', () => {
     });
   });
   describe('findFilePaths(fileName)', () => {
-    it('should return the fileName', async () => {
+    it('should return empty array', async () => {
       await initRepo('some/repo', 'token');
       const files = await gitlab.findFilePaths('package.json');
-      expect(files).toEqual(['package.json']);
+      expect(files.length).toBe(0);
     });
   });
   describe('branchExists(branchName)', () => {
