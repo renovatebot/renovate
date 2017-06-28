@@ -16,7 +16,7 @@ describe('workers/branch', () => {
     const branchName = 'foo';
     beforeEach(() => {
       config = {
-        platform: 'github',
+        isGitHub: true,
         api: {
           branchExists: jest.fn(() => true),
           deleteBranch: jest.fn(),
@@ -65,7 +65,7 @@ describe('workers/branch', () => {
       );
     });
     it('returns undefined if unmergeable and can rebase (gitlab)', async () => {
-      config.platform = 'gitlab';
+      config.isGitHub = false;
       config.api.getBranchPr.mockReturnValue({
         isUnmergeable: true,
         canRebase: true,
