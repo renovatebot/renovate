@@ -417,7 +417,7 @@ describe('api/gitlab', () => {
   describe('updatePr(prNo, title, body)', () => {
     jest.resetAllMocks();
     it('updates the PR', async () => {
-      await gitlab.updatePr();
+      await gitlab.updatePr(1, 'title', 'body');
       expect(glGot.put.mock.calls.length).toEqual(1);
     });
   });

@@ -26,16 +26,6 @@ describe('lib/workers/repository/onboarding', () => {
       ).toBe(-1);
       expect(config.api.commitFilesToBranch.mock.calls).toMatchSnapshot();
     });
-    it('should adapt for gitlab phrasing', async () => {
-      config.platform = 'gitlab';
-      await onboarding.onboardRepository(config);
-      expect(config.api.createPr.mock.calls[0][2].indexOf('Pull Request')).toBe(
-        -1
-      );
-      expect(
-        config.api.createPr.mock.calls[0][2].indexOf('Merge Request')
-      ).not.toBe(-1);
-    });
   });
   describe('getOnboardingStatus(config)', () => {
     let config;
