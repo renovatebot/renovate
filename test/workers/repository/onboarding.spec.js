@@ -30,6 +30,7 @@ describe('lib/workers/repository/onboarding', () => {
       const existingPrBody = `Welcome to [Renovate](https://keylocation.sg/our-tech/renovate)!
 
 This is an onboarding PR to help you understand and configure Renovate before any changes are made to any \`package.json\` files. Once you close this Pull Request, we will begin keeping your dependencies up-to-date via automated Pull Requests.
+
 ---
 
 It looks like your repository dependencies are already up-to-date and no initial Pull Requests will be necessary.
