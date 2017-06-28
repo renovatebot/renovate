@@ -9,9 +9,7 @@ const logger = require('../../_fixtures/logger');
 
 apis.initApis = jest.fn(input => input);
 apis.mergeRenovateJson = jest.fn(input => input);
-apis.detectPackageFiles = jest.fn(input =>
-  Object.assign(input, { packageFiles: ['package.json'] })
-);
+apis.detectPackageFiles = jest.fn();
 
 describe('workers/repository', () => {
   describe('renovateRepository', () => {
@@ -23,20 +21,32 @@ describe('workers/repository', () => {
       upgrades.groupUpgradesByBranch = jest.fn(() => ({}));
       branchWorker.updateBranch = jest.fn();
       config = {
-        api: {},
+        api: {
+          getFileJson: jest.fn(),
+        },
         logger,
         packageFiles: [],
       };
     });
     it('skips repository if no package.json', async () => {
-      config.api.getFileJson = jest.fn(() => ({}));
+      apis.detectPackageFiles.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(0);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('does not skip repository if package.json', async () => {
+      apis.detectPackageFiles.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
-      onboarding.getOnboardingStatus.mockReturnValueOnce(false);
+      apis.mergeRenovateJson.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
+      apis.mergeRenovateJson.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
       expect(branchWorker.updateBranch.mock.calls.length).toBe(0);
@@ -44,6 +54,7 @@ describe('workers/repository', () => {
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('calls branchWorker', async () => {
+      config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
       onboarding.getOnboardingStatus.mockReturnValueOnce(true);
       upgrades.groupUpgradesByBranch.mockReturnValueOnce({

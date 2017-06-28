@@ -316,7 +316,7 @@ Array [
 ]
 `;
 
-exports[`api/github findFilePaths(fileName) should return default value if none found 1`] = `
+exports[`api/github findFilePaths(fileName) should return empty array if none found 1`] = `
 Array [
   Array [
     "repos/some/repo",
