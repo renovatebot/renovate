@@ -65,7 +65,7 @@ describe('workers/branch', () => {
       );
     });
     it('returns undefined if unmergeable and can rebase (gitlab)', async () => {
-      config.isGitHub = false;
+      config.isGitLab = true;
       config.api.getBranchPr.mockReturnValue({
         isUnmergeable: true,
         canRebase: true,
