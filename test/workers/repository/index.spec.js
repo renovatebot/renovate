@@ -7,10 +7,6 @@ const upgrades = require('../../../lib/workers/repository/upgrades');
 
 const logger = require('../../_fixtures/logger');
 
-jest.mock('../../../lib/workers/repository/onboarding');
-jest.mock('../../../lib/workers/repository/upgrades');
-jest.mock('../../../lib/workers/branch');
-
 apis.initApis = jest.fn(input => input);
 apis.mergeRenovateJson = jest.fn(input => input);
 apis.detectPackageFiles = jest.fn(input => input);
@@ -19,6 +15,10 @@ describe('workers/repository', () => {
   describe('renovateRepository', () => {
     let config;
     beforeEach(() => {
+      onboarding.getOnboardingStatus = jest.fn();
+      onboarding.ensurePr = jest.fn();
+      upgrades.groupUpgradesByBranch = jest.fn();
+      branchWorker.updateBranch = jest.fn();
       config = {
         logger,
         packageFiles: [],
@@ -41,6 +41,17 @@ describe('workers/repository', () => {
       });
       await repositoryWorker.renovateRepository(config);
       expect(branchWorker.updateBranch.mock.calls.length).toBe(3);
+    });
+    it('calls ensurePr', async () => {
+      onboarding.getOnboardingStatus.mockReturnValueOnce(false);
+      upgrades.groupUpgradesByBranch.mockReturnValueOnce({
+        foo: {},
+        bar: {},
+        baz: {},
+      });
+      await repositoryWorker.renovateRepository(config);
+      expect(branchWorker.updateBranch.mock.calls.length).toBe(0);
+      expect(onboarding.ensurePr.mock.calls.length).toBe(1);
     });
     it('swallows errors', async () => {
       apis.initApis.mockImplementationOnce(() => {

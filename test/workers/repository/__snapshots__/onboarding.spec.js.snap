@@ -1,33 +1,70 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/workers/repository/onboarding onboardRepository(config) should commit files and create PR 1`] = `
+exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates complex pr 1`] = `
 Array [
   Array [
     "renovate/configure",
-    Array [
-      Object {
-        "contents": "{
-  \\"enabled\\": true,
-  \\"packageFiles\\": [],
-  \\"depTypes\\": [\\"dependencies\\", \\"devDependencies\\", \\"optionalDependencies\\"],
-  \\"ignoreDeps\\": [],
-  \\"pinVersions\\": true,
-  \\"separateMajorReleases\\": true,
-  \\"rebaseStalePrs\\": false,
-  \\"prCreation\\": \\"immediate\\",
-  \\"automerge\\": \\"none\\",
-  \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
-  \\"commitMessage\\": \\"Update dependency {{depName}} to version {{newVersion}}\\",
-  \\"maintainYarnLock\\": false,
-  \\"labels\\": [],
-  \\"assignees\\": [],
-  \\"reviewers\\": []
-}
+    "Configure Renovate",
+    "Welcome to [Renovate](https://keylocation.sg/our-tech/renovate)!
+
+This is an onboarding PR to help you understand and configure Renovate before any changes are made to any \`package.json\` files. Once you close this Pull Request, we will begin keeping your dependencies up-to-date via automated Pull Requests.
+---
+
+
+With your current configuration, renovate will initially create the following Pull Requests:
+
+| Pull Requests (2) |
+| ------ |
+| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` from \`^1.0.0\` to \`1.1.0\`</li></ul> |
+| **Upgrade b**<ul><li>Branch name: \`branch-b\`</li><li>Upgrades [b](https://b) in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
+
+
+Would you like to change this? Simply edit the \`renovate.json\` in this branch and Renovate will update this Pull Request description the next time it runs.
+
+The [Configuration](https://github.com/singapore/renovate/blob/master/docs/configuration.md) and [Configuration FAQ](https://github.com/singapore/renovate/blob/master/docs/faq.md) documents should be helpful if you wish to modify this behaviour.
+
+---
+
+#### Important!
+
+You do not need to *merge* this Pull Request - renovate will begin even if it's closed *unmerged*.
+In fact, you only need to add a \`renovate.json\` file to your repository if you wish to override any default settings. The file is included as part of this PR only in case you wish to change default settings before you start.
+
+Alternatively, you can add the same configuration settings into a \\"renovate\\" section of \`package.json\`, which might be more convenient if you have only one.
+
+If the default settings are all suitable for you, simply close this Pull Request unmerged and your first renovation will begin the next time the program is run.
 ",
-        "name": "renovate.json",
-      },
-    ],
-    "Add renovate.json",
+  ],
+]
+`;
+
+exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates pr 1`] = `
+Array [
+  Array [
+    "renovate/configure",
+    "Configure Renovate",
+    "Welcome to [Renovate](https://keylocation.sg/our-tech/renovate)!
+
+This is an onboarding PR to help you understand and configure Renovate before any changes are made to any \`package.json\` files. Once you close this Pull Request, we will begin keeping your dependencies up-to-date via automated Pull Requests.
+---
+
+It looks like your repository dependencies are already up-to-date and no initial Pull Requests will be necessary.
+
+Would you like to change this? Simply edit the \`renovate.json\` in this branch and Renovate will update this Pull Request description the next time it runs.
+
+The [Configuration](https://github.com/singapore/renovate/blob/master/docs/configuration.md) and [Configuration FAQ](https://github.com/singapore/renovate/blob/master/docs/faq.md) documents should be helpful if you wish to modify this behaviour.
+
+---
+
+#### Important!
+
+You do not need to *merge* this Pull Request - renovate will begin even if it's closed *unmerged*.
+In fact, you only need to add a \`renovate.json\` file to your repository if you wish to override any default settings. The file is included as part of this PR only in case you wish to change default settings before you start.
+
+Alternatively, you can add the same configuration settings into a \\"renovate\\" section of \`package.json\`, which might be more convenient if you have only one.
+
+If the default settings are all suitable for you, simply close this Pull Request unmerged and your first renovation will begin the next time the program is run.
+",
   ],
 ]
 `;
