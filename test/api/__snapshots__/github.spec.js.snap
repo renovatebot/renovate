@@ -316,6 +316,20 @@ Array [
 ]
 `;
 
+exports[`api/github findFilePaths(fileName) should return default value if none found 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "search/code?q=repo:some/repo+filename:package.json",
+  ],
+]
+`;
+
 exports[`api/github findFilePaths(fileName) should return the files matching the fileName 1`] = `
 Array [
   Array [
