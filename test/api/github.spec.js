@@ -298,6 +298,17 @@ describe('api/github', () => {
     });
   });
   describe('findFilePaths(fileName)', () => {
+    it('should return default value if none found', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          items: [],
+        },
+      }));
+      const files = await github.findFilePaths('package.json');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(files).toMatchObject(['package.json']);
+    });
     it('should return the files matching the fileName', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({

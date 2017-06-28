@@ -8,6 +8,7 @@ describe('packageFileWorker', () => {
     let config;
     beforeEach(() => {
       config = {
+        repoIsOnboarded: true,
         api: {
           getFileJson: jest.fn(),
         },
@@ -23,6 +24,17 @@ describe('packageFileWorker', () => {
       config.enabled = false;
       config.api.getFileJson.mockReturnValueOnce({});
       const res = await packageFileWorker.findUpgrades(config);
+      expect(config.api.getFileJson.mock.calls[0][1]).toBe(null);
+      expect(res).toEqual([]);
+    });
+    it('uses onboarding branch', async () => {
+      config.enabled = false;
+      config.repoIsOnboarded = false;
+      config.api.getFileJson.mockReturnValueOnce({});
+      const res = await packageFileWorker.findUpgrades(config);
+      expect(config.api.getFileJson.mock.calls[0][1]).toEqual(
+        'renovate/configure'
+      );
       expect(res).toEqual([]);
     });
     it('returns empty array if config disabled', async () => {
