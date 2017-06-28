@@ -1,6 +1,8 @@
-const globalWorker = require('../../lib/workers/global');
-const repositoryWorker = require('../../lib/workers/repository');
-const configParser = require('../../lib/config');
+const globalWorker = require('../../../lib/workers/global');
+const repositoryWorker = require('../../../lib/workers/repository');
+const configParser = require('../../../lib/config');
+
+jest.mock('../../../lib/workers/global/versions');
 
 describe('lib/workers/global', () => {
   beforeEach(() => {

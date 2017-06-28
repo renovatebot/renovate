@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getLockFile(packageJson, config) throws if no npm 1`] = `[Error: Need to generate package-lock.json but npm is not installed]`;
+
+exports[`getLockFile(packageJson, config) throws if wrong npm version 1`] = `[Error: Need to generate package-lock.json but npm version is "4.0.0"]`;

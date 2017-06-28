@@ -109,6 +109,7 @@ describe('workers/branch', () => {
       config.currentVersion = '1.0.0';
       config.newVersion = '1.1.0';
       config.newVersionMajor = 1;
+      config.versions = {};
     });
     it('returns if new content matches old', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
@@ -249,7 +250,7 @@ describe('workers/branch', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('Could not generate new yarn.lock file');
+      expect(err.message).toBe('yarn not found');
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
@@ -268,7 +269,7 @@ describe('workers/branch', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('Could not generate new package-lock.json file');
+      expect(err.message).toBe('no package lock generated');
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(yarnHelper.getLockFile.mock.calls.length).toBe(1);
