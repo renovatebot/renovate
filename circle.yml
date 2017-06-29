@@ -20,3 +20,9 @@ test:
     - npm test
   post:
     - bash <(curl -s https://codecov.io/bash)
+
+deployment:
+  npm:
+    branch: master
+    commands:
+      - npm run semantic-release

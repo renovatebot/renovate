@@ -1,7 +1,7 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
-  "version": "8.48.1",
+  "version": "0.0.0-semantic-release",
   "bin": "dist/renovate.js",
   "scripts": {
     "build": "npm run transpile",
@@ -18,7 +18,8 @@
     "test-dirty": "git diff --exit-code",
     "test": "npm run lint && npm run jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
-    "update-docs": "npm run transpile && bash bin/update-docs.sh"
+    "update-docs": "npm run transpile && bash bin/update-docs.sh",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
     "type": "git",
@@ -69,6 +70,7 @@
     "babel-jest": "20.0.3",
     "babel-plugin-transform-async-to-generator": "6.24.1",
     "chai": "4.0.2",
+    "condition-circle": "1.5.0",
     "eslint": "3.19.0",
     "eslint-config-airbnb-base": "11.2.0",
     "eslint-config-prettier": "2.2.0",
@@ -79,7 +81,8 @@
     "mkdirp": "0.5.1",
     "np": "2.16.0",
     "prettier": "1.5.2",
-    "rimraf": "2.6.1"
+    "rimraf": "2.6.1",
+    "semantic-release": "6.3.6"
   },
   "babel": {
     "plugins": [
@@ -114,5 +117,8 @@
         "groupName": "jest"
       }
     ]
+  },
+  "release": {
+    "verifyConditions": "condition-circle"
   }
 }
