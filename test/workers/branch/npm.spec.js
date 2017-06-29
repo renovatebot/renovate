@@ -1,4 +1,4 @@
-const npmHelper = require('../../lib/helpers/npm');
+const npmHelper = require('../../../lib/workers/branch/npm');
 
 jest.mock('fs');
 jest.mock('child_process');

@@ -1,4 +1,4 @@
-const yarnHelper = require('../../lib/helpers/yarn');
+const yarnHelper = require('../../../lib/workers/branch/yarn');
 
 jest.mock('fs');
 jest.mock('child_process');
