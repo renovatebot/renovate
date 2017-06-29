@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`helpers/logger/config-serializer redacts sensitive fields 1`] = `
+exports[`logger/config-serializer redacts sensitive fields 1`] = `
 Object {
   "githubAppKey": "***********",
   "nottoken": "b",
@@ -8,7 +8,7 @@ Object {
 }
 `;
 
-exports[`helpers/logger/config-serializer replaces functions 1`] = `
+exports[`logger/config-serializer replaces functions 1`] = `
 Object {
   "api": "[Function]",
   "logger": "[Function]",
