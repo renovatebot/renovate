@@ -3,12 +3,12 @@ const prWorker = require('../../../lib/workers/pr');
 const npm = require('../../../lib/workers/branch/npm');
 const yarn = require('../../../lib/workers/branch/yarn');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-const packageJsonHelper = require('../../../lib/helpers/package-json');
+const packageJsonHelper = require('../../../lib/workers/branch/package-json');
 
 const logger = require('../../_fixtures/logger');
 
 jest.mock('../../../lib/workers/branch/yarn');
-jest.mock('../../../lib/helpers/package-json');
+jest.mock('../../../lib/workers/branch/package-json');
 
 describe('workers/branch', () => {
   describe('getParentBranch(branchName, config)', () => {
