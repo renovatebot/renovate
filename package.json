@@ -77,6 +77,7 @@
     "eslint-plugin-import": "2.6.1",
     "eslint-plugin-prettier": "2.1.2",
     "eslint-plugin-promise": "3.5.0",
+    "freeform-semantic-commit-analyzer": "1.1.8",
     "jest": "20.0.4",
     "mkdirp": "0.5.1",
     "np": "2.16.0",
@@ -119,6 +120,9 @@
     ]
   },
   "release": {
+    "analyzeCommits": {
+      "path": "./node_modules/freeform-semantic-commit-analyzer/dist/index.js"
+    },
     "verifyConditions": "condition-circle"
   }
 }
