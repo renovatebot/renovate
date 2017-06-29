@@ -1,7 +1,8 @@
 /node_modules
 /config.js
-/npm-debug.log
 /coverage
 /dist
+/tmp
 .DS_Store
-*.log
+.jest-cache
+/*.log

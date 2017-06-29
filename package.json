@@ -91,6 +91,7 @@
     ]
   },
   "jest": {
+    "cacheDirectory": ".jest-cache",
     "coverageDirectory": "./coverage",
     "collectCoverage": true,
     "collectCoverageFrom": [
