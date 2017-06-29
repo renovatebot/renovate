@@ -357,6 +357,12 @@ describe('workers/branch', () => {
       await branchWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
+    it('handles semantic commits', async () => {
+      config.upgradeType = 'minor';
+      config.semanticCommitsEnabled = true;
+      await branchWorker.updateBranch([config]);
+      expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
+    });
     it('handles errors', async () => {
       config.api.checkForClosedPr = jest.fn(() => {
         throw new Error('oops');
