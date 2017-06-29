@@ -12,6 +12,7 @@ dependencies:
   override:
     - yarn install --frozen-lockfile
   cache_directories:
+    - .jest-cache
     - ~/.cache/yarn
     - ~/.yarn
 
