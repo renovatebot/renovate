@@ -21,9 +21,7 @@ describe('config/github-app', () => {
     });
     it('returns empty list', async () => {
       ghApi.getInstallationRepositories = jest.fn(() => ({ repositories: [] }));
-      expect(
-        await githubApp.getUserRepositories('token', 123)
-      ).toHaveLength(0);
+      expect(await githubApp.getUserRepositories('token', 123)).toHaveLength(0);
     });
     it('returns a repository list', async () => {
       ghApi.getInstallationRepositories = jest.fn(() => ({
