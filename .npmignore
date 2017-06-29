@@ -1,5 +1,6 @@
 /bin
 /coverage
+/docs
 /test
 node_modules
 .DS_Store
@@ -7,6 +8,7 @@ node_modules
 .eslintrc.js
 .gitattributes
 .gitignore
+.jest-cache
 circle.yml
 config.js
 npm-debug.log
