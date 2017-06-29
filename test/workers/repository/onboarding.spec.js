@@ -96,6 +96,7 @@ If the default settings are all suitable for you, simply close this Pull Request
           findPr: jest.fn(),
         },
         logger,
+        detectedPackageFiles: true,
       };
     });
     it('returns true if onboarding is false', async () => {
