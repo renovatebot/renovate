@@ -6,7 +6,7 @@ describe('config/index', () => {
     let defaultArgv;
     let ghGot;
     let glGot;
-    let githubAppHelper;
+    let githubApp;
     beforeEach(() => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
@@ -15,9 +15,9 @@ describe('config/index', () => {
       ghGot = require('gh-got');
       jest.mock('gl-got');
       glGot = require('gl-got');
-      jest.mock('../../lib/helpers/github-app');
-      githubAppHelper = require('../../lib/helpers/github-app');
-      githubAppHelper.getRepositories = jest.fn();
+      jest.mock('../../lib/config/github-app');
+      githubApp = require('../../lib/config/github-app');
+      githubApp.getRepositories = jest.fn();
     });
     it('throws for invalid platform', async () => {
       const env = {};
@@ -92,7 +92,7 @@ describe('config/index', () => {
         '--github-app-id=5',
         '--github-app-key=abc',
       ]);
-      githubAppHelper.getRepositories.mockImplementationOnce(() => {
+      githubApp.getRepositories.mockImplementationOnce(() => {
         const result = [
           {
             repository: 'a/b',
@@ -102,7 +102,7 @@ describe('config/index', () => {
         return result;
       });
       await configParser.parseConfigs(env, defaultArgv);
-      expect(githubAppHelper.getRepositories.mock.calls.length).toBe(1);
+      expect(githubApp.getRepositories.mock.calls.length).toBe(1);
     });
     it('autodiscovers github platform', async () => {
       const env = {};
