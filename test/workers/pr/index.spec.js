@@ -186,6 +186,7 @@ describe('workers/pr', () => {
       config.repositoryUrl = 'https://github.com/renovateapp/dummy';
       config.api.getBranchPr = jest.fn(() => existingPr);
       config.api.updatePr = jest.fn();
+      config.semanticPrefix = '';
       const pr = await prWorker.ensurePr([config], logger);
       expect(config.api.updatePr.mock.calls).toMatchSnapshot();
       expect(config.api.updatePr.mock.calls.length).toBe(0);
