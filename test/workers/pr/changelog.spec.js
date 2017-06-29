@@ -1,10 +1,10 @@
 const changelog = require('changelog');
-const changelogHelper = require('../../lib/helpers/changelog');
-const logger = require('../_fixtures/logger');
+const changelogHelper = require('../../../lib/workers/pr/changelog');
+const logger = require('../../_fixtures/logger');
 
 jest.mock('changelog');
 
-describe('helpers/changelog', () => {
+describe('workers/pr/changelog', () => {
   describe('changelogHelper.getChangeLog(depName, fromVersion, newVersion, logger)', () => {
     it('returns empty if no fromVersion', async () => {
       expect(
