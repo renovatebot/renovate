@@ -1,4 +1,4 @@
-const githubAppHelper = require('../../lib/helpers/github-app');
+const githubApp = require('../../lib/config/github-app');
 const ghApi = require('../../lib/api/github');
 const fs = require('fs');
 const path = require('path');
@@ -9,10 +9,10 @@ const examplePrivateKey = fs.readFileSync(
   path.resolve(__dirname, '../_fixtures/jwt/example.pem')
 );
 
-describe('helpers/github-app', () => {
+describe('config/github-app', () => {
   describe('generateJwt', () => {
     it('returns a jwt for valid PEM file', () => {
-      expect(githubAppHelper.generateJwt(1, examplePrivateKey)).not.toBeNull();
+      expect(githubApp.generateJwt(1, examplePrivateKey)).not.toBeNull();
     });
   });
   describe('getUserRepositories', async () => {
@@ -21,16 +21,14 @@ describe('helpers/github-app', () => {
     });
     it('returns empty list', async () => {
       ghApi.getInstallationRepositories = jest.fn(() => ({ repositories: [] }));
-      expect(
-        await githubAppHelper.getUserRepositories('token', 123)
-      ).toHaveLength(0);
+      expect(await githubApp.getUserRepositories('token', 123)).toHaveLength(0);
     });
     it('returns a repository list', async () => {
       ghApi.getInstallationRepositories = jest.fn(() => ({
         repositories: [{ full_name: 'a' }, { full_name: 'b' }],
       }));
       expect(
-        await githubAppHelper.getUserRepositories('token', 123)
+        await githubApp.getUserRepositories('token', 123)
       ).toMatchSnapshot();
     });
   });
@@ -41,26 +39,26 @@ describe('helpers/github-app', () => {
       repositories: [],
     };
     beforeEach(() => {
-      githubAppHelper.generateJwt = jest.fn();
-      githubAppHelper.generateJwt.mockImplementationOnce(() => 'jwt');
-      githubAppHelper.getUserRepositories = jest.fn();
+      githubApp.generateJwt = jest.fn();
+      githubApp.generateJwt.mockImplementationOnce(() => 'jwt');
+      githubApp.getUserRepositories = jest.fn();
     });
     it('returns empty list if error', async () => {
       ghApi.getInstallations.mockImplementationOnce(() => {
         throw new Error('error');
       });
-      const results = await githubAppHelper.getRepositories(config);
+      const results = await githubApp.getRepositories(config);
       expect(results).toHaveLength(0);
     });
     it('returns empty list if no installations', async () => {
       ghApi.getInstallations.mockImplementationOnce(() => []);
-      const results = await githubAppHelper.getRepositories(config);
+      const results = await githubApp.getRepositories(config);
       expect(results).toHaveLength(0);
     });
     it('returns empty list if no repos per installation', async () => {
       ghApi.getInstallations.mockImplementationOnce(() => [{ id: 567 }]);
-      githubAppHelper.getUserRepositories.mockImplementationOnce(() => []);
-      const results = await githubAppHelper.getRepositories(config);
+      githubApp.getUserRepositories.mockImplementationOnce(() => []);
+      const results = await githubApp.getRepositories(config);
       expect(results).toHaveLength(0);
     });
     it('returns list of repos', async () => {
@@ -68,7 +66,7 @@ describe('helpers/github-app', () => {
         { id: 567 },
         { id: 568 },
       ]);
-      githubAppHelper.getUserRepositories.mockImplementationOnce(() => [
+      githubApp.getUserRepositories.mockImplementationOnce(() => [
         {
           repository: 'a/b',
           token: 'token_a',
@@ -78,7 +76,7 @@ describe('helpers/github-app', () => {
           token: 'token_a',
         },
       ]);
-      githubAppHelper.getUserRepositories.mockImplementationOnce(() => [
+      githubApp.getUserRepositories.mockImplementationOnce(() => [
         {
           repository: 'd/e',
           token: 'token_d',
@@ -88,7 +86,7 @@ describe('helpers/github-app', () => {
           token: 'token_d',
         },
       ]);
-      const results = await githubAppHelper.getRepositories(config);
+      const results = await githubApp.getRepositories(config);
       expect(results).toMatchSnapshot();
     });
     it('returns filtered list of repos', async () => {
@@ -96,7 +94,7 @@ describe('helpers/github-app', () => {
         { id: 567 },
         { id: 568 },
       ]);
-      githubAppHelper.getUserRepositories.mockImplementationOnce(() => [
+      githubApp.getUserRepositories.mockImplementationOnce(() => [
         {
           repository: 'a/b',
           token: 'token_a',
@@ -106,7 +104,7 @@ describe('helpers/github-app', () => {
           token: 'token_a',
         },
       ]);
-      githubAppHelper.getUserRepositories.mockImplementationOnce(() => [
+      githubApp.getUserRepositories.mockImplementationOnce(() => [
         {
           repository: 'd/e',
           token: 'token_d',
@@ -117,7 +115,7 @@ describe('helpers/github-app', () => {
         },
       ]);
       config.repositories = ['a/b', 'd/f', 'x/y'];
-      const results = await githubAppHelper.getRepositories(config);
+      const results = await githubApp.getRepositories(config);
       expect(results.length).toBe(2);
       expect(results).toMatchSnapshot();
     });

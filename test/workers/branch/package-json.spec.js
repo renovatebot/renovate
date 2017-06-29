@@ -1,18 +1,18 @@
 const fs = require('fs');
 const path = require('path');
-const packageJson = require('../../lib/helpers/package-json');
-const logger = require('../_fixtures/logger');
+const packageJson = require('../../../lib/workers/branch/package-json');
+const logger = require('../../_fixtures/logger');
 
 function readFixture(fixture) {
   return fs.readFileSync(
-    path.resolve(__dirname, `../_fixtures/package-json/${fixture}`),
+    path.resolve(__dirname, `../../_fixtures/package-json/${fixture}`),
     'utf8'
   );
 }
 
 const input01Content = readFixture('inputs/01.json');
 
-describe('helpers/package-json', () => {
+describe('workers/branch/package-json', () => {
   describe('.setNewValue(currentFileContent, depType, depName, newVersion, logger)', () => {
     it('replaces a dependency value', () => {
       const outputContent = readFixture('outputs/011.json');

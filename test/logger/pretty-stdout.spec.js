@@ -1,7 +1,7 @@
-const prettyStdout = require('../../../lib/helpers/logger/pretty-stdout');
+const prettyStdout = require('../../lib/logger/pretty-stdout');
 const chalk = require('chalk');
 
-describe('helpers/logger/pretty-stdout', () => {
+describe('logger/pretty-stdout', () => {
   describe('getMeta(rec)', () => {
     it('returns empty string if null rec', () => {
       expect(prettyStdout.getMeta(null)).toEqual('');

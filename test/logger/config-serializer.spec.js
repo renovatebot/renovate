@@ -1,6 +1,6 @@
-const configSerializer = require('../../../lib/helpers/logger/config-serializer');
+const configSerializer = require('../../lib/logger/config-serializer');
 
-describe('helpers/logger/config-serializer', () => {
+describe('logger/config-serializer', () => {
   it('redacts sensitive fields', () => {
     const config = {
       token: 'a',
