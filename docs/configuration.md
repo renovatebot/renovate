@@ -178,8 +178,8 @@ Obviously, you can't set repository or package file location with this method.
 | `yarnCacheFolder` | Location of yarn cache folder to use. Set to empty string to disable | string | `"/tmp/yarn-cache"` | `RENOVATE_YARN_CACHE_FOLDER` | `--yarn-cache-folder` |
 | `lockFileMaintenance` | Configuration for lock file maintenance | json | `{
   "branchName": "renovate/lock-files",
-  "commitMessage": "Update lock file",
-  "prTitle": "Lock file maintenance",
+  "commitMessage": "{{semanticPrefix}}Update lock file",
+  "prTitle": "{{semanticPrefix}}Lock file maintenance",
   "prBody": "This PR regenerates lock files to keep them up-to-date.",
   "schedule": "before 5am on monday"
 }` |  |  |
