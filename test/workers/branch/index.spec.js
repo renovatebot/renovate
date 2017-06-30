@@ -359,7 +359,7 @@ describe('workers/branch', () => {
     });
     it('handles semantic commits', async () => {
       config.upgradeType = 'minor';
-      config.semanticCommitsEnabled = true;
+      config.semanticCommits = true;
       await branchWorker.updateBranch([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
