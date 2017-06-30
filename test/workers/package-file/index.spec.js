@@ -2,6 +2,8 @@ const packageFileWorker = require('../../../lib/workers/package-file');
 const depTypeWorker = require('../../../lib/workers/dep-type');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
+const logger = require('../../_fixtures/logger');
+
 jest.mock('../../../lib/workers/dep-type');
 
 describe('packageFileWorker', () => {
@@ -14,6 +16,7 @@ describe('packageFileWorker', () => {
           getFileJson: jest.fn(),
         },
         depTypes: ['dependencies', 'devDependencies'],
+        logger,
       });
       packageFileWorker.updateBranch = jest.fn();
     });
