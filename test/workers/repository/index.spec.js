@@ -28,6 +28,11 @@ describe('workers/repository', () => {
         packageFiles: [],
       };
     });
+    it('skips repository if config is disabled', async () => {
+      config.enabled = false;
+      await repositoryWorker.renovateRepository(config);
+      expect(apis.detectPackageFiles.mock.calls.length).toBe(0);
+    });
     it('skips repository if no package.json', async () => {
       apis.detectPackageFiles.mockImplementationOnce(input =>
         Object.assign(input, { packageFiles: [] })
