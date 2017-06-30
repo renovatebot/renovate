@@ -10,7 +10,6 @@
     "jest": "LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --ignore-path .gitignore --fix .",
     "lint": "eslint --ignore-path .gitignore .",
-    "np": "np",
     "prepublish": "npm run build",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
@@ -80,7 +79,6 @@
     "freeform-semantic-commit-analyzer": "1.1.8",
     "jest": "20.0.4",
     "mkdirp": "0.5.1",
-    "np": "2.16.0",
     "prettier": "1.5.2",
     "rimraf": "2.6.1",
     "semantic-release": "6.3.6"
