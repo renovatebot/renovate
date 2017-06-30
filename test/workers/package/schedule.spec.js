@@ -55,24 +55,22 @@ describe('workers/package/schedule', () => {
           logger
         )
       ).toBe(true);
-      it('supports hours shorthand 1', () => {
-        const res = schedule.hasValidSchedule(['after 11pm'], logger);
-        expect(res).toBe(true);
-      });
-      it('supports hours shorthand 2', () => {
-        const res = schedule.hasValidSchedule(
-          ['after 11pm and before 6am'],
-          logger
-        );
-        expect(res).toBe(true);
-      });
-      it('supports hours shorthand 3', () => {
-        const res = schedule.hasValidSchedule(
-          ['after 11pm and before 6am every weekend'],
-          logger
-        );
-        expect(res).toBe(true);
-      });
+    });
+    it('supports hours shorthand', () => {
+      const res = schedule.hasValidSchedule(
+        [
+          'after 11pm and before 6am every weekend',
+          'after 11pm',
+          'after 10pm and before 5:00am',
+          'after 10pm and before 5am every weekday',
+          'after 11pm and before 6am',
+          'after 9pm on friday and saturday',
+          'before 5am every weekday',
+          'every weekend',
+        ],
+        logger
+      );
+      expect(res).toBe(true);
     });
   });
   describe('isPackageScheduled(config)', () => {
