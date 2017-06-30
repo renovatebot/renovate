@@ -54,6 +54,8 @@
     "json-stringify-pretty-compact": "1.0.4",
     "jsonwebtoken": "7.4.1",
     "lodash": "4.17.4",
+    "moment": "2.18.1",
+    "moment-timezone": "0.5.13",
     "registry-auth-token": "3.3.1",
     "registry-url": "3.1.0",
     "root-require": "0.3.1",
