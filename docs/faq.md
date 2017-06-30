@@ -21,6 +21,45 @@ Renovate will:
 
 Set configuration option `autodiscover` to `true`, via CLI, environment, or configuration file. Obviously it's too late to set it in any `renovate.json` or `package.json`.
 
+### Control renovate's schedule
+
+Renovate itself will run as often as its administrator has configured it (e.g. hourly, daily, etc). But you may wish to update certain repositories less often, or even specific packages at a different schedule.
+
+If you want to control the days of the week or times of day that renovate updates packages, use the `timezone` and `schedule` configuration options.
+
+By default, Renovate schedules will use the timezone of the machine that it's running on. This can be overridden in global config. Finally, it can be overridden on a per-repository basis too, e.g.:
+
+```json
+  "timezone": "America/Los_Angeles",
+```
+
+The timezone must be one of the valid [IANA time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+
+Now that your timezone is set, you can define days of week or hours of the day in which renovate will make changes. For this we rely on text parsing of the library [later](http://bunkat.github.io/later/parsers.html#text) and its concepts of "days", "time_before", and "time_after".
+
+Example scheduling:
+
+```
+every weekend
+before 5:00am
+after 10pm and before 5:00am
+after 10pm and before 5am every weekday
+on friday and saturday
+```
+
+This scheduling feature can be particularly useful for "noisy" packages that are updated frequently, such as `aws-sdk`.
+
+To restrict `aws-sdk` to only weekly updates, you could add this package rule:
+
+```json
+  "packages": [
+    {
+      "packageName": "aws-sdk",
+      "schedule": "after 9pm on sunday"
+    }
+  ]
+```
+
 ### Selectively enable or disable renovate for specific `package.json` files
 
 You could:
