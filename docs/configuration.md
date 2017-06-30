@@ -73,6 +73,8 @@ $ node renovate --help
     --enabled [boolean]                  Enable or disable renovate
     --log-file <string>                  Log file path
     --log-file-level <string>            Log file log level
+    --timezone <string>                  [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+    --schedule <list>                    Times of day/week to renovate
     --onboarding [boolean]               Require a Configuration PR first
     --platform <string>                  Platform type of repository
     --endpoint <string>                  Custom endpoint to use
@@ -140,6 +142,8 @@ Obviously, you can't set repository or package file location with this method.
 | `enabled` | Enable or disable renovate | boolean | `true` | `RENOVATE_ENABLED` | `--enabled` |
 | `logFile` | Log file path | string | `null` | `RENOVATE_LOG_FILE` | `--log-file` |
 | `logFileLevel` | Log file log level | string | `"debug"` | `RENOVATE_LOG_FILE_LEVEL` | `--log-file-level` |
+| `timezone` | [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) | string | `null` | `RENOVATE_TIMEZONE` | `--timezone` |
+| `schedule` | Times of day/week to renovate | list | `[]` | `RENOVATE_SCHEDULE` | `--schedule` |
 | `onboarding` | Require a Configuration PR first | boolean | `true` | `RENOVATE_ONBOARDING` | `--onboarding` |
 | `platform` | Platform type of repository | string | `"github"` | `RENOVATE_PLATFORM` | `--platform` |
 | `endpoint` | Custom endpoint to use | string | `null` | `RENOVATE_ENDPOINT` | `--endpoint` |
