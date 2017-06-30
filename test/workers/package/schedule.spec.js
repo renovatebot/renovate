@@ -1,8 +1,9 @@
+const mockDate = require('mockdate');
 const schedule = require('../../../lib/workers/package/schedule');
 const logger = require('../../_fixtures/logger');
 
 describe('workers/package/schedule', () => {
-  describe('hasValidSchedule', () => {
+  describe('hasValidSchedule(schedule)', () => {
     it('returns false if schedule is not an array', () => {
       expect(schedule.hasValidSchedule({ a: 1 }, logger)).toBe(false);
     });
@@ -12,17 +13,22 @@ describe('workers/package/schedule', () => {
     it('returns false if only schedule is empty', () => {
       expect(schedule.hasValidSchedule([''], logger)).toBe(false);
     });
-    it('returns false if schedules fail to parse', () => {
-      expect(schedule.hasValidSchedule(['foo', 'bar'], logger)).toBe(false);
-    });
-    it('returns false if schedules have no days or time range', () => {
-      expect(schedule.hasValidSchedule(['foo', 'at 5:00pm'], logger)).toBe(
+    it('returns false if any schedule fails to parse', () => {
+      expect(schedule.hasValidSchedule(['after 5:00pm`', 'foo'], logger)).toBe(
         false
       );
     });
-    it('returns true if any schedule has days of week', () => {
+    it('returns false if schedules have no days or time range', () => {
+      expect(schedule.hasValidSchedule(['at 5:00pm'], logger)).toBe(false);
+    });
+    it('returns false if any schedule has no days or time range', () => {
+      expect(schedule.hasValidSchedule(['at 5:00pm`', 'foo'], logger)).toBe(
+        false
+      );
+    });
+    it('returns true if schedule has days of week', () => {
       expect(
-        schedule.hasValidSchedule(['foo', 'on friday and saturday'], logger)
+        schedule.hasValidSchedule(['on friday and saturday'], logger)
       ).toBe(true);
     });
     it('returns true if schedule has a start time', () => {
@@ -43,6 +49,64 @@ describe('workers/package/schedule', () => {
           logger
         )
       ).toBe(true);
+    });
+  });
+  describe('isPackageScheduled(config)', () => {
+    let config;
+    beforeEach(() => {
+      mockDate.set(1498812608678); // 2017-06-30 10:50am
+      jest.resetAllMocks();
+      config = {
+        logger,
+      };
+    });
+    it('returns true if no schedule', () => {
+      const res = schedule.isPackageScheduled(config);
+      expect(logger.debug.mock.calls).toMatchSnapshot();
+      expect(res).toBe(true);
+    });
+    it('supports before hours true', () => {
+      config.schedule = 'before 4:00pm';
+      const res = schedule.isPackageScheduled(config);
+      expect(logger.debug.mock.calls).toMatchSnapshot();
+      expect(res).toBe(true);
+    });
+    it('supports before hours false', () => {
+      config.schedule = 'before 4:00am';
+      const res = schedule.isPackageScheduled(config);
+      expect(logger.debug.mock.calls).toMatchSnapshot();
+      expect(res).toBe(false);
+    });
+    it('supports outside hours', () => {
+      config.schedule = 'after 4:00pm';
+      const res = schedule.isPackageScheduled(config);
+      expect(logger.debug.mock.calls).toMatchSnapshot();
+      expect(res).toBe(false);
+    });
+    it('supports timezone', () => {
+      config.schedule = 'after 4:00pm';
+      config.timezone = 'Asia/Singapore';
+      const res = schedule.isPackageScheduled(config);
+      expect(logger.debug.mock.calls).toMatchSnapshot();
+      expect(res).toBe(true);
+    });
+    it('supports multiple schedules', () => {
+      config.schedule = ['after 4:00pm', 'before 11:00am'];
+      const res = schedule.isPackageScheduled(config);
+      expect(logger.debug.mock.calls).toMatchSnapshot();
+      expect(res).toBe(true);
+    });
+    it('supports day match', () => {
+      config.schedule = 'on friday and saturday';
+      const res = schedule.isPackageScheduled(config);
+      expect(logger.debug.mock.calls).toMatchSnapshot();
+      expect(res).toBe(true);
+    });
+    it('supports day mismatch', () => {
+      config.schedule = 'on monday and tuesday';
+      const res = schedule.isPackageScheduled(config);
+      expect(logger.debug.mock.calls).toMatchSnapshot();
+      expect(res).toBe(false);
     });
   });
 });

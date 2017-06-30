@@ -70,3 +70,41 @@ If the default settings are all suitable for you, simply close this Pull Request
   ],
 ]
 `;
+
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) returns false if no pr 1`] = `
+Array [
+  "renovate/configure",
+  Array [
+    Object {
+      "contents": "{
+  \\"enabled\\": true,
+  \\"timezone\\": null,
+  \\"schedule\\": [],
+  \\"packageFiles\\": [],
+  \\"depTypes\\": [
+    {\\"depType\\": \\"dependencies\\", \\"semanticPrefix\\": \\"fix: \\"},
+    \\"devDependencies\\",
+    \\"optionalDependencies\\"
+  ],
+  \\"ignoreDeps\\": [],
+  \\"pinVersions\\": true,
+  \\"separateMajorReleases\\": true,
+  \\"semanticCommits\\": false,
+  \\"semanticPrefix\\": \\"chore: \\",
+  \\"rebaseStalePrs\\": false,
+  \\"prCreation\\": \\"immediate\\",
+  \\"automerge\\": \\"none\\",
+  \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
+  \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
+  \\"maintainYarnLock\\": false,
+  \\"labels\\": [],
+  \\"assignees\\": [],
+  \\"reviewers\\": []
+}
+",
+      "name": "renovate.json",
+    },
+  ],
+  "Add renovate.json",
+]
+`;

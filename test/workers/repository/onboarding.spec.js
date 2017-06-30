@@ -1,5 +1,6 @@
 const onboarding = require('../../../lib/workers/repository/onboarding');
 const logger = require('../../_fixtures/logger');
+const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 describe('lib/workers/repository/onboarding', () => {
   describe('ensurePr(config, branchUpgrades)', () => {
@@ -89,15 +90,14 @@ If the default settings are all suitable for you, simply close this Pull Request
   describe('getOnboardingStatus(config)', () => {
     let config;
     beforeEach(() => {
-      config = {
-        api: {
-          commitFilesToBranch: jest.fn(),
-          createPr: jest.fn(() => ({ displayNumber: 1 })),
-          findPr: jest.fn(),
-        },
-        logger,
-        detectedPackageFiles: true,
+      config = Object.assign({}, defaultConfig);
+      config.api = {
+        commitFilesToBranch: jest.fn(),
+        createPr: jest.fn(() => ({ displayNumber: 1 })),
+        findPr: jest.fn(),
       };
+      config.logger = logger;
+      config.detectedPackageFiles = true;
     });
     it('returns true if onboarding is false', async () => {
       config.onboarding = false;
@@ -132,6 +132,7 @@ If the default settings are all suitable for you, simply close this Pull Request
       expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
   });
 });

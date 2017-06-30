@@ -1,0 +1,224 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/package/schedule isPackageScheduled(config) returns true if no schedule 1`] = `
+Array [
+  Array [
+    "Checking schedule undefined",
+  ],
+  Array [
+    "Invalid schedule: undefined",
+  ],
+]
+`;
+
+exports[`workers/package/schedule isPackageScheduled(config) supports before hours false 1`] = `
+Array [
+  Array [
+    "Checking schedule \\"before 4:00am\\"",
+  ],
+  Array [
+    "now=2017-06-30T10:50:08+02:00",
+  ],
+  Array [
+    "currentDay=Friday",
+  ],
+  Array [
+    "currentSeconds=39008",
+  ],
+  Array [
+    "Checking 1 schedule(s)",
+  ],
+  Array [
+    "Checking schedule \\"before 4:00am\\"",
+  ],
+  Array [
+    "Does not match schedule because 39008 is later than 14400",
+  ],
+  Array [
+    "Package not scheduled",
+  ],
+]
+`;
+
+exports[`workers/package/schedule isPackageScheduled(config) supports before hours true 1`] = `
+Array [
+  Array [
+    "Checking schedule \\"before 4:00pm\\"",
+  ],
+  Array [
+    "now=2017-06-30T10:50:08+02:00",
+  ],
+  Array [
+    "currentDay=Friday",
+  ],
+  Array [
+    "currentSeconds=39008",
+  ],
+  Array [
+    "Checking 1 schedule(s)",
+  ],
+  Array [
+    "Checking schedule \\"before 4:00pm\\"",
+  ],
+  Array [
+    "Matches schedule before 4:00pm",
+  ],
+]
+`;
+
+exports[`workers/package/schedule isPackageScheduled(config) supports day match 1`] = `
+Array [
+  Array [
+    "Checking schedule \\"on friday and saturday\\"",
+  ],
+  Array [
+    "now=2017-06-30T10:50:08+02:00",
+  ],
+  Array [
+    "currentDay=Friday",
+  ],
+  Array [
+    "currentSeconds=39008",
+  ],
+  Array [
+    "Checking 1 schedule(s)",
+  ],
+  Array [
+    "Checking schedule \\"on friday and saturday\\"",
+  ],
+  Array [
+    "schedule.d=[6,7]",
+  ],
+  Array [
+    "scheduledDays=[\\"Friday\\",\\"Saturday\\"]",
+  ],
+  Array [
+    "Matches schedule on friday and saturday",
+  ],
+]
+`;
+
+exports[`workers/package/schedule isPackageScheduled(config) supports day mismatch 1`] = `
+Array [
+  Array [
+    "Checking schedule \\"on monday and tuesday\\"",
+  ],
+  Array [
+    "now=2017-06-30T10:50:08+02:00",
+  ],
+  Array [
+    "currentDay=Friday",
+  ],
+  Array [
+    "currentSeconds=39008",
+  ],
+  Array [
+    "Checking 1 schedule(s)",
+  ],
+  Array [
+    "Checking schedule \\"on monday and tuesday\\"",
+  ],
+  Array [
+    "schedule.d=[2,3]",
+  ],
+  Array [
+    "scheduledDays=[\\"Monday\\",\\"Tuesday\\"]",
+  ],
+  Array [
+    "Does not match schedule because Friday is not in Monday,Tuesday",
+  ],
+  Array [
+    "Package not scheduled",
+  ],
+]
+`;
+
+exports[`workers/package/schedule isPackageScheduled(config) supports multiple schedules 1`] = `
+Array [
+  Array [
+    "Checking schedule [\\"after 4:00pm\\",\\"before 11:00am\\"]",
+  ],
+  Array [
+    "now=2017-06-30T10:50:08+02:00",
+  ],
+  Array [
+    "currentDay=Friday",
+  ],
+  Array [
+    "currentSeconds=39008",
+  ],
+  Array [
+    "Checking 2 schedule(s)",
+  ],
+  Array [
+    "Checking schedule \\"after 4:00pm\\"",
+  ],
+  Array [
+    "Does not match schedule because 39008 is earlier than 57600",
+  ],
+  Array [
+    "Checking schedule \\"before 11:00am\\"",
+  ],
+  Array [
+    "Matches schedule before 11:00am",
+  ],
+]
+`;
+
+exports[`workers/package/schedule isPackageScheduled(config) supports outside hours 1`] = `
+Array [
+  Array [
+    "Checking schedule \\"after 4:00pm\\"",
+  ],
+  Array [
+    "now=2017-06-30T10:50:08+02:00",
+  ],
+  Array [
+    "currentDay=Friday",
+  ],
+  Array [
+    "currentSeconds=39008",
+  ],
+  Array [
+    "Checking 1 schedule(s)",
+  ],
+  Array [
+    "Checking schedule \\"after 4:00pm\\"",
+  ],
+  Array [
+    "Does not match schedule because 39008 is earlier than 57600",
+  ],
+  Array [
+    "Package not scheduled",
+  ],
+]
+`;
+
+exports[`workers/package/schedule isPackageScheduled(config) supports timezone 1`] = `
+Array [
+  Array [
+    "Checking schedule \\"after 4:00pm\\"",
+  ],
+  Array [
+    "now=2017-06-30T10:50:08+02:00",
+  ],
+  Array [
+    "now=2017-06-30T16:50:08+08:00",
+  ],
+  Array [
+    "currentDay=Friday",
+  ],
+  Array [
+    "currentSeconds=60608",
+  ],
+  Array [
+    "Checking 1 schedule(s)",
+  ],
+  Array [
+    "Checking schedule \\"after 4:00pm\\"",
+  ],
+  Array [
+    "Matches schedule after 4:00pm",
+  ],
+]
+`;
