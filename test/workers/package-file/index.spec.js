@@ -1,5 +1,6 @@
 const packageFileWorker = require('../../../lib/workers/package-file');
 const depTypeWorker = require('../../../lib/workers/dep-type');
+const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 jest.mock('../../../lib/workers/dep-type');
 
@@ -7,13 +8,13 @@ describe('packageFileWorker', () => {
   describe('findUpgrades(config)', () => {
     let config;
     beforeEach(() => {
-      config = {
+      config = Object.assign({}, defaultConfig, {
         repoIsOnboarded: true,
         api: {
           getFileJson: jest.fn(),
         },
         depTypes: ['dependencies', 'devDependencies'],
-      };
+      });
       packageFileWorker.updateBranch = jest.fn();
     });
     it('handles null', async () => {
@@ -55,7 +56,7 @@ describe('packageFileWorker', () => {
     });
     it('maintains yarn.lock', async () => {
       config.api.getFileJson.mockReturnValueOnce({});
-      config.maintainYarnLock = true;
+      config.lockFileMaintenance.enabled = true;
       depTypeWorker.findUpgrades.mockReturnValue([]);
       const res = await packageFileWorker.findUpgrades(config);
       expect(res).toHaveLength(1);
