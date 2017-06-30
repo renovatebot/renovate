@@ -14,6 +14,7 @@ dependencies:
   cache_directories:
     - ~/.cache
     - ~/.yarn
+    - .cache
 
 test:
   override:
