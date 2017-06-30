@@ -96,7 +96,6 @@ Array [
   \\"automerge\\": \\"none\\",
   \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
   \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
-  \\"maintainYarnLock\\": false,
   \\"labels\\": [],
   \\"assignees\\": [],
   \\"reviewers\\": []
