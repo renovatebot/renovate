@@ -55,7 +55,6 @@
     "jsonwebtoken": "7.4.1",
     "later": "1.2.0",
     "lodash": "4.17.4",
-    "mockdate": "^2.0.1",
     "moment": "2.18.1",
     "moment-timezone": "0.5.13",
     "registry-auth-token": "3.3.1",
@@ -83,6 +82,7 @@
     "freeform-semantic-commit-analyzer": "1.1.8",
     "jest": "20.0.4",
     "mkdirp": "0.5.1",
+    "mockdate": "2.0.1",
     "prettier": "1.5.2",
     "rimraf": "2.6.1",
     "semantic-release": "6.3.6"
