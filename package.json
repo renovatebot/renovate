@@ -10,7 +10,7 @@
     "jest": "LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --ignore-path .gitignore --fix .",
     "lint": "eslint --ignore-path .gitignore .",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node lib/renovate",
