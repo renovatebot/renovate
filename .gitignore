@@ -4,5 +4,5 @@
 /dist
 /tmp
 .DS_Store
-.jest-cache
+.cache
 /*.log
