@@ -4,6 +4,9 @@ const logger = require('../../_fixtures/logger');
 
 describe('workers/package/schedule', () => {
   describe('hasValidSchedule(schedule)', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
     it('returns false if schedule is not an array', () => {
       expect(schedule.hasValidSchedule({ a: 1 }, logger)).toBe(false);
     });
@@ -13,8 +16,11 @@ describe('workers/package/schedule', () => {
     it('returns false if only schedule is empty', () => {
       expect(schedule.hasValidSchedule([''], logger)).toBe(false);
     });
+    it('returns false for invalid schedule', () => {
+      expect(schedule.hasValidSchedule(['foo'], logger)).toBe(false);
+    });
     it('returns false if any schedule fails to parse', () => {
-      expect(schedule.hasValidSchedule(['after 5:00pm`', 'foo'], logger)).toBe(
+      expect(schedule.hasValidSchedule(['after 5:00pm', 'foo'], logger)).toBe(
         false
       );
     });
@@ -22,9 +28,9 @@ describe('workers/package/schedule', () => {
       expect(schedule.hasValidSchedule(['at 5:00pm'], logger)).toBe(false);
     });
     it('returns false if any schedule has no days or time range', () => {
-      expect(schedule.hasValidSchedule(['at 5:00pm`', 'foo'], logger)).toBe(
-        false
-      );
+      expect(
+        schedule.hasValidSchedule(['at 5:00pm', 'on saturday'], logger)
+      ).toBe(false);
     });
     it('returns true if schedule has days of week', () => {
       expect(
@@ -49,6 +55,24 @@ describe('workers/package/schedule', () => {
           logger
         )
       ).toBe(true);
+      it('supports hours shorthand 1', () => {
+        const res = schedule.hasValidSchedule(['after 11pm'], logger);
+        expect(res).toBe(true);
+      });
+      it('supports hours shorthand 2', () => {
+        const res = schedule.hasValidSchedule(
+          ['after 11pm and before 6am'],
+          logger
+        );
+        expect(res).toBe(true);
+      });
+      it('supports hours shorthand 3', () => {
+        const res = schedule.hasValidSchedule(
+          ['after 11pm and before 6am every weekend'],
+          logger
+        );
+        expect(res).toBe(true);
+      });
     });
   });
   describe('isPackageScheduled(config)', () => {
