@@ -88,6 +88,8 @@ $ node renovate --help
     --ignore-future [boolean]            Ignore versions tagged as "future"
     --ignore-unstable [boolean]          Ignore versions with unstable semver
     --respect-latest [boolean]           Ignore versions newer than npm "latest" version
+    --semantic-commits [boolean]         Enable semantic commit prefixes for commits and PR titles
+    --semantic-prefix <string>           Prefix to use if semantic commits are enabled
     --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
     --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
@@ -147,7 +149,11 @@ Obviously, you can't set repository or package file location with this method.
 | `githubAppKey` | GitHub App Private Key (.pem file contents) | string | `null` | `RENOVATE_GITHUB_APP_KEY` | `--github-app-key` |
 | `repositories` | List of Repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
 | `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
-| `depTypes` | Dependency types | list | `["dependencies", "devDependencies", "optionalDependencies"]` | `RENOVATE_DEP_TYPES` | `--dep-types` |
+| `depTypes` | Dependency types | list | `[
+  {"depType": "dependencies", "semanticPrefix": "fix: "},
+  "devDependencies",
+  "optionalDependencies"
+]` | `RENOVATE_DEP_TYPES` | `--dep-types` |
 | `ignoreDeps` | Dependencies to ignore | list | `[]` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
 | `packages` | Package Rules | list | `[]` |  |  |
 | `pinVersions` | Convert ranged versions in package.json to pinned versions | boolean | `true` | `RENOVATE_PIN_VERSIONS` | `--pin-versions` |
@@ -155,14 +161,16 @@ Obviously, you can't set repository or package file location with this method.
 | `ignoreFuture` | Ignore versions tagged as "future" | boolean | `true` | `RENOVATE_IGNORE_FUTURE` | `--ignore-future` |
 | `ignoreUnstable` | Ignore versions with unstable semver | boolean | `true` | `RENOVATE_IGNORE_UNSTABLE` | `--ignore-unstable` |
 | `respectLatest` | Ignore versions newer than npm "latest" version | boolean | `true` | `RENOVATE_RESPECT_LATEST` | `--respect-latest` |
+| `semanticCommits` | Enable semantic commit prefixes for commits and PR titles | boolean | `false` | `RENOVATE_SEMANTIC_COMMITS` | `--semantic-commits` |
+| `semanticPrefix` | Prefix to use if semantic commits are enabled | string | `"chore: "` | `RENOVATE_SEMANTIC_PREFIX` | `--semantic-prefix` |
 | `recreateClosed` | Recreate PRs even if same ones were closed previously | boolean | `false` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
 | `rebaseStalePrs` | Rebase stale PRs (GitHub only) | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
 | `prCreation` | When to create the PR for a branch. Values: immediate, not-pending, status-success. | string | `"immediate"` | `RENOVATE_PR_CREATION` | `--pr-creation` |
 | `automerge` | What types of upgrades to merge to base branch automatically. Values: none, minor or any | string | `"none"` | `RENOVATE_AUTOMERGE` | `--automerge` |
 | `automergeType` | How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only | string | `"pr"` | `RENOVATE_AUTOMERGE_TYPE` | `--automerge-type` |
 | `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` | `RENOVATE_BRANCH_NAME` |  |
-| `commitMessage` | Commit message template | string | `"Update dependency {{depName}} to version {{newVersion}}"` | `RENOVATE_COMMIT_MESSAGE` |  |
-| `prTitle` | Pull Request title template | string | `"{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` | `RENOVATE_PR_TITLE` |  |
+| `commitMessage` | Commit message template | string | `"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}"` | `RENOVATE_COMMIT_MESSAGE` |  |
+| `prTitle` | Pull Request title template | string | `"{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` | `RENOVATE_PR_TITLE` |  |
 | `prBody` | Pull Request body template | string | `"This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates dependency [{{depName}}]({{repositoryUrl}}) from version `{{currentVersion}}` to `{{newVersion}}`\n{{#if releases.length}}\n\n### Commits\n\n<details>\n<summary>{{githubName}}</summary>\n\n{{#each releases as |release|}}\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n<br />\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://keylocation.sg/our-tech/renovate)."` | `RENOVATE_PR_BODY` |  |
 | `yarnCacheFolder` | Location of yarn cache folder to use. Set to empty string to disable | string | `"/tmp/yarn-cache"` | `RENOVATE_YARN_CACHE_FOLDER` | `--yarn-cache-folder` |
 | `maintainYarnLock` | Keep yarn.lock files updated in base branch | boolean | `false` | `RENOVATE_MAINTAIN_YARN_LOCK` | `--maintain-yarn-lock` |
@@ -174,8 +182,8 @@ Obviously, you can't set repository or package file location with this method.
 | `groupName` | Human understandable name for the dependency group | string | `null` | `RENOVATE_GROUP_NAME` | `--group-name` |
 | `groupSlug` | Slug to use for group (e.g. in branch name). Will be calculated from groupName if null | string | `null` | `RENOVATE_GROUP_SLUG` | `--group-slug` |
 | `groupBranchName` | Branch name template for the group | string | `"renovate/{{groupSlug}}"` | `RENOVATE_GROUP_BRANCH_NAME` |  |
-| `groupCommitMessage` | Group commit message | string | `"Renovate {{groupName}} packages"` | `RENOVATE_GROUP_COMMIT_MESSAGE` |  |
-| `groupPrTitle` | Pull Request title template for the group | string | `"Renovate {{groupName}} packages"` | `RENOVATE_GROUP_PR_TITLE` |  |
+| `groupCommitMessage` | Group commit message | string | `"{{semanticPrefix}}Renovate {{groupName}} packages"` | `RENOVATE_GROUP_COMMIT_MESSAGE` |  |
+| `groupPrTitle` | Pull Request title template for the group | string | `"{{semanticPrefix}}Renovate {{groupName}} packages"` | `RENOVATE_GROUP_PR_TITLE` |  |
 | `groupPrBody` | Pull Request body template for the group | string | `"This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \"{{groupName}}\".\n\n{{#each upgrades as |upgrade|}}\n-   [{{upgrade.depName}}]({{upgrade.repositoryUrl}}): from `{{upgrade.currentVersion}}` to `{{upgrade.newVersion}}`\n{{/each}}\n\n{{#unless isPin}}\n### Commits\n\n{{#each upgrades as |upgrade|}}\n{{#if upgrade.releases.length}}\n<details>\n<summary>{{upgrade.githubName}}</summary>\n{{#each upgrade.releases as |release|}}\n\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}){{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n{{/each}}\n{{/unless}}\n<br />\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://keylocation.sg/our-tech/renovate)."` | `RENOVATE_GROUP_PR_BODY` |  |
 | `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
 | `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
