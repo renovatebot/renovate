@@ -15,6 +15,11 @@ describe('lib/workers/package/index', () => {
         depName: 'foo',
       };
     });
+    it('returns empty if package is disabled', async () => {
+      config.enabled = false;
+      const res = await pkgWorker.findUpgrades(config);
+      expect(res).toMatchObject([]);
+    });
     it('returns empty if package is not scheduled', async () => {
       config.schedule = 'some schedule';
       schedule.isPackageScheduled.mockReturnValueOnce(false);

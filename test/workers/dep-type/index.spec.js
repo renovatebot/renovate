@@ -17,6 +17,11 @@ describe('lib/workers/dep-type/index', () => {
         ignoreDeps: ['a', 'b'],
       };
     });
+    it('returns empty if config is disabled', async () => {
+      config.enabled = false;
+      const res = await depTypeWorker.findUpgrades({}, config);
+      expect(res).toMatchObject([]);
+    });
     it('returns empty if no deps found', async () => {
       packageJson.extractDependencies.mockReturnValueOnce([]);
       const res = await depTypeWorker.findUpgrades({}, config);
