@@ -372,6 +372,14 @@ describe('workers/branch', () => {
     });
   });
   describe('removeStandaloneBranches(upgrades)', () => {
+    it('returns if length is one or less', async () => {
+      const upgrades = [{}];
+      await branchWorker.removeStandaloneBranches(upgrades);
+    });
+    it('returns if upgradeType is lockFileMaintenance', async () => {
+      const upgrades = [{ upgradeType: 'lockFileMaintenance' }, {}];
+      await branchWorker.removeStandaloneBranches(upgrades);
+    });
     it('deletes standalone branch names', async () => {
       const api = {
         deleteBranch: jest.fn(),
