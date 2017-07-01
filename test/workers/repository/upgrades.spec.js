@@ -35,7 +35,7 @@ describe('workers/repository/upgrades', () => {
           packageFile: 'backend/package.json',
         },
         {
-          fileName: 'frontend/package.json',
+          packageFile: 'frontend/package.json',
         },
       ];
       packageFileWorker.findUpgrades.mockReturnValueOnce(['a']);
