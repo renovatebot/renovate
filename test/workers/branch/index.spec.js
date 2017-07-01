@@ -279,7 +279,7 @@ describe('workers/branch', () => {
     it('maintains lock files if needing updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       yarn.maintainLockFile.mockReturnValueOnce('non null response');
-      config.upgradeType = 'maintainYarnLock';
+      config.upgradeType = 'lockFileMaintenance';
       await branchWorker.ensureBranch([config]);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
@@ -290,7 +290,7 @@ describe('workers/branch', () => {
     });
     it('skips maintaining lock files if no updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
-      config.upgradeType = 'maintainYarnLock';
+      config.upgradeType = 'lockFileMaintenance';
       await branchWorker.ensureBranch([config]);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
@@ -301,7 +301,7 @@ describe('workers/branch', () => {
     });
     it('throws error if cannot maintain yarn.lock file', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
-      config.upgradeType = 'maintainYarnLock';
+      config.upgradeType = 'lockFileMaintenance';
       yarn.maintainLockFile.mockImplementationOnce(() => {
         throw new Error('yarn not found');
       });
@@ -372,6 +372,14 @@ describe('workers/branch', () => {
     });
   });
   describe('removeStandaloneBranches(upgrades)', () => {
+    it('returns if length is one or less', async () => {
+      const upgrades = [{}];
+      await branchWorker.removeStandaloneBranches(upgrades);
+    });
+    it('returns if upgradeType is lockFileMaintenance', async () => {
+      const upgrades = [{ upgradeType: 'lockFileMaintenance' }, {}];
+      await branchWorker.removeStandaloneBranches(upgrades);
+    });
     it('deletes standalone branch names', async () => {
       const api = {
         deleteBranch: jest.fn(),

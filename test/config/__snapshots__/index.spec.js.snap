@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
+Object {
+  "branchName": "renovate/lock-files",
+  "commitMessage": "{{semanticPrefix}}Update lock file",
+  "enabled": true,
+  "prBody": "This PR regenerates lock files to keep them up-to-date.",
+  "prTitle": "{{semanticPrefix}}Lock file maintenance",
+  "schedule": "on monday",
+}
+`;

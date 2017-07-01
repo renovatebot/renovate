@@ -1,4 +1,5 @@
 const argv = require('../_fixtures/config/argv');
+const defaultConfig = require('../../lib/config/defaults').getConfig();
 
 describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
@@ -158,6 +159,24 @@ describe('config/index', () => {
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(1);
       expect(glGot.mock.calls.length).toBe(0);
+    });
+  });
+  describe('mergeChildConfig(parentConfig, childConfig)', () => {
+    it('merges', () => {
+      const parentConfig = Object.assign({}, defaultConfig);
+      const childConfig = {
+        foo: 'bar',
+        pinVersions: false,
+        lockFileMaintenance: {
+          schedule: 'on monday',
+        },
+      };
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.foo).toEqual('bar');
+      expect(config.pinVersions).toBe(false);
+      expect(config.lockFileMaintenance.schedule).toEqual('on monday');
+      expect(config.lockFileMaintenance).toMatchSnapshot();
     });
   });
 });
