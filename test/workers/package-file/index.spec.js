@@ -3,8 +3,6 @@ const depTypeWorker = require('../../../lib/workers/dep-type');
 const schedule = require('../../../lib/workers/package/schedule');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
-console.log(JSON.stringify(defaultConfig));
-
 const logger = require('../../_fixtures/logger');
 
 jest.mock('../../../lib/workers/dep-type');

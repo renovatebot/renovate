@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "bunyan": "1.8.10",
-    "chalk": "1.1.3",
+    "chalk": "2.0.1",
     "changelog": "1.3.0",
     "commander": "2.10.0",
     "gh-got": "6.0.0",
