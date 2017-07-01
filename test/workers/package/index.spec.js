@@ -22,14 +22,14 @@ describe('lib/workers/package/index', () => {
     });
     it('returns empty if package is not scheduled', async () => {
       config.schedule = 'some schedule';
-      schedule.isPackageScheduled.mockReturnValueOnce(false);
+      schedule.isScheduledNow.mockReturnValueOnce(false);
       const res = await pkgWorker.findUpgrades(config);
       expect(res).toMatchObject([]);
       expect(npmApi.getDependency.mock.calls.length).toBe(0);
     });
     it('returns empty if no npm dep found', async () => {
       config.schedule = 'some schedule';
-      schedule.isPackageScheduled.mockReturnValueOnce(true);
+      schedule.isScheduledNow.mockReturnValueOnce(true);
       const res = await pkgWorker.findUpgrades(config);
       expect(res).toMatchObject([]);
       expect(npmApi.getDependency.mock.calls.length).toBe(1);

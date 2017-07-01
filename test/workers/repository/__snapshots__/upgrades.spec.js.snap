@@ -56,7 +56,9 @@ Object {
     Object {
       "branchName": "bar-{{version}}",
       "commitMessage": undefined,
-      "groupBranchName": "renovate/my-group",
+      "group": Object {
+        "branchName": "renovate/my-group",
+      },
       "groupName": "My Group",
       "groupSlug": "my-group",
       "prBody": undefined,
@@ -65,7 +67,9 @@ Object {
     },
     Object {
       "branchName": "foo",
-      "groupBranchName": "renovate/{{groupSlug}}",
+      "group": Object {
+        "branchName": "renovate/{{groupSlug}}",
+      },
       "groupName": "My Group",
       "groupSlug": "my-group",
       "version": "1.1.0",
