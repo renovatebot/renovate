@@ -104,7 +104,7 @@ describe('workers/repository/upgrades', () => {
           branchName: 'foo',
           version: '1.1.0',
           groupName: 'My Group',
-          groupBranchName: 'renovate/{{groupSlug}}',
+          group: { branchName: 'renovate/{{groupSlug}}' },
         },
         {
           branchName: 'foo',
@@ -114,7 +114,7 @@ describe('workers/repository/upgrades', () => {
           branchName: 'bar-{{version}}',
           version: '1.1.0',
           groupName: 'My Group',
-          groupBranchName: 'renovate/my-group',
+          group: { branchName: 'renovate/my-group' },
         },
       ];
       const res = await upgrades.groupUpgradesByBranch(input, logger);
