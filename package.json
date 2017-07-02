@@ -123,9 +123,6 @@
       }
     ]
   },
-  "publishConfig": {
-    "tag": "next"
-  },
   "release": {
     "analyzeCommits": {
       "path": "./node_modules/freeform-semantic-commit-analyzer/dist/index.js"
