@@ -15,3 +15,11 @@ Object {
   "nottoken": "b",
 }
 `;
+
+exports[`logger/config-serializer squashes templates 1`] = `
+Object {
+  "api": "[Function]",
+  "nottoken": "b",
+  "prBody": "[Template]",
+}
+`;

@@ -17,4 +17,12 @@ describe('logger/config-serializer', () => {
     };
     expect(configSerializer(config)).toMatchSnapshot();
   });
+  it('squashes templates', () => {
+    const config = {
+      api: 'a',
+      nottoken: 'b',
+      prBody: 'foo',
+    };
+    expect(configSerializer(config)).toMatchSnapshot();
+  });
 });
