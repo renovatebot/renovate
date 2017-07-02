@@ -21,6 +21,15 @@ Renovate will:
 
 Set configuration option `autodiscover` to `true`, via CLI, environment, or configuration file. Obviously it's too late to set it in any `renovate.json` or `package.json`.
 
+### Support private npm modules
+
+If you are running your own Renovate instance, then the easiest way to support private modules is to make sure the appropriate credentials are in `~/.npmrc`;
+
+If you are using hosted Renovate instance, and your repository `package.json` includes private modules, then you can:
+
+1.  Commit an `.npmrc` file to the repository, and Renovate will use this, or
+2.  If using the [GitHub App hosted service](https://github.com/apps/renovate), authorize the npm user named "renovate" with read-only access to the relevant modules. This "renovate" account is used solely for the purpose of the renovate GitHub App.
+
 ### Control renovate's schedule
 
 Renovate itself will run as often as its administrator has configured it (e.g. hourly, daily, etc). But you may wish to update certain repositories less often, or even specific packages at a different schedule.

@@ -74,6 +74,17 @@ describe('api/npm', () => {
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
   });
+  it('should use NPM_TOKEN if provided', async () => {
+    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
+    got.mockImplementation(() => Promise.resolve(npmResponse));
+    const oldToken = process.env.NPM_TOKEN;
+    process.env.NPM_TOKEN = 'some-token';
+    const res = await npm.getDependency('foobar', logger);
+    process.env.NPM_TOKEN = oldToken;
+    expect(res).toMatchSnapshot();
+    const call = got.mock.calls[0];
+    expect(call).toMatchSnapshot();
+  });
   it('sets .npmrc', () => {
     npm.setNpmrc('input');
   });

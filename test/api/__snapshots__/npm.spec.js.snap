@@ -46,6 +46,30 @@ Array [
 ]
 `;
 
+exports[`api/npm should use NPM_TOKEN if provided 1`] = `
+Object {
+  "dist-tags": undefined,
+  "homepage": "https://google.com",
+  "name": undefined,
+  "repositoryUrl": "https://google.com",
+  "versions": Object {
+    "0.0.1": Object {},
+  },
+}
+`;
+
+exports[`api/npm should use NPM_TOKEN if provided 2`] = `
+Array [
+  "https://npm.mycustomregistry.com/foobar",
+  Object {
+    "headers": Object {
+      "authorization": "Bearer some-token",
+    },
+    "json": true,
+  },
+]
+`;
+
 exports[`api/npm should use homepage 1`] = `
 Object {
   "dist-tags": undefined,
