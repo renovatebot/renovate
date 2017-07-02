@@ -110,12 +110,13 @@ describe('workers/branch', () => {
       config.newVersion = '1.1.0';
       config.newVersionMajor = 1;
       config.versions = {};
+      config.upgrades = [Object.assign({}, config)];
     });
     it('returns if new content matches old', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('old content');
       config.api.branchExists.mockReturnValueOnce(false);
-      expect(await branchWorker.ensureBranch([config])).toBe(false);
+      expect(await branchWorker.ensureBranch(config)).toBe(false);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(npm.getLockFile.mock.calls.length).toBe(0);
@@ -125,7 +126,7 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
-      expect(await branchWorker.ensureBranch([config])).toBe(true);
+      expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(npm.getLockFile.mock.calls.length).toBe(1);
@@ -138,7 +139,7 @@ describe('workers/branch', () => {
       config.api.branchExists.mockReturnValueOnce(true);
       config.automergeEnabled = true;
       config.automergeType = 'pr';
-      expect(await branchWorker.ensureBranch([config])).toBe(true);
+      expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(npm.getLockFile.mock.calls.length).toBe(1);
@@ -153,7 +154,7 @@ describe('workers/branch', () => {
       config.api.mergeBranch = jest.fn();
       config.automergeEnabled = true;
       config.automergeType = 'branch-push';
-      expect(await branchWorker.ensureBranch([config])).toBe(true);
+      expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(config.api.getBranchStatus.mock.calls.length).toBe(1);
       expect(config.api.mergeBranch.mock).toMatchSnapshot();
@@ -170,7 +171,7 @@ describe('workers/branch', () => {
       config.api.mergeBranch = jest.fn();
       config.automergeEnabled = true;
       config.automergeType = 'branch-push';
-      expect(await branchWorker.ensureBranch([config])).toBe(true);
+      expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(config.api.getBranchStatus.mock.calls.length).toBe(1);
       expect(config.api.mergeBranch.mock.calls.length).toBe(0);
@@ -191,7 +192,7 @@ describe('workers/branch', () => {
       });
       let e;
       try {
-        await branchWorker.ensureBranch([config]);
+        await branchWorker.ensureBranch(config);
       } catch (err) {
         e = err;
       }
@@ -208,7 +209,7 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       yarn.getLockFile.mockReturnValueOnce('non null response');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
-      await branchWorker.ensureBranch([config]);
+      await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(npm.getLockFile.mock.calls.length).toBe(1);
@@ -219,7 +220,7 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       npm.getLockFile.mockReturnValueOnce('non null response');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
-      await branchWorker.ensureBranch([config]);
+      await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(npm.getLockFile.mock.calls.length).toBe(1);
@@ -231,7 +232,7 @@ describe('workers/branch', () => {
       npm.getLockFile.mockReturnValueOnce('non null response');
       yarn.getLockFile.mockReturnValueOnce('non null response');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
-      await branchWorker.ensureBranch([config]);
+      await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(npm.getLockFile.mock.calls.length).toBe(1);
@@ -246,7 +247,7 @@ describe('workers/branch', () => {
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       let err;
       try {
-        await branchWorker.ensureBranch([config]);
+        await branchWorker.ensureBranch(config);
       } catch (e) {
         err = e;
       }
@@ -265,7 +266,7 @@ describe('workers/branch', () => {
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       let err;
       try {
-        await branchWorker.ensureBranch([config]);
+        await branchWorker.ensureBranch(config);
       } catch (e) {
         err = e;
       }
@@ -279,8 +280,8 @@ describe('workers/branch', () => {
     it('maintains lock files if needing updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       yarn.maintainLockFile.mockReturnValueOnce('non null response');
-      config.upgradeType = 'lockFileMaintenance';
-      await branchWorker.ensureBranch([config]);
+      config.upgrades[0].upgradeType = 'lockFileMaintenance';
+      await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
       expect(yarn.getLockFile.mock.calls.length).toBe(0);
@@ -290,8 +291,8 @@ describe('workers/branch', () => {
     });
     it('skips maintaining lock files if no updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
-      config.upgradeType = 'lockFileMaintenance';
-      await branchWorker.ensureBranch([config]);
+      config.upgrades[0].upgradeType = 'lockFileMaintenance';
+      await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
       expect(yarn.getLockFile.mock.calls.length).toBe(0);
@@ -301,13 +302,13 @@ describe('workers/branch', () => {
     });
     it('throws error if cannot maintain yarn.lock file', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
-      config.upgradeType = 'lockFileMaintenance';
+      config.upgrades[0].upgradeType = 'lockFileMaintenance';
       yarn.maintainLockFile.mockImplementationOnce(() => {
         throw new Error('yarn not found');
       });
       let err;
       try {
-        await branchWorker.ensureBranch([config]);
+        await branchWorker.ensureBranch(config);
       } catch (e) {
         err = e;
       }
@@ -371,55 +372,18 @@ describe('workers/branch', () => {
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
   });
-  describe('removeStandaloneBranches(upgrades)', () => {
-    it('returns if length is one or less', async () => {
-      const upgrades = [{}];
-      await branchWorker.removeStandaloneBranches(upgrades);
+  describe('generateConfig(branchUpgrades)', () => {
+    let config;
+    beforeEach(() => {
+      config = Object.assign({}, defaultConfig, { logger });
     });
-    it('returns if upgradeType is lockFileMaintenance', async () => {
-      const upgrades = [{ upgradeType: 'lockFileMaintenance' }, {}];
-      await branchWorker.removeStandaloneBranches(upgrades);
-    });
-    it('deletes standalone branch names', async () => {
-      const api = {
-        deleteBranch: jest.fn(),
-      };
-      const upgrades = [
-        {
-          branchName: 'foo',
-          groupBranchName: 'what',
-          api,
-          logger,
-        },
-        {
-          branchName: 'bar',
-          groupBranchName: 'what',
-          api,
-          logger,
-        },
-      ];
-      await branchWorker.removeStandaloneBranches(upgrades);
-      expect(upgrades).toMatchSnapshot();
-    });
-    it('handles errors', async () => {
-      const upgrades = [
-        {
-          branchName: 'foo',
-          api: {
-            deleteBranch: jest.fn(() => {
-              throw new Error('deletion error');
-            }),
-          },
-          logger,
-        },
-        {
-          branchName: 'bar',
-          groupBranchName: 'what',
-          api: null,
-          logger,
-        },
-      ];
-      await branchWorker.removeStandaloneBranches(upgrades);
+    it('uses group settings', async () => {
+      config.groupName = 'some-group';
+      config.group.branchName = 'some-group-branchname';
+      const branchUpgrades = [config, config];
+      const res = await branchWorker.generateConfig(branchUpgrades);
+      expect(res).toMatchSnapshot();
+      expect(res.branchName).toEqual(config.group.branchName);
     });
   });
 });
