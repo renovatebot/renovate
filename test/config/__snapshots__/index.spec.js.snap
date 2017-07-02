@@ -7,6 +7,7 @@ Object {
   "enabled": true,
   "prBody": "This PR regenerates lock files to keep them up-to-date.",
   "prTitle": "{{semanticPrefix}}Lock file maintenance",
+  "recreateClosed": true,
   "schedule": "on monday",
 }
 `;
