@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/upgrades groupUpgradesByBranch(upgrades, logger) does not group if different compiled branch names 1`] = `
+exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) does not group if different compiled branch names 1`] = `
 Object {
   "bar-1.1.0": Array [
     Object {
@@ -23,7 +23,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades groupUpgradesByBranch(upgrades, logger) groups if same compiled branch names 1`] = `
+exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) groups if same compiled branch names 1`] = `
 Object {
   "bar-1.1.0": Array [
     Object {
@@ -44,7 +44,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades groupUpgradesByBranch(upgrades, logger) groups if same compiled group name 1`] = `
+exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) groups if same compiled group name 1`] = `
 Object {
   "foo": Array [
     Object {
@@ -78,7 +78,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades groupUpgradesByBranch(upgrades, logger) returns one branch if one input 1`] = `
+exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) returns one branch if one input 1`] = `
 Object {
   "foo-1.1.0": Array [
     Object {

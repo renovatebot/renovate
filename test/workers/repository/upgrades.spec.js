@@ -44,9 +44,9 @@ describe('workers/repository/upgrades', () => {
       expect(res.length).toBe(3);
     });
   });
-  describe('groupUpgradesByBranch(upgrades, logger)', () => {
+  describe('branchifyUpgrades(upgrades, logger)', () => {
     it('returns empty object if no input array', async () => {
-      const res = await upgrades.groupUpgradesByBranch([], logger);
+      const res = await upgrades.branchifyUpgrades([], logger);
       expect(res).toEqual({});
     });
     it('returns one branch if one input', async () => {
@@ -56,7 +56,7 @@ describe('workers/repository/upgrades', () => {
           version: '1.1.0',
         },
       ];
-      const res = await upgrades.groupUpgradesByBranch(input, logger);
+      const res = await upgrades.branchifyUpgrades(input, logger);
       expect(Object.keys(res).length).toBe(1);
       expect(res).toMatchSnapshot();
     });
@@ -75,7 +75,7 @@ describe('workers/repository/upgrades', () => {
           version: '1.1.0',
         },
       ];
-      const res = await upgrades.groupUpgradesByBranch(input, logger);
+      const res = await upgrades.branchifyUpgrades(input, logger);
       expect(Object.keys(res).length).toBe(3);
       expect(res).toMatchSnapshot();
     });
@@ -94,7 +94,7 @@ describe('workers/repository/upgrades', () => {
           version: '1.1.0',
         },
       ];
-      const res = await upgrades.groupUpgradesByBranch(input, logger);
+      const res = await upgrades.branchifyUpgrades(input, logger);
       expect(Object.keys(res).length).toBe(2);
       expect(res).toMatchSnapshot();
     });
@@ -117,7 +117,7 @@ describe('workers/repository/upgrades', () => {
           group: { branchName: 'renovate/my-group' },
         },
       ];
-      const res = await upgrades.groupUpgradesByBranch(input, logger);
+      const res = await upgrades.branchifyUpgrades(input, logger);
       expect(Object.keys(res).length).toBe(2);
       expect(res).toMatchSnapshot();
     });

@@ -18,7 +18,7 @@ describe('workers/repository', () => {
       onboarding.getOnboardingStatus = jest.fn();
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
-      upgrades.groupUpgradesByBranch = jest.fn(() => ({}));
+      upgrades.branchifyUpgrades = jest.fn(() => ({}));
       branchWorker.updateBranch = jest.fn();
       config = {
         api: {
@@ -62,7 +62,7 @@ describe('workers/repository', () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
       onboarding.getOnboardingStatus.mockReturnValueOnce(true);
-      upgrades.groupUpgradesByBranch.mockReturnValueOnce({
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
         foo: {},
         bar: {},
         baz: {},
