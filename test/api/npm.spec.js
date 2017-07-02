@@ -23,6 +23,7 @@ const npmResponse = {
 };
 
 describe('api/npm', () => {
+  delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
     npm.resetCache();
