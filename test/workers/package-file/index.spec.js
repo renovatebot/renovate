@@ -20,7 +20,6 @@ describe('packageFileWorker', () => {
         depTypes: ['dependencies', 'devDependencies'],
         logger,
       });
-      packageFileWorker.updateBranch = jest.fn();
     });
     it('handles null', async () => {
       const allUpgrades = await packageFileWorker.findUpgrades(config);

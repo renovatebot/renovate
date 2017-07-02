@@ -19,7 +19,7 @@ describe('workers/repository', () => {
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
       upgrades.branchifyUpgrades = jest.fn(() => ({}));
-      branchWorker.updateBranch = jest.fn();
+      branchWorker.processBranchUpgrades = jest.fn();
       config = {
         api: {
           getFileJson: jest.fn(),
@@ -54,7 +54,7 @@ describe('workers/repository', () => {
       );
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
-      expect(branchWorker.updateBranch.mock.calls.length).toBe(0);
+      expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(0);
       expect(onboarding.ensurePr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
@@ -68,7 +68,7 @@ describe('workers/repository', () => {
         baz: {},
       });
       await repositoryWorker.renovateRepository(config);
-      expect(branchWorker.updateBranch.mock.calls.length).toBe(3);
+      expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(3);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('swallows errors', async () => {

@@ -320,7 +320,7 @@ describe('workers/branch', () => {
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
   });
-  describe('updateBranch(upgrades)', () => {
+  describe('processBranchUpgrades(upgrades)', () => {
     let config;
     beforeEach(() => {
       config = Object.assign({}, defaultConfig);
@@ -333,41 +333,41 @@ describe('workers/branch', () => {
     });
     it('returns immediately if closed PR found', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
-      await branchWorker.updateBranch([config]);
+      await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
     it('does not return immediately if recreateClosed true', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
       config.recreateClosed = true;
-      await branchWorker.updateBranch([config]);
+      await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('pins', async () => {
       config.upgradeType = 'pin';
-      await branchWorker.updateBranch([config]);
+      await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('majors', async () => {
       config.upgradeType = 'major';
-      await branchWorker.updateBranch([config]);
+      await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('minors', async () => {
       config.upgradeType = 'minor';
-      await branchWorker.updateBranch([config]);
+      await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('handles semantic commits', async () => {
       config.upgradeType = 'minor';
       config.semanticCommits = true;
-      await branchWorker.updateBranch([config]);
+      await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('handles errors', async () => {
       config.api.checkForClosedPr = jest.fn(() => {
         throw new Error('oops');
       });
-      await branchWorker.updateBranch([config]);
+      await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
   });
