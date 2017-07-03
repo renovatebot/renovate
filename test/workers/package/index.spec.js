@@ -2,6 +2,8 @@ const npmApi = require('../../../lib/api/npm');
 const schedule = require('../../../lib/workers/package/schedule');
 const versions = require('../../../lib/workers/package/versions');
 const pkgWorker = require('../../../lib/workers/package/index');
+const defaultConfig = require('../../../lib/config/defaults').getConfig();
+const configParser = require('../../../lib/config');
 
 jest.mock('../../../lib/workers/package/schedule');
 jest.mock('../../../lib/workers/package/versions');
@@ -11,9 +13,8 @@ describe('lib/workers/package/index', () => {
   describe('findUpgrades(config)', () => {
     let config;
     beforeEach(() => {
-      config = {
-        depName: 'foo',
-      };
+      config = configParser.filterConfig(defaultConfig, 'package');
+      config.depName = 'foo';
     });
     it('returns empty if package is disabled', async () => {
       config.enabled = false;
@@ -45,6 +46,7 @@ describe('lib/workers/package/index', () => {
       versions.determineUpgrades.mockReturnValueOnce([{}]);
       const res = await pkgWorker.findUpgrades(config);
       expect(res).toHaveLength(1);
+      expect(Object.keys(res[0])).toMatchSnapshot();
     });
   });
 });
