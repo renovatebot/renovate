@@ -4,7 +4,7 @@ Keep npm dependencies up-to-date.
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/singapore/renovate/master/license)
 [![codecov](https://codecov.io/gh/singapore/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/singapore/renovate)
-
+[![Join the chat at https://gitter.im/renovate-app/Lobby](https://badges.gitter.im/renovate-app/Lobby.svg)](https://gitter.im/renovate-app/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Why
 
