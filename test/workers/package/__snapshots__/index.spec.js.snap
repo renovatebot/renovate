@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/workers/package/index findUpgrades(config) returns array if upgrades found 1`] = `
+Array [
+  "semanticCommits",
+  "semanticPrefix",
+  "recreateClosed",
+  "rebaseStalePrs",
+  "prCreation",
+  "automerge",
+  "automergeType",
+  "branchName",
+  "commitMessage",
+  "prTitle",
+  "prBody",
+  "lazyGrouping",
+  "groupName",
+  "groupSlug",
+  "group",
+  "labels",
+  "assignees",
+  "reviewers",
+  "depName",
+  "repositoryUrl",
+]
+`;
