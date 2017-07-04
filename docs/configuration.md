@@ -67,14 +67,15 @@ $ node renovate --help
 
   Usage: renovate [options] [repositories...]
 
+
   Options:
 
-    -h, --help                           output usage information
     --log-level <string>                 Logging level
     --log-file <string>                  Log file path
     --log-file-level <string>            Log file log level
     --onboarding [boolean]               Require a Configuration PR first
     --timezone <string>                  [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+    --onboarding [boolean]               Require a Configuration PR first
     --platform <string>                  Platform type of repository
     --endpoint <string>                  Custom endpoint to use
     --token <string>                     Repository Auth Token
@@ -101,7 +102,7 @@ $ node renovate --help
     --labels <list>                      Labels to add to Pull Request
     --assignees <list>                   Assignees for Pull Request
     --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
-
+    -h, --help                           output usage information
   Examples:
 
     $ renovate --token abc123 singapore/lint-condo
@@ -132,48 +133,312 @@ Obviously, you can't set repository or package file location with this method.
 
 ## Configuration Options
 
-| Name | Description | Type | Default value | Environment | CLI |
-|------|-------------|------|---------------|-------------|-----|
-| `enabled` | Enable or disable renovate | boolean | `true` |  |  |
-| `logLevel` | Logging level | string | `"info"` | `LOG_LEVEL` | `--log-level` |
-| `logFile` | Log file path | string | `null` | `RENOVATE_LOG_FILE` | `--log-file` |
-| `logFileLevel` | Log file log level | string | `"debug"` | `RENOVATE_LOG_FILE_LEVEL` | `--log-file-level` |
-| `onboarding` | Require a Configuration PR first | boolean | `true` | `RENOVATE_ONBOARDING` | `--onboarding` |
-| `timezone` | [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) | string | `null` | `RENOVATE_TIMEZONE` | `--timezone` |
-| `schedule` | Times of day/week to renovate | list | `[]` |  |  |
-| `platform` | Platform type of repository | string | `"github"` | `RENOVATE_PLATFORM` | `--platform` |
-| `endpoint` | Custom endpoint to use | string | `null` | `RENOVATE_ENDPOINT` | `--endpoint` |
-| `token` | Repository Auth Token | string | `null` | `RENOVATE_TOKEN` | `--token` |
-| `autodiscover` | Autodiscover all repositories | boolean | `false` | `RENOVATE_AUTODISCOVER` | `--autodiscover` |
-| `githubAppId` | GitHub App ID (enables GitHub App functionality if set) | integer | `undefined` | `RENOVATE_GITHUB_APP_ID` | `--github-app-id` |
-| `githubAppKey` | GitHub App Private Key (.pem file contents) | string | `null` | `RENOVATE_GITHUB_APP_KEY` | `--github-app-key` |
-| `repositories` | List of Repositories | list | `[]` | `RENOVATE_REPOSITORIES` |  |
-| `packageFiles` | Package file paths | list | `[]` | `RENOVATE_PACKAGE_FILES` | `--package-files` |
-| `depTypes` | Dependency types | list | `[
+<table>
+<tr>
+  <th>Name</th>
+  <th>Description</th>
+  <th>Type</th>
+  <th>Default value</th>
+  <th>Environment</th>
+  <th>CLI</th>
+</tr>
+<tr>
+  <td>`enabled`</td>
+  <td>Enable or disable renovate</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
+  <td>`logLevel`</td>
+  <td>Logging level</td>
+  <td>string</td>
+  <td><pre>"info"</pre></td>
+  <td>`LOG_LEVEL`</td>
+  <td>`--log-level`<td>
+</tr>
+<tr>
+  <td>`logFile`</td>
+  <td>Log file path</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_LOG_FILE`</td>
+  <td>`--log-file`<td>
+</tr>
+<tr>
+  <td>`logFileLevel`</td>
+  <td>Log file log level</td>
+  <td>string</td>
+  <td><pre>"debug"</pre></td>
+  <td>`RENOVATE_LOG_FILE_LEVEL`</td>
+  <td>`--log-file-level`<td>
+</tr>
+<tr>
+  <td>`onboarding`</td>
+  <td>Require a Configuration PR first</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_ONBOARDING`</td>
+  <td>`--onboarding`<td>
+</tr>
+<tr>
+  <td>`timezone`</td>
+  <td>[IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_TIMEZONE`</td>
+  <td>`--timezone`<td>
+</tr>
+<tr>
+  <td>`schedule`</td>
+  <td>Times of day/week to renovate</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
+  <td>`onboarding`</td>
+  <td>Require a Configuration PR first</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_ONBOARDING`</td>
+  <td>`--onboarding`<td>
+</tr>
+<tr>
+  <td>`platform`</td>
+  <td>Platform type of repository</td>
+  <td>string</td>
+  <td><pre>"github"</pre></td>
+  <td>`RENOVATE_PLATFORM`</td>
+  <td>`--platform`<td>
+</tr>
+<tr>
+  <td>`endpoint`</td>
+  <td>Custom endpoint to use</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_ENDPOINT`</td>
+  <td>`--endpoint`<td>
+</tr>
+<tr>
+  <td>`token`</td>
+  <td>Repository Auth Token</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_TOKEN`</td>
+  <td>`--token`<td>
+</tr>
+<tr>
+  <td>`autodiscover`</td>
+  <td>Autodiscover all repositories</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_AUTODISCOVER`</td>
+  <td>`--autodiscover`<td>
+</tr>
+<tr>
+  <td>`githubAppId`</td>
+  <td>GitHub App ID (enables GitHub App functionality if set)</td>
+  <td>integer</td>
+  <td><pre>undefined</pre></td>
+  <td>`RENOVATE_GITHUB_APP_ID`</td>
+  <td>`--github-app-id`<td>
+</tr>
+<tr>
+  <td>`githubAppKey`</td>
+  <td>GitHub App Private Key (.pem file contents)</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_GITHUB_APP_KEY`</td>
+  <td>`--github-app-key`<td>
+</tr>
+<tr>
+  <td>`repositories`</td>
+  <td>List of Repositories</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td>`RENOVATE_REPOSITORIES`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`packageFiles`</td>
+  <td>Package file paths</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td>`RENOVATE_PACKAGE_FILES`</td>
+  <td>`--package-files`<td>
+</tr>
+<tr>
+  <td>`depTypes`</td>
+  <td>Dependency types</td>
+  <td>list</td>
+  <td><pre>[
   {"depType": "dependencies", "semanticPrefix": "fix: "},
   "devDependencies",
   "optionalDependencies"
-]` | `RENOVATE_DEP_TYPES` | `--dep-types` |
-| `ignoreDeps` | Dependencies to ignore | list | `[]` | `RENOVATE_IGNORE_DEPS` | `--ignore-deps` |
-| `packages` | Package Rules | list | `[]` |  |  |
-| `pinVersions` | Convert ranged versions in package.json to pinned versions | boolean | `true` | `RENOVATE_PIN_VERSIONS` | `--pin-versions` |
-| `separateMajorReleases` | If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches | boolean | `true` | `RENOVATE_SEPARATE_MAJOR_RELEASES` | `--separate-major-releases` |
-| `ignoreFuture` | Ignore versions tagged as "future" | boolean | `true` | `RENOVATE_IGNORE_FUTURE` | `--ignore-future` |
-| `ignoreUnstable` | Ignore versions with unstable semver | boolean | `true` | `RENOVATE_IGNORE_UNSTABLE` | `--ignore-unstable` |
-| `respectLatest` | Ignore versions newer than npm "latest" version | boolean | `true` | `RENOVATE_RESPECT_LATEST` | `--respect-latest` |
-| `semanticCommits` | Enable semantic commit prefixes for commits and PR titles | boolean | `false` | `RENOVATE_SEMANTIC_COMMITS` | `--semantic-commits` |
-| `semanticPrefix` | Prefix to use if semantic commits are enabled | string | `"chore: "` | `RENOVATE_SEMANTIC_PREFIX` | `--semantic-prefix` |
-| `recreateClosed` | Recreate PRs even if same ones were closed previously | boolean | `false` | `RENOVATE_RECREATE_CLOSED` | `--recreate-closed` |
-| `rebaseStalePrs` | Rebase stale PRs (GitHub only) | boolean | `false` | `RENOVATE_REBASE_STALE_PRS` | `--rebase-stale-prs` |
-| `prCreation` | When to create the PR for a branch. Values: immediate, not-pending, status-success. | string | `"immediate"` | `RENOVATE_PR_CREATION` | `--pr-creation` |
-| `automerge` | What types of upgrades to merge to base branch automatically. Values: none, minor or any | string | `"none"` | `RENOVATE_AUTOMERGE` | `--automerge` |
-| `automergeType` | How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only | string | `"pr"` | `RENOVATE_AUTOMERGE_TYPE` | `--automerge-type` |
-| `branchName` | Branch name template | string | `"renovate/{{depName}}-{{newVersionMajor}}.x"` | `RENOVATE_BRANCH_NAME` |  |
-| `commitMessage` | Commit message template | string | `"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}"` | `RENOVATE_COMMIT_MESSAGE` |  |
-| `prTitle` | Pull Request title template | string | `"{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"` | `RENOVATE_PR_TITLE` |  |
-| `prBody` | Pull Request body template | string | `"This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates dependency [{{depName}}]({{repositoryUrl}}) from version `{{currentVersion}}` to `{{newVersion}}`\n{{#if releases.length}}\n\n### Commits\n\n<details>\n<summary>{{githubName}}</summary>\n\n{{#each releases as |release|}}\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n<br />\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://keylocation.sg/our-tech/renovate)."` | `RENOVATE_PR_BODY` |  |
-| `yarnCacheFolder` | Location of yarn cache folder to use. Set to empty string to disable | string | `"/tmp/yarn-cache"` | `RENOVATE_YARN_CACHE_FOLDER` |  |
-| `lockFileMaintenance` | Configuration for lock file maintenance | json | `{
+]</pre></td>
+  <td>`RENOVATE_DEP_TYPES`</td>
+  <td>`--dep-types`<td>
+</tr>
+<tr>
+  <td>`ignoreDeps`</td>
+  <td>Dependencies to ignore</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td>`RENOVATE_IGNORE_DEPS`</td>
+  <td>`--ignore-deps`<td>
+</tr>
+<tr>
+  <td>`packages`</td>
+  <td>Package Rules</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
+  <td>`pinVersions`</td>
+  <td>Convert ranged versions in package.json to pinned versions</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_PIN_VERSIONS`</td>
+  <td>`--pin-versions`<td>
+</tr>
+<tr>
+  <td>`separateMajorReleases`</td>
+  <td>If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_SEPARATE_MAJOR_RELEASES`</td>
+  <td>`--separate-major-releases`<td>
+</tr>
+<tr>
+  <td>`ignoreFuture`</td>
+  <td>Ignore versions tagged as "future"</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_IGNORE_FUTURE`</td>
+  <td>`--ignore-future`<td>
+</tr>
+<tr>
+  <td>`ignoreUnstable`</td>
+  <td>Ignore versions with unstable semver</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_IGNORE_UNSTABLE`</td>
+  <td>`--ignore-unstable`<td>
+</tr>
+<tr>
+  <td>`respectLatest`</td>
+  <td>Ignore versions newer than npm "latest" version</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_RESPECT_LATEST`</td>
+  <td>`--respect-latest`<td>
+</tr>
+<tr>
+  <td>`semanticCommits`</td>
+  <td>Enable semantic commit prefixes for commits and PR titles</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_SEMANTIC_COMMITS`</td>
+  <td>`--semantic-commits`<td>
+</tr>
+<tr>
+  <td>`semanticPrefix`</td>
+  <td>Prefix to use if semantic commits are enabled</td>
+  <td>string</td>
+  <td><pre>"chore: "</pre></td>
+  <td>`RENOVATE_SEMANTIC_PREFIX`</td>
+  <td>`--semantic-prefix`<td>
+</tr>
+<tr>
+  <td>`recreateClosed`</td>
+  <td>Recreate PRs even if same ones were closed previously</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_RECREATE_CLOSED`</td>
+  <td>`--recreate-closed`<td>
+</tr>
+<tr>
+  <td>`rebaseStalePrs`</td>
+  <td>Rebase stale PRs (GitHub only)</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_REBASE_STALE_PRS`</td>
+  <td>`--rebase-stale-prs`<td>
+</tr>
+<tr>
+  <td>`prCreation`</td>
+  <td>When to create the PR for a branch. Values: immediate, not-pending, status-success.</td>
+  <td>string</td>
+  <td><pre>"immediate"</pre></td>
+  <td>`RENOVATE_PR_CREATION`</td>
+  <td>`--pr-creation`<td>
+</tr>
+<tr>
+  <td>`automerge`</td>
+  <td>What types of upgrades to merge to base branch automatically. Values: none, minor or any</td>
+  <td>string</td>
+  <td><pre>"none"</pre></td>
+  <td>`RENOVATE_AUTOMERGE`</td>
+  <td>`--automerge`<td>
+</tr>
+<tr>
+  <td>`automergeType`</td>
+  <td>How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only</td>
+  <td>string</td>
+  <td><pre>"pr"</pre></td>
+  <td>`RENOVATE_AUTOMERGE_TYPE`</td>
+  <td>`--automerge-type`<td>
+</tr>
+<tr>
+  <td>`branchName`</td>
+  <td>Branch name template</td>
+  <td>string</td>
+  <td><pre>"renovate/{{depName}}-{{newVersionMajor}}.x"</pre></td>
+  <td>`RENOVATE_BRANCH_NAME`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`commitMessage`</td>
+  <td>Commit message template</td>
+  <td>string</td>
+  <td><pre>"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}"</pre></td>
+  <td>`RENOVATE_COMMIT_MESSAGE`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`prTitle`</td>
+  <td>Pull Request title template</td>
+  <td>string</td>
+  <td><pre>"{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"</pre></td>
+  <td>`RENOVATE_PR_TITLE`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`prBody`</td>
+  <td>Pull Request body template</td>
+  <td>string</td>
+  <td><pre>"This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates dependency [{{depName}}]({{repositoryUrl}}) from version `{{currentVersion}}` to `{{newVersion}}`\n{{#if releases.length}}\n\n### Commits\n\n<details>\n<summary>{{githubName}}</summary>\n\n{{#each releases as |release|}}\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n<br />\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://keylocation.sg/our-tech/renovate)."</pre></td>
+  <td>`RENOVATE_PR_BODY`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`yarnCacheFolder`</td>
+  <td>Location of yarn cache folder to use. Set to empty string to disable</td>
+  <td>string</td>
+  <td><pre>"/tmp/yarn-cache"</pre></td>
+  <td>`RENOVATE_YARN_CACHE_FOLDER`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`lockFileMaintenance`</td>
+  <td>Configuration for lock file maintenance</td>
+  <td>json</td>
+  <td><pre>{
   "enabled": true,
   "recreateClosed": true,
   "branchName": "renovate/lock-files",
@@ -181,17 +446,69 @@ Obviously, you can't set repository or package file location with this method.
   "prTitle": "{{semanticPrefix}}Lock file maintenance",
   "prBody": "This PR regenerates lock files to keep them up-to-date.",
   "schedule": "before 5am on monday"
-}` |  |  |
-| `lazyGrouping` | Use group names only when multiple dependencies upgraded | boolean | `true` | `RENOVATE_LAZY_GROUPING` | `--lazy-grouping` |
-| `groupName` | Human understandable name for the dependency group | string | `null` | `RENOVATE_GROUP_NAME` | `--group-name` |
-| `groupSlug` | Slug to use for group (e.g. in branch name). Will be calculated from groupName if null | string | `null` |  |  |
-| `group` | Config if groupName is enabled | json | `{
+}</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
+  <td>`lazyGrouping`</td>
+  <td>Use group names only when multiple dependencies upgraded</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_LAZY_GROUPING`</td>
+  <td>`--lazy-grouping`<td>
+</tr>
+<tr>
+  <td>`groupName`</td>
+  <td>Human understandable name for the dependency group</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_GROUP_NAME`</td>
+  <td>`--group-name`<td>
+</tr>
+<tr>
+  <td>`groupSlug`</td>
+  <td>Slug to use for group (e.g. in branch name). Will be calculated from groupName if null</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
+  <td>`group`</td>
+  <td>Config if groupName is enabled</td>
+  <td>json</td>
+  <td><pre>{
   "recreateClosed": true,
   "branchName": "renovate/{{groupSlug}}",
   "commitMessage": "{{semanticPrefix}}Renovate {{groupName}} packages",
   "prTitle": "{{semanticPrefix}}Renovate {{groupName}} packages",
   "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \"{{groupName}}\".\n\n{{#each upgrades as |upgrade|}}\n-   [{{upgrade.depName}}]({{upgrade.repositoryUrl}}): from `{{upgrade.currentVersion}}` to `{{upgrade.newVersion}}`\n{{/each}}\n\n{{#unless isPin}}\n### Commits\n\n{{#each upgrades as |upgrade|}}\n{{#if upgrade.releases.length}}\n<details>\n<summary>{{upgrade.githubName}}</summary>\n{{#each upgrade.releases as |release|}}\n\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}){{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n{{/each}}\n{{/unless}}\n<br />\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://keylocation.sg/our-tech/renovate)."
-}` |  |  |
-| `labels` | Labels to add to Pull Request | list | `[]` | `RENOVATE_LABELS` | `--labels` |
-| `assignees` | Assignees for Pull Request | list | `[]` | `RENOVATE_ASSIGNEES` | `--assignees` |
-| `reviewers` | Requested reviewers for Pull Requests (GitHub only) | list | `[]` | `RENOVATE_REVIEWERS` | `--reviewers` |
+}</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
+  <td>`labels`</td>
+  <td>Labels to add to Pull Request</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td>`RENOVATE_LABELS`</td>
+  <td>`--labels`<td>
+</tr>
+<tr>
+  <td>`assignees`</td>
+  <td>Assignees for Pull Request</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td>`RENOVATE_ASSIGNEES`</td>
+  <td>`--assignees`<td>
+</tr>
+<tr>
+  <td>`reviewers`</td>
+  <td>Requested reviewers for Pull Requests (GitHub only)</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td>`RENOVATE_REVIEWERS`</td>
+  <td>`--reviewers`<td>
+</tr>
