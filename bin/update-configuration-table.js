@@ -10,18 +10,25 @@ const envParser = require('../lib/config/env');
 // Print table header
 console.log('## Configuration Options');
 console.log('');
-console.log(
-  '| Name | Description | Type | Default value | Environment | CLI |'
-);
-console.log(
-  '|------|-------------|------|---------------|-------------|-----|'
-);
-
+console.log('<table>');
+console.log('<tr>');
+const columns = [
+  'Name',
+  'Description',
+  'Type',
+  'Default value',
+  'Environment',
+  'CLI',
+];
+columns.forEach(column => {
+  console.log(`  <th>${column}</th>`);
+});
+console.log('</tr>');
 const options = definitions.getOptions();
 options.forEach(option => {
   let optionDefault = defaultsParser.getDefault(option);
   if (optionDefault !== '') {
-    optionDefault = `\`${stringify(optionDefault)}\``;
+    optionDefault = `<pre>${stringify(optionDefault)}</pre>`;
   }
   let envName = envParser.getEnvName(option);
   if (envName.length) {
@@ -32,7 +39,14 @@ options.forEach(option => {
     cliName = `\`${cliName}\``;
   }
   console.log(
-    `| \`${option.name}\` | ${option.description} | ${option.type} | ${optionDefault} | ${envName} | ${cliName} |`
+    `<tr>
+  <td>\`${option.name}\`</td>
+  <td>${option.description}</td>
+  <td>${option.type}</td>
+  <td>${optionDefault}</td>
+  <td>${envName}</td>
+  <td>${cliName}<td>
+</tr>`
   );
 });
 /* eslint-enable no-console */
