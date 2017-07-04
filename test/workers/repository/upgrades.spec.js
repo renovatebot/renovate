@@ -47,7 +47,7 @@ describe('workers/repository/upgrades', () => {
   describe('branchifyUpgrades(upgrades, logger)', () => {
     it('returns empty object if no input array', async () => {
       const res = await upgrades.branchifyUpgrades([], logger);
-      expect(res).toEqual({});
+      expect(res).toMatchSnapshot();
     });
     it('returns one branch if one input', async () => {
       const input = [
@@ -57,7 +57,7 @@ describe('workers/repository/upgrades', () => {
         },
       ];
       const res = await upgrades.branchifyUpgrades(input, logger);
-      expect(Object.keys(res).length).toBe(1);
+      expect(Object.keys(res.branchUpgrades).length).toBe(1);
       expect(res).toMatchSnapshot();
     });
     it('does not group if different compiled branch names', async () => {
@@ -76,7 +76,7 @@ describe('workers/repository/upgrades', () => {
         },
       ];
       const res = await upgrades.branchifyUpgrades(input, logger);
-      expect(Object.keys(res).length).toBe(3);
+      expect(Object.keys(res.branchUpgrades).length).toBe(3);
       expect(res).toMatchSnapshot();
     });
     it('groups if same compiled branch names', async () => {
@@ -95,7 +95,7 @@ describe('workers/repository/upgrades', () => {
         },
       ];
       const res = await upgrades.branchifyUpgrades(input, logger);
-      expect(Object.keys(res).length).toBe(2);
+      expect(Object.keys(res.branchUpgrades).length).toBe(2);
       expect(res).toMatchSnapshot();
     });
     it('groups if same compiled group name', async () => {
@@ -118,7 +118,32 @@ describe('workers/repository/upgrades', () => {
         },
       ];
       const res = await upgrades.branchifyUpgrades(input, logger);
-      expect(Object.keys(res).length).toBe(2);
+      expect(Object.keys(res.branchUpgrades).length).toBe(2);
+      expect(res).toMatchSnapshot();
+    });
+    it('mixes errors and warnings', async () => {
+      const input = [
+        {
+          upgradeType: 'error',
+        },
+        {
+          branchName: 'foo-{{version}}',
+          version: '1.1.0',
+        },
+        {
+          upgradeType: 'warning',
+          branchName: 'foo-{{version}}',
+          version: '2.0.0',
+        },
+        {
+          branchName: 'bar-{{version}}',
+          version: '1.1.0',
+        },
+      ];
+      const res = await upgrades.branchifyUpgrades(input, logger);
+      expect(Object.keys(res.branchUpgrades).length).toBe(2);
+      expect(res.errors).toHaveLength(1);
+      expect(res.warnings).toHaveLength(1);
       expect(res).toMatchSnapshot();
     });
   });

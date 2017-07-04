@@ -2,86 +2,141 @@
 
 exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) does not group if different compiled branch names 1`] = `
 Object {
-  "bar-1.1.0": Array [
-    Object {
-      "branchName": "bar-{{version}}",
-      "version": "1.1.0",
-    },
-  ],
-  "foo-1.1.0": Array [
-    Object {
-      "branchName": "foo-{{version}}",
-      "version": "1.1.0",
-    },
-  ],
-  "foo-2.0.0": Array [
-    Object {
-      "branchName": "foo-{{version}}",
-      "version": "2.0.0",
-    },
-  ],
+  "branchUpgrades": Object {
+    "bar-1.1.0": Array [
+      Object {
+        "branchName": "bar-{{version}}",
+        "version": "1.1.0",
+      },
+    ],
+    "foo-1.1.0": Array [
+      Object {
+        "branchName": "foo-{{version}}",
+        "version": "1.1.0",
+      },
+    ],
+    "foo-2.0.0": Array [
+      Object {
+        "branchName": "foo-{{version}}",
+        "version": "2.0.0",
+      },
+    ],
+  },
+  "errors": Array [],
+  "warnings": Array [],
 }
 `;
 
 exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) groups if same compiled branch names 1`] = `
 Object {
-  "bar-1.1.0": Array [
-    Object {
-      "branchName": "bar-{{version}}",
-      "version": "1.1.0",
-    },
-  ],
-  "foo": Array [
-    Object {
-      "branchName": "foo",
-      "version": "2.0.0",
-    },
-    Object {
-      "branchName": "foo",
-      "version": "1.1.0",
-    },
-  ],
+  "branchUpgrades": Object {
+    "bar-1.1.0": Array [
+      Object {
+        "branchName": "bar-{{version}}",
+        "version": "1.1.0",
+      },
+    ],
+    "foo": Array [
+      Object {
+        "branchName": "foo",
+        "version": "2.0.0",
+      },
+      Object {
+        "branchName": "foo",
+        "version": "1.1.0",
+      },
+    ],
+  },
+  "errors": Array [],
+  "warnings": Array [],
 }
 `;
 
 exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) groups if same compiled group name 1`] = `
 Object {
-  "foo": Array [
+  "branchUpgrades": Object {
+    "foo": Array [
+      Object {
+        "branchName": "foo",
+        "version": "2.0.0",
+      },
+    ],
+    "renovate/my-group": Array [
+      Object {
+        "branchName": "bar-{{version}}",
+        "group": Object {
+          "branchName": "renovate/my-group",
+        },
+        "groupName": "My Group",
+        "groupSlug": "my-group",
+        "version": "1.1.0",
+      },
+      Object {
+        "branchName": "foo",
+        "group": Object {
+          "branchName": "renovate/{{groupSlug}}",
+        },
+        "groupName": "My Group",
+        "groupSlug": "my-group",
+        "version": "1.1.0",
+      },
+    ],
+  },
+  "errors": Array [],
+  "warnings": Array [],
+}
+`;
+
+exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) mixes errors and warnings 1`] = `
+Object {
+  "branchUpgrades": Object {
+    "bar-1.1.0": Array [
+      Object {
+        "branchName": "bar-{{version}}",
+        "version": "1.1.0",
+      },
+    ],
+    "foo-1.1.0": Array [
+      Object {
+        "branchName": "foo-{{version}}",
+        "version": "1.1.0",
+      },
+    ],
+  },
+  "errors": Array [
     Object {
-      "branchName": "foo",
-      "version": "2.0.0",
+      "upgradeType": "error",
     },
   ],
-  "renovate/my-group": Array [
+  "warnings": Array [
     Object {
-      "branchName": "bar-{{version}}",
-      "group": Object {
-        "branchName": "renovate/my-group",
-      },
-      "groupName": "My Group",
-      "groupSlug": "my-group",
-      "version": "1.1.0",
-    },
-    Object {
-      "branchName": "foo",
-      "group": Object {
-        "branchName": "renovate/{{groupSlug}}",
-      },
-      "groupName": "My Group",
-      "groupSlug": "my-group",
-      "version": "1.1.0",
+      "branchName": "foo-{{version}}",
+      "upgradeType": "warning",
+      "version": "2.0.0",
     },
   ],
 }
 `;
 
+exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) returns empty object if no input array 1`] = `
+Object {
+  "branchUpgrades": Object {},
+  "errors": Array [],
+  "warnings": Array [],
+}
+`;
+
 exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) returns one branch if one input 1`] = `
 Object {
-  "foo-1.1.0": Array [
-    Object {
-      "branchName": "foo-{{version}}",
-      "version": "1.1.0",
-    },
-  ],
+  "branchUpgrades": Object {
+    "foo-1.1.0": Array [
+      Object {
+        "branchName": "foo-{{version}}",
+        "version": "1.1.0",
+      },
+    ],
+  },
+  "errors": Array [],
+  "warnings": Array [],
 }
 `;
