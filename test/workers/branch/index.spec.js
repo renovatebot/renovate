@@ -382,7 +382,6 @@ describe('workers/branch', () => {
       config.group.branchName = 'some-group-branchname';
       const branchUpgrades = [config, config];
       const res = await branchWorker.generateConfig(branchUpgrades);
-      expect(res).toMatchSnapshot();
       expect(res.branchName).toEqual(config.group.branchName);
     });
   });

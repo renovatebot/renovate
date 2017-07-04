@@ -32,8 +32,8 @@ describe('lib/workers/package/index', () => {
       config.schedule = 'some schedule';
       schedule.isScheduledNow.mockReturnValueOnce(true);
       const res = await pkgWorker.findUpgrades(config);
+      expect(res).toHaveLength(1);
       expect(res[0].upgradeType).toEqual('error');
-      expect(res).toMatchSnapshot();
       expect(npmApi.getDependency.mock.calls.length).toBe(1);
     });
     it('returns warning if warning found', async () => {
@@ -45,7 +45,7 @@ describe('lib/workers/package/index', () => {
         },
       ]);
       const res = await pkgWorker.findUpgrades(config);
-      expect(res).toMatchSnapshot();
+      expect(res[0].upgradeType).toEqual('warning');
     });
     it('returns array if upgrades found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
