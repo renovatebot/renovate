@@ -39,6 +39,13 @@ Array [
 ]
 `;
 
+exports[`workers/package/versions .determineUpgrades(npmDep, config) ignores complex ranges when not pinning 1`] = `
+Object {
+  "message": "Complex semver ranges such as \\"^0.7.0 || ^0.8.0\\" are not yet supported so won't ever be upgraded",
+  "upgradeType": "warning",
+}
+`;
+
 exports[`workers/package/versions .determineUpgrades(npmDep, config) ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
@@ -78,6 +85,43 @@ Array [
     "upgradeType": "pin",
   },
 ]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) rejects less than ranges without pinning 1`] = `
+Array [
+  Object {
+    "message": "The current semver range \\"< 0.7.2\\" is not supported so won't ever be upgraded",
+    "upgradeType": "warning",
+  },
+]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) return warning if empty versions 1`] = `
+Object {
+  "message": "No versions returned from registry for this package",
+  "upgradeType": "warning",
+}
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) return warning if invalid current version 1`] = `
+Object {
+  "message": "Dependency uses tag \\"invalid\\" as its version so that will never be changed",
+  "upgradeType": "warning",
+}
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) return warning if null versions 1`] = `
+Object {
+  "message": "No versions returned from registry for this package",
+  "upgradeType": "warning",
+}
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) return warning if using a known tag 1`] = `
+Object {
+  "message": "Dependency uses tag \\"next\\" as its version so that will never be changed",
+  "upgradeType": "warning",
+}
 `;
 
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns both updates if automerging minor 1`] = `

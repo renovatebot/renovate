@@ -10,28 +10,36 @@ describe('workers/package/versions', () => {
   });
 
   describe('.determineUpgrades(npmDep, config)', () => {
-    it('return empty if invalid current version', () => {
+    it('return warning if invalid current version', () => {
       config.currentVersion = 'invalid';
-      versions.determineUpgrades(qJson, config).should.have.length(0);
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toHaveLength(1);
+      expect(res[0]).toMatchSnapshot();
     });
-    it('return empty if using a known tag', () => {
+    it('return warning if using a known tag', () => {
       config.currentVersion = 'next';
-      versions.determineUpgrades(qJson, config).should.have.length(0);
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toHaveLength(1);
+      expect(res[0]).toMatchSnapshot();
     });
-    it('return empty if null versions', () => {
+    it('return warning if null versions', () => {
       config.currentVersion = '1.0.0';
       const testDep = {
         name: 'q',
       };
-      versions.determineUpgrades(testDep, config).should.have.length(0);
+      const res = versions.determineUpgrades(testDep, config);
+      expect(res).toHaveLength(1);
+      expect(res[0]).toMatchSnapshot();
     });
-    it('return empty if empty versions', () => {
+    it('return warning if empty versions', () => {
       const testDep = {
         name: 'q',
         versions: [],
       };
       config.currentVersion = '1.0.0';
-      versions.determineUpgrades(testDep, config).should.have.length(0);
+      const res = versions.determineUpgrades(testDep, config);
+      expect(res).toHaveLength(1);
+      expect(res[0]).toMatchSnapshot();
     });
     it('supports minor and major upgrades for tilde ranges', () => {
       config.currentVersion = '^0.4.0';
@@ -129,7 +137,9 @@ describe('workers/package/versions', () => {
     it('ignores complex ranges when not pinning', () => {
       config.pinVersions = false;
       config.currentVersion = '^0.7.0 || ^0.8.0';
-      expect(versions.determineUpgrades(qJson, config)).toHaveLength(0);
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toHaveLength(1);
+      expect(res[0]).toMatchSnapshot();
     });
     it('returns nothing for greater than ranges', () => {
       config.pinVersions = false;
@@ -144,7 +154,7 @@ describe('workers/package/versions', () => {
     it('rejects less than ranges without pinning', () => {
       config.pinVersions = false;
       config.currentVersion = '< 0.7.2';
-      expect(versions.determineUpgrades(qJson, config)).toEqual([]);
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('supports > latest versions if configured', () => {
       config.respectLatest = false;

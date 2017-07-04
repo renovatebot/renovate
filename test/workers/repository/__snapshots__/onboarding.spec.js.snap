@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates complex pr 1`] = `
+exports[`lib/workers/repository/onboarding ensurePr(config, upgradeData) creates complex pr 1`] = `
 Array [
   Array [
     "renovate/configure",
@@ -39,7 +39,7 @@ If the default settings are all suitable for you, simply close this Pull Request
 ]
 `;
 
-exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates pr 1`] = `
+exports[`lib/workers/repository/onboarding ensurePr(config, upgradeData) creates pr 1`] = `
 Array [
   Array [
     "renovate/configure",
@@ -51,6 +51,63 @@ This is an onboarding PR to help you understand and configure Renovate before an
 ---
 
 It looks like your repository dependencies are already up-to-date and no initial Pull Requests will be necessary.
+
+Would you like to change this? Simply edit the \`renovate.json\` in this branch and Renovate will update this Pull Request description the next time it runs.
+
+The [Configuration](https://github.com/singapore/renovate/blob/master/docs/configuration.md) and [Configuration FAQ](https://github.com/singapore/renovate/blob/master/docs/faq.md) documents should be helpful if you wish to modify this behaviour.
+
+---
+
+#### Important!
+
+You do not need to *merge* this Pull Request - renovate will begin even if it's closed *unmerged*.
+In fact, you only need to add a \`renovate.json\` file to your repository if you wish to override any default settings. The file is included as part of this PR only in case you wish to change default settings before you start.
+
+Alternatively, you can add the same configuration settings into a \\"renovate\\" section of \`package.json\`, which might be more convenient if you have only one.
+
+If the default settings are all suitable for you, simply close this Pull Request unmerged and your first renovation will begin the next time the program is run.
+",
+  ],
+]
+`;
+
+exports[`lib/workers/repository/onboarding ensurePr(config, upgradeData) creates shows warnings and errors 1`] = `
+Array [
+  Array [
+    "renovate/configure",
+    "Configure Renovate",
+    "Welcome to [Renovate](https://keylocation.sg/our-tech/renovate)!
+
+This is an onboarding PR to help you understand and configure Renovate before any changes are made to any \`package.json\` files. Once you close this Pull Request, we will begin keeping your dependencies up-to-date via automated Pull Requests.
+
+---
+
+## Errors (1)
+
+Renovate has raised errors when processing this repository that you should fix before merging or closing this PR.
+
+Please make any fixes in _this branch_.
+-   \`a\`: uhoh a
+
+Feel free to raise create a [GitHub Issue](https:/github.com/singapore/renovate/issues) to ask any questions.
+
+---
+
+### Warnings (1)
+
+Please correct - or verify that you can safely ignore - these warnings before you merge this PR.
+-   \`b\`: uhoh b
+
+---
+
+
+With your current configuration, renovate will initially create the following Pull Requests:
+
+| Pull Requests (2) |
+| ------ |
+| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` from \`^1.0.0\` to \`1.1.0\`</li></ul> |
+| **Upgrade b**<ul><li>Branch name: \`branch-b\`</li><li>Upgrades [b](https://b) in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
+
 
 Would you like to change this? Simply edit the \`renovate.json\` in this branch and Renovate will update this Pull Request description the next time it runs.
 
