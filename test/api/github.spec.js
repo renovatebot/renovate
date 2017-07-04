@@ -790,10 +790,13 @@ describe('api/github', () => {
             },
           },
           {
-            author: {
-              login: 'bar',
+            commit: {
+              author: {
+                email: 'bar',
+              },
             },
           },
+          {},
         ],
       }));
       const pr = await github.getPr(1234);
