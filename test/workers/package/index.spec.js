@@ -28,18 +28,24 @@ describe('lib/workers/package/index', () => {
       expect(res).toMatchObject([]);
       expect(npmApi.getDependency.mock.calls.length).toBe(0);
     });
-    it('returns empty if no npm dep found', async () => {
+    it('returns error if no npm dep found', async () => {
       config.schedule = 'some schedule';
       schedule.isScheduledNow.mockReturnValueOnce(true);
       const res = await pkgWorker.findUpgrades(config);
-      expect(res).toMatchObject([]);
+      expect(res[0].upgradeType).toEqual('error');
+      expect(res).toMatchSnapshot();
       expect(npmApi.getDependency.mock.calls.length).toBe(1);
     });
-    it('returns empty if no upgrades found', async () => {
+    it('returns warning if warning found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades.mockReturnValueOnce([]);
+      versions.determineUpgrades.mockReturnValueOnce([
+        {
+          upgradeType: 'warning',
+          message: 'bad version',
+        },
+      ]);
       const res = await pkgWorker.findUpgrades(config);
-      expect(res).toMatchObject([]);
+      expect(res).toMatchSnapshot();
     });
     it('returns array if upgrades found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
