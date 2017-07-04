@@ -105,13 +105,13 @@ Object {
   },
   "errors": Array [
     Object {
-      "upgradeType": "error",
+      "type": "error",
     },
   ],
   "warnings": Array [
     Object {
       "branchName": "foo-{{version}}",
-      "upgradeType": "warning",
+      "type": "warning",
       "version": "2.0.0",
     },
   ],

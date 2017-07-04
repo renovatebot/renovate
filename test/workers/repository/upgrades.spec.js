@@ -124,14 +124,14 @@ describe('workers/repository/upgrades', () => {
     it('mixes errors and warnings', async () => {
       const input = [
         {
-          upgradeType: 'error',
+          type: 'error',
         },
         {
           branchName: 'foo-{{version}}',
           version: '1.1.0',
         },
         {
-          upgradeType: 'warning',
+          type: 'warning',
           branchName: 'foo-{{version}}',
           version: '2.0.0',
         },
