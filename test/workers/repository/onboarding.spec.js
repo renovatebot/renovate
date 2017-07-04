@@ -3,8 +3,9 @@ const logger = require('../../_fixtures/logger');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 describe('lib/workers/repository/onboarding', () => {
-  describe('ensurePr(config, branchUpgrades)', () => {
+  describe('ensurePr(config, upgradeData)', () => {
     let config;
+    let upgradeData;
     beforeEach(() => {
       config = {
         api: {
@@ -14,16 +15,21 @@ describe('lib/workers/repository/onboarding', () => {
         },
         logger,
       };
+      upgradeData = {
+        branchUpgrades: {},
+        errors: [],
+        warnings: [],
+      };
     });
     it('creates pr', async () => {
-      await onboarding.ensurePr(config, {});
+      await onboarding.ensurePr(config, upgradeData);
       expect(config.api.createPr.mock.calls.length).toBe(1);
       expect(config.api.updatePr.mock.calls.length).toBe(0);
       expect(config.api.createPr.mock.calls).toMatchSnapshot();
     });
     it('updates pr', async () => {
       config.api.getBranchPr.mockReturnValueOnce({});
-      await onboarding.ensurePr(config, {});
+      await onboarding.ensurePr(config, upgradeData);
       expect(config.api.createPr.mock.calls.length).toBe(0);
       expect(config.api.updatePr.mock.calls.length).toBe(1);
     });
@@ -55,12 +61,12 @@ If the default settings are all suitable for you, simply close this Pull Request
         title: 'Configure Renovate',
         body: existingPrBody,
       });
-      await onboarding.ensurePr(config, {});
+      await onboarding.ensurePr(config, upgradeData);
       expect(config.api.createPr.mock.calls.length).toBe(0);
       expect(config.api.updatePr.mock.calls.length).toBe(0);
     });
     it('creates complex pr', async () => {
-      const branchUpgrades = {
+      upgradeData.branchUpgrades = {
         'branch-a': [
           {
             prTitle: 'Pin a',
@@ -81,7 +87,46 @@ If the default settings are all suitable for you, simply close this Pull Request
           },
         ],
       };
-      await onboarding.ensurePr(config, branchUpgrades);
+      await onboarding.ensurePr(config, upgradeData);
+      expect(config.api.createPr.mock.calls.length).toBe(1);
+      expect(config.api.updatePr.mock.calls.length).toBe(0);
+      expect(config.api.createPr.mock.calls).toMatchSnapshot();
+    });
+    it('creates shows warnings and errors', async () => {
+      upgradeData.branchUpgrades = {
+        'branch-a': [
+          {
+            prTitle: 'Pin a',
+            isPin: true,
+            depName: 'a',
+            repositoryUrl: 'https://a',
+            currentVersion: '^1.0.0',
+            newVersion: '1.1.0',
+          },
+        ],
+        'branch-b': [
+          {
+            prTitle: 'Upgrade b',
+            depName: 'b',
+            repositoryUrl: 'https://b',
+            currentVersion: '1.0.0',
+            newVersion: '2.0.0',
+          },
+        ],
+      };
+      upgradeData.errors = [
+        {
+          depName: 'a',
+          message: 'uhoh a',
+        },
+      ];
+      upgradeData.warnings = [
+        {
+          depName: 'b',
+          message: 'uhoh b',
+        },
+      ];
+      await onboarding.ensurePr(config, upgradeData);
       expect(config.api.createPr.mock.calls.length).toBe(1);
       expect(config.api.updatePr.mock.calls.length).toBe(0);
       expect(config.api.createPr.mock.calls).toMatchSnapshot();

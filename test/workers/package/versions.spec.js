@@ -154,7 +154,7 @@ describe('workers/package/versions', () => {
     it('rejects less than ranges without pinning', () => {
       config.pinVersions = false;
       config.currentVersion = '< 0.7.2';
-      expect(versions.determineUpgrades(qJson, config)).toEqual([]);
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('supports > latest versions if configured', () => {
       config.respectLatest = false;
