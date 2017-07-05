@@ -175,6 +175,21 @@ describe('api/gitlab', () => {
       expect(config).toMatchSnapshot();
     });
   });
+  describe('setBaseBranch(branchName)', () => {
+    it('sets the base branch', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      glGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1238',
+          },
+        },
+      }));
+      await gitlab.setBaseBranch('some-branch');
+      expect(glGot.mock.calls).toMatchSnapshot();
+    });
+  });
   describe('findFilePaths(fileName)', () => {
     it('should return empty array', async () => {
       await initRepo('some/repo', 'token');

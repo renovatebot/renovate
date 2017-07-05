@@ -203,7 +203,7 @@ Object {
 exports[`api/gitlab getFile(filePath, branchName) gets the file with v3 1`] = `
 Object {
   "apiVersion": "v3",
-  "defaultBranch": undefined,
+  "baseBranch": undefined,
   "email": undefined,
   "repoName": "some-repo",
 }
@@ -298,7 +298,7 @@ Array [
 exports[`api/gitlab initRepo should initialise the config for the repo - 0 2`] = `
 Object {
   "apiVersion": "v3",
-  "defaultBranch": "master",
+  "baseBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }
@@ -321,7 +321,7 @@ Array [
 exports[`api/gitlab initRepo should initialise the config for the repo - 1 2`] = `
 Object {
   "apiVersion": "v3",
-  "defaultBranch": "master",
+  "baseBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }
@@ -344,7 +344,7 @@ Array [
 exports[`api/gitlab initRepo should initialise the config for the repo - 2 2`] = `
 Object {
   "apiVersion": "v3",
-  "defaultBranch": "master",
+  "baseBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }
@@ -353,7 +353,7 @@ Object {
 exports[`api/gitlab initRepo should use api v4 1`] = `
 Object {
   "apiVersion": "v4",
-  "defaultBranch": "master",
+  "baseBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }
@@ -362,8 +362,22 @@ Object {
 exports[`api/gitlab initRepo uses provided logger 1`] = `
 Object {
   "apiVersion": "v3",
-  "defaultBranch": "master",
+  "baseBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }
+`;
+
+exports[`api/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
+Array [
+  Array [
+    "projects/owned",
+  ],
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+]
 `;
