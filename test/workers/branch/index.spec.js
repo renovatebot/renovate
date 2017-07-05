@@ -280,7 +280,7 @@ describe('workers/branch', () => {
     it('maintains lock files if needing updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       yarn.maintainLockFile.mockReturnValueOnce('non null response');
-      config.upgrades[0].upgradeType = 'lockFileMaintenance';
+      config.upgrades[0].type = 'lockFileMaintenance';
       await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
@@ -291,7 +291,7 @@ describe('workers/branch', () => {
     });
     it('skips maintaining lock files if no updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
-      config.upgrades[0].upgradeType = 'lockFileMaintenance';
+      config.upgrades[0].type = 'lockFileMaintenance';
       await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
@@ -302,7 +302,7 @@ describe('workers/branch', () => {
     });
     it('throws error if cannot maintain yarn.lock file', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
-      config.upgrades[0].upgradeType = 'lockFileMaintenance';
+      config.upgrades[0].type = 'lockFileMaintenance';
       yarn.maintainLockFile.mockImplementationOnce(() => {
         throw new Error('yarn not found');
       });
@@ -344,22 +344,22 @@ describe('workers/branch', () => {
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('pins', async () => {
-      config.upgradeType = 'pin';
+      config.type = 'pin';
       await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('majors', async () => {
-      config.upgradeType = 'major';
+      config.type = 'major';
       await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('minors', async () => {
-      config.upgradeType = 'minor';
+      config.type = 'minor';
       await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('handles semantic commits', async () => {
-      config.upgradeType = 'minor';
+      config.type = 'minor';
       config.semanticCommits = true;
       await branchWorker.processBranchUpgrades([config]);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);

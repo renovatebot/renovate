@@ -23,7 +23,8 @@ describe('packageFileWorker', () => {
     });
     it('handles null', async () => {
       const allUpgrades = await packageFileWorker.findUpgrades(config);
-      expect(allUpgrades).toHaveLength(0);
+      expect(allUpgrades).toHaveLength(1);
+      expect(allUpgrades[0].type).toEqual('error');
     });
     it('handles no renovate config', async () => {
       config.enabled = false;

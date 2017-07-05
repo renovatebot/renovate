@@ -33,19 +33,19 @@ describe('lib/workers/package/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       const res = await pkgWorker.findUpgrades(config);
       expect(res).toHaveLength(1);
-      expect(res[0].upgradeType).toEqual('error');
+      expect(res[0].type).toEqual('error');
       expect(npmApi.getDependency.mock.calls.length).toBe(1);
     });
     it('returns warning if warning found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
       versions.determineUpgrades.mockReturnValueOnce([
         {
-          upgradeType: 'warning',
+          type: 'warning',
           message: 'bad version',
         },
       ]);
       const res = await pkgWorker.findUpgrades(config);
-      expect(res[0].upgradeType).toEqual('warning');
+      expect(res[0].type).toEqual('warning');
     });
     it('returns array if upgrades found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});

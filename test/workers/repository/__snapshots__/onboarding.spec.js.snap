@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/workers/repository/onboarding ensurePr(config, upgradeData) creates complex pr 1`] = `
+exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates complex pr 1`] = `
 Array [
   Array [
     "renovate/configure",
@@ -39,7 +39,7 @@ If the default settings are all suitable for you, simply close this Pull Request
 ]
 `;
 
-exports[`lib/workers/repository/onboarding ensurePr(config, upgradeData) creates pr 1`] = `
+exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates pr 1`] = `
 Array [
   Array [
     "renovate/configure",
@@ -71,7 +71,7 @@ If the default settings are all suitable for you, simply close this Pull Request
 ]
 `;
 
-exports[`lib/workers/repository/onboarding ensurePr(config, upgradeData) creates shows warnings and errors 1`] = `
+exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates shows warnings and errors 1`] = `
 Array [
   Array [
     "renovate/configure",
