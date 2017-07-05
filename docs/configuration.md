@@ -97,7 +97,6 @@ $ node renovate --help
     --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
     --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, minor or any
     --automerge-type <string>            How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only
-    --required-status-checks <list>      List of status checks that must pass before automerging. Currently supports only empty list ([]) to disable tests.
     --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
     --group-name <string>                Human understandable name for the dependency group
     --labels <list>                      Labels to add to Pull Request
@@ -397,11 +396,11 @@ Obviously, you can't set repository or package file location with this method.
 </tr>
 <tr>
   <td>`requiredStatusChecks`</td>
-  <td>List of status checks that must pass before automerging. Currently supports only empty list ([]) to disable tests.</td>
+  <td>List of status checks that must pass before automerging. Set to null to enable automerging without tests.</td>
   <td>list</td>
-  <td><pre>null</pre></td>
-  <td>`RENOVATE_REQUIRED_STATUS_CHECKS`</td>
-  <td>`--required-status-checks`<td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
 </tr>
 <tr>
   <td>`branchName`</td>

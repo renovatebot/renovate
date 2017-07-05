@@ -262,7 +262,7 @@ describe('api/gitlab', () => {
       expect(pr).toMatchSnapshot();
     });
   });
-  describe('getBranchStatus(branchName)', () => {
+  describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     beforeEach(() => {
       glGot.mockReturnValueOnce({
         body: {
@@ -272,32 +272,42 @@ describe('api/gitlab', () => {
         },
       });
     });
+    it('returns success if requiredStatusChecks null', async () => {
+      await initRepo('some/repo', 'token');
+      const res = await gitlab.getBranchStatus('somebranch', null);
+      expect(res).toEqual('success');
+    });
+    it('return failed if unsupported requiredStatusChecks', async () => {
+      await initRepo('some/repo', 'token');
+      const res = await gitlab.getBranchStatus('somebranch', ['foo']);
+      expect(res).toEqual('failed');
+    });
     it('returns pending if no results', async () => {
       glGot.mockReturnValueOnce({
         body: [],
       });
-      const res = await gitlab.getBranchStatus('some-branch');
+      const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('pending');
     });
     it('returns success if all are success', async () => {
       glGot.mockReturnValueOnce({
         body: [{ status: 'success' }, { status: 'success' }],
       });
-      const res = await gitlab.getBranchStatus('some-branch');
+      const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('success');
     });
     it('returns failure if any are failed', async () => {
       glGot.mockReturnValueOnce({
         body: [{ status: 'success' }, { status: 'failed' }],
       });
-      const res = await gitlab.getBranchStatus('some-branch');
+      const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('failure');
     });
     it('returns custom statuses', async () => {
       glGot.mockReturnValueOnce({
         body: [{ status: 'success' }, { status: 'foo' }],
       });
-      const res = await gitlab.getBranchStatus('some-branch');
+      const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('foo');
     });
   });
