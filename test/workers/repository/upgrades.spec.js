@@ -44,9 +44,71 @@ describe('workers/repository/upgrades', () => {
       expect(res.length).toBe(3);
     });
   });
-  describe('branchifyUpgrades(upgrades, logger)', () => {
+  describe('generateConfig(branchUpgrades)', () => {
+    it('does not group single upgrade', () => {
+      const branchUpgrades = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+      ];
+      const res = upgrades.generateConfig(branchUpgrades);
+      expect(res.foo).toBe(1);
+      expect(res.groupName).toBeUndefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('groups single upgrade if not lazyGrouping', () => {
+      const branchUpgrades = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          lazyGrouping: false,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+      ];
+      const res = upgrades.generateConfig(branchUpgrades);
+      expect(res.foo).toBe(2);
+      expect(res.groupName).toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+  });
+  it('groups multiple upgrades', () => {
+    const branchUpgrades = [
+      {
+        depName: 'some-dep',
+        groupName: 'some-group',
+        lazyGrouping: true,
+        foo: 1,
+        group: {
+          foo: 2,
+        },
+      },
+      {
+        depName: 'some-other-dep',
+        groupName: 'some-group',
+        lazyGrouping: true,
+        foo: 1,
+        group: {
+          foo: 2,
+        },
+      },
+    ];
+    const res = upgrades.generateConfig(branchUpgrades);
+    expect(res.foo).toBe(2);
+    expect(res.groupName).toBeDefined();
+    expect(res).toMatchSnapshot();
+  });
+  describe('groupByBranch(upgrades)', () => {
     it('returns empty object if no input array', async () => {
-      const res = await upgrades.branchifyUpgrades([], logger);
+      const res = await upgrades.groupByBranch([]);
       expect(res).toMatchSnapshot();
     });
     it('returns one branch if one input', async () => {
@@ -56,7 +118,7 @@ describe('workers/repository/upgrades', () => {
           version: '1.1.0',
         },
       ];
-      const res = await upgrades.branchifyUpgrades(input, logger);
+      const res = await upgrades.groupByBranch(input);
       expect(Object.keys(res.branchUpgrades).length).toBe(1);
       expect(res).toMatchSnapshot();
     });
@@ -75,7 +137,7 @@ describe('workers/repository/upgrades', () => {
           version: '1.1.0',
         },
       ];
-      const res = await upgrades.branchifyUpgrades(input, logger);
+      const res = await upgrades.groupByBranch(input);
       expect(Object.keys(res.branchUpgrades).length).toBe(3);
       expect(res).toMatchSnapshot();
     });
@@ -94,7 +156,7 @@ describe('workers/repository/upgrades', () => {
           version: '1.1.0',
         },
       ];
-      const res = await upgrades.branchifyUpgrades(input, logger);
+      const res = await upgrades.groupByBranch(input);
       expect(Object.keys(res.branchUpgrades).length).toBe(2);
       expect(res).toMatchSnapshot();
     });
@@ -117,7 +179,7 @@ describe('workers/repository/upgrades', () => {
           group: { branchName: 'renovate/my-group' },
         },
       ];
-      const res = await upgrades.branchifyUpgrades(input, logger);
+      const res = await upgrades.groupByBranch(input);
       expect(Object.keys(res.branchUpgrades).length).toBe(2);
       expect(res).toMatchSnapshot();
     });
@@ -140,11 +202,35 @@ describe('workers/repository/upgrades', () => {
           version: '1.1.0',
         },
       ];
-      const res = await upgrades.branchifyUpgrades(input, logger);
+      const res = await upgrades.groupByBranch(input);
       expect(Object.keys(res.branchUpgrades).length).toBe(2);
       expect(res.errors).toHaveLength(1);
       expect(res.warnings).toHaveLength(1);
       expect(res).toMatchSnapshot();
+    });
+  });
+  describe('branchifyUpgrades(upgrades, parentLogger)', () => {
+    it('returns empty', async () => {
+      upgrades.groupByBranch = jest.fn(() => ({
+        branchUpgrades: {},
+        errors: [],
+        warnings: [],
+      }));
+      const res = await upgrades.branchifyUpgrades({});
+      expect(res).toEqual([]);
+    });
+    it('processes multiple branches', async () => {
+      upgrades.groupByBranch = jest.fn(() => ({
+        branchUpgrades: {
+          a: [],
+          b: [],
+        },
+        errors: [],
+        warnings: [],
+      }));
+      upgrades.generateConfig = jest.fn(() => ({}));
+      const res = await upgrades.branchifyUpgrades({});
+      expect(res).toHaveLength(2);
     });
   });
 });

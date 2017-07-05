@@ -1,6 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) does not group if different compiled branch names 1`] = `
+exports[`workers/repository/upgrades generateConfig(branchUpgrades) does not group single upgrade 1`] = `
+Object {
+  "depName": "some-dep",
+  "foo": 1,
+  "upgrades": Array [
+    Object {
+      "depName": "some-dep",
+      "foo": 1,
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/upgrades generateConfig(branchUpgrades) groups single upgrade if not lazyGrouping 1`] = `
+Object {
+  "depName": "some-dep",
+  "foo": 2,
+  "groupName": "some-group",
+  "upgrades": Array [
+    Object {
+      "depName": "some-dep",
+      "foo": 2,
+      "groupName": "some-group",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/upgrades groupByBranch(upgrades) does not group if different compiled branch names 1`] = `
 Object {
   "branchUpgrades": Object {
     "bar-1.1.0": Array [
@@ -27,7 +55,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) groups if same compiled branch names 1`] = `
+exports[`workers/repository/upgrades groupByBranch(upgrades) groups if same compiled branch names 1`] = `
 Object {
   "branchUpgrades": Object {
     "bar-1.1.0": Array [
@@ -52,7 +80,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) groups if same compiled group name 1`] = `
+exports[`workers/repository/upgrades groupByBranch(upgrades) groups if same compiled group name 1`] = `
 Object {
   "branchUpgrades": Object {
     "foo": Array [
@@ -87,7 +115,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) mixes errors and warnings 1`] = `
+exports[`workers/repository/upgrades groupByBranch(upgrades) mixes errors and warnings 1`] = `
 Object {
   "branchUpgrades": Object {
     "bar-1.1.0": Array [
@@ -118,7 +146,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) returns empty object if no input array 1`] = `
+exports[`workers/repository/upgrades groupByBranch(upgrades) returns empty object if no input array 1`] = `
 Object {
   "branchUpgrades": Object {},
   "errors": Array [],
@@ -126,7 +154,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades branchifyUpgrades(upgrades, logger) returns one branch if one input 1`] = `
+exports[`workers/repository/upgrades groupByBranch(upgrades) returns one branch if one input 1`] = `
 Object {
   "branchUpgrades": Object {
     "foo-1.1.0": Array [
@@ -138,5 +166,25 @@ Object {
   },
   "errors": Array [],
   "warnings": Array [],
+}
+`;
+
+exports[`workers/repository/upgrades groups multiple upgrades 1`] = `
+Object {
+  "depName": "some-dep",
+  "foo": 2,
+  "groupName": "some-group",
+  "upgrades": Array [
+    Object {
+      "depName": "some-dep",
+      "foo": 2,
+      "groupName": "some-group",
+    },
+    Object {
+      "depName": "some-other-dep",
+      "foo": 2,
+      "groupName": "some-group",
+    },
+  ],
 }
 `;

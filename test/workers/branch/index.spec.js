@@ -331,58 +331,46 @@ describe('workers/branch', () => {
       config.logger = logger;
       branchWorker.ensureBranch = jest.fn(() => true);
       prWorker.ensurePr = jest.fn(() => true);
+      config.upgrades = [{ depName: 'a' }];
     });
     it('returns immediately if closed PR found', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
-      await branchWorker.processBranchUpgrades([config]);
+      await branchWorker.processBranchUpgrades(config);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
     it('does not return immediately if recreateClosed true', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
       config.recreateClosed = true;
-      await branchWorker.processBranchUpgrades([config]);
+      await branchWorker.processBranchUpgrades(config);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('pins', async () => {
       config.type = 'pin';
-      await branchWorker.processBranchUpgrades([config]);
+      await branchWorker.processBranchUpgrades(config);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('majors', async () => {
       config.type = 'major';
-      await branchWorker.processBranchUpgrades([config]);
+      await branchWorker.processBranchUpgrades(config);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('minors', async () => {
       config.type = 'minor';
-      await branchWorker.processBranchUpgrades([config]);
+      await branchWorker.processBranchUpgrades(config);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('handles semantic commits', async () => {
       config.type = 'minor';
       config.semanticCommits = true;
-      await branchWorker.processBranchUpgrades([config]);
+      await branchWorker.processBranchUpgrades(config);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(1);
     });
     it('handles errors', async () => {
       config.api.checkForClosedPr = jest.fn(() => {
         throw new Error('oops');
       });
-      await branchWorker.processBranchUpgrades([config]);
+      await branchWorker.processBranchUpgrades(config);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
-    });
-  });
-  describe('generateConfig(branchUpgrades)', () => {
-    let config;
-    beforeEach(() => {
-      config = Object.assign({}, defaultConfig, { logger });
-    });
-    it('uses group settings', async () => {
-      config.groupName = 'some-group';
-      config.group.branchName = 'some-group-branchname';
-      const branchUpgrades = [config, config];
-      const res = await branchWorker.generateConfig(branchUpgrades);
-      expect(res.branchName).toEqual(config.group.branchName);
     });
   });
 });
