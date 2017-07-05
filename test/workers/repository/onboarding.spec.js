@@ -73,6 +73,7 @@ If the default settings are all suitable for you, simply close this Pull Request
             repositoryUrl: 'https://a',
             currentVersion: '^1.0.0',
             newVersion: '1.1.0',
+            semanticCommits: true,
           },
         ],
         'branch-b': [
@@ -82,6 +83,36 @@ If the default settings are all suitable for you, simply close this Pull Request
             repositoryUrl: 'https://b',
             currentVersion: '1.0.0',
             newVersion: '2.0.0',
+            schedule: 'on monday',
+          },
+        ],
+      };
+      await onboarding.ensurePr(config, branchUpgrades);
+      expect(config.api.createPr.mock.calls.length).toBe(1);
+      expect(config.api.updatePr.mock.calls.length).toBe(0);
+      expect(config.api.createPr.mock.calls).toMatchSnapshot();
+    });
+    it('handles groups', async () => {
+      branchUpgrades = {
+        'branch-a': [
+          {
+            prTitle: 'Pin a',
+            isPin: true,
+            depName: 'a',
+            repositoryUrl: 'https://a',
+            currentVersion: '^1.0.0',
+            newVersion: '1.1.0',
+            semanticCommits: true,
+            lazyGrouping: true,
+            groupName: 'some-group',
+          },
+          {
+            prTitle: 'Upgrade b',
+            depName: 'b',
+            repositoryUrl: 'https://b',
+            currentVersion: '1.0.0',
+            newVersion: '2.0.0',
+            schedule: 'on monday',
           },
         ],
       };

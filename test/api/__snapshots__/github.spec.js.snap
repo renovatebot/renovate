@@ -413,6 +413,30 @@ Object {
 }
 `;
 
+exports[`api/github getAllPrs() maps results to simple array 1`] = `
+Array [
+  Object {
+    "branchName": "renovate/a",
+    "number": 5,
+  },
+  Object {
+    "branchName": "not-renovate",
+    "number": 6,
+  },
+  Object {
+    "branchName": "renovate/b",
+    "number": 9,
+  },
+]
+`;
+
+exports[`api/github getAllRenovateBranches() should return all renovate branches 1`] = `
+Array [
+  "renovate/a",
+  "renovate/b",
+]
+`;
+
 exports[`api/github getBranchPr(branchName) should return null if no PR exists 1`] = `
 Array [
   Array [
