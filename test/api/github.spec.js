@@ -500,26 +500,36 @@ describe('api/github', () => {
       expect(pr).toMatchSnapshot();
     });
   });
-  describe('getBranchStatus(branchName)', () => {
-    it('should return true', async () => {
+  describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
+    it('returne success if requiredStatusChecks null', async () => {
       await initRepo('some/repo', 'token');
-      ghGot.mockImplementationOnce(() => ({
-        body: {
-          state: true,
-        },
-      }));
-      const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(true);
+      const res = await github.getBranchStatus('somebranch', null);
+      expect(res).toEqual('success');
     });
-    it('should return false', async () => {
+    it('return failed if unsupported requiredStatusChecks', async () => {
+      await initRepo('some/repo', 'token');
+      const res = await github.getBranchStatus('somebranch', ['foo']);
+      expect(res).toEqual('failed');
+    });
+    it('should pass through success', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
         body: {
-          state: false,
+          state: 'success',
         },
       }));
-      const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(false);
+      const res = await github.getBranchStatus('somebranch', []);
+      expect(res).toEqual('success');
+    });
+    it('should pass through failed', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          state: 'failed',
+        },
+      }));
+      const res = await github.getBranchStatus('somebranch', []);
+      expect(res).toEqual('failed');
     });
   });
   describe('mergeBranch(branchName, mergeType)', () => {

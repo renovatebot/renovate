@@ -9,6 +9,7 @@ Array [
   "prCreation",
   "automerge",
   "automergeType",
+  "requiredStatusChecks",
   "branchName",
   "commitMessage",
   "prTitle",
