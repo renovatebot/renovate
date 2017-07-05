@@ -19,7 +19,7 @@ describe('workers/repository', () => {
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
       upgrades.branchifyUpgrades = jest.fn(() => ({ branchUpgrades: {} }));
-      branchWorker.processBranchUpgrades = jest.fn();
+      branchWorker.processBranchUpgrades = jest.fn(() => 'some-branch');
       config = {
         api: {
           getFileJson: jest.fn(),

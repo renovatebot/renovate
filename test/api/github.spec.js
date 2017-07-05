@@ -423,6 +423,26 @@ describe('api/github', () => {
       expect(err.message).toBe('Something went wrong');
     });
   });
+  describe('getAllRenovateBranches()', () => {
+    it('should return all renovate branches', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: [
+          {
+            ref: 'refs/heads/renovate/a',
+          },
+          {
+            ref: 'refs/heads/master',
+          },
+          {
+            ref: 'refs/heads/renovate/b',
+          },
+        ],
+      }));
+      const res = await github.getAllRenovateBranches();
+      expect(res).toMatchSnapshot();
+    });
+  });
   describe('isBranchStale(branchName)', () => {
     it('should return false if same SHA as master', async () => {
       await initRepo('some/repo', 'token');
@@ -811,6 +831,38 @@ describe('api/github', () => {
       }));
       const pr = await github.getPr(1234);
       expect(pr).toMatchSnapshot();
+    });
+  });
+  describe('getAllPrs()', () => {
+    it('maps results to simple array', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 5,
+            foo: 'bar',
+            head: {
+              ref: 'renovate/a',
+            },
+          },
+          {
+            number: 6,
+            foo: 'bar',
+            head: {
+              ref: 'not-renovate',
+            },
+          },
+          {
+            number: 9,
+            foo: 'baz',
+            head: {
+              ref: 'renovate/b',
+            },
+          },
+        ],
+      }));
+      const res = await github.getAllPrs();
+      expect(res).toMatchSnapshot();
     });
   });
   describe('updatePr(prNo, title, body)', () => {
