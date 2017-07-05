@@ -78,8 +78,10 @@ describe('workers/repository/apis', () => {
     let config;
     beforeEach(() => {
       config = {
+        errors: [],
+        warnings: [],
         api: {
-          getFileJson: jest.fn(),
+          getFileContent: jest.fn(),
         },
         logger,
       };
@@ -88,10 +90,18 @@ describe('workers/repository/apis', () => {
       expect(await apis.mergeRenovateJson(config)).toEqual(config);
     });
     it('returns extended config if renovate.json found', async () => {
-      config.api.getFileJson.mockReturnValueOnce({ foo: 1 });
+      config.api.getFileContent.mockReturnValueOnce('{ "foo": 1 }');
       const returnConfig = await apis.mergeRenovateJson(config);
       expect(returnConfig.foo).toBe(1);
       expect(returnConfig.renovateJsonPresent).toBe(true);
+      expect(returnConfig.errors).toHaveLength(0);
+    });
+    it('returns error in config if renovate.json cannot be parsed', async () => {
+      config.api.getFileContent.mockReturnValueOnce('{ foo: 1 }');
+      const returnConfig = await apis.mergeRenovateJson(config);
+      expect(returnConfig.foo).toBeUndefined();
+      expect(returnConfig.renovateJsonPresent).toBeUndefined();
+      expect(returnConfig.errors).toHaveLength(1);
     });
   });
   describe('detectPackageFiles(config)', () => {
