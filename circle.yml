@@ -9,6 +9,7 @@ dependencies:
   pre:
     - bash bin/install-yarn.sh
     - yarn --version
+    - npm i -g npm@5
   override:
     - yarn install --frozen-lockfile
   cache_directories:
