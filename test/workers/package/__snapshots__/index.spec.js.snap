@@ -2,6 +2,8 @@
 
 exports[`lib/workers/package/index findUpgrades(config) returns array if upgrades found 1`] = `
 Array [
+  "timezone",
+  "schedule",
   "semanticCommits",
   "semanticPrefix",
   "recreateClosed",

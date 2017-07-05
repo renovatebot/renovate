@@ -1,6 +1,10 @@
 This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates dependency [{{depName}}]({{repositoryUrl}}) from version `{{currentVersion}}` to `{{newVersion}}`
 {{#if releases.length}}
 
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule ("{{schedule}}"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
 ### Commits
 
 <details>
