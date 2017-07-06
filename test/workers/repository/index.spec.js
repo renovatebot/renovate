@@ -72,6 +72,9 @@ describe('workers/repository', () => {
       apis.mergeRenovateJson.mockImplementationOnce(input =>
         Object.assign(input, { packageFiles: [] })
       );
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
+        upgrades: [{}, {}, {}],
+      });
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
       expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(0);
@@ -83,7 +86,7 @@ describe('workers/repository', () => {
       config.hasRenovateJson = true;
       onboarding.getOnboardingStatus.mockReturnValueOnce(true);
       upgrades.branchifyUpgrades.mockReturnValueOnce({
-        branchUpgrades: [{}, {}, {}],
+        upgrades: [{}, {}, {}],
       });
       await repositoryWorker.renovateRepository(config);
       expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(3);
