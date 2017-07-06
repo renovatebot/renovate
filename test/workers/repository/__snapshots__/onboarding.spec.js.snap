@@ -50,6 +50,8 @@ This is an onboarding PR to help you understand and configure Renovate before an
 
 ---
 
+You have configured renovate to use branch \`next\` as base branch.
+
 It looks like your repository dependencies are already up-to-date and no initial Pull Requests will be necessary.
 
 Would you like to change this? Simply edit the \`renovate.json\` in this branch and Renovate will update this Pull Request description the next time it runs.
