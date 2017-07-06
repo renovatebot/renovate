@@ -83,11 +83,7 @@ describe('workers/repository', () => {
       config.hasRenovateJson = true;
       onboarding.getOnboardingStatus.mockReturnValueOnce(true);
       upgrades.branchifyUpgrades.mockReturnValueOnce({
-        branchUpgrades: {
-          foo: {},
-          bar: {},
-          baz: {},
-        },
+        branchUpgrades: [{}, {}, {}],
       });
       await repositoryWorker.renovateRepository(config);
       expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(3);

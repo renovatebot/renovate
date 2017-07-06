@@ -17,7 +17,7 @@ describe('lib/workers/repository/onboarding', () => {
         },
         logger,
       };
-      branchUpgrades = {};
+      branchUpgrades = [];
     });
     it('creates pr', async () => {
       config.baseBranch = 'next';
@@ -65,85 +65,95 @@ If the default settings are all suitable for you, simply close this Pull Request
       expect(config.api.updatePr.mock.calls.length).toBe(0);
     });
     it('creates complex pr', async () => {
-      branchUpgrades = {
-        'branch-a': [
-          {
-            prTitle: 'Pin a',
-            isPin: true,
-            depName: 'a',
-            repositoryUrl: 'https://a',
-            currentVersion: '^1.0.0',
-            newVersion: '1.1.0',
-            semanticCommits: true,
-          },
-        ],
-        'branch-b': [
-          {
-            prTitle: 'Upgrade b',
-            depName: 'b',
-            repositoryUrl: 'https://b',
-            currentVersion: '1.0.0',
-            newVersion: '2.0.0',
-            schedule: 'on monday',
-          },
-        ],
-      };
+      branchUpgrades = [
+        {
+          branchName: 'branch-a',
+          prTitle: 'Pin a',
+          upgrades: [
+            {
+              isPin: true,
+              depName: 'a',
+              repositoryUrl: 'https://a',
+              currentVersion: '^1.0.0',
+              newVersion: '1.1.0',
+            },
+          ],
+        },
+        {
+          branchName: 'branch-b',
+          prTitle: 'Upgrade b',
+          schedule: 'on monday',
+          upgrades: [
+            {
+              depName: 'b',
+              repositoryUrl: 'https://b',
+              currentVersion: '1.0.0',
+              newVersion: '2.0.0',
+            },
+          ],
+        },
+      ];
       await onboarding.ensurePr(config, branchUpgrades);
       expect(config.api.createPr.mock.calls.length).toBe(1);
       expect(config.api.updatePr.mock.calls.length).toBe(0);
       expect(config.api.createPr.mock.calls).toMatchSnapshot();
     });
     it('handles groups', async () => {
-      branchUpgrades = {
-        'branch-a': [
-          {
-            prTitle: 'Pin a',
-            isPin: true,
-            depName: 'a',
-            repositoryUrl: 'https://a',
-            currentVersion: '^1.0.0',
-            newVersion: '1.1.0',
-            semanticCommits: true,
-            lazyGrouping: true,
-            groupName: 'some-group',
-          },
-          {
-            prTitle: 'Upgrade b',
-            depName: 'b',
-            repositoryUrl: 'https://b',
-            currentVersion: '1.0.0',
-            newVersion: '2.0.0',
-            schedule: 'on monday',
-          },
-        ],
-      };
+      branchUpgrades = [
+        {
+          branchName: 'branch-a',
+          prTitle: 'Pin a',
+          groupName: 'some-group',
+          upgrades: [
+            {
+              isPin: true,
+              depName: 'a',
+              repositoryUrl: 'https://a',
+              currentVersion: '^1.0.0',
+              newVersion: '1.1.0',
+            },
+            {
+              depName: 'b',
+              repositoryUrl: 'https://b',
+              currentVersion: '1.0.0',
+              newVersion: '2.0.0',
+            },
+          ],
+        },
+      ];
       await onboarding.ensurePr(config, branchUpgrades);
       expect(config.api.createPr.mock.calls.length).toBe(1);
       expect(config.api.updatePr.mock.calls.length).toBe(0);
       expect(config.api.createPr.mock.calls).toMatchSnapshot();
     });
     it('creates shows warnings and errors', async () => {
-      branchUpgrades = {
-        'branch-a': [
-          {
-            prTitle: 'Pin a',
-            isPin: true,
-            depName: 'a',
-            repositoryUrl: 'https://a',
-            currentVersion: '^1.0.0',
-            newVersion: '1.1.0',
-          },
-        ],
-        'branch-b': [
-          {
-            prTitle: 'Upgrade b',
-            depName: 'b',
-            repositoryUrl: 'https://b',
-            currentVersion: '1.0.0',
-            newVersion: '2.0.0',
-          },
-        ],
-      };
+      branchUpgrades = [
+        {
+          branchName: 'branch-a',
+          prTitle: 'Pin a',
+          upgrades: [
+            {
+              isPin: true,
+              depName: 'a',
+              repositoryUrl: 'https://a',
+              currentVersion: '^1.0.0',
+              newVersion: '1.1.0',
+            },
+          ],
+        },
+        {
+          branchName: 'branch-b',
+          prTitle: 'Upgrade b',
+          upgrades: [
+            {
+              depName: 'b',
+              repositoryUrl: 'https://b',
+              currentVersion: '1.0.0',
+              newVersion: '2.0.0',
+            },
+          ],
+        },
+      ];
       config.errors = [
         {
           depName: 'a',
