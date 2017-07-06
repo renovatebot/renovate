@@ -8,3 +8,30 @@ Array [
 `;
 
 exports[`workers/repository/apis initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
+
+exports[`workers/repository/apis mergeRenovateJson(config) returns error in JSON.parse 1`] = `
+Array [
+  Object {
+    "depName": "renovate.json",
+    "message": "Could not parse repository's renovate.json file",
+  },
+]
+`;
+
+exports[`workers/repository/apis mergeRenovateJson(config) returns error in config if renovate.json cannot be parsed 1`] = `
+Array [
+  Object {
+    "depName": "renovate.json",
+    "message": "Syntax error: expecting String near { foo: 1 }",
+  },
+]
+`;
+
+exports[`workers/repository/apis mergeRenovateJson(config) returns error plus extended config if duplicate keys 1`] = `
+Array [
+  Object {
+    "depName": "renovate.json",
+    "message": "Syntax error: duplicated keys \\"foo\\" near \\"foo\\": 2 }",
+  },
+]
+`;

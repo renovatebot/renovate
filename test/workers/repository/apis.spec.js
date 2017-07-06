@@ -1,3 +1,5 @@
+const jsonValidator = require('json-dup-key-validator');
+
 const apis = require('../../../lib/workers/repository/apis');
 const logger = require('../../_fixtures/logger');
 
@@ -96,12 +98,30 @@ describe('workers/repository/apis', () => {
       expect(returnConfig.renovateJsonPresent).toBe(true);
       expect(returnConfig.errors).toHaveLength(0);
     });
+    it('returns error plus extended config if duplicate keys', async () => {
+      config.api.getFileContent.mockReturnValueOnce('{ "foo": 1, "foo": 2 }');
+      const returnConfig = await apis.mergeRenovateJson(config);
+      expect(returnConfig.foo).toBe(2);
+      expect(returnConfig.renovateJsonPresent).toBe(true);
+      expect(returnConfig.errors).toHaveLength(1);
+      expect(returnConfig.errors).toMatchSnapshot();
+    });
     it('returns error in config if renovate.json cannot be parsed', async () => {
       config.api.getFileContent.mockReturnValueOnce('{ foo: 1 }');
       const returnConfig = await apis.mergeRenovateJson(config);
       expect(returnConfig.foo).toBeUndefined();
       expect(returnConfig.renovateJsonPresent).toBeUndefined();
-      expect(returnConfig.errors).toHaveLength(1);
+      expect(returnConfig.errors).toMatchSnapshot();
+    });
+    it('returns error in JSON.parse', async () => {
+      config.api.getFileContent.mockReturnValueOnce('{ foo: 1 }');
+      jsonValidator.validate = jest.fn();
+      jsonValidator.validate.mockReturnValueOnce(false);
+      jsonValidator.validate.mockReturnValueOnce(false);
+      const returnConfig = await apis.mergeRenovateJson(config);
+      expect(returnConfig.foo).toBeUndefined();
+      expect(returnConfig.renovateJsonPresent).toBeUndefined();
+      expect(returnConfig.errors).toMatchSnapshot();
     });
   });
   describe('detectPackageFiles(config)', () => {
