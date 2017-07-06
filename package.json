@@ -37,8 +37,7 @@
   "homepage": "https://github.com/singapore/renovate#readme",
   "engines": {
     "node": ">=6.9.0",
-    "npm": "5",
-    "yarn": "0.24.6"
+    "npm": "5"
   },
   "dependencies": {
     "bunyan": "1.8.10",
