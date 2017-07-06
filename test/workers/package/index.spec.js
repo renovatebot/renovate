@@ -1,11 +1,11 @@
 const npmApi = require('../../../lib/api/npm');
-const schedule = require('../../../lib/workers/package/schedule');
+const schedule = require('../../../lib/workers/branch/schedule');
 const versions = require('../../../lib/workers/package/versions');
 const pkgWorker = require('../../../lib/workers/package/index');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const configParser = require('../../../lib/config');
 
-jest.mock('../../../lib/workers/package/schedule');
+jest.mock('../../../lib/workers/branch/schedule');
 jest.mock('../../../lib/workers/package/versions');
 jest.mock('../../../lib/api/npm');
 

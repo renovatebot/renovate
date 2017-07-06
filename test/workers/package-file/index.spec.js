@@ -1,12 +1,12 @@
 const packageFileWorker = require('../../../lib/workers/package-file');
 const depTypeWorker = require('../../../lib/workers/dep-type');
-const schedule = require('../../../lib/workers/package/schedule');
+const schedule = require('../../../lib/workers/branch/schedule');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 const logger = require('../../_fixtures/logger');
 
 jest.mock('../../../lib/workers/dep-type');
-jest.mock('../../../lib/workers/package/schedule');
+jest.mock('../../../lib/workers/branch/schedule');
 
 describe('packageFileWorker', () => {
   describe('findUpgrades(config)', () => {
