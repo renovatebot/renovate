@@ -316,6 +316,29 @@ Array [
 ]
 `;
 
+exports[`api/github createPr(branchName, title, body) should use defaultBranch 1`] = `
+Object {
+  "displayNumber": "Pull Request #123",
+  "number": 123,
+}
+`;
+
+exports[`api/github createPr(branchName, title, body) should use defaultBranch 2`] = `
+Array [
+  Array [
+    "repos/some/repo/pulls",
+    Object {
+      "body": Object {
+        "base": "master",
+        "body": "Hello world",
+        "head": "some-branch",
+        "title": "The Title",
+      },
+    },
+  ],
+]
+`;
+
 exports[`api/github findFilePaths(fileName) should return empty array if none found 1`] = `
 Array [
   Array [

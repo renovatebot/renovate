@@ -759,6 +759,22 @@ describe('api/github', () => {
       expect(pr).toMatchSnapshot();
       expect(ghGot.post.mock.calls).toMatchSnapshot();
     });
+    it('should use defaultBranch', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.post.mockImplementationOnce(() => ({
+        body: {
+          number: 123,
+        },
+      }));
+      const pr = await github.createPr(
+        'some-branch',
+        'The Title',
+        'Hello world',
+        true
+      );
+      expect(pr).toMatchSnapshot();
+      expect(ghGot.post.mock.calls).toMatchSnapshot();
+    });
   });
   describe('getPr(prNo)', () => {
     it('should return null if no prNo is passed', async () => {
