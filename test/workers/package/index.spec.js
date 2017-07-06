@@ -1,5 +1,4 @@
 const npmApi = require('../../../lib/api/npm');
-const schedule = require('../../../lib/workers/branch/schedule');
 const versions = require('../../../lib/workers/package/versions');
 const pkgWorker = require('../../../lib/workers/package/index');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
@@ -21,18 +20,9 @@ describe('lib/workers/package/index', () => {
       const res = await pkgWorker.findUpgrades(config);
       expect(res).toMatchObject([]);
     });
-    it('returns empty if package is not scheduled', async () => {
-      config.repoIsOnboarded = true;
-      config.schedule = 'some schedule';
-      schedule.isScheduledNow.mockReturnValueOnce(false);
-      const res = await pkgWorker.findUpgrades(config);
-      expect(res).toMatchObject([]);
-      expect(npmApi.getDependency.mock.calls.length).toBe(0);
-    });
     it('returns error if no npm dep found', async () => {
       config.repoIsOnboarded = true;
       config.schedule = 'some schedule';
-      schedule.isScheduledNow.mockReturnValueOnce(true);
       const res = await pkgWorker.findUpgrades(config);
       expect(res).toHaveLength(1);
       expect(res[0].type).toEqual('error');
