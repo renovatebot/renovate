@@ -21,7 +21,10 @@ Array [
   Array [
     "repos/some/repo/issues/42/labels",
     Object {
-      "body": "[\\"foo\\",\\"bar\\"]",
+      "body": Array [
+        "foo",
+        "bar",
+      ],
     },
   ],
 ]
