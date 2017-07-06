@@ -217,7 +217,7 @@ describe('workers/repository/upgrades', () => {
         warnings: [],
       }));
       const res = await upgrades.branchifyUpgrades({});
-      expect(res).toEqual([]);
+      expect(res.upgrades).toEqual([]);
     });
     it('processes multiple branches', async () => {
       upgrades.groupByBranch = jest.fn(() => ({
@@ -230,7 +230,7 @@ describe('workers/repository/upgrades', () => {
       }));
       upgrades.generateConfig = jest.fn(() => ({}));
       const res = await upgrades.branchifyUpgrades({});
-      expect(res).toHaveLength(2);
+      expect(res.upgrades).toHaveLength(2);
     });
   });
 });
