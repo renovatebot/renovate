@@ -36,6 +36,7 @@ describe('packageFileWorker', () => {
     it('uses onboarding branch', async () => {
       config.enabled = false;
       config.repoIsOnboarded = false;
+      config.contentBaseBranch = 'renovate/configure';
       config.api.getFileJson.mockReturnValueOnce({});
       const res = await packageFileWorker.findUpgrades(config);
       expect(config.api.getFileJson.mock.calls[0][1]).toEqual(

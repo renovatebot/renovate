@@ -81,6 +81,47 @@ describe('workers/repository', () => {
       expect(onboarding.ensurePr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
+    it('uses onboarding custom baseBranch', async () => {
+      apis.detectPackageFiles.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
+      config.api.getFileJson = jest.fn(() => ({ a: 1 }));
+      apis.mergeRenovateJson.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
+      apis.mergeRenovateJson.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [], baseBranch: 'next' })
+      );
+      config.api.branchExists.mockReturnValueOnce(true);
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
+        upgrades: [{}, {}, {}],
+      });
+      await repositoryWorker.renovateRepository(config);
+      expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
+      expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(0);
+      expect(onboarding.ensurePr.mock.calls.length).toBe(1);
+      expect(config.logger.error.mock.calls.length).toBe(0);
+    });
+    it('errors onboarding custom baseBranch', async () => {
+      apis.detectPackageFiles.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
+      config.api.getFileJson = jest.fn(() => ({ a: 1 }));
+      apis.mergeRenovateJson.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
+      apis.mergeRenovateJson.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [], baseBranch: 'next' })
+      );
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
+        upgrades: [{}, {}, {}],
+      });
+      await repositoryWorker.renovateRepository(config);
+      expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
+      expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(0);
+      expect(onboarding.ensurePr.mock.calls.length).toBe(1);
+      expect(config.logger.error.mock.calls.length).toBe(0);
+    });
     it('calls branchWorker', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
