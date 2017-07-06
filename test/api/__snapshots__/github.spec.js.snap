@@ -316,6 +316,29 @@ Array [
 ]
 `;
 
+exports[`api/github createPr(branchName, title, body) should use defaultBranch 1`] = `
+Object {
+  "displayNumber": "Pull Request #123",
+  "number": 123,
+}
+`;
+
+exports[`api/github createPr(branchName, title, body) should use defaultBranch 2`] = `
+Array [
+  Array [
+    "repos/some/repo/pulls",
+    Object {
+      "body": Object {
+        "base": "master",
+        "body": "Hello world",
+        "head": "some-branch",
+        "title": "The Title",
+      },
+    },
+  ],
+]
+`;
+
 exports[`api/github findFilePaths(fileName) should return empty array if none found 1`] = `
 Array [
   Array [
@@ -722,6 +745,7 @@ exports[`api/github initRepo should initialise the config for the repo - 0 2`] =
 Object {
   "baseBranch": "master",
   "baseCommitSHA": "1234",
+  "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
   "repoName": "some/repo",
@@ -743,6 +767,7 @@ exports[`api/github initRepo should initialise the config for the repo - 1 2`] =
 Object {
   "baseBranch": "master",
   "baseCommitSHA": "1234",
+  "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
   "repoName": "some/repo",
@@ -764,6 +789,7 @@ exports[`api/github initRepo should initialise the config for the repo - 2 2`] =
 Object {
   "baseBranch": "master",
   "baseCommitSHA": "1234",
+  "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
   "repoName": "some/repo",
@@ -774,6 +800,7 @@ exports[`api/github initRepo should merge 1`] = `
 Object {
   "baseBranch": "master",
   "baseCommitSHA": "1234",
+  "defaultBranch": "master",
   "mergeMethod": "merge",
   "owner": "theowner",
   "repoName": "some/repo",
@@ -784,6 +811,7 @@ exports[`api/github initRepo should not guess at merge 1`] = `
 Object {
   "baseBranch": "master",
   "baseCommitSHA": "1234",
+  "defaultBranch": "master",
   "owner": "theowner",
   "repoName": "some/repo",
 }
@@ -793,6 +821,7 @@ exports[`api/github initRepo should rebase 1`] = `
 Object {
   "baseBranch": "master",
   "baseCommitSHA": "1234",
+  "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
   "repoName": "some/repo",
@@ -803,6 +832,7 @@ exports[`api/github initRepo should squash 1`] = `
 Object {
   "baseBranch": "master",
   "baseCommitSHA": "1234",
+  "defaultBranch": "master",
   "mergeMethod": "squash",
   "owner": "theowner",
   "repoName": "some/repo",

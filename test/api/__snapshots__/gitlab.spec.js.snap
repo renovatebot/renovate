@@ -144,6 +144,32 @@ Array [
 ]
 `;
 
+exports[`api/gitlab createPr(branchName, title, body) uses default branch 1`] = `
+Object {
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "number": 1,
+}
+`;
+
+exports[`api/gitlab createPr(branchName, title, body) uses default branch 2`] = `
+Array [
+  Array [
+    "projects/undefined/merge_requests",
+    Object {
+      "body": Object {
+        "description": "the-body",
+        "remove_source_branch": true,
+        "source_branch": "some-branch",
+        "target_branch": undefined,
+        "title": "some-title",
+      },
+    },
+  ],
+]
+`;
+
 exports[`api/gitlab getBranch returns a branch 1`] = `"foo"`;
 
 exports[`api/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
@@ -204,6 +230,7 @@ exports[`api/gitlab getFile(filePath, branchName) gets the file with v3 1`] = `
 Object {
   "apiVersion": "v3",
   "baseBranch": undefined,
+  "defaultBranch": undefined,
   "email": undefined,
   "repoName": "some-repo",
 }
@@ -299,6 +326,7 @@ exports[`api/gitlab initRepo should initialise the config for the repo - 0 2`] =
 Object {
   "apiVersion": "v3",
   "baseBranch": "master",
+  "defaultBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }
@@ -322,6 +350,7 @@ exports[`api/gitlab initRepo should initialise the config for the repo - 1 2`] =
 Object {
   "apiVersion": "v3",
   "baseBranch": "master",
+  "defaultBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }
@@ -345,6 +374,7 @@ exports[`api/gitlab initRepo should initialise the config for the repo - 2 2`] =
 Object {
   "apiVersion": "v3",
   "baseBranch": "master",
+  "defaultBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }
@@ -354,6 +384,7 @@ exports[`api/gitlab initRepo should use api v4 1`] = `
 Object {
   "apiVersion": "v4",
   "baseBranch": "master",
+  "defaultBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }
@@ -363,6 +394,7 @@ exports[`api/gitlab initRepo uses provided logger 1`] = `
 Object {
   "apiVersion": "v3",
   "baseBranch": "master",
+  "defaultBranch": "master",
   "email": "a@b.com",
   "repoName": "some%2Frepo",
 }

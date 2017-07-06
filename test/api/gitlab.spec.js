@@ -437,6 +437,22 @@ describe('api/gitlab', () => {
       expect(pr).toMatchSnapshot();
       expect(glGot.post.mock.calls).toMatchSnapshot();
     });
+    it('uses default branch', async () => {
+      glGot.post.mockReturnValueOnce({
+        body: {
+          id: 1,
+          iid: 12345,
+        },
+      });
+      const pr = await gitlab.createPr(
+        'some-branch',
+        'some-title',
+        'the-body',
+        true
+      );
+      expect(pr).toMatchSnapshot();
+      expect(glGot.post.mock.calls).toMatchSnapshot();
+    });
   });
   describe('getPr(prNo)', () => {
     it('returns the PR', async () => {
