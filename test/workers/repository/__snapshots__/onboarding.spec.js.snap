@@ -179,7 +179,7 @@ Array [
   \\"schedule\\": [],
   \\"packageFiles\\": [],
   \\"depTypes\\": [
-    {\\"depType\\": \\"dependencies\\", \\"semanticPrefix\\": \\"fix: \\"},
+    {\\"depType\\": \\"dependencies\\", \\"semanticPrefix\\": \\"fix(deps): \\"},
     \\"devDependencies\\",
     \\"optionalDependencies\\"
   ],
@@ -187,7 +187,7 @@ Array [
   \\"pinVersions\\": true,
   \\"separateMajorReleases\\": true,
   \\"semanticCommits\\": false,
-  \\"semanticPrefix\\": \\"chore: \\",
+  \\"semanticPrefix\\": \\"chore(deps): \\",
   \\"rebaseStalePrs\\": false,
   \\"prCreation\\": \\"immediate\\",
   \\"automerge\\": \\"none\\",
