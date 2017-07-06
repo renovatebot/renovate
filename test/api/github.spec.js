@@ -297,6 +297,21 @@ describe('api/github', () => {
       expect(config).toMatchSnapshot();
     });
   });
+  describe('setBaseBranch(branchName)', () => {
+    it('sets the base branch', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1238',
+          },
+        },
+      }));
+      await github.setBaseBranch('some-branch');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+    });
+  });
   describe('findFilePaths(fileName)', () => {
     it('should return empty array if none found', async () => {
       await initRepo('some/repo', 'token');

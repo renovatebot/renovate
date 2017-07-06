@@ -20,6 +20,7 @@ describe('lib/workers/repository/onboarding', () => {
       branchUpgrades = {};
     });
     it('creates pr', async () => {
+      config.baseBranch = 'next';
       await onboarding.ensurePr(config, branchUpgrades);
       expect(config.api.createPr.mock.calls.length).toBe(1);
       expect(config.api.updatePr.mock.calls.length).toBe(0);

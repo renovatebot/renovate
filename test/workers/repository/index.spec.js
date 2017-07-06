@@ -23,6 +23,8 @@ describe('workers/repository', () => {
       config = {
         api: {
           getFileJson: jest.fn(),
+          setBaseBranch: jest.fn(),
+          branchExists: jest.fn(),
         },
         logger,
         packageFiles: [],
@@ -32,6 +34,24 @@ describe('workers/repository', () => {
       config.enabled = false;
       await repositoryWorker.renovateRepository(config);
       expect(apis.detectPackageFiles.mock.calls.length).toBe(0);
+    });
+    it('sets custom base branch', async () => {
+      config.baseBranch = 'some-branch';
+      config.api.branchExists.mockReturnValueOnce(true);
+      apis.detectPackageFiles.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
+      await repositoryWorker.renovateRepository(config);
+      expect(config.api.setBaseBranch.mock.calls).toHaveLength(1);
+    });
+    it('errors when missing custom base branch', async () => {
+      config.baseBranch = 'some-branch';
+      config.api.branchExists.mockReturnValueOnce(false);
+      apis.detectPackageFiles.mockImplementationOnce(input =>
+        Object.assign(input, { packageFiles: [] })
+      );
+      await repositoryWorker.renovateRepository(config);
+      expect(config.api.setBaseBranch.mock.calls).toHaveLength(0);
     });
     it('skips repository if no package.json', async () => {
       apis.detectPackageFiles.mockImplementationOnce(input =>

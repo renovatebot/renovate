@@ -21,6 +21,16 @@ Renovate will:
 
 Set configuration option `autodiscover` to `true`, via CLI, environment, or configuration file. Obviously it's too late to set it in any `renovate.json` or `package.json`.
 
+### Use an alternative branch for Pull Request target
+
+If for example your repository default branch is `master` but your Pull Requests should target branch `next`, then you can configure this via the `baseBranch` configuration option. To do this, add this line to the `renovate.json` in the *default* branch (i.e. `master` in this example).
+
+```json
+{
+  "baseBranch": "next"
+}
+```
+
 ### Support private npm modules
 
 If you are running your own Renovate instance, then the easiest way to support private modules is to make sure the appropriate credentials are in `~/.npmrc`;
