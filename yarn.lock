@@ -625,9 +625,9 @@ chalk@2.0.1:
     escape-string-regexp "^1.0.5"
     supports-color "^4.0.0"
 
-changelog@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/changelog/-/changelog-1.3.0.tgz#51b7e174917281135854e1235c6c5c27e179ae5b"
+changelog@1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/changelog/-/changelog-1.3.1.tgz#ed3c2ee061c3e8bb751e300aaf2458b7e9534d6e"
   dependencies:
     chalk "1.1.3"
     cli "1.0.1"
@@ -3808,8 +3808,8 @@ supports-color@^3.1.2:
     has-flag "^1.0.0"
 
 supports-color@^4.0.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-4.1.0.tgz#92cc14bb3dad8928ca5656c33e19a19f20af5c7a"
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-4.2.0.tgz#ad986dc7eb2315d009b4d77c8169c2231a684037"
   dependencies:
     has-flag "^2.0.0"
 
