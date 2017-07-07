@@ -282,3 +282,44 @@ Array [
   "Add renovate.json",
 ]
 `;
+
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) pins private repos 1`] = `
+Array [
+  "renovate/configure",
+  Array [
+    Object {
+      "contents": "{
+  \\"enabled\\": true,
+  \\"timezone\\": null,
+  \\"schedule\\": [],
+  \\"packageFiles\\": [],
+  \\"depTypes\\": [
+    {
+      \\"depType\\": \\"dependencies\\",
+      \\"semanticPrefix\\": \\"fix(deps): \\",
+      \\"pinVersions\\": false
+    },
+    \\"devDependencies\\",
+    \\"optionalDependencies\\"
+  ],
+  \\"ignoreDeps\\": [],
+  \\"pinVersions\\": true,
+  \\"separateMajorReleases\\": true,
+  \\"semanticCommits\\": false,
+  \\"semanticPrefix\\": \\"chore(deps): \\",
+  \\"rebaseStalePrs\\": false,
+  \\"prCreation\\": \\"immediate\\",
+  \\"automerge\\": \\"none\\",
+  \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
+  \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
+  \\"labels\\": [],
+  \\"assignees\\": [],
+  \\"reviewers\\": []
+}
+",
+      "name": "renovate.json",
+    },
+  ],
+  "Add renovate.json",
+]
+`;
