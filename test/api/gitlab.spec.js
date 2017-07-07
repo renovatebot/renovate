@@ -678,4 +678,27 @@ describe('api/gitlab', () => {
       });
     });
   });
+  describe('getCommitMessages()', () => {
+    it('returns commits messages', async () => {
+      glGot.mockReturnValueOnce({
+        body: [
+          {
+            title: 'foo',
+          },
+          {
+            title: 'bar',
+          },
+        ],
+      });
+      const res = await gitlab.getCommitMessages();
+      expect(res).toMatchSnapshot();
+    });
+    it('swallows errors', async () => {
+      glGot.mockImplementationOnce(() => {
+        throw new Error('some-error');
+      });
+      const res = await gitlab.getCommitMessages();
+      expect(res).toHaveLength(0);
+    });
+  });
 });

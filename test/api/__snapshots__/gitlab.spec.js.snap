@@ -226,6 +226,13 @@ Object {
 }
 `;
 
+exports[`api/gitlab getCommitMessages() returns commits messages 1`] = `
+Array [
+  "foo",
+  "bar",
+]
+`;
+
 exports[`api/gitlab getFile(filePath, branchName) gets the file with v3 1`] = `
 Object {
   "apiVersion": "v3",

@@ -508,6 +508,13 @@ Object {
 }
 `;
 
+exports[`api/github getCommitMessages() returns commits messages 1`] = `
+Array [
+  "foo",
+  "bar",
+]
+`;
+
 exports[`api/github getFile(filePatch, branchName) should return the encoded file content 1`] = `
 Array [
   Array [
