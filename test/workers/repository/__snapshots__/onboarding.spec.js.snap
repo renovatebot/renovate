@@ -201,6 +201,43 @@ Alternatively, you can add the same configuration settings into a \\"renovate\\"
 ]
 `;
 
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) commits files and returns false if no pr 1`] = `
+Array [
+  "renovate/configure",
+  Array [
+    Object {
+      "contents": "{
+  \\"enabled\\": true,
+  \\"timezone\\": null,
+  \\"schedule\\": [],
+  \\"packageFiles\\": [],
+  \\"depTypes\\": [
+    {\\"depType\\": \\"dependencies\\", \\"semanticPrefix\\": \\"fix(deps): \\"},
+    \\"devDependencies\\",
+    \\"optionalDependencies\\"
+  ],
+  \\"ignoreDeps\\": [],
+  \\"pinVersions\\": true,
+  \\"separateMajorReleases\\": true,
+  \\"semanticCommits\\": false,
+  \\"semanticPrefix\\": \\"chore(deps): \\",
+  \\"rebaseStalePrs\\": false,
+  \\"prCreation\\": \\"immediate\\",
+  \\"automerge\\": \\"none\\",
+  \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
+  \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
+  \\"labels\\": [],
+  \\"assignees\\": [],
+  \\"reviewers\\": []
+}
+",
+      "name": "renovate.json",
+    },
+  ],
+  "Add renovate.json",
+]
+`;
+
 exports[`lib/workers/repository/onboarding getOnboardingStatus(config) enables semantic commits 1`] = `
 Array [
   "renovate/configure",
@@ -220,43 +257,6 @@ Array [
   \\"pinVersions\\": true,
   \\"separateMajorReleases\\": true,
   \\"semanticCommits\\": true,
-  \\"semanticPrefix\\": \\"chore(deps): \\",
-  \\"rebaseStalePrs\\": false,
-  \\"prCreation\\": \\"immediate\\",
-  \\"automerge\\": \\"none\\",
-  \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
-  \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
-  \\"labels\\": [],
-  \\"assignees\\": [],
-  \\"reviewers\\": []
-}
-",
-      "name": "renovate.json",
-    },
-  ],
-  "Add renovate.json",
-]
-`;
-
-exports[`lib/workers/repository/onboarding getOnboardingStatus(config) returns false if no pr 1`] = `
-Array [
-  "renovate/configure",
-  Array [
-    Object {
-      "contents": "{
-  \\"enabled\\": true,
-  \\"timezone\\": null,
-  \\"schedule\\": [],
-  \\"packageFiles\\": [],
-  \\"depTypes\\": [
-    {\\"depType\\": \\"dependencies\\", \\"semanticPrefix\\": \\"fix(deps): \\"},
-    \\"devDependencies\\",
-    \\"optionalDependencies\\"
-  ],
-  \\"ignoreDeps\\": [],
-  \\"pinVersions\\": true,
-  \\"separateMajorReleases\\": true,
-  \\"semanticCommits\\": false,
   \\"semanticPrefix\\": \\"chore(deps): \\",
   \\"rebaseStalePrs\\": false,
   \\"prCreation\\": \\"immediate\\",
