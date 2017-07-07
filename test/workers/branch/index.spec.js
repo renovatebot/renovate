@@ -98,6 +98,7 @@ describe('workers/branch', () => {
       packageJsonHelper.setNewValue = jest.fn();
       branchWorker.getParentBranch = jest.fn();
       npm.getLockFile = jest.fn();
+      npm.maintainLockFile = jest.fn();
       yarn.getLockFile = jest.fn();
       yarn.maintainLockFile = jest.fn();
       config = Object.assign({}, defaultConfig);
@@ -282,29 +283,37 @@ describe('workers/branch', () => {
     it('maintains lock files if needing updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       yarn.maintainLockFile.mockReturnValueOnce('non null response');
+      npm.maintainLockFile.mockReturnValueOnce('non null response');
       config.upgrades[0].type = 'lockFileMaintenance';
+      config.upgrades[0].hasYarnLock = true;
+      config.upgrades[0].hasPackageLock = true;
       await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
       expect(yarn.getLockFile.mock.calls.length).toBe(0);
       expect(npm.getLockFile.mock.calls.length).toBe(0);
       expect(yarn.maintainLockFile.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(1);
+      expect(npm.maintainLockFile.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(2);
     });
     it('skips maintaining lock files if no updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       config.upgrades[0].type = 'lockFileMaintenance';
+      config.upgrades[0].hasYarnLock = true;
+      config.upgrades[0].hasPackageLock = true;
       await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
       expect(yarn.getLockFile.mock.calls.length).toBe(0);
       expect(npm.getLockFile.mock.calls.length).toBe(0);
       expect(yarn.maintainLockFile.mock.calls.length).toBe(1);
+      expect(npm.maintainLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('throws error if cannot maintain yarn.lock file', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       config.upgrades[0].type = 'lockFileMaintenance';
+      config.upgrades[0].hasYarnLock = true;
       yarn.maintainLockFile.mockImplementationOnce(() => {
         throw new Error('yarn not found');
       });
@@ -314,7 +323,7 @@ describe('workers/branch', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('Could not maintain yarn.lock file');
+      expect(err.message).toMatchSnapshot();
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(0);
       expect(yarn.getLockFile.mock.calls.length).toBe(0);
