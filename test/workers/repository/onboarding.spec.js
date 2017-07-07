@@ -177,6 +177,7 @@ describe('lib/workers/repository/onboarding', () => {
         commitFilesToBranch: jest.fn(),
         createPr: jest.fn(() => ({ displayNumber: 1 })),
         findPr: jest.fn(),
+        getPr: jest.fn(() => {}),
         getCommitMessages: jest.fn(),
       };
       config.logger = logger;
@@ -203,14 +204,23 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
-    it('returns false if pr and pr is not closed', async () => {
+    it('commits files if pr is not closed and is rebaseable', async () => {
       config.api.findPr.mockReturnValueOnce({});
+      config.api.getPr.mockReturnValueOnce({ canRebase: true });
+      const res = await onboarding.getOnboardingStatus(config);
+      expect(res).toEqual(false);
+      expect(config.api.findPr.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
+    });
+    it('skips file update if existing pr is not rebaseable', async () => {
+      config.api.findPr.mockReturnValueOnce({});
+      config.api.getPr.mockReturnValueOnce({ canRebase: false });
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
-    it('returns false if no pr', async () => {
+    it('commits files and returns false if no pr', async () => {
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
