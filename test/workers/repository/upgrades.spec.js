@@ -50,6 +50,9 @@ describe('workers/repository/upgrades', () => {
         {
           depName: 'some-dep',
           groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          semanticCommits: true,
           lazyGrouping: true,
           foo: 1,
           group: {
@@ -67,6 +70,8 @@ describe('workers/repository/upgrades', () => {
         {
           depName: 'some-dep',
           groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
           lazyGrouping: false,
           foo: 1,
           group: {
@@ -85,6 +90,8 @@ describe('workers/repository/upgrades', () => {
       {
         depName: 'some-dep',
         groupName: 'some-group',
+        branchName: 'some-branch',
+        prTitle: 'some-title',
         lazyGrouping: true,
         foo: 1,
         group: {
@@ -94,6 +101,8 @@ describe('workers/repository/upgrades', () => {
       {
         depName: 'some-other-dep',
         groupName: 'some-group',
+        branchName: 'some-branch',
+        prTitle: 'some-title',
         lazyGrouping: true,
         foo: 1,
         group: {
@@ -116,6 +125,7 @@ describe('workers/repository/upgrades', () => {
         {
           branchName: 'foo-{{version}}',
           version: '1.1.0',
+          prTitle: 'some-title',
         },
       ];
       const res = await upgrades.groupByBranch(input);
@@ -127,14 +137,17 @@ describe('workers/repository/upgrades', () => {
         {
           branchName: 'foo-{{version}}',
           version: '1.1.0',
+          prTitle: 'some-title',
         },
         {
           branchName: 'foo-{{version}}',
           version: '2.0.0',
+          prTitle: 'some-title',
         },
         {
           branchName: 'bar-{{version}}',
           version: '1.1.0',
+          prTitle: 'some-title',
         },
       ];
       const res = await upgrades.groupByBranch(input);
@@ -146,14 +159,17 @@ describe('workers/repository/upgrades', () => {
         {
           branchName: 'foo',
           version: '1.1.0',
+          prTitle: 'some-title',
         },
         {
           branchName: 'foo',
           version: '2.0.0',
+          prTitle: 'some-title',
         },
         {
           branchName: 'bar-{{version}}',
           version: '1.1.0',
+          prTitle: 'some-title',
         },
       ];
       const res = await upgrades.groupByBranch(input);
@@ -164,16 +180,19 @@ describe('workers/repository/upgrades', () => {
       const input = [
         {
           branchName: 'foo',
+          prTitle: 'some-title',
           version: '1.1.0',
           groupName: 'My Group',
           group: { branchName: 'renovate/{{groupSlug}}' },
         },
         {
           branchName: 'foo',
+          prTitle: 'some-title',
           version: '2.0.0',
         },
         {
           branchName: 'bar-{{version}}',
+          prTitle: 'some-title',
           version: '1.1.0',
           groupName: 'My Group',
           group: { branchName: 'renovate/my-group' },
@@ -190,15 +209,18 @@ describe('workers/repository/upgrades', () => {
         },
         {
           branchName: 'foo-{{version}}',
+          prTitle: 'some-title',
           version: '1.1.0',
         },
         {
           type: 'warning',
           branchName: 'foo-{{version}}',
+          prTitle: 'some-title',
           version: '2.0.0',
         },
         {
           branchName: 'bar-{{version}}',
+          prTitle: 'some-title',
           version: '1.1.0',
         },
       ];

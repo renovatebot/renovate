@@ -12,8 +12,10 @@ describe('packageFileWorker', () => {
     let config;
     beforeEach(() => {
       config = Object.assign({}, defaultConfig, {
+        packageFile: 'package.json',
         repoIsOnboarded: true,
         api: {
+          getFileContent: jest.fn(),
           getFileJson: jest.fn(),
         },
         depTypes: ['dependencies', 'devDependencies'],
@@ -57,7 +59,15 @@ describe('packageFileWorker', () => {
       depTypeWorker.findUpgrades.mockReturnValueOnce([{}]);
       depTypeWorker.findUpgrades.mockReturnValueOnce([{}, {}]);
       const res = await packageFileWorker.findUpgrades(config);
-      expect(res).toHaveLength(4);
+      expect(res).toHaveLength(3);
+    });
+    it('maintains yarn.lock', async () => {
+      config.api.getFileJson.mockReturnValueOnce({});
+      config.api.getFileContent.mockReturnValueOnce('some-content');
+      depTypeWorker.findUpgrades.mockReturnValueOnce([]);
+      depTypeWorker.findUpgrades.mockReturnValueOnce([]);
+      const res = await packageFileWorker.findUpgrades(config);
+      expect(res).toHaveLength(1);
     });
   });
 });
