@@ -198,6 +198,7 @@ If the default settings are all suitable for you, simply close this Pull Request
         commitFilesToBranch: jest.fn(),
         createPr: jest.fn(() => ({ displayNumber: 1 })),
         findPr: jest.fn(),
+        getCommitMessages: jest.fn(),
       };
       config.logger = logger;
       config.detectedPackageFiles = true;
@@ -231,6 +232,14 @@ If the default settings are all suitable for you, simply close this Pull Request
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('returns false if no pr', async () => {
+      const res = await onboarding.getOnboardingStatus(config);
+      expect(res).toEqual(false);
+      expect(config.api.findPr.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
+    });
+    it('enables semantic commits', async () => {
+      config.api.getCommitMessages.mockReturnValueOnce(['fix: something']);
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);

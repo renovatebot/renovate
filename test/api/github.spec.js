@@ -1211,4 +1211,27 @@ describe('api/github', () => {
       expect(ghGot.patch.mock.calls).toMatchSnapshot();
     });
   });
+  describe('getCommitMessages()', () => {
+    it('returns commits messages', async () => {
+      ghGot.mockReturnValueOnce({
+        body: [
+          {
+            commit: { message: 'foo' },
+          },
+          {
+            commit: { message: 'bar' },
+          },
+        ],
+      });
+      const res = await github.getCommitMessages();
+      expect(res).toMatchSnapshot();
+    });
+    it('swallows errors', async () => {
+      ghGot.mockImplementationOnce(() => {
+        throw new Error('some-error');
+      });
+      const res = await github.getCommitMessages();
+      expect(res).toHaveLength(0);
+    });
+  });
 });
