@@ -20,6 +20,8 @@ Object {
 }
 `;
 
+exports[`workers/branch ensureBranch(config) throws error if cannot maintain yarn.lock file 1`] = `"Error maintaining lock files"`;
+
 exports[`workers/branch ensureBranch(config) throws if automerge throws 1`] = `[Error: automerge failed]`;
 
 exports[`workers/branch ensureBranch(config) throws if automerge throws 2`] = `

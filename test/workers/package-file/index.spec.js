@@ -61,9 +61,10 @@ describe('packageFileWorker', () => {
       const res = await packageFileWorker.findUpgrades(config);
       expect(res).toHaveLength(3);
     });
-    it('maintains yarn.lock', async () => {
+    it('maintains lock files', async () => {
       config.api.getFileJson.mockReturnValueOnce({});
-      config.api.getFileContent.mockReturnValueOnce('some-content');
+      config.api.getFileContent.mockReturnValueOnce('some-content-1');
+      config.api.getFileContent.mockReturnValueOnce('some-content-2');
       depTypeWorker.findUpgrades.mockReturnValueOnce([]);
       depTypeWorker.findUpgrades.mockReturnValueOnce([]);
       const res = await packageFileWorker.findUpgrades(config);

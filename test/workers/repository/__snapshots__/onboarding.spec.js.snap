@@ -180,7 +180,7 @@ With your current configuration, renovate will initially create the following Pu
 
 | Pull Requests (1) |
 | ------ |
-| **Lock File Maintenance**<ul><li>Schedule: \\"before 5am on monday\\"</li><li>Branch name: \`renovate/lock-files\`</li><li>Regenerates \`yarn.lock\` file to use latest dependency versions</li></ul> |
+| **Lock File Maintenance**<ul><li>Schedule: \\"before 5am on monday\\"</li><li>Branch name: \`renovate/lock-files\`</li><li>Regenerates lock file to use latest dependency versions</li></ul> |
 
 
 Sometimes you may see multiple options for the same dependency (e.g. pinning in one branch and upgrading in another). This is expected and allows you the flexibility to choose which to merge first. Once you merge any PR, others will be updated or removed the next time Renovate runs.
