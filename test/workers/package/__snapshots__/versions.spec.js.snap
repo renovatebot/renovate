@@ -5,8 +5,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -61,8 +61,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -78,8 +78,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -150,8 +150,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -167,8 +167,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -193,8 +193,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -262,8 +262,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -311,8 +311,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -346,8 +346,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -387,8 +387,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -453,8 +453,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
@@ -559,8 +559,8 @@ Array [
   Object {
     "automergeEnabled": true,
     "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor: ",
+      "prTitle": "{{semanticPrefix}}{{groupName}}",
+      "semanticPrefix": "refactor(deps): ",
     },
     "groupName": "Pin Dependencies",
     "isPin": true,
