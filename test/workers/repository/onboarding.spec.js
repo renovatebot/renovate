@@ -98,6 +98,24 @@ If the default settings are all suitable for you, simply close this Pull Request
       expect(config.api.updatePr.mock.calls.length).toBe(0);
       expect(config.api.createPr.mock.calls).toMatchSnapshot();
     });
+    it('maintains yarn.lock', async () => {
+      branchUpgrades = [
+        {
+          branchName: 'renovate/lock-files',
+          prTitle: 'Lock File Maintenance',
+          schedule: 'before 5am on monday',
+          upgrades: [
+            {
+              type: 'lockFileMaintenance',
+            },
+          ],
+        },
+      ];
+      await onboarding.ensurePr(config, branchUpgrades);
+      expect(config.api.createPr.mock.calls.length).toBe(1);
+      expect(config.api.updatePr.mock.calls.length).toBe(0);
+      expect(config.api.createPr.mock.calls).toMatchSnapshot();
+    });
     it('handles groups', async () => {
       branchUpgrades = [
         {

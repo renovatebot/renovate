@@ -1,5 +1,6 @@
 const branchWorker = require('../../../lib/workers/branch');
 const prWorker = require('../../../lib/workers/pr');
+const schedule = require('../../../lib/workers/branch/schedule');
 const npm = require('../../../lib/workers/branch/npm');
 const yarn = require('../../../lib/workers/branch/yarn');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
@@ -15,6 +16,7 @@ describe('workers/branch', () => {
     let config;
     const branchName = 'foo';
     beforeEach(() => {
+      schedule.isScheduledNow = jest.fn();
       config = {
         api: {
           branchExists: jest.fn(() => true),
@@ -332,6 +334,12 @@ describe('workers/branch', () => {
       branchWorker.ensureBranch = jest.fn(() => true);
       prWorker.ensurePr = jest.fn(() => true);
       config.upgrades = [{ depName: 'a' }];
+    });
+    it('skips branch if not scheduled', async () => {
+      config.schedule = ['some-schedule'];
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      await branchWorker.processBranchUpgrades(config);
+      expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
     it('returns immediately if closed PR found', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);

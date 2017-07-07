@@ -1,8 +1,8 @@
 const mockDate = require('mockdate');
-const schedule = require('../../../lib/workers/package/schedule');
+const schedule = require('../../../lib/workers/branch/schedule');
 const logger = require('../../_fixtures/logger');
 
-describe('workers/package/schedule', () => {
+describe('workers/branch/schedule', () => {
   describe('hasValidSchedule(schedule)', () => {
     beforeEach(() => {
       jest.resetAllMocks();

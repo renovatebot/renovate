@@ -1,20 +1,21 @@
 const packageFileWorker = require('../../../lib/workers/package-file');
 const depTypeWorker = require('../../../lib/workers/dep-type');
-const schedule = require('../../../lib/workers/package/schedule');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 const logger = require('../../_fixtures/logger');
 
 jest.mock('../../../lib/workers/dep-type');
-jest.mock('../../../lib/workers/package/schedule');
+jest.mock('../../../lib/workers/branch/schedule');
 
 describe('packageFileWorker', () => {
   describe('findUpgrades(config)', () => {
     let config;
     beforeEach(() => {
       config = Object.assign({}, defaultConfig, {
+        packageFile: 'package.json',
         repoIsOnboarded: true,
         api: {
+          getFileContent: jest.fn(),
           getFileJson: jest.fn(),
         },
         depTypes: ['dependencies', 'devDependencies'],
@@ -62,17 +63,11 @@ describe('packageFileWorker', () => {
     });
     it('maintains yarn.lock', async () => {
       config.api.getFileJson.mockReturnValueOnce({});
-      depTypeWorker.findUpgrades.mockReturnValue([]);
-      schedule.isScheduledNow.mockReturnValueOnce(true);
+      config.api.getFileContent.mockReturnValueOnce('some-content');
+      depTypeWorker.findUpgrades.mockReturnValueOnce([]);
+      depTypeWorker.findUpgrades.mockReturnValueOnce([]);
       const res = await packageFileWorker.findUpgrades(config);
       expect(res).toHaveLength(1);
-    });
-    it('skips yarn.lock', async () => {
-      config.api.getFileJson.mockReturnValueOnce({});
-      depTypeWorker.findUpgrades.mockReturnValue([]);
-      schedule.isScheduledNow.mockReturnValueOnce(false);
-      const res = await packageFileWorker.findUpgrades(config);
-      expect(res).toHaveLength(0);
     });
   });
 });
