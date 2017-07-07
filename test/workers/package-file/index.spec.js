@@ -8,7 +8,7 @@ jest.mock('../../../lib/workers/dep-type');
 jest.mock('../../../lib/workers/branch/schedule');
 
 describe('packageFileWorker', () => {
-  describe('findUpgrades(config)', () => {
+  describe('renovatePackageFile(config)', () => {
     let config;
     beforeEach(() => {
       config = Object.assign({}, defaultConfig, {
@@ -23,14 +23,14 @@ describe('packageFileWorker', () => {
       });
     });
     it('handles null', async () => {
-      const allUpgrades = await packageFileWorker.findUpgrades(config);
+      const allUpgrades = await packageFileWorker.renovatePackageFile(config);
       expect(allUpgrades).toHaveLength(1);
       expect(allUpgrades[0].type).toEqual('error');
     });
     it('handles no renovate config', async () => {
       config.enabled = false;
       config.api.getFileJson.mockReturnValueOnce({});
-      const res = await packageFileWorker.findUpgrades(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(config.api.getFileJson.mock.calls[0][1]).toBeUndefined();
       expect(res).toEqual([]);
     });
@@ -39,7 +39,7 @@ describe('packageFileWorker', () => {
       config.repoIsOnboarded = false;
       config.contentBaseBranch = 'renovate/configure';
       config.api.getFileJson.mockReturnValueOnce({});
-      const res = await packageFileWorker.findUpgrades(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(config.api.getFileJson.mock.calls[0][1]).toEqual(
         'renovate/configure'
       );
@@ -51,23 +51,23 @@ describe('packageFileWorker', () => {
           enabled: false,
         },
       });
-      const res = await packageFileWorker.findUpgrades(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toEqual([]);
     });
     it('calls depTypeWorker', async () => {
       config.api.getFileJson.mockReturnValueOnce({});
-      depTypeWorker.findUpgrades.mockReturnValueOnce([{}]);
-      depTypeWorker.findUpgrades.mockReturnValueOnce([{}, {}]);
-      const res = await packageFileWorker.findUpgrades(config);
+      depTypeWorker.renovateDepType.mockReturnValueOnce([{}]);
+      depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(3);
     });
     it('maintains lock files', async () => {
       config.api.getFileJson.mockReturnValueOnce({});
       config.api.getFileContent.mockReturnValueOnce('some-content-1');
       config.api.getFileContent.mockReturnValueOnce('some-content-2');
-      depTypeWorker.findUpgrades.mockReturnValueOnce([]);
-      depTypeWorker.findUpgrades.mockReturnValueOnce([]);
-      const res = await packageFileWorker.findUpgrades(config);
+      depTypeWorker.renovateDepType.mockReturnValueOnce([]);
+      depTypeWorker.renovateDepType.mockReturnValueOnce([]);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(1);
     });
   });

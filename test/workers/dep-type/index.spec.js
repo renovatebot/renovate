@@ -7,10 +7,10 @@ const logger = require('../../_fixtures/logger');
 jest.mock('../../../lib/workers/dep-type/package-json');
 jest.mock('../../../lib/workers/package/index');
 
-pkgWorker.findUpgrades = jest.fn(() => ['a']);
+pkgWorker.renovatePackage = jest.fn(() => ['a']);
 
 describe('lib/workers/dep-type/index', () => {
-  describe('findUpgrades(packageContent, config)', () => {
+  describe('renovateDepType(packageContent, config)', () => {
     let config;
     beforeEach(() => {
       config = {
@@ -19,12 +19,12 @@ describe('lib/workers/dep-type/index', () => {
     });
     it('returns empty if config is disabled', async () => {
       config.enabled = false;
-      const res = await depTypeWorker.findUpgrades({}, config);
+      const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toMatchObject([]);
     });
     it('returns empty if no deps found', async () => {
       packageJson.extractDependencies.mockReturnValueOnce([]);
-      const res = await depTypeWorker.findUpgrades({}, config);
+      const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toMatchObject([]);
     });
     it('returns empty if all deps are filtered', async () => {
@@ -32,7 +32,7 @@ describe('lib/workers/dep-type/index', () => {
         { depName: 'a' },
         { depName: 'b' },
       ]);
-      const res = await depTypeWorker.findUpgrades({}, config);
+      const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toMatchObject([]);
     });
     it('returns combined upgrades if all deps are filtered', async () => {
@@ -41,7 +41,7 @@ describe('lib/workers/dep-type/index', () => {
         { depName: 'c' },
         { depName: 'd' },
       ]);
-      const res = await depTypeWorker.findUpgrades({}, config);
+      const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toHaveLength(2);
     });
   });

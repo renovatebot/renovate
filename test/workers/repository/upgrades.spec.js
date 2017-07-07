@@ -24,7 +24,7 @@ describe('workers/repository/upgrades', () => {
           packageFile: 'backend/package.json',
         },
       ];
-      packageFileWorker.findUpgrades.mockReturnValue([]);
+      packageFileWorker.renovatePackageFile.mockReturnValue([]);
       const res = await upgrades.determineRepoUpgrades(config);
       expect(res.length).toBe(0);
     });
@@ -38,8 +38,8 @@ describe('workers/repository/upgrades', () => {
           packageFile: 'frontend/package.json',
         },
       ];
-      packageFileWorker.findUpgrades.mockReturnValueOnce(['a']);
-      packageFileWorker.findUpgrades.mockReturnValueOnce(['b', 'c']);
+      packageFileWorker.renovatePackageFile.mockReturnValueOnce(['a']);
+      packageFileWorker.renovatePackageFile.mockReturnValueOnce(['b', 'c']);
       const res = await upgrades.determineRepoUpgrades(config);
       expect(res.length).toBe(3);
     });

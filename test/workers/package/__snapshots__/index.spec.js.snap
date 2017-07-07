@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/workers/package/index findUpgrades(config) returns array if upgrades found 1`] = `
+exports[`lib/workers/package/index renovatePackage(config) returns array if upgrades found 1`] = `
 Array [
   "timezone",
   "schedule",
