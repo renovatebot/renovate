@@ -206,6 +206,7 @@ describe('lib/workers/repository/onboarding', () => {
         getPr: jest.fn(() => {}),
         getCommitMessages: jest.fn(),
       };
+      config.foundNodeModules = true;
       config.logger = logger;
       config.detectedPackageFiles = true;
       onboarding.isRepoPrivate = jest.fn();

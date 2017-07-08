@@ -134,10 +134,28 @@ describe('workers/repository/apis', () => {
           ]),
         },
         logger,
+        warnings: [],
       };
       const res = await apis.detectPackageFiles(config);
       expect(res).toMatchObject(config);
       expect(res.packageFiles).toMatchSnapshot();
+    });
+    it('ignores node modules', async () => {
+      const config = {
+        ignoreNodeModules: true,
+        api: {
+          findFilePaths: jest.fn(() => [
+            'package.json',
+            'node_modules/backend/package.json',
+          ]),
+        },
+        logger,
+        warnings: [],
+      };
+      const res = await apis.detectPackageFiles(config);
+      expect(res.packageFiles).toMatchSnapshot();
+      expect(res.foundNodeModules).toMatchSnapshot();
+      expect(res.warnings).toMatchSnapshot();
     });
   });
 });

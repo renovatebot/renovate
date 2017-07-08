@@ -232,7 +232,8 @@ Array [
   \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
   \\"labels\\": [],
   \\"assignees\\": [],
-  \\"reviewers\\": []
+  \\"reviewers\\": [],
+  \\"ignoreNodeModules\\": true
 }
 ",
       "name": "renovate.json",
@@ -273,7 +274,8 @@ Array [
   \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
   \\"labels\\": [],
   \\"assignees\\": [],
-  \\"reviewers\\": []
+  \\"reviewers\\": [],
+  \\"ignoreNodeModules\\": true
 }
 ",
       "name": "renovate.json",
@@ -314,7 +316,8 @@ Array [
   \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
   \\"labels\\": [],
   \\"assignees\\": [],
-  \\"reviewers\\": []
+  \\"reviewers\\": [],
+  \\"ignoreNodeModules\\": true
 }
 ",
       "name": "renovate.json",

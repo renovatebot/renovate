@@ -7,6 +7,23 @@ Array [
 ]
 `;
 
+exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 1`] = `
+Array [
+  "package.json",
+]
+`;
+
+exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 2`] = `true`;
+
+exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 3`] = `
+Array [
+  Object {
+    "depName": "packageFiles",
+    "message": "Skipped package.json files found within node_modules subfolders: \`node_modules/backend/package.json\`",
+  },
+]
+`;
+
 exports[`workers/repository/apis initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
 
 exports[`workers/repository/apis mergeRenovateJson(config) returns error in JSON.parse 1`] = `
