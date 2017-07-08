@@ -3,6 +3,32 @@ const logger = require('../../_fixtures/logger');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 describe('lib/workers/repository/onboarding', () => {
+  describe('isRepoPrivate(config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        api: {
+          getFileJson: jest.fn(),
+        },
+        packageFiles: [
+          'package.json',
+          {
+            packageFile: 'a/package.json',
+          },
+        ],
+      };
+    });
+    it('returns true if all are private', async () => {
+      config.api.getFileJson.mockReturnValueOnce({ private: true });
+      config.api.getFileJson.mockReturnValueOnce({ private: true });
+      expect(await onboarding.isRepoPrivate(config)).toBe(true);
+    });
+    it('returns false if some are not private', async () => {
+      config.api.getFileJson.mockReturnValueOnce({ private: true });
+      config.api.getFileJson.mockReturnValueOnce({});
+      expect(await onboarding.isRepoPrivate(config)).toBe(false);
+    });
+  });
   describe('ensurePr(config, branchUpgrades)', () => {
     let config;
     let branchUpgrades;
@@ -182,6 +208,7 @@ describe('lib/workers/repository/onboarding', () => {
       };
       config.logger = logger;
       config.detectedPackageFiles = true;
+      onboarding.isRepoPrivate = jest.fn();
     });
     it('returns true if onboarding is false', async () => {
       config.onboarding = false;
@@ -229,6 +256,14 @@ describe('lib/workers/repository/onboarding', () => {
     });
     it('enables semantic commits', async () => {
       config.api.getCommitMessages.mockReturnValueOnce(['fix: something']);
+      const res = await onboarding.getOnboardingStatus(config);
+      expect(res).toEqual(false);
+      expect(config.api.findPr.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
+    });
+    it('pins private repos', async () => {
+      onboarding.isRepoPrivate.mockReturnValueOnce(true);
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
