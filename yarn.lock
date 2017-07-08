@@ -625,12 +625,13 @@ chalk@2.0.1:
     escape-string-regexp "^1.0.5"
     supports-color "^4.0.0"
 
-changelog@1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/changelog/-/changelog-1.3.1.tgz#ed3c2ee061c3e8bb751e300aaf2458b7e9534d6e"
+changelog@1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/changelog/-/changelog-1.4.0.tgz#069214a4892f222db9a41d60ea768e080ef3f7bc"
   dependencies:
     chalk "1.1.3"
     cli "1.0.1"
+    github-url-from-git "^1.5.0"
     has-color "0.1.7"
     lodash "4.17.4"
     moment "2.17.1"
@@ -1385,12 +1386,6 @@ form-data@~2.1.1:
     combined-stream "^1.0.5"
     mime-types "^2.1.12"
 
-freeform-semantic-commit-analyzer@1.1.8:
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/freeform-semantic-commit-analyzer/-/freeform-semantic-commit-analyzer-1.1.8.tgz#c185aa6faf08a68ee42b4d8b7c659e6253513d85"
-  dependencies:
-    conventional-changelog "0.0.17"
-
 from@~0:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/from/-/from-0.1.7.tgz#83c60afc58b9c56997007ed1a768b3ab303a44fe"
@@ -1528,7 +1523,7 @@ git-refs@^1.1.3:
     slash "^1.0.0"
     walk "^2.3.9"
 
-github-url-from-git@1.5.0, github-url-from-git@^1.3.0, github-url-from-git@^1.4.0:
+github-url-from-git@1.5.0, github-url-from-git@^1.3.0, github-url-from-git@^1.4.0, github-url-from-git@^1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/github-url-from-git/-/github-url-from-git-1.5.0.tgz#f985fedcc0a9aa579dc88d7aff068d55cc6251a0"
 
