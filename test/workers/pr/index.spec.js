@@ -199,6 +199,7 @@ describe('workers/pr', () => {
     it('should return unmodified existing PR', async () => {
       config.depName = 'dummy';
       config.isGitHub = true;
+      config.privateRepo = true;
       config.currentVersion = '1.0.0';
       config.newVersion = '1.1.0';
       config.repositoryUrl = 'https://github.com/renovateapp/dummy';

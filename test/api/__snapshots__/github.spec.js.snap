@@ -758,6 +758,7 @@ Object {
   "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
+  "privateRepo": false,
   "repoName": "some/repo",
 }
 `;
@@ -780,6 +781,7 @@ Object {
   "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
+  "privateRepo": false,
   "repoName": "some/repo",
 }
 `;
@@ -802,6 +804,7 @@ Object {
   "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
+  "privateRepo": false,
   "repoName": "some/repo",
 }
 `;
@@ -813,6 +816,7 @@ Object {
   "defaultBranch": "master",
   "mergeMethod": "merge",
   "owner": "theowner",
+  "privateRepo": false,
   "repoName": "some/repo",
 }
 `;
@@ -823,6 +827,7 @@ Object {
   "baseCommitSHA": "1234",
   "defaultBranch": "master",
   "owner": "theowner",
+  "privateRepo": false,
   "repoName": "some/repo",
 }
 `;
@@ -834,6 +839,7 @@ Object {
   "defaultBranch": "master",
   "mergeMethod": "rebase",
   "owner": "theowner",
+  "privateRepo": false,
   "repoName": "some/repo",
 }
 `;
@@ -845,6 +851,7 @@ Object {
   "defaultBranch": "master",
   "mergeMethod": "squash",
   "owner": "theowner",
+  "privateRepo": false,
   "repoName": "some/repo",
 }
 `;
