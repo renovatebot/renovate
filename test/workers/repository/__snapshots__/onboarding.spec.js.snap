@@ -218,7 +218,8 @@ Array [
       \\"pinVersions\\": false
     },
     \\"devDependencies\\",
-    \\"optionalDependencies\\"
+    \\"optionalDependencies\\",
+    {\\"depType\\": \\"peerDependencies\\", \\"enabled\\": false}
   ],
   \\"ignoreDeps\\": [],
   \\"pinVersions\\": true,
@@ -260,7 +261,8 @@ Array [
       \\"pinVersions\\": false
     },
     \\"devDependencies\\",
-    \\"optionalDependencies\\"
+    \\"optionalDependencies\\",
+    {\\"depType\\": \\"peerDependencies\\", \\"enabled\\": false}
   ],
   \\"ignoreDeps\\": [],
   \\"pinVersions\\": true,
@@ -302,7 +304,8 @@ Array [
       \\"pinVersions\\": false
     },
     \\"devDependencies\\",
-    \\"optionalDependencies\\"
+    \\"optionalDependencies\\",
+    {\\"depType\\": \\"peerDependencies\\", \\"enabled\\": false}
   ],
   \\"ignoreDeps\\": [],
   \\"pinVersions\\": true,

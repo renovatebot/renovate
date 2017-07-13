@@ -178,5 +178,30 @@ describe('config/index', () => {
       expect(config.lockFileMaintenance.schedule).toEqual('on monday');
       expect(config.lockFileMaintenance).toMatchSnapshot();
     });
+    it('merges depTypes with no child config', () => {
+      const parentConfig = Object.assign({}, defaultConfig);
+      const childConfig = {
+        depTypes: ['dependencies'],
+      };
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.depTypes).toMatchSnapshot();
+    });
+    it('merges depTypes with meaningful child', () => {
+      const parentConfig = Object.assign({}, defaultConfig);
+      const childConfig = {
+        depTypes: [
+          'dependencies',
+          {
+            depType: 'devDependencies',
+            foo: 1,
+          },
+          'peerDependencies',
+        ],
+      };
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.depTypes).toMatchSnapshot();
+    });
   });
 });
