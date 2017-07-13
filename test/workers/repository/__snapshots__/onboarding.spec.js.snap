@@ -208,32 +208,8 @@ Array [
     Object {
       "contents": "{
   \\"enabled\\": true,
-  \\"timezone\\": null,
-  \\"schedule\\": [],
-  \\"packageFiles\\": [],
-  \\"depTypes\\": [
-    {
-      \\"depType\\": \\"dependencies\\",
-      \\"semanticPrefix\\": \\"fix(deps): \\",
-      \\"pinVersions\\": false
-    },
-    \\"devDependencies\\",
-    \\"optionalDependencies\\",
-    {\\"depType\\": \\"peerDependencies\\", \\"enabled\\": false}
-  ],
-  \\"ignoreDeps\\": [],
   \\"pinVersions\\": true,
-  \\"separateMajorReleases\\": true,
-  \\"semanticCommits\\": false,
-  \\"semanticPrefix\\": \\"chore(deps): \\",
-  \\"rebaseStalePrs\\": false,
-  \\"prCreation\\": \\"immediate\\",
-  \\"automerge\\": \\"none\\",
-  \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
-  \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
-  \\"labels\\": [],
-  \\"assignees\\": [],
-  \\"reviewers\\": [],
+  \\"depTypes\\": [{\\"depType\\": \\"dependencies\\", \\"pinVersions\\": false}],
   \\"ignoreNodeModules\\": true
 }
 ",
@@ -251,32 +227,9 @@ Array [
     Object {
       "contents": "{
   \\"enabled\\": true,
-  \\"timezone\\": null,
-  \\"schedule\\": [],
-  \\"packageFiles\\": [],
-  \\"depTypes\\": [
-    {
-      \\"depType\\": \\"dependencies\\",
-      \\"semanticPrefix\\": \\"fix(deps): \\",
-      \\"pinVersions\\": false
-    },
-    \\"devDependencies\\",
-    \\"optionalDependencies\\",
-    {\\"depType\\": \\"peerDependencies\\", \\"enabled\\": false}
-  ],
-  \\"ignoreDeps\\": [],
   \\"pinVersions\\": true,
-  \\"separateMajorReleases\\": true,
   \\"semanticCommits\\": true,
-  \\"semanticPrefix\\": \\"chore(deps): \\",
-  \\"rebaseStalePrs\\": false,
-  \\"prCreation\\": \\"immediate\\",
-  \\"automerge\\": \\"none\\",
-  \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
-  \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
-  \\"labels\\": [],
-  \\"assignees\\": [],
-  \\"reviewers\\": [],
+  \\"depTypes\\": [{\\"depType\\": \\"dependencies\\", \\"pinVersions\\": false}],
   \\"ignoreNodeModules\\": true
 }
 ",
@@ -292,36 +245,7 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{
-  \\"enabled\\": true,
-  \\"timezone\\": null,
-  \\"schedule\\": [],
-  \\"packageFiles\\": [],
-  \\"depTypes\\": [
-    {
-      \\"depType\\": \\"dependencies\\",
-      \\"semanticPrefix\\": \\"fix(deps): \\",
-      \\"pinVersions\\": false
-    },
-    \\"devDependencies\\",
-    \\"optionalDependencies\\",
-    {\\"depType\\": \\"peerDependencies\\", \\"enabled\\": false}
-  ],
-  \\"ignoreDeps\\": [],
-  \\"pinVersions\\": true,
-  \\"separateMajorReleases\\": true,
-  \\"semanticCommits\\": false,
-  \\"semanticPrefix\\": \\"chore(deps): \\",
-  \\"rebaseStalePrs\\": false,
-  \\"prCreation\\": \\"immediate\\",
-  \\"automerge\\": \\"none\\",
-  \\"branchName\\": \\"renovate/{{depName}}-{{newVersionMajor}}.x\\",
-  \\"commitMessage\\": \\"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}\\",
-  \\"labels\\": [],
-  \\"assignees\\": [],
-  \\"reviewers\\": [],
-  \\"ignoreNodeModules\\": true
-}
+      "contents": "{\\"enabled\\": true, \\"pinVersions\\": true, \\"ignoreNodeModules\\": true}
 ",
       "name": "renovate.json",
     },
