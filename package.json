@@ -3,6 +3,7 @@
   "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "0.0.0-semantic-release",
   "bin": "dist/renovate.js",
+  "main": "dist/workers/global",
   "scripts": {
     "build": "yarn && npm run transpile && cp -R lib/config/templates dist/config",
     "heroku-push": "git push heroku master",
