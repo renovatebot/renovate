@@ -53,28 +53,12 @@ describe('config/index', () => {
     });
     it('supports token in env', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe(
-        'At least one repository must be configured, or use --autodiscover'
-      );
+      await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports token in CLI options', async () => {
       defaultArgv = defaultArgv.concat(['--token=abc']);
       const env = {};
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe(
-        'At least one repository must be configured, or use --autodiscover'
-      );
+      await configParser.parseConfigs(env, defaultArgv);
     });
     it('throws if no GitHub App key defined', async () => {
       defaultArgv = defaultArgv.concat(['--github-app-id=5']);
