@@ -215,6 +215,7 @@ describe('workers/pr', () => {
       config.depName = 'dummy';
       config.currentVersion = '1.0.0';
       config.newVersion = '1.2.0';
+      config.isGitHub = true;
       config.api.getBranchPr = jest.fn(() => existingPr);
       config.api.updatePr = jest.fn();
       const pr = await prWorker.ensurePr(config, logger);
