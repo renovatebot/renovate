@@ -38,5 +38,51 @@ describe('workers/repository/cleanup', () => {
       expect(config.api.getAllRenovateBranches.mock.calls).toHaveLength(1);
       expect(config.api.deleteBranch.mock.calls).toHaveLength(1);
     });
+    it('deletes lock file maintenance if pr is closed', async () => {
+      branchNames = ['renovate/lock-file-maintenance'];
+      config.api.getAllRenovateBranches.mockReturnValueOnce([
+        'renovate/lock-file-maintenance',
+      ]);
+      config.api.getBranchPr = jest.fn(() => ({ isClosed: true }));
+      await cleanup.pruneStaleBranches(config, [
+        'renovate/lock-file-maintenance',
+      ]);
+      expect(config.api.getAllRenovateBranches.mock.calls).toHaveLength(1);
+      expect(config.api.deleteBranch.mock.calls).toHaveLength(1);
+    });
+    it('deletes lock file maintenance if pr is unmergeable', async () => {
+      branchNames = ['renovate/lock-file-maintenance'];
+      config.api.getAllRenovateBranches.mockReturnValueOnce([
+        'renovate/lock-file-maintenance',
+      ]);
+      config.api.getBranchPr = jest.fn(() => ({ isUnmergeable: true }));
+      await cleanup.pruneStaleBranches(config, [
+        'renovate/lock-file-maintenance',
+      ]);
+      expect(config.api.getAllRenovateBranches.mock.calls).toHaveLength(1);
+      expect(config.api.deleteBranch.mock.calls).toHaveLength(1);
+    });
+    it('deletes lock file maintenance if no changed files', async () => {
+      branchNames = ['renovate/lock-file-maintenance'];
+      config.api.getAllRenovateBranches.mockReturnValueOnce([
+        'renovate/lock-file-maintenance',
+      ]);
+      config.api.getBranchPr = jest.fn(() => ({ changed_files: 0 }));
+      await cleanup.pruneStaleBranches(config, [
+        'renovate/lock-file-maintenance',
+      ]);
+      expect(config.api.getAllRenovateBranches.mock.calls).toHaveLength(1);
+      expect(config.api.deleteBranch.mock.calls).toHaveLength(1);
+    });
+    it('calls delete only once', async () => {
+      branchNames = ['renovate/lock-file-maintenance'];
+      config.api.getAllRenovateBranches.mockReturnValueOnce([
+        'renovate/lock-file-maintenance',
+      ]);
+      config.api.getBranchPr = jest.fn(() => ({ isClosed: true }));
+      await cleanup.pruneStaleBranches(config, []);
+      expect(config.api.getAllRenovateBranches.mock.calls).toHaveLength(1);
+      expect(config.api.deleteBranch.mock.calls).toHaveLength(1);
+    });
   });
 });
