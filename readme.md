@@ -1,3 +1,5 @@
+![Renovate banner](https://renovateapp.com/images/design/header_small.jpg)
+
 # renovate
 
 Keep npm dependencies up-to-date.
