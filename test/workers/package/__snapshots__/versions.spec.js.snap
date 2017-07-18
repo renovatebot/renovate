@@ -228,6 +228,8 @@ Array [
 ]
 `;
 
+exports[`workers/package/versions .determineUpgrades(npmDep, config) should downgrade from missing versions 1`] = `Array []`;
+
 exports[`workers/package/versions .determineUpgrades(npmDep, config) should treat zero zero caret ranges as pinned 1`] = `
 Array [
   Object {
