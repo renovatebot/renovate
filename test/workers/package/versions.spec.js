@@ -1,6 +1,7 @@
 const versions = require('../../../lib/workers/package/versions');
 const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
+const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
 
 let config;
 
@@ -210,6 +211,12 @@ describe('workers/package/versions', () => {
       config.pinVersions = false;
       config.currentVersion = '^0.0.34';
       expect(versions.determineUpgrades(helmetJson, config)).toMatchSnapshot();
+    });
+    it('should downgrade from missing versions', () => {
+      config.currentVersion = '1.16.1';
+      const res = versions.determineUpgrades(coffeelintJson, config);
+      expect(res).toHaveLength(1);
+      expect(res[0]).toMatchSnapshot();
     });
   });
   describe('.isRange(input)', () => {

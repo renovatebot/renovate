@@ -228,6 +228,17 @@ Array [
 ]
 `;
 
+exports[`workers/package/versions .determineUpgrades(npmDep, config) should downgrade from missing versions 1`] = `
+Object {
+  "branchName": "renovate/rollback-{{depName}}-{{newVersionMajor}}.x",
+  "isRollback": true,
+  "newVersion": "1.16.0",
+  "newVersionMajor": 1,
+  "semanticPrefix": "fix(deps): ",
+  "type": "rollback",
+}
+`;
+
 exports[`workers/package/versions .determineUpgrades(npmDep, config) should treat zero zero caret ranges as pinned 1`] = `
 Array [
   Object {
