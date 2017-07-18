@@ -233,6 +233,7 @@ Object {
   "isRollback": true,
   "newVersion": "1.16.0",
   "newVersionMajor": 1,
+  "semanticPrefix": "fix(deps): ",
   "type": "rollback",
 }
 `;
