@@ -7,14 +7,14 @@ const upgrades = require('../../../lib/workers/repository/upgrades');
 
 const logger = require('../../_fixtures/logger');
 
-apis.initApis = jest.fn(input => input);
-apis.mergeRenovateJson = jest.fn(input => input);
-apis.detectPackageFiles = jest.fn();
-
 describe('workers/repository', () => {
   describe('renovateRepository', () => {
     let config;
     beforeEach(() => {
+      jest.resetAllMocks();
+      apis.initApis = jest.fn(input => input);
+      apis.mergeRenovateJson = jest.fn(input => input);
+      apis.detectPackageFiles = jest.fn();
       onboarding.getOnboardingStatus = jest.fn();
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
@@ -139,6 +139,19 @@ describe('workers/repository', () => {
       });
       await repositoryWorker.renovateRepository(config);
       expect(config.logger.error.mock.calls.length).toBe(1);
+    });
+    it('handles special uninitiated error', async () => {
+      apis.initApis.mockImplementationOnce(() => {
+        // Create a new object, that prototypically inherits from the Error constructor
+        function MyError() {
+          this.message = 'uninitiated';
+        }
+        MyError.prototype = Object.create(Error.prototype);
+        MyError.prototype.constructor = MyError;
+        throw new MyError();
+      });
+      await repositoryWorker.renovateRepository(config);
+      expect(config.logger.error.mock.calls.length).toBe(0);
     });
   });
 });
