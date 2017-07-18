@@ -1,4 +1,4 @@
-This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates dependency [{{depName}}]({{repositoryUrl}}) from version `{{currentVersion}}` to `{{newVersion}}`
+This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency [{{depName}}]({{repositoryUrl}}) from version `{{currentVersion}}` to `{{newVersion}}`{{#if isRollback}}. This is necessary and important because version `{{currentVersion}}` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}
 {{#if releases.length}}
 
 {{#if schedule}}
