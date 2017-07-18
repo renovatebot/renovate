@@ -216,7 +216,7 @@ describe('workers/package/versions', () => {
       config.currentVersion = '1.16.1';
       const res = versions.determineUpgrades(coffeelintJson, config);
       expect(res).toHaveLength(1);
-      expect(res[0]).toEqual('1.16.0');
+      expect(res[0]).toMatchSnapshot();
     });
   });
   describe('.isRange(input)', () => {
