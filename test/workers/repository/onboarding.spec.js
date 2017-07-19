@@ -199,10 +199,12 @@ describe('lib/workers/repository/onboarding', () => {
     let config;
     beforeEach(() => {
       config = Object.assign({}, defaultConfig);
+      jest.resetAllMocks();
       config.api = {
         commitFilesToBranch: jest.fn(),
         createPr: jest.fn(() => ({ displayNumber: 1 })),
         findPr: jest.fn(),
+        getFileContent: jest.fn(),
         getPr: jest.fn(() => {}),
         getCommitMessages: jest.fn(),
       };
@@ -270,6 +272,27 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
+    });
+    it('commits files if existing content does not match', async () => {
+      config.api.getFileContent.mockReturnValueOnce('some-different-content');
+      const res = await onboarding.getOnboardingStatus(config);
+      expect(res).toEqual(false);
+      expect(config.api.findPr.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
+    });
+    it('skips commit files if existing content matches', async () => {
+      const existingContent = `{
+  "pinVersions": true,
+  "depTypes": [{"depType": "dependencies", "pinVersions": false}],
+  "ignoreNodeModules": true
+}
+`;
+      config.api.getFileContent.mockReturnValueOnce(existingContent);
+      const res = await onboarding.getOnboardingStatus(config);
+      expect(res).toEqual(false);
+      expect(config.api.findPr.mock.calls.length).toBe(1);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
   });
 });

@@ -229,6 +229,24 @@ Array [
 ]
 `;
 
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) commits files if existing content does not match 1`] = `
+Array [
+  "renovate/configure",
+  Array [
+    Object {
+      "contents": "{
+  \\"pinVersions\\": true,
+  \\"depTypes\\": [{\\"depType\\": \\"dependencies\\", \\"pinVersions\\": false}],
+  \\"ignoreNodeModules\\": true
+}
+",
+      "name": "renovate.json",
+    },
+  ],
+  "Add renovate.json",
+]
+`;
+
 exports[`lib/workers/repository/onboarding getOnboardingStatus(config) enables semantic commits 1`] = `
 Array [
   "renovate/configure",
