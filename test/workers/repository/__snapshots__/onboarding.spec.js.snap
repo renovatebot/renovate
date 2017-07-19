@@ -229,6 +229,24 @@ Array [
 ]
 `;
 
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) commits files if existing content does not match 1`] = `
+Array [
+  "renovate/configure",
+  Array [
+    Object {
+      "contents": "{
+  \\"pinVersions\\": true,
+  \\"depTypes\\": [{\\"depType\\": \\"dependencies\\", \\"pinVersions\\": false}],
+  \\"ignoreNodeModules\\": true
+}
+",
+      "name": "renovate.json",
+    },
+  ],
+  "Add renovate.json",
+]
+`;
+
 exports[`lib/workers/repository/onboarding getOnboardingStatus(config) enables semantic commits 1`] = `
 Array [
   "renovate/configure",
@@ -259,5 +277,115 @@ Array [
     },
   ],
   "Add renovate.json",
+]
+`;
+
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) skips commit files if existing content matches 1`] = `
+Array [
+  Array [
+    "Created 1 for configuration",
+  ],
+  Array [
+    "Created 1 for configuration",
+  ],
+  Array [
+    "Created 1 for configuration",
+  ],
+  Array [
+    "Created 1 for configuration",
+  ],
+  Array [
+    "Created 1 for configuration",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "Repo onboarding is disabled",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "Repo onboarded",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "Found existing onboarding PR#undefined",
+  ],
+  Array [
+    "Found closed Configure Renovate PR",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "Found existing onboarding PR#undefined",
+  ],
+  Array [
+    "PR #undefined needs to be closed to enable renovate to continue",
+  ],
+  Array [
+    "No semantic commit type found",
+  ],
+  Array [
+    "Repo is not private - unpinning versions",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "Found existing onboarding PR#undefined",
+  ],
+  Array [
+    "PR #undefined needs to be closed to enable renovate to continue",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "No semantic commit type found",
+  ],
+  Array [
+    "Repo is not private - unpinning versions",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "Found semantic commit type angular - enabling semantic commits",
+  ],
+  Array [
+    "Repo is not private - unpinning versions",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "No semantic commit type found",
+  ],
+  Array [
+    "Repo is private - pinning dependencies versions",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "No semantic commit type found",
+  ],
+  Array [
+    "Repo is not private - unpinning versions",
+  ],
+  Array [
+    "Checking if repo is configured",
+  ],
+  Array [
+    "No semantic commit type found",
+  ],
+  Array [
+    "Repo is not private - unpinning versions",
+  ],
 ]
 `;
