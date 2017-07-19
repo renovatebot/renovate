@@ -38,4 +38,19 @@ describe('workers/pr/changelog', () => {
       ).toBe('No changelog available');
     });
   });
+  describe('getChangeLogJSON', () => {
+    it('filters unnecessary warns', async () => {
+      changelog.generate = jest.fn(() => {
+        throw new Error('Unknown Github Repo');
+      });
+      expect(
+        await changelogHelper.getChangeLogJSON(
+          'renovate',
+          '1.0.0',
+          '2.0.0',
+          logger
+        )
+      ).toBe(null);
+    });
+  });
 });

@@ -42,15 +42,16 @@ describe('logger/pretty-stdout', () => {
     it('returns empty string if empty rec', () => {
       expect(prettyStdout.getDetails({})).toEqual('');
     });
-    it('returns empty string if no meta fields', () => {
+    it('returns empty string if all are meta fields', () => {
       const rec = {
-        foo: 'bar',
+        branch: 'bar',
+        v: 0,
       };
       expect(prettyStdout.getDetails(rec)).toEqual('');
     });
     it('supports a config', () => {
       const rec = {
-        foo: 'bar',
+        v: 0,
         config: {
           a: 'b',
           d: ['e', 'f'],
