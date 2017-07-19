@@ -292,7 +292,6 @@ describe('lib/workers/repository/onboarding', () => {
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
-      expect(config.logger.debug.mock.calls).toMatchSnapshot();
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
   });
