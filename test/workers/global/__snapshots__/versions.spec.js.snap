@@ -6,6 +6,5 @@ exports[`lib/workers/global/versions returns versions 1`] = `
 Object {
   "npm": "5.0.4",
   "renovate": "1.0.0",
-  "yarn": "",
 }
 `;

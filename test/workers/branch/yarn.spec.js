@@ -38,9 +38,9 @@ describe('getLockFile(packageJson, config)', () => {
   });
   it('returns null if no existing yarn.lock', async () => {
     api.getFileContent.mockReturnValueOnce(false);
-    expect(
-      await yarnHelper.getLockFile('package.json', '', api, '', '0.24.5')
-    ).toBe(null);
+    expect(await yarnHelper.getLockFile('package.json', '', api, '')).toBe(
+      null
+    );
   });
   it('returns yarn.lock file', async () => {
     api.getFileContent.mockReturnValueOnce('Existing yarn.lock');
@@ -53,18 +53,8 @@ describe('getLockFile(packageJson, config)', () => {
       contents: 'New yarn.lock',
     };
     expect(
-      await yarnHelper.getLockFile('package.json', '', api, '', '0.24.5')
+      await yarnHelper.getLockFile('package.json', '', api, '')
     ).toMatchObject(yarnLockFile);
-  });
-  it('throws if no yarn', async () => {
-    api.getFileContent.mockReturnValueOnce('Existing yarn.lock');
-    let e;
-    try {
-      await yarnHelper.getLockFile('package.json', '', api, '', '');
-    } catch (err) {
-      e = err;
-    }
-    expect(e).toMatchSnapshot();
   });
 });
 
