@@ -91,7 +91,6 @@ describe('lib/workers/repository/onboarding', () => {
           upgrades: [
             {
               depName: 'b',
-              repositoryUrl: 'https://b',
               currentVersion: '1.0.0',
               newVersion: '2.0.0',
             },
