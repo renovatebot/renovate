@@ -81,6 +81,9 @@ describe('maintainLockFile(inputConfig)', () => {
     config.api = {
       getFileContent: jest.fn(),
     };
+    config.versions = {
+      npm: '5.3.0',
+    };
     config.api.getFileContent.mockReturnValueOnce('oldPackageContent');
     npmHelper.getLockFile = jest.fn();
   });
