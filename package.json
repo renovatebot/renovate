@@ -61,7 +61,7 @@
     "registry-auth-token": "3.3.1",
     "registry-url": "3.1.0",
     "root-require": "0.3.1",
-    "semver": "5.3.0",
+    "semver": "5.4.0",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.1",
     "showdown": "1.7.1",
