@@ -34,6 +34,10 @@ describe('config/env', () => {
       const envParam = { RENOVATE_GITHUB_APP_ID: 5 };
       env.getConfig(envParam).should.eql({ githubAppId: 5 });
     });
+    it('supports json', () => {
+      const envParam = { RENOVATE_LOCK_FILE_MAINTENANCE: '{}' };
+      expect(env.getConfig(envParam)).toEqual({ lockFileMaintenance: {} });
+    });
   });
   describe('.getEnvName(definition)', () => {
     it('returns empty', () => {
