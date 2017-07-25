@@ -152,6 +152,14 @@ describe('api/github', () => {
         },
       },
     }));
+    // getBranchProtection
+    ghGot.mockImplementationOnce(() => ({
+      body: {
+        required_status_checks: {
+          strict: false,
+        },
+      },
+    }));
     return github.initRepo(...args);
   }
 
@@ -213,6 +221,14 @@ describe('api/github', () => {
             },
           },
         }));
+        // getBranchProtection
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            required_status_checks: {
+              strict: false,
+            },
+          },
+        }));
         return github.initRepo(...args);
       }
       const config = await squashInitRepo('some/repo', 'token');
@@ -237,6 +253,14 @@ describe('api/github', () => {
           body: {
             object: {
               sha: '1234',
+            },
+          },
+        }));
+        // getBranchProtection
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            required_status_checks: {
+              strict: false,
             },
           },
         }));
@@ -267,6 +291,14 @@ describe('api/github', () => {
             },
           },
         }));
+        // getBranchProtection
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            required_status_checks: {
+              strict: false,
+            },
+          },
+        }));
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo('some/repo', 'token');
@@ -291,10 +323,123 @@ describe('api/github', () => {
             },
           },
         }));
+        // getBranchProtection
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            required_status_checks: {
+              strict: false,
+            },
+          },
+        }));
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo('some/repo', 'token');
       expect(config).toMatchSnapshot();
+    });
+    it('should detect repoForceRebase', async () => {
+      async function mergeInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getBranchProtection
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            required_status_checks: {
+              strict: true,
+            },
+          },
+        }));
+        return github.initRepo(...args);
+      }
+      const config = await mergeInitRepo('some/repo', 'token');
+      expect(config).toMatchSnapshot();
+    });
+    it('should ignore repoForceRebase 404', async () => {
+      async function mergeInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getBranchProtection
+        ghGot.mockImplementationOnce(() => {
+          // Create a new object, that prototypically inherits from the Error constructor
+          function MyError() {
+            this.statusCode = 404;
+          }
+          MyError.prototype = Object.create(Error.prototype);
+          MyError.prototype.constructor = MyError;
+          throw new MyError();
+        });
+        return github.initRepo(...args);
+      }
+      const config = await mergeInitRepo('some/repo', 'token');
+      expect(config).toMatchSnapshot();
+    });
+    it('should throw repoForceRebase non-404', async () => {
+      async function mergeInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getBranchProtection
+        ghGot.mockImplementationOnce(() => {
+          // Create a new object, that prototypically inherits from the Error constructor
+          function MyError() {
+            this.statusCode = 500;
+          }
+          MyError.prototype = Object.create(Error.prototype);
+          MyError.prototype.constructor = MyError;
+          throw new MyError();
+        });
+        return github.initRepo(...args);
+      }
+      let e;
+      try {
+        await mergeInitRepo('some/repo', 'token');
+      } catch (err) {
+        e = err;
+      }
+      expect(e.statusCode).toBe(500);
     });
   });
   describe('setBaseBranch(branchName)', () => {
@@ -923,7 +1068,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
-      expect(ghGot.mock.calls).toHaveLength(3);
+      expect(ghGot.mock.calls).toHaveLength(4);
     });
   });
   describe('mergePr(prNo)', () => {
@@ -941,7 +1086,7 @@ describe('api/github', () => {
       await github.mergePr(pr);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
-      expect(ghGot.mock.calls).toHaveLength(2);
+      expect(ghGot.mock.calls).toHaveLength(3);
     });
   });
   describe('mergePr(prNo) - autodetection', () => {
