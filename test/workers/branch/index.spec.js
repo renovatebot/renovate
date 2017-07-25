@@ -91,6 +91,17 @@ describe('workers/branch', () => {
         undefined
       );
     });
+    it('returns branch if rebaseStalePrs enabled but cannot rebase', async () => {
+      config.rebaseStalePrs = true;
+      config.api.isBranchStale.mockReturnValueOnce(true);
+      config.api.getBranchPr.mockReturnValue({
+        isUnmergeable: true,
+        canRebase: false,
+      });
+      expect(await branchWorker.getParentBranch(branchName, config)).not.toBe(
+        undefined
+      );
+    });
   });
   describe('ensureBranch(config)', () => {
     let config;
