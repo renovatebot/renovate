@@ -402,6 +402,40 @@ describe('api/github', () => {
       const config = await mergeInitRepo('some/repo', 'token');
       expect(config).toMatchSnapshot();
     });
+    it('should ignore repoForceRebase 403', async () => {
+      async function mergeInitRepo(...args) {
+        // repo info
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+          },
+        }));
+        // getBranchCommit
+        ghGot.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getBranchProtection
+        ghGot.mockImplementationOnce(() => {
+          // Create a new object, that prototypically inherits from the Error constructor
+          function MyError() {
+            this.statusCode = 403;
+          }
+          MyError.prototype = Object.create(Error.prototype);
+          MyError.prototype.constructor = MyError;
+          throw new MyError();
+        });
+        return github.initRepo(...args);
+      }
+      const config = await mergeInitRepo('some/repo', 'token');
+      expect(config).toMatchSnapshot();
+    });
     it('should throw repoForceRebase non-404', async () => {
       async function mergeInitRepo(...args) {
         // repo info

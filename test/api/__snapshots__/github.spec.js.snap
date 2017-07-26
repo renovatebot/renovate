@@ -920,6 +920,18 @@ Object {
 }
 `;
 
+exports[`api/github initRepo should ignore repoForceRebase 403 1`] = `
+Object {
+  "baseBranch": "master",
+  "baseCommitSHA": "1234",
+  "defaultBranch": "master",
+  "owner": "theowner",
+  "privateRepo": false,
+  "repoForceRebase": false,
+  "repoName": "some/repo",
+}
+`;
+
 exports[`api/github initRepo should ignore repoForceRebase 404 1`] = `
 Object {
   "baseBranch": "master",
