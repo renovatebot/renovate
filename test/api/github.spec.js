@@ -155,9 +155,7 @@ describe('api/github', () => {
     // getBranchProtection
     ghGot.mockImplementationOnce(() => ({
       body: {
-        required_status_checks: {
-          strict: false,
-        },
+        strict: false,
       },
     }));
     return github.initRepo(...args);
@@ -224,9 +222,7 @@ describe('api/github', () => {
         // getBranchProtection
         ghGot.mockImplementationOnce(() => ({
           body: {
-            required_status_checks: {
-              strict: false,
-            },
+            strict: false,
           },
         }));
         return github.initRepo(...args);
@@ -259,9 +255,7 @@ describe('api/github', () => {
         // getBranchProtection
         ghGot.mockImplementationOnce(() => ({
           body: {
-            required_status_checks: {
-              strict: false,
-            },
+            strict: false,
           },
         }));
         return github.initRepo(...args);
@@ -294,9 +288,7 @@ describe('api/github', () => {
         // getBranchProtection
         ghGot.mockImplementationOnce(() => ({
           body: {
-            required_status_checks: {
-              strict: false,
-            },
+            strict: false,
           },
         }));
         return github.initRepo(...args);
@@ -326,9 +318,7 @@ describe('api/github', () => {
         // getBranchProtection
         ghGot.mockImplementationOnce(() => ({
           body: {
-            required_status_checks: {
-              strict: false,
-            },
+            strict: false,
           },
         }));
         return github.initRepo(...args);
@@ -358,9 +348,7 @@ describe('api/github', () => {
         // getBranchProtection
         ghGot.mockImplementationOnce(() => ({
           body: {
-            required_status_checks: {
-              strict: true,
-            },
+            strict: true,
           },
         }));
         return github.initRepo(...args);
