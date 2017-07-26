@@ -910,37 +910,19 @@ Array [
 
 exports[`api/github initRepo should detect repoForceRebase 1`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": true,
-  "repoName": "some/repo",
 }
 `;
 
 exports[`api/github initRepo should ignore repoForceRebase 403 1`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": false,
-  "repoName": "some/repo",
 }
 `;
 
 exports[`api/github initRepo should ignore repoForceRebase 404 1`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": false,
-  "repoName": "some/repo",
 }
 `;
 
@@ -965,14 +947,7 @@ Array [
 
 exports[`api/github initRepo should initialise the config for the repo - 0 2`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "mergeMethod": "rebase",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": false,
-  "repoName": "some/repo",
 }
 `;
 
@@ -997,14 +972,7 @@ Array [
 
 exports[`api/github initRepo should initialise the config for the repo - 1 2`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "mergeMethod": "rebase",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": false,
-  "repoName": "some/repo",
 }
 `;
 
@@ -1029,65 +997,31 @@ Array [
 
 exports[`api/github initRepo should initialise the config for the repo - 2 2`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "mergeMethod": "rebase",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": false,
-  "repoName": "some/repo",
 }
 `;
 
 exports[`api/github initRepo should merge 1`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "mergeMethod": "merge",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": false,
-  "repoName": "some/repo",
 }
 `;
 
 exports[`api/github initRepo should not guess at merge 1`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": false,
-  "repoName": "some/repo",
 }
 `;
 
 exports[`api/github initRepo should rebase 1`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "mergeMethod": "rebase",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": false,
-  "repoName": "some/repo",
 }
 `;
 
 exports[`api/github initRepo should squash 1`] = `
 Object {
-  "baseBranch": "master",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "master",
-  "mergeMethod": "squash",
-  "owner": "theowner",
-  "privateRepo": false,
   "repoForceRebase": false,
-  "repoName": "some/repo",
 }
 `;
 
