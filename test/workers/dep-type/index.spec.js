@@ -15,6 +15,7 @@ describe('lib/workers/dep-type/index', () => {
     beforeEach(() => {
       config = {
         ignoreDeps: ['a', 'b'],
+        lernaPackages: ['e'],
       };
     });
     it('returns empty if config is disabled', async () => {
@@ -31,6 +32,7 @@ describe('lib/workers/dep-type/index', () => {
       packageJson.extractDependencies.mockReturnValueOnce([
         { depName: 'a' },
         { depName: 'b' },
+        { depName: 'e' },
       ]);
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toMatchObject([]);

@@ -908,6 +908,34 @@ Array [
 ]
 `;
 
+exports[`api/github getSubDirectories(path) should return subdirectories 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/branches/master/protection/required_status_checks",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/contents/some-path",
+  ],
+]
+`;
+
+exports[`api/github getSubDirectories(path) should return subdirectories 2`] = `
+Array [
+  "a",
+]
+`;
+
 exports[`api/github initRepo should detect repoForceRebase 1`] = `
 Object {
   "repoForceRebase": true,

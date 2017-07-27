@@ -42,6 +42,30 @@ describe('workers/repository/apis', () => {
       await apis.setNpmrc(config);
     });
   });
+  describe('checkForLerna(config)', () => {
+    it('ignores zero length lerna', async () => {
+      const config = {
+        api: {
+          getFileContent: jest.fn(() => 'some content'),
+          getSubDirectories: jest.fn(() => []),
+        },
+        logger,
+      };
+      const res = await apis.checkForLerna(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('returns lerna package names', async () => {
+      const config = {
+        api: {
+          getFileContent: jest.fn(() => 'some content'),
+          getSubDirectories: jest.fn(() => ['a', 'b']),
+        },
+        logger,
+      };
+      const res = await apis.checkForLerna(config);
+      expect(res).toMatchSnapshot();
+    });
+  });
   describe('initApis(config)', () => {
     beforeEach(() => {
       jest.resetAllMocks();

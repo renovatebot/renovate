@@ -639,6 +639,18 @@ describe('api/gitlab', () => {
         expect(glGot.post.mock.calls[0][1].body.branch_name).toBeDefined();
       });
     });
+    describe('getSubDirectories(path)', () => {
+      it('should return subdirectories', async () => {
+        await initRepo('some/repo', 'token');
+        glGot.mockImplementationOnce(() => ({
+          body: [{ type: 'tree', name: 'a' }, { type: 'file', name: 'b' }],
+        }));
+        const dirList = await gitlab.getSubDirectories('some-path');
+        expect(glGot.mock.calls).toMatchSnapshot();
+        expect(dirList).toHaveLength(1);
+        expect(dirList).toMatchSnapshot();
+      });
+    });
     describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
       it('creates branch', async () => {
         glGot.mockReturnValueOnce({ statusCode: 404 });
