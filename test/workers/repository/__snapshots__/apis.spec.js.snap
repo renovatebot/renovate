@@ -11,6 +11,8 @@ Object {
 }
 `;
 
+exports[`workers/repository/apis checkForLerna(config) swallows lerna 404 1`] = `Object {}`;
+
 exports[`workers/repository/apis detectPackageFiles(config) adds package files to object 1`] = `
 Array [
   "package.json",
