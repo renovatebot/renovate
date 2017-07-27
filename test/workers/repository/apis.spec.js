@@ -43,10 +43,23 @@ describe('workers/repository/apis', () => {
     });
   });
   describe('checkForLerna(config)', () => {
+    it('swallows lerna 404', async () => {
+      const config = {
+        api: {
+          getFileJson: jest.fn(() => ({})),
+          getSubDirectories: jest.fn(() => {
+            throw new Error('some-error');
+          }),
+        },
+        logger,
+      };
+      const res = await apis.checkForLerna(config);
+      expect(res).toMatchSnapshot();
+    });
     it('ignores zero length lerna', async () => {
       const config = {
         api: {
-          getFileContent: jest.fn(() => 'some content'),
+          getFileJson: jest.fn(() => ({})),
           getSubDirectories: jest.fn(() => []),
         },
         logger,
@@ -57,7 +70,7 @@ describe('workers/repository/apis', () => {
     it('returns lerna package names', async () => {
       const config = {
         api: {
-          getFileContent: jest.fn(() => 'some content'),
+          getFileJson: jest.fn(() => ({})),
           getSubDirectories: jest.fn(() => ['a', 'b']),
         },
         logger,
