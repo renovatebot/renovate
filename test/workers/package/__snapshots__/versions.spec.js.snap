@@ -21,6 +21,7 @@ Array [
     "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
 ]
@@ -35,6 +36,7 @@ Array [
     "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "minor",
   },
 ]
@@ -56,6 +58,7 @@ Array [
     "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
   Object {
@@ -136,6 +139,7 @@ Array [
     "isMinor": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
+    "newVersionMinor": 9,
     "type": "minor",
   },
   Object {
@@ -145,6 +149,7 @@ Array [
     "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
   Object {
@@ -158,6 +163,31 @@ Array [
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
+  },
+]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns both updates if automerging patch 1`] = `
+Array [
+  Object {
+    "automergeEnabled": true,
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "0.9.7",
+    "isPatch": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "type": "patch",
+  },
+  Object {
+    "automergeEnabled": false,
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "1.4.1",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "major",
   },
 ]
 `;
@@ -183,6 +213,7 @@ Array [
     "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
 ]
@@ -209,6 +240,7 @@ Array [
     "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
 ]
@@ -223,6 +255,7 @@ Array [
     "isMinor": true,
     "newVersion": "1.1.0-beta",
     "newVersionMajor": 1,
+    "newVersionMinor": 1,
     "type": "minor",
   },
 ]
@@ -245,11 +278,12 @@ Array [
     "automergeEnabled": false,
     "changeLogFromVersion": "0.0.34",
     "changeLogToVersion": "0.0.35",
-    "isMinor": true,
+    "isPatch": true,
     "isRange": true,
     "newVersion": "^0.0.35",
     "newVersionMajor": 0,
-    "type": "minor",
+    "newVersionMinor": 0,
+    "type": "patch",
   },
 ]
 `;
@@ -263,6 +297,7 @@ Array [
     "isMajor": true,
     "newVersion": "2.0.1",
     "newVersionMajor": 2,
+    "newVersionMinor": 0,
     "type": "major",
   },
 ]
@@ -294,6 +329,7 @@ Array [
     "isMajor": true,
     "newVersion": "2.0.3",
     "newVersionMajor": 2,
+    "newVersionMinor": 0,
     "type": "major",
   },
 ]
@@ -308,6 +344,7 @@ Array [
     "isMinor": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
+    "newVersionMinor": 9,
     "type": "minor",
   },
   Object {
@@ -317,6 +354,7 @@ Array [
     "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
   Object {
@@ -343,6 +381,7 @@ Array [
     "isMinor": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
+    "newVersionMinor": 9,
     "type": "minor",
   },
   Object {
@@ -352,6 +391,7 @@ Array [
     "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
   Object {
@@ -379,6 +419,7 @@ Array [
     "isRange": true,
     "newVersion": "1.x",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
 ]
@@ -393,6 +434,7 @@ Array [
     "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "minor",
   },
   Object {
@@ -420,6 +462,7 @@ Array [
     "isRange": true,
     "newVersion": "1.4.x",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "minor",
   },
 ]
@@ -435,6 +478,7 @@ Array [
     "isRange": true,
     "newVersion": "<= 0.9.7",
     "newVersionMajor": 0,
+    "newVersionMinor": 9,
     "type": "minor",
   },
   Object {
@@ -445,6 +489,7 @@ Array [
     "isRange": true,
     "newVersion": "<= 1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
 ]
@@ -459,6 +504,7 @@ Array [
     "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "minor",
   },
   Object {
@@ -486,6 +532,7 @@ Array [
     "isRange": true,
     "newVersion": "^0.9.0",
     "newVersionMajor": 0,
+    "newVersionMinor": 9,
     "type": "minor",
   },
   Object {
@@ -496,6 +543,7 @@ Array [
     "isRange": true,
     "newVersion": "^1.0.0",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
 ]
@@ -511,6 +559,7 @@ Array [
     "isRange": true,
     "newVersion": "~0.9.0",
     "newVersionMajor": 0,
+    "newVersionMinor": 9,
     "type": "minor",
   },
   Object {
@@ -521,6 +570,7 @@ Array [
     "isRange": true,
     "newVersion": "~1.4.0",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
 ]
@@ -536,6 +586,7 @@ Array [
     "isRange": true,
     "newVersion": "1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "major",
   },
 ]
@@ -551,6 +602,7 @@ Array [
     "isRange": true,
     "newVersion": "1.4",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "minor",
   },
 ]
@@ -565,6 +617,7 @@ Array [
     "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "minor",
   },
   Object {
@@ -592,6 +645,7 @@ Array [
     "isRange": true,
     "newVersion": "~1.4.0",
     "newVersionMajor": 1,
+    "newVersionMinor": 4,
     "type": "minor",
   },
 ]

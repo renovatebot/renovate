@@ -61,6 +61,11 @@ describe('workers/package/versions', () => {
       config.currentVersion = '^0.4.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
+    it('returns both updates if automerging patch', () => {
+      config.automerge = 'patch';
+      config.currentVersion = '0.9.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
     it('disables major release separation (major)', () => {
       config.separateMajorReleases = false;
       config.currentVersion = '^0.4.0';
@@ -262,6 +267,32 @@ describe('workers/package/versions', () => {
     });
     it('should return true for greater than', () => {
       versions.isPastLatest(qJson, '2.0.3').should.eql(true);
+    });
+  });
+  describe('.isAutomergeEnabled(automerge, type)', () => {
+    it('should return true for automerge = any', () => {
+      versions.isAutomergeEnabled('any', 'whatever').should.eql(true);
+    });
+    it('should return true for automerge = minor and type = minor', () => {
+      versions.isAutomergeEnabled('minor', 'minor').should.eql(true);
+    });
+    it('should return true for automerge = minor and type = patch', () => {
+      versions.isAutomergeEnabled('minor', 'patch').should.eql(true);
+    });
+    it('should return true for automerge = patch and type = patch', () => {
+      versions.isAutomergeEnabled('patch', 'patch').should.eql(true);
+    });
+    it('should return false for automerge = minor and type = major', () => {
+      versions.isAutomergeEnabled('minor', 'major').should.eql(false);
+    });
+    it('should return false for automerge = patch and type = minor', () => {
+      versions.isAutomergeEnabled('patch', 'minor').should.eql(false);
+    });
+    it('should return false for automerge = patch and type = major', () => {
+      versions.isAutomergeEnabled('patch', 'major').should.eql(false);
+    });
+    it('should return false for automerge = none', () => {
+      versions.isAutomergeEnabled('none', 'whatever').should.eql(false);
     });
   });
 });
