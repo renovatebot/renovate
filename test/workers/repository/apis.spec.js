@@ -59,7 +59,7 @@ describe('workers/repository/apis', () => {
     it('ignores zero length lerna', async () => {
       const config = {
         api: {
-          getFileJson: jest.fn(() => ({})),
+          getFileJson: jest.fn(() => ({ packages: ['packages/*'] })),
           getSubDirectories: jest.fn(() => []),
         },
         logger,
@@ -70,7 +70,7 @@ describe('workers/repository/apis', () => {
     it('returns lerna package names', async () => {
       const config = {
         api: {
-          getFileJson: jest.fn(() => ({})),
+          getFileJson: jest.fn(() => ({ packages: ['packages/*'] })),
           getSubDirectories: jest.fn(() => ['a', 'b']),
         },
         logger,
