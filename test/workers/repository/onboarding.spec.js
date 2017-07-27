@@ -204,7 +204,6 @@ describe('lib/workers/repository/onboarding', () => {
         createPr: jest.fn(() => ({ displayNumber: 1 })),
         findPr: jest.fn(),
         getFileContent: jest.fn(),
-        getSubDirectories: jest.fn(() => []),
         getPr: jest.fn(() => {}),
         getCommitMessages: jest.fn(),
       };
@@ -212,7 +211,6 @@ describe('lib/workers/repository/onboarding', () => {
       config.logger = logger;
       config.detectedPackageFiles = true;
       onboarding.isRepoPrivate = jest.fn();
-      config.api.getFileContent.mockReturnValueOnce(null);
     });
     it('returns true if onboarding is false', async () => {
       config.onboarding = false;
@@ -294,25 +292,6 @@ describe('lib/workers/repository/onboarding', () => {
       expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
-    });
-    it('ignores lerna packages', async () => {
-      config.api.getFileContent = jest.fn();
-      config.api.getFileContent.mockReturnValueOnce('some-content');
-      config.api.getSubDirectories.mockReturnValueOnce(['a', 'b']);
-      const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
-      expect(config.api.findPr.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
-    });
-    it('handles empty lerna packages', async () => {
-      config.api.getFileContent = jest.fn();
-      config.api.getFileContent.mockReturnValueOnce('some-content');
-      const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
-      expect(config.api.findPr.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
   });
 });
