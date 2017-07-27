@@ -96,7 +96,7 @@ $ node renovate --help
     --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
     --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
-    --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, minor or any
+    --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, patch, minor or any
     --automerge-type <string>            How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only
     --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
     --group-name <string>                Human understandable name for the dependency group
@@ -398,7 +398,7 @@ Obviously, you can't set repository or package file location with this method.
 </tr>
 <tr>
   <td>`automerge`</td>
-  <td>What types of upgrades to merge to base branch automatically. Values: none, minor or any</td>
+  <td>What types of upgrades to merge to base branch automatically. Values: none, patch, minor or any</td>
   <td>string</td>
   <td><pre>"none"</pre></td>
   <td>`RENOVATE_AUTOMERGE`</td>
