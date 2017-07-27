@@ -61,6 +61,11 @@ describe('workers/package/versions', () => {
       config.currentVersion = '^0.4.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
+    it('returns both updates if automerging patch', () => {
+      config.automerge = 'patch';
+      config.currentVersion = '0.9.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
     it('disables major release separation (major)', () => {
       config.separateMajorReleases = false;
       config.currentVersion = '^0.4.0';
