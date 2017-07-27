@@ -1291,6 +1291,18 @@ describe('api/github', () => {
       expect(content).toBeNull();
     });
   });
+  describe('getSubDirectories(path)', () => {
+    it('should return subdirectories', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: [{ type: 'dir', name: 'a' }, { type: 'file', name: 'b' }],
+      }));
+      const dirList = await github.getSubDirectories('some-path');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(dirList).toHaveLength(1);
+      expect(dirList).toMatchSnapshot();
+    });
+  });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
     beforeEach(async () => {
       await initRepo('some/repo', 'token');

@@ -266,6 +266,43 @@ Array [
 ]
 `;
 
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) handles empty lerna packages 1`] = `
+Array [
+  "renovate/configure",
+  Array [
+    Object {
+      "contents": "{
+  \\"pinVersions\\": true,
+  \\"depTypes\\": [{\\"depType\\": \\"dependencies\\", \\"pinVersions\\": false}],
+  \\"ignoreNodeModules\\": true
+}
+",
+      "name": "renovate.json",
+    },
+  ],
+  "Add renovate.json",
+]
+`;
+
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) ignores lerna packages 1`] = `
+Array [
+  "renovate/configure",
+  Array [
+    Object {
+      "contents": "{
+  \\"pinVersions\\": true,
+  \\"ignoreDeps\\": [\\"a\\", \\"b\\"],
+  \\"depTypes\\": [{\\"depType\\": \\"dependencies\\", \\"pinVersions\\": false}],
+  \\"ignoreNodeModules\\": true
+}
+",
+      "name": "renovate.json",
+    },
+  ],
+  "Add renovate.json",
+]
+`;
+
 exports[`lib/workers/repository/onboarding getOnboardingStatus(config) pins private repos 1`] = `
 Array [
   "renovate/configure",

@@ -85,6 +85,29 @@ Array [
 ]
 `;
 
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) getSubDirectories(path) should return subdirectories 1`] = `
+Array [
+  Array [
+    "projects/owned",
+  ],
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/repository/tree?path=some-path",
+  ],
+]
+`;
+
+exports[`api/gitlab createFile(branchName, filePath, fileContents, message) getSubDirectories(path) should return subdirectories 2`] = `
+Array [
+  "a",
+]
+`;
+
 exports[`api/gitlab createFile(branchName, filePath, fileContents, message) updateFile(branchName, filePath, fileContents, message) creates file with v3 1`] = `
 Array [
   Array [
