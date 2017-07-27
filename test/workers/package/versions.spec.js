@@ -269,4 +269,30 @@ describe('workers/package/versions', () => {
       versions.isPastLatest(qJson, '2.0.3').should.eql(true);
     });
   });
+  describe('.isAutomergeEnabled(automerge, type)', () => {
+    it('should return true for automerge = any', () => {
+      versions.isAutomergeEnabled('any', 'whatever').should.eql(true);
+    });
+    it('should return true for automerge = minor and type = minor', () => {
+      versions.isAutomergeEnabled('minor', 'minor').should.eql(true);
+    });
+    it('should return true for automerge = minor and type = patch', () => {
+      versions.isAutomergeEnabled('minor', 'patch').should.eql(true);
+    });
+    it('should return true for automerge = patch and type = patch', () => {
+      versions.isAutomergeEnabled('patch', 'patch').should.eql(true);
+    });
+    it('should return false for automerge = minor and type = major', () => {
+      versions.isAutomergeEnabled('minor', 'major').should.eql(false);
+    });
+    it('should return false for automerge = patch and type = minor', () => {
+      versions.isAutomergeEnabled('patch', 'minor').should.eql(false);
+    });
+    it('should return false for automerge = patch and type = major', () => {
+      versions.isAutomergeEnabled('patch', 'major').should.eql(false);
+    });
+    it('should return false for automerge = none', () => {
+      versions.isAutomergeEnabled('none', 'whatever').should.eql(false);
+    });
+  });
 });
