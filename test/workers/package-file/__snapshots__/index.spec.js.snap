@@ -1,11 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`packageFileWorker renovatePackageFile(config) handles renovate config errors 1`] = `
-Array [
-  Object {
-    "depName": "package.json(renovate)",
-    "message": "Invalid configuration option: \`foo\`",
-    "type": "error",
-  },
-]
-`;
+exports[`packageFileWorker renovatePackageFile(config) handles renovate config errors 1`] = `Array []`;

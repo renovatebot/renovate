@@ -66,11 +66,4 @@ Array [
 ]
 `;
 
-exports[`workers/repository/apis mergeRenovateJson(config) returns error plus extended config if unknown keys 1`] = `
-Array [
-  Object {
-    "depName": "renovate.json",
-    "message": "Invalid configuration option: \`foo\`",
-  },
-]
-`;
+exports[`workers/repository/apis mergeRenovateJson(config) returns error plus extended config if unknown keys 1`] = `Array []`;
