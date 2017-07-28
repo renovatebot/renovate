@@ -22,6 +22,12 @@ describe('packageFileWorker', () => {
         logger,
       });
     });
+    it('handles renovate config errors', async () => {
+      config.enabled = false;
+      config.api.getFileJson.mockReturnValueOnce({ renovate: { foo: 1 } });
+      const res = await packageFileWorker.renovatePackageFile(config);
+      expect(res).toMatchSnapshot();
+    });
     it('handles null', async () => {
       const allUpgrades = await packageFileWorker.renovatePackageFile(config);
       expect(allUpgrades).toHaveLength(1);
