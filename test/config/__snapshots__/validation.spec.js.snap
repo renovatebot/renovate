@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/validation validateConfig(config) errors for all types 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`enabled\` should be boolean",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`schedule\` should be a list (Array)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`semanticPrefix\` should be a string",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`githubAppId\` should be an integer",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`lockFileMaintenance\` should be a json object",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) returns nested errors 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid configuration option: \`foo\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid configuration option: \`bar\`",
+  },
+]
+`;

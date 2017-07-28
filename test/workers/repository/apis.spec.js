@@ -129,29 +129,41 @@ describe('workers/repository/apis', () => {
       expect(await apis.mergeRenovateJson(config)).toEqual(config);
     });
     it('returns extended config if renovate.json found', async () => {
-      config.api.getFileContent.mockReturnValueOnce('{ "foo": 1 }');
+      config.api.getFileContent.mockReturnValueOnce('{ "enabled": true }');
       const returnConfig = await apis.mergeRenovateJson(config);
-      expect(returnConfig.foo).toBe(1);
+      expect(returnConfig.enabled).toBe(true);
       expect(returnConfig.renovateJsonPresent).toBe(true);
       expect(returnConfig.errors).toHaveLength(0);
     });
-    it('returns error plus extended config if duplicate keys', async () => {
-      config.api.getFileContent.mockReturnValueOnce('{ "foo": 1, "foo": 2 }');
+    it('returns error plus extended config if unknown keys', async () => {
+      config.api.getFileContent.mockReturnValueOnce(
+        '{ "enabled": true, "foo": false }'
+      );
       const returnConfig = await apis.mergeRenovateJson(config);
-      expect(returnConfig.foo).toBe(2);
+      expect(returnConfig.enabled).toBe(true);
+      expect(returnConfig.renovateJsonPresent).toBe(true);
+      expect(returnConfig.errors).toHaveLength(0); // TODO: Update to 1 later
+      expect(returnConfig.errors).toMatchSnapshot();
+    });
+    it('returns error plus extended config if duplicate keys', async () => {
+      config.api.getFileContent.mockReturnValueOnce(
+        '{ "enabled": true, "enabled": false }'
+      );
+      const returnConfig = await apis.mergeRenovateJson(config);
+      expect(returnConfig.enabled).toBe(false);
       expect(returnConfig.renovateJsonPresent).toBe(true);
       expect(returnConfig.errors).toHaveLength(1);
       expect(returnConfig.errors).toMatchSnapshot();
     });
     it('returns error in config if renovate.json cannot be parsed', async () => {
-      config.api.getFileContent.mockReturnValueOnce('{ foo: 1 }');
+      config.api.getFileContent.mockReturnValueOnce('{ enabled: true }');
       const returnConfig = await apis.mergeRenovateJson(config);
-      expect(returnConfig.foo).toBeUndefined();
+      expect(returnConfig.enabled).toBeUndefined();
       expect(returnConfig.renovateJsonPresent).toBeUndefined();
       expect(returnConfig.errors).toMatchSnapshot();
     });
     it('returns error in JSON.parse', async () => {
-      config.api.getFileContent.mockReturnValueOnce('{ foo: 1 }');
+      config.api.getFileContent.mockReturnValueOnce('{ enabled: true }');
       jsonValidator.validate = jest.fn();
       jsonValidator.validate.mockReturnValueOnce(false);
       jsonValidator.validate.mockReturnValueOnce(false);

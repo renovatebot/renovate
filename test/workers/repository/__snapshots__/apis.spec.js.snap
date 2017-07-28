@@ -52,7 +52,7 @@ exports[`workers/repository/apis mergeRenovateJson(config) returns error in conf
 Array [
   Object {
     "depName": "renovate.json",
-    "message": "Syntax error: expecting String near { foo: 1 }",
+    "message": "Syntax error: expecting String near { enabled:",
   },
 ]
 `;
@@ -61,7 +61,9 @@ exports[`workers/repository/apis mergeRenovateJson(config) returns error plus ex
 Array [
   Object {
     "depName": "renovate.json",
-    "message": "Syntax error: duplicated keys \\"foo\\" near \\"foo\\": 2 }",
+    "message": "Syntax error: duplicated keys \\"enabled\\" near \\": false }",
   },
 ]
 `;
+
+exports[`workers/repository/apis mergeRenovateJson(config) returns error plus extended config if unknown keys 1`] = `Array []`;
