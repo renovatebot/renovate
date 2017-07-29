@@ -5,6 +5,7 @@ describe('config/validation', () => {
     it('returns nested errors', () => {
       const config = {
         foo: 1,
+        schedule: 'after 5pm',
         prBody: 'some-body',
         lockFileMaintenance: {
           bar: 2,
@@ -17,7 +18,7 @@ describe('config/validation', () => {
     it('errors for all types', () => {
       const config = {
         enabled: 1,
-        schedule: 'after 5pm',
+        schedule: 5,
         semanticPrefix: 7,
         githubAppId: 'none',
         lockFileMaintenance: false,
