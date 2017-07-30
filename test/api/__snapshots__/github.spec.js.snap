@@ -826,9 +826,82 @@ Object {
 }
 `;
 
+exports[`api/github getInstallationToken should retry posts 1`] = `Array []`;
+
+exports[`api/github getInstallationToken should retry posts 2`] = `"aUserToken"`;
+
 exports[`api/github getInstallationToken should return an installation token 1`] = `Array []`;
 
 exports[`api/github getInstallationToken should return an installation token 2`] = `"aUserToken"`;
+
+exports[`api/github getInstallations should retry 502s once 1`] = `
+Array [
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github getInstallations should retry 502s once 2`] = `
+Array [
+  "a",
+  "b",
+]
+`;
+
+exports[`api/github getInstallations should retry 502s until success 1`] = `
+Array [
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github getInstallations should retry 502s until success 2`] = `
+Array [
+  "a",
+  "b",
+]
+`;
 
 exports[`api/github getInstallations should return an array of installations 1`] = `
 Array [
