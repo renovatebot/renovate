@@ -93,17 +93,7 @@ describe('api/github', () => {
       }
       expect(err.statusCode).toBe(404);
     });
-    it('should give up after five retries', async () => {
-      ghGot.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 502,
-        })
-      );
-      ghGot.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 502,
-        })
-      );
+    it('should give up after 3 retries', async () => {
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 502,
