@@ -376,15 +376,11 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGot.mockImplementationOnce(() => {
-          // Create a new object, that prototypically inherits from the Error constructor
-          function MyError() {
-            this.statusCode = 404;
-          }
-          MyError.prototype = Object.create(Error.prototype);
-          MyError.prototype.constructor = MyError;
-          throw new MyError();
-        });
+        ghGot.mockImplementationOnce(() =>
+          Promise.reject({
+            statusCode: 404,
+          })
+        );
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo('some/repo', 'token');
@@ -410,15 +406,11 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGot.mockImplementationOnce(() => {
-          // Create a new object, that prototypically inherits from the Error constructor
-          function MyError() {
-            this.statusCode = 403;
-          }
-          MyError.prototype = Object.create(Error.prototype);
-          MyError.prototype.constructor = MyError;
-          throw new MyError();
-        });
+        ghGot.mockImplementationOnce(() =>
+          Promise.reject({
+            statusCode: 403,
+          })
+        );
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo('some/repo', 'token');
@@ -444,15 +436,11 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGot.mockImplementationOnce(() => {
-          // Create a new object, that prototypically inherits from the Error constructor
-          function MyError() {
-            this.statusCode = 500;
-          }
-          MyError.prototype = Object.create(Error.prototype);
-          MyError.prototype.constructor = MyError;
-          throw new MyError();
-        });
+        ghGot.mockImplementationOnce(() =>
+          Promise.reject({
+            statusCode: 500,
+          })
+        );
         return github.initRepo(...args);
       }
       let e;
@@ -515,7 +503,6 @@ describe('api/github', () => {
     it('should return true if the branch exists (one result)', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
-        statusCode: 200,
         body: {
           ref: 'refs/heads/thebranchname',
         },
@@ -527,7 +514,6 @@ describe('api/github', () => {
     it('should return true if the branch exists (multiple results)', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
-        statusCode: 200,
         body: [
           {
             ref: 'refs/heads/notthebranchname',
@@ -544,7 +530,6 @@ describe('api/github', () => {
     it('should return false if the branch does not exist (one result)', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
-        statusCode: 200,
         body: {
           ref: 'refs/heads/notthebranchname',
         },
@@ -556,7 +541,6 @@ describe('api/github', () => {
     it('should return false if the branch does not exist (multiple results)', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
-        statusCode: 200,
         body: [
           {
             ref: 'refs/heads/notthebranchname',
@@ -565,15 +549,6 @@ describe('api/github', () => {
             ref: 'refs/heads/alsonotthebranchname',
           },
         ],
-      }));
-      const exists = await github.branchExists('thebranchname');
-      expect(ghGot.mock.calls).toMatchSnapshot();
-      expect(exists).toBe(false);
-    });
-    it('should return false if a non-200 response is returned', async () => {
-      await initRepo('some/repo', 'token');
-      ghGot.mockImplementationOnce(() => ({
-        statusCode: 123,
       }));
       const exists = await github.branchExists('thebranchname');
       expect(ghGot.mock.calls).toMatchSnapshot();
@@ -1242,11 +1217,11 @@ describe('api/github', () => {
     });
     it('should return null if GitHub returns a 404', async () => {
       await initRepo('some/repo', 'token');
-      ghGot.mockImplementationOnce(() => {
-        const error = new Error();
-        error.statusCode = 404;
-        throw error;
-      });
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
       const content = await github.getFileContent('package.json');
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
@@ -1349,7 +1324,6 @@ describe('api/github', () => {
     it('should add a new commit to the branch', async () => {
       // branchExists
       ghGot.mockImplementationOnce(() => ({
-        statusCode: 200,
         body: {
           ref: 'refs/heads/package.json',
         },
@@ -1371,9 +1345,11 @@ describe('api/github', () => {
     });
     it('should add a commit to a new branch if the branch does not already exist', async () => {
       // branchExists
-      ghGot.mockImplementationOnce(() => ({
-        statusCode: 404,
-      }));
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
       const files = [
         {
           name: 'package.json',
