@@ -24,22 +24,126 @@ describe('api/github', () => {
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(installations).toMatchSnapshot();
     });
-    it('should return an error if given one', async () => {
-      ghGot.mockImplementationOnce(() => {
-        throw new Error('error');
-      });
+    it('should return a 404', async () => {
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
       let err;
       try {
         await github.getInstallations('sometoken');
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('error');
+      expect(err.statusCode).toBe(404);
+    });
+    it('should retry 502s once', async () => {
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      ghGot.mockImplementationOnce(() => ({
+        body: ['a', 'b'],
+      }));
+      const installations = await github.getInstallations('sometoken');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(installations).toMatchSnapshot();
+    });
+    it('should retry 502s until success', async () => {
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      ghGot.mockImplementationOnce(() => ({
+        body: ['a', 'b'],
+      }));
+      const installations = await github.getInstallations('sometoken');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(installations).toMatchSnapshot();
+    });
+    it('should retry 502s until failure', async () => {
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      let err;
+      try {
+        await github.getInstallations('sometoken');
+      } catch (e) {
+        err = e;
+      }
+      expect(err.statusCode).toBe(404);
+    });
+    it('should give up after 3 retries', async () => {
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
+      let err;
+      try {
+        await github.getInstallations('sometoken');
+      } catch (e) {
+        err = e;
+      }
+      expect(err.statusCode).toBe(502);
     });
   });
 
   describe('getInstallationToken', () => {
     it('should return an installation token', async () => {
+      ghGot.post.mockImplementationOnce(() => ({
+        body: {
+          token: 'aUserToken',
+        },
+      }));
+      const installationToken = await github.getInstallationToken(
+        'sometoken',
+        123456
+      );
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(installationToken).toMatchSnapshot();
+    });
+    it('should retry posts', async () => {
+      ghGot.post.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
       ghGot.post.mockImplementationOnce(() => ({
         body: {
           token: 'aUserToken',

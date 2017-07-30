@@ -53,9 +53,11 @@ exports[`api/github branchExists(branchName) should propagate unknown errors 1`]
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -67,6 +69,7 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -75,9 +78,11 @@ exports[`api/github branchExists(branchName) should return false if a 404 is ret
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -89,6 +94,7 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -97,9 +103,11 @@ exports[`api/github branchExists(branchName) should return false if the branch d
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -111,6 +119,7 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -119,9 +128,11 @@ exports[`api/github branchExists(branchName) should return false if the branch d
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -133,6 +144,7 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -141,9 +153,11 @@ exports[`api/github branchExists(branchName) should return true if the branch ex
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -155,6 +169,7 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -163,9 +178,11 @@ exports[`api/github branchExists(branchName) should return true if the branch ex
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -177,6 +194,7 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -185,9 +203,11 @@ exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -199,12 +219,15 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/commits/1111",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/package.json",
+    undefined,
   ],
 ]
 `;
@@ -266,9 +289,11 @@ exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -280,12 +305,15 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/commits/1111",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/package.json",
+    undefined,
   ],
 ]
 `;
@@ -396,9 +424,11 @@ exports[`api/github findFilePaths(fileName) should return empty array if none fo
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -410,6 +440,7 @@ Array [
   ],
   Array [
     "search/code?q=repo:some/repo+filename:package.json",
+    undefined,
   ],
 ]
 `;
@@ -418,9 +449,11 @@ exports[`api/github findFilePaths(fileName) should return the files matching the
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -432,6 +465,7 @@ Array [
   ],
   Array [
     "search/code?q=repo:some/repo+filename:package.json",
+    undefined,
   ],
 ]
 `;
@@ -448,9 +482,11 @@ exports[`api/github findPr(branchName, prTitle, state) should return a PR object
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -462,6 +498,7 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?head=theowner:master&state=all",
+    undefined,
   ],
 ]
 `;
@@ -479,9 +516,11 @@ exports[`api/github findPr(branchName, prTitle, state) should return null if no 
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -493,6 +532,7 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?head=theowner:master&state=all",
+    undefined,
   ],
 ]
 `;
@@ -501,9 +541,11 @@ exports[`api/github findPr(branchName, prTitle, state) should set the isClosed a
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -515,6 +557,7 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?head=theowner:master&state=all",
+    undefined,
   ],
 ]
 `;
@@ -557,9 +600,11 @@ exports[`api/github getBranchPr(branchName) should return null if no PR exists 1
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -571,6 +616,7 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
+    undefined,
   ],
 ]
 `;
@@ -579,9 +625,11 @@ exports[`api/github getBranchPr(branchName) should return the PR object 1`] = `
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -593,9 +641,11 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
+    undefined,
   ],
   Array [
     "repos/some/repo/pulls/91",
+    undefined,
   ],
 ]
 `;
@@ -625,9 +675,11 @@ exports[`api/github getFile(filePatch, branchName) should return the encoded fil
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -639,6 +691,7 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
+    undefined,
   ],
 ]
 `;
@@ -647,9 +700,11 @@ exports[`api/github getFileContent(filePatch, branchName) should return null if 
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -661,6 +716,7 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
+    undefined,
   ],
 ]
 `;
@@ -669,9 +725,11 @@ exports[`api/github getFileContent(filePatch, branchName) should return the enco
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -683,6 +741,7 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
+    undefined,
   ],
 ]
 `;
@@ -691,9 +750,11 @@ exports[`api/github getFileJson(filePatch, branchName) should return null if inv
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -705,6 +766,7 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
+    undefined,
   ],
 ]
 `;
@@ -713,9 +775,11 @@ exports[`api/github getFileJson(filePatch, branchName) should return the file co
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -727,6 +791,7 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
+    undefined,
   ],
 ]
 `;
@@ -761,9 +826,82 @@ Object {
 }
 `;
 
+exports[`api/github getInstallationToken should retry posts 1`] = `Array []`;
+
+exports[`api/github getInstallationToken should retry posts 2`] = `"aUserToken"`;
+
 exports[`api/github getInstallationToken should return an installation token 1`] = `Array []`;
 
 exports[`api/github getInstallationToken should return an installation token 2`] = `"aUserToken"`;
+
+exports[`api/github getInstallations should retry 502s once 1`] = `
+Array [
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github getInstallations should retry 502s once 2`] = `
+Array [
+  "a",
+  "b",
+]
+`;
+
+exports[`api/github getInstallations should retry 502s until success 1`] = `
+Array [
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+  Array [
+    "app/installations",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.machine-man-preview+json",
+        "authorization": "Bearer sometoken",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github getInstallations should retry 502s until success 2`] = `
+Array [
+  "a",
+  "b",
+]
+`;
 
 exports[`api/github getInstallations should return an array of installations 1`] = `
 Array [
@@ -860,6 +998,7 @@ exports[`api/github getRepos should return an array of repos 1`] = `
 Array [
   Array [
     "user/repos",
+    undefined,
   ],
 ]
 `;
@@ -875,6 +1014,7 @@ exports[`api/github getRepos should support a custom endpoint 1`] = `
 Array [
   Array [
     "user/repos",
+    undefined,
   ],
 ]
 `;
@@ -890,9 +1030,11 @@ exports[`api/github getSubDirectories(path) should return subdirectories 1`] = `
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -904,6 +1046,7 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/some-path",
+    undefined,
   ],
 ]
 `;
@@ -936,9 +1079,11 @@ exports[`api/github initRepo should initialise the config for the repo - 0 1`] =
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -961,9 +1106,11 @@ exports[`api/github initRepo should initialise the config for the repo - 1 1`] =
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -986,9 +1133,11 @@ exports[`api/github initRepo should initialise the config for the repo - 2 1`] =
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1035,9 +1184,11 @@ exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-m
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1049,6 +1200,7 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
 ]
 `;
@@ -1075,6 +1227,7 @@ exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-m
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -1083,9 +1236,11 @@ exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-p
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1097,9 +1252,11 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
 ]
 `;
@@ -1125,6 +1282,7 @@ exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-p
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -1135,9 +1293,11 @@ exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-me
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1176,9 +1336,11 @@ exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-pu
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1190,6 +1352,7 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -1219,9 +1382,11 @@ exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown m
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1246,9 +1411,11 @@ exports[`api/github setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
     "repos/some/repo",
+    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
+    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1260,6 +1427,7 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/some-branch",
+    undefined,
   ],
 ]
 `;
