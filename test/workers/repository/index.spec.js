@@ -35,6 +35,12 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(apis.detectPackageFiles.mock.calls.length).toBe(0);
     });
+    it('skips repository if its unconfigured fork', async () => {
+      config.isFork = true;
+      config.renovateJsonPresent = false;
+      await repositoryWorker.renovateRepository(config);
+      expect(apis.detectPackageFiles.mock.calls.length).toBe(0);
+    });
     it('sets custom base branch', async () => {
       config.baseBranch = 'some-branch';
       config.api.branchExists.mockReturnValueOnce(true);
