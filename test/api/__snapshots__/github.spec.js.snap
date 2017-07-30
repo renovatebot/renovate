@@ -93,28 +93,6 @@ Array [
 ]
 `;
 
-exports[`api/github branchExists(branchName) should return false if a non-200 response is returned 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-]
-`;
-
 exports[`api/github branchExists(branchName) should return false if the branch does not exist (multiple results) 1`] = `
 Array [
   Array [
