@@ -22,9 +22,11 @@ describe('packageFileWorker', () => {
         logger,
       });
     });
-    it('handles renovate config errors', async () => {
+    it('handles renovate config warnings and errors', async () => {
       config.enabled = false;
-      config.api.getFileJson.mockReturnValueOnce({ renovate: { foo: 1 } });
+      config.api.getFileJson.mockReturnValueOnce({
+        renovate: { foo: 1, maintainYarnLock: true },
+      });
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toMatchSnapshot();
     });

@@ -21,6 +21,7 @@ describe('workers/repository', () => {
       upgrades.branchifyUpgrades = jest.fn(() => ({ branchUpgrades: {} }));
       branchWorker.processBranchUpgrades = jest.fn(() => 'some-branch');
       config = {
+        lockFileMaintenance: true,
         api: {
           getFileJson: jest.fn(),
           setBaseBranch: jest.fn(),

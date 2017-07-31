@@ -11,7 +11,8 @@ describe('config/validation', () => {
           bar: 2,
         },
       };
-      const errors = configValidation.validateConfig(config);
+      const { warnings, errors } = configValidation.validateConfig(config);
+      expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
@@ -23,7 +24,8 @@ describe('config/validation', () => {
         githubAppId: 'none',
         lockFileMaintenance: false,
       };
-      const errors = configValidation.validateConfig(config);
+      const { warnings, errors } = configValidation.validateConfig(config);
+      expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(5);
       expect(errors).toMatchSnapshot();
     });

@@ -135,9 +135,9 @@ describe('workers/repository/apis', () => {
       expect(returnConfig.renovateJsonPresent).toBe(true);
       expect(returnConfig.errors).toHaveLength(0);
     });
-    it('returns error plus extended config if unknown keys', async () => {
+    it('returns warning + error plus extended config if unknown keys', async () => {
       config.api.getFileContent.mockReturnValueOnce(
-        '{ "enabled": true, "foo": false }'
+        '{ "enabled": true, "foo": false, "maintainYarnLock": true }'
       );
       const returnConfig = await apis.mergeRenovateJson(config);
       expect(returnConfig.enabled).toBe(true);
