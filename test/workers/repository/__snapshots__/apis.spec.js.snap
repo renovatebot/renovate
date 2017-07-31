@@ -66,4 +66,4 @@ Array [
 ]
 `;
 
-exports[`workers/repository/apis mergeRenovateJson(config) returns error plus extended config if unknown keys 1`] = `Array []`;
+exports[`workers/repository/apis mergeRenovateJson(config) returns warning + error plus extended config if unknown keys 1`] = `Array []`;

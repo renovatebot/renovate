@@ -11,9 +11,10 @@ describe('lib/workers/global', () => {
     configParser.getRepositoryConfig = jest.fn();
     repositoryWorker.renovateRepository = jest.fn();
   });
-  it('handles config errors', async () => {
+  it('handles config warnings and errors', async () => {
     configParser.parseConfigs.mockReturnValueOnce({
       repositories: [],
+      maintainYarnLock: true,
       foo: 1,
     });
     await globalWorker.start();
