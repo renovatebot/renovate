@@ -109,23 +109,9 @@ Object {
 }
 `;
 
-exports[`workers/package/versions .determineUpgrades(npmDep, config) return warning if invalid current version 1`] = `
-Object {
-  "message": "Dependency uses tag \\"invalid\\" as its version so that will never be changed",
-  "type": "warning",
-}
-`;
-
 exports[`workers/package/versions .determineUpgrades(npmDep, config) return warning if null versions 1`] = `
 Object {
   "message": "No versions returned from registry for this package",
-  "type": "warning",
-}
-`;
-
-exports[`workers/package/versions .determineUpgrades(npmDep, config) return warning if using a known tag 1`] = `
-Object {
-  "message": "Dependency uses tag \\"next\\" as its version so that will never be changed",
   "type": "warning",
 }
 `;

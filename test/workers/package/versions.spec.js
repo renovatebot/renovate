@@ -11,18 +11,6 @@ describe('workers/package/versions', () => {
   });
 
   describe('.determineUpgrades(npmDep, config)', () => {
-    it('return warning if invalid current version', () => {
-      config.currentVersion = 'invalid';
-      const res = versions.determineUpgrades(qJson, config);
-      expect(res).toHaveLength(1);
-      expect(res[0]).toMatchSnapshot();
-    });
-    it('return warning if using a known tag', () => {
-      config.currentVersion = 'next';
-      const res = versions.determineUpgrades(qJson, config);
-      expect(res).toHaveLength(1);
-      expect(res[0]).toMatchSnapshot();
-    });
     it('return warning if null versions', () => {
       config.currentVersion = '1.0.0';
       const testDep = {
