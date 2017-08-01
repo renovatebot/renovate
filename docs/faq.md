@@ -25,7 +25,7 @@ Set configuration option `autodiscover` to `true`, via CLI, environment, or conf
 
 If for example your repository default branch is `master` but your Pull Requests should target branch `next`, then you can configure this via the `baseBranch` configuration option. To do this, add this line to the `renovate.json` in the *default* branch (i.e. `master` in this example).
 
-```json
+```
 {
   "baseBranch": "next"
 }
@@ -48,7 +48,7 @@ If you want to control the days of the week or times of day that renovate update
 
 By default, Renovate schedules will use the timezone of the machine that it's running on. This can be overridden in global config. Finally, it can be overridden on a per-repository basis too, e.g.:
 
-```json
+```
   "timezone": "America/Los_Angeles",
 ```
 
@@ -70,7 +70,7 @@ This scheduling feature can be particularly useful for "noisy" packages that are
 
 To restrict `aws-sdk` to only weekly updates, you could add this package rule:
 
-```json
+```
   "packages": [
     {
       "packageName": "aws-sdk",
@@ -131,7 +131,7 @@ Set the configuration option `labels` to an array of labels to use
 
 e.g.
 
-```json
+```
 "packages": [
   {
     "packageName": "abc",
@@ -144,7 +144,7 @@ e.g.
 
 Do the same as above, but instead of using `packageName`, use `packagePattern` and a regex. e.g.
 
-```json
+```
 "packages": [
   {
     "packagePattern": "^abc",
@@ -157,7 +157,7 @@ Do the same as above, but instead of using `packageName`, use `packagePattern` a
 
 As above, but apply a `groupName`, e.g.
 
-```json
+```
 "packages": [
   {
     "packagePattern": "^abc",
@@ -170,7 +170,7 @@ As above, but apply a `groupName`, e.g.
 
 Set the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration options:
 
-```json
+```
 "branchName": "vroom/{{depName}}-{{newVersionMajor}}.x",
 "commitMessage": "Vroom vroom dependency {{depName}} to version {{newVersion}}",
 "prTitle": "Vroom {{depName}},
@@ -179,3 +179,15 @@ Set the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration optio
 ### Automatically merge passing Pull Requests
 
 Set configuration option `autoMerge` to `minor` if you want this to apply only to minor upgrades, or set to value `all` if you want it applied to both minor and major upgrades.
+
+### Separate patch releases from minor releases
+
+Renovate's default behaviour is to separate major and minor releases, while patch releases are also consider "minor". For example if you were running `q@0.8.7` you would receive one branch for the minor update to `q@0.9.7` and a second for the major update to `q@1.4.1`.
+
+If you set the configuration option `separatePatchReleases` to `true`, or you configure `automerge` to have value `"patch"`, then Renovate will then separate patch releases as well. For example, if you did this when running `q@0.8.7` then you'd receive three PRs - for `q@0.8.13`, `q@0.9.7` and `q@1.4.1`.
+
+Of course, most people don't want *more* PRs, so you would probably want to utilise this feature to make less work for yourself instead. As an example, you might:
+-   Update patch updates daily and automerge if they pass tests
+-   Update minor and major updates weekly
+
+The result of this would hopefully be that you barely notice Renovate during the week while still getting the benefits of patch updates.
