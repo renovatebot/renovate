@@ -63,6 +63,13 @@ describe('workers/package/versions', () => {
       config.currentVersion = '0.9.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
+    it('returns patch minor and major', () => {
+      config.separatePatchReleases = true;
+      config.currentVersion = '0.8.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toHaveLength(3);
+      expect(res).toMatchSnapshot();
+    });
     it('disables major release separation (major)', () => {
       config.separateMajorReleases = false;
       config.currentVersion = '^0.4.0';

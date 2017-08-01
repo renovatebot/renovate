@@ -232,6 +232,41 @@ Array [
 ]
 `;
 
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns patch minor and major 1`] = `
+Array [
+  Object {
+    "automergeEnabled": false,
+    "changeLogFromVersion": "0.8.0",
+    "changeLogToVersion": "0.9.7",
+    "isMinor": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "type": "minor",
+  },
+  Object {
+    "automergeEnabled": false,
+    "changeLogFromVersion": "0.8.0",
+    "changeLogToVersion": "1.4.1",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "major",
+  },
+  Object {
+    "automergeEnabled": false,
+    "changeLogFromVersion": "0.8.0",
+    "changeLogToVersion": "0.8.12",
+    "isPatch": true,
+    "newVersion": "0.8.12",
+    "newVersionMajor": 0,
+    "newVersionMinor": 8,
+    "type": "patch",
+  },
+]
+`;
+
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns patch update if automerging patch 1`] = `
 Array [
   Object {
