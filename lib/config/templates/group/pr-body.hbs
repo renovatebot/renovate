@@ -5,7 +5,7 @@ This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package grou
 {{/if}}
 
 {{#each upgrades as |upgrade|}}
--   [{{upgrade.depName}}]({{upgrade.repositoryUrl}}): from `{{upgrade.currentVersion}}` to `{{upgrade.newVersion}}`
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}`{{depName}}`{{/if}}: from `{{upgrade.currentVersion}}` to `{{upgrade.newVersion}}`
 {{/each}}
 
 {{#unless isPin}}
