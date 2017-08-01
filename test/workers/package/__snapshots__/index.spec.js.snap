@@ -1,5 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/workers/package/index renovatePackage(config) merges type 1`] = `
+Array [
+  "timezone",
+  "schedule",
+  "semanticCommits",
+  "semanticPrefix",
+  "recreateClosed",
+  "rebaseStalePrs",
+  "prCreation",
+  "automerge",
+  "automergeType",
+  "requiredStatusChecks",
+  "branchName",
+  "commitMessage",
+  "prTitle",
+  "prBody",
+  "lazyGrouping",
+  "groupName",
+  "groupSlug",
+  "group",
+  "labels",
+  "assignees",
+  "reviewers",
+  "depName",
+  "currentVersion",
+  "isMajor",
+  "repositoryUrl",
+]
+`;
+
 exports[`lib/workers/package/index renovatePackage(config) returns array if upgrades found 1`] = `
 Array [
   "timezone",

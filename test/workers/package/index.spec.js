@@ -53,5 +53,19 @@ describe('lib/workers/package/index', () => {
       expect(res).toHaveLength(1);
       expect(Object.keys(res[0])).toMatchSnapshot();
     });
+    it('merges type', async () => {
+      npmApi.getDependency.mockReturnValueOnce({});
+      versions.determineUpgrades = jest.fn(() => [
+        { isMajor: true },
+        { isMinor: true },
+        { isPatch: true },
+      ]);
+      const res = await pkgWorker.renovatePackage(config);
+      expect(res).toHaveLength(3);
+      expect(Object.keys(res[0])).toMatchSnapshot();
+      expect(res[0].branchName.indexOf('newVersionMinor')).toBe(-1);
+      expect(res[1].branchName.indexOf('newVersionMinor')).toBe(-1);
+      expect(res[2].branchName.indexOf('newVersionMinor')).not.toBe(-1);
+    });
   });
 });
