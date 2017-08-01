@@ -156,16 +156,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns both updates if automerging patch 1`] = `
 Array [
   Object {
-    "automergeEnabled": true,
-    "changeLogFromVersion": "0.9.0",
-    "changeLogToVersion": "0.9.7",
-    "isPatch": true,
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
-    "type": "patch",
-  },
-  Object {
     "automergeEnabled": false,
     "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "1.4.1",
@@ -174,6 +164,16 @@ Array [
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "major",
+  },
+  Object {
+    "automergeEnabled": true,
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "0.9.7",
+    "isPatch": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "type": "patch",
   },
 ]
 `;
