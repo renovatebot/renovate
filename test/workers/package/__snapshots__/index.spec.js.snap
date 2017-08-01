@@ -25,6 +25,7 @@ Array [
   "reviewers",
   "depName",
   "currentVersion",
+  "isMajor",
   "repositoryUrl",
 ]
 `;
