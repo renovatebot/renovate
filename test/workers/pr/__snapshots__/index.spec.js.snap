@@ -1,3 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/pr ensurePr(upgrades, logger) should add assignees and reviewers to new PR 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "foo",
+      "bar",
+    ],
+  ],
+]
+`;
+
+exports[`workers/pr ensurePr(upgrades, logger) should add assignees and reviewers to new PR 2`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "baz",
+      "boo",
+    ],
+  ],
+]
+`;
+
 exports[`workers/pr ensurePr(upgrades, logger) should return unmodified existing PR 1`] = `Array []`;
