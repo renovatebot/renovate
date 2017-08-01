@@ -166,12 +166,14 @@ describe('workers/pr', () => {
       config.api.getBranchPr = jest.fn();
       config.api.addAssignees = jest.fn();
       config.api.addReviewers = jest.fn();
-      config.assignees = ['bar'];
-      config.reviewers = ['baz'];
+      config.assignees = ['@foo', 'bar'];
+      config.reviewers = ['baz', '@boo'];
       const pr = await prWorker.ensurePr(config, logger);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(config.api.addAssignees.mock.calls.length).toBe(1);
+      expect(config.api.addAssignees.mock.calls).toMatchSnapshot();
       expect(config.api.addReviewers.mock.calls.length).toBe(1);
+      expect(config.api.addReviewers.mock.calls).toMatchSnapshot();
     });
     it('should display errors and warnings', async () => {
       config.api.getBranchPr = jest.fn();
