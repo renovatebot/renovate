@@ -153,8 +153,18 @@ Array [
 ]
 `;
 
-exports[`workers/package/versions .determineUpgrades(npmDep, config) returns both updates if automerging patch 1`] = `
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns minor update if separate patches not configured 1`] = `
 Array [
+  Object {
+    "automergeEnabled": false,
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "0.9.7",
+    "isMinor": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "type": "minor",
+  },
   Object {
     "automergeEnabled": false,
     "changeLogFromVersion": "0.9.0",
@@ -164,16 +174,6 @@ Array [
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "major",
-  },
-  Object {
-    "automergeEnabled": true,
-    "changeLogFromVersion": "0.9.0",
-    "changeLogToVersion": "0.9.7",
-    "isPatch": true,
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
-    "type": "patch",
   },
 ]
 `;
@@ -228,6 +228,56 @@ Array [
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "major",
+  },
+]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns patch update if automerging patch 1`] = `
+Array [
+  Object {
+    "automergeEnabled": false,
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "1.4.1",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "major",
+  },
+  Object {
+    "automergeEnabled": true,
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "0.9.7",
+    "isPatch": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "type": "patch",
+  },
+]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns patch update if separatePatchReleases 1`] = `
+Array [
+  Object {
+    "automergeEnabled": false,
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "1.4.1",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "major",
+  },
+  Object {
+    "automergeEnabled": false,
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "0.9.7",
+    "isPatch": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "type": "patch",
   },
 ]
 `;

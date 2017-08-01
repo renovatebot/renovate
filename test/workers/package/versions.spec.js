@@ -49,8 +49,17 @@ describe('workers/package/versions', () => {
       config.currentVersion = '^0.4.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
-    it('returns both updates if automerging patch', () => {
+    it('returns minor update if separate patches not configured', () => {
+      config.currentVersion = '0.9.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('returns patch update if automerging patch', () => {
       config.automerge = 'patch';
+      config.currentVersion = '0.9.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('returns patch update if separatePatchReleases', () => {
+      config.separatePatchReleases = true;
       config.currentVersion = '0.9.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
