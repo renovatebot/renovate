@@ -33,5 +33,27 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(false);
       expect(migratedConfig).toMatchObject(config);
     });
+    it('it migrates subconfig', () => {
+      const config = {
+        lockFileMaintenance: {
+          depTypes: [
+            'dependencies',
+            {
+              depType: 'optionalDependencies',
+              respectLatest: false,
+            },
+          ],
+        },
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config
+      );
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig.lockFileMaintenance.depTypes).not.toBeDefined();
+      expect(
+        migratedConfig.lockFileMaintenance.optionalDependencies.respectLatest
+      ).toBe(false);
+    });
   });
 });
