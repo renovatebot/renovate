@@ -6,6 +6,12 @@ Object {
   "optionalDependencies": Object {
     "respectLatest": false,
   },
+  "packageRules": Object {
+    "0": Object {
+      "enabled": false,
+      "packageName": "angular",
+    },
+  },
   "schedule": Array [
     "after 5pm",
   ],

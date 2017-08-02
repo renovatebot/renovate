@@ -7,6 +7,12 @@ describe('config/migration', () => {
         enabled: true,
         maintainYarnLock: true,
         schedule: 'after 5pm',
+        packages: [
+          {
+            packageName: 'angular',
+            enabled: false,
+          },
+        ],
         depTypes: [
           'dependencies',
           {

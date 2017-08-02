@@ -328,8 +328,8 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--ignore-deps`<td>
 </tr>
 <tr>
-  <td>`packages`</td>
-  <td>Package Rules</td>
+  <td>`packageRules`</td>
+  <td>Rules for matching package names</td>
   <td>list</td>
   <td><pre>[]</pre></td>
   <td></td>

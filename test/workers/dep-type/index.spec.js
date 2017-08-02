@@ -51,7 +51,7 @@ describe('lib/workers/dep-type/index', () => {
     const depTypeConfig = {
       foo: 'bar',
       logger,
-      packages: [
+      packageRules: [
         {
           packageName: 'a',
           x: 2,
@@ -69,7 +69,7 @@ describe('lib/workers/dep-type/index', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
       expect(res.y).toBeUndefined();
-      expect(res.packages).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
     });
     it('applies the second rule', () => {
       const dep = {
@@ -78,7 +78,7 @@ describe('lib/workers/dep-type/index', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBe(2);
-      expect(res.packages).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
     });
   });
 });
