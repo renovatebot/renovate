@@ -22,6 +22,10 @@ Array [
     "depName": "Configuration Error",
     "message": "Configuration option \`lockFileMaintenance\` should be a json object",
   },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid configuration option: \`foo\`",
+  },
 ]
 `;
 
