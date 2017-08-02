@@ -23,10 +23,15 @@ describe('config/validation', () => {
         semanticPrefix: 7,
         githubAppId: 'none',
         lockFileMaintenance: false,
+        packages: [
+          {
+            foo: 1,
+          },
+        ],
       };
       const { warnings, errors } = configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(5);
+      expect(errors).toHaveLength(6);
       expect(errors).toMatchSnapshot();
     });
   });

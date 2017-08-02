@@ -318,6 +318,22 @@ Obviously, you can't set repository or package file location with this method.
   <td><td>
 </tr>
 <tr>
+  <td>`packageName`</td>
+  <td>A package name to match. Valid only within `packages` object</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
+  <td>`packagePattern`</td>
+  <td>A package name pattern to match. Valid only within `packages` object.</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
   <td>`pinVersions`</td>
   <td>Convert ranged versions in package.json to pinned versions</td>
   <td>boolean</td>
@@ -385,7 +401,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`patch`</td>
   <td>Configuration to apply when an update type is patch. Only applies if `separatePatchReleases` is set to true</td>
   <td>json</td>
-  <td><pre>{"branchName": "renovate/{{depName}}-{{newVersionMajor}}.{newVersionMinor}}.x"}</pre></td>
+  <td><pre>{"branchName": "renovate/{{depName}}-{{newVersionMajor}}.{{newVersionMinor}}.x"}</pre></td>
   <td>`RENOVATE_PATCH`</td>
   <td><td>
 </tr>
