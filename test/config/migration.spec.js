@@ -6,6 +6,7 @@ describe('config/migration', () => {
       const config = {
         enabled: true,
         maintainYarnLock: true,
+        schedule: 'after 5pm',
         depTypes: [
           'dependencies',
           {

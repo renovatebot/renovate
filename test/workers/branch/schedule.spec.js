@@ -87,22 +87,22 @@ describe('workers/branch/schedule', () => {
       expect(res).toBe(true);
     });
     it('supports before hours true', () => {
-      config.schedule = 'before 4:00pm';
+      config.schedule = ['before 4:00pm'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
     it('supports before hours false', () => {
-      config.schedule = 'before 4:00am';
+      config.schedule = ['before 4:00am'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });
     it('supports outside hours', () => {
-      config.schedule = 'after 4:00pm';
+      config.schedule = ['after 4:00pm'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });
     it('supports timezone', () => {
-      config.schedule = 'after 4:00pm';
+      config.schedule = ['after 4:00pm'];
       config.timezone = 'Asia/Singapore';
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
@@ -113,12 +113,12 @@ describe('workers/branch/schedule', () => {
       expect(res).toBe(true);
     });
     it('supports day match', () => {
-      config.schedule = 'on friday and saturday';
+      config.schedule = ['on friday and saturday'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
     it('supports day mismatch', () => {
-      config.schedule = 'on monday and tuesday';
+      config.schedule = ['on monday and tuesday'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });

@@ -5,7 +5,7 @@ describe('config/validation', () => {
     it('returns nested errors', () => {
       const config = {
         foo: 1,
-        schedule: 'after 5pm',
+        schedule: ['after 5pm'],
         prBody: 'some-body',
         lockFileMaintenance: {
           bar: 2,
