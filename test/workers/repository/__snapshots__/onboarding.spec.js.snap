@@ -218,7 +218,7 @@ Array [
     Object {
       "contents": "{
   \\"pinVersions\\": true,
-  \\"depTypes\\": [{\\"depType\\": \\"dependencies\\", \\"pinVersions\\": false}],
+  \\"dependencies\\": {\\"pinVersions\\": false},
   \\"ignoreNodeModules\\": true
 }
 ",
@@ -236,7 +236,7 @@ Array [
     Object {
       "contents": "{
   \\"pinVersions\\": true,
-  \\"depTypes\\": [{\\"depType\\": \\"dependencies\\", \\"pinVersions\\": false}],
+  \\"dependencies\\": {\\"pinVersions\\": false},
   \\"ignoreNodeModules\\": true
 }
 ",
@@ -255,7 +255,7 @@ Array [
       "contents": "{
   \\"pinVersions\\": true,
   \\"semanticCommits\\": true,
-  \\"depTypes\\": [{\\"depType\\": \\"dependencies\\", \\"pinVersions\\": false}],
+  \\"dependencies\\": {\\"pinVersions\\": false},
   \\"ignoreNodeModules\\": true
 }
 ",

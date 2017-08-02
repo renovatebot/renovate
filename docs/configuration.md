@@ -84,7 +84,6 @@ $ node renovate --help
     --github-app-key <string>            GitHub App Private Key (.pem file contents)
     --package-files <list>               Package file paths
     --ignore-node-modules [boolean]      Skip any package.json files found within node_modules folders
-    --dep-types <list>                   Dependency types
     --ignore-deps <list>                 Dependencies to ignore
     --pin-versions [boolean]             Convert ranged versions in package.json to pinned versions
     --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches
@@ -289,17 +288,36 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--ignore-node-modules`<td>
 </tr>
 <tr>
-  <td>`depTypes`</td>
-  <td>Dependency types</td>
-  <td>list</td>
-  <td><pre>[
-  {"depType": "dependencies", "semanticPrefix": "fix(deps): "},
-  "devDependencies",
-  "optionalDependencies",
-  {"depType": "peerDependencies", "enabled": false}
-]</pre></td>
-  <td>`RENOVATE_DEP_TYPES`</td>
-  <td>`--dep-types`<td>
+  <td>`dependencies`</td>
+  <td>Configuration specifically for `package.json`>`dependencies`</td>
+  <td>json</td>
+  <td><pre>{}</pre></td>
+  <td>`RENOVATE_DEPENDENCIES`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`devDependencies`</td>
+  <td>Configuration specifically for `package.json`>`devDependencies`</td>
+  <td>json</td>
+  <td><pre>{}</pre></td>
+  <td>`RENOVATE_DEV_DEPENDENCIES`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`optionalDependencies`</td>
+  <td>Configuration specifically for `package.json`>`optionalDependencies`</td>
+  <td>json</td>
+  <td><pre>{}</pre></td>
+  <td>`RENOVATE_OPTIONAL_DEPENDENCIES`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`peerDependencies`</td>
+  <td>Configuration specifically for `package.json`>`peerDependencies`</td>
+  <td>json</td>
+  <td><pre>{"enabled": false}</pre></td>
+  <td>`RENOVATE_PEER_DEPENDENCIES`</td>
+  <td><td>
 </tr>
 <tr>
   <td>`ignoreDeps`</td>
