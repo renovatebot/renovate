@@ -144,12 +144,12 @@ e.g.
 
 ### Apply a rule, but only for packages starting with `abc`
 
-Do the same as above, but instead of using `packageNames`, use `packagePattern` and a regex. e.g.
+Do the same as above, but instead of using `packageNames`, use `packagePatterns` and a regex. e.g.
 
 ```
 "packages": [
   {
-    "packagePattern": "^abc",
+    "packagePatterns": "^abc",
     "assignees": ["importantreviewer"]
   }
 ]
@@ -162,7 +162,7 @@ As above, but apply a `groupName`, e.g.
 ```
 "packages": [
   {
-    "packagePattern": "^abc",
+    "packagePatterns": "^abc",
     "groupName": ["abc packages"]
   }
 ]

@@ -57,7 +57,7 @@ describe('lib/workers/dep-type/index', () => {
           x: 2,
         },
         {
-          packagePattern: 'a',
+          packagePatterns: ['a', 'b'],
           y: 2,
         },
       ],
@@ -83,6 +83,15 @@ describe('lib/workers/dep-type/index', () => {
     it('applies the second rule', () => {
       const dep = {
         depName: 'abc',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBeUndefined();
+      expect(res.y).toBe(2);
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('applies the second second rule', () => {
+      const dep = {
+        depName: 'bc',
       };
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
