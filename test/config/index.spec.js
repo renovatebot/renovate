@@ -152,14 +152,14 @@ describe('config/index', () => {
         foo: 'bar',
         pinVersions: false,
         lockFileMaintenance: {
-          schedule: 'on monday',
+          schedule: ['on monday'],
         },
       };
       const configParser = require('../../lib/config/index.js');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.foo).toEqual('bar');
       expect(config.pinVersions).toBe(false);
-      expect(config.lockFileMaintenance.schedule).toEqual('on monday');
+      expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
       expect(config.lockFileMaintenance).toMatchSnapshot();
     });
     it('merges depTypes', () => {

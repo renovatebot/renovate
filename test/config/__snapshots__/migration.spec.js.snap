@@ -6,6 +6,9 @@ Object {
   "optionalDependencies": Object {
     "respectLatest": false,
   },
+  "schedule": Array [
+    "after 5pm",
+  ],
 }
 `;
 

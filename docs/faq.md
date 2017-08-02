@@ -74,10 +74,12 @@ To restrict `aws-sdk` to only weekly updates, you could add this package rule:
   "packages": [
     {
       "packageName": "aws-sdk",
-      "schedule": "after 9pm on sunday"
+      "schedule": ["after 9pm on sunday"]
     }
   ]
 ```
+
+Note that schedule must be in the form of an array, even if only one schedule is present. Multiple entries in the array means "or".
 
 ### Selectively enable or disable renovate for specific `package.json` files
 
@@ -104,7 +106,7 @@ Set configuration option `pinVersions` to `false`.
 
 ### Keep `yarn.lock` sub-dependencies up-to-date, even when `package.json` hasn't changed
 
-This is enabled by default, but its schedule is set to 'before 5am on monday'. If you want it more frequently, then update the `schedule` field inside the `lockFileMaintenance` object.
+This is enabled by default, but its schedule is set to `['before 5am on monday']`. If you want it more frequently, then update the `schedule` field inside the `lockFileMaintenance` object.
 
 ### Wait until tests have passed before creating the PR
 
