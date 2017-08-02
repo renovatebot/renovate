@@ -8,3 +8,13 @@ Object {
   },
 }
 `;
+
+exports[`config/migration migrateConfig(config) it migrates subconfig 1`] = `
+Object {
+  "lockFileMaintenance": Object {
+    "optionalDependencies": Object {
+      "respectLatest": false,
+    },
+  },
+}
+`;
