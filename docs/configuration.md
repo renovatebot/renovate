@@ -344,8 +344,24 @@ Obviously, you can't set repository or package file location with this method.
   <td><td>
 </tr>
 <tr>
+  <td>`excludePackageNames`</td>
+  <td>Package names to exclude. Valid only within `packageRules` object</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
   <td>`packagePatterns`</td>
   <td>Package name patterns to match. Valid only within `packageRules` object.</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
+  <td>`excludePackagePatterns`</td>
+  <td>Package name patterns to exclude. Valid only within `packageRules` object.</td>
   <td>list</td>
   <td><pre>[]</pre></td>
   <td></td>
