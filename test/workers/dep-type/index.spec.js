@@ -58,6 +58,8 @@ describe('lib/workers/dep-type/index', () => {
         },
         {
           packagePatterns: ['a', 'b'],
+          excludePackageNames: ['aa'],
+          excludePackagePatterns: ['d'],
           y: 2,
         },
       ],
@@ -96,6 +98,24 @@ describe('lib/workers/dep-type/index', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBe(2);
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('excludes package name', () => {
+      const dep = {
+        depName: 'aa',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBeUndefined();
+      expect(res.y).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('excludes package pattern', () => {
+      const dep = {
+        depName: 'bcd',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBeUndefined();
+      expect(res.y).toBeUndefined();
       expect(res.packageRules).toBeUndefined();
     });
   });
