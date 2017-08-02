@@ -40,7 +40,7 @@
     "npm": "5"
   },
   "dependencies": {
-    "bunyan": "1.8.10",
+    "bunyan": "1.8.11",
     "chalk": "2.0.1",
     "changelog": "1.4.0",
     "commander": "2.11.0",
