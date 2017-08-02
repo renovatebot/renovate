@@ -9,7 +9,9 @@ Object {
   "packageRules": Object {
     "0": Object {
       "enabled": false,
-      "packageName": "angular",
+      "packageNames": Array [
+        "angular",
+      ],
     },
   },
   "schedule": Array [

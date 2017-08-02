@@ -53,7 +53,7 @@ describe('lib/workers/dep-type/index', () => {
       logger,
       packageRules: [
         {
-          packageName: 'a',
+          packageNames: ['a', 'b'],
           x: 2,
         },
         {
@@ -62,9 +62,18 @@ describe('lib/workers/dep-type/index', () => {
         },
       ],
     };
-    it('applies only one rule', () => {
+    it('applies only one rule for a', () => {
       const dep = {
         depName: 'a',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBe(2);
+      expect(res.y).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('applies only one rule for b', () => {
+      const dep = {
+        depName: 'b',
       };
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);

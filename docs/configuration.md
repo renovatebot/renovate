@@ -336,16 +336,16 @@ Obviously, you can't set repository or package file location with this method.
   <td><td>
 </tr>
 <tr>
-  <td>`packageName`</td>
-  <td>A package name to match. Valid only within `packages` object</td>
-  <td>string</td>
-  <td><pre>null</pre></td>
+  <td>`packageNames`</td>
+  <td>A package name to match. Valid only within `packageRules` object</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
   <td></td>
   <td><td>
 </tr>
 <tr>
   <td>`packagePattern`</td>
-  <td>A package name pattern to match. Valid only within `packages` object.</td>
+  <td>A package name pattern to match. Valid only within `packageRules` object.</td>
   <td>string</td>
   <td><pre>null</pre></td>
   <td></td>

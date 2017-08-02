@@ -9,7 +9,7 @@ describe('config/migration', () => {
         schedule: 'after 5pm',
         packages: [
           {
-            packageName: 'angular',
+            packageNames: ['angular'],
             enabled: false,
           },
         ],
