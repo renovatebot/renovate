@@ -18,7 +18,6 @@ describe('packageFileWorker', () => {
           getFileContent: jest.fn(),
           getFileJson: jest.fn(),
         },
-        depTypes: ['dependencies', 'devDependencies'],
         logger,
       });
     });
@@ -66,6 +65,8 @@ describe('packageFileWorker', () => {
       config.api.getFileJson.mockReturnValueOnce({});
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}]);
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
+      depTypeWorker.renovateDepType.mockReturnValueOnce([]);
+      depTypeWorker.renovateDepType.mockReturnValueOnce([]);
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(3);
     });
@@ -73,8 +74,7 @@ describe('packageFileWorker', () => {
       config.api.getFileJson.mockReturnValueOnce({});
       config.api.getFileContent.mockReturnValueOnce('some-content-1');
       config.api.getFileContent.mockReturnValueOnce('some-content-2');
-      depTypeWorker.renovateDepType.mockReturnValueOnce([]);
-      depTypeWorker.renovateDepType.mockReturnValueOnce([]);
+      depTypeWorker.renovateDepType.mockReturnValue([]);
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(1);
     });

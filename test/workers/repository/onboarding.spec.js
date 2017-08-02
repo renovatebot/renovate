@@ -281,12 +281,8 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('skips commit files if existing content matches', async () => {
-      const existingContent = `{
-  "pinVersions": true,
-  "depTypes": [{"depType": "dependencies", "pinVersions": false}],
-  "ignoreNodeModules": true
-}
-`;
+      const existingContent =
+        '{\n  "pinVersions": true,\n  "dependencies": {"pinVersions": false},\n  "ignoreNodeModules": true\n}\n';
       config.api.getFileContent.mockReturnValueOnce(existingContent);
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual(false);

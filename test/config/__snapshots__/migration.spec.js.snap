@@ -3,5 +3,8 @@
 exports[`config/migration migrateConfig(config) it migrates config 1`] = `
 Object {
   "enabled": true,
+  "optionalDependencies": Object {
+    "respectLatest": false,
+  },
 }
 `;
