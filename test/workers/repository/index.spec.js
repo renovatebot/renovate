@@ -45,40 +45,46 @@ describe('workers/repository', () => {
     it('sets custom base branch', async () => {
       config.baseBranch = 'some-branch';
       config.api.branchExists.mockReturnValueOnce(true);
-      apis.detectPackageFiles.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
+      apis.detectPackageFiles.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
       await repositoryWorker.renovateRepository(config);
       expect(config.api.setBaseBranch.mock.calls).toHaveLength(1);
     });
     it('errors when missing custom base branch', async () => {
       config.baseBranch = 'some-branch';
       config.api.branchExists.mockReturnValueOnce(false);
-      apis.detectPackageFiles.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
+      apis.detectPackageFiles.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
       await repositoryWorker.renovateRepository(config);
       expect(config.api.setBaseBranch.mock.calls).toHaveLength(0);
     });
     it('skips repository if no package.json', async () => {
-      apis.detectPackageFiles.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
+      apis.detectPackageFiles.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(0);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('does not skip repository if package.json', async () => {
-      apis.detectPackageFiles.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
+      apis.detectPackageFiles.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
-      apis.mergeRenovateJson.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
-      apis.mergeRenovateJson.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
+      apis.mergeRenovateJson.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
+      apis.mergeRenovateJson.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
       });
@@ -89,16 +95,19 @@ describe('workers/repository', () => {
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('uses onboarding custom baseBranch', async () => {
-      apis.detectPackageFiles.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
+      apis.detectPackageFiles.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
-      apis.mergeRenovateJson.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
-      apis.mergeRenovateJson.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [], baseBranch: 'next' })
-      );
+      apis.mergeRenovateJson.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
+      apis.mergeRenovateJson.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [], baseBranch: 'next' },
+      }));
       config.api.branchExists.mockReturnValueOnce(true);
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
@@ -110,16 +119,19 @@ describe('workers/repository', () => {
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('errors onboarding custom baseBranch', async () => {
-      apis.detectPackageFiles.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
+      apis.detectPackageFiles.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
-      apis.mergeRenovateJson.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [] })
-      );
-      apis.mergeRenovateJson.mockImplementationOnce(input =>
-        Object.assign(input, { packageFiles: [], baseBranch: 'next' })
-      );
+      apis.mergeRenovateJson.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [] },
+      }));
+      apis.mergeRenovateJson.mockImplementationOnce(input => ({
+        ...input,
+        ...{ packageFiles: [], baseBranch: 'next' },
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
       });
