@@ -65,7 +65,7 @@ describe('packageFileWorker', () => {
       expect(res).toEqual([]);
     });
     it('calls depTypeWorker', async () => {
-      config.api.getFileJson.mockReturnValueOnce({});
+      config.api.getFileJson.mockReturnValueOnce({ workspaces: true });
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}]);
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
       depTypeWorker.renovateDepType.mockReturnValueOnce([]);
