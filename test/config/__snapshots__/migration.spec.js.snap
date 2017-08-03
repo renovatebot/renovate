@@ -6,20 +6,17 @@ Object {
   "optionalDependencies": Object {
     "respectLatest": false,
   },
-  "packageRules": Object {
-    "isMigrated": true,
-    "migratedConfig": Object {
-      "0": Object {
-        "enabled": false,
-        "packageNames": Array [
-          "angular",
-        ],
-        "packagePatterns": Array [
-          "ang",
-        ],
-      },
+  "packageRules": Array [
+    Object {
+      "enabled": false,
+      "packageNames": Array [
+        "angular",
+      ],
+      "packagePatterns": Array [
+        "ang",
+      ],
     },
-  },
+  ],
   "schedule": Array [
     "after 5pm",
   ],
