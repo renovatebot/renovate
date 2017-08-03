@@ -140,6 +140,7 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
+      config.semanticCommits = true;
       expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
