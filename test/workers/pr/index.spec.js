@@ -33,7 +33,7 @@ describe('workers/pr', () => {
     let config;
     let pr;
     beforeEach(() => {
-      config = Object.assign({}, defaultConfig);
+      config = { ...defaultConfig };
       pr = {
         head: {
           ref: 'somebranch',
@@ -80,7 +80,7 @@ describe('workers/pr', () => {
     let config;
     let existingPr;
     beforeEach(() => {
-      config = Object.assign({}, defaultConfig);
+      config = { ...defaultConfig };
       config.api = {
         createPr: jest.fn(() => ({ displayNumber: 'New Pull Request' })),
         getBranchStatus: jest.fn(),
@@ -221,11 +221,7 @@ describe('workers/pr', () => {
       config.api.getBranchPr = jest.fn(() => existingPr);
       config.api.updatePr = jest.fn();
       const pr = await prWorker.ensurePr(config, logger);
-      const updatedPr = Object.assign(existingPr, {
-        body:
-          'This Pull Request updates dependency dummy from version `1.0.0` to `1.2.0`\n\nNo changelog available',
-      });
-      expect(pr).toMatchObject(updatedPr);
+      expect(pr).toMatchSnapshot();
     });
     it('should create PR if branch automerging failed', async () => {
       config.automergeEnabled = true;

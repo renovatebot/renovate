@@ -11,15 +11,18 @@ describe('packageFileWorker', () => {
   describe('renovatePackageFile(config)', () => {
     let config;
     beforeEach(() => {
-      config = Object.assign({}, defaultConfig, {
-        packageFile: 'package.json',
-        repoIsOnboarded: true,
-        api: {
-          getFileContent: jest.fn(),
-          getFileJson: jest.fn(),
+      config = {
+        ...defaultConfig,
+        ...{
+          packageFile: 'package.json',
+          repoIsOnboarded: true,
+          api: {
+            getFileContent: jest.fn(),
+            getFileJson: jest.fn(),
+          },
+          logger,
         },
-        logger,
-      });
+      };
     });
     it('handles renovate config warnings and errors', async () => {
       config.enabled = false;

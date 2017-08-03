@@ -112,7 +112,7 @@ describe('workers/branch', () => {
       npm.maintainLockFile = jest.fn();
       yarn.getLockFile = jest.fn();
       yarn.maintainLockFile = jest.fn();
-      config = Object.assign({}, defaultConfig);
+      config = { ...defaultConfig };
       config.api = {};
       config.api.getFileContent = jest.fn();
       config.api.branchExists = jest.fn();
@@ -124,7 +124,7 @@ describe('workers/branch', () => {
       config.newVersion = '1.1.0';
       config.newVersionMajor = 1;
       config.versions = {};
-      config.upgrades = [Object.assign({}, config)];
+      config.upgrades = [{ ...config }];
     });
     it('returns if new content matches old', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
@@ -346,7 +346,7 @@ describe('workers/branch', () => {
   describe('processBranchUpgrades(upgrades)', () => {
     let config;
     beforeEach(() => {
-      config = Object.assign({}, defaultConfig);
+      config = { ...defaultConfig };
       config.api = {
         checkForClosedPr: jest.fn(),
       };

@@ -8,7 +8,7 @@ describe('workers/repository/cleanup', () => {
     let config;
     beforeEach(() => {
       branchNames = [];
-      config = Object.assign({}, defaultConfig);
+      config = { ...defaultConfig };
       config.api = {
         getAllRenovateBranches: jest.fn(),
         getAllPrs: jest.fn(),
