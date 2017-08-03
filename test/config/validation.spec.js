@@ -23,7 +23,7 @@ describe('config/validation', () => {
         semanticPrefix: 7,
         githubAppId: 'none',
         lockFileMaintenance: false,
-        packages: [
+        packageRules: [
           {
             foo: 1,
           },
