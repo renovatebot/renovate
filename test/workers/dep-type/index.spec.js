@@ -51,25 +51,36 @@ describe('lib/workers/dep-type/index', () => {
     const depTypeConfig = {
       foo: 'bar',
       logger,
-      packages: [
+      packageRules: [
         {
-          packageName: 'a',
+          packageNames: ['a', 'b'],
           x: 2,
         },
         {
-          packagePattern: 'a',
+          packagePatterns: ['a', 'b'],
+          excludePackageNames: ['aa'],
+          excludePackagePatterns: ['d'],
           y: 2,
         },
       ],
     };
-    it('applies only one rule', () => {
+    it('applies only one rule for a', () => {
       const dep = {
         depName: 'a',
       };
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
       expect(res.y).toBeUndefined();
-      expect(res.packages).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('applies only one rule for b', () => {
+      const dep = {
+        depName: 'b',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBe(2);
+      expect(res.y).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
     });
     it('applies the second rule', () => {
       const dep = {
@@ -78,7 +89,34 @@ describe('lib/workers/dep-type/index', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBe(2);
-      expect(res.packages).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('applies the second second rule', () => {
+      const dep = {
+        depName: 'bc',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBeUndefined();
+      expect(res.y).toBe(2);
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('excludes package name', () => {
+      const dep = {
+        depName: 'aa',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBeUndefined();
+      expect(res.y).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('excludes package pattern', () => {
+      const dep = {
+        depName: 'bcd',
+      };
+      const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
+      expect(res.x).toBeUndefined();
+      expect(res.y).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
     });
   });
 });

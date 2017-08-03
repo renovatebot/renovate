@@ -118,7 +118,7 @@
     "semanticCommits": true,
     "packages": [
       {
-        "packagePattern": "jest",
+        "packagePatterns": "jest",
         "groupName": "jest"
       }
     ]
