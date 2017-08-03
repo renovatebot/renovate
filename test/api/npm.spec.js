@@ -38,7 +38,7 @@ describe('api/npm', () => {
   });
   it('should use homepage', async () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
-    const npmResponseHomepage = Object.assign({}, npmResponse);
+    const npmResponseHomepage = { ...npmResponse };
     npmResponseHomepage.body.repository.url = '';
     npmResponseHomepage.body.homepage = 'https://google.com';
     got.mockImplementationOnce(() => Promise.resolve(npmResponseHomepage));

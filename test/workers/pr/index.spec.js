@@ -33,7 +33,7 @@ describe('workers/pr', () => {
     let config;
     let pr;
     beforeEach(() => {
-      config = Object.assign({}, defaultConfig);
+      config = { ...defaultConfig };
       pr = {
         head: {
           ref: 'somebranch',
@@ -80,7 +80,7 @@ describe('workers/pr', () => {
     let config;
     let existingPr;
     beforeEach(() => {
-      config = Object.assign({}, defaultConfig);
+      config = { ...defaultConfig };
       config.api = {
         createPr: jest.fn(() => ({ displayNumber: 'New Pull Request' })),
         getBranchStatus: jest.fn(),

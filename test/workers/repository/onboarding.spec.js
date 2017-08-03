@@ -197,7 +197,7 @@ describe('lib/workers/repository/onboarding', () => {
   describe('getOnboardingStatus(config)', () => {
     let config;
     beforeEach(() => {
-      config = Object.assign({}, defaultConfig);
+      config = { ...defaultConfig };
       jest.resetAllMocks();
       config.api = {
         commitFilesToBranch: jest.fn(),

@@ -147,7 +147,7 @@ describe('config/index', () => {
   });
   describe('mergeChildConfig(parentConfig, childConfig)', () => {
     it('merges', () => {
-      const parentConfig = Object.assign({}, defaultConfig);
+      const parentConfig = { ...defaultConfig };
       const childConfig = {
         foo: 'bar',
         pinVersions: false,
@@ -163,7 +163,7 @@ describe('config/index', () => {
       expect(config.lockFileMaintenance).toMatchSnapshot();
     });
     it('merges depTypes', () => {
-      const parentConfig = Object.assign({}, defaultConfig);
+      const parentConfig = { ...defaultConfig };
       const childConfig = {
         dependencies: {},
         devDependencies: { foo: 1 },

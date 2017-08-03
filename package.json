@@ -72,6 +72,7 @@
     "babel-cli": "6.24.1",
     "babel-jest": "20.0.3",
     "babel-plugin-transform-async-to-generator": "6.24.1",
+    "babel-plugin-transform-object-rest-spread": "6.23.0",
     "chai": "4.1.0",
     "condition-circle": "1.5.0",
     "eslint": "4.3.0",
@@ -89,7 +90,8 @@
   },
   "babel": {
     "plugins": [
-      "transform-async-to-generator"
+      "transform-async-to-generator",
+      "transform-object-rest-spread"
     ]
   },
   "jest": {
