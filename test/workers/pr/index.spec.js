@@ -221,11 +221,7 @@ describe('workers/pr', () => {
       config.api.getBranchPr = jest.fn(() => existingPr);
       config.api.updatePr = jest.fn();
       const pr = await prWorker.ensurePr(config, logger);
-      const updatedPr = Object.assign(existingPr, {
-        body:
-          'This Pull Request updates dependency dummy from version `1.0.0` to `1.2.0`\n\nNo changelog available',
-      });
-      expect(pr).toMatchObject(updatedPr);
+      expect(pr).toMatchSnapshot();
     });
     it('should create PR if branch automerging failed', async () => {
       config.automergeEnabled = true;
