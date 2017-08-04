@@ -1,1 +1,1 @@
-{{semanticPrefix}}{{#if isPin}}Pin{{else}}{{#if isRollback}}Roll back{{else}}Update{{/if}}{{/if}} dependency {{depName}} to {{#if isRange}}v{{newVersion}}{{else}}{{#if isMajor}}v{{newVersionMajor}}.x{{else}}v{{newVersion}}{{/if}}{{/if}}
+{{semanticPrefix}}{{#if isPin}}Pin{{else}}{{#if isRollback}}Roll back{{else}}Update{{/if}}{{/if}} dependency {{depName}} to {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}v{{newVersionMajor}}.x{{else}}v{{newVersion}}{{/if}}{{/if}}
