@@ -2,6 +2,7 @@
 
 exports[`config/migration migrateConfig(config) it migrates config 1`] = `
 Object {
+  "commitMessage": "some commit message",
   "enabled": true,
   "optionalDependencies": Object {
     "respectLatest": false,
@@ -17,9 +18,11 @@ Object {
       ],
     },
   ],
+  "prTitle": "some pr title",
   "schedule": Array [
     "after 5pm",
   ],
+  "semanticPrefix": "fix(deps):",
 }
 `;
 

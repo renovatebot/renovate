@@ -53,6 +53,7 @@ describe('workers/repository/upgrades', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           semanticCommits: true,
+          semanticPrefix: 'some-prefix:',
           lazyGrouping: true,
           foo: 1,
           group: {
@@ -84,36 +85,36 @@ describe('workers/repository/upgrades', () => {
       expect(res.groupName).toBeDefined();
       expect(res).toMatchSnapshot();
     });
-  });
-  it('groups multiple upgrades', () => {
-    const branchUpgrades = [
-      {
-        depName: 'some-dep',
-        groupName: 'some-group',
-        branchName: 'some-branch',
-        prTitle: 'some-title',
-        lazyGrouping: true,
-        foo: 1,
-        group: {
-          foo: 2,
+    it('groups multiple upgrades', () => {
+      const branchUpgrades = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
         },
-      },
-      {
-        depName: 'some-other-dep',
-        groupName: 'some-group',
-        branchName: 'some-branch',
-        prTitle: 'some-title',
-        lazyGrouping: true,
-        foo: 1,
-        group: {
-          foo: 2,
+        {
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
         },
-      },
-    ];
-    const res = upgrades.generateConfig(branchUpgrades);
-    expect(res.foo).toBe(2);
-    expect(res.groupName).toBeDefined();
-    expect(res).toMatchSnapshot();
+      ];
+      const res = upgrades.generateConfig(branchUpgrades);
+      expect(res.foo).toBe(2);
+      expect(res.groupName).toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('groupByBranch(upgrades)', () => {
     it('returns empty object if no input array', async () => {
