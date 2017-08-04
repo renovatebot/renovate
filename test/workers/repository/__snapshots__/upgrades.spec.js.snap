@@ -7,7 +7,7 @@ Object {
   "foo": 1,
   "prTitle": "some-prefix: some-title",
   "semanticCommits": true,
-  "semanticPrefix": "some-prefix: ",
+  "semanticPrefix": "some-prefix:",
   "upgrades": Array [
     Object {
       "branchName": "some-branch",
@@ -15,7 +15,7 @@ Object {
       "foo": 1,
       "prTitle": "some-prefix: some-title",
       "semanticCommits": true,
-      "semanticPrefix": "some-prefix: ",
+      "semanticPrefix": "some-prefix:",
     },
   ],
 }

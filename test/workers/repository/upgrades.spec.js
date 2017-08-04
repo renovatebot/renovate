@@ -53,7 +53,7 @@ describe('workers/repository/upgrades', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           semanticCommits: true,
-          semanticPrefix: 'some-prefix: ',
+          semanticPrefix: 'some-prefix:',
           lazyGrouping: true,
           foo: 1,
           group: {

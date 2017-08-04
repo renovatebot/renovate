@@ -7,6 +7,8 @@ describe('config/migration', () => {
         enabled: true,
         maintainYarnLock: true,
         schedule: 'after 5pm',
+        commitMessage: '{{semanticPrefix}}some commit message',
+        prTitle: '{{semanticPrefix}}some pr title',
         packages: [
           {
             packageName: 'angular',
