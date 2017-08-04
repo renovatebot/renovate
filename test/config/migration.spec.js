@@ -1,12 +1,14 @@
 const configMigration = require('../../lib/config/migration.js');
+const defaultConfig = require('../../lib/config/defaults').getConfig();
 
 describe('config/migration', () => {
-  describe('migrateConfig(config)', () => {
+  describe('migrateConfig(config, parentConfig)', () => {
     it('it migrates config', () => {
       const config = {
         enabled: true,
         maintainYarnLock: true,
         schedule: 'after 5pm',
+        semanticCommits: false,
         packages: [
           {
             packageName: 'angular',
@@ -23,7 +25,8 @@ describe('config/migration', () => {
         ],
       };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
-        config
+        config,
+        defaultConfig
       );
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
@@ -33,6 +36,7 @@ describe('config/migration', () => {
     it('it does not migrate config', () => {
       const config = {
         enabled: true,
+        semanticCommits: true,
         separatePatchReleases: true,
       };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -54,7 +58,8 @@ describe('config/migration', () => {
         },
       };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
-        config
+        config,
+        defaultConfig
       );
       expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
