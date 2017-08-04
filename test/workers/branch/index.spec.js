@@ -25,6 +25,7 @@ describe('workers/branch', () => {
           getBranchStatus: jest.fn(),
           isBranchStale: jest.fn(() => false),
         },
+        logger,
       };
     });
     it('returns undefined if branch does not exist', async () => {
@@ -112,7 +113,7 @@ describe('workers/branch', () => {
       npm.maintainLockFile = jest.fn();
       yarn.getLockFile = jest.fn();
       yarn.maintainLockFile = jest.fn();
-      config = { ...defaultConfig };
+      config = { ...defaultConfig, logger };
       config.api = {};
       config.api.getFileContent = jest.fn();
       config.api.branchExists = jest.fn();
@@ -347,11 +348,10 @@ describe('workers/branch', () => {
   describe('processBranchUpgrades(upgrades)', () => {
     let config;
     beforeEach(() => {
-      config = { ...defaultConfig };
+      config = { ...defaultConfig, logger };
       config.api = {
         checkForClosedPr: jest.fn(),
       };
-      config.logger = logger;
       branchWorker.ensureBranch = jest.fn(() => true);
       prWorker.ensurePr = jest.fn(() => true);
       config.upgrades = [{ depName: 'a' }];
