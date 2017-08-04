@@ -93,7 +93,7 @@ describe('api/github', () => {
       }
       expect(err.statusCode).toBe(404);
     });
-    it('should give up after 3 retries', async () => {
+    it('should give up after 5 retries', async () => {
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 502,
@@ -102,6 +102,16 @@ describe('api/github', () => {
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 502,
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 500,
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 500,
         })
       );
       ghGot.mockImplementationOnce(() =>
@@ -542,7 +552,7 @@ describe('api/github', () => {
         // getBranchProtection
         ghGot.mockImplementationOnce(() =>
           Promise.reject({
-            statusCode: 500,
+            statusCode: 600,
           })
         );
         return github.initRepo(...args);
@@ -553,7 +563,7 @@ describe('api/github', () => {
       } catch (err) {
         e = err;
       }
-      expect(e.statusCode).toBe(500);
+      expect(e.statusCode).toBe(600);
     });
   });
   describe('setBaseBranch(branchName)', () => {
