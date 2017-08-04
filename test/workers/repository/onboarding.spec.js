@@ -257,14 +257,6 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
-    it('enables semantic commits', async () => {
-      config.api.getCommitMessages.mockReturnValueOnce(['fix: something']);
-      const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
-      expect(config.api.findPr.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
-    });
     it('pins private repos', async () => {
       onboarding.isRepoPrivate.mockReturnValueOnce(true);
       const res = await onboarding.getOnboardingStatus(config);

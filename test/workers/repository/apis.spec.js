@@ -42,6 +42,19 @@ describe('workers/repository/apis', () => {
       await apis.setNpmrc(config);
     });
   });
+  describe('detectSemanticCommits', () => {
+    it('enables semantic commits', async () => {
+      const config = {
+        api: {
+          getCommitMessages: jest.fn(() => []),
+        },
+        logger,
+      };
+      config.api.getCommitMessages.mockReturnValueOnce(['fix: something']);
+      const res = await apis.detectSemanticCommits(config);
+      expect(res).toEqual(true);
+    });
+  });
   describe('checkForLerna(config)', () => {
     it('swallows lerna 404', async () => {
       const config = {
@@ -84,7 +97,7 @@ describe('workers/repository/apis', () => {
       jest.resetAllMocks();
     });
     it('returns github api', async () => {
-      const config = { platform: 'github' };
+      const config = { logger, platform: 'github' };
       const res = await apis.initApis(config);
       expect(res.platform).toEqual('github');
       expect(githubApi.initRepo.mock.calls.length).toBe(1);
@@ -92,7 +105,7 @@ describe('workers/repository/apis', () => {
       expect(npmApi.setNpmrc.mock.calls.length).toBe(1);
     });
     it('returns gitlab api', async () => {
-      const config = { platform: 'gitlab' };
+      const config = { logger, platform: 'gitlab' };
       const res = await apis.initApis(config);
       expect(res.platform).toEqual('gitlab');
       expect(githubApi.initRepo.mock.calls.length).toBe(0);

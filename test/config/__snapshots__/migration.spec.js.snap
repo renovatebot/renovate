@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`config/migration migrateConfig(config) it migrates config 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
 Object {
   "commitMessage": "some commit message",
   "enabled": true,
@@ -26,7 +26,7 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config) it migrates subconfig 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) it migrates subconfig 1`] = `
 Object {
   "lockFileMaintenance": Object {
     "optionalDependencies": Object {
