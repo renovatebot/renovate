@@ -118,9 +118,9 @@
     "automerge": "minor",
     "rebaseStalePrs": true,
     "semanticCommits": true,
-    "packages": [
+    "packageRules": [
       {
-        "packagePatterns": "jest",
+        "packagePatterns": ["jest"],
         "groupName": "jest"
       }
     ]
