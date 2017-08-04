@@ -7,7 +7,7 @@
     "build": "yarn && npm run transpile && cp -R lib/config/templates dist/config",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "jest": "LOG_LEVEL=fatal jest",
+    "jest": "NODE_ENV=test LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --fix lib/**/*.js test/**/*.js",
     "lint": "eslint lib/**/*.js test/**/*.js",
     "prepublishOnly": "npm run build",
