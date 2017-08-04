@@ -71,7 +71,7 @@ describe('packageFileWorker', () => {
       depTypeWorker.renovateDepType.mockReturnValueOnce([]);
       depTypeWorker.renovateDepType.mockReturnValueOnce([]);
       const res = await packageFileWorker.renovatePackageFile(config);
-      expect(res).toHaveLength(3);
+      expect(res).toHaveLength(4);
     });
     it('maintains lock files', async () => {
       config.api.getFileJson.mockReturnValueOnce({});
