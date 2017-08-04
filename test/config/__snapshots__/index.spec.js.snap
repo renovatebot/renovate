@@ -2,7 +2,7 @@
 
 exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
 Object {
-  "branchName": "renovate/lock-files",
+  "branchName": "{{branchPrefix}}lock-file-maintenance",
   "commitMessage": "{{semanticPrefix}}Update lock file",
   "enabled": true,
   "groupName": "Lock File Maintenance",

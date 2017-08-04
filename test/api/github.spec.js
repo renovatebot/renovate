@@ -700,7 +700,7 @@ describe('api/github', () => {
           },
         ],
       }));
-      const res = await github.getAllRenovateBranches();
+      const res = await github.getAllRenovateBranches('renovate/');
       expect(res).toMatchSnapshot();
     });
   });

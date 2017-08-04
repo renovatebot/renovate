@@ -4,6 +4,7 @@ exports[`lib/workers/package/index renovatePackage(config) merges type 1`] = `
 Array [
   "timezone",
   "schedule",
+  "branchPrefix",
   "semanticCommits",
   "semanticPrefix",
   "recreateClosed",
@@ -34,6 +35,7 @@ exports[`lib/workers/package/index renovatePackage(config) returns array if upgr
 Array [
   "timezone",
   "schedule",
+  "branchPrefix",
   "semanticCommits",
   "semanticPrefix",
   "recreateClosed",
@@ -65,12 +67,13 @@ Array [
     "assignees": Array [],
     "automerge": "none",
     "automergeType": "pr",
-    "branchName": "renovate/{{depName}}-{{newVersionMajor}}.x",
+    "branchName": "{{branchPrefix}}{{depName}}-{{newVersionMajor}}.x",
+    "branchPrefix": "renovate/",
     "commitMessage": "{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}",
     "currentVersion": "1.0.0",
     "depName": "foo",
     "group": Object {
-      "branchName": "renovate/{{groupSlug}}",
+      "branchName": "{{branchPrefix}}{{groupSlug}}",
       "commitMessage": "{{semanticPrefix}}Renovate {{groupName}} packages",
       "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \\"{{groupName}}\\".
 

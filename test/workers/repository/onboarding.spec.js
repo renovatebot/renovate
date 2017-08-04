@@ -34,6 +34,7 @@ describe('lib/workers/repository/onboarding', () => {
     let branchUpgrades;
     beforeEach(() => {
       config = {
+        branchPrefix: 'renovate/',
         errors: [],
         warnings: [],
         api: {
