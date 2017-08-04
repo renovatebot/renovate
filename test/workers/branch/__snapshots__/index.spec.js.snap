@@ -43,3 +43,29 @@ Object {
   ],
 }
 `;
+
+exports[`workers/branch processBranchUpgrades(upgrades) returns if legacy closed major PR found 1`] = `
+Array [
+  Array [
+    "renovate/a-2.x",
+    "Upgrade a to v2",
+  ],
+  Array [
+    "renovate/a-2.x",
+    "Upgrade a to version 2.x",
+  ],
+]
+`;
+
+exports[`workers/branch processBranchUpgrades(upgrades) returns if legacy closed minor PR found 1`] = `
+Array [
+  Array [
+    "renovate/a-2.x",
+    "Upgrade a to v2.1.0",
+  ],
+  Array [
+    "renovate/a-2.x",
+    "Upgrade a to version 2.1.0",
+  ],
+]
+`;
