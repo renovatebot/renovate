@@ -1,4 +1,5 @@
 const yarnHelper = require('../../../lib/workers/branch/yarn');
+const logger = require('../../_fixtures/logger');
 
 jest.mock('fs');
 jest.mock('child_process');
@@ -8,7 +9,7 @@ const fs = require('fs');
 const cp = require('child_process');
 const tmp = require('tmp');
 
-describe('generateLockFile(newPackageJson, npmrcContent, yarnrcContent)', () => {
+describe('generateLockFile(newPackageJson, npmrcContent, yarnrcContent, logger)', () => {
   tmp.dirSync = jest.fn(() => ({ name: 'somedir' }));
   fs.writeFileSync = jest.fn();
   fs.readFileSync = jest.fn(() => 'yarn-lock-contents');
@@ -21,7 +22,7 @@ describe('generateLockFile(newPackageJson, npmrcContent, yarnrcContent)', () => 
       'package-json-contents',
       'npmrc-contents',
       'yarnrc-contents',
-      '/tmp/yarn-cache'
+      logger
     );
     expect(tmp.dirSync.mock.calls.length).toEqual(1);
     expect(fs.writeFileSync.mock.calls.length).toEqual(3);
@@ -61,7 +62,7 @@ describe('getLockFile(packageJson, config)', () => {
 describe('maintainLockFile(inputConfig)', () => {
   let config;
   beforeEach(() => {
-    config = {};
+    config = { logger };
     config.packageFile = 'package.json';
     config.api = {
       getFileContent: jest.fn(),
