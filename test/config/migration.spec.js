@@ -9,6 +9,7 @@ describe('config/migration', () => {
         schedule: 'after 5pm',
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
+        semanticPrefix: 'fix(deps): ',
         packages: [
           {
             packageName: 'angular',
