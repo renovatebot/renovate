@@ -87,8 +87,8 @@ describe('workers/pr', () => {
       };
       config.upgrades = [config];
       existingPr = {
-        title: 'Update dependency dummy to version 1.1.0',
-        body: `<p>This Pull Request updates dependency <a href="https://github.com/renovateapp/dummy">dummy</a> from version <code>1.0.0</code> to <code>1.1.0</code></p>
+        title: 'Update dependency dummy to v1.1.0',
+        body: `<p>This Pull Request updates dependency <a href="https://github.com/renovateapp/dummy">dummy</a> from <code>v1.0.0</code> to <code>v1.1.0</code></p>
 <h3 id="commits">Commits</h3>
 <p><details><br />
 <summary>renovateapp/dummy</summary></p>
