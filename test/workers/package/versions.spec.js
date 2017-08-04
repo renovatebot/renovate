@@ -3,11 +3,14 @@ const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
 const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
 
+const logger = require('../../_fixtures/logger');
+
 let config;
 
 describe('workers/package/versions', () => {
   beforeEach(() => {
     config = require('../../../lib/config/defaults').getConfig();
+    config.logger = logger;
   });
 
   describe('.determineUpgrades(npmDep, config)', () => {
