@@ -5,15 +5,43 @@ Object {
   "branchName": "some-branch",
   "depName": "some-dep",
   "foo": 1,
-  "prTitle": "some-title",
+  "prTitle": "some-prefix: some-title",
   "semanticCommits": true,
+  "semanticPrefix": "some-prefix:",
   "upgrades": Array [
     Object {
       "branchName": "some-branch",
       "depName": "some-dep",
       "foo": 1,
-      "prTitle": "some-title",
+      "prTitle": "some-prefix: some-title",
       "semanticCommits": true,
+      "semanticPrefix": "some-prefix:",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/upgrades generateConfig(branchUpgrades) groups multiple upgrades 1`] = `
+Object {
+  "branchName": "some-branch",
+  "depName": "some-dep",
+  "foo": 2,
+  "groupName": "some-group",
+  "prTitle": "some-title",
+  "upgrades": Array [
+    Object {
+      "branchName": "some-branch",
+      "depName": "some-dep",
+      "foo": 2,
+      "groupName": "some-group",
+      "prTitle": "some-title",
+    },
+    Object {
+      "branchName": "some-branch",
+      "depName": "some-other-dep",
+      "foo": 2,
+      "groupName": "some-group",
+      "prTitle": "some-title",
     },
   ],
 }
@@ -189,31 +217,5 @@ Object {
   },
   "errors": Array [],
   "warnings": Array [],
-}
-`;
-
-exports[`workers/repository/upgrades groups multiple upgrades 1`] = `
-Object {
-  "branchName": "some-branch",
-  "depName": "some-dep",
-  "foo": 2,
-  "groupName": "some-group",
-  "prTitle": "some-title",
-  "upgrades": Array [
-    Object {
-      "branchName": "some-branch",
-      "depName": "some-dep",
-      "foo": 2,
-      "groupName": "some-group",
-      "prTitle": "some-title",
-    },
-    Object {
-      "branchName": "some-branch",
-      "depName": "some-other-dep",
-      "foo": 2,
-      "groupName": "some-group",
-      "prTitle": "some-title",
-    },
-  ],
 }
 `;
