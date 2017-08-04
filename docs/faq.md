@@ -104,7 +104,7 @@ Set configuration option `separateMajorReleases` to `false`.
 
 Set configuration option `pinVersions` to `false`.
 
-### Keep `yarn.lock` sub-dependencies up-to-date, even when `package.json` hasn't changed
+### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` hasn't changed
 
 This is enabled by default, but its schedule is set to `['before 5am on monday']`. If you want it more frequently, then update the `schedule` field inside the `lockFileMaintenance` object.
 
