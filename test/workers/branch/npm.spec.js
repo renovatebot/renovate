@@ -1,4 +1,5 @@
 const npmHelper = require('../../../lib/workers/branch/npm');
+const logger = require('../../_fixtures/logger');
 
 jest.mock('fs');
 jest.mock('child_process');
@@ -8,7 +9,7 @@ const fs = require('fs');
 const cp = require('child_process');
 const tmp = require('tmp');
 
-describe('generateLockFile(newPackageJson, npmrcContent)', () => {
+describe('generateLockFile(newPackageJson, npmrcContent, logger)', () => {
   tmp.dirSync = jest.fn(() => ({ name: 'somedir' }));
   fs.writeFileSync = jest.fn();
   fs.readFileSync = jest.fn(() => 'package-lock-contents');
@@ -19,7 +20,8 @@ describe('generateLockFile(newPackageJson, npmrcContent)', () => {
   it('generates lock files', async () => {
     const packageLock = await npmHelper.generateLockFile(
       'package-json-contents',
-      'npmrc-contents'
+      'npmrc-contents',
+      logger
     );
     expect(tmp.dirSync.mock.calls.length).toEqual(1);
     expect(fs.writeFileSync.mock.calls.length).toEqual(2);
@@ -27,7 +29,7 @@ describe('generateLockFile(newPackageJson, npmrcContent)', () => {
     expect(packageLock).toEqual('package-lock-contents');
   });
 });
-describe('getLockFile(packageJson, config)', () => {
+describe('getLockFile(packageFile, packageContent, api, npmVersion)', () => {
   let api;
   beforeEach(() => {
     api = {
@@ -76,7 +78,7 @@ describe('getLockFile(packageJson, config)', () => {
 describe('maintainLockFile(inputConfig)', () => {
   let config;
   beforeEach(() => {
-    config = {};
+    config = { logger };
     config.packageFile = 'package.json';
     config.api = {
       getFileContent: jest.fn(),
