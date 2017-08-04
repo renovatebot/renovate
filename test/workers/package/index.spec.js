@@ -4,6 +4,8 @@ const pkgWorker = require('../../../lib/workers/package/index');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const configParser = require('../../../lib/config');
 
+const logger = require('../../_fixtures/logger');
+
 jest.mock('../../../lib/workers/branch/schedule');
 jest.mock('../../../lib/api/npm');
 
@@ -14,6 +16,7 @@ describe('lib/workers/package/index', () => {
       config = configParser.filterConfig(defaultConfig, 'package');
       config.depName = 'foo';
       config.currentVersion = '1.0.0';
+      config.logger = logger;
     });
     it('returns empty if package is disabled', async () => {
       config.enabled = false;
