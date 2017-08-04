@@ -547,14 +547,6 @@ Obviously, you can't set repository or package file location with this method.
   <td><td>
 </tr>
 <tr>
-  <td>`yarnCacheFolder`</td>
-  <td>Location of yarn cache folder to use. Set to empty string to disable</td>
-  <td>string</td>
-  <td><pre>"/tmp/yarn-cache"</pre></td>
-  <td>`RENOVATE_YARN_CACHE_FOLDER`</td>
-  <td><td>
-</tr>
-<tr>
   <td>`lockFileMaintenance`</td>
   <td>Configuration for lock file maintenance</td>
   <td>json</td>
