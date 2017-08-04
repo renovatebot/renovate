@@ -367,6 +367,24 @@ describe('workers/branch', () => {
       await branchWorker.processBranchUpgrades(config);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
+    it('returns if legacy closed major PR found', async () => {
+      config.branchName = 'renovate/a-2.x';
+      config.prTitle = 'Upgrade a to v2';
+      config.api.checkForClosedPr.mockReturnValueOnce(false);
+      config.api.checkForClosedPr.mockReturnValueOnce(true);
+      await branchWorker.processBranchUpgrades(config);
+      expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
+      expect(config.api.checkForClosedPr.mock.calls).toMatchSnapshot();
+    });
+    it('returns if legacy closed minor PR found', async () => {
+      config.branchName = 'renovate/a-2.x';
+      config.prTitle = 'Upgrade a to v2.1.0';
+      config.api.checkForClosedPr.mockReturnValueOnce(false);
+      config.api.checkForClosedPr.mockReturnValueOnce(true);
+      await branchWorker.processBranchUpgrades(config);
+      expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
+      expect(config.api.checkForClosedPr.mock.calls).toMatchSnapshot();
+    });
     it('does not return immediately if recreateClosed true', async () => {
       config.api.checkForClosedPr.mockReturnValue(true);
       config.recreateClosed = true;
