@@ -29,11 +29,11 @@ changelogHelper.getChangeLogJSON.mockReturnValue({
 });
 
 describe('workers/pr', () => {
-  describe('checkAutoMerge(pr, config, logger)', () => {
+  describe('checkAutoMerge(pr, config)', () => {
     let config;
     let pr;
     beforeEach(() => {
-      config = { ...defaultConfig };
+      config = { ...defaultConfig, logger };
       pr = {
         head: {
           ref: 'somebranch',
@@ -45,42 +45,42 @@ describe('workers/pr', () => {
       };
     });
     it('should not automerge if not configured', async () => {
-      await prWorker.checkAutoMerge(pr, config, logger);
+      await prWorker.checkAutoMerge(pr, config);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automergeEnabled = true;
       pr.mergeable = true;
       config.api.getBranchStatus.mockReturnValueOnce('success');
-      await prWorker.checkAutoMerge(pr, config, logger);
+      await prWorker.checkAutoMerge(pr, config);
       expect(config.api.mergePr.mock.calls.length).toBe(1);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automergeEnabled = true;
       pr.mergeable = true;
       config.api.getBranchStatus.mockReturnValueOnce('pending');
-      await prWorker.checkAutoMerge(pr, config, logger);
+      await prWorker.checkAutoMerge(pr, config);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automergeEnabled = true;
       pr.mergeable = true;
       pr.mergeable_state = 'unstable';
-      await prWorker.checkAutoMerge(pr, config, logger);
+      await prWorker.checkAutoMerge(pr, config);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automergeEnabled = true;
       pr.mergeable = false;
-      await prWorker.checkAutoMerge(pr, config, logger);
+      await prWorker.checkAutoMerge(pr, config);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
   });
-  describe('ensurePr(upgrades, logger)', () => {
+  describe('ensurePr(inputConfig, errors, warnings)', () => {
     let config;
     let existingPr;
     beforeEach(() => {
-      config = { ...defaultConfig };
+      config = { ...defaultConfig, logger };
       config.api = {
         createPr: jest.fn(() => ({ displayNumber: 'New Pull Request' })),
         getBranchStatus: jest.fn(),
@@ -106,38 +106,38 @@ describe('workers/pr', () => {
       config.api.getBranchPr = jest.fn(() => {
         throw new Error('oops');
       });
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
     });
     it('should return null if waiting for success', async () => {
       config.api.getBranchStatus = jest.fn(() => 'failed');
       config.prCreation = 'status-success';
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
     });
     it('should create PR if success', async () => {
       config.api.getBranchStatus = jest.fn(() => 'success');
       config.api.getBranchPr = jest.fn();
       config.prCreation = 'status-success';
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should return null if waiting for not pending', async () => {
       config.api.getBranchStatus = jest.fn(() => 'pending');
       config.prCreation = 'not-pending';
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
     });
     it('should create PR if no longer pending', async () => {
       config.api.getBranchStatus = jest.fn(() => 'failed');
       config.api.getBranchPr = jest.fn();
       config.prCreation = 'not-pending';
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should create new branch if none exists', async () => {
       config.api.getBranchPr = jest.fn();
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(
         config.api.createPr.mock.calls[0][2].indexOf('Errors</h3>')
@@ -150,7 +150,7 @@ describe('workers/pr', () => {
       config.api.getBranchPr = jest.fn();
       config.api.addLabels = jest.fn();
       config.labels = ['foo'];
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(config.api.addLabels.mock.calls.length).toBe(1);
     });
@@ -158,7 +158,7 @@ describe('workers/pr', () => {
       config.api.getBranchPr = jest.fn();
       config.api.addLabels = jest.fn();
       config.labels = [];
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(config.api.addLabels.mock.calls.length).toBe(0);
     });
@@ -168,7 +168,7 @@ describe('workers/pr', () => {
       config.api.addReviewers = jest.fn();
       config.assignees = ['@foo', 'bar'];
       config.reviewers = ['baz', '@boo'];
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(config.api.addAssignees.mock.calls.length).toBe(1);
       expect(config.api.addAssignees.mock.calls).toMatchSnapshot();
@@ -177,7 +177,7 @@ describe('workers/pr', () => {
     });
     it('should display errors and warnings', async () => {
       config.api.getBranchPr = jest.fn();
-      const pr = await prWorker.ensurePr(config, logger, [{}], [{}]);
+      const pr = await prWorker.ensurePr(config, [{}], [{}]);
       expect(
         config.api.createPr.mock.calls[0][2].indexOf('Errors</h3>')
       ).not.toEqual(-1);
@@ -208,7 +208,7 @@ describe('workers/pr', () => {
       config.api.getBranchPr = jest.fn(() => existingPr);
       config.api.updatePr = jest.fn();
       config.semanticPrefix = '';
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(config.api.updatePr.mock.calls).toMatchSnapshot();
       expect(config.api.updatePr.mock.calls.length).toBe(0);
       expect(pr).toMatchObject(existingPr);
@@ -220,7 +220,7 @@ describe('workers/pr', () => {
       config.isGitHub = true;
       config.api.getBranchPr = jest.fn(() => existingPr);
       config.api.updatePr = jest.fn();
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchSnapshot();
     });
     it('should create PR if branch automerging failed', async () => {
@@ -228,20 +228,20 @@ describe('workers/pr', () => {
       config.automergeType = 'branch-push';
       config.api.getBranchStatus.mockReturnValueOnce('failure');
       config.api.getBranchPr = jest.fn();
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should return null if branch automerging not failed', async () => {
       config.automergeEnabled = true;
       config.automergeType = 'branch-push';
       config.api.getBranchStatus.mockReturnValueOnce('pending');
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
     });
     it('handles duplicate upgrades', async () => {
       config.api.getBranchPr = jest.fn();
       config.upgrades.push(config.upgrades[0]);
-      const pr = await prWorker.ensurePr(config, logger);
+      const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
   });
