@@ -419,5 +419,11 @@ describe('workers/branch', () => {
       await branchWorker.processBranchUpgrades(config);
       expect(branchWorker.ensureBranch.mock.calls.length).toBe(0);
     });
+    it('handles known errors', async () => {
+      branchWorker.ensureBranch.mockImplementationOnce(() => {
+        throw Error('Error generating lock file');
+      });
+      await branchWorker.processBranchUpgrades(config);
+    });
   });
 });
