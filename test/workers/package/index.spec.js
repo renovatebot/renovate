@@ -47,7 +47,7 @@ describe('lib/workers/package/index', () => {
       expect(res[0].type).toEqual('warning');
     });
     it('returns array if upgrades found', async () => {
-      npmApi.getDependency.mockReturnValueOnce({});
+      npmApi.getDependency.mockReturnValueOnce({ repositoryUrl: 'some-url' });
       versions.determineUpgrades = jest.fn(() => [{}]);
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toHaveLength(1);
