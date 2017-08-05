@@ -3595,9 +3595,9 @@ shellwords@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.0.tgz#66afd47b6a12932d9071cbfd98a52e785cd0ba14"
 
-showdown@1.7.1:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/showdown/-/showdown-1.7.1.tgz#4cbc7b2b333bbd3d679d581c59fc8f27d88db0b1"
+showdown@1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/showdown/-/showdown-1.7.2.tgz#bf99da9f3af00fad1d73421e112fdc352e1249de"
   dependencies:
     yargs "^8.0.1"
 
