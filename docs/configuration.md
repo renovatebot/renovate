@@ -96,6 +96,7 @@ $ node renovate --help
     --semantic-prefix <string>           Prefix to use if semantic commits are enabled
     --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
+    --unpublish-safe [boolean]           Set a status check for unpublish-safe upgrades
     --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
     --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, patch, minor or any
     --automerge-type <string>            How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only
@@ -481,6 +482,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>false</pre></td>
   <td>`RENOVATE_REBASE_STALE_PRS`</td>
   <td>`--rebase-stale-prs`<td>
+</tr>
+<tr>
+  <td>`unpublishSafe`</td>
+  <td>Set a status check for unpublish-safe upgrades</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_UNPUBLISH_SAFE`</td>
+  <td>`--unpublish-safe`<td>
 </tr>
 <tr>
   <td>`prCreation`</td>

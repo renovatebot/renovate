@@ -119,6 +119,7 @@ describe('workers/branch', () => {
       config.api.commitFilesToBranch = jest.fn();
       config.api.getFileContent.mockReturnValueOnce('old content');
       config.api.getBranchStatus = jest.fn();
+      config.api.setBranchStatus = jest.fn();
       config.depName = 'dummy';
       config.currentVersion = '1.0.0';
       config.newVersion = '1.1.0';
@@ -160,6 +161,25 @@ describe('workers/branch', () => {
       expect(npm.getLockFile.mock.calls.length).toBe(1);
       expect(yarn.getLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(1);
+      expect(config.api.setBranchStatus.mock.calls).toHaveLength(0);
+    });
+    it('sets branch status pending', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      config.api.branchExists.mockReturnValueOnce(true);
+      config.upgrades[0].unpublishable = true;
+      config.upgrades.push({ ...config });
+      config.upgrades[1].unpublishable = false;
+      expect(await branchWorker.ensureBranch(config)).toBe(true);
+      expect(config.api.setBranchStatus.mock.calls).toHaveLength(1);
+    });
+    it('sets branch status success', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      config.api.branchExists.mockReturnValueOnce(true);
+      config.upgrades[0].unpublishable = true;
+      expect(await branchWorker.ensureBranch(config)).toBe(true);
+      expect(config.api.setBranchStatus.mock.calls).toHaveLength(1);
     });
     it('automerges successful branches', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');

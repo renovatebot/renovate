@@ -15,6 +15,7 @@ Object {
       "getBranchStatus": [Function],
       "getFileContent": [Function],
       "mergeBranch": [Function],
+      "setBranchStatus": [Function],
     },
   ],
 }
@@ -39,6 +40,7 @@ Object {
       "getBranchStatus": [Function],
       "getFileContent": [Function],
       "mergeBranch": [Function],
+      "setBranchStatus": [Function],
     },
   ],
 }

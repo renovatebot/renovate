@@ -7,7 +7,9 @@ Object {
   "name": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {
-    "0.0.1": Object {},
+    "0.0.1": Object {
+      "time": "",
+    },
   },
 }
 `;
@@ -29,7 +31,9 @@ Object {
   "name": undefined,
   "repositoryUrl": "https://google.com",
   "versions": Object {
-    "0.0.1": Object {},
+    "0.0.1": Object {
+      "time": "",
+    },
   },
 }
 `;
@@ -53,7 +57,9 @@ Object {
   "name": undefined,
   "repositoryUrl": "https://google.com",
   "versions": Object {
-    "0.0.1": Object {},
+    "0.0.1": Object {
+      "time": "",
+    },
   },
 }
 `;
@@ -77,7 +83,9 @@ Object {
   "name": undefined,
   "repositoryUrl": "https://google.com",
   "versions": Object {
-    "0.0.1": Object {},
+    "0.0.1": Object {
+      "time": "",
+    },
   },
 }
 `;

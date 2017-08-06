@@ -19,6 +19,9 @@ const npmResponse = {
       type: 'git',
       url: 'git://github.com/renovateapp/dummy.git',
     },
+    time: {
+      '0.0.1': '',
+    },
   },
 };
 

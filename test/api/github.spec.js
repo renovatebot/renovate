@@ -823,6 +823,27 @@ describe('api/github', () => {
       expect(res).toEqual('failed');
     });
   });
+  describe('setBranchStatus', () => {
+    it('sets branch status', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      await github.setBranchStatus(
+        'some-branch',
+        'some-context',
+        'some-description',
+        'some-state',
+        'some-url'
+      );
+      expect(ghGot.post.mock.calls).toHaveLength(1);
+    });
+  });
   describe('mergeBranch(branchName, mergeType)', () => {
     it('should perform a branch-push merge', async () => {
       await initRepo('some/repo', 'token');
