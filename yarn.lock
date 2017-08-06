@@ -3936,6 +3936,10 @@ tunnel-agent@~0.4.1:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/tunnel-agent/-/tunnel-agent-0.4.3.tgz#6373db76909fe570e08d73583365ed828a74eeeb"
 
+tunnel@0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/tunnel/-/tunnel-0.0.4.tgz#2d3785a158c174c9a16dc2c046ec5fc5f1742213"
+
 tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
@@ -3953,6 +3957,13 @@ type-detect@^3.0.0:
 type-detect@^4.0.0:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.3.tgz#0e3f2670b44099b0b46c284d136a7ef49c74c2ea"
+
+typed-rest-client@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/typed-rest-client/-/typed-rest-client-0.11.0.tgz#0ef41352d628ee2e0878fb58a67891645f6a1b41"
+  dependencies:
+    tunnel "0.0.4"
+    underscore "1.8.3"
 
 typedarray@^0.0.6:
   version "0.0.6"
@@ -3982,6 +3993,10 @@ uid-number@^0.0.6:
 underscore.string@~2.2.0rc:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/underscore.string/-/underscore.string-2.2.1.tgz#d7c0fa2af5d5a1a67f4253daee98132e733f0f19"
+
+underscore@1.8.3, underscore@^1.8.3:
+  version "1.8.3"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.8.3.tgz#4f3fb53b106e6097fcf9cb4109f2a5e9bdfa5022"
 
 url-parse-lax@^1.0.0:
   version "1.0.0"
@@ -4025,6 +4040,14 @@ verror@1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
+
+vso-node-api@^6.2.7-preview:
+  version "6.2.7-preview"
+  resolved "https://registry.yarnpkg.com/vso-node-api/-/vso-node-api-6.2.7-preview.tgz#380af4fee3bc2288047a80c598899a46e6016294"
+  dependencies:
+    tunnel "0.0.4"
+    typed-rest-client "^0.11.0"
+    underscore "^1.8.3"
 
 walk@^2.3.9:
   version "2.3.9"
