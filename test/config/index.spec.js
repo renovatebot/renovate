@@ -173,5 +173,22 @@ describe('config/index', () => {
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.depTypes).toMatchSnapshot();
     });
+    it('merges packageRules', () => {
+      const parentConfig = { ...defaultConfig };
+      Object.assign(parentConfig, {
+        packageRules: [{ a: 1 }, { a: 2 }],
+      });
+      const childConfig = {
+        packageRules: [{ a: 3 }, { a: 4 }],
+      };
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.packageRules.map(rule => rule.a)).toMatchObject([
+        3,
+        4,
+        1,
+        2,
+      ]);
+    });
   });
 });
