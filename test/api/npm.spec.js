@@ -19,6 +19,9 @@ const npmResponse = {
       type: 'git',
       url: 'git://github.com/renovateapp/dummy.git',
     },
+    time: {
+      '0.0.1': '',
+    },
   },
 };
 
@@ -27,7 +30,7 @@ describe('api/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     npm.resetCache();
-  }); /*
+  });
   it('should fetch package info from npm', async () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => Promise.resolve(npmResponse));
@@ -46,7 +49,7 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
-  }); */
+  });
   it('should cache package info from npm', async () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => Promise.resolve(npmResponse));
@@ -54,7 +57,7 @@ describe('api/npm', () => {
     const res2 = await npm.getDependency('foobar', logger);
     expect(res1).toEqual(res2);
     expect(got.mock.calls.length).toEqual(1);
-  }); /*
+  });
   it('should return null if lookup fails', async () => {
     registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => {
@@ -88,5 +91,5 @@ describe('api/npm', () => {
   });
   it('sets .npmrc', () => {
     npm.setNpmrc('input');
-  }); */
+  });
 });

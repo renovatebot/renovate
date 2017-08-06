@@ -326,6 +326,27 @@ describe('api/gitlab', () => {
       expect(res).toEqual('foo');
     });
   });
+  describe('setBranchStatus', () => {
+    it('sets branch status', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      glGot.mockReturnValueOnce({
+        body: {
+          commit: {
+            id: 1,
+          },
+        },
+      });
+      await gitlab.setBranchStatus(
+        'some-branch',
+        'some-context',
+        'some-description',
+        'some-state',
+        'some-url'
+      );
+      expect(glGot.post.mock.calls).toHaveLength(1);
+    });
+  });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       glGot.delete = jest.fn();
