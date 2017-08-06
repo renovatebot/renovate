@@ -169,7 +169,7 @@ describe('workers/branch', () => {
       config.api.mergeBranch = jest.fn();
       config.automergeEnabled = true;
       config.automergeType = 'branch-push';
-      expect(await branchWorker.ensureBranch(config)).toBe(true);
+      expect(await branchWorker.ensureBranch(config)).toBe(false);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(config.api.getBranchStatus.mock.calls.length).toBe(1);
       expect(config.api.mergeBranch.mock).toMatchSnapshot();
