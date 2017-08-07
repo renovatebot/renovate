@@ -15,6 +15,7 @@ describe('workers/repository', () => {
       apis.initApis = jest.fn(input => input);
       apis.mergeRenovateJson = jest.fn(input => input);
       apis.detectPackageFiles = jest.fn();
+      apis.resolvePackageFiles = jest.fn(input => input);
       onboarding.getOnboardingStatus = jest.fn();
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
@@ -74,16 +75,16 @@ describe('workers/repository', () => {
     it('does not skip repository if package.json', async () => {
       apis.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
-        ...{ packageFiles: [] },
+        ...{ packageFiles: ['package.json'] },
       }));
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
       apis.mergeRenovateJson.mockImplementationOnce(input => ({
         ...input,
-        ...{ packageFiles: [] },
+        ...{ packageFiles: ['package.json'] },
       }));
       apis.mergeRenovateJson.mockImplementationOnce(input => ({
         ...input,
-        ...{ packageFiles: [] },
+        ...{ packageFiles: ['package.json'] },
       }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
@@ -97,16 +98,16 @@ describe('workers/repository', () => {
     it('uses onboarding custom baseBranch', async () => {
       apis.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
-        ...{ packageFiles: [] },
+        ...{ packageFiles: ['package.json'] },
       }));
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
       apis.mergeRenovateJson.mockImplementationOnce(input => ({
         ...input,
-        ...{ packageFiles: [] },
+        ...{ packageFiles: ['package.json'] },
       }));
       apis.mergeRenovateJson.mockImplementationOnce(input => ({
         ...input,
-        ...{ packageFiles: [], baseBranch: 'next' },
+        ...{ packageFiles: ['package.json'], baseBranch: 'next' },
       }));
       config.api.branchExists.mockReturnValueOnce(true);
       upgrades.branchifyUpgrades.mockReturnValueOnce({
@@ -121,7 +122,7 @@ describe('workers/repository', () => {
     it('errors onboarding custom baseBranch', async () => {
       apis.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
-        ...{ packageFiles: [] },
+        ...{ packageFiles: ['package.json'] },
       }));
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
       apis.mergeRenovateJson.mockImplementationOnce(input => ({

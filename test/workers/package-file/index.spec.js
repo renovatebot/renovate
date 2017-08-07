@@ -15,69 +15,34 @@ describe('packageFileWorker', () => {
         ...defaultConfig,
         ...{
           packageFile: 'package.json',
+          content: {},
           repoIsOnboarded: true,
-          api: {
-            getFileContent: jest.fn(),
-            getFileJson: jest.fn(),
-          },
           logger,
         },
       };
+      depTypeWorker.renovateDepType.mockReturnValue([]);
     });
-    it('handles renovate config warnings and errors', async () => {
+    it('returns empty if disabled', async () => {
       config.enabled = false;
-      config.api.getFileJson.mockReturnValueOnce({
-        renovate: { foo: 1, maintainYarnLock: true },
-      });
-      const res = await packageFileWorker.renovatePackageFile(config);
-      expect(res).toMatchSnapshot();
-    });
-    it('handles null', async () => {
-      const allUpgrades = await packageFileWorker.renovatePackageFile(config);
-      expect(allUpgrades).toHaveLength(1);
-      expect(allUpgrades[0].type).toEqual('error');
-    });
-    it('handles no renovate config', async () => {
-      config.enabled = false;
-      config.api.getFileJson.mockReturnValueOnce({});
-      const res = await packageFileWorker.renovatePackageFile(config);
-      expect(config.api.getFileJson.mock.calls[0][1]).toBeUndefined();
-      expect(res).toEqual([]);
-    });
-    it('uses onboarding branch', async () => {
-      config.enabled = false;
-      config.repoIsOnboarded = false;
-      config.contentBaseBranch = 'renovate/configure';
-      config.api.getFileJson.mockReturnValueOnce({});
-      const res = await packageFileWorker.renovatePackageFile(config);
-      expect(config.api.getFileJson.mock.calls[0][1]).toEqual(
-        'renovate/configure'
-      );
-      expect(res).toEqual([]);
-    });
-    it('returns empty array if config disabled', async () => {
-      config.api.getFileJson.mockReturnValueOnce({
-        renovate: {
-          enabled: false,
-        },
-      });
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toEqual([]);
     });
-    it('calls depTypeWorker', async () => {
-      config.api.getFileJson.mockReturnValueOnce({ workspaces: true });
+    it('warns if using workspaces', async () => {
+      config.content.workspaces = {};
+      const res = await packageFileWorker.renovatePackageFile(config);
+      expect(res).toHaveLength(1);
+      expect(res[0].type).toEqual('warning');
+    });
+    it('returns upgrades', async () => {
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}]);
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
       depTypeWorker.renovateDepType.mockReturnValueOnce([]);
       depTypeWorker.renovateDepType.mockReturnValueOnce([]);
       const res = await packageFileWorker.renovatePackageFile(config);
-      expect(res).toHaveLength(4);
+      expect(res).toHaveLength(3);
     });
     it('maintains lock files', async () => {
-      config.api.getFileJson.mockReturnValueOnce({});
-      config.api.getFileContent.mockReturnValueOnce('some-content-1');
-      config.api.getFileContent.mockReturnValueOnce('some-content-2');
-      depTypeWorker.renovateDepType.mockReturnValue([]);
+      config.hasYarnLock = true;
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(1);
     });

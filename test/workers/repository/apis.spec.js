@@ -219,5 +219,54 @@ describe('workers/repository/apis', () => {
       expect(res.foundNodeModules).toMatchSnapshot();
       expect(res.warnings).toMatchSnapshot();
     });
+    it('defaults to package.json if found', async () => {
+      const config = {
+        api: {
+          findFilePaths: jest.fn(() => []),
+          getFileJson: jest.fn(() => ({})),
+        },
+        logger,
+      };
+      const res = await apis.detectPackageFiles(config);
+      expect(res.packageFiles).toHaveLength(1);
+      expect(res.packageFiles).toMatchSnapshot();
+    });
+    it('returns empty if package.json not found', async () => {
+      const config = {
+        api: {
+          findFilePaths: jest.fn(() => []),
+          getFileJson: jest.fn(() => null),
+        },
+        logger,
+      };
+      const res = await apis.detectPackageFiles(config);
+      expect(res.packageFiles).toEqual([]);
+    });
+  });
+  describe('resolvePackageFiles', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        packageFiles: ['package.json', { packageFile: 'a/package.json' }],
+        api: {
+          getFileContent: jest.fn(),
+          getFileJson: jest.fn(),
+        },
+        logger,
+      };
+    });
+    it('skips files with no content', async () => {
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toEqual([]);
+    });
+    it('includes files with content', async () => {
+      config.api.getFileJson.mockReturnValueOnce({ renovate: {} });
+      config.api.getFileJson.mockReturnValueOnce({});
+      config.api.getFileContent.mockReturnValueOnce(true);
+      config.api.getFileContent.mockReturnValueOnce(true);
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(2);
+      expect(res.packageFiles).toMatchSnapshot();
+    });
   });
 });
