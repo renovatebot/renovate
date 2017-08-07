@@ -190,5 +190,17 @@ describe('config/index', () => {
         2,
       ]);
     });
+    it('skips null parent packageRules', () => {
+      const parentConfig = { ...defaultConfig };
+      Object.assign(parentConfig, {
+        packageRules: null,
+      });
+      const childConfig = {
+        packageRules: [{ a: 3 }, { a: 4 }],
+      };
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.packageRules).toHaveLength(2);
+    });
   });
 });
