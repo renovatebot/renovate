@@ -16,6 +16,7 @@ describe('lib/workers/dep-type/index', () => {
       config = {
         ignoreDeps: ['a', 'b'],
         lernaPackages: ['e'],
+        logger,
       };
     });
     it('returns empty if config is disabled', async () => {

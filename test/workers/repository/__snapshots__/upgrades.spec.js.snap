@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/upgrades generateConfig(branchUpgrades) does not group single upgrade 1`] = `
+exports[`workers/repository/upgrades generateConfig(branchUpgrades, logger) does not group single upgrade 1`] = `
 Object {
   "branchName": "some-branch",
   "depName": "some-dep",
@@ -21,7 +21,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades generateConfig(branchUpgrades) groups multiple upgrades 1`] = `
+exports[`workers/repository/upgrades generateConfig(branchUpgrades, logger) groups multiple upgrades 1`] = `
 Object {
   "branchName": "some-branch",
   "depName": "some-dep",
@@ -47,7 +47,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/upgrades generateConfig(branchUpgrades) groups single upgrade if not lazyGrouping 1`] = `
+exports[`workers/repository/upgrades generateConfig(branchUpgrades, logger) groups single upgrade if not lazyGrouping 1`] = `
 Object {
   "branchName": "some-branch",
   "depName": "some-dep",
