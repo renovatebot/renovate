@@ -115,9 +115,9 @@
     "assignees": [
       "rarkins"
     ],
+    "prCreation": "not-pending",
     "automerge": "minor",
     "rebaseStalePrs": true,
-    "semanticCommits": true,
     "packageRules": [
       {
         "packagePatterns": ["jest"],
