@@ -516,7 +516,7 @@ describe('api/gitlab', () => {
           content: 'foo',
         },
       });
-      const res = await gitlab.getFile('some-path', 'some-branch');
+      const res = await gitlab.getFile('some-path');
       expect(res).toMatchSnapshot();
       expect(glGot.mock.calls[0][0].indexOf('file_path')).toBe(-1);
     });
@@ -537,7 +537,7 @@ describe('api/gitlab', () => {
       });
       const config = await gitlab.initRepo('some-repo', 'some-token');
       expect(config).toMatchSnapshot();
-      const res = await gitlab.getFile('some-path', 'some-branch');
+      const res = await gitlab.getFile('some-path');
       expect(res).toMatchSnapshot();
       expect(glGot.mock.calls[3][0].indexOf('file_path')).not.toBe(-1);
     });
