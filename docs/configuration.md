@@ -109,6 +109,7 @@ $ node renovate --help
     $ renovate --token abc123 singapore/lint-condo
     $ renovate --labels=renovate,dependency --ignore-unstable=false --log-level verbose singapore/lint-condo
     $ renovate singapore/lint-condo singapore/package-test
+    $ renovate {repo} --token {token} --platform vsts --endpoint https://{instance}.visualstudio.com/DefaultCollection
 ```
 
 To configure any `<list>` items, separate with commas. E.g. `renovate --labels=renovate,dependency`.

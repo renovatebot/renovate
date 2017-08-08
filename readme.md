@@ -17,7 +17,7 @@ Keep npm dependencies up-to-date.
 -   Supports multiple major versions per-dependency at once
 -   Configurable via file, environment, CLI, and `package.json`
 -   Supports `yarn.lock` and `package-lock.json` files
--   Supports GitHub and GitLab
+-   Supports GitHub and GitLab and vsts (soon!)
 -   Open source and can be self-hosted
 
 ## GitHub App
@@ -38,8 +38,10 @@ You can find instructions for GitHub [here](https://help.github.com/articles/cre
 
 You can find instructions for GitLab [here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens).
 
+You can find instructions for VSTS [vsts](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
+
 This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
-The simplest way is to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN`.
+The simplest way is to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN` or `VSTS_TOKEN`.
 
 ## Usage
 
