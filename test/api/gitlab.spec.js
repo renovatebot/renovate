@@ -326,6 +326,51 @@ describe('api/gitlab', () => {
       expect(res).toEqual('foo');
     });
   });
+  describe('getBranchStatusCheck', () => {
+    beforeEach(() => {
+      glGot.mockReturnValueOnce({
+        body: {
+          commit: {
+            id: 1,
+          },
+        },
+      });
+    });
+    it('returns null if no results', async () => {
+      glGot.mockReturnValueOnce({
+        body: [],
+      });
+      const res = await gitlab.getBranchStatusCheck(
+        'somebranch',
+        'some-context'
+      );
+      expect(res).toEqual(null);
+    });
+    it('returns null if no matching results', async () => {
+      glGot.mockReturnValueOnce({
+        body: [{ name: 'context-1', status: 'pending' }],
+      });
+      const res = await gitlab.getBranchStatusCheck(
+        'somebranch',
+        'some-context'
+      );
+      expect(res).toEqual(null);
+    });
+    it('returns status if name found', async () => {
+      glGot.mockReturnValueOnce({
+        body: [
+          { name: 'context-1', state: 'pending' },
+          { name: 'some-context', state: 'success' },
+          { name: 'context-3', state: 'failed' },
+        ],
+      });
+      const res = await gitlab.getBranchStatusCheck(
+        'somebranch',
+        'some-context'
+      );
+      expect(res).toEqual('success');
+    });
+  });
   describe('setBranchStatus', () => {
     it('sets branch status', async () => {
       await initRepo('some/repo', 'token');
