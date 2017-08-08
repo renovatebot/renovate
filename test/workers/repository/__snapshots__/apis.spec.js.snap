@@ -20,6 +20,12 @@ Array [
 ]
 `;
 
+exports[`workers/repository/apis detectPackageFiles(config) defaults to package.json if found 1`] = `
+Array [
+  "package.json",
+]
+`;
+
 exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 1`] = `
 Array [
   "package.json",
@@ -67,3 +73,20 @@ Array [
 `;
 
 exports[`workers/repository/apis mergeRenovateJson(config) returns warning + error plus extended config if unknown keys 1`] = `Array []`;
+
+exports[`workers/repository/apis resolvePackageFiles includes files with content 1`] = `
+Array [
+  Object {
+    "content": Object {},
+    "hasPackageLock": true,
+    "hasYarnLock": true,
+    "packageFile": "package.json",
+  },
+  Object {
+    "content": Object {},
+    "hasPackageLock": false,
+    "hasYarnLock": false,
+    "packageFile": "a/package.json",
+  },
+]
+`;

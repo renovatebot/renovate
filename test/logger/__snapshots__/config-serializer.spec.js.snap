@@ -23,3 +23,9 @@ Object {
   "prBody": "[Template]",
 }
 `;
+
+exports[`logger/config-serializer suppresses content 1`] = `
+Object {
+  "content": "[content]",
+}
+`;

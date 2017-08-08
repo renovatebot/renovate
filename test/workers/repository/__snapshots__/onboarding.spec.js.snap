@@ -36,6 +36,7 @@ You are not required to *merge* this Pull Request - Renovate will begin even if 
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
 ",
+    true,
   ],
 ]
 `;
@@ -71,6 +72,7 @@ You are not required to *merge* this Pull Request - Renovate will begin even if 
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
 ",
+    true,
   ],
 ]
 `;
@@ -129,6 +131,7 @@ You are not required to *merge* this Pull Request - Renovate will begin even if 
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
 ",
+    true,
   ],
 ]
 `;
@@ -168,6 +171,7 @@ You are not required to *merge* this Pull Request - Renovate will begin even if 
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
 ",
+    true,
   ],
 ]
 `;
@@ -207,6 +211,7 @@ You are not required to *merge* this Pull Request - Renovate will begin even if 
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
 ",
+    true,
   ],
 ]
 `;
