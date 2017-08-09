@@ -481,7 +481,7 @@ describe('api/gitlab', () => {
         body: {
           id: 1,
           iid: 12345,
-          description: 'a merge request',
+          description: ['a merge request'],
           state: 'merged',
           merge_status: 'cannot_be_merged',
         },
