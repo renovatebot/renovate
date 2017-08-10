@@ -65,6 +65,21 @@ Object {
 }
 `;
 
+exports[`config/presets resolvePreset returns same if invalid preset 1`] = `
+Object {
+  "foo": 1,
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+}
+`;
+
 exports[`config/presets resolvePreset returns same if no presets 1`] = `
 Object {
   "foo": 1,
@@ -77,5 +92,24 @@ Object {
     "trace": [Function],
     "warn": [Function],
   },
+}
+`;
+
+exports[`config/presets resolvePreset works with vaid and invalid 1`] = `
+Object {
+  "description": Array [
+    "Use version pinning (maintain a single version only and not semver ranges)",
+  ],
+  "foo": 1,
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "pinVersions": true,
 }
 `;

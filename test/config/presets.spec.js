@@ -16,6 +16,18 @@ describe('config/presets', () => {
       expect(config).toMatchObject(res);
       expect(res).toMatchSnapshot();
     });
+    it('returns same if invalid preset', () => {
+      config.foo = 1;
+      config.presets = ['invalid-preset'];
+      const res = presets.resolvePresets(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('works with vaid and invalid', () => {
+      config.foo = 1;
+      config.presets = ['invalid-preset', 'pinVersions'];
+      const res = presets.resolvePresets(config);
+      expect(res).toMatchSnapshot();
+    });
     it('resolves app preset', () => {
       config.presets = ['app'];
       const res = presets.resolvePresets(config);
