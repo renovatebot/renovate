@@ -5,6 +5,7 @@ describe('config/presets', () => {
   describe('resolvePreset', () => {
     let config;
     beforeEach(() => {
+      jest.resetAllMocks();
       config = {
         logger,
       };
@@ -33,5 +34,26 @@ describe('config/presets', () => {
       const res = presets.resolvePresets(config);
       expect(res).toMatchSnapshot();
     });
+    it('combines two package alls', () => {
+      config.presets = ['allEslint', 'allStylelint'];
+      const res = presets.resolvePresets(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('resolves packageRule', () => {
+      config.packageRules = [
+        {
+          presets: ['allEslint'],
+          groupName: 'eslint',
+        },
+      ];
+      const res = presets.resolvePresets(config);
+      expect(res).toMatchSnapshot();
+    }); /*
+    it('resolves nested groups', () => {
+      config.presets = ['automergeLinters'];
+      const res = presets.resolvePresets(config);
+      expect(res).toMatchSnapshot();
+      expect(config.logger.debug.mock.calls).toMatchSnapshot();
+    }); */
   });
 });

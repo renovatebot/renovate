@@ -1,5 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/presets resolvePreset combines two package alls 1`] = `
+Object {
+  "description": Array [
+    "All eslint packages",
+    "All stylelint packages",
+  ],
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "packagePatterns": Array [
+    "^eslint",
+    "^stylelint",
+  ],
+}
+`;
+
 exports[`config/presets resolvePreset resolves app preset 1`] = `
 Object {
   "automerge": "none",
@@ -62,6 +84,31 @@ Object {
   "separateMajorReleases": true,
   "separatePatchReleases": false,
   "unpublishSafe": true,
+}
+`;
+
+exports[`config/presets resolvePreset resolves packageRule 1`] = `
+Object {
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "packageRules": Array [
+    Object {
+      "description": Array [
+        "All eslint packages",
+      ],
+      "groupName": "eslint",
+      "packagePatterns": Array [
+        "^eslint",
+      ],
+    },
+  ],
 }
 `;
 
