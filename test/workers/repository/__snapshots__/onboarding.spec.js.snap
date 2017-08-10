@@ -221,11 +221,7 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{
-  \\"pinVersions\\": true,
-  \\"dependencies\\": {\\"pinVersions\\": false},
-  \\"ignoreNodeModules\\": true
-}
+      "contents": "{\\"presets\\":[\\"library\\"]}
 ",
       "name": "renovate.json",
     },
@@ -239,11 +235,7 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{
-  \\"pinVersions\\": true,
-  \\"dependencies\\": {\\"pinVersions\\": false},
-  \\"ignoreNodeModules\\": true
-}
+      "contents": "{\\"presets\\":[\\"library\\"]}
 ",
       "name": "renovate.json",
     },
@@ -257,7 +249,7 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{\\"pinVersions\\": true, \\"ignoreNodeModules\\": true}
+      "contents": "{\\"presets\\":[\\"app\\"]}
 ",
       "name": "renovate.json",
     },

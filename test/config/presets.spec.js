@@ -9,6 +9,13 @@ describe('config/presets', () => {
         logger,
       };
     });
+    it('returns same if no presets', () => {
+      config.foo = 1;
+      config.presets = [];
+      const res = presets.resolvePresets(config);
+      expect(config).toMatchObject(res);
+      expect(res).toMatchSnapshot();
+    });
     it('resolves app preset', () => {
       config.presets = ['app'];
       const res = presets.resolvePresets(config);

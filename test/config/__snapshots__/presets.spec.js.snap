@@ -64,3 +64,18 @@ Object {
   "unpublishSafe": true,
 }
 `;
+
+exports[`config/presets resolvePreset returns same if no presets 1`] = `
+Object {
+  "foo": 1,
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+}
+`;
