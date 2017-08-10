@@ -87,6 +87,31 @@ Object {
 }
 `;
 
+exports[`config/presets resolvePreset resolves nested groups 1`] = `
+Object {
+  "automerge": "any",
+  "description": Array [
+    "All eslint packages",
+    "All remark packages",
+    "All lint-related packages",
+    "Update lint packages automatically if tests pass",
+  ],
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "packagePatterns": Array [
+    "^eslint",
+    "^remark",
+  ],
+}
+`;
+
 exports[`config/presets resolvePreset resolves packageRule 1`] = `
 Object {
   "logger": Object {

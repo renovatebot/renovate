@@ -48,12 +48,11 @@ describe('config/presets', () => {
       ];
       const res = presets.resolvePresets(config);
       expect(res).toMatchSnapshot();
-    }); /*
+    });
     it('resolves nested groups', () => {
       config.presets = ['automergeLinters'];
       const res = presets.resolvePresets(config);
       expect(res).toMatchSnapshot();
-      expect(config.logger.debug.mock.calls).toMatchSnapshot();
-    }); */
+    });
   });
 });
