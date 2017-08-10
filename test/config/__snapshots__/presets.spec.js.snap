@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/presets resolvePreset resolves app preset 1`] = `
+Object {
+  "automerge": "none",
+  "branchprefix": "renovate/",
+  "dependencies": Object {
+    "description": Array [
+      "Use \\"fix(deps):\\" as semantic prefix for commit messages and PR titles",
+    ],
+    "semanticPrefix": "fix(deps):",
+  },
+  "description": Array [
+    "Separate different major releases of a dependencies into separate PRs",
+    "Combine any patch and minor upgrades of a dependency into the same PR",
+    "Only upgrade to stable npm versions",
+    "Do not upgrade versions past the \\"latest\\" tag in npm registry",
+    "Set a status check to warn when upgrades <  24 hours old might get unpublished",
+    "Raise PRs only once branch status is no longer in \\"pending\\" state",
+    "Use \\"renovate/\\" as prefix for all branch names",
+    "If semantic commits detected, use \\"fix(deps):\\" for dependencies and \\"chore(deps):\\" for all others",
+    "Do not automerge any upgrades",
+    "If preset, update lock files only when package.json is modified",
+    "Default base configuration for repositories",
+    "Use version pinning (maintain a single version only and not semver ranges)",
+    "Default configuration for webapps",
+  ],
+  "devDependencies": Object {
+    "description": Array [
+      "Use \\"chore(deps):\\" as semantic prefix for commit messages and PR titles",
+    ],
+    "semanticPrefix": "chore(deps):",
+  },
+  "ignoreUnstable": true,
+  "lockFileMaintenance": Object {
+    "enabled": false,
+  },
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "optionalDependencies": Object {
+    "description": Array [
+      "Use \\"chore(deps):\\" as semantic prefix for commit messages and PR titles",
+    ],
+    "semanticPrefix": "chore(deps):",
+  },
+  "peerDependencies": Object {
+    "description": Array [
+      "Use \\"chore(deps):\\" as semantic prefix for commit messages and PR titles",
+    ],
+    "semanticPrefix": "chore(deps):",
+  },
+  "pinVersions": true,
+  "prCreation": "not-pending",
+  "respectLatest": true,
+  "separateMajorReleases": true,
+  "separatePatchReleases": false,
+  "unpublishSafe": true,
+}
+`;
