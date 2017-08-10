@@ -71,7 +71,7 @@ This scheduling feature can be particularly useful for "noisy" packages that are
 To restrict `aws-sdk` to only weekly updates, you could add this package rule:
 
 ```
-  "packages": [
+  "packageRules": [
     {
       "packageNames": ["aws-sdk"],
       "schedule": ["after 9pm on sunday"]
@@ -126,7 +126,7 @@ Set the configuration option `labels` to an array of labels to use
 
 ### Apply a rule, but only to package `abc`?
 
-1.  Add a `packages` array to your configuration.
+1.  Add a `packageRules` array to your configuration.
 2.  Create one object inside this array
 3.  Set field `packageNames` to value `["abc"]`
 4.  Add the configuration option to the same object.
@@ -134,7 +134,7 @@ Set the configuration option `labels` to an array of labels to use
 e.g.
 
 ```
-"packages": [
+"packageRules": [
   {
     "packageNames": ["abc"],
     "assignees": ["importantreviewer"]
@@ -147,7 +147,7 @@ e.g.
 Do the same as above, but instead of using `packageNames`, use `packagePatterns` and a regex. e.g.
 
 ```
-"packages": [
+"packageRules": [
   {
     "packagePatterns": "^abc",
     "assignees": ["importantreviewer"]
@@ -160,7 +160,7 @@ Do the same as above, but instead of using `packageNames`, use `packagePatterns`
 As above, but apply a `groupName`, e.g.
 
 ```
-"packages": [
+"packageRules": [
   {
     "packagePatterns": "^abc",
     "groupName": ["abc packages"]
