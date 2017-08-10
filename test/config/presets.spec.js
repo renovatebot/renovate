@@ -12,37 +12,37 @@ describe('config/presets', () => {
     });
     it('returns same if no presets', () => {
       config.foo = 1;
-      config.presets = [];
+      config.extends = [];
       const res = presets.resolvePresets(config);
       expect(config).toMatchObject(res);
       expect(res).toMatchSnapshot();
     });
     it('returns same if invalid preset', () => {
       config.foo = 1;
-      config.presets = ['invalid-preset'];
+      config.extends = ['invalid-preset'];
       const res = presets.resolvePresets(config);
       expect(res).toMatchSnapshot();
     });
     it('works with vaid and invalid', () => {
       config.foo = 1;
-      config.presets = ['invalid-preset', 'pinVersions'];
+      config.extends = ['invalid-preset', 'pinVersions'];
       const res = presets.resolvePresets(config);
       expect(res).toMatchSnapshot();
     });
     it('resolves app preset', () => {
-      config.presets = ['app'];
+      config.extends = ['app'];
       const res = presets.resolvePresets(config);
       expect(res).toMatchSnapshot();
     });
     it('combines two package alls', () => {
-      config.presets = ['allEslint', 'allStylelint'];
+      config.extends = ['allEslint', 'allStylelint'];
       const res = presets.resolvePresets(config);
       expect(res).toMatchSnapshot();
     });
     it('resolves packageRule', () => {
       config.packageRules = [
         {
-          presets: ['allEslint'],
+          extends: ['allEslint'],
           groupName: 'eslint',
         },
       ];
@@ -50,7 +50,7 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
     it('resolves nested groups', () => {
-      config.presets = ['automergeLinters'];
+      config.extends = ['automergeLinters'];
       const res = presets.resolvePresets(config);
       expect(res).toMatchSnapshot();
     });
