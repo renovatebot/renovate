@@ -43,6 +43,16 @@ describe('workers/repository/apis', () => {
     });
   });
   describe('detectSemanticCommits', () => {
+    it('disables semantic commits', async () => {
+      const config = {
+        api: {
+          getCommitMessages: jest.fn(() => []),
+        },
+        logger,
+      };
+      const res = await apis.detectSemanticCommits(config);
+      expect(res).toEqual(false);
+    });
     it('enables semantic commits', async () => {
       const config = {
         api: {
@@ -97,7 +107,7 @@ describe('workers/repository/apis', () => {
       jest.resetAllMocks();
     });
     it('returns github api', async () => {
-      const config = { logger, platform: 'github' };
+      const config = { logger, platform: 'github', semanticCommits: null };
       const res = await apis.initApis(config);
       expect(res.platform).toEqual('github');
       expect(githubApi.initRepo.mock.calls.length).toBe(1);

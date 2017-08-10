@@ -27,9 +27,10 @@ describe('config/migration', () => {
           },
         ],
       };
+      const parentConfig = { ...defaultConfig, semanticCommits: false };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
         config,
-        defaultConfig
+        parentConfig
       );
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
