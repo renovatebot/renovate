@@ -64,22 +64,22 @@ describe('lib/workers/dep-type/index', () => {
         },
       ],
     };
-    it('applies only one rule for a', () => {
+    it('applies both rules for a', () => {
       const dep = {
         depName: 'a',
       };
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
-      expect(res.y).toBeUndefined();
+      expect(res.y).toBe(2);
       expect(res.packageRules).toBeUndefined();
     });
-    it('applies only one rule for b', () => {
+    it('applies both rules for b', () => {
       const dep = {
         depName: 'b',
       };
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
-      expect(res.y).toBeUndefined();
+      expect(res.y).toBe(2);
       expect(res.packageRules).toBeUndefined();
     });
     it('applies the second rule', () => {
