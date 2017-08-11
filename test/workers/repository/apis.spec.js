@@ -160,7 +160,7 @@ describe('workers/repository/apis', () => {
     });
     it('returns warning + error plus extended config if unknown keys', async () => {
       config.api.getFileContent.mockReturnValueOnce(
-        '{ "enabled": true, "foo": false, "maintainYarnLock": true }'
+        '{ "enabled": true, "foo": false, "maintainYarnLock": true, "schedule": "before 5am", "minor": {} }'
       );
       const returnConfig = await apis.mergeRenovateJson(config);
       expect(returnConfig.enabled).toBe(true);
