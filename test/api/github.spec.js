@@ -823,6 +823,66 @@ describe('api/github', () => {
       expect(res).toEqual('failed');
     });
   });
+  describe('getBranchStatusCheck', () => {
+    it('returns state if found', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      ghGot.mockImplementationOnce(() => ({
+        body: [
+          {
+            context: 'context-1',
+            state: 'state-1',
+          },
+          {
+            context: 'context-2',
+            state: 'state-2',
+          },
+          {
+            context: 'context-3',
+            state: 'state-3',
+          },
+        ],
+      }));
+      const res = await github.getBranchStatusCheck('somebranch', 'context-2');
+      expect(res).toEqual('state-2');
+    });
+    it('returns null', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      ghGot.mockImplementationOnce(() => ({
+        body: [
+          {
+            context: 'context-1',
+            state: 'state-1',
+          },
+          {
+            context: 'context-2',
+            state: 'state-2',
+          },
+          {
+            context: 'context-3',
+            state: 'state-3',
+          },
+        ],
+      }));
+      const res = await github.getBranchStatusCheck('somebranch', 'context-4');
+      expect(res).toEqual(null);
+    });
+  });
   describe('setBranchStatus', () => {
     it('sets branch status', async () => {
       await initRepo('some/repo', 'token');

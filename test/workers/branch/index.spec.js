@@ -119,6 +119,7 @@ describe('workers/branch', () => {
       config.api.commitFilesToBranch = jest.fn();
       config.api.getFileContent.mockReturnValueOnce('old content');
       config.api.getBranchStatus = jest.fn();
+      config.api.getBranchStatusCheck = jest.fn();
       config.api.setBranchStatus = jest.fn();
       config.depName = 'dummy';
       config.currentVersion = '1.0.0';
@@ -173,13 +174,14 @@ describe('workers/branch', () => {
       expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(config.api.setBranchStatus.mock.calls).toHaveLength(1);
     });
-    it('sets branch status success', async () => {
+    it('skips branch status success', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
       config.upgrades[0].unpublishable = true;
+      config.api.getBranchStatusCheck.mockReturnValueOnce('success');
       expect(await branchWorker.ensureBranch(config)).toBe(true);
-      expect(config.api.setBranchStatus.mock.calls).toHaveLength(1);
+      expect(config.api.setBranchStatus.mock.calls).toHaveLength(0);
     });
     it('automerges successful branches', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');

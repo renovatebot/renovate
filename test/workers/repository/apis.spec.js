@@ -43,6 +43,16 @@ describe('workers/repository/apis', () => {
     });
   });
   describe('detectSemanticCommits', () => {
+    it('disables semantic commits', async () => {
+      const config = {
+        api: {
+          getCommitMessages: jest.fn(() => []),
+        },
+        logger,
+      };
+      const res = await apis.detectSemanticCommits(config);
+      expect(res).toEqual(false);
+    });
     it('enables semantic commits', async () => {
       const config = {
         api: {
@@ -97,7 +107,7 @@ describe('workers/repository/apis', () => {
       jest.resetAllMocks();
     });
     it('returns github api', async () => {
-      const config = { logger, platform: 'github' };
+      const config = { logger, platform: 'github', semanticCommits: null };
       const res = await apis.initApis(config);
       expect(res.platform).toEqual('github');
       expect(githubApi.initRepo.mock.calls.length).toBe(1);
@@ -150,7 +160,7 @@ describe('workers/repository/apis', () => {
     });
     it('returns warning + error plus extended config if unknown keys', async () => {
       config.api.getFileContent.mockReturnValueOnce(
-        '{ "enabled": true, "foo": false, "maintainYarnLock": true }'
+        '{ "enabled": true, "foo": false, "maintainYarnLock": true, "schedule": "before 5am", "minor": {} }'
       );
       const returnConfig = await apis.mergeRenovateJson(config);
       expect(returnConfig.enabled).toBe(true);

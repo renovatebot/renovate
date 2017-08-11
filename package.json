@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "bunyan": "1.8.12",
-    "chalk": "2.0.1",
+    "chalk": "2.1.0",
     "changelog": "1.4.0",
     "commander": "2.11.0",
     "conventional-commits-detector": "0.1.1",
@@ -75,7 +75,7 @@
     "babel-plugin-transform-object-rest-spread": "6.23.0",
     "chai": "4.1.1",
     "condition-circle": "1.5.0",
-    "eslint": "4.4.0",
+    "eslint": "4.4.1",
     "eslint-config-airbnb-base": "11.3.1",
     "eslint-config-prettier": "2.3.0",
     "eslint-plugin-import": "2.7.0",
