@@ -184,13 +184,13 @@ describe('config/index', () => {
       const configParser = require('../../lib/config/index.js');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules.map(rule => rule.a)).toMatchObject([
-        3,
-        4,
         1,
         2,
+        3,
+        4,
       ]);
     });
-    it('skips null parent packageRules', () => {
+    it('handles null parent packageRules', () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
         packageRules: null,
@@ -200,6 +200,13 @@ describe('config/index', () => {
       };
       const configParser = require('../../lib/config/index.js');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.packageRules).toHaveLength(2);
+    });
+    it('handles null child packageRules', () => {
+      const parentConfig = { ...defaultConfig };
+      parentConfig.packageRules = [{ a: 3 }, { a: 4 }];
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, {});
       expect(config.packageRules).toHaveLength(2);
     });
   });
