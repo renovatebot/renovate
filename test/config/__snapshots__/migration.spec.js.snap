@@ -19,9 +19,7 @@ Object {
     },
   ],
   "prTitle": "some pr title",
-  "schedule": Array [
-    "after 5pm",
-  ],
+  "schedule": "after 5pm",
   "semanticPrefix": "fix(deps):",
 }
 `;
