@@ -117,8 +117,6 @@ exports[`config/presets resolvePreset resolves nested groups 1`] = `
 Object {
   "automerge": "any",
   "description": Array [
-    "All eslint packages",
-    "All remark packages",
     "Update lint packages automatically if tests pass",
   ],
   "logger": Object {
