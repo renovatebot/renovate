@@ -29,6 +29,11 @@ describe('config/presets', () => {
       const res = presets.resolvePresets(config);
       expect(res).toMatchSnapshot();
     });
+    it('resolves group with parent description', () => {
+      config.extends = ['groupJest'];
+      const res = presets.resolvePresets(config);
+      expect(res).toMatchSnapshot();
+    });
     it('resolves app preset', () => {
       config.extends = ['app'];
       const res = presets.resolvePresets(config);
