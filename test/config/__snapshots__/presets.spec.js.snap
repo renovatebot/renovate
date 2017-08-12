@@ -43,9 +43,7 @@ Object {
     "If semantic commits detected, use \\"fix(deps):\\" for dependencies and \\"chore(deps):\\" for all others",
     "Do not automerge any upgrades",
     "If preset, update lock files only when package.json is modified",
-    "Default base configuration for repositories",
     "Use version pinning (maintain a single version only and not semver ranges)",
-    "Default configuration for webapps",
   ],
   "devDependencies": Object {
     "description": Array [
@@ -121,7 +119,6 @@ Object {
   "description": Array [
     "All eslint packages",
     "All remark packages",
-    "All lint-related packages",
     "Update lint packages automatically if tests pass",
   ],
   "logger": Object {
