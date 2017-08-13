@@ -63,13 +63,6 @@ describe('config/presets', () => {
     });
   });
 });
-describe('presetGroups', () => {
-  for (const key of Object.keys(presetGroups)) {
-    it(`has a description for ${key}`, () => {
-      expect(presetGroups[key].description).toBeDefined();
-    });
-  }
-});
 describe('presetDefaults', () => {
   it('has no conflict with presetGroups', () => {
     const overlap = [];
@@ -81,9 +74,4 @@ describe('presetDefaults', () => {
     }
     expect(overlap).toEqual([]);
   });
-  for (const key of Object.keys(presetDefaults)) {
-    it(`has a description for ${key}`, () => {
-      expect(presetDefaults[key].description).toBeDefined();
-    });
-  }
 });
