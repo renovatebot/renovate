@@ -29,15 +29,15 @@ Object {
     "semanticPrefix": "fix(deps):",
   },
   "description": Array [
-    "Separate different major releases of a dependencies into separate PRs",
-    "Combine any patch and minor upgrades of a dependency into the same PR",
+    "Separate major versions of dependencies into individual branches/PRs",
+    "Use the same branch/PR for both patch and minor upgrades of a dependency",
     "Only upgrade to stable npm versions",
     "Do not upgrade versions past the \\"latest\\" tag in npm registry",
-    "Set a status check to warn when upgrades <  24 hours old might get unpublished",
-    "Raise PRs only once branch status is no longer in \\"pending\\" state",
+    "Create branches/PRs for dependency upgrades as soon as they're available",
+    "Wait until branch tests have passed or failed before creating the PR",
     "Use \\"renovate/\\" as prefix for all branch names",
     "If semantic commits detected, use \\"fix(deps):\\" for dependencies and \\"chore(deps):\\" for all others",
-    "Do not automerge any upgrades",
+    "Do not automerge any upgrades - wait for humans to merge PRs",
     "Update existing lock files only when package.json is modified",
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
@@ -77,7 +77,7 @@ Object {
   "respectLatest": true,
   "separateMajorReleases": true,
   "separatePatchReleases": false,
-  "unpublishSafe": true,
+  "unpublishSafe": false,
 }
 `;
 
