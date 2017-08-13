@@ -1,5 +1,7 @@
 const presets = require('../../lib/config/presets');
 const logger = require('../_fixtures/logger');
+const presetGroups = require('../../lib/config/presetGroups');
+const presetDefaults = require('../../lib/config/presetDefaults');
 
 describe('config/presets', () => {
   describe('resolvePreset', () => {
@@ -60,4 +62,28 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
   });
+});
+describe('presetGroups', () => {
+  for (const key of Object.keys(presetGroups)) {
+    it(`has a description for ${key}`, () => {
+      expect(presetGroups[key].description).toBeDefined();
+    });
+  }
+});
+describe('presetDefaults', () => {
+  it('has no conflict with presetGroups', () => {
+    const overlap = [];
+    const groups = Object.keys(presetGroups);
+    for (const presetDefault of Object.keys(presetDefaults)) {
+      if (groups.indexOf(presetDefault) !== -1) {
+        overlap.push(presetDefault);
+      }
+    }
+    expect(overlap).toEqual([]);
+  });
+  for (const key of Object.keys(presetDefaults)) {
+    it(`has a description for ${key}`, () => {
+      expect(presetDefaults[key].description).toBeDefined();
+    });
+  }
 });

@@ -29,6 +29,7 @@ Object {
     "semanticPrefix": "fix(deps):",
   },
   "description": Array [
+    "Use version pinning (maintain a single version only and not semver ranges)",
     "Separate major versions of dependencies into individual branches/PRs",
     "Use the same branch/PR for both patch and minor upgrades of a dependency",
     "Only upgrade to stable npm versions",
@@ -39,7 +40,6 @@ Object {
     "If semantic commits detected, use \\"fix(deps):\\" for dependencies and \\"chore(deps):\\" for all others",
     "Do not automerge any upgrades - wait for humans to merge PRs",
     "Update existing lock files only when package.json is modified",
-    "Use version pinning (maintain a single version only and not semver ranges)",
   ],
   "devDependencies": Object {
     "description": Array [
@@ -108,7 +108,6 @@ Object {
 
 exports[`config/presets resolvePreset resolves nested groups 1`] = `
 Object {
-  "automerge": "any",
   "description": Array [
     "Update lint packages automatically if tests pass",
   ],
@@ -121,9 +120,14 @@ Object {
     "trace": [Function],
     "warn": [Function],
   },
-  "packagePatterns": Array [
-    "^eslint",
-    "^remark",
+  "packageRules": Array [
+    Object {
+      "automerge": "any",
+      "packagePatterns": Array [
+        "^eslint",
+        "^remark",
+      ],
+    },
   ],
 }
 `;
