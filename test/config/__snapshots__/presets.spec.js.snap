@@ -42,7 +42,7 @@ Object {
     "Use \\"renovate/\\" as prefix for all branch names",
     "If semantic commits detected, use \\"fix(deps):\\" for dependencies and \\"chore(deps):\\" for all others",
     "Do not automerge any upgrades",
-    "If preset, update lock files only when package.json is modified",
+    "Update existing lock files only when package.json is modified",
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
   "devDependencies": Object {
