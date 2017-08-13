@@ -2,10 +2,6 @@
 
 exports[`config/presets resolvePreset combines two package alls 1`] = `
 Object {
-  "description": Array [
-    "All eslint packages",
-    "All stylelint packages",
-  ],
   "logger": Object {
     "child": [Function],
     "debug": [Function],
@@ -101,9 +97,6 @@ Object {
   },
   "packageRules": Array [
     Object {
-      "description": Array [
-        "All jest packages",
-      ],
       "groupName": "jest",
       "packagePatterns": Array [
         "jest",
@@ -148,9 +141,6 @@ Object {
   },
   "packageRules": Array [
     Object {
-      "description": Array [
-        "All eslint packages",
-      ],
       "groupName": "eslint",
       "packagePatterns": Array [
         "^eslint",
