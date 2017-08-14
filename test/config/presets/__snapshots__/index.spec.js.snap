@@ -2,6 +2,18 @@
 
 exports[`config/presets replaceArgs replaces args in strings 1`] = `"c foo ab"`;
 
+exports[`config/presets replaceArgs replaces objects 1`] = `
+Object {
+  "bar": Object {
+    "aaa": Object {
+      "bbb": "woo c",
+    },
+    "baz": "b boo",
+  },
+  "foo": "ha a",
+}
+`;
+
 exports[`config/presets resolvePreset combines two package alls 1`] = `
 Object {
   "logger": Object {

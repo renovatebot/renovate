@@ -56,14 +56,27 @@ describe('config/presets', () => {
     });
   });
   describe('replaceArgs', () => {
+    const argMappings = {
+      arg0: 'a',
+      arg1: 'b',
+      arg2: 'c',
+    };
     it('replaces args in strings', () => {
       const str = '{{arg2}} foo {{arg0}}{{arg1}}';
-      const argMappings = {
-        arg0: 'a',
-        arg1: 'b',
-        arg2: 'c',
-      };
       const res = presets.replaceArgs(str, argMappings);
+      expect(res).toMatchSnapshot();
+    });
+    it('replaces objects', () => {
+      const obj = {
+        foo: 'ha {{arg0}}',
+        bar: {
+          baz: '{{arg1}} boo',
+          aaa: {
+            bbb: 'woo {{arg2}}',
+          },
+        },
+      };
+      const res = presets.replaceArgs(obj, argMappings);
       expect(res).toMatchSnapshot();
     });
   });
