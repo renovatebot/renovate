@@ -10,12 +10,6 @@ describe('workers/branch/schedule', () => {
     it('returns false if schedule is not an array', () => {
       expect(schedule.hasValidSchedule({ a: 1 }, logger)).toBe(false);
     });
-    it('returns false if schedule array is empty', () => {
-      expect(schedule.hasValidSchedule([], logger)).toBe(false);
-    });
-    it('returns false if only schedule is empty', () => {
-      expect(schedule.hasValidSchedule([''], logger)).toBe(false);
-    });
     it('returns false for invalid schedule', () => {
       expect(schedule.hasValidSchedule(['foo'], logger)).toBe(false);
     });
@@ -23,6 +17,11 @@ describe('workers/branch/schedule', () => {
       expect(schedule.hasValidSchedule(['after 5:00pm', 'foo'], logger)).toBe(
         false
       );
+    });
+    it('returns false if using minutes', () => {
+      expect(
+        schedule.hasValidSchedule(['every 15 mins every weekday'], logger)
+      ).toBe(false);
     });
     it('returns false if schedules have no days or time range', () => {
       expect(schedule.hasValidSchedule(['at 5:00pm'], logger)).toBe(false);
@@ -83,6 +82,11 @@ describe('workers/branch/schedule', () => {
       };
     });
     it('returns true if no schedule', () => {
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('returns true if invalid schedule', () => {
+      config.schedule = ['every 15 minutes'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });

@@ -8,7 +8,11 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`schedule\` should be a list (Array)",
+    "message": "Invalid schedule: \`every 15 mins every weekday\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`labels\` should be a list (Array)",
   },
   Object {
     "depName": "Configuration Error",
