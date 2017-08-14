@@ -24,7 +24,7 @@ Object {
   "branchprefix": "renovate/",
   "dependencies": Object {
     "description": Array [
-      "Use \\"fix(deps):\\" as semantic prefix for commit messages and PR titles",
+      "Use <code>fix(deps):</code> as semantic prefix for commit messages and PR titles",
     ],
     "semanticPrefix": "fix(deps):",
   },
@@ -36,14 +36,14 @@ Object {
     "Do not upgrade versions past the \\"latest\\" tag in npm registry",
     "Create branches/PRs for dependency upgrades as soon as they're available",
     "Wait until branch tests have passed or failed before creating the PR",
-    "Use \\"renovate/\\" as prefix for all branch names",
-    "If semantic commits detected, use \\"fix(deps):\\" for dependencies and \\"chore(deps):\\" for all others",
+    "Use <code>renovate/</code> as prefix for all branch names",
+    "If semantic commits detected, use <code>fix(deps):</code> for dependencies and <code>chore(deps):</code> for all others",
     "Do not automerge any upgrades - wait for humans to merge PRs",
-    "Update existing lock files only when package.json is modified",
+    "Update existing lock files only when <code>package.json</code> is modified",
   ],
   "devDependencies": Object {
     "description": Array [
-      "Use \\"chore(deps):\\" as semantic prefix for commit messages and PR titles",
+      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
     ],
     "semanticPrefix": "chore(deps):",
   },
@@ -62,13 +62,13 @@ Object {
   },
   "optionalDependencies": Object {
     "description": Array [
-      "Use \\"chore(deps):\\" as semantic prefix for commit messages and PR titles",
+      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
     ],
     "semanticPrefix": "chore(deps):",
   },
   "peerDependencies": Object {
     "description": Array [
-      "Use \\"chore(deps):\\" as semantic prefix for commit messages and PR titles",
+      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
     ],
     "semanticPrefix": "chore(deps):",
   },
@@ -98,6 +98,12 @@ Object {
   "packageRules": Array [
     Object {
       "automerge": "any",
+      "description": Array [
+        "All lint-related packages",
+      ],
+      "packageNames": Array [
+        "remark-lint",
+      ],
     },
   ],
 }
