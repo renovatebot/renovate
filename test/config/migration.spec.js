@@ -7,6 +7,8 @@ describe('config/migration', () => {
       const config = {
         enabled: true,
         maintainYarnLock: true,
+        onboarding: 'false',
+        autodiscover: 'true',
         schedule: 'after 5pm',
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',

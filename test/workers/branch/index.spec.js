@@ -168,20 +168,33 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
+      config.unpublishSafe = true;
       config.upgrades[0].unpublishable = true;
       config.upgrades.push({ ...config });
       config.upgrades[1].unpublishable = false;
       expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(config.api.setBranchStatus.mock.calls).toHaveLength(1);
     });
-    it('skips branch status success', async () => {
+    it('skips branch status pending', async () => {
+      branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
+      packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      config.api.branchExists.mockReturnValueOnce(true);
+      config.unpublishSafe = true;
+      config.api.getBranchStatusCheck.mockReturnValueOnce('pending');
+      config.upgrades[0].unpublishable = true;
+      config.upgrades.push({ ...config });
+      config.upgrades[1].unpublishable = false;
+      expect(await branchWorker.ensureBranch(config)).toBe(true);
+      expect(config.api.setBranchStatus.mock.calls).toHaveLength(0);
+    });
+    it('skips branch status success if setting disabled', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
       config.upgrades[0].unpublishable = true;
-      config.api.getBranchStatusCheck.mockReturnValueOnce('success');
+      config.api.getBranchStatusCheck.mockReturnValueOnce('pending');
       expect(await branchWorker.ensureBranch(config)).toBe(true);
-      expect(config.api.setBranchStatus.mock.calls).toHaveLength(0);
+      expect(config.api.setBranchStatus.mock.calls).toHaveLength(1);
     });
     it('automerges successful branches', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');

@@ -2,8 +2,10 @@
 
 exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
 Object {
+  "autodiscover": true,
   "commitMessage": "some commit message",
   "enabled": true,
+  "onboarding": false,
   "optionalDependencies": Object {
     "respectLatest": false,
   },

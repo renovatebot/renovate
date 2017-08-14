@@ -159,6 +159,7 @@ describe('workers/repository/apis', () => {
       expect(returnConfig.errors).toHaveLength(0);
     });
     it('returns warning + error plus extended config if unknown keys', async () => {
+      config.repoIsOnboarded = true;
       config.api.getFileContent.mockReturnValueOnce(
         '{ "enabled": true, "foo": false, "maintainYarnLock": true, "schedule": "before 5am", "minor": {} }'
       );
@@ -169,6 +170,7 @@ describe('workers/repository/apis', () => {
       expect(returnConfig.errors).toMatchSnapshot();
     });
     it('returns error plus extended config if duplicate keys', async () => {
+      config.repoIsOnboarded = true;
       config.api.getFileContent.mockReturnValueOnce(
         '{ "enabled": true, "enabled": false }'
       );
