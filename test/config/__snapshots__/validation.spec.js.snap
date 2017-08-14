@@ -8,7 +8,11 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`schedule\` should be a list (Array)",
+    "message": "Invalid schedule: \`Schedules should not specify minutes\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`labels\` should be a list (Array)",
   },
   Object {
     "depName": "Configuration Error",

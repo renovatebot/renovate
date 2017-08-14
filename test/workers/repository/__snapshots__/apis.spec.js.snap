@@ -78,9 +78,11 @@ exports[`workers/repository/apis resolvePackageFiles includes files with content
 Array [
   Object {
     "content": Object {},
+    "errors": Array [],
     "hasPackageLock": true,
     "hasYarnLock": true,
     "packageFile": "package.json",
+    "warnings": Array [],
   },
   Object {
     "content": Object {},

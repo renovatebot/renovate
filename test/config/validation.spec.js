@@ -1,4 +1,5 @@
 const configValidation = require('../../lib/config/validation.js');
+const logger = require('../_fixtures/logger');
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
@@ -19,7 +20,8 @@ describe('config/validation', () => {
     it('errors for all types', () => {
       const config = {
         enabled: 1,
-        schedule: 5,
+        schedule: ['every 15 mins every weekday'],
+        labels: 5,
         semanticPrefix: 7,
         githubAppId: 'none',
         lockFileMaintenance: false,
@@ -29,9 +31,12 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings, errors } = configValidation.validateConfig(config);
+      const { warnings, errors } = configValidation.validateConfig(
+        config,
+        logger
+      );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(6);
+      expect(errors).toHaveLength(7);
       expect(errors).toMatchSnapshot();
     });
   });

@@ -8,44 +8,48 @@ describe('workers/branch/schedule', () => {
       jest.resetAllMocks();
     });
     it('returns false if schedule is not an array', () => {
-      expect(schedule.hasValidSchedule({ a: 1 }, logger)).toBe(false);
-    });
-    it('returns false if schedule array is empty', () => {
-      expect(schedule.hasValidSchedule([], logger)).toBe(false);
-    });
-    it('returns false if only schedule is empty', () => {
-      expect(schedule.hasValidSchedule([''], logger)).toBe(false);
+      expect(schedule.hasValidSchedule({ a: 1 }, logger)[0]).toBe(false);
     });
     it('returns false for invalid schedule', () => {
-      expect(schedule.hasValidSchedule(['foo'], logger)).toBe(false);
+      expect(schedule.hasValidSchedule(['foo'], logger)[0]).toBe(false);
     });
     it('returns false if any schedule fails to parse', () => {
-      expect(schedule.hasValidSchedule(['after 5:00pm', 'foo'], logger)).toBe(
-        false
-      );
+      expect(
+        schedule.hasValidSchedule(['after 5:00pm', 'foo'], logger)[0]
+      ).toBe(false);
+    });
+    it('returns false if using minutes', () => {
+      expect(
+        schedule.hasValidSchedule(['every 15 mins every weekday'], logger)[0]
+      ).toBe(false);
     });
     it('returns false if schedules have no days or time range', () => {
-      expect(schedule.hasValidSchedule(['at 5:00pm'], logger)).toBe(false);
+      expect(schedule.hasValidSchedule(['at 5:00pm'], logger)[0]).toBe(false);
     });
     it('returns false if any schedule has no days or time range', () => {
       expect(
-        schedule.hasValidSchedule(['at 5:00pm', 'on saturday'], logger)
+        schedule.hasValidSchedule(['at 5:00pm', 'on saturday'], logger)[0]
       ).toBe(false);
     });
     it('returns true if schedule has days of week', () => {
       expect(
-        schedule.hasValidSchedule(['on friday and saturday'], logger)
+        schedule.hasValidSchedule(['on friday and saturday'], logger)[0]
       ).toBe(true);
     });
     it('returns true if schedule has a start time', () => {
-      expect(schedule.hasValidSchedule(['after 8:00pm'], logger)).toBe(true);
+      expect(schedule.hasValidSchedule(['after 8:00pm'], logger)[0]).toBe(true);
     });
     it('returns true if schedule has an end time', () => {
-      expect(schedule.hasValidSchedule(['before 6:00am'], logger)).toBe(true);
+      expect(schedule.hasValidSchedule(['before 6:00am'], logger)[0]).toBe(
+        true
+      );
     });
     it('returns true if schedule has a start and end time', () => {
       expect(
-        schedule.hasValidSchedule(['after 11:00pm and before 6:00am'], logger)
+        schedule.hasValidSchedule(
+          ['after 11:00pm and before 6:00am'],
+          logger
+        )[0]
       ).toBe(true);
     });
     it('returns true if schedule has days and a start and end time', () => {
@@ -53,11 +57,11 @@ describe('workers/branch/schedule', () => {
         schedule.hasValidSchedule(
           ['after 11:00pm and before 6:00am every weekday'],
           logger
-        )
+        )[0]
       ).toBe(true);
     });
     it('supports hours shorthand', () => {
-      const res = schedule.hasValidSchedule(
+      const [res] = schedule.hasValidSchedule(
         [
           'after 11pm and before 6am every weekend',
           'after 11pm',
@@ -83,6 +87,11 @@ describe('workers/branch/schedule', () => {
       };
     });
     it('returns true if no schedule', () => {
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('returns true if invalid schedule', () => {
+      config.schedule = ['every 15 minutes'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
