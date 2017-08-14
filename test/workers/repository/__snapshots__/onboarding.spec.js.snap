@@ -93,7 +93,7 @@ If you have any questions, try reading our [Getting Started Configuring Renovate
 
 Based on the currently configured presets, you should expect to see the following behaviour:
 <ul>
-  <li>Start dependency updates once this Configure Renovate PR is closed</li>
+  <li>Start dependency updates once this Configure Renovate PR is merged or closed</li>
   <li>Assign PRs to @rarkins</li>
   <li>Apply labels <code>renovate</code> and <code>upgrades</code> to PRs</li>
   <li>Run Renovate on following schedule: before 5am</li>
@@ -138,7 +138,7 @@ If you have any questions, try reading our [Getting Started Configuring Renovate
 
 Based on the currently configured presets, you should expect to see the following behaviour:
 <ul>
-  <li>Start dependency updates once this Configure Renovate PR is closed</li>
+  <li>Start dependency updates once this Configure Renovate PR is merged or closed</li>
   <li>Description 1</li>
   <li>Description 2</li>
 
