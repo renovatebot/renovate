@@ -1,5 +1,5 @@
-const presets = require('../../lib/config/presets');
-const logger = require('../_fixtures/logger');
+const presets = require('../../../lib/config/presets');
+const logger = require('../../_fixtures/logger');
 
 describe('config/presets', () => {
   describe('resolvePreset', () => {
