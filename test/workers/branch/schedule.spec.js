@@ -7,9 +7,6 @@ describe('workers/branch/schedule', () => {
     beforeEach(() => {
       jest.resetAllMocks();
     });
-    it('returns false if schedule is not an array', () => {
-      expect(schedule.hasValidSchedule({ a: 1 }, logger)[0]).toBe(false);
-    });
     it('returns false for invalid schedule', () => {
       expect(schedule.hasValidSchedule(['foo'], logger)[0]).toBe(false);
     });
@@ -102,6 +99,11 @@ describe('workers/branch/schedule', () => {
     });
     it('supports before hours false', () => {
       config.schedule = ['before 4:00am'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(false);
+    });
+    it('massages string', () => {
+      config.schedule = 'before 4:00am';
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });
