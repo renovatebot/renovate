@@ -1,5 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/presets getPreset gets parameterised configs 1`] = `
+Object {
+  "description": Array [
+    "Group eslint packages into same branch/PR",
+  ],
+  "packageRules": Array [
+    Object {
+      "extends": Array [
+        "packages/eslint",
+      ],
+      "groupName": "eslint",
+    },
+  ],
+}
+`;
+
+exports[`config/presets getPreset handles missing params 1`] = `
+Object {
+  "description": Array [
+    "Group {{arg1}} packages into same branch/PR",
+  ],
+  "packageRules": Array [
+    Object {
+      "extends": Array [
+        "",
+      ],
+      "groupName": "{{arg1}}",
+    },
+  ],
+}
+`;
+
+exports[`config/presets getPreset ignores irrelevant params 1`] = `
+Object {
+  "description": Array [
+    "Use version pinning (maintain a single version only and not semver ranges)",
+  ],
+  "pinVersions": true,
+}
+`;
+
 exports[`config/presets replaceArgs replaces args in strings 1`] = `"c foo ab"`;
 
 exports[`config/presets replaceArgs replaces arrays 1`] = `

@@ -93,4 +93,18 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
   });
+  describe('getPreset', () => {
+    it('gets parameterised configs', () => {
+      const res = presets.getPreset('group(packages/eslint, eslint)', logger);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles missing params', () => {
+      const res = presets.getPreset('group()', logger);
+      expect(res).toMatchSnapshot();
+    });
+    it('ignores irrelevant params', () => {
+      const res = presets.getPreset('pinVersions(foo, bar)', logger);
+      expect(res).toMatchSnapshot();
+    });
+  });
 });
