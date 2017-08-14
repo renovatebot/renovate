@@ -1,7 +1,5 @@
 const presets = require('../../lib/config/presets');
 const logger = require('../_fixtures/logger');
-const presetGroups = require('../../lib/config/presetGroups');
-const presetDefaults = require('../../lib/config/presetDefaults');
 
 describe('config/presets', () => {
   describe('resolvePreset', () => {
@@ -25,14 +23,9 @@ describe('config/presets', () => {
       const res = presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
-    it('works with vaid and invalid', () => {
+    it('works with valid and invalid', () => {
       config.foo = 1;
       config.extends = ['invalid-preset', 'pinVersions'];
-      const res = presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
-    });
-    it('resolves group with parent description', () => {
-      config.extends = ['groupJest'];
       const res = presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
@@ -42,14 +35,14 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
     it('combines two package alls', () => {
-      config.extends = ['allEslint', 'allStylelint'];
+      config.extends = ['packages/eslint', 'packages/stylelint'];
       const res = presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
     it('resolves packageRule', () => {
       config.packageRules = [
         {
-          extends: ['allEslint'],
+          extends: ['packages/eslint'],
           groupName: 'eslint',
         },
       ];
@@ -61,17 +54,5 @@ describe('config/presets', () => {
       const res = presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
-  });
-});
-describe('presetDefaults', () => {
-  it('has no conflict with presetGroups', () => {
-    const overlap = [];
-    const groups = Object.keys(presetGroups);
-    for (const presetDefault of Object.keys(presetDefaults)) {
-      if (groups.indexOf(presetDefault) !== -1) {
-        overlap.push(presetDefault);
-      }
-    }
-    expect(overlap).toEqual([]);
   });
 });

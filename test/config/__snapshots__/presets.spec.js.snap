@@ -81,31 +81,6 @@ Object {
 }
 `;
 
-exports[`config/presets resolvePreset resolves group with parent description 1`] = `
-Object {
-  "description": Array [
-    "Group together jest packages",
-  ],
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
-  "packageRules": Array [
-    Object {
-      "groupName": "jest",
-      "packagePatterns": Array [
-        "jest",
-      ],
-    },
-  ],
-}
-`;
-
 exports[`config/presets resolvePreset resolves nested groups 1`] = `
 Object {
   "description": Array [
@@ -123,10 +98,6 @@ Object {
   "packageRules": Array [
     Object {
       "automerge": "any",
-      "packagePatterns": Array [
-        "^eslint",
-        "^remark",
-      ],
     },
   ],
 }
@@ -184,7 +155,7 @@ Object {
 }
 `;
 
-exports[`config/presets resolvePreset works with vaid and invalid 1`] = `
+exports[`config/presets resolvePreset works with valid and invalid 1`] = `
 Object {
   "description": Array [
     "Use version pinning (maintain a single version only and not semver ranges)",
