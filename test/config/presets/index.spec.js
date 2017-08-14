@@ -79,5 +79,18 @@ describe('config/presets', () => {
       const res = presets.replaceArgs(obj, argMappings);
       expect(res).toMatchSnapshot();
     });
+    it('replaces arrays', () => {
+      const obj = {
+        foo: [
+          '{{arg0}}',
+          {
+            bar: '{{arg1}}',
+            baz: 5,
+          },
+        ],
+      };
+      const res = presets.replaceArgs(obj, argMappings);
+      expect(res).toMatchSnapshot();
+    });
   });
 });

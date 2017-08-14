@@ -2,6 +2,18 @@
 
 exports[`config/presets replaceArgs replaces args in strings 1`] = `"c foo ab"`;
 
+exports[`config/presets replaceArgs replaces arrays 1`] = `
+Object {
+  "foo": Array [
+    "a",
+    Object {
+      "bar": "b",
+      "baz": 5,
+    },
+  ],
+}
+`;
+
 exports[`config/presets replaceArgs replaces objects 1`] = `
 Object {
   "bar": Object {
