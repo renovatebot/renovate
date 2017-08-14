@@ -55,4 +55,16 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
   });
+  describe('replaceArgs', () => {
+    it('replaces args in strings', () => {
+      const str = '{{arg2}} foo {{arg0}}{{arg1}}';
+      const argMappings = {
+        arg0: 'a',
+        arg1: 'b',
+        arg2: 'c',
+      };
+      const res = presets.replaceArgs(str, argMappings);
+      expect(res).toMatchSnapshot();
+    });
+  });
 });

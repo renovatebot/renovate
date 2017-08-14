@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/presets replaceArgs replaces args in strings 1`] = `"c foo ab"`;
+
 exports[`config/presets resolvePreset combines two package alls 1`] = `
 Object {
   "logger": Object {
