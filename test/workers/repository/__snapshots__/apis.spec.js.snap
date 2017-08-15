@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`migrateAndValidate returns empty config 1`] = `
+Object {
+  "errors": Array [],
+  "warnings": Array [],
+}
+`;
+
 exports[`workers/repository/apis checkForLerna(config) ignores zero length lerna 1`] = `Object {}`;
 
 exports[`workers/repository/apis checkForLerna(config) returns lerna package names 1`] = `
