@@ -8,7 +8,7 @@ Object {
   "packageRules": Array [
     Object {
       "extends": Array [
-        "packages/eslint",
+        "packages:eslint",
       ],
       "groupName": "eslint",
     },

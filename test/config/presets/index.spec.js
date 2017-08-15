@@ -35,14 +35,14 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
     it('combines two package alls', () => {
-      config.extends = ['packages/eslint', 'packages/stylelint'];
+      config.extends = ['packages:eslint', 'packages:stylelint'];
       const res = presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
     it('resolves packageRule', () => {
       config.packageRules = [
         {
-          extends: ['packages/eslint'],
+          extends: ['packages:eslint'],
           groupName: 'eslint',
         },
       ];
@@ -95,7 +95,7 @@ describe('config/presets', () => {
   });
   describe('getPreset', () => {
     it('gets parameterised configs', () => {
-      const res = presets.getPreset('group(packages/eslint, eslint)', logger);
+      const res = presets.getPreset('group(packages:eslint, eslint)', logger);
       expect(res).toMatchSnapshot();
     });
     it('handles missing params', () => {
