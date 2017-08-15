@@ -3,6 +3,7 @@
 exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
 Object {
   "autodiscover": true,
+  "automerge": "none",
   "commitMessage": "some commit message",
   "enabled": true,
   "onboarding": false,
@@ -21,7 +22,9 @@ Object {
     },
   ],
   "prTitle": "some pr title",
-  "schedule": "after 5pm",
+  "schedule": Array [
+    "on the first day of the month",
+  ],
   "semanticPrefix": "fix(deps):",
 }
 `;

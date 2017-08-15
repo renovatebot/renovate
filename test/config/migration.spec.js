@@ -8,8 +8,9 @@ describe('config/migration', () => {
         enabled: true,
         maintainYarnLock: true,
         onboarding: 'false',
+        automerge: false,
         autodiscover: 'true',
-        schedule: 'after 5pm',
+        schedule: ['on the last day of the month'],
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
@@ -37,6 +38,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.optionalDependencies.respectLatest).toBe(false);
+      expect(migratedConfig.automerge).toEqual('none');
       expect(migratedConfig).toMatchSnapshot();
     });
     it('it does not migrate config', () => {
