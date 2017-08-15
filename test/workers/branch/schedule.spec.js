@@ -41,6 +41,11 @@ describe('workers/branch/schedule', () => {
     it('returns true if schedule has a start time', () => {
       expect(schedule.hasValidSchedule(['after 8:00pm'])[0]).toBe(true);
     });
+    it('returns true for first day of the month', () => {
+      expect(
+        schedule.hasValidSchedule(['on the first day of the month'])[0]
+      ).toBe(true);
+    });
     it('returns true if schedule has an end time', () => {
       expect(schedule.hasValidSchedule(['before 6:00am'])[0]).toBe(true);
     });
