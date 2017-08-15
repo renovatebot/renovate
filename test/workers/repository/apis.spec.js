@@ -7,6 +7,8 @@ const githubApi = require('../../../lib/api/github');
 const gitlabApi = require('../../../lib/api/gitlab');
 const npmApi = require('../../../lib/api/npm');
 
+const defaultConfig = require('../../../lib/config/defaults').getConfig();
+
 jest.mock('../../../lib/api/github');
 jest.mock('../../../lib/api/gitlab');
 jest.mock('../../../lib/api/npm');
@@ -280,5 +282,19 @@ describe('workers/repository/apis', () => {
       expect(res.packageFiles).toHaveLength(2);
       expect(res.packageFiles).toMatchSnapshot();
     });
+  });
+});
+describe('migrateAndValidate', () => {
+  it('returns empty config', () => {
+    const renovateJson = {};
+    const res = apis.migrateAndValidate(defaultConfig, renovateJson);
+    expect(res).toMatchSnapshot();
+  });
+  it('massages string to array', () => {
+    const renovateJson = {
+      schedule: 'before 5am',
+    };
+    const res = apis.migrateAndValidate(defaultConfig, renovateJson);
+    expect(Array.isArray(res.schedule)).toBe(true);
   });
 });
