@@ -8,7 +8,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid schedule: \`Schedules should not specify minutes\`",
+    "message": "Invalid schedule: \`Schedule \\"every 15 mins every weekday\\" should not specify minutes\`",
   },
   Object {
     "depName": "Configuration Error",
