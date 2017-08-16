@@ -72,7 +72,7 @@ exports[`config/presets parsePreset returns non-scoped package name 1`] = `
 Object {
   "packageName": "renovate-config-somepackage",
   "params": undefined,
-  "presetName": ":webapp",
+  "presetName": "webapp",
 }
 `;
 
@@ -80,7 +80,7 @@ exports[`config/presets parsePreset returns non-scoped package name full 1`] = `
 Object {
   "packageName": "renovate-config-somepackage",
   "params": undefined,
-  "presetName": ":webapp",
+  "presetName": "webapp",
 }
 `;
 
@@ -90,7 +90,7 @@ Object {
   "params": Array [
     "param1",
   ],
-  "presetName": ":webapp",
+  "presetName": "webapp",
 }
 `;
 

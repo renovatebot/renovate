@@ -19,18 +19,18 @@ describe('config/presets', () => {
     });
     it('returns same if invalid preset', () => {
       config.foo = 1;
-      config.extends = ['invalid-preset'];
+      config.extends = [':invalid-preset'];
       const res = presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
     it('works with valid and invalid', () => {
       config.foo = 1;
-      config.extends = ['invalid-preset', 'pinVersions'];
+      config.extends = [':invalid-preset', ':pinVersions'];
       const res = presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
     it('resolves app preset', () => {
-      config.extends = ['app'];
+      config.extends = [':app'];
       const res = presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
@@ -50,7 +50,7 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
     it('resolves nested groups', () => {
-      config.extends = ['automergeLinters'];
+      config.extends = [':automergeLinters'];
       const res = presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
@@ -164,15 +164,15 @@ describe('config/presets', () => {
   });
   describe('getPreset', () => {
     it('gets parameterised configs', () => {
-      const res = presets.getPreset('group(packages:eslint, eslint)', logger);
+      const res = presets.getPreset(':group(packages:eslint, eslint)', logger);
       expect(res).toMatchSnapshot();
     });
     it('handles missing params', () => {
-      const res = presets.getPreset('group()', logger);
+      const res = presets.getPreset(':group()', logger);
       expect(res).toMatchSnapshot();
     });
     it('ignores irrelevant params', () => {
-      const res = presets.getPreset('pinVersions(foo, bar)', logger);
+      const res = presets.getPreset(':pinVersions(foo, bar)', logger);
       expect(res).toMatchSnapshot();
     });
   });
