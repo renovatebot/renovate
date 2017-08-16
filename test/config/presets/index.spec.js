@@ -94,6 +94,16 @@ describe('config/presets', () => {
     });
   });
   describe('parsePreset', () => {
+    // default namespace
+    it('returns default package name', () => {
+      expect(presets.parsePreset(':base')).toMatchSnapshot();
+    });
+    it('returns default package name with params', () => {
+      expect(
+        presets.parsePreset(':group(packages/eslint, eslint)')
+      ).toMatchSnapshot();
+    }); /*
+    // scoped namespace
     it('returns simple scope', () => {
       expect(presets.parsePreset('@somescope')).toMatchSnapshot();
     });
@@ -134,25 +144,23 @@ describe('config/presets', () => {
         )
       ).toMatchSnapshot();
     });
+    // non-scoped namespace
+    it('returns non-scoped default', () => {
+      expect(presets.parsePreset('somepackage')).toMatchSnapshot();
+    });
     it('returns non-scoped package name', () => {
-      expect(presets.parsePreset('someuser:webapp')).toMatchSnapshot();
+      expect(presets.parsePreset('somepackage:webapp')).toMatchSnapshot();
     });
     it('returns non-scoped package name full', () => {
       expect(
-        presets.parsePreset('renovate-config-someuser:webapp')
+        presets.parsePreset('renovate-config-somepackage:webapp')
       ).toMatchSnapshot();
     });
     it('returns non-scoped package name with params', () => {
-      expect(presets.parsePreset('someuser:webapp(param1)')).toMatchSnapshot();
-    });
-    it('returns default package name', () => {
-      expect(presets.parsePreset('base')).toMatchSnapshot();
-    });
-    it('returns default package name with params', () => {
       expect(
-        presets.parsePreset('group(packages/eslint, eslint)')
+        presets.parsePreset('somepackage:webapp(param1)')
       ).toMatchSnapshot();
-    });
+    }); */
   });
   describe('getPreset', () => {
     it('gets parameterised configs', () => {
