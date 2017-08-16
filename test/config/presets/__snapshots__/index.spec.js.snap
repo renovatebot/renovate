@@ -41,6 +41,51 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset returns default package name 1`] = `
+Object {
+  "packageName": "renovate-config-default",
+  "params": undefined,
+  "presetName": "base",
+}
+`;
+
+exports[`config/presets parsePreset returns default package name with params 1`] = `
+Object {
+  "packageName": "renovate-config-default",
+  "params": Array [
+    "packages/eslint",
+    "eslint",
+  ],
+  "presetName": "group",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped package name 1`] = `
+Object {
+  "packageName": "renovate-config-someuser",
+  "params": undefined,
+  "presetName": "webapp",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped package name full 1`] = `
+Object {
+  "packageName": "renovate-config-someuser",
+  "params": undefined,
+  "presetName": "webapp",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped package name with params 1`] = `
+Object {
+  "packageName": "renovate-config-someuser",
+  "params": Array [
+    "param1",
+  ],
+  "presetName": "webapp",
+}
+`;
+
 exports[`config/presets parsePreset returns scope with packageName 1`] = `
 Object {
   "packageName": "@somescope/somepackagename",

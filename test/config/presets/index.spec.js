@@ -134,6 +134,25 @@ describe('config/presets', () => {
         )
       ).toMatchSnapshot();
     });
+    it('returns non-scoped package name', () => {
+      expect(presets.parsePreset('someuser:webapp')).toMatchSnapshot();
+    });
+    it('returns non-scoped package name full', () => {
+      expect(
+        presets.parsePreset('renovate-config-someuser:webapp')
+      ).toMatchSnapshot();
+    });
+    it('returns non-scoped package name with params', () => {
+      expect(presets.parsePreset('someuser:webapp(param1)')).toMatchSnapshot();
+    });
+    it('returns default package name', () => {
+      expect(presets.parsePreset('base')).toMatchSnapshot();
+    });
+    it('returns default package name with params', () => {
+      expect(
+        presets.parsePreset('group(packages/eslint, eslint)')
+      ).toMatchSnapshot();
+    });
   });
   describe('getPreset', () => {
     it('gets parameterised configs', () => {
