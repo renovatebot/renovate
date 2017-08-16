@@ -93,6 +93,48 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
   });
+  describe('parsePreset', () => {
+    it('returns simple scope', () => {
+      expect(presets.parsePreset('@somescope')).toMatchSnapshot();
+    });
+    it('returns simple scope and params', () => {
+      expect(presets.parsePreset('@somescope(param1)')).toMatchSnapshot();
+    });
+    it('returns scope with packageName', () => {
+      expect(
+        presets.parsePreset('@somescope/somepackagename')
+      ).toMatchSnapshot();
+    });
+    it('returns scope with packageName and params', () => {
+      expect(
+        presets.parsePreset(
+          '@somescope/somepackagename(param1, param2, param3)'
+        )
+      ).toMatchSnapshot();
+    });
+    it('returns scope with presetName', () => {
+      expect(
+        presets.parsePreset('@somescope:somePresetName')
+      ).toMatchSnapshot();
+    });
+    it('returns scope with presetName and params', () => {
+      expect(
+        presets.parsePreset('@somescope:somePresetName(param1)')
+      ).toMatchSnapshot();
+    });
+    it('returns scope with packageName and presetName', () => {
+      expect(
+        presets.parsePreset('@somescope/somepackagename:somePresetName')
+      ).toMatchSnapshot();
+    });
+    it('returns scope with packageName and presetName and params', () => {
+      expect(
+        presets.parsePreset(
+          '@somescope/somepackagename:somePresetName(param1, param2)'
+        )
+      ).toMatchSnapshot();
+    });
+  });
   describe('getPreset', () => {
     it('gets parameterised configs', () => {
       const res = presets.getPreset('group(packages:eslint, eslint)', logger);
