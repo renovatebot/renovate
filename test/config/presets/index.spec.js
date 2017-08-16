@@ -102,7 +102,7 @@ describe('config/presets', () => {
       expect(
         presets.parsePreset(':group(packages/eslint, eslint)')
       ).toMatchSnapshot();
-    }); /*
+    });
     // scoped namespace
     it('returns simple scope', () => {
       expect(presets.parsePreset('@somescope')).toMatchSnapshot();
@@ -110,12 +110,12 @@ describe('config/presets', () => {
     it('returns simple scope and params', () => {
       expect(presets.parsePreset('@somescope(param1)')).toMatchSnapshot();
     });
-    it('returns scope with packageName', () => {
+    it('returns scope with packageName and default', () => {
       expect(
         presets.parsePreset('@somescope/somepackagename')
       ).toMatchSnapshot();
     });
-    it('returns scope with packageName and params', () => {
+    it('returns scope with packageName and params and default', () => {
       expect(
         presets.parsePreset(
           '@somescope/somepackagename(param1, param2, param3)'
@@ -143,7 +143,7 @@ describe('config/presets', () => {
           '@somescope/somepackagename:somePresetName(param1, param2)'
         )
       ).toMatchSnapshot();
-    });
+    }); /*
     // non-scoped namespace
     it('returns non-scoped default', () => {
       expect(presets.parsePreset('somepackage')).toMatchSnapshot();
