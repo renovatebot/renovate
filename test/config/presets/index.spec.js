@@ -143,7 +143,7 @@ describe('config/presets', () => {
           '@somescope/somepackagename:somePresetName(param1, param2)'
         )
       ).toMatchSnapshot();
-    }); /*
+    });
     // non-scoped namespace
     it('returns non-scoped default', () => {
       expect(presets.parsePreset('somepackage')).toMatchSnapshot();
@@ -160,7 +160,7 @@ describe('config/presets', () => {
       expect(
         presets.parsePreset('somepackage:webapp(param1)')
       ).toMatchSnapshot();
-    }); */
+    });
   });
   describe('getPreset', () => {
     it('gets parameterised configs', () => {

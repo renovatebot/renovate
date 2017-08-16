@@ -60,6 +60,40 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset returns non-scoped default 1`] = `
+Object {
+  "packageName": "renovate-config-somepackage",
+  "params": undefined,
+  "presetName": "default",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped package name 1`] = `
+Object {
+  "packageName": "renovate-config-somepackage",
+  "params": undefined,
+  "presetName": ":webapp",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped package name full 1`] = `
+Object {
+  "packageName": "renovate-config-somepackage",
+  "params": undefined,
+  "presetName": ":webapp",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped package name with params 1`] = `
+Object {
+  "packageName": "renovate-config-somepackage",
+  "params": Array [
+    "param1",
+  ],
+  "presetName": ":webapp",
+}
+`;
+
 exports[`config/presets parsePreset returns scope with packageName and default 1`] = `
 Object {
   "packageName": "@somescope/somepackagename",
