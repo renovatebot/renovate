@@ -33,11 +33,10 @@ describe('config/presets', () => {
   describe('resolvePreset', () => {
     let config;
     beforeEach(() => {
-      jest.resetAllMocks();
       config = {
         logger,
       };
-    });
+    }); /*
     it('returns same if no presets', async () => {
       config.foo = 1;
       config.extends = [];
@@ -50,7 +49,15 @@ describe('config/presets', () => {
       config.extends = [':invalid-preset'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-    }); /*
+    }); */
+    it('works with valid', async () => {
+      config.foo = 1;
+      config.extends = [':pinVersions'];
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toMatchSnapshot();
+      expect(res.pinVersions).toBe(true);
+    });
+    /*
     it('works with valid and invalid', async () => {
       config.foo = 1;
       config.extends = [':invalid-preset', ':pinVersions'];
@@ -81,7 +88,7 @@ describe('config/presets', () => {
       config.extends = [':automergeLinters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-    }); */
+    });
   });
   describe('replaceArgs', () => {
     const argMappings = {
@@ -221,6 +228,6 @@ describe('config/presets', () => {
     it('handles preset not found', async () => {
       const res = await presets.getPreset('wrongpreset:foo', logger);
       expect(res).toMatchSnapshot();
-    });
+    }); */
   });
 });
