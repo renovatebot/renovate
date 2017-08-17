@@ -36,7 +36,7 @@ describe('config/presets', () => {
       config = {
         logger,
       };
-    }); /*
+    });
     it('returns same if no presets', async () => {
       config.foo = 1;
       config.extends = [];
@@ -49,7 +49,7 @@ describe('config/presets', () => {
       config.extends = [':invalid-preset'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-    }); */
+    });
     it('works with valid', async () => {
       config.foo = 1;
       config.extends = [':pinVersions'];
@@ -57,13 +57,13 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
       expect(res.pinVersions).toBe(true);
     });
-    /*
     it('works with valid and invalid', async () => {
       config.foo = 1;
       config.extends = [':invalid-preset', ':pinVersions'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-    }); /*
+      expect(res.pinVersions).toBe(true);
+    });
     it('resolves app preset', async () => {
       config.extends = [':app'];
       const res = await presets.resolveConfigPresets(config);
@@ -83,12 +83,23 @@ describe('config/presets', () => {
       ];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-    });
+    }); /*
+    it('resolves linters', async () => {
+      config.extends = ['packages:linters'];
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toMatchSnapshot();
+      expect(res.packageNames).toHaveLength(1);
+      expect(res.packagePatterns).toHaveLength(2);
+    }); /*
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-    });
+      const rule = res.packageRules[0];
+      expect(rule.automerge).toEqual('any');
+      expect(rule.packageNames).toHaveLength(1);
+      expect(rule.packagePatterns).toHaveLength(2);
+    }); */
   });
   describe('replaceArgs', () => {
     const argMappings = {
@@ -204,7 +215,7 @@ describe('config/presets', () => {
         logger
       );
       expect(res).toMatchSnapshot();
-    });
+    }); /*
     it('handles missing params', async () => {
       const res = await presets.getPreset(':group()', logger);
       expect(res).toMatchSnapshot();
