@@ -209,13 +209,17 @@ describe('config/presets', () => {
     });
   });
   describe('getPreset', () => {
+    it('gets linters', async () => {
+      const res = await presets.getPreset('packages:linters', logger);
+      expect(res).toMatchSnapshot();
+    });
     it('gets parameterised configs', async () => {
       const res = await presets.getPreset(
         ':group(packages:eslint, eslint)',
         logger
       );
       expect(res).toMatchSnapshot();
-    }); /*
+    });
     it('handles missing params', async () => {
       const res = await presets.getPreset(':group()', logger);
       expect(res).toMatchSnapshot();
@@ -239,6 +243,6 @@ describe('config/presets', () => {
     it('handles preset not found', async () => {
       const res = await presets.getPreset('wrongpreset:foo', logger);
       expect(res).toMatchSnapshot();
-    }); */
+    });
   });
 });
