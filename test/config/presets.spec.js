@@ -36,7 +36,7 @@ describe('config/presets', () => {
       config = {
         logger,
       };
-    }); /*
+    });
     it('returns same if no presets', async () => {
       config.foo = 1;
       config.extends = [];
@@ -83,14 +83,14 @@ describe('config/presets', () => {
       ];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-    }); */
+    });
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.packageNames).toHaveLength(1);
       expect(res.packagePatterns).toHaveLength(2);
-    }); /*
+    });
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
       const res = await presets.resolveConfigPresets(config);
@@ -99,7 +99,7 @@ describe('config/presets', () => {
       expect(rule.automerge).toEqual('any');
       expect(rule.packageNames).toHaveLength(1);
       expect(rule.packagePatterns).toHaveLength(2);
-    }); */
+    });
   });
   describe('replaceArgs', () => {
     const argMappings = {
