@@ -1,6 +1,16 @@
 {
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
+  "author": "Rhys Arkins <rhys@arkins.net>",
+  "license": "MIT",
+  "homepage": "https://github.com/singapore/renovate#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/singapore/renovate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/singapore/renovate/issues"
+  },
   "version": "0.0.0-semantic-release",
   "bin": "dist/renovate.js",
   "scripts": {
@@ -8,36 +18,17 @@
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "NODE_ENV=test LOG_LEVEL=fatal jest",
-    "lint-fix": "eslint --fix lib/**/*.js test/**/*.js",
     "lint": "eslint lib/**/*.js test/**/*.js",
+    "lint-fix": "eslint --fix lib/**/*.js test/**/*.js",
     "prepublishOnly": "npm run build",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node lib/renovate",
-    "test-dirty": "git diff --exit-code",
     "test": "npm run lint && npm run jest",
+    "test-dirty": "git diff --exit-code",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
-    "update-docs": "npm run build && bash bin/update-docs.sh",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/singapore/renovate.git"
-  },
-  "keywords": [
-    "npm",
-    "outdated",
-    "update"
-  ],
-  "author": "Rhys Arkins <rhys@arkins.net>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/singapore/renovate/issues"
-  },
-  "homepage": "https://github.com/singapore/renovate#readme",
-  "engines": {
-    "node": ">=6.11.1",
-    "npm": "5"
+    "update-docs": "npm run build && bash bin/update-docs.sh"
   },
   "dependencies": {
     "bunyan": "1.8.12",
@@ -88,6 +79,15 @@
     "rimraf": "2.6.1",
     "semantic-release": "6.3.6"
   },
+  "keywords": [
+    "npm",
+    "outdated",
+    "update"
+  ],
+  "engines": {
+    "node": ">=6.11.1",
+    "npm": "5"
+  },
   "babel": {
     "plugins": [
       "transform-async-to-generator",
@@ -108,6 +108,9 @@
     ],
     "setupTestFrameworkScriptFile": "./test/chai.js"
   },
+  "release": {
+    "verifyConditions": "condition-circle"
+  },
   "renovate": {
     "labels": [
       "ready"
@@ -120,12 +123,11 @@
     "rebaseStalePrs": true,
     "packageRules": [
       {
-        "packagePatterns": ["jest"],
+        "packagePatterns": [
+          "jest"
+        ],
         "groupName": "jest"
       }
     ]
-  },
-  "release": {
-    "verifyConditions": "condition-circle"
   }
 }

@@ -1,5 +1,5 @@
-const presets = require('../../../lib/config/presets');
-const logger = require('../../_fixtures/logger');
+const presets = require('../../lib/config/presets');
+const logger = require('../_fixtures/logger');
 
 describe('config/presets', () => {
   describe('resolvePreset', () => {
@@ -10,48 +10,48 @@ describe('config/presets', () => {
         logger,
       };
     });
-    it('returns same if no presets', () => {
+    it('returns same if no presets', async () => {
       config.foo = 1;
       config.extends = [];
-      const res = presets.resolveConfigPresets(config);
+      const res = await presets.resolveConfigPresets(config);
       expect(config).toMatchObject(res);
       expect(res).toMatchSnapshot();
     });
-    it('returns same if invalid preset', () => {
+    it('returns same if invalid preset', async () => {
       config.foo = 1;
       config.extends = [':invalid-preset'];
-      const res = presets.resolveConfigPresets(config);
+      const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
-    it('works with valid and invalid', () => {
+    it('works with valid and invalid', async () => {
       config.foo = 1;
       config.extends = [':invalid-preset', ':pinVersions'];
-      const res = presets.resolveConfigPresets(config);
+      const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
-    it('resolves app preset', () => {
+    it('resolves app preset', async () => {
       config.extends = [':app'];
-      const res = presets.resolveConfigPresets(config);
+      const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
-    it('combines two package alls', () => {
+    it('combines two package alls', async () => {
       config.extends = ['packages:eslint', 'packages:stylelint'];
-      const res = presets.resolveConfigPresets(config);
+      const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
-    it('resolves packageRule', () => {
+    it('resolves packageRule', async () => {
       config.packageRules = [
         {
           extends: ['packages:eslint'],
           groupName: 'eslint',
         },
       ];
-      const res = presets.resolveConfigPresets(config);
+      const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
-    it('resolves nested groups', () => {
+    it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
-      const res = presets.resolveConfigPresets(config);
+      const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
   });
@@ -61,12 +61,12 @@ describe('config/presets', () => {
       arg1: 'b',
       arg2: 'c',
     };
-    it('replaces args in strings', () => {
+    it('replaces args in strings', async () => {
       const str = '{{arg2}} foo {{arg0}}{{arg1}}';
       const res = presets.replaceArgs(str, argMappings);
       expect(res).toMatchSnapshot();
     });
-    it('replaces objects', () => {
+    it('replaces objects', async () => {
       const obj = {
         foo: 'ha {{arg0}}',
         bar: {
@@ -79,7 +79,7 @@ describe('config/presets', () => {
       const res = presets.replaceArgs(obj, argMappings);
       expect(res).toMatchSnapshot();
     });
-    it('replaces arrays', () => {
+    it('replaces arrays', async () => {
       const obj = {
         foo: [
           '{{arg0}}',
@@ -95,49 +95,49 @@ describe('config/presets', () => {
   });
   describe('parsePreset', () => {
     // default namespace
-    it('returns default package name', () => {
+    it('returns default package name', async () => {
       expect(presets.parsePreset(':base')).toMatchSnapshot();
     });
-    it('returns default package name with params', () => {
+    it('returns default package name with params', async () => {
       expect(
         presets.parsePreset(':group(packages/eslint, eslint)')
       ).toMatchSnapshot();
     });
     // scoped namespace
-    it('returns simple scope', () => {
+    it('returns simple scope', async () => {
       expect(presets.parsePreset('@somescope')).toMatchSnapshot();
     });
-    it('returns simple scope and params', () => {
+    it('returns simple scope and params', async () => {
       expect(presets.parsePreset('@somescope(param1)')).toMatchSnapshot();
     });
-    it('returns scope with packageName and default', () => {
+    it('returns scope with packageName and default', async () => {
       expect(
         presets.parsePreset('@somescope/somepackagename')
       ).toMatchSnapshot();
     });
-    it('returns scope with packageName and params and default', () => {
+    it('returns scope with packageName and params and default', async () => {
       expect(
         presets.parsePreset(
           '@somescope/somepackagename(param1, param2, param3)'
         )
       ).toMatchSnapshot();
     });
-    it('returns scope with presetName', () => {
+    it('returns scope with presetName', async () => {
       expect(
         presets.parsePreset('@somescope:somePresetName')
       ).toMatchSnapshot();
     });
-    it('returns scope with presetName and params', () => {
+    it('returns scope with presetName and params', async () => {
       expect(
         presets.parsePreset('@somescope:somePresetName(param1)')
       ).toMatchSnapshot();
     });
-    it('returns scope with packageName and presetName', () => {
+    it('returns scope with packageName and presetName', async () => {
       expect(
         presets.parsePreset('@somescope/somepackagename:somePresetName')
       ).toMatchSnapshot();
     });
-    it('returns scope with packageName and presetName and params', () => {
+    it('returns scope with packageName and presetName and params', async () => {
       expect(
         presets.parsePreset(
           '@somescope/somepackagename:somePresetName(param1, param2)'
@@ -145,35 +145,38 @@ describe('config/presets', () => {
       ).toMatchSnapshot();
     });
     // non-scoped namespace
-    it('returns non-scoped default', () => {
+    it('returns non-scoped default', async () => {
       expect(presets.parsePreset('somepackage')).toMatchSnapshot();
     });
-    it('returns non-scoped package name', () => {
+    it('returns non-scoped package name', async () => {
       expect(presets.parsePreset('somepackage:webapp')).toMatchSnapshot();
     });
-    it('returns non-scoped package name full', () => {
+    it('returns non-scoped package name full', async () => {
       expect(
         presets.parsePreset('renovate-config-somepackage:webapp')
       ).toMatchSnapshot();
     });
-    it('returns non-scoped package name with params', () => {
+    it('returns non-scoped package name with params', async () => {
       expect(
         presets.parsePreset('somepackage:webapp(param1)')
       ).toMatchSnapshot();
     });
-  });
+  }); /*
   describe('getPreset', () => {
-    it('gets parameterised configs', () => {
-      const res = presets.getPreset(':group(packages:eslint, eslint)', logger);
+    it('gets parameterised configs', async () => {
+      const res = await presets.getPreset(
+        ':group(packages:eslint, eslint)',
+        logger
+      );
       expect(res).toMatchSnapshot();
     });
-    it('handles missing params', () => {
-      const res = presets.getPreset(':group()', logger);
+    it('handles missing params', async () => {
+      const res = await presets.getPreset(':group()', logger);
       expect(res).toMatchSnapshot();
     });
-    it('ignores irrelevant params', () => {
-      const res = presets.getPreset(':pinVersions(foo, bar)', logger);
+    it('ignores irrelevant params', async () => {
+      const res = await presets.getPreset(':pinVersions(foo, bar)', logger);
       expect(res).toMatchSnapshot();
     });
-  });
+  }); */
 });
