@@ -1,6 +1,9 @@
 # Preset configs
 
-Renovate uses the term "presets" to refer to shareable config snippets, similar to eslint.
+Renovate uses the term "presets" to refer to shareable config snippets, similar to eslint. Unlike eslint though:
+
+-   Presets may be as small as a list of package names, or as large as a full config
+-   Shared config files can contain many presets
 
 ## Preset config URIs
 
