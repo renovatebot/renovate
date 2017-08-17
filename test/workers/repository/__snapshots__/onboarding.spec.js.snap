@@ -91,7 +91,7 @@ If you have any questions, try reading our [Getting Started Configuring Renovate
 
 ## Configuration Summary
 
-Based on the currently configured presets, you should expect to see the following behaviour:
+Based on the currently configured presets, Renovate will:
 <ul>
   <li>Start dependency updates once this Configure Renovate PR is merged or closed</li>
   <li>Assign PRs to @rarkins</li>
@@ -136,7 +136,7 @@ If you have any questions, try reading our [Getting Started Configuring Renovate
 
 ## Configuration Summary
 
-Based on the currently configured presets, you should expect to see the following behaviour:
+Based on the currently configured presets, Renovate will:
 <ul>
   <li>Start dependency updates once this Configure Renovate PR is merged or closed</li>
   <li>Description 1</li>
