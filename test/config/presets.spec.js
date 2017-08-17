@@ -112,6 +112,11 @@ describe('config/presets', () => {
       const res = presets.replaceArgs(str, argMappings);
       expect(res).toMatchSnapshot();
     });
+    it('replaces args twice in same string', async () => {
+      const str = '{{arg2}}{{arg0}} foo {{arg0}}{{arg1}}';
+      const res = presets.replaceArgs(str, argMappings);
+      expect(res).toEqual('ca foo ab');
+    });
     it('replaces objects', async () => {
       const obj = {
         foo: 'ha {{arg0}}',
