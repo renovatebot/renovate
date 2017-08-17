@@ -209,13 +209,12 @@ describe('config/presets', () => {
     });
   });
   describe('getPreset', () => {
-    /*
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', logger);
       expect(res).toMatchSnapshot();
       expect(res.packageNames).toHaveLength(1);
-      expect(res.packagePatterns).toHaveLength(2);
-    }); */
+      expect(res.extends).toHaveLength(2);
+    });
     it('gets parameterised configs', async () => {
       const res = await presets.getPreset(
         ':group(packages:eslint, eslint)',

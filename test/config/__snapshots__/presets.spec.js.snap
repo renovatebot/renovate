@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/presets getPreset gets linters 1`] = `
+Object {
+  "description": Array [
+    "All lint-related packages",
+  ],
+  "extends": Array [
+    "packages:eslint",
+    "packages:stylelint",
+  ],
+  "packageNames": Array [
+    "remark-lint",
+  ],
+}
+`;
+
 exports[`config/presets getPreset gets parameterised configs 1`] = `
 Object {
   "description": Array [
