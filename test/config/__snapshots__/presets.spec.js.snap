@@ -1,0 +1,446 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/presets getPreset gets linters 1`] = `
+Object {
+  "description": Array [
+    "All lint-related packages",
+  ],
+  "extends": Array [
+    "packages:eslint",
+    "packages:stylelint",
+  ],
+  "packageNames": Array [
+    "remark-lint",
+  ],
+}
+`;
+
+exports[`config/presets getPreset gets parameterised configs 1`] = `
+Object {
+  "description": Array [
+    "Group eslint packages into same branch/PR",
+  ],
+  "packageRules": Array [
+    Object {
+      "extends": Array [
+        "packages:eslint",
+      ],
+      "groupName": "eslint",
+    },
+  ],
+}
+`;
+
+exports[`config/presets getPreset handles 404 packages 1`] = `Object {}`;
+
+exports[`config/presets getPreset handles missing params 1`] = `
+Object {
+  "description": Array [
+    "Group {{arg1}} packages into same branch/PR",
+  ],
+  "packageRules": Array [
+    Object {
+      "extends": Array [
+        "",
+      ],
+      "groupName": "{{arg1}}",
+    },
+  ],
+}
+`;
+
+exports[`config/presets getPreset handles no config 1`] = `Object {}`;
+
+exports[`config/presets getPreset handles preset not found 1`] = `Object {}`;
+
+exports[`config/presets getPreset handles throw errors 1`] = `Object {}`;
+
+exports[`config/presets getPreset ignores irrelevant params 1`] = `
+Object {
+  "description": Array [
+    "Use version pinning (maintain a single version only and not semver ranges)",
+  ],
+  "pinVersions": true,
+}
+`;
+
+exports[`config/presets parsePreset returns default package name 1`] = `
+Object {
+  "packageName": "renovate-config-default",
+  "params": undefined,
+  "presetName": "base",
+}
+`;
+
+exports[`config/presets parsePreset returns default package name with params 1`] = `
+Object {
+  "packageName": "renovate-config-default",
+  "params": Array [
+    "packages/eslint",
+    "eslint",
+  ],
+  "presetName": "group",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped default 1`] = `
+Object {
+  "packageName": "renovate-config-somepackage",
+  "params": undefined,
+  "presetName": "default",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped package name 1`] = `
+Object {
+  "packageName": "renovate-config-somepackage",
+  "params": undefined,
+  "presetName": "webapp",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped package name full 1`] = `
+Object {
+  "packageName": "renovate-config-somepackage",
+  "params": undefined,
+  "presetName": "webapp",
+}
+`;
+
+exports[`config/presets parsePreset returns non-scoped package name with params 1`] = `
+Object {
+  "packageName": "renovate-config-somepackage",
+  "params": Array [
+    "param1",
+  ],
+  "presetName": "webapp",
+}
+`;
+
+exports[`config/presets parsePreset returns scope with packageName and default 1`] = `
+Object {
+  "packageName": "@somescope/somepackagename",
+  "params": undefined,
+  "presetName": "default",
+}
+`;
+
+exports[`config/presets parsePreset returns scope with packageName and params and default 1`] = `
+Object {
+  "packageName": "@somescope/somepackagename",
+  "params": Array [
+    "param1",
+    "param2",
+    "param3",
+  ],
+  "presetName": "default",
+}
+`;
+
+exports[`config/presets parsePreset returns scope with packageName and presetName 1`] = `
+Object {
+  "packageName": "@somescope/somepackagename",
+  "params": undefined,
+  "presetName": "somePresetName",
+}
+`;
+
+exports[`config/presets parsePreset returns scope with packageName and presetName and params 1`] = `
+Object {
+  "packageName": "@somescope/somepackagename",
+  "params": Array [
+    "param1",
+    "param2",
+  ],
+  "presetName": "somePresetName",
+}
+`;
+
+exports[`config/presets parsePreset returns scope with presetName 1`] = `
+Object {
+  "packageName": "@somescope/renovate-config",
+  "params": undefined,
+  "presetName": "somePresetName",
+}
+`;
+
+exports[`config/presets parsePreset returns scope with presetName and params 1`] = `
+Object {
+  "packageName": "@somescope/renovate-config",
+  "params": Array [
+    "param1",
+  ],
+  "presetName": "somePresetName",
+}
+`;
+
+exports[`config/presets parsePreset returns simple scope 1`] = `
+Object {
+  "packageName": "@somescope/renovate-config",
+  "params": undefined,
+  "presetName": "default",
+}
+`;
+
+exports[`config/presets parsePreset returns simple scope and params 1`] = `
+Object {
+  "packageName": "@somescope/renovate-config",
+  "params": Array [
+    "param1",
+  ],
+  "presetName": "default",
+}
+`;
+
+exports[`config/presets replaceArgs replaces args in strings 1`] = `"c foo ab"`;
+
+exports[`config/presets replaceArgs replaces arrays 1`] = `
+Object {
+  "foo": Array [
+    "a",
+    Object {
+      "bar": "b",
+      "baz": 5,
+    },
+  ],
+}
+`;
+
+exports[`config/presets replaceArgs replaces objects 1`] = `
+Object {
+  "bar": Object {
+    "aaa": Object {
+      "bbb": "woo c",
+    },
+    "baz": "b boo",
+  },
+  "foo": "ha a",
+}
+`;
+
+exports[`config/presets resolvePreset combines two package alls 1`] = `
+Object {
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "packagePatterns": Array [
+    "^eslint",
+    "^stylelint",
+  ],
+}
+`;
+
+exports[`config/presets resolvePreset resolves app preset 1`] = `
+Object {
+  "automerge": "none",
+  "branchprefix": "renovate/",
+  "dependencies": Object {
+    "description": Array [
+      "Use <code>fix(deps):</code> as semantic prefix for commit messages and PR titles",
+    ],
+    "semanticPrefix": "fix(deps):",
+  },
+  "description": Array [
+    "Use version pinning (maintain a single version only and not semver ranges)",
+    "Separate major versions of dependencies into individual branches/PRs",
+    "Use the same branch/PR for both patch and minor upgrades of a dependency",
+    "Only upgrade to stable npm versions",
+    "Do not upgrade versions past the \\"latest\\" tag in npm registry",
+    "Create branches/PRs for dependency upgrades as soon as they're available",
+    "Wait until branch tests have passed or failed before creating the PR",
+    "Use <code>renovate/</code> as prefix for all branch names",
+    "If semantic commits detected, use <code>fix(deps):</code> for dependencies and <code>chore(deps):</code> for all others",
+    "Do not automerge any upgrades - wait for humans to merge PRs",
+    "Update existing lock files only when <code>package.json</code> is modified",
+  ],
+  "devDependencies": Object {
+    "description": Array [
+      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
+    ],
+    "semanticPrefix": "chore(deps):",
+  },
+  "ignoreUnstable": true,
+  "lockFileMaintenance": Object {
+    "enabled": false,
+  },
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "optionalDependencies": Object {
+    "description": Array [
+      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
+    ],
+    "semanticPrefix": "chore(deps):",
+  },
+  "peerDependencies": Object {
+    "description": Array [
+      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
+    ],
+    "semanticPrefix": "chore(deps):",
+  },
+  "pinVersions": true,
+  "prCreation": "not-pending",
+  "respectLatest": true,
+  "separateMajorReleases": true,
+  "separatePatchReleases": false,
+  "unpublishSafe": false,
+}
+`;
+
+exports[`config/presets resolvePreset resolves linters 1`] = `
+Object {
+  "description": Array [
+    "All lint-related packages",
+  ],
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "packageNames": Array [
+    "remark-lint",
+  ],
+  "packagePatterns": Array [
+    "^eslint",
+    "^stylelint",
+  ],
+}
+`;
+
+exports[`config/presets resolvePreset resolves nested groups 1`] = `
+Object {
+  "description": Array [
+    "Update lint packages automatically if tests pass",
+  ],
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "packageRules": Array [
+    Object {
+      "automerge": "any",
+      "description": Array [
+        "All lint-related packages",
+      ],
+      "packageNames": Array [
+        "remark-lint",
+      ],
+      "packagePatterns": Array [
+        "^eslint",
+        "^stylelint",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`config/presets resolvePreset resolves packageRule 1`] = `
+Object {
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "packageRules": Array [
+    Object {
+      "groupName": "eslint",
+      "packagePatterns": Array [
+        "^eslint",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`config/presets resolvePreset returns same if invalid preset 1`] = `
+Object {
+  "foo": 1,
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+}
+`;
+
+exports[`config/presets resolvePreset returns same if no presets 1`] = `
+Object {
+  "foo": 1,
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+}
+`;
+
+exports[`config/presets resolvePreset works with valid 1`] = `
+Object {
+  "description": Array [
+    "Use version pinning (maintain a single version only and not semver ranges)",
+  ],
+  "foo": 1,
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "pinVersions": true,
+}
+`;
+
+exports[`config/presets resolvePreset works with valid and invalid 1`] = `
+Object {
+  "description": Array [
+    "Use version pinning (maintain a single version only and not semver ranges)",
+  ],
+  "foo": 1,
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "pinVersions": true,
+}
+`;

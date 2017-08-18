@@ -77,6 +77,95 @@ Alternatively, you can add the same configuration settings into a \\"renovate\\"
 ]
 `;
 
+exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates pr with dynamic descriptions 1`] = `
+Array [
+  "renovate/configure",
+  "Configure Renovate",
+  "Welcome to [Renovate](https://renovateapp.com)!
+
+This is an onboarding PR to help you understand and configure Renovate before any regular Pull Requests begin. Once you close this Pull Request, Renovate will begin keeping your dependencies up-to-date via automated Pull Requests.
+
+If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first.
+
+---
+
+## Configuration Summary
+
+Based on the currently configured presets, Renovate will:
+<ul>
+  <li>Start dependency updates once this Configure Renovate PR is merged or closed</li>
+  <li>Assign PRs to @rarkins</li>
+  <li>Apply labels <code>renovate</code> and <code>upgrades</code> to PRs</li>
+  <li>Run Renovate on following schedule: before 5am</li>
+
+</ul>
+
+---
+
+It looks like your repository dependencies are already up-to-date and no initial Pull Requests will be necessary.
+
+Sometimes you may see multiple options for the same dependency (e.g. pinning in one branch and upgrading in another). This is expected and allows you the flexibility to choose which to merge first. Once you merge any PR, others will be updated or removed the next time Renovate runs.
+
+Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch and this Pull Request description will be updated the next time Renovate runs.
+
+Our [Configuration Docs](https://renovateapp.com/docs/) should be helpful if you wish to modify any behaviour.
+
+---
+
+#### Don't want a \`renovate.json\` file?
+
+You are not required to *merge* this Pull Request - Renovate will begin even if this \\"Configure Renovate\\" PR is closed *unmerged* and without a \`renovate.json\` file. However, it's recommended that you add configuration to your repository to ensure behaviour matches what you see described here.
+
+Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
+",
+  true,
+]
+`;
+
+exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates pr with preset descriptions 1`] = `
+Array [
+  "renovate/configure",
+  "Configure Renovate",
+  "Welcome to [Renovate](https://renovateapp.com)!
+
+This is an onboarding PR to help you understand and configure Renovate before any regular Pull Requests begin. Once you close this Pull Request, Renovate will begin keeping your dependencies up-to-date via automated Pull Requests.
+
+If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first.
+
+---
+
+## Configuration Summary
+
+Based on the currently configured presets, Renovate will:
+<ul>
+  <li>Start dependency updates once this Configure Renovate PR is merged or closed</li>
+  <li>Description 1</li>
+  <li>Description 2</li>
+
+</ul>
+
+---
+
+It looks like your repository dependencies are already up-to-date and no initial Pull Requests will be necessary.
+
+Sometimes you may see multiple options for the same dependency (e.g. pinning in one branch and upgrading in another). This is expected and allows you the flexibility to choose which to merge first. Once you merge any PR, others will be updated or removed the next time Renovate runs.
+
+Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch and this Pull Request description will be updated the next time Renovate runs.
+
+Our [Configuration Docs](https://renovateapp.com/docs/) should be helpful if you wish to modify any behaviour.
+
+---
+
+#### Don't want a \`renovate.json\` file?
+
+You are not required to *merge* this Pull Request - Renovate will begin even if this \\"Configure Renovate\\" PR is closed *unmerged* and without a \`renovate.json\` file. However, it's recommended that you add configuration to your repository to ensure behaviour matches what you see described here.
+
+Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
+",
+  true,
+]
+`;
+
 exports[`lib/workers/repository/onboarding ensurePr(config, branchUpgrades) creates shows warnings and errors 1`] = `
 Array [
   Array [
@@ -90,7 +179,7 @@ If you have any questions, try reading our [Getting Started Configuring Renovate
 
 ---
 
-## Errors (1)
+### Errors (1)
 
 Renovate has raised errors when processing this repository that you should fix before merging or closing this PR.
 
@@ -221,11 +310,7 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{
-  \\"pinVersions\\": true,
-  \\"dependencies\\": {\\"pinVersions\\": false},
-  \\"ignoreNodeModules\\": true
-}
+      "contents": "{\\"extends\\": [\\"library\\"]}
 ",
       "name": "renovate.json",
     },
@@ -239,11 +324,7 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{
-  \\"pinVersions\\": true,
-  \\"dependencies\\": {\\"pinVersions\\": false},
-  \\"ignoreNodeModules\\": true
-}
+      "contents": "{\\"extends\\": [\\"library\\"]}
 ",
       "name": "renovate.json",
     },
@@ -257,7 +338,7 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{\\"pinVersions\\": true, \\"ignoreNodeModules\\": true}
+      "contents": "{\\"extends\\": [\\"app\\"]}
 ",
       "name": "renovate.json",
     },

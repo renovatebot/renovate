@@ -53,6 +53,28 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.updatePr.mock.calls.length).toBe(0);
       expect(config.api.createPr.mock.calls).toMatchSnapshot();
     });
+    it('creates pr with preset descriptions', async () => {
+      config.description = ['Description 1', 'Description 2'];
+      await onboarding.ensurePr(config, branchUpgrades);
+      expect(config.api.createPr.mock.calls.length).toBe(1);
+      expect(config.api.updatePr.mock.calls.length).toBe(0);
+      expect(
+        config.api.createPr.mock.calls[0][2].indexOf('## Configuration Summary')
+      ).not.toBe(-1);
+      expect(config.api.createPr.mock.calls[0]).toMatchSnapshot();
+    });
+    it('creates pr with dynamic descriptions', async () => {
+      config.labels = ['renovate', 'upgrades'];
+      config.assignees = ['rarkins'];
+      config.schedule = ['before 5am'];
+      await onboarding.ensurePr(config, branchUpgrades);
+      expect(config.api.createPr.mock.calls.length).toBe(1);
+      expect(config.api.updatePr.mock.calls.length).toBe(0);
+      expect(
+        config.api.createPr.mock.calls[0][2].indexOf('## Configuration Summary')
+      ).not.toBe(-1);
+      expect(config.api.createPr.mock.calls[0]).toMatchSnapshot();
+    });
     it('updates pr', async () => {
       config.api.getBranchPr.mockReturnValueOnce({});
       await onboarding.ensurePr(config, branchUpgrades);
@@ -274,8 +296,7 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('skips commit files if existing content matches', async () => {
-      const existingContent =
-        '{\n  "pinVersions": true,\n  "dependencies": {"pinVersions": false},\n  "ignoreNodeModules": true\n}\n';
+      const existingContent = '{"extends": ["library"]}\n';
       config.api.getFileContent.mockReturnValueOnce(existingContent);
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual(false);

@@ -19,6 +19,9 @@ const npmResponse = {
       type: 'git',
       url: 'git://github.com/renovateapp/dummy.git',
     },
+    'dist-tags': {
+      latest: '0.0.1',
+    },
     time: {
       '0.0.1': '',
     },
