@@ -15,7 +15,15 @@ describe('config/migration', () => {
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
         semanticCommits: false,
-        packages: [
+        packageRules: [
+          {
+            packagePatterns: '^(@angular|typescript)',
+            groupName: ['angular packages'],
+          },
+          {
+            packagePatterns: ['^foo'],
+            groupName: ['foo'],
+          },
           {
             packageName: 'angular',
             packagePattern: 'ang',
@@ -39,6 +47,23 @@ describe('config/migration', () => {
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.optionalDependencies.respectLatest).toBe(false);
       expect(migratedConfig.automerge).toEqual('none');
+      expect(migratedConfig).toMatchSnapshot();
+    });
+    it('it migrates packages', () => {
+      const config = {
+        packages: [
+          {
+            packagePatterns: '^(@angular|typescript)',
+            groupName: ['angular packages'],
+          },
+        ],
+      };
+      const parentConfig = { ...defaultConfig };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        parentConfig
+      );
+      expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
     });
     it('it does not migrate config', () => {
