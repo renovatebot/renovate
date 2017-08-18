@@ -12,6 +12,16 @@ Object {
   },
   "packageRules": Array [
     Object {
+      "groupName": "angular packages",
+      "packagePatterns": "^(@angular|typescript)",
+    },
+    Object {
+      "groupName": "foo",
+      "packagePatterns": Array [
+        "^foo",
+      ],
+    },
+    Object {
       "enabled": false,
       "packageNames": Array [
         "angular",
@@ -26,6 +36,17 @@ Object {
     "on the first day of the month",
   ],
   "semanticPrefix": "fix(deps):",
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it migrates packages 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "groupName": "angular packages",
+      "packagePatterns": "^(@angular|typescript)",
+    },
+  ],
 }
 `;
 
