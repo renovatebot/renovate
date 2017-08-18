@@ -109,21 +109,14 @@
     "setupTestFrameworkScriptFile": "./test/chai.js"
   },
   "renovate": {
-    "labels": [
-      "ready"
+    "extends": [
+      ":app",
+      ":automergePatch",
+      ":automergeBranchPush",
+      "group:monorepos"
     ],
-    "assignees": [
-      "rarkins"
-    ],
-    "prCreation": "not-pending",
-    "automerge": "minor",
-    "rebaseStalePrs": true,
-    "packageRules": [
-      {
-        "packagePatterns": ["jest"],
-        "groupName": "jest"
-      }
-    ]
+    "labels": ["ready"],
+    "assignees": ["rarkins"]
   },
   "release": {
     "verifyConditions": "condition-circle"
