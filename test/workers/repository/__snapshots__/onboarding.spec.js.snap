@@ -310,7 +310,9 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{\\"extends\\": [\\":library\\"]}
+      "contents": "{
+  \\"extends\\": [\\":library\\"]
+}
 ",
       "name": "renovate.json",
     },
@@ -324,7 +326,9 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{\\"extends\\": [\\":library\\"]}
+      "contents": "{
+  \\"extends\\": [\\":library\\"]
+}
 ",
       "name": "renovate.json",
     },
@@ -338,7 +342,9 @@ Array [
   "renovate/configure",
   Array [
     Object {
-      "contents": "{\\"extends\\": [\\":app\\"]}
+      "contents": "{
+  \\"extends\\": [\\":app\\"]
+}
 ",
       "name": "renovate.json",
     },
