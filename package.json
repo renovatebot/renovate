@@ -69,7 +69,7 @@
     "traverse": "0.6.6"
   },
   "devDependencies": {
-    "babel-cli": "6.24.1",
+    "babel-cli": "6.26.0",
     "babel-jest": "20.0.3",
     "babel-plugin-transform-async-to-generator": "6.24.1",
     "babel-plugin-transform-object-rest-spread": "6.23.0",
