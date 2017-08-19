@@ -35,6 +35,15 @@ describe('lib/workers/package/index', () => {
       expect(res[0].type).toEqual('error');
       expect(npmApi.getDependency.mock.calls.length).toBe(1);
     });
+    it('returns error if no npm scoped dep found', async () => {
+      config.depName = '@foo/something';
+      config.repoIsOnboarded = true;
+      config.schedule = 'some schedule';
+      const res = await pkgWorker.renovatePackage(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].type).toEqual('error');
+    });
     it('returns warning if warning found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
       versions.determineUpgrades = jest.fn(() => [
