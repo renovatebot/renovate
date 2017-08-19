@@ -3,6 +3,8 @@ const presets = require('../../lib/config/presets');
 const logger = require('../_fixtures/logger');
 const presetDefaults = require('../_fixtures/npm/renovate-config-default');
 const presetPackages = require('../_fixtures/npm/renovate-config-packages');
+const presetGroup = require('../_fixtures/npm/renovate-config-group');
+const presetMonorepo = require('../_fixtures/npm/renovate-config-monorepo');
 
 npm.getDependency = jest.fn(dep => {
   if (dep === 'renovate-config-default') {
@@ -13,6 +15,16 @@ npm.getDependency = jest.fn(dep => {
   if (dep === 'renovate-config-packages') {
     return {
       'renovate-config': presetPackages.versions['0.0.1']['renovate-config'],
+    };
+  }
+  if (dep === 'renovate-config-group') {
+    return {
+      'renovate-config': presetGroup.versions['0.0.3']['renovate-config'],
+    };
+  }
+  if (dep === 'renovate-config-monorepo') {
+    return {
+      'renovate-config': presetMonorepo.versions['0.0.2']['renovate-config'],
     };
   }
   if (dep === 'renovate-config-noconfig') {
@@ -66,6 +78,11 @@ describe('config/presets', () => {
     });
     it('resolves app preset', async () => {
       config.extends = [':app'];
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('resolves group monorepos', async () => {
+      config.extends = ['group:monorepos'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
