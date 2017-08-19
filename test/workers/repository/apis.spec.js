@@ -92,6 +92,17 @@ describe('workers/repository/apis', () => {
       const res = await apis.checkForLerna(config);
       expect(res).toMatchSnapshot();
     });
+    it('implies lerna package path', async () => {
+      const config = {
+        api: {
+          getFileJson: jest.fn(() => ({})),
+          getSubDirectories: jest.fn(() => ['a', 'b']),
+        },
+        logger,
+      };
+      const res = await apis.checkForLerna(config);
+      expect(res).toMatchSnapshot();
+    });
     it('returns lerna package names', async () => {
       const config = {
         api: {
