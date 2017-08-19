@@ -69,7 +69,7 @@ describe('api/github', () => {
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(installations).toMatchSnapshot();
     });
-    it('should retry 502s until failure', async () => {
+    it('should retry until failure', async () => {
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 502,
@@ -77,7 +77,9 @@ describe('api/github', () => {
       );
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
-          statusCode: 502,
+          statusCode: 403,
+          message:
+            'You have triggered an abuse detection mechanism. Please wait a few minutes before you try again.',
         })
       );
       ghGot.mockImplementationOnce(() =>
