@@ -312,14 +312,18 @@ Object {
   },
   "packageRules": Array [
     Object {
-      "description": "Group packages from angular monorepo together",
+      "description": Array [
+        "Group packages from angular monorepo together",
+      ],
       "groupName": "angular monorepo",
       "packagePatterns": Array [
         "^@angular/",
       ],
     },
     Object {
-      "description": "Group packages from babel monorepo together",
+      "description": Array [
+        "Group packages from babel monorepo together",
+      ],
       "groupName": "babel monorepo",
       "packageNames": Array [
         "babel-cli",
@@ -447,7 +451,9 @@ Object {
       ],
     },
     Object {
-      "description": "Group packages from jest monorepo together",
+      "description": Array [
+        "Group packages from jest monorepo together",
+      ],
       "groupName": "jest monorepo",
       "packageNames": Array [
         "babel-jest",
@@ -487,7 +493,9 @@ Object {
       ],
     },
     Object {
-      "description": "Group packages from lodash monorepo together",
+      "description": Array [
+        "Group packages from lodash monorepo together",
+      ],
       "groupName": "lodash monorepo",
       "packageNames": Array [
         "babel-plugin-lodash",
@@ -499,7 +507,9 @@ Object {
       ],
     },
     Object {
-      "description": "Group packages from pouchdb monorepo together",
+      "description": Array [
+        "Group packages from pouchdb monorepo together",
+      ],
       "groupName": "pouchdb monorepo",
       "packageNames": Array [
         "pouchdb-abstract-mapreduce",
@@ -543,7 +553,9 @@ Object {
       ],
     },
     Object {
-      "description": "Group packages from react monorepo together",
+      "description": Array [
+        "Group packages from react monorepo together",
+      ],
       "groupName": "react monorepo",
       "packageNames": Array [
         "react-art",
@@ -554,7 +566,9 @@ Object {
       ],
     },
     Object {
-      "description": "Group packages from storybook monorepo together",
+      "description": Array [
+        "Group packages from storybook monorepo together",
+      ],
       "groupName": "storybook monorepo",
       "packagePatterns": Array [
         "^@storybook/",
