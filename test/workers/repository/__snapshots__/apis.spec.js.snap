@@ -9,6 +9,15 @@ Object {
 
 exports[`workers/repository/apis checkForLerna(config) ignores zero length lerna 1`] = `Object {}`;
 
+exports[`workers/repository/apis checkForLerna(config) implies lerna package path 1`] = `
+Object {
+  "lernaPackages": Array [
+    "a",
+    "b",
+  ],
+}
+`;
+
 exports[`workers/repository/apis checkForLerna(config) returns lerna package names 1`] = `
 Object {
   "lernaPackages": Array [
