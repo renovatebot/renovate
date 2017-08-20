@@ -1,16 +1,16 @@
 const npmHelper = require('../../../lib/workers/branch/npm');
 const logger = require('../../_fixtures/logger');
 
-jest.mock('fs');
+jest.mock('fs-extra');
 jest.mock('child_process');
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const cp = require('child_process');
 
-const tmpDir = 'some-dir';
+const tmpDir = { name: 'some-dir' };
 
 describe('generateLockFile', () => {
-  fs.writeFileSync = jest.fn();
+  fs.outputFile = jest.fn();
   fs.readFileSync = jest.fn(() => 'package-lock-contents');
   cp.spawnSync = jest.fn(() => ({
     stdout: '',
@@ -18,12 +18,12 @@ describe('generateLockFile', () => {
   }));
   it('generates lock files', async () => {
     const packageLock = await npmHelper.generateLockFile(
-      tmpDir,
-      'package-json-contents',
+      tmpDir.name,
+      {},
       'npmrc-contents',
       logger
     );
-    expect(fs.writeFileSync.mock.calls.length).toEqual(2);
+    expect(fs.outputFile.mock.calls.length).toEqual(2);
     expect(fs.readFileSync.mock.calls.length).toEqual(1);
     expect(packageLock).toEqual('package-lock-contents');
   });

@@ -1,16 +1,16 @@
 const yarnHelper = require('../../../lib/workers/branch/yarn');
 const logger = require('../../_fixtures/logger');
 
-jest.mock('fs');
+jest.mock('fs-extra');
 jest.mock('child_process');
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const cp = require('child_process');
 
-const tmpDir = 'some-dir';
+const tmpDir = { name: 'some-dir' };
 
 describe('generateLockFile', () => {
-  fs.writeFileSync = jest.fn();
+  fs.outputFile = jest.fn();
   fs.readFileSync = jest.fn(() => 'yarn-lock-contents');
   cp.spawnSync = jest.fn(() => ({
     stdout: '',
@@ -18,13 +18,13 @@ describe('generateLockFile', () => {
   }));
   it('generates lock files', async () => {
     const yarnLock = await yarnHelper.generateLockFile(
-      tmpDir,
-      'package-json-contents',
+      tmpDir.name,
+      {},
       'npmrc-contents',
       'yarnrc-contents',
       logger
     );
-    expect(fs.writeFileSync.mock.calls.length).toEqual(3);
+    expect(fs.outputFile.mock.calls.length).toEqual(3);
     expect(fs.readFileSync.mock.calls.length).toEqual(1);
     expect(yarnLock).toEqual('yarn-lock-contents');
   });
