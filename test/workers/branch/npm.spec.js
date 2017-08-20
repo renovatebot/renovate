@@ -7,9 +7,7 @@ jest.mock('child_process');
 const fs = require('fs');
 const cp = require('child_process');
 
-const tmpDir = {
-  name: 'some-dir',
-};
+const tmpDir = 'some-dir';
 
 describe('generateLockFile', () => {
   fs.writeFileSync = jest.fn();
