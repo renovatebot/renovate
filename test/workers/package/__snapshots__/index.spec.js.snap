@@ -69,7 +69,7 @@ exports[`lib/workers/package/index renovatePackage(config) returns error if no n
 Array [
   Object {
     "assignees": Array [],
-    "automerge": "none",
+    "automerge": false,
     "automergeType": "pr",
     "branchName": "{{branchPrefix}}{{depName}}-{{newVersionMajor}}.x",
     "branchPrefix": "renovate/",
@@ -221,7 +221,7 @@ exports[`lib/workers/package/index renovatePackage(config) returns error if no n
 Array [
   Object {
     "assignees": Array [],
-    "automerge": "none",
+    "automerge": false,
     "automergeType": "pr",
     "branchName": "{{branchPrefix}}{{depName}}-{{newVersionMajor}}.x",
     "branchPrefix": "renovate/",
