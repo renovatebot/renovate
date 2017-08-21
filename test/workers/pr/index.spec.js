@@ -50,10 +50,19 @@ describe('workers/pr', () => {
     });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automergeEnabled = true;
+      pr.canRebase = true;
       pr.mergeable = true;
       config.api.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config, logger);
       expect(config.api.mergePr.mock.calls.length).toBe(1);
+    });
+    it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
+      config.automergeEnabled = true;
+      pr.canRebase = false;
+      pr.mergeable = true;
+      config.api.getBranchStatus.mockReturnValueOnce('success');
+      await prWorker.checkAutoMerge(pr, config, logger);
+      expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automergeEnabled = true;
