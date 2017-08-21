@@ -98,7 +98,7 @@ $ node renovate --help
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
     --unpublish-safe [boolean]           Set a status check for unpublish-safe upgrades
     --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
-    --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, patch, minor or any
+    --automerge [boolean]                Whether to automerge branches/PRs automatically, without human intervention
     --automerge-type <string>            How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only
     --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
     --group-name <string>                Human understandable name for the dependency group
@@ -144,6 +144,22 @@ Obviously, you can't set repository or package file location with this method.
   <th>Default value</th>
   <th>Environment</th>
   <th>CLI</th>
+</tr>
+<tr>
+  <td>`extends`</td>
+  <td>Configuration presets to use/extend</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td>`RENOVATE_EXTENDS`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`description`</td>
+  <td>Plain text description for a config or preset</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
 </tr>
 <tr>
   <td>`enabled`</td>
@@ -293,7 +309,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`dependencies`</td>
   <td>Configuration specifically for `package.json`>`dependencies`</td>
   <td>json</td>
-  <td><pre>{}</pre></td>
+  <td><pre>{"semanticPrefix": "fix(deps):"}</pre></td>
   <td>`RENOVATE_DEPENDENCIES`</td>
   <td><td>
 </tr>
@@ -455,7 +471,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`semanticCommits`</td>
   <td>Enable semantic commit prefixes for commits and PR titles</td>
   <td>boolean</td>
-  <td><pre>false</pre></td>
+  <td><pre>null</pre></td>
   <td>`RENOVATE_SEMANTIC_COMMITS`</td>
   <td>`--semantic-commits`<td>
 </tr>
@@ -487,7 +503,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`unpublishSafe`</td>
   <td>Set a status check for unpublish-safe upgrades</td>
   <td>boolean</td>
-  <td><pre>true</pre></td>
+  <td><pre>false</pre></td>
   <td>`RENOVATE_UNPUBLISH_SAFE`</td>
   <td>`--unpublish-safe`<td>
 </tr>
@@ -501,9 +517,9 @@ Obviously, you can't set repository or package file location with this method.
 </tr>
 <tr>
   <td>`automerge`</td>
-  <td>What types of upgrades to merge to base branch automatically. Values: none, patch, minor or any</td>
-  <td>string</td>
-  <td><pre>"none"</pre></td>
+  <td>Whether to automerge branches/PRs automatically, without human intervention</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
   <td>`RENOVATE_AUTOMERGE`</td>
   <td>`--automerge`<td>
 </tr>

@@ -3,9 +3,20 @@
 exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
 Object {
   "autodiscover": true,
-  "automerge": "none",
+  "automerge": false,
   "commitMessage": "some commit message",
+  "devDependencies": Object {
+    "minor": Object {
+      "automerge": true,
+    },
+    "patch": Object {
+      "automerge": true,
+    },
+  },
   "enabled": true,
+  "lockFileConfig": Object {
+    "automerge": true,
+  },
   "onboarding": false,
   "optionalDependencies": Object {
     "respectLatest": false,
