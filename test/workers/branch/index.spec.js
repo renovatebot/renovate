@@ -77,14 +77,14 @@ describe('workers/branch', () => {
       expect(config.api.deleteBranch.mock.calls.length).toBe(1);
     });
     it('returns branchName if automerge branch-push and not stale', async () => {
-      config.automergeEnabled = true;
+      config.automerge = true;
       config.automergeType = 'branch-push';
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
         branchName
       );
     });
     it('returns undefined if automerge branch-push and stale', async () => {
-      config.automergeEnabled = true;
+      config.automerge = true;
       config.automergeType = 'branch-push';
       config.api.isBranchStale.mockReturnValueOnce(true);
       expect(await branchWorker.getParentBranch(branchName, config)).toBe(
@@ -155,7 +155,7 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
-      config.automergeEnabled = true;
+      config.automerge = true;
       config.automergeType = 'pr';
       expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
@@ -203,7 +203,7 @@ describe('workers/branch', () => {
       config.api.branchExists.mockReturnValueOnce(true);
       config.api.getBranchStatus.mockReturnValueOnce('success');
       config.api.mergeBranch = jest.fn();
-      config.automergeEnabled = true;
+      config.automerge = true;
       config.automergeType = 'branch-push';
       expect(await branchWorker.ensureBranch(config)).toBe(false);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
@@ -220,7 +220,7 @@ describe('workers/branch', () => {
       config.api.branchExists.mockReturnValueOnce(true);
       config.api.getBranchStatus.mockReturnValueOnce('pending');
       config.api.mergeBranch = jest.fn();
-      config.automergeEnabled = true;
+      config.automerge = true;
       config.automergeType = 'branch-push';
       expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
@@ -236,7 +236,7 @@ describe('workers/branch', () => {
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
       config.api.getBranchStatus.mockReturnValueOnce('success');
-      config.automergeEnabled = true;
+      config.automerge = true;
       config.automergeType = 'branch-push';
       config.api.mergeBranch = jest.fn(() => {
         throw new Error('automerge failed');

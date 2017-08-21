@@ -8,7 +8,7 @@ describe('config/migration', () => {
         enabled: true,
         maintainYarnLock: true,
         onboarding: 'false',
-        automerge: false,
+        automerge: 'none',
         autodiscover: 'true',
         schedule: ['on the last day of the month'],
         commitMessage: '{{semanticPrefix}}some commit message',
@@ -30,6 +30,12 @@ describe('config/migration', () => {
             enabled: false,
           },
         ],
+        lockFileConfig: {
+          automerge: 'any',
+        },
+        devDependencies: {
+          automerge: 'minor',
+        },
         depTypes: [
           'dependencies',
           {
@@ -46,7 +52,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.optionalDependencies.respectLatest).toBe(false);
-      expect(migratedConfig.automerge).toEqual('none');
+      expect(migratedConfig.automerge).toEqual(false);
       expect(migratedConfig).toMatchSnapshot();
     });
     it('it migrates packages', () => {
