@@ -49,7 +49,7 @@ describe('workers/pr', () => {
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should automerge if enabled and pr is mergeable', async () => {
-      config.automergeEnabled = true;
+      config.automerge = true;
       pr.canRebase = true;
       pr.mergeable = true;
       config.api.getBranchStatus.mockReturnValueOnce('success');
@@ -57,7 +57,7 @@ describe('workers/pr', () => {
       expect(config.api.mergePr.mock.calls.length).toBe(1);
     });
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
-      config.automergeEnabled = true;
+      config.automerge = true;
       pr.canRebase = false;
       pr.mergeable = true;
       config.api.getBranchStatus.mockReturnValueOnce('success');
@@ -65,21 +65,21 @@ describe('workers/pr', () => {
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
-      config.automergeEnabled = true;
+      config.automerge = true;
       pr.mergeable = true;
       config.api.getBranchStatus.mockReturnValueOnce('pending');
       await prWorker.checkAutoMerge(pr, config, logger);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
-      config.automergeEnabled = true;
+      config.automerge = true;
       pr.mergeable = true;
       pr.mergeable_state = 'unstable';
       await prWorker.checkAutoMerge(pr, config, logger);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
-      config.automergeEnabled = true;
+      config.automerge = true;
       pr.mergeable = false;
       await prWorker.checkAutoMerge(pr, config, logger);
       expect(config.api.mergePr.mock.calls.length).toBe(0);
@@ -201,7 +201,7 @@ describe('workers/pr', () => {
       config.api.addReviewers = jest.fn();
       config.assignees = ['bar'];
       config.reviewers = ['baz'];
-      config.automergeEnabled = true;
+      config.automerge = true;
       const pr = await prWorker.ensurePr(config, logger);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(config.api.addAssignees.mock.calls.length).toBe(0);
@@ -233,7 +233,7 @@ describe('workers/pr', () => {
       expect(pr).toMatchSnapshot();
     });
     it('should create PR if branch automerging failed', async () => {
-      config.automergeEnabled = true;
+      config.automerge = true;
       config.automergeType = 'branch-push';
       config.api.getBranchStatus.mockReturnValueOnce('failure');
       config.api.getBranchPr = jest.fn();
@@ -241,7 +241,7 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should return null if branch automerging not failed', async () => {
-      config.automergeEnabled = true;
+      config.automerge = true;
       config.automergeType = 'branch-push';
       config.api.getBranchStatus.mockReturnValueOnce('pending');
       const pr = await prWorker.ensurePr(config, logger);

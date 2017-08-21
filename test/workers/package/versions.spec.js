@@ -51,10 +51,16 @@ describe('workers/package/versions', () => {
     });
     it('returns minor update if separate patches not configured', () => {
       config.currentVersion = '0.9.0';
-      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
+      expect(res.length).toBe(2);
+      expect(res[0].type).not.toEqual('patch');
+      expect(res[1].type).not.toEqual('patch');
     });
     it('returns patch update if automerging patch', () => {
-      config.automerge = 'patch';
+      config.patch = {
+        automerge: true,
+      };
       config.currentVersion = '0.9.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
@@ -271,32 +277,6 @@ describe('workers/package/versions', () => {
     });
     it('should return true for greater than', () => {
       versions.isPastLatest(qJson, '2.0.3').should.eql(true);
-    });
-  });
-  describe('.isAutomergeEnabled(automerge, type)', () => {
-    it('should return true for automerge = any', () => {
-      versions.isAutomergeEnabled('any', 'whatever').should.eql(true);
-    });
-    it('should return true for automerge = minor and type = minor', () => {
-      versions.isAutomergeEnabled('minor', 'minor').should.eql(true);
-    });
-    it('should return true for automerge = minor and type = patch', () => {
-      versions.isAutomergeEnabled('minor', 'patch').should.eql(true);
-    });
-    it('should return true for automerge = patch and type = patch', () => {
-      versions.isAutomergeEnabled('patch', 'patch').should.eql(true);
-    });
-    it('should return false for automerge = minor and type = major', () => {
-      versions.isAutomergeEnabled('minor', 'major').should.eql(false);
-    });
-    it('should return false for automerge = patch and type = minor', () => {
-      versions.isAutomergeEnabled('patch', 'minor').should.eql(false);
-    });
-    it('should return false for automerge = patch and type = major', () => {
-      versions.isAutomergeEnabled('patch', 'major').should.eql(false);
-    });
-    it('should return false for automerge = none', () => {
-      versions.isAutomergeEnabled('none', 'whatever').should.eql(false);
     });
   });
 });

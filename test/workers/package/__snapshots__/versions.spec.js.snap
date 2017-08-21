@@ -3,7 +3,7 @@
 exports[`workers/package/versions .determineUpgrades(npmDep, config) disables major release separation (major) 1`] = `
 Array [
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -17,7 +17,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -33,7 +32,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) disables major release separation (minor) 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.0.0",
     "changeLogToVersion": "1.4.1",
     "isMinor": true,
@@ -56,7 +54,6 @@ Object {
 exports[`workers/package/versions .determineUpgrades(npmDep, config) ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.9.7",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -67,7 +64,7 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -86,7 +83,7 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) pins minor ranged versions 1`] = `
 Array [
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -128,7 +125,6 @@ Object {
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns both updates if automerging minor 1`] = `
 Array [
   Object {
-    "automergeEnabled": true,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "0.9.7",
     "isMinor": true,
@@ -139,7 +135,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -150,7 +145,7 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -169,7 +164,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns minor update if separate patches not configured 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "0.9.7",
     "isMinor": true,
@@ -180,7 +174,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -196,7 +189,7 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns only one update if automerging any 1`] = `
 Array [
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -210,7 +203,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": true,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -226,7 +218,7 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns only one update if grouping 1`] = `
 Array [
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -240,7 +232,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -256,7 +247,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns patch minor and major 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.8.0",
     "changeLogToVersion": "0.9.7",
     "isMinor": true,
@@ -267,7 +257,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.8.0",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -278,7 +267,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.8.0",
     "changeLogToVersion": "0.8.12",
     "isPatch": true,
@@ -294,7 +282,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns patch update if automerging patch 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -305,7 +292,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": true,
     "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "0.9.7",
     "isPatch": true,
@@ -321,7 +307,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns patch update if separatePatchReleases 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -332,7 +317,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "0.9.7",
     "isPatch": true,
@@ -348,7 +332,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) should allow unstable versions if the current version is unstable 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.0.0-beta",
     "changeLogToVersion": "1.1.0-beta",
     "isMinor": true,
@@ -376,7 +359,6 @@ Object {
 exports[`workers/package/versions .determineUpgrades(npmDep, config) should treat zero zero caret ranges as pinned 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.0.34",
     "changeLogToVersion": "0.0.35",
     "isMinor": true,
@@ -393,7 +375,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) supports > latest versions if configured 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.4.1",
     "changeLogToVersion": "2.0.1",
     "isMajor": true,
@@ -409,7 +390,7 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) supports future versions if already future 1`] = `
 Array [
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -428,7 +409,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) supports future versions if configured 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.4.1",
     "changeLogToVersion": "2.0.3",
     "isMajor": true,
@@ -444,7 +424,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) supports minor and major upgrades for ranged versions 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "0.9.7",
     "isMinor": true,
@@ -455,7 +434,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -466,7 +444,7 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -485,7 +463,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) supports minor and major upgrades for tilde ranges 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "0.9.7",
     "isMinor": true,
@@ -496,7 +473,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -507,7 +483,7 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -526,7 +502,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades .x major ranges without pinning 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.9.7",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -543,7 +518,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades .x minor ranges 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.3.0",
     "changeLogToVersion": "1.4.1",
     "isMinor": true,
@@ -554,7 +528,7 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -573,7 +547,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades .x minor ranges without pinning 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.3.0",
     "changeLogToVersion": "1.4.1",
     "isMinor": true,
@@ -590,7 +563,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades less than equal ranges without pinning 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.7.2",
     "changeLogToVersion": "0.9.7",
     "isMinor": true,
@@ -602,7 +574,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.7.2",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -619,7 +590,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades minor ranged versions 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.0.1",
     "changeLogToVersion": "1.4.1",
     "isMinor": true,
@@ -630,7 +600,7 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -649,7 +619,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades multiple caret ranges without pinning 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.7.2",
     "changeLogToVersion": "0.9.7",
     "isMinor": true,
@@ -661,7 +630,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.7.2",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -678,7 +646,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades multiple tilde ranges without pinning 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.7.2",
     "changeLogToVersion": "0.9.7",
     "isMinor": true,
@@ -690,7 +657,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.7.2",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -707,7 +673,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades shorthand major ranges without pinning 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "0.9.7",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -724,7 +689,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades shorthand minor ranges without pinning 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.3.0",
     "changeLogToVersion": "1.4.1",
     "isMinor": true,
@@ -741,7 +705,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades tilde ranges 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.3.0",
     "changeLogToVersion": "1.4.1",
     "isMinor": true,
@@ -752,7 +715,7 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automergeEnabled": true,
+    "automerge": true,
     "group": Object {
       "prTitle": "{{groupName}}",
       "semanticPrefix": "refactor(deps):",
@@ -771,7 +734,6 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) upgrades tilde ranges without pinning 1`] = `
 Array [
   Object {
-    "automergeEnabled": false,
     "changeLogFromVersion": "1.3.0",
     "changeLogToVersion": "1.4.1",
     "isMinor": true,
