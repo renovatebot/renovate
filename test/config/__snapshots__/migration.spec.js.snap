@@ -12,9 +12,6 @@ Object {
     "minor": Object {
       "automerge": true,
     },
-    "patch": Object {
-      "automerge": true,
-    },
   },
   "enabled": true,
   "lockFileConfig": Object {
@@ -22,6 +19,12 @@ Object {
   },
   "onboarding": false,
   "optionalDependencies": Object {
+    "major": Object {
+      "automerge": false,
+    },
+    "minor": Object {
+      "automerge": true,
+    },
     "respectLatest": false,
   },
   "packageRules": Array [
@@ -96,8 +99,5 @@ Object {
       },
     },
   ],
-  "patch": Object {
-    "automerge": true,
-  },
 }
 `;

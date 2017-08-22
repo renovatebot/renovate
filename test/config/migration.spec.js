@@ -41,6 +41,7 @@ describe('config/migration', () => {
           {
             depType: 'optionalDependencies',
             respectLatest: false,
+            automerge: 'minor',
           },
         ],
       };
