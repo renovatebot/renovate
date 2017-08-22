@@ -121,6 +121,7 @@ describe('workers/branch', () => {
       config.api.getBranchStatus = jest.fn();
       config.api.getBranchStatusCheck = jest.fn();
       config.api.setBranchStatus = jest.fn();
+      config.tmpDir = { name: 'some-dir' };
       config.depName = 'dummy';
       config.currentVersion = '1.0.0';
       config.newVersion = '1.1.0';

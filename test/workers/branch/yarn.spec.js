@@ -1,17 +1,16 @@
 const yarnHelper = require('../../../lib/workers/branch/yarn');
 const logger = require('../../_fixtures/logger');
 
-jest.mock('fs');
+jest.mock('fs-extra');
 jest.mock('child_process');
-jest.mock('tmp');
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const cp = require('child_process');
-const tmp = require('tmp');
 
-describe('generateLockFile(newPackageJson, npmrcContent, yarnrcContent, logger)', () => {
-  tmp.dirSync = jest.fn(() => ({ name: 'somedir' }));
-  fs.writeFileSync = jest.fn();
+const tmpDir = { name: 'some-dir' };
+
+describe('generateLockFile', () => {
+  fs.outputFile = jest.fn();
   fs.readFileSync = jest.fn(() => 'yarn-lock-contents');
   cp.spawnSync = jest.fn(() => ({
     stdout: '',
@@ -19,18 +18,18 @@ describe('generateLockFile(newPackageJson, npmrcContent, yarnrcContent, logger)'
   }));
   it('generates lock files', async () => {
     const yarnLock = await yarnHelper.generateLockFile(
-      'package-json-contents',
+      tmpDir.name,
+      {},
       'npmrc-contents',
       'yarnrc-contents',
       logger
     );
-    expect(tmp.dirSync.mock.calls.length).toEqual(1);
-    expect(fs.writeFileSync.mock.calls.length).toEqual(3);
+    expect(fs.outputFile.mock.calls.length).toEqual(3);
     expect(fs.readFileSync.mock.calls.length).toEqual(1);
     expect(yarnLock).toEqual('yarn-lock-contents');
   });
 });
-describe('getLockFile(packageJson, config)', () => {
+describe('getLockFile', () => {
   let api;
   beforeEach(() => {
     api = {
@@ -39,9 +38,9 @@ describe('getLockFile(packageJson, config)', () => {
   });
   it('returns null if no existing yarn.lock', async () => {
     api.getFileContent.mockReturnValueOnce(false);
-    expect(await yarnHelper.getLockFile('package.json', '', api, '')).toBe(
-      null
-    );
+    expect(
+      await yarnHelper.getLockFile(tmpDir, 'package.json', '', api, '')
+    ).toBe(null);
   });
   it('returns yarn.lock file', async () => {
     api.getFileContent.mockReturnValueOnce('Existing yarn.lock');
@@ -54,12 +53,12 @@ describe('getLockFile(packageJson, config)', () => {
       contents: 'New yarn.lock',
     };
     expect(
-      await yarnHelper.getLockFile('package.json', '', api, '')
+      await yarnHelper.getLockFile(tmpDir, 'package.json', '', api, '')
     ).toMatchObject(yarnLockFile);
   });
 });
 
-describe('maintainLockFile(inputConfig)', () => {
+describe('maintainLockFile', () => {
   let config;
   beforeEach(() => {
     config = { logger };
@@ -67,6 +66,7 @@ describe('maintainLockFile(inputConfig)', () => {
     config.api = {
       getFileContent: jest.fn(),
     };
+    config.tmpDir = tmpDir;
     config.api.getFileContent.mockReturnValueOnce('oldPackageContent');
     yarnHelper.getLockFile = jest.fn();
   });
