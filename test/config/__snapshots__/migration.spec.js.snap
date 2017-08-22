@@ -6,6 +6,9 @@ Object {
   "automerge": false,
   "commitMessage": "some commit message",
   "devDependencies": Object {
+    "major": Object {
+      "automerge": false,
+    },
     "minor": Object {
       "automerge": true,
     },
@@ -67,6 +70,34 @@ Object {
     "optionalDependencies": Object {
       "respectLatest": false,
     },
+  },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it overrides existing automerge setting 1`] = `
+Object {
+  "major": Object {
+    "automerge": false,
+  },
+  "minor": Object {
+    "automerge": true,
+  },
+  "packageRules": Array [
+    Object {
+      "major": Object {
+        "automerge": false,
+      },
+      "minor": Object {
+        "automerge": false,
+      },
+      "packagePatterns": "^(@angular|typescript)",
+      "patch": Object {
+        "automerge": true,
+      },
+    },
+  ],
+  "patch": Object {
+    "automerge": true,
   },
 }
 `;

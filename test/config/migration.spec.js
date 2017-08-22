@@ -72,6 +72,25 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
     });
+    it('it overrides existing automerge setting', () => {
+      const config = {
+        automerge: 'minor',
+        packages: [
+          {
+            packagePatterns: '^(@angular|typescript)',
+            automerge: 'patch',
+          },
+        ],
+      };
+      const parentConfig = { ...defaultConfig };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        parentConfig
+      );
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig.packageRules[0].minor.automerge).toBe(false);
+    });
     it('it does not migrate config', () => {
       const config = {
         enabled: true,
