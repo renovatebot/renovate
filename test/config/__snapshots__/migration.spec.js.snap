@@ -26,6 +26,7 @@ Object {
       "automerge": true,
     },
     "respectLatest": false,
+    "schedule": "before 5am on Monday",
   },
   "packageRules": Array [
     Object {
@@ -49,9 +50,7 @@ Object {
     },
   ],
   "prTitle": "some pr title",
-  "schedule": Array [
-    "on the first day of the month",
-  ],
+  "schedule": "on the first day of the month",
   "semanticPrefix": "fix(deps):",
 }
 `;
@@ -98,6 +97,15 @@ Object {
         "automerge": true,
       },
     },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates schedules with and 1`] = `
+Object {
+  "schedule": Array [
+    "after 10pm",
+    "before 7am",
   ],
 }
 `;
