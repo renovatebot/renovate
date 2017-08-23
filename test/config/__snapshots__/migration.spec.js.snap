@@ -1,5 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
+Object {
+  "schedule": "after 5:00pm on wednesday and thursday",
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
 Object {
   "autodiscover": true,
@@ -101,7 +107,7 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) migrates schedules with and 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
 Object {
   "schedule": Array [
     "after 10pm",
