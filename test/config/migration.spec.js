@@ -10,7 +10,7 @@ describe('config/migration', () => {
         onboarding: 'false',
         automerge: 'none',
         autodiscover: 'true',
-        schedule: ['on the last day of the month'],
+        schedule: 'on the last day of the month',
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
@@ -42,6 +42,7 @@ describe('config/migration', () => {
             depType: 'optionalDependencies',
             respectLatest: false,
             automerge: 'minor',
+            schedule: 'before 5am on Mondays',
           },
         ],
       };
@@ -55,6 +56,21 @@ describe('config/migration', () => {
       expect(migratedConfig.optionalDependencies.respectLatest).toBe(false);
       expect(migratedConfig.automerge).toEqual(false);
       expect(migratedConfig).toMatchSnapshot();
+    });
+    it('migrates schedules with and', () => {
+      const config = {
+        schedule: 'after 10pm and before 7am',
+      };
+      const parentConfig = { ...defaultConfig };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        parentConfig
+      );
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig.schedule.length).toBe(2);
+      expect(migratedConfig.schedule[0]).toEqual('after 10pm');
+      expect(migratedConfig.schedule[1]).toEqual('before 7am');
     });
     it('it migrates packages', () => {
       const config = {
