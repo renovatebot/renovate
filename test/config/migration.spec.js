@@ -57,7 +57,7 @@ describe('config/migration', () => {
       expect(migratedConfig.automerge).toEqual(false);
       expect(migratedConfig).toMatchSnapshot();
     });
-    it('migrates schedules with and', () => {
+    it('migrates before and after schedules', () => {
       const config = {
         schedule: 'after 10pm and before 7am',
       };
@@ -71,6 +71,19 @@ describe('config/migration', () => {
       expect(migratedConfig.schedule.length).toBe(2);
       expect(migratedConfig.schedule[0]).toEqual('after 10pm');
       expect(migratedConfig.schedule[1]).toEqual('before 7am');
+    });
+    it('does not migrate multi days', () => {
+      const config = {
+        schedule: 'after 5:00pm on wednesday and thursday',
+      };
+      const parentConfig = { ...defaultConfig };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        parentConfig
+      );
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBe(false);
+      expect(migratedConfig.schedule).toEqual(config.schedule);
     });
     it('it migrates packages', () => {
       const config = {

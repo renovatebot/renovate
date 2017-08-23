@@ -38,6 +38,11 @@ describe('workers/branch/schedule', () => {
         true
       );
     });
+    it('returns true for multi day schedules', () => {
+      expect(
+        schedule.hasValidSchedule(['after 5:00pm on wednesday and thursday'])[0]
+      ).toBe(true);
+    });
     it('returns true if schedule has a start time', () => {
       expect(schedule.hasValidSchedule(['after 8:00pm'])[0]).toBe(true);
     });

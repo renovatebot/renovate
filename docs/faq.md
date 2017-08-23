@@ -61,8 +61,8 @@ Example scheduling:
 ```
 every weekend
 before 5:00am
-after 10pm and before 5:00am
-after 10pm and before 5am every weekday
+[after 10pm, before 5:00am]
+[after 10pm every weekday, before 5am every weekday]
 on friday and saturday
 ```
 
