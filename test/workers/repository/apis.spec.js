@@ -125,7 +125,7 @@ describe('workers/repository/apis', () => {
       expect(res.platform).toEqual('github');
       expect(githubApi.initRepo.mock.calls.length).toBe(1);
       expect(gitlabApi.initRepo.mock.calls.length).toBe(0);
-      expect(npmApi.setNpmrc.mock.calls.length).toBe(1);
+      expect(npmApi.setNpmrc.mock.calls.length).toBe(0);
     });
     it('returns gitlab api', async () => {
       const config = { logger, platform: 'gitlab' };
@@ -133,7 +133,7 @@ describe('workers/repository/apis', () => {
       expect(res.platform).toEqual('gitlab');
       expect(githubApi.initRepo.mock.calls.length).toBe(0);
       expect(gitlabApi.initRepo.mock.calls.length).toBe(1);
-      expect(npmApi.setNpmrc.mock.calls.length).toBe(1);
+      expect(npmApi.setNpmrc.mock.calls.length).toBe(0);
     });
     it('throws if unknown platform', async () => {
       const config = { platform: 'foo' };
