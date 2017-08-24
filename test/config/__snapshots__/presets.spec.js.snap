@@ -238,7 +238,7 @@ Object {
 
 exports[`config/presets resolvePreset resolves app preset 1`] = `
 Object {
-  "automerge": "none",
+  "automerge": false,
   "branchprefix": "renovate/",
   "dependencies": Object {
     "description": Array [
@@ -251,12 +251,12 @@ Object {
     "Separate major versions of dependencies into individual branches/PRs",
     "Use the same branch/PR for both patch and minor upgrades of a dependency",
     "Only upgrade to stable npm versions",
-    "Do not upgrade versions past the \\"latest\\" tag in npm registry",
+    "Upgrade versions up to the \\"latest\\" tag in npm registry",
     "Create branches/PRs for dependency upgrades as soon as they're available",
     "Wait until branch tests have passed or failed before creating the PR",
     "Use <code>renovate/</code> as prefix for all branch names",
     "If semantic commits detected, use <code>fix(deps):</code> for dependencies and <code>chore(deps):</code> for all others",
-    "Do not automerge any upgrades - wait for humans to merge PRs",
+    "Disable automerging feature - wait for humans to merge all PRs",
     "Update existing lock files only when <code>package.json</code> is modified",
   ],
   "devDependencies": Object {
@@ -296,6 +296,23 @@ Object {
   "separateMajorReleases": true,
   "separatePatchReleases": false,
   "unpublishSafe": false,
+}
+`;
+
+exports[`config/presets resolvePreset resolves eslint 1`] = `
+Object {
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "packagePatterns": Array [
+    "^eslint",
+  ],
 }
 `;
 
@@ -618,7 +635,7 @@ Object {
   },
   "packageRules": Array [
     Object {
-      "automerge": "any",
+      "automerge": true,
       "description": Array [
         "All lint-related packages",
       ],

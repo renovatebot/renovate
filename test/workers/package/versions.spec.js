@@ -39,13 +39,13 @@ describe('workers/package/versions', () => {
       config.currentVersion = '^0.4.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
-    it('returns only one update if automerging any', () => {
-      config.automerge = 'any';
+    it('returns only one update if automerging major', () => {
+      config.major = { automerge: true };
       config.currentVersion = '^0.4.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('returns both updates if automerging minor', () => {
-      config.automerge = 'minor';
+      config.minor = { automerge: true };
       config.currentVersion = '^0.4.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
