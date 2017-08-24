@@ -184,6 +184,34 @@ describe('workers/pr', () => {
       expect(config.api.addReviewers.mock.calls.length).toBe(1);
       expect(config.api.addReviewers.mock.calls).toMatchSnapshot();
     });
+    it('should add reviewers even if assignees fails', async () => {
+      config.api.getBranchPr = jest.fn();
+      config.api.addAssignees = jest.fn(() => {
+        throw new Error('some error');
+      });
+      config.api.addReviewers = jest.fn();
+      config.assignees = ['@foo', 'bar'];
+      config.reviewers = ['baz', '@boo'];
+      config.logger = logger;
+      const pr = await prWorker.ensurePr(config, logger);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(config.api.addAssignees.mock.calls.length).toBe(1);
+      expect(config.api.addReviewers.mock.calls.length).toBe(1);
+    });
+    it('should handled failed reviewers add', async () => {
+      config.api.getBranchPr = jest.fn();
+      config.api.addAssignees = jest.fn();
+      config.api.addReviewers = jest.fn(() => {
+        throw new Error('some error');
+      });
+      config.assignees = ['@foo', 'bar'];
+      config.reviewers = ['baz', '@boo'];
+      config.logger = logger;
+      const pr = await prWorker.ensurePr(config, logger);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(config.api.addAssignees.mock.calls.length).toBe(1);
+      expect(config.api.addReviewers.mock.calls.length).toBe(1);
+    });
     it('should display errors and warnings', async () => {
       config.api.getBranchPr = jest.fn();
       const pr = await prWorker.ensurePr(config, logger, [{}], [{}]);
