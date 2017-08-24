@@ -9,22 +9,34 @@ const presetMonorepo = require('../_fixtures/npm/renovate-config-monorepo');
 npm.getDependency = jest.fn(dep => {
   if (dep === 'renovate-config-default') {
     return {
-      'renovate-config': presetDefaults.versions['0.0.1']['renovate-config'],
+      'renovate-config':
+        presetDefaults.versions[presetDefaults['dist-tags'].latest][
+          'renovate-config'
+        ],
     };
   }
   if (dep === 'renovate-config-packages') {
     return {
-      'renovate-config': presetPackages.versions['0.0.1']['renovate-config'],
+      'renovate-config':
+        presetPackages.versions[presetPackages['dist-tags'].latest][
+          'renovate-config'
+        ],
     };
   }
   if (dep === 'renovate-config-group') {
     return {
-      'renovate-config': presetGroup.versions['0.0.3']['renovate-config'],
+      'renovate-config':
+        presetGroup.versions[presetGroup['dist-tags'].latest][
+          'renovate-config'
+        ],
     };
   }
   if (dep === 'renovate-config-monorepo') {
     return {
-      'renovate-config': presetMonorepo.versions['0.0.2']['renovate-config'],
+      'renovate-config':
+        presetMonorepo.versions[presetMonorepo['dist-tags'].latest][
+          'renovate-config'
+        ],
     };
   }
   if (dep === 'renovate-config-noconfig') {
@@ -101,6 +113,12 @@ describe('config/presets', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
     });
+    it('resolves eslint', async () => {
+      config.extends = ['packages:eslint'];
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toMatchSnapshot();
+      expect(res.packagePatterns).toHaveLength(1);
+    });
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
@@ -113,7 +131,7 @@ describe('config/presets', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
-      expect(rule.automerge).toEqual('any');
+      expect(rule.automerge).toEqual(true);
       expect(rule.packageNames).toHaveLength(1);
       expect(rule.packagePatterns).toHaveLength(2);
     });
