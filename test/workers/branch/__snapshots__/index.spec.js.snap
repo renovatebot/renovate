@@ -73,3 +73,24 @@ Array [
   ],
 ]
 `;
+
+exports[`workers/branch writePackageFiles handles nested dirs 1`] = `
+Array [
+  Array [
+    "some-tmpdir/package.json",
+    "{}",
+  ],
+  Array [
+    "some-tmpdir/.npmrc",
+    "some-npmrc",
+  ],
+  Array [
+    "some-tmpdir/backend/package.json",
+    "{}",
+  ],
+  Array [
+    "some-tmpdir/backend/.yarnrc",
+    "some-yarnrc",
+  ],
+]
+`;

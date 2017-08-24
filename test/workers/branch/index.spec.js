@@ -1,3 +1,4 @@
+const fs = require('fs-extra');
 const branchWorker = require('../../../lib/workers/branch');
 const prWorker = require('../../../lib/workers/pr');
 const schedule = require('../../../lib/workers/branch/schedule');
@@ -8,6 +9,7 @@ const packageJsonHelper = require('../../../lib/workers/branch/package-json');
 
 const logger = require('../../_fixtures/logger');
 
+jest.mock('fs-extra');
 jest.mock('../../../lib/workers/branch/yarn');
 jest.mock('../../../lib/workers/branch/package-json');
 
@@ -101,6 +103,39 @@ describe('workers/branch', () => {
       expect(await branchWorker.getParentBranch(branchName, config)).not.toBe(
         undefined
       );
+    });
+  });
+  describe('writePackageFiles', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        logger,
+      };
+    });
+    it('skips empty packageFiles', async () => {
+      await branchWorker.writePackageFiles(config);
+    });
+    it('handles empty packageFiles', async () => {
+      config.packageFiles = [];
+      await branchWorker.writePackageFiles(config);
+    });
+    it('handles nested dirs', async () => {
+      config.tmpDir = { name: 'some-tmpdir' };
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          content: {},
+          npmrc: 'some-npmrc',
+        },
+        {
+          packageFile: 'backend/package.json',
+          content: {},
+          yarnrc: 'some-yarnrc',
+        },
+      ];
+      await branchWorker.writePackageFiles(config);
+      expect(fs.outputFile.mock.calls).toMatchSnapshot();
+      expect(fs.outputFile.mock.calls.length).toBe(4);
     });
   });
   describe('ensureBranch(config)', () => {
