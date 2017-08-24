@@ -274,7 +274,7 @@ describe('workers/repository/apis', () => {
       config = {
         packageFiles: ['package.json', { packageFile: 'a/package.json' }],
         api: {
-          getFileContent: jest.fn(),
+          getFileContent: jest.fn(() => null),
           getFileJson: jest.fn(),
         },
         logger,
@@ -287,8 +287,12 @@ describe('workers/repository/apis', () => {
     it('includes files with content', async () => {
       config.api.getFileJson.mockReturnValueOnce({ renovate: {} });
       config.api.getFileJson.mockReturnValueOnce({});
-      config.api.getFileContent.mockReturnValueOnce(true);
-      config.api.getFileContent.mockReturnValueOnce(true);
+      config.api.getFileContent.mockReturnValueOnce(null);
+      config.api.getFileContent.mockReturnValueOnce(null);
+      config.api.getFileContent.mockReturnValueOnce('some-content');
+      config.api.getFileContent.mockReturnValueOnce('some-content');
+      config.api.getFileContent.mockReturnValueOnce(null);
+      config.api.getFileContent.mockReturnValueOnce(null);
       const res = await apis.resolvePackageFiles(config);
       expect(res.packageFiles).toHaveLength(2);
       expect(res.packageFiles).toMatchSnapshot();
