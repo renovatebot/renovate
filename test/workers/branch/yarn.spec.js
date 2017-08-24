@@ -19,7 +19,7 @@ describe('generateLockFile', () => {
   it('generates lock files', async () => {
     const yarnLock = await yarnHelper.generateLockFile(
       tmpDir.name,
-      {},
+      '{ "workspaces": [] }',
       'npmrc-contents',
       'yarnrc-contents',
       logger
