@@ -113,7 +113,7 @@ describe('config/presets', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
-      expect(rule.automerge).toEqual('any');
+      expect(rule.major.automerge).toEqual(true);
       expect(rule.packageNames).toHaveLength(1);
       expect(rule.packagePatterns).toHaveLength(2);
     });

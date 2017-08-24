@@ -6,8 +6,8 @@ Object {
     "All lint-related packages",
   ],
   "extends": Array [
-    "packages:eslint",
-    "packages:stylelint",
+    "packages:allEslint",
+    "packages:allStyleLint",
   ],
   "packageNames": Array [
     "remark-lint",
@@ -595,10 +595,6 @@ Object {
   "packageNames": Array [
     "remark-lint",
   ],
-  "packagePatterns": Array [
-    "^eslint",
-    "^stylelint",
-  ],
 }
 `;
 
@@ -624,10 +620,6 @@ Object {
       ],
       "packageNames": Array [
         "remark-lint",
-      ],
-      "packagePatterns": Array [
-        "^eslint",
-        "^stylelint",
       ],
     },
   ],
