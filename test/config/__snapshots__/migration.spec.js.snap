@@ -109,9 +109,17 @@ Object {
 
 exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
 Object {
-  "schedule": Array [
-    "after 10pm",
-    "before 7am",
-  ],
+  "dependencies": Object {
+    "schedule": Array [
+      "after 10pm",
+      "before 7am",
+    ],
+  },
+  "devDependencies": Object {
+    "schedule": Array [
+      "after 10pm every weekday",
+      "before 7am every weekday",
+    ],
+  },
 }
 `;

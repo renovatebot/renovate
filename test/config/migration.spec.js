@@ -59,7 +59,12 @@ describe('config/migration', () => {
     });
     it('migrates before and after schedules', () => {
       const config = {
-        schedule: 'after 10pm and before 7am',
+        dependencies: {
+          schedule: 'after 10pm and before 7am',
+        },
+        devDependencies: {
+          schedule: 'after 10pm and before 7am on every weekday',
+        },
       };
       const parentConfig = { ...defaultConfig };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -68,9 +73,16 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
-      expect(migratedConfig.schedule.length).toBe(2);
-      expect(migratedConfig.schedule[0]).toEqual('after 10pm');
-      expect(migratedConfig.schedule[1]).toEqual('before 7am');
+      expect(migratedConfig.dependencies.schedule.length).toBe(2);
+      expect(migratedConfig.dependencies.schedule[0]).toEqual('after 10pm');
+      expect(migratedConfig.dependencies.schedule[1]).toEqual('before 7am');
+      expect(migratedConfig.devDependencies.schedule.length).toBe(2);
+      expect(migratedConfig.devDependencies.schedule[0]).toEqual(
+        'after 10pm every weekday'
+      );
+      expect(migratedConfig.devDependencies.schedule[1]).toEqual(
+        'before 7am every weekday'
+      );
     });
     it('does not migrate multi days', () => {
       const config = {

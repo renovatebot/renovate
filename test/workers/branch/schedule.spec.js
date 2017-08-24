@@ -26,13 +26,6 @@ describe('workers/branch/schedule', () => {
         false
       );
     });
-    it('returns true for massaged invalid schedule', () => {
-      expect(
-        schedule.hasValidSchedule([
-          'after 10pm and before 5am on every weekday',
-        ])[0]
-      ).toBe(true);
-    });
     it('returns true if schedule has days of week', () => {
       expect(schedule.hasValidSchedule(['on friday and saturday'])[0]).toBe(
         true
@@ -145,6 +138,26 @@ describe('workers/branch/schedule', () => {
       config.schedule = ['on monday and tuesday'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
+    });
+    it('supports every weekday', () => {
+      config.schedule = ['every weekday'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('supports every weekday', () => {
+      config.schedule = ['every weekend'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(false);
+    });
+    it('supports every weekday', () => {
+      config.schedule = ['before 11:00am every weekday'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('supports o every weekday', () => {
+      config.schedule = ['before 11:00am on inevery weekday'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
     });
   });
 });
