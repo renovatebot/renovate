@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/branch/lock-files determineLockFileDirs returns all directories if lock file maintenance 1`] = `
+Object {
+  "packageLockFileDirs": Array [
+    "backend",
+  ],
+  "yarnLockFileDirs": Array [
+    ".",
+  ],
+}
+`;
+
+exports[`workers/branch/lock-files determineLockFileDirs returns directories from updated package files 1`] = `
+Object {
+  "packageLockFileDirs": Array [
+    "backend",
+  ],
+  "yarnLockFileDirs": Array [
+    ".",
+  ],
+}
+`;

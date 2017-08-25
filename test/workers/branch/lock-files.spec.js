@@ -106,4 +106,43 @@ describe('workers/branch/lock-files', () => {
       expect(e).toBeDefined();
     });
   });
+  describe('determineLockFileDirs', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        logger,
+        packageFiles: [
+          {
+            packageFile: 'package.json',
+            hasYarnLock: true,
+          },
+          {
+            packageFile: 'backend/package.json',
+            hasPackageLock: true,
+          },
+        ],
+      };
+    });
+    it('returns all directories if lock file maintenance', () => {
+      config.upgrades = [{ type: 'lockFileMaintenance' }];
+      const res = determineLockFileDirs(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('returns directories from updated package files', () => {
+      config.upgrades = [{}];
+      config.updatedPackageFiles = [
+        {
+          name: 'package.json',
+          contents: 'some contents',
+        },
+        {
+          name: 'backend/package.json',
+          contents: 'some contents',
+        },
+      ];
+      const res = determineLockFileDirs(config);
+      expect(res).toMatchSnapshot();
+    });
+  });
 });
