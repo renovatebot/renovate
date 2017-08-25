@@ -5,6 +5,7 @@ const presetDefaults = require('../_fixtures/npm/renovate-config-default');
 const presetPackages = require('../_fixtures/npm/renovate-config-packages');
 const presetGroup = require('../_fixtures/npm/renovate-config-group');
 const presetMonorepo = require('../_fixtures/npm/renovate-config-monorepo');
+const presetIkatyang = require('../_fixtures/npm/renovate-config-ikatyang');
 
 npm.getDependency = jest.fn(dep => {
   if (dep === 'renovate-config-default') {
@@ -27,6 +28,14 @@ npm.getDependency = jest.fn(dep => {
     return {
       'renovate-config':
         presetGroup.versions[presetGroup['dist-tags'].latest][
+          'renovate-config'
+        ],
+    };
+  }
+  if (dep === 'renovate-config-ikatyang') {
+    return {
+      'renovate-config':
+        presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
           'renovate-config'
         ],
     };
@@ -134,6 +143,13 @@ describe('config/presets', () => {
       expect(rule.automerge).toEqual(true);
       expect(rule.packageNames).toHaveLength(1);
       expect(rule.packagePatterns).toHaveLength(2);
+    });
+    it('migrates automerge in presets', async () => {
+      config.extends = ['ikatyang:library'];
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toMatchSnapshot();
+      expect(res.automerge).not.toBeDefined();
+      expect(res.minor.automerge).toBe(true);
     });
   });
   describe('replaceArgs', () => {
