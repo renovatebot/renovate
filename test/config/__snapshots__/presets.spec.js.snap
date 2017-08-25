@@ -236,6 +236,85 @@ Object {
 }
 `;
 
+exports[`config/presets resolvePreset migrates automerge in presets 1`] = `
+Object {
+  "automergeType": "pr",
+  "branchprefix": "renovate/",
+  "dependencies": Object {
+    "description": Array [
+      "Preserve (but continue to upgrade) any existing semver ranges",
+    ],
+    "pinVersions": false,
+    "semanticPrefix": "fix(deps):",
+  },
+  "description": Array [
+    "Use <code>renovate/</code> as prefix for all branch names",
+    "If semantic commits detected, use <code>fix(deps):</code> for dependencies and <code>chore(deps):</code> for all others",
+    "Require all status checks to pass before any automerging",
+    "Pin dependency versions for <code>devDependencies</code> and retain semver ranges for others",
+  ],
+  "devDependencies": Object {
+    "description": Array [
+      "Use version pinning (maintain a single version only and not semver ranges)",
+    ],
+    "pinVersions": true,
+    "semanticPrefix": "chore(deps):",
+  },
+  "ignoreUnstable": true,
+  "labels": Array [
+    "dependencies",
+  ],
+  "lockFileMaintenance": Object {
+    "automerge": true,
+    "enabled": true,
+    "schedule": Array [
+      "before 8am on Monday",
+    ],
+  },
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "major": Object {
+    "automerge": false,
+  },
+  "minor": Object {
+    "automerge": true,
+  },
+  "optionalDependencies": Object {
+    "description": Array [
+      "Preserve (but continue to upgrade) any existing semver ranges",
+    ],
+    "pinVersions": false,
+    "semanticPrefix": "chore(deps):",
+  },
+  "peerDependencies": Object {
+    "description": Array [
+      "Preserve (but continue to upgrade) any existing semver ranges",
+    ],
+    "pinVersions": false,
+    "semanticPrefix": "chore(deps):",
+  },
+  "prCreation": "immediate",
+  "rebaseStalePrs": true,
+  "requiredStatusChecks": Array [],
+  "respectLatest": true,
+  "schedule": Array [
+    "before 8am",
+  ],
+  "semanticCommits": true,
+  "separateMajorReleases": true,
+  "separatePatchReleases": false,
+  "timezone": "Asia/Taipei",
+  "unpublishSafe": false,
+}
+`;
+
 exports[`config/presets resolvePreset resolves app preset 1`] = `
 Object {
   "automerge": false,
