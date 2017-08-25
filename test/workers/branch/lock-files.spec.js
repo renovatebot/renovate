@@ -181,4 +181,35 @@ describe('workers/branch/lock-files', () => {
       expect(fs.remove.mock.calls).toHaveLength(4);
     });
   });
+  describe('writeUpdatedPackageFiles', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        logger,
+        tmpDir: { name: 'some-tmp-dir' },
+      };
+      fs.outputFile = jest.fn();
+    });
+    it('returns if no updated packageFiles', async () => {
+      delete config.updatedPackageFiles;
+      await writeUpdatedPackageFiles(config);
+      expect(fs.outputFile.mock.calls).toHaveLength(0);
+    });
+    it('writes updated packageFiles', async () => {
+      config.updatedPackageFiles = [
+        {
+          name: 'package.json',
+          contents: 'raw contents',
+        },
+        {
+          name: 'backend/package.json',
+          contents: 'more raw contents',
+        },
+      ];
+      await writeUpdatedPackageFiles(config);
+      expect(fs.outputFile.mock.calls).toMatchSnapshot();
+      expect(fs.outputFile.mock.calls).toHaveLength(2);
+    });
+  });
 });
