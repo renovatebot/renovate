@@ -1,3 +1,4 @@
+const fs = require('fs-extra');
 const {
   hasPackageLock,
   hasYarnLock,
@@ -143,6 +144,41 @@ describe('workers/branch/lock-files', () => {
       ];
       const res = determineLockFileDirs(config);
       expect(res).toMatchSnapshot();
+    });
+  });
+  describe('writeExistingFiles', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        logger,
+        tmpDir: { name: 'some-tmp-dir' },
+      };
+      fs.outputFile = jest.fn();
+      fs.remove = jest.fn();
+    });
+    it('returns if no packageFiles', async () => {
+      delete config.packageFiles;
+      await writeExistingFiles(config);
+      expect(fs.outputFile.mock.calls).toHaveLength(0);
+    });
+    it('writes files and removes files', async () => {
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          content: { name: 'package 1' },
+          npmrc: 'some npmrc',
+        },
+        {
+          packageFile: 'backend/package.json',
+          content: { name: 'package 2' },
+          yarnrc: 'some yarnrc',
+        },
+      ];
+      await writeExistingFiles(config);
+      expect(fs.outputFile.mock.calls).toMatchSnapshot();
+      expect(fs.outputFile.mock.calls).toHaveLength(4);
+      expect(fs.remove.mock.calls).toHaveLength(4);
     });
   });
 });
