@@ -1,14 +1,18 @@
 const fs = require('fs-extra');
+const lockFiles = require('../../../lib/workers/branch/lock-files');
+const defaultConfig = require('../../../lib/config/defaults').getConfig();
+const logger = require('../../_fixtures/logger');
+const npm = require('../../../lib/workers/branch/npm');
+const yarn = require('../../../lib/workers/branch/yarn');
+
 const {
   hasPackageLock,
   hasYarnLock,
   determineLockFileDirs,
   writeExistingFiles,
   writeUpdatedPackageFiles,
-  getUpdatedFiles,
-} = require('../../../lib/workers/branch/lock-files');
-const defaultConfig = require('../../../lib/config/defaults').getConfig();
-const logger = require('../../_fixtures/logger');
+  getUpdatedLockFiles,
+} = lockFiles;
 
 describe('workers/branch/lock-files', () => {
   describe('hasPackageLock', () => {
@@ -210,6 +214,77 @@ describe('workers/branch/lock-files', () => {
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(2);
+    });
+  });
+  describe('getUpdatedLockFiles', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        api: { getFileContent: jest.fn() },
+        logger,
+        tmpDir: { name: 'some-tmp-dir' },
+      };
+      npm.generateLockFile = jest.fn();
+      yarn.generateLockFile = jest.fn();
+      lockFiles.determineLockFileDirs = jest.fn();
+    });
+    it('returns no error and empty lockfiles if none updated', async () => {
+      lockFiles.determineLockFileDirs.mockReturnValueOnce({
+        packageLockFileDirs: [],
+        yarnLockFileDirs: [],
+      });
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res.lockFileError).toBe(false);
+      expect(res.updatedLockFiles).toHaveLength(0);
+    });
+    it('tries multiple lock files', async () => {
+      lockFiles.determineLockFileDirs.mockReturnValueOnce({
+        packageLockFileDirs: ['a', 'b'],
+        yarnLockFileDirs: ['c', 'd'],
+      });
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res.lockFileError).toBe(false);
+      expect(res.updatedLockFiles).toHaveLength(0);
+      expect(npm.generateLockFile.mock.calls).toHaveLength(2);
+      expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
+      expect(config.api.getFileContent.mock.calls).toHaveLength(4);
+    });
+    it('adds multiple lock files', async () => {
+      lockFiles.determineLockFileDirs.mockReturnValueOnce({
+        packageLockFileDirs: ['a', 'b'],
+        yarnLockFileDirs: ['c', 'd'],
+      });
+      npm.generateLockFile.mockReturnValueOnce('some npm lock');
+      yarn.generateLockFile.mockReturnValueOnce('some yarn lock');
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res.lockFileError).toBe(false);
+      expect(res.updatedLockFiles).toHaveLength(2);
+      expect(npm.generateLockFile.mock.calls).toHaveLength(2);
+      expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
+      expect(config.api.getFileContent.mock.calls).toHaveLength(4);
+    });
+    it('returns errors', async () => {
+      lockFiles.determineLockFileDirs.mockReturnValueOnce({
+        packageLockFileDirs: ['a', 'b'],
+        yarnLockFileDirs: ['c', 'd'],
+      });
+      npm.generateLockFile.mockImplementationOnce(() => {
+        throw new Error('some error');
+      });
+      yarn.generateLockFile.mockImplementationOnce(() => {
+        throw new Error('some error');
+      });
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res.lockFileError).toBe(true);
+      expect(res.updatedLockFiles).toHaveLength(0);
+      expect(npm.generateLockFile.mock.calls).toHaveLength(2);
+      expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
+      expect(config.api.getFileContent.mock.calls).toHaveLength(2);
     });
   });
 });
