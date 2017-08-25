@@ -1147,10 +1147,6 @@ ecdsa-sig-formatter@1.0.9:
     base64url "^2.0.0"
     safe-buffer "^5.0.1"
 
-eol@0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/eol/-/eol-0.9.0.tgz#5c33e25b7001bbb69ca6947593d3332e36e04f6a"
-
 errno@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/errno/-/errno-0.1.4.tgz#b896e23a9e5e8ba33871fc996abd3635fc9a1c7d"
