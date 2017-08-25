@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/pr ensurePr(upgrades, logger) should add assignees and reviewers to new PR 1`] = `
+exports[`workers/pr ensurePr should add assignees and reviewers to new PR 1`] = `
 Array [
   Array [
     undefined,
@@ -12,7 +12,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr ensurePr(upgrades, logger) should add assignees and reviewers to new PR 2`] = `
+exports[`workers/pr ensurePr should add assignees and reviewers to new PR 2`] = `
 Array [
   Array [
     undefined,
@@ -24,7 +24,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr ensurePr(upgrades, logger) should return modified existing PR 1`] = `
+exports[`workers/pr ensurePr should return modified existing PR 1`] = `
 Object {
   "body": "<p>This Pull Request updates dependency <a href=\\"https://github.com/renovateapp/dummy\\">dummy</a> from <code>v1.0.0</code> to <code>v1.1.0</code></p>
 <h3 id=\\"commits\\">Commits</h3>
@@ -42,4 +42,4 @@ Object {
 }
 `;
 
-exports[`workers/pr ensurePr(upgrades, logger) should return unmodified existing PR 1`] = `Array []`;
+exports[`workers/pr ensurePr should return unmodified existing PR 1`] = `Array []`;
