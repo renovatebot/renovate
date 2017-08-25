@@ -81,8 +81,21 @@ describe('workers/branch', () => {
       expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(1);
     });
-    it('swallows errors', async () => {
+    it('swallows branch errors', async () => {
       packageFiles.getUpdatedPackageFiles.mockImplementationOnce(() => {
+        throw new Error('some error');
+      });
+      await branchWorker.processBranch(config);
+    });
+    it('swallows pr errors', async () => {
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+        lockFileError: false,
+        updatedLockFiles: [{}],
+      });
+      config.api.branchExists.mockReturnValueOnce(true);
+      automerge.tryBranchAutomerge.mockReturnValueOnce(false);
+      prWorker.ensurePr.mockImplementationOnce(() => {
         throw new Error('some error');
       });
       await branchWorker.processBranch(config);
