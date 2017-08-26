@@ -181,6 +181,7 @@ describe('workers/branch', () => {
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
       config.unpublishSafe = true;
+      config.api.getBranchStatusCheck.mockReturnValueOnce(null);
       config.api.getBranchStatusCheck.mockReturnValueOnce('pending');
       config.upgrades[0].unpublishable = true;
       config.upgrades.push({ ...config });
@@ -193,6 +194,7 @@ describe('workers/branch', () => {
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
       config.api.branchExists.mockReturnValueOnce(true);
       config.upgrades[0].unpublishable = true;
+      config.api.getBranchStatusCheck.mockReturnValueOnce(null);
       config.api.getBranchStatusCheck.mockReturnValueOnce('pending');
       expect(await branchWorker.ensureBranch(config)).toBe(true);
       expect(config.api.setBranchStatus.mock.calls).toHaveLength(1);
@@ -260,6 +262,7 @@ describe('workers/branch', () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       yarn.getLockFile.mockReturnValueOnce('non null response');
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
+      config.api.getBranchStatusCheck.mockReturnValueOnce('failure');
       await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
@@ -290,24 +293,18 @@ describe('workers/branch', () => {
       expect(yarn.getLockFile.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0][1].length).toBe(3);
     });
-    it('throws an error if no yarn lock generation possible', async () => {
+    it('sets branch status if no yarn lock generation possible', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
       yarn.getLockFile.mockImplementationOnce(() => {
         throw new Error('yarn not found');
       });
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
-      let err;
-      try {
-        await branchWorker.ensureBranch(config);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('yarn not found');
+      await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(yarn.getLockFile.mock.calls.length).toBe(1);
       expect(npm.getLockFile.mock.calls.length).toBe(0);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
     });
     it('throws an error if no package lock generation possible', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
@@ -315,18 +312,12 @@ describe('workers/branch', () => {
         throw new Error('no package lock generated');
       });
       packageJsonHelper.setNewValue.mockReturnValueOnce('new content');
-      let err;
-      try {
-        await branchWorker.ensureBranch(config);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('no package lock generated');
+      await branchWorker.ensureBranch(config);
       expect(branchWorker.getParentBranch.mock.calls.length).toBe(1);
       expect(packageJsonHelper.setNewValue.mock.calls.length).toBe(1);
       expect(yarn.getLockFile.mock.calls.length).toBe(1);
       expect(npm.getLockFile.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
+      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
     });
     it('maintains lock files if needing updates', async () => {
       branchWorker.getParentBranch.mockReturnValueOnce('dummy branch');
