@@ -587,6 +587,7 @@ describe('api/github', () => {
     it('should return empty array if none found', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
+        headers: { link: '' },
         body: {
           items: [],
         },
@@ -598,6 +599,7 @@ describe('api/github', () => {
     it('should return the files matching the fileName', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
+        headers: { link: '' },
         body: {
           items: [
             { name: 'package.json', path: '/package.json' },
@@ -605,6 +607,36 @@ describe('api/github', () => {
               name: 'package.json.something-else',
               path: 'some-dir/package.json.some-thing-else',
             },
+            { name: 'package.json', path: 'src/app/package.json' },
+            { name: 'package.json', path: 'src/otherapp/package.json' },
+          ],
+        },
+      }));
+      const files = await github.findFilePaths('package.json');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(files).toMatchSnapshot();
+    });
+    it('paginates', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        headers: {
+          link:
+            '<https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=2>; rel="next", <https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=2>; rel="last" <https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=1>; rel="first", <https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=1>; rel="prev"',
+        },
+        body: {
+          items: [
+            { name: 'package.json', path: '/package.json' },
+            {
+              name: 'package.json.something-else',
+              path: 'some-dir/package.json.some-thing-else',
+            },
+          ],
+        },
+      }));
+      ghGot.mockImplementationOnce(() => ({
+        headers: { link: '' },
+        body: {
+          items: [
             { name: 'package.json', path: 'src/app/package.json' },
             { name: 'package.json', path: 'src/otherapp/package.json' },
           ],
