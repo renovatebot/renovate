@@ -83,7 +83,7 @@ $ node renovate --help
     --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
     --github-app-key <string>            GitHub App Private Key (.pem file contents)
     --package-files <list>               Package file paths
-    --ignore-node-modules [boolean]      Skip any package.json files found within node_modules folders
+    --ignore-paths <list>                Skip any package.json whose path matches one of these.
     --ignore-deps <list>                 Dependencies to ignore
     --pin-versions [boolean]             Convert ranged versions in package.json to pinned versions
     --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches
@@ -298,12 +298,12 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--package-files`<td>
 </tr>
 <tr>
-  <td>`ignoreNodeModules`</td>
-  <td>Skip any package.json files found within node_modules folders</td>
-  <td>boolean</td>
-  <td><pre>true</pre></td>
-  <td>`RENOVATE_IGNORE_NODE_MODULES`</td>
-  <td>`--ignore-node-modules`<td>
+  <td>`ignorePaths`</td>
+  <td>Skip any package.json whose path matches one of these.</td>
+  <td>list</td>
+  <td><pre>["node_modules/"]</pre></td>
+  <td>`RENOVATE_IGNORE_PATHS`</td>
+  <td>`--ignore-paths`<td>
 </tr>
 <tr>
   <td>`dependencies`</td>
@@ -577,7 +577,6 @@ Obviously, you can't set repository or package file location with this method.
   <td>json</td>
   <td><pre>{
   "enabled": true,
-  "groupName": "Lock File Maintenance",
   "recreateClosed": true,
   "branchName": "{{branchPrefix}}lock-file-maintenance",
   "commitMessage": "Update lock file",

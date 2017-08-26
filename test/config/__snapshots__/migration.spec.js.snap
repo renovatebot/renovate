@@ -20,6 +20,9 @@ Object {
     },
   },
   "enabled": true,
+  "ignorePaths": Array [
+    "node_modules/",
+  ],
   "lockFileConfig": Object {
     "automerge": true,
   },

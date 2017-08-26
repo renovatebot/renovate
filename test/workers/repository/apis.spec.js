@@ -229,7 +229,7 @@ describe('workers/repository/apis', () => {
     });
     it('ignores node modules', async () => {
       const config = {
-        ignoreNodeModules: true,
+        ignorePaths: ['node_modules/'],
         api: {
           findFilePaths: jest.fn(() => [
             'package.json',
@@ -241,7 +241,7 @@ describe('workers/repository/apis', () => {
       };
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
-      expect(res.foundNodeModules).toMatchSnapshot();
+      expect(res.foundIgnoredPaths).toMatchSnapshot();
       expect(res.warnings).toMatchSnapshot();
     });
     it('defaults to package.json if found', async () => {
