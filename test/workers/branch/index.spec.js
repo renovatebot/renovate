@@ -87,6 +87,14 @@ describe('workers/branch', () => {
       });
       await branchWorker.processBranch(config);
     });
+    it('throws and swallows branch errors', async () => {
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+        lockFileError: true,
+        updatedLockFiles: [{}],
+      });
+      await branchWorker.processBranch(config);
+    });
     it('swallows pr errors', async () => {
       packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({

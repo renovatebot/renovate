@@ -221,12 +221,14 @@ describe('workers/branch/lock-files', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: { getFileContent: jest.fn() },
+        api: { getFileContent: jest.fn(() => 'some lock file contents') },
         logger,
         tmpDir: { name: 'some-tmp-dir' },
       };
       npm.generateLockFile = jest.fn();
+      npm.generateLockFile.mockReturnValue('some lock file contents');
       yarn.generateLockFile = jest.fn();
+      yarn.generateLockFile.mockReturnValue('some lock file contents');
       lockFiles.determineLockFileDirs = jest.fn();
     });
     it('returns no error and empty lockfiles if none updated', async () => {
@@ -252,13 +254,28 @@ describe('workers/branch/lock-files', () => {
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
       expect(config.api.getFileContent.mock.calls).toHaveLength(4);
     });
+    it('sets error if receiving null', async () => {
+      lockFiles.determineLockFileDirs.mockReturnValueOnce({
+        packageLockFileDirs: ['a', 'b'],
+        yarnLockFileDirs: ['c', 'd'],
+      });
+      npm.generateLockFile.mockReturnValueOnce(null);
+      yarn.generateLockFile.mockReturnValueOnce(null);
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res.lockFileError).toBe(true);
+      expect(res.updatedLockFiles).toHaveLength(0);
+      expect(npm.generateLockFile.mock.calls).toHaveLength(2);
+      expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
+      expect(config.api.getFileContent.mock.calls).toHaveLength(2);
+    });
     it('adds multiple lock files', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: ['a', 'b'],
         yarnLockFileDirs: ['c', 'd'],
       });
-      npm.generateLockFile.mockReturnValueOnce('some npm lock');
-      yarn.generateLockFile.mockReturnValueOnce('some yarn lock');
+      npm.generateLockFile.mockReturnValueOnce('some new lock file contents');
+      yarn.generateLockFile.mockReturnValueOnce('some new lock file contents');
       const res = await getUpdatedLockFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.lockFileError).toBe(false);
@@ -267,13 +284,26 @@ describe('workers/branch/lock-files', () => {
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
       expect(config.api.getFileContent.mock.calls).toHaveLength(4);
     });
-    it('returns errors', async () => {
+    it('returns npm errors', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: ['a', 'b'],
         yarnLockFileDirs: ['c', 'd'],
       });
       npm.generateLockFile.mockImplementationOnce(() => {
         throw new Error('some error');
+      });
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res.lockFileError).toBe(true);
+      expect(res.updatedLockFiles).toHaveLength(0);
+      expect(npm.generateLockFile.mock.calls).toHaveLength(1);
+      expect(yarn.generateLockFile.mock.calls).toHaveLength(0);
+      expect(config.api.getFileContent.mock.calls).toHaveLength(0);
+    });
+    it('returns yarn errors', async () => {
+      lockFiles.determineLockFileDirs.mockReturnValueOnce({
+        packageLockFileDirs: [],
+        yarnLockFileDirs: ['c', 'd'],
       });
       yarn.generateLockFile.mockImplementationOnce(() => {
         throw new Error('some error');
@@ -282,9 +312,9 @@ describe('workers/branch/lock-files', () => {
       expect(res).toMatchSnapshot();
       expect(res.lockFileError).toBe(true);
       expect(res.updatedLockFiles).toHaveLength(0);
-      expect(npm.generateLockFile.mock.calls).toHaveLength(2);
-      expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(config.api.getFileContent.mock.calls).toHaveLength(2);
+      expect(npm.generateLockFile.mock.calls).toHaveLength(0);
+      expect(yarn.generateLockFile.mock.calls).toHaveLength(1);
+      expect(config.api.getFileContent.mock.calls).toHaveLength(0);
     });
   });
 });
