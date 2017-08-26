@@ -475,7 +475,7 @@ Array [
     },
   ],
   Array [
-    "search/code?q=repo:some/repo+filename:package.json",
+    "search/code?q=repo:some/repo+filename:package.json&per_page=100",
     undefined,
   ],
   Array [
@@ -516,7 +516,7 @@ Array [
     },
   ],
   Array [
-    "search/code?q=repo:some/repo+filename:package.json",
+    "search/code?q=repo:some/repo+filename:package.json&per_page=100",
     undefined,
   ],
 ]
@@ -545,7 +545,7 @@ Array [
     },
   ],
   Array [
-    "search/code?q=repo:some/repo+filename:package.json",
+    "search/code?q=repo:some/repo+filename:package.json&per_page=100",
     undefined,
   ],
 ]
