@@ -9,6 +9,7 @@ describe('config/migration', () => {
         maintainYarnLock: true,
         onboarding: 'false',
         automerge: 'none',
+        ignoreNodeModules: true,
         autodiscover: 'true',
         schedule: 'on the last day of the month',
         commitMessage: '{{semanticPrefix}}some commit message',

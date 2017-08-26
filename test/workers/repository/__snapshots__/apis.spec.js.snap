@@ -54,7 +54,7 @@ exports[`workers/repository/apis detectPackageFiles(config) ignores node modules
 Array [
   Object {
     "depName": "packageFiles",
-    "message": "Skipped package.json files found within node_modules subfolders: \`node_modules/backend/package.json\`",
+    "message": "Skipped package.json files found within ignored paths: \`node_modules/backend/package.json\`",
   },
 ]
 `;
