@@ -13,12 +13,11 @@ describe('packageFileWorker', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        ...{
-          packageFile: 'package.json',
-          content: {},
-          repoIsOnboarded: true,
-          logger,
-        },
+        packageFile: 'package.json',
+        content: {},
+        repoIsOnboarded: true,
+        npmrc: '# nothing',
+        logger,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);
     });

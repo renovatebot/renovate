@@ -97,14 +97,18 @@ Array [
     "errors": Array [],
     "hasPackageLock": true,
     "hasYarnLock": true,
+    "npmrc": null,
     "packageFile": "package.json",
     "warnings": Array [],
+    "yarnrc": null,
   },
   Object {
     "content": Object {},
     "hasPackageLock": false,
     "hasYarnLock": false,
+    "npmrc": null,
     "packageFile": "a/package.json",
+    "yarnrc": null,
   },
 ]
 `;

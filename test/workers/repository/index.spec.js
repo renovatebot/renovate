@@ -20,7 +20,7 @@ describe('workers/repository', () => {
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
       upgrades.branchifyUpgrades = jest.fn(() => ({ branchUpgrades: {} }));
-      branchWorker.processBranchUpgrades = jest.fn(() => 'some-branch');
+      branchWorker.processBranch = jest.fn(() => 'some-branch');
       config = {
         lockFileMaintenance: true,
         api: {
@@ -91,7 +91,7 @@ describe('workers/repository', () => {
       });
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
-      expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(0);
+      expect(branchWorker.processBranch.mock.calls.length).toBe(0);
       expect(onboarding.ensurePr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
@@ -115,7 +115,7 @@ describe('workers/repository', () => {
       });
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
-      expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(0);
+      expect(branchWorker.processBranch.mock.calls.length).toBe(0);
       expect(onboarding.ensurePr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
@@ -138,7 +138,7 @@ describe('workers/repository', () => {
       });
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
-      expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(0);
+      expect(branchWorker.processBranch.mock.calls.length).toBe(0);
       expect(onboarding.ensurePr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
@@ -150,7 +150,7 @@ describe('workers/repository', () => {
         upgrades: [{}, {}, {}],
       });
       await repositoryWorker.renovateRepository(config);
-      expect(branchWorker.processBranchUpgrades.mock.calls.length).toBe(3);
+      expect(branchWorker.processBranch.mock.calls.length).toBe(3);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('swallows errors', async () => {

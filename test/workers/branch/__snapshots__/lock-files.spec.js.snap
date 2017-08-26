@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/branch/lock-files determineLockFileDirs returns all directories if lock file maintenance 1`] = `
+Object {
+  "packageLockFileDirs": Array [
+    "backend",
+  ],
+  "yarnLockFileDirs": Array [
+    ".",
+  ],
+}
+`;
+
+exports[`workers/branch/lock-files determineLockFileDirs returns directories from updated package files 1`] = `
+Object {
+  "packageLockFileDirs": Array [
+    "backend",
+  ],
+  "yarnLockFileDirs": Array [
+    ".",
+  ],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles adds multiple lock files 1`] = `
+Object {
+  "lockFileError": false,
+  "updatedLockFiles": Array [
+    Object {
+      "contents": "some new lock file contents",
+      "name": "a/package-lock.json",
+    },
+    Object {
+      "contents": "some new lock file contents",
+      "name": "c/yarn.lock",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if none updated 1`] = `
+Object {
+  "lockFileError": false,
+  "updatedLockFiles": Array [],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles returns npm errors 1`] = `
+Object {
+  "lockFileError": true,
+  "updatedLockFiles": Array [],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles returns yarn errors 1`] = `
+Object {
+  "lockFileError": true,
+  "updatedLockFiles": Array [],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles sets error if receiving null 1`] = `
+Object {
+  "lockFileError": true,
+  "updatedLockFiles": Array [],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles tries multiple lock files 1`] = `
+Object {
+  "lockFileError": false,
+  "updatedLockFiles": Array [],
+}
+`;
+
+exports[`workers/branch/lock-files writeExistingFiles writes files and removes files 1`] = `
+Array [
+  Array [
+    "some-tmp-dir/package.json",
+    "{\\"name\\":\\"package 1\\"}",
+  ],
+  Array [
+    "some-tmp-dir/.npmrc",
+    "some npmrc",
+  ],
+  Array [
+    "some-tmp-dir/backend/package.json",
+    "{\\"name\\":\\"package 2\\"}",
+  ],
+  Array [
+    "some-tmp-dir/backend/.yarnrc",
+    "some yarnrc",
+  ],
+]
+`;
+
+exports[`workers/branch/lock-files writeUpdatedPackageFiles writes updated packageFiles 1`] = `
+Array [
+  Array [
+    "some-tmp-dir/package.json",
+    "raw contents",
+  ],
+  Array [
+    "some-tmp-dir/backend/package.json",
+    "more raw contents",
+  ],
+]
+`;

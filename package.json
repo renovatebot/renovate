@@ -45,7 +45,6 @@
     "changelog": "1.4.0",
     "commander": "2.11.0",
     "conventional-commits-detector": "0.1.1",
-    "eol": "0.9.0",
     "fs-extra": "4.0.1",
     "gh-got": "6.0.0",
     "github-url-from-git": "1.5.0",
