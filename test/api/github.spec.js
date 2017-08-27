@@ -95,27 +95,6 @@ describe('api/github', () => {
       }
       expect(err.statusCode).toBe(404);
     });
-    it('should retry 401 only once', async () => {
-      ghGot.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 401,
-          message: 'Bad credentials',
-        })
-      );
-      ghGot.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 401,
-          message: 'Bad credentials',
-        })
-      );
-      let err;
-      try {
-        await github.getInstallations('sometoken');
-      } catch (e) {
-        err = e;
-      }
-      expect(err.statusCode).toBe(401);
-    });
     it('should give up after 5 retries', async () => {
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
