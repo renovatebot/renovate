@@ -26,12 +26,6 @@ describe('packageFileWorker', () => {
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toEqual([]);
     });
-    it('warns if using workspaces', async () => {
-      config.content.workspaces = {};
-      const res = await packageFileWorker.renovatePackageFile(config);
-      expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('warning');
-    });
     it('returns upgrades', async () => {
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}]);
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);

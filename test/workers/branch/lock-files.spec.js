@@ -149,6 +149,30 @@ describe('workers/branch/lock-files', () => {
       const res = determineLockFileDirs(config);
       expect(res).toMatchSnapshot();
     });
+    it('returns root directory if using yarn workspaces', () => {
+      config.hasYarnWorkspaces = true;
+      config.upgrades = [{}];
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          hasYarnLock: true,
+        },
+        {
+          packageFile: 'backend/package.json',
+        },
+      ];
+      config.updatedPackageFiles = [
+        {
+          name: 'backend/package.json',
+          contents: 'some contents',
+        },
+      ];
+      const res = determineLockFileDirs(config);
+      expect(res).toMatchSnapshot();
+      expect(res.packageLockFileDirs).toHaveLength(0);
+      expect(res.yarnLockFileDirs).toHaveLength(1);
+      expect(res.yarnLockFileDirs[0]).toEqual('.');
+    });
   });
   describe('writeExistingFiles', () => {
     let config;
