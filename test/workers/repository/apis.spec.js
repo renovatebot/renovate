@@ -285,7 +285,10 @@ describe('workers/repository/apis', () => {
       expect(res.packageFiles).toEqual([]);
     });
     it('includes files with content', async () => {
-      config.api.getFileJson.mockReturnValueOnce({ renovate: {} });
+      config.api.getFileJson.mockReturnValueOnce({
+        renovate: {},
+        workspaces: [],
+      });
       config.api.getFileJson.mockReturnValueOnce({});
       config.api.getFileContent.mockReturnValueOnce(null);
       config.api.getFileContent.mockReturnValueOnce(null);

@@ -93,7 +93,9 @@ exports[`workers/repository/apis mergeRenovateJson(config) returns warning + err
 exports[`workers/repository/apis resolvePackageFiles includes files with content 1`] = `
 Array [
   Object {
-    "content": Object {},
+    "content": Object {
+      "workspaces": Array [],
+    },
     "errors": Array [],
     "hasPackageLock": true,
     "hasYarnLock": true,

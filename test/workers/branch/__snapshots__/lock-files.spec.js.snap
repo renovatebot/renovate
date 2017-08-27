@@ -22,6 +22,15 @@ Object {
 }
 `;
 
+exports[`workers/branch/lock-files determineLockFileDirs returns root directory if using yarn workspaces 1`] = `
+Object {
+  "packageLockFileDirs": Array [],
+  "yarnLockFileDirs": Array [
+    ".",
+  ],
+}
+`;
+
 exports[`workers/branch/lock-files getUpdatedLockFiles adds multiple lock files 1`] = `
 Object {
   "lockFileError": false,
