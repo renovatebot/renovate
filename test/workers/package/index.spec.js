@@ -29,6 +29,7 @@ describe('lib/workers/package/index', () => {
     it('returns error if no npm dep found', async () => {
       config.repoIsOnboarded = true;
       config.schedule = 'some schedule';
+      config.hasYarnLock = true;
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
