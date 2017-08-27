@@ -30,6 +30,8 @@ describe('workers/branch', () => {
       config = {
         ...defaultConfig,
         api: { branchExists: jest.fn() },
+        errors: [],
+        warnings: [],
         logger,
         upgrades: [{}],
       };
