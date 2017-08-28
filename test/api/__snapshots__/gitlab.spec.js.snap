@@ -195,6 +195,8 @@ Array [
 
 exports[`api/gitlab getBranch returns a branch 1`] = `"foo"`;
 
+exports[`api/gitlab getBranchLastCommitTime should return a Date 1`] = `2012-09-20T08:50:22.000Z`;
+
 exports[`api/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
 Array [
   Array [

@@ -1044,6 +1044,32 @@ describe('api/github', () => {
       expect(ghGot.delete.mock.calls).toMatchSnapshot();
     });
   });
+  describe('getBranchLastCommitTime', () => {
+    it('should return a Date', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockReturnValueOnce({
+        body: [
+          {
+            commit: {
+              committer: {
+                date: '2011-04-14T16:00:49Z',
+              },
+            },
+          },
+        ],
+      });
+      const res = await github.getBranchLastCommitTime('some-branch');
+      expect(res).toMatchSnapshot();
+    });
+    it('handles error', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockReturnValueOnce({
+        body: [],
+      });
+      const res = await github.getBranchLastCommitTime('some-branch');
+      expect(res).toBeDefined();
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo('some/repo', 'token');
