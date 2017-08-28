@@ -79,6 +79,7 @@ describe('workers/branch', () => {
       config.api.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce(false);
       prWorker.ensurePr.mockReturnValueOnce({});
+      prWorker.checkAutoMerge.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
       expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(1);
