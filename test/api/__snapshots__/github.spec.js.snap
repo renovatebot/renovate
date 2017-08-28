@@ -689,6 +689,8 @@ Array [
 ]
 `;
 
+exports[`api/github getBranchLastCommitTime should return a Date 1`] = `2011-04-14T16:00:49.000Z`;
+
 exports[`api/github getBranchPr(branchName) should return null if no PR exists 1`] = `
 Array [
   Array [

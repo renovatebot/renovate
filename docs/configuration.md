@@ -98,6 +98,7 @@ $ node renovate --help
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
     --unpublish-safe [boolean]           Set a status check for unpublish-safe upgrades
     --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
+    --pr-not-pending-hours <integer>     Timeout in hours for when prCreation=not-pending
     --automerge [boolean]                Whether to automerge branches/PRs automatically, without human intervention
     --automerge-type <string>            How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only
     --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
@@ -514,6 +515,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>"immediate"</pre></td>
   <td>`RENOVATE_PR_CREATION`</td>
   <td>`--pr-creation`<td>
+</tr>
+<tr>
+  <td>`prNotPendingHours`</td>
+  <td>Timeout in hours for when prCreation=not-pending</td>
+  <td>integer</td>
+  <td><pre>12</pre></td>
+  <td>`RENOVATE_PR_NOT_PENDING_HOURS`</td>
+  <td>`--pr-not-pending-hours`<td>
 </tr>
 <tr>
   <td>`automerge`</td>

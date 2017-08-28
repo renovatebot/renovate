@@ -139,9 +139,20 @@ describe('workers/pr', () => {
     });
     it('should return null if waiting for not pending', async () => {
       config.api.getBranchStatus = jest.fn(() => 'pending');
+      config.api.getBranchLastCommitTime = jest.fn(() => new Date());
       config.prCreation = 'not-pending';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
+    });
+    it('should create PR if pending timeout hit', async () => {
+      config.api.getBranchStatus = jest.fn(() => 'pending');
+      config.api.getBranchLastCommitTime = jest.fn(
+        () => new Date('2017-01-01')
+      );
+      config.prCreation = 'not-pending';
+      config.api.getBranchPr = jest.fn();
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should create PR if no longer pending', async () => {
       config.api.getBranchStatus = jest.fn(() => 'failed');
