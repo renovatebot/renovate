@@ -20,7 +20,7 @@ describe('workers/repository', () => {
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
       upgrades.branchifyUpgrades = jest.fn(() => ({ branchUpgrades: {} }));
-      branchWorker.processBranch = jest.fn(() => 'some-branch');
+      branchWorker.processBranch = jest.fn(() => 'done');
       config = {
         lockFileMaintenance: true,
         api: {
@@ -152,6 +152,28 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(branchWorker.processBranch.mock.calls.length).toBe(3);
       expect(config.logger.error.mock.calls.length).toBe(0);
+    });
+    it('skips branchWorker after automerging', async () => {
+      config.packageFiles = ['package.json'];
+      config.hasRenovateJson = true;
+      onboarding.getOnboardingStatus.mockReturnValue(true);
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
+        upgrades: [{}, {}, {}],
+      });
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
+        upgrades: [{}, {}],
+      });
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
+        upgrades: [{}],
+      });
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
+        upgrades: [],
+      });
+      branchWorker.processBranch.mockReturnValue('automerged');
+      await repositoryWorker.renovateRepository(config);
+      expect(upgrades.branchifyUpgrades.mock.calls).toHaveLength(4);
+      expect(branchWorker.processBranch.mock.calls).toHaveLength(3);
+      expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('swallows errors', async () => {
       apis.initApis.mockImplementationOnce(() => {
