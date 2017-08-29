@@ -14,14 +14,14 @@ jest.mock('../../../lib/api/gitlab');
 jest.mock('../../../lib/api/npm');
 
 describe('workers/repository/apis', () => {
-  describe('setNpmrc(config)', () => {
+  describe('getNpmrc', () => {
     it('Skips if npmrc not found', async () => {
       const config = {
         api: {
           getFileContent: jest.fn(),
         },
       };
-      await apis.setNpmrc(config);
+      expect(await apis.getNpmrc(config)).toMatchObject(config);
     });
     it('Parses if npmrc found', async () => {
       const config = {
@@ -30,7 +30,8 @@ describe('workers/repository/apis', () => {
         },
         logger,
       };
-      await apis.setNpmrc(config);
+      const res = await apis.getNpmrc(config);
+      expect(res.npmrc).toEqual('a = b');
     });
     it('Catches errors', async () => {
       const config = {
@@ -41,7 +42,7 @@ describe('workers/repository/apis', () => {
         },
         logger,
       };
-      await apis.setNpmrc(config);
+      expect(await apis.getNpmrc(config)).toMatchObject(config);
     });
   });
   describe('detectSemanticCommits', () => {
