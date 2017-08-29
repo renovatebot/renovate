@@ -186,9 +186,11 @@ describe('workers/branch/lock-files', () => {
       fs.remove = jest.fn();
     });
     it('returns if no packageFiles', async () => {
+      config.npmrc = 'some-npmrc';
+      config.yarnrc = 'some-yarnrc';
       delete config.packageFiles;
       await writeExistingFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(0);
+      expect(fs.outputFile.mock.calls).toHaveLength(2);
     });
     it('writes files and removes files', async () => {
       config.packageFiles = [

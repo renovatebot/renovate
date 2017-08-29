@@ -79,6 +79,9 @@ $ node renovate --help
     --platform <string>                  Platform type of repository
     --endpoint <string>                  Custom endpoint to use
     --token <string>                     Repository Auth Token
+    --npmrc <string>                     String copy of npmrc file. Use \n instead of line breaks
+    --yarnrc <string>                    String copy of yarnrc file. Use \n instead of line breaks
+    --autodiscover [boolean]             Autodiscover all repositories
     --autodiscover [boolean]             Autodiscover all repositories
     --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
     --github-app-key <string>            GitHub App Private Key (.pem file contents)
@@ -249,6 +252,30 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>null</pre></td>
   <td>`RENOVATE_TOKEN`</td>
   <td>`--token`<td>
+</tr>
+<tr>
+  <td>`npmrc`</td>
+  <td>String copy of npmrc file. Use \n instead of line breaks</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_NPMRC`</td>
+  <td>`--npmrc`<td>
+</tr>
+<tr>
+  <td>`yarnrc`</td>
+  <td>String copy of yarnrc file. Use \n instead of line breaks</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_YARNRC`</td>
+  <td>`--yarnrc`<td>
+</tr>
+<tr>
+  <td>`autodiscover`</td>
+  <td>Autodiscover all repositories</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_AUTODISCOVER`</td>
+  <td>`--autodiscover`<td>
 </tr>
 <tr>
   <td>`autodiscover`</td>
