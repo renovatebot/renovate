@@ -14,5 +14,11 @@ describe('config/massage', () => {
       const res = massage.massageConfig(config);
       expect(Array.isArray(res.schedule)).toBe(true);
     });
+    it('massages npmToken', () => {
+      const config = {
+        npmToken: 'some-token',
+      };
+      expect(massage.massageConfig(config)).toMatchSnapshot();
+    });
   });
 });
