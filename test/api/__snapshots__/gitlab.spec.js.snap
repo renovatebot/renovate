@@ -232,7 +232,7 @@ Array [
     "projects/some%2Frepo/merge_requests/undefined",
   ],
   Array [
-    "projects/some%2Frepo/repository/branches/undefined",
+    "projects/some%2Frepo/repository/branches/some-branch",
   ],
 ]
 `;
@@ -246,8 +246,10 @@ Object {
   "body": undefined,
   "commits": 1,
   "deletions": 1,
-  "displayNumber": "Merge Request #undefined",
+  "displayNumber": "Merge Request #91",
+  "iid": 91,
   "number": undefined,
+  "source_branch": "some-branch",
 }
 `;
 
@@ -284,6 +286,7 @@ Object {
   "isUnmergeable": true,
   "merge_status": "cannot_be_merged",
   "number": 12345,
+  "source_branch": "some-branch",
   "state": "merged",
 }
 `;

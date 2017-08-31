@@ -263,10 +263,11 @@ describe('api/gitlab', () => {
       }));
       glGot.mockImplementationOnce(() => ({
         body: {
-          number: 91,
+          iid: 91,
           additions: 1,
           deletions: 1,
           commits: 1,
+          source_branch: 'some-branch',
           base: {
             sha: '1234',
           },
@@ -574,6 +575,7 @@ describe('api/gitlab', () => {
           description: 'a merge request',
           state: 'merged',
           merge_status: 'cannot_be_merged',
+          source_branch: 'some-branch',
         },
       });
       glGot.mockReturnValueOnce({
