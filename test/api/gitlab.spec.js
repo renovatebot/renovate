@@ -499,11 +499,11 @@ describe('api/gitlab', () => {
         body: [
           {
             source_branch: 'some-branch',
-            id: 1,
+            iid: 1,
           },
           {
             source_branch: 'some-branch',
-            id: 2,
+            iid: 2,
           },
         ],
       });
