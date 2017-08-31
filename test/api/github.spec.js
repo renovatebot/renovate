@@ -1317,7 +1317,7 @@ describe('api/github', () => {
           ref: 'someref',
         },
       };
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(true);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
       expect(ghGot.mock.calls).toHaveLength(4);
@@ -1335,7 +1335,7 @@ describe('api/github', () => {
       ghGot.put.mockImplementationOnce(() => {
         throw new Error('merge error');
       });
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(false);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
       expect(ghGot.mock.calls).toHaveLength(3);
@@ -1389,7 +1389,7 @@ describe('api/github', () => {
           ref: 'someref',
         },
       };
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(true);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
     });
@@ -1420,7 +1420,7 @@ describe('api/github', () => {
       ghGot.put.mockImplementationOnce(() => {
         throw new Error('no squashing allowed');
       });
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(true);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
     });
@@ -1440,7 +1440,7 @@ describe('api/github', () => {
       ghGot.put.mockImplementationOnce(() => {
         throw new Error('no merging allowed');
       });
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(false);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
     });
