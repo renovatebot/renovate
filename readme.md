@@ -32,7 +32,7 @@ $ npm install -g renovate
 
 ## Authentication
 
-You need to select a repository user for `renovate` to assume the identity of, and generate a Personal Access Token. It's recommended that you use a dedicated "bot" account for this to avoid user confusion.
+You need to select a repository user for `renovate` to assume the identity of, and generate a Personal Access Token. It's strongly recommended that you use a dedicated "bot" account for this to avoid user confusion and to avoid the Renovate bot mistaking changes you have made or PRs you have raised for its own.
 
 You can find instructions for GitHub [here](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) (select "repo" permissions)
 
