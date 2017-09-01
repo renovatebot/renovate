@@ -1,10 +1,8 @@
 const npm = require('../../lib/api/npm');
 const got = require('got');
-const registryUrl = require('registry-url');
 const registryAuthToken = require('registry-auth-token');
 const logger = require('../_fixtures/logger');
 
-jest.mock('registry-url');
 jest.mock('registry-auth-token');
 jest.mock('got');
 
@@ -35,7 +33,6 @@ describe('api/npm', () => {
     npm.resetCache();
   });
   it('should fetch package info from npm', async () => {
-    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => Promise.resolve(npmResponse));
     const res = await npm.getDependency('foobar', logger);
     expect(res).toMatchSnapshot();
@@ -43,7 +40,6 @@ describe('api/npm', () => {
     expect(call).toMatchSnapshot();
   });
   it('should use homepage', async () => {
-    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     const npmResponseHomepage = { ...npmResponse };
     npmResponseHomepage.body.repository.url = '';
     npmResponseHomepage.body.homepage = 'https://google.com';
@@ -54,7 +50,6 @@ describe('api/npm', () => {
     expect(call).toMatchSnapshot();
   });
   it('should cache package info from npm', async () => {
-    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => Promise.resolve(npmResponse));
     const res1 = await npm.getDependency('foobar', logger);
     const res2 = await npm.getDependency('foobar', logger);
@@ -62,7 +57,6 @@ describe('api/npm', () => {
     expect(got.mock.calls.length).toEqual(1);
   });
   it('should return null if lookup fails', async () => {
-    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => {
       throw new Error('not found');
     });
@@ -70,7 +64,6 @@ describe('api/npm', () => {
     expect(res).toBeNull();
   });
   it('should send an authorization header if provided', async () => {
-    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     registryAuthToken.mockImplementation(() => ({
       type: 'Basic',
       token: '1234',
@@ -82,7 +75,6 @@ describe('api/npm', () => {
     expect(call).toMatchSnapshot();
   });
   it('should use NPM_TOKEN if provided', async () => {
-    registryUrl.mockImplementation(() => 'https://npm.mycustomregistry.com/');
     got.mockImplementation(() => Promise.resolve(npmResponse));
     const oldToken = process.env.NPM_TOKEN;
     process.env.NPM_TOKEN = 'some-token';
@@ -92,7 +84,12 @@ describe('api/npm', () => {
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
   });
-  it('sets .npmrc', () => {
-    npm.setNpmrc('input');
+  it('should fetch package info from custom registry', async () => {
+    got.mockImplementation(() => Promise.resolve(npmResponse));
+    npm.setNpmrc('registry=https://npm.mycustomregistry.com/');
+    const res = await npm.getDependency('foobar', logger);
+    expect(res).toMatchSnapshot();
+    const call = got.mock.calls[0];
+    expect(call).toMatchSnapshot();
   });
 });
