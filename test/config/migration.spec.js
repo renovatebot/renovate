@@ -85,6 +85,30 @@ describe('config/migration', () => {
         'before 7am every weekday'
       );
     });
+    it('migrates every friday', () => {
+      const config = {
+        schedule: 'every friday',
+      };
+      const parentConfig = { ...defaultConfig };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        parentConfig
+      );
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig.schedule).toEqual('on friday');
+    });
+    it('does not migrate every weekday', () => {
+      const config = {
+        schedule: 'every weekday',
+      };
+      const parentConfig = { ...defaultConfig };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        parentConfig
+      );
+      expect(isMigrated).toBe(false);
+      expect(migratedConfig.schedule).toEqual(config.schedule);
+    });
     it('does not migrate multi days', () => {
       const config = {
         schedule: 'after 5:00pm on wednesday and thursday',
