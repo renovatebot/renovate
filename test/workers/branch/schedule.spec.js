@@ -26,6 +26,9 @@ describe('workers/branch/schedule', () => {
         false
       );
     });
+    it('returns false for every xday', () => {
+      expect(schedule.hasValidSchedule(['every friday'])[0]).toBe(false);
+    });
     it('returns true if schedule has days of week', () => {
       expect(schedule.hasValidSchedule(['on friday and saturday'])[0]).toBe(
         true
