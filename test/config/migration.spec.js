@@ -77,6 +77,7 @@ describe('config/migration', () => {
       expect(migratedConfig.dependencies.schedule.length).toBe(2);
       expect(migratedConfig.dependencies.schedule[0]).toEqual('after 10pm');
       expect(migratedConfig.dependencies.schedule[1]).toEqual('before 7am');
+      expect(migratedConfig.devDependencies.schedule).toMatchSnapshot();
       expect(migratedConfig.devDependencies.schedule.length).toBe(2);
       expect(migratedConfig.devDependencies.schedule[0]).toEqual(
         'after 10pm every weekday'
@@ -121,6 +122,18 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(false);
       expect(migratedConfig.schedule).toEqual(config.schedule);
+    });
+    it('does not migrate hour range', () => {
+      const config = {
+        schedule: 'after 1:00pm and before 5:00pm',
+      };
+      const parentConfig = { ...defaultConfig };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        parentConfig
+      );
+      expect(migratedConfig.schedule).toEqual(config.schedule);
+      expect(isMigrated).toBe(false);
     });
     it('it migrates packages', () => {
       const config = {
