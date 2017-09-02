@@ -21,9 +21,7 @@ exports[`api/npm should fetch package info from custom registry 2`] = `
 Array [
   "https://npm.mycustomregistry.com/foobar",
   Object {
-    "headers": Object {
-      "authorization": "Bearer undefined",
-    },
+    "headers": Object {},
     "json": true,
   },
 ]
@@ -109,6 +107,33 @@ Array [
     "headers": Object {
       "authorization": "Bearer some-token",
     },
+    "json": true,
+  },
+]
+`;
+
+exports[`api/npm should use default registry if missing from npmrc 1`] = `
+Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
+  "homepage": "https://google.com",
+  "name": undefined,
+  "renovate-config": undefined,
+  "repositoryUrl": "https://google.com",
+  "versions": Object {
+    "0.0.1": Object {
+      "time": "",
+    },
+  },
+}
+`;
+
+exports[`api/npm should use default registry if missing from npmrc 2`] = `
+Array [
+  "https://registry.npmjs.org/foobar",
+  Object {
+    "headers": Object {},
     "json": true,
   },
 ]

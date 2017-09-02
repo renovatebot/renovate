@@ -92,4 +92,12 @@ describe('api/npm', () => {
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
   });
+  it('should use default registry if missing from npmrc', async () => {
+    got.mockImplementation(() => Promise.resolve(npmResponse));
+    npm.setNpmrc('foo=bar');
+    const res = await npm.getDependency('foobar', logger);
+    expect(res).toMatchSnapshot();
+    const call = got.mock.calls[0];
+    expect(call).toMatchSnapshot();
+  });
 });
