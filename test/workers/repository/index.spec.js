@@ -8,6 +8,37 @@ const upgrades = require('../../../lib/workers/repository/upgrades');
 const logger = require('../../_fixtures/logger');
 
 describe('workers/repository', () => {
+  describe('pinDependenciesFirst', () => {
+    it('returns sorted if no pin', () => {
+      const arr = [
+        { branchName: 'a' },
+        { branchName: 'c' },
+        { branchName: 'b' },
+      ];
+      arr.sort(repositoryWorker.pinDependenciesFirst);
+      expect(arr).toMatchSnapshot();
+    });
+    it('returns pin first', () => {
+      const arr = [
+        { branchName: 'a' },
+        { branchName: 'c' },
+        { branchName: 'd', type: 'pin' },
+        { branchName: 'b' },
+      ];
+      arr.sort(repositoryWorker.pinDependenciesFirst);
+      expect(arr).toMatchSnapshot();
+    });
+    it('returns pin first', () => {
+      const arr = [
+        { branchName: 'd', type: 'pin' },
+        { branchName: 'a' },
+        { branchName: 'c' },
+        { branchName: 'b' },
+      ];
+      arr.sort(repositoryWorker.pinDependenciesFirst);
+      expect(arr).toMatchSnapshot();
+    });
+  });
   describe('renovateRepository', () => {
     let config;
     beforeEach(() => {
@@ -173,6 +204,32 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(upgrades.branchifyUpgrades.mock.calls).toHaveLength(4);
       expect(branchWorker.processBranch.mock.calls).toHaveLength(3);
+      expect(config.logger.error.mock.calls).toHaveLength(0);
+    });
+    it('stops branchWorker after lockFileError', async () => {
+      config.packageFiles = ['package.json'];
+      config.hasRenovateJson = true;
+      onboarding.getOnboardingStatus.mockReturnValue(true);
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
+        upgrades: [{}, {}, {}],
+      });
+      branchWorker.processBranch.mockReturnValue('lockFileError');
+      await repositoryWorker.renovateRepository(config);
+      expect(upgrades.branchifyUpgrades.mock.calls).toHaveLength(1);
+      expect(branchWorker.processBranch.mock.calls).toHaveLength(1);
+      expect(config.logger.error.mock.calls).toHaveLength(0);
+    });
+    it('stops branchWorker after pin', async () => {
+      config.packageFiles = ['package.json'];
+      config.hasRenovateJson = true;
+      onboarding.getOnboardingStatus.mockReturnValue(true);
+      upgrades.branchifyUpgrades.mockReturnValueOnce({
+        upgrades: [{ type: 'pin' }, {}, {}],
+      });
+      branchWorker.processBranch.mockReturnValue('done');
+      await repositoryWorker.renovateRepository(config);
+      expect(upgrades.branchifyUpgrades.mock.calls).toHaveLength(1);
+      expect(branchWorker.processBranch.mock.calls).toHaveLength(1);
       expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('swallows errors', async () => {
