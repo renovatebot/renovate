@@ -137,6 +137,18 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
+    it('should delete branch and return null if creating PR fails', async () => {
+      config.api.getBranchStatus = jest.fn(() => 'success');
+      config.api.getBranchPr = jest.fn();
+      config.api.createPr = jest.fn(() => {
+        throw new Error('failed to create PR');
+      });
+      config.api.deleteBranch = jest.fn();
+      config.prCreation = 'status-success';
+      const pr = await prWorker.ensurePr(config);
+      expect(config.api.deleteBranch.mock.calls).toHaveLength(1);
+      expect(pr).toBe(null);
+    });
     it('should return null if waiting for not pending', async () => {
       config.api.getBranchStatus = jest.fn(() => 'pending');
       config.api.getBranchLastCommitTime = jest.fn(() => new Date());
