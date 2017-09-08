@@ -41,9 +41,6 @@ Array [
           "someotheruser",
         ],
       },
-      "headers": Object {
-        "accept": "application/vnd.github.black-cat-preview+json",
-      },
     },
   ],
 ]
