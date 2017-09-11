@@ -35,13 +35,14 @@ describe('workers/repository/upgrades', () => {
           packageFile: 'backend/package.json',
         },
         {
-          packageFile: 'frontend/package.json',
+          packageFile: 'frontend/package.js',
         },
       ];
       packageFileWorker.renovatePackageFile.mockReturnValueOnce(['a']);
       packageFileWorker.renovatePackageFile.mockReturnValueOnce(['b', 'c']);
+      packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce(['d']);
       const res = await upgrades.determineRepoUpgrades(config);
-      expect(res.length).toBe(3);
+      expect(res).toHaveLength(4);
     });
   });
   describe('generateConfig(branchUpgrades)', () => {

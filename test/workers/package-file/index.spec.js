@@ -40,4 +40,29 @@ describe('packageFileWorker', () => {
       expect(res).toHaveLength(1);
     });
   });
+  describe('renovateMeteorPackageFile(config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        api: {
+          getFileContent: jest.fn(),
+        },
+        packageFile: 'package.js',
+        repoIsOnboarded: true,
+        logger,
+      };
+      depTypeWorker.renovateDepType.mockReturnValue([]);
+    });
+    it('returns empty if disabled', async () => {
+      config.enabled = false;
+      const res = await packageFileWorker.renovateMeteorPackageFile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns upgrades', async () => {
+      depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
+      const res = await packageFileWorker.renovateMeteorPackageFile(config);
+      expect(res).toHaveLength(2);
+    });
+  });
 });
