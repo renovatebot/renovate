@@ -45,6 +45,8 @@ Array [
 exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 1`] = `
 Array [
   "package.json",
+  "package.json",
+  "node_modules/backend/package.json",
 ]
 `;
 

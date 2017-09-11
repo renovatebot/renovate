@@ -221,6 +221,9 @@ describe('workers/repository/apis', () => {
             'backend/package.json',
           ]),
         },
+        meteor: {
+          enabled: false,
+        },
         logger,
         warnings: [],
       };
@@ -230,6 +233,7 @@ describe('workers/repository/apis', () => {
     });
     it('ignores node modules', async () => {
       const config = {
+        ...defaultConfig,
         ignorePaths: ['node_modules/'],
         api: {
           findFilePaths: jest.fn(() => [
@@ -247,6 +251,7 @@ describe('workers/repository/apis', () => {
     });
     it('defaults to package.json if found', async () => {
       const config = {
+        ...defaultConfig,
         api: {
           findFilePaths: jest.fn(() => []),
           getFileJson: jest.fn(() => ({})),
@@ -259,6 +264,7 @@ describe('workers/repository/apis', () => {
     });
     it('returns empty if package.json not found', async () => {
       const config = {
+        ...defaultConfig,
         api: {
           findFilePaths: jest.fn(() => []),
           getFileJson: jest.fn(() => null),

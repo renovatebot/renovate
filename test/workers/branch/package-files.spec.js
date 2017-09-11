@@ -22,7 +22,10 @@ describe('workers/branch/package-files', () => {
       expect(res).toHaveLength(0);
     });
     it('returns updated files', async () => {
-      config.upgrades = [{}, {}];
+      config.upgrades = [
+        { packageFile: 'package.json' },
+        { packageFile: 'backend/package.json' },
+      ];
       config.api.getFileContent.mockReturnValueOnce('old content 1');
       config.api.getFileContent.mockReturnValueOnce('old content 2');
       packageJsonHelper.setNewValue.mockReturnValueOnce('old content 1');

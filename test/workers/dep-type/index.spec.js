@@ -14,6 +14,7 @@ describe('lib/workers/dep-type/index', () => {
     let config;
     beforeEach(() => {
       config = {
+        packageFile: 'package.json',
         ignoreDeps: ['a', 'b'],
         lernaPackages: ['e'],
       };
