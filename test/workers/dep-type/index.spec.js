@@ -15,7 +15,7 @@ describe('lib/workers/dep-type/index', () => {
     beforeEach(() => {
       config = {
         ignoreDeps: ['a', 'b'],
-        lernaPackages: ['e'],
+        monorepoPackages: ['e'],
       };
     });
     it('returns empty if config is disabled', async () => {
