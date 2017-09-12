@@ -74,6 +74,8 @@ $ node renovate --help
     --log-file <string>                  Log file path
     --log-file-level <string>            Log file log level
     --onboarding [boolean]               Require a Configuration PR first
+    --private-key <string>               Server-side private key
+    --encrypted <json>                   A configuration object containing configuration encrypted with project key
     --timezone <string>                  [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
     --onboarding [boolean]               Require a Configuration PR first
     --platform <string>                  Platform type of repository
@@ -109,6 +111,7 @@ $ node renovate --help
     --labels <list>                      Labels to add to Pull Request
     --assignees <list>                   Assignees for Pull Request
     --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
+    --meteor <json>                      Configuration object for meteor package.js renovation
     -h, --help                           output usage information
   Examples:
 
@@ -204,6 +207,22 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>true</pre></td>
   <td>`RENOVATE_ONBOARDING`</td>
   <td>`--onboarding`<td>
+</tr>
+<tr>
+  <td>`privateKey`</td>
+  <td>Server-side private key</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_PRIVATE_KEY`</td>
+  <td>`--private-key`<td>
+</tr>
+<tr>
+  <td>`encrypted`</td>
+  <td>A configuration object containing configuration encrypted with project key</td>
+  <td>json</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_ENCRYPTED`</td>
+  <td>`--encrypted`<td>
 </tr>
 <tr>
   <td>`timezone`</td>
@@ -684,4 +703,12 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>[]</pre></td>
   <td>`RENOVATE_REVIEWERS`</td>
   <td>`--reviewers`<td>
+</tr>
+<tr>
+  <td>`meteor`</td>
+  <td>Configuration object for meteor package.js renovation</td>
+  <td>json</td>
+  <td><pre>{"enabled": true}</pre></td>
+  <td>`RENOVATE_METEOR`</td>
+  <td>`--meteor`<td>
 </tr>

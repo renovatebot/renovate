@@ -542,7 +542,7 @@ Array [
     },
   ],
   Array [
-    "search/code?q=repo:some/repo+filename:package.json&per_page=100",
+    "search/code?q=some-content+repo:some/repo+filename:package.json&per_page=100",
     undefined,
   ],
 ]

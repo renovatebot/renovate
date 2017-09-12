@@ -34,6 +34,13 @@ Array [
 ]
 `;
 
+exports[`workers/repository/apis detectPackageFiles(config) finds meteor package files 1`] = `
+Array [
+  "package.json",
+  "modules/something/package.js",
+]
+`;
+
 exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 1`] = `
 Array [
   "package.json",
@@ -99,6 +106,9 @@ Array [
     "hasPackageLock": false,
     "hasYarnLock": false,
     "packageFile": "a/package.json",
+  },
+  Object {
+    "packageFile": "module/package.js",
   },
 ]
 `;

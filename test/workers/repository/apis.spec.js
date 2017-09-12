@@ -222,6 +222,9 @@ describe('workers/repository/apis', () => {
             'backend/package.json',
           ]),
         },
+        meteor: {
+          enabled: false,
+        },
         logger,
         warnings: [],
       };
@@ -229,8 +232,28 @@ describe('workers/repository/apis', () => {
       expect(res).toMatchObject(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
+    it('finds meteor package files', async () => {
+      const config = {
+        api: {
+          findFilePaths: jest.fn(),
+        },
+        meteor: {
+          enabled: true,
+        },
+        logger,
+        warnings: [],
+      };
+      config.api.findFilePaths.mockReturnValueOnce(['package.json']);
+      config.api.findFilePaths.mockReturnValueOnce([
+        'modules/something/package.js',
+      ]);
+      const res = await apis.detectPackageFiles(config);
+      expect(res).toMatchObject(config);
+      expect(res.packageFiles).toMatchSnapshot();
+    });
     it('ignores node modules', async () => {
       const config = {
+        ...defaultConfig,
         ignorePaths: ['node_modules/'],
         api: {
           findFilePaths: jest.fn(() => [
@@ -248,6 +271,7 @@ describe('workers/repository/apis', () => {
     });
     it('defaults to package.json if found', async () => {
       const config = {
+        ...defaultConfig,
         api: {
           findFilePaths: jest.fn(() => []),
           getFileJson: jest.fn(() => ({})),
@@ -260,6 +284,7 @@ describe('workers/repository/apis', () => {
     });
     it('returns empty if package.json not found', async () => {
       const config = {
+        ...defaultConfig,
         api: {
           findFilePaths: jest.fn(() => []),
           getFileJson: jest.fn(() => null),
@@ -287,6 +312,7 @@ describe('workers/repository/apis', () => {
       expect(res.packageFiles).toEqual([]);
     });
     it('includes files with content', async () => {
+      config.packageFiles.push('module/package.js');
       config.api.getFileJson.mockReturnValueOnce({
         renovate: {},
         workspaces: [],
@@ -299,7 +325,7 @@ describe('workers/repository/apis', () => {
       config.api.getFileContent.mockReturnValueOnce(null);
       config.api.getFileContent.mockReturnValueOnce(null);
       const res = await apis.resolvePackageFiles(config);
-      expect(res.packageFiles).toHaveLength(2);
+      expect(res.packageFiles).toHaveLength(3);
       expect(res.packageFiles).toMatchSnapshot();
     });
   });

@@ -612,7 +612,7 @@ describe('api/github', () => {
           ],
         },
       }));
-      const files = await github.findFilePaths('package.json');
+      const files = await github.findFilePaths('package.json', 'some-content');
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(files).toMatchSnapshot();
     });
