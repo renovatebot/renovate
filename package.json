@@ -57,6 +57,7 @@
     "jsonwebtoken": "7.4.3",
     "later": "1.2.0",
     "lodash": "4.17.4",
+    "minimatch": "3.0.4",
     "moment": "2.18.1",
     "moment-timezone": "0.5.13",
     "registry-auth-token": "3.3.1",
