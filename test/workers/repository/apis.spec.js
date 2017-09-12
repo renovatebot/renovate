@@ -45,6 +45,55 @@ describe('workers/repository/apis', () => {
       expect(await apis.getNpmrc(config)).toMatchObject(config);
     });
   });
+  describe('checkMonorepos', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        api: {
+          getFileJson: jest.fn(),
+        },
+        logger,
+      };
+    });
+    it('adds yarn workspaces', async () => {
+      config.hasYarnWorkspaces = true;
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          content: { workspaces: ['packages/*'] },
+        },
+        {
+          packageFile: 'packages/something/package.json',
+          content: { name: '@a/b' },
+        },
+        {
+          packageFile: 'packages/something-else/package.json',
+          content: { name: '@a/c' },
+        },
+      ];
+      const res = await apis.checkMonorepos(config);
+      expect(res.monorepoPackages).toMatchSnapshot();
+    });
+    it('adds lerna packages', async () => {
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+        },
+        {
+          packageFile: 'packages/something/package.json',
+          content: { name: '@a/b' },
+        },
+        {
+          packageFile: 'packages/something-else/package.json',
+          content: { name: '@a/c' },
+        },
+      ];
+      config.api.getFileJson.mockReturnValue({ packages: ['packages/*'] });
+      const res = await apis.checkMonorepos(config);
+      expect(res.monorepoPackages).toMatchSnapshot();
+    });
+  });
   describe('detectSemanticCommits', () => {
     it('disables semantic commits', async () => {
       const config = {
@@ -66,54 +115,6 @@ describe('workers/repository/apis', () => {
       config.api.getCommitMessages.mockReturnValueOnce(['fix: something']);
       const res = await apis.detectSemanticCommits(config);
       expect(res).toEqual(true);
-    });
-  });
-  describe('checkForLerna(config)', () => {
-    it('swallows lerna 404', async () => {
-      const config = {
-        api: {
-          getFileJson: jest.fn(() => ({})),
-          getSubDirectories: jest.fn(() => {
-            throw new Error('some-error');
-          }),
-        },
-        logger,
-      };
-      const res = await apis.checkForLerna(config);
-      expect(res).toMatchSnapshot();
-    });
-    it('ignores zero length lerna', async () => {
-      const config = {
-        api: {
-          getFileJson: jest.fn(() => ({ packages: ['packages/*'] })),
-          getSubDirectories: jest.fn(() => []),
-        },
-        logger,
-      };
-      const res = await apis.checkForLerna(config);
-      expect(res).toMatchSnapshot();
-    });
-    it('implies lerna package path', async () => {
-      const config = {
-        api: {
-          getFileJson: jest.fn(() => ({})),
-          getSubDirectories: jest.fn(() => ['a', 'b']),
-        },
-        logger,
-      };
-      const res = await apis.checkForLerna(config);
-      expect(res).toMatchSnapshot();
-    });
-    it('returns lerna package names', async () => {
-      const config = {
-        api: {
-          getFileJson: jest.fn(() => ({ packages: ['packages/*'] })),
-          getSubDirectories: jest.fn(() => ['a', 'b']),
-        },
-        logger,
-      };
-      const res = await apis.checkForLerna(config);
-      expect(res).toMatchSnapshot();
     });
   });
   describe('initApis(config)', () => {

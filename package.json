@@ -57,6 +57,7 @@
     "jsonwebtoken": "7.4.3",
     "later": "1.2.0",
     "lodash": "4.17.4",
+    "minimatch": "3.0.4",
     "moment": "2.18.1",
     "moment-timezone": "0.5.13",
     "registry-auth-token": "3.3.1",
@@ -85,7 +86,7 @@
     "mkdirp": "0.5.1",
     "mockdate": "2.0.2",
     "prettier": "1.5.3",
-    "rimraf": "2.6.1",
+    "rimraf": "2.6.2",
     "semantic-release": "7.0.2"
   },
   "babel": {
