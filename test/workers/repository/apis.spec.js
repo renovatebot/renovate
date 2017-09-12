@@ -216,6 +216,7 @@ describe('workers/repository/apis', () => {
   describe('detectPackageFiles(config)', () => {
     it('adds package files to object', async () => {
       const config = {
+        ...defaultConfig,
         api: {
           findFilePaths: jest.fn(() => [
             'package.json',
@@ -229,11 +230,11 @@ describe('workers/repository/apis', () => {
         warnings: [],
       };
       const res = await apis.detectPackageFiles(config);
-      expect(res).toMatchObject(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
     it('finds meteor package files', async () => {
       const config = {
+        ...defaultConfig,
         api: {
           findFilePaths: jest.fn(),
         },
@@ -248,7 +249,6 @@ describe('workers/repository/apis', () => {
         'modules/something/package.js',
       ]);
       const res = await apis.detectPackageFiles(config);
-      expect(res).toMatchObject(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
     it('ignores node modules', async () => {
