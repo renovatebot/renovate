@@ -1,5 +1,6 @@
 const packageJsonHelper = require('../../../lib/workers/branch/package-json');
 const packageJsHelper = require('../../../lib/workers/branch/package-js');
+const dockerHelper = require('../../../lib/workers/branch/dockerfile');
 const {
   getUpdatedPackageFiles,
 } = require('../../../lib/workers/branch/package-files');
@@ -16,6 +17,7 @@ describe('workers/branch/package-files', () => {
         logger,
       };
       packageJsonHelper.setNewValue = jest.fn();
+      dockerHelper.setNewValue = jest.fn();
       packageJsHelper.setNewValue = jest.fn();
     });
     it('returns empty if lock file maintenance', async () => {
@@ -26,14 +28,14 @@ describe('workers/branch/package-files', () => {
     it('returns updated files', async () => {
       config.upgrades = [
         { packageFile: 'package.json' },
-        { packageFile: 'backend/package.json' },
+        { packageFile: 'Dockerfile' },
         { packageFile: 'packages/foo/package.js' },
       ];
       config.api.getFileContent.mockReturnValueOnce('old content 1');
       config.api.getFileContent.mockReturnValueOnce('old content 2');
       config.api.getFileContent.mockReturnValueOnce('old content 3');
       packageJsonHelper.setNewValue.mockReturnValueOnce('old content 1');
-      packageJsonHelper.setNewValue.mockReturnValueOnce('new content 2');
+      dockerHelper.setNewValue.mockReturnValueOnce('new content 2');
       packageJsHelper.setNewValue.mockReturnValueOnce('old content 3');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toHaveLength(1);

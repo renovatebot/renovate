@@ -251,6 +251,23 @@ describe('workers/repository/apis', () => {
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
+    it('finds Dockerfiles', async () => {
+      const config = {
+        ...defaultConfig,
+        api: {
+          findFilePaths: jest.fn(),
+        },
+        docker: {
+          enabled: true,
+        },
+        logger,
+        warnings: [],
+      };
+      config.api.findFilePaths.mockReturnValueOnce(['package.json']);
+      config.api.findFilePaths.mockReturnValueOnce(['Dockerfile']);
+      const res = await apis.detectPackageFiles(config);
+      expect(res.packageFiles).toMatchSnapshot();
+    });
     it('ignores node modules', async () => {
       const config = {
         ...defaultConfig,
