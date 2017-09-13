@@ -515,6 +515,19 @@ Obviously, you can't set repository or package file location with this method.
   <td><td>
 </tr>
 <tr>
+  <td>`pin`</td>
+  <td>Configuration to apply when an update type is pin.</td>
+  <td>json</td>
+  <td><pre>{
+  "automerge": true,
+  "unpublishSafe": false,
+  "groupName": "Pin Dependencies",
+  "group": {"prTitle": "{{groupName}}", "semanticPrefix": "refactor(deps):"}
+}</pre></td>
+  <td>`RENOVATE_PIN`</td>
+  <td><td>
+</tr>
+<tr>
   <td>`semanticCommits`</td>
   <td>Enable semantic commit prefixes for commits and PR titles</td>
   <td>boolean</td>
