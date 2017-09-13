@@ -32,7 +32,7 @@ Array [
   "reviewers",
   "depName",
   "currentVersion",
-  "isMajor",
+  "type",
   "repositoryUrl",
 ]
 `;
