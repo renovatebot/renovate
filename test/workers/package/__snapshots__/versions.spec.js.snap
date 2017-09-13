@@ -3,17 +3,10 @@
 exports[`workers/package/versions .determineUpgrades(npmDep, config) disables major release separation (major) 1`] = `
 Array [
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
   Object {
@@ -64,17 +57,10 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
 ]
@@ -83,17 +69,10 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) pins minor ranged versions 1`] = `
 Array [
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
 ]
@@ -145,17 +124,10 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
 ]
@@ -189,17 +161,10 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns only one update if automerging major 1`] = `
 Array [
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
   Object {
@@ -218,17 +183,10 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns only one update if grouping 1`] = `
 Array [
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
   Object {
@@ -390,17 +348,10 @@ Array [
 exports[`workers/package/versions .determineUpgrades(npmDep, config) supports future versions if already future 1`] = `
 Array [
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "2.0.3",
     "newVersionMajor": 2,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
 ]
@@ -444,17 +395,10 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
 ]
@@ -483,17 +427,10 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
 ]
@@ -528,17 +465,10 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "1.3.0",
     "newVersionMajor": 1,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
 ]
@@ -600,17 +530,10 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "1.0.1",
     "newVersionMajor": 1,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
 ]
@@ -715,17 +638,10 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "automerge": true,
-    "group": Object {
-      "prTitle": "{{groupName}}",
-      "semanticPrefix": "refactor(deps):",
-    },
-    "groupName": "Pin Dependencies",
     "isPin": true,
     "newVersion": "1.3.0",
     "newVersionMajor": 1,
     "type": "pin",
-    "unpublishSafe": false,
     "unpublishable": false,
   },
 ]

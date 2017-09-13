@@ -66,9 +66,9 @@ describe('lib/workers/package/index', () => {
     it('merges type', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
       versions.determineUpgrades = jest.fn(() => [
-        { isMajor: true },
-        { isMinor: true },
-        { isPatch: true },
+        { type: 'major' },
+        { type: 'minor' },
+        { type: 'patch' },
       ]);
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toHaveLength(3);
