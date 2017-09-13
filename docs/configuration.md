@@ -111,6 +111,7 @@ $ node renovate --help
     --labels <list>                      Labels to add to Pull Request
     --assignees <list>                   Assignees for Pull Request
     --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
+    --meteor <json>                      Configuration object for meteor package.js renovation
     -h, --help                           output usage information
   Examples:
 
@@ -722,7 +723,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>json</td>
   <td><pre>{"enabled": false}</pre></td>
   <td>`RENOVATE_METEOR`</td>
-  <td><td>
+  <td>`--meteor`<td>
 </tr>
 <tr>
   <td>`docker`</td>
