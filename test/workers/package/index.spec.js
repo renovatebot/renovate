@@ -1,17 +1,17 @@
-const npmApi = require('../../../lib/api/npm');
-const versions = require('../../../lib/workers/package/versions');
 const pkgWorker = require('../../../lib/workers/package/index');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const configParser = require('../../../lib/config');
+const logger = require('../../_fixtures/logger');
+const npm = require('../../../lib/workers/package/npm');
 
-jest.mock('../../../lib/workers/branch/schedule');
-jest.mock('../../../lib/api/npm');
+jest.mock('../../../lib/workers/package/npm');
 
 describe('lib/workers/package/index', () => {
   describe('renovatePackage(config)', () => {
     let config;
     beforeEach(() => {
       config = configParser.filterConfig(defaultConfig, 'package');
+      config.logger = logger;
       config.depName = 'foo';
       config.currentVersion = '1.0.0';
     });
@@ -20,62 +20,19 @@ describe('lib/workers/package/index', () => {
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
-    it('returns warning if using invalid version', async () => {
-      config.currentVersion =
-        'git+ssh://git@github.com/joefraley/eslint-config-meridian.git';
+    it('calls npm', async () => {
+      npm.renovateNpmPackage.mockReturnValueOnce([]);
+      config.depType = 'npm';
       const res = await pkgWorker.renovatePackage(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject([]);
     });
-    it('returns error if no npm dep found', async () => {
-      config.repoIsOnboarded = true;
-      config.schedule = 'some schedule';
-      config.hasYarnLock = true;
-      const res = await pkgWorker.renovatePackage(config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('error');
-      expect(npmApi.getDependency.mock.calls.length).toBe(1);
-    });
-    it('returns error if no npm scoped dep found', async () => {
-      config.depName = '@foo/something';
-      config.repoIsOnboarded = true;
-      config.schedule = 'some schedule';
-      const res = await pkgWorker.renovatePackage(config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('error');
-    });
-    it('returns warning if warning found', async () => {
-      npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades = jest.fn(() => [
-        {
-          type: 'warning',
-          message: 'bad version',
-        },
-      ]);
-      const res = await pkgWorker.renovatePackage(config);
-      expect(res[0].type).toEqual('warning');
-    });
-    it('returns array if upgrades found', async () => {
-      npmApi.getDependency.mockReturnValueOnce({ repositoryUrl: 'some-url' });
-      versions.determineUpgrades = jest.fn(() => [{}]);
+    it('maps type', async () => {
+      config.depType = 'npm';
+      npm.renovateNpmPackage.mockReturnValueOnce([{ type: 'pin' }]);
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toHaveLength(1);
-      expect(Object.keys(res[0])).toMatchSnapshot();
-    });
-    it('merges type', async () => {
-      npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades = jest.fn(() => [
-        { type: 'major' },
-        { type: 'minor' },
-        { type: 'patch' },
-      ]);
-      const res = await pkgWorker.renovatePackage(config);
-      expect(res).toHaveLength(3);
-      expect(Object.keys(res[0])).toMatchSnapshot();
-      expect(res[0].branchName.indexOf('newVersionMinor')).toBe(-1);
-      expect(res[1].branchName.indexOf('newVersionMinor')).toBe(-1);
-      expect(res[2].branchName.indexOf('newVersionMinor')).not.toBe(-1);
+      expect(res[0]).toMatchSnapshot();
+      expect(res[0].groupName).toEqual('Pin Dependencies');
     });
   });
 });

@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/workers/package/npm renovateNpmPackage returns array if upgrades found 1`] = `
+Array [
+  "repositoryUrl",
+]
+`;
+
+exports[`lib/workers/package/npm renovateNpmPackage returns error if no npm dep found 1`] = `
+Array [
+  Object {
+    "message": "Failed to look up dependency. This will block *all* dependencies from being updated due to presence of lock file.",
+    "repositoryUrl": null,
+    "type": "error",
+  },
+]
+`;
+
+exports[`lib/workers/package/npm renovateNpmPackage returns error if no npm scoped dep found 1`] = `
+Array [
+  Object {
+    "message": "Failed to look up dependency. This will block *all* dependencies from being updated due to presence of lock file.",
+    "repositoryUrl": null,
+    "type": "error",
+  },
+]
+`;
+
+exports[`lib/workers/package/npm renovateNpmPackage returns warning if using invalid version 1`] = `
+Array [
+  Object {
+    "depName": "some-dep",
+    "message": "Dependency uses tag \\"\`git+ssh://git@github.com/joefraley/eslint-config-meridian.git\`\\" as its version so that will never be changed by Renovate",
+    "type": "warning",
+  },
+]
+`;
