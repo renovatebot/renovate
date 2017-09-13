@@ -209,5 +209,11 @@ describe('config/index', () => {
       const config = configParser.mergeChildConfig(parentConfig, {});
       expect(config.packageRules).toHaveLength(2);
     });
+    it('handles undefined childConfig', () => {
+      const parentConfig = { ...defaultConfig };
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, undefined);
+      expect(config).toMatchObject(parentConfig);
+    });
   });
 });
