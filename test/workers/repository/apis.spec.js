@@ -345,6 +345,22 @@ describe('workers/repository/apis', () => {
       expect(res.packageFiles).toHaveLength(3);
       expect(res.packageFiles).toMatchSnapshot();
     });
+    it('handles dockerfile', async () => {
+      config.packageFiles = [{ packageFile: 'Dockerfile' }];
+      config.api.getFileContent.mockReturnValueOnce(
+        '# some content\nFROM node:8\nRUN something'
+      );
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(1);
+    });
+    it('handles dockerfile with no FROM', async () => {
+      config.packageFiles = [{ packageFile: 'Dockerfile' }];
+      config.api.getFileContent.mockReturnValueOnce(
+        '# some content\n# FROM node:8\nRUN something'
+      );
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(0);
+    });
   });
 });
 describe('migrateAndValidate', () => {

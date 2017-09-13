@@ -65,4 +65,26 @@ describe('packageFileWorker', () => {
       expect(res).toHaveLength(2);
     });
   });
+  describe('renovateDockerfile', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        packageFile: 'Dockerfile',
+        repoIsOnboarded: true,
+        logger,
+      };
+      depTypeWorker.renovateDepType.mockReturnValue([]);
+    });
+    it('returns empty if disabled', async () => {
+      config.enabled = false;
+      const res = await packageFileWorker.renovateDockerfile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns upgrades', async () => {
+      depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
+      const res = await packageFileWorker.renovateDockerfile(config);
+      expect(res).toHaveLength(2);
+    });
+  });
 });

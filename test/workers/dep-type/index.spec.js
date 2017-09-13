@@ -58,6 +58,12 @@ describe('lib/workers/dep-type/index', () => {
       const res = await depTypeWorker.renovateDepType(content, config);
       expect(res).toHaveLength(6);
     });
+    it('returns upgrades for docker', async () => {
+      config.packageFile = 'Dockerfile';
+      config.currentFrom = 'node';
+      const res = await depTypeWorker.renovateDepType('some-content', config);
+      expect(res).toHaveLength(1);
+    });
   });
   describe('getDepConfig(depTypeConfig, dep)', () => {
     const depTypeConfig = {
