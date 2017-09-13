@@ -708,7 +708,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`meteor`</td>
   <td>Configuration object for meteor package.js renovation</td>
   <td>json</td>
-  <td><pre>{"enabled": true}</pre></td>
+  <td><pre>{"enabled": false}</pre></td>
   <td>`RENOVATE_METEOR`</td>
   <td>`--meteor`<td>
 </tr>
