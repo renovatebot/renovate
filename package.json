@@ -67,7 +67,8 @@
     "semver-utils": "1.1.1",
     "showdown": "1.7.4",
     "tmp": "0.0.33",
-    "traverse": "0.6.6"
+    "traverse": "0.6.6",
+    "yarn": "1.0.2"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
