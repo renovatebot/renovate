@@ -1,13 +1,10 @@
 machine:
-  environment:
-    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
-    YARN_PATH: "$HOME/.yarn"
   node:
     version: 6.9
 
 dependencies:
   pre:
-    - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 0.27.5
+    - npm i -g yarn
     - yarn --version
     - npm i -g npm@5
   override:
