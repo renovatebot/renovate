@@ -201,7 +201,7 @@ describe('workers/branch/lock-files', () => {
         },
         {
           packageFile: 'backend/package.json',
-          content: { name: 'package 2' },
+          content: { name: 'package-2', engines: { yarn: '^0.27.5' } },
           yarnrc: 'some yarnrc',
         },
       ];
@@ -230,16 +230,19 @@ describe('workers/branch/lock-files', () => {
       config.updatedPackageFiles = [
         {
           name: 'package.json',
-          contents: 'raw contents',
+          contents: '{ "name": "{{some-template}}" }',
         },
         {
           name: 'backend/package.json',
-          contents: 'more raw contents',
+          contents:
+            '{ "name": "some-other-name", "engines": { "node": "^6.0.0" }}',
         },
       ];
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(2);
+      expect(fs.outputFile.mock.calls[0][1].includes('"dummy"')).toBe(true);
+      expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
     });
   });
   describe('getUpdatedLockFiles', () => {
