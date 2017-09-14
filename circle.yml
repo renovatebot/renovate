@@ -1,12 +1,11 @@
 machine:
   node:
-    version: 6.9
+    version: 6.11
 
 dependencies:
   pre:
     - npm i -g yarn
     - yarn --version
-    - npm i -g npm@5
   override:
     - yarn install --frozen-lockfile
   cache_directories:
@@ -16,7 +15,7 @@ dependencies:
 
 test:
   override:
-    - npm test
+    - yarn test
   post:
     - bash <(curl -s https://codecov.io/bash)
 
@@ -24,4 +23,4 @@ deployment:
   npm:
     branch: master
     commands:
-      - npm run semantic-release || true
+      - yarn run semantic-release || true
