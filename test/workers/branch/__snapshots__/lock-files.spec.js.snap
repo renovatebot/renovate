@@ -86,7 +86,7 @@ exports[`workers/branch/lock-files writeExistingFiles writes files and removes f
 Array [
   Array [
     "some-tmp-dir/package.json",
-    "{\\"name\\":\\"package 1\\"}",
+    "{\\"name\\":\\"dummy\\"}",
   ],
   Array [
     "some-tmp-dir/.npmrc",
@@ -94,7 +94,7 @@ Array [
   ],
   Array [
     "some-tmp-dir/backend/package.json",
-    "{\\"name\\":\\"package 2\\"}",
+    "{\\"name\\":\\"package-2\\"}",
   ],
   Array [
     "some-tmp-dir/backend/.yarnrc",
@@ -107,11 +107,11 @@ exports[`workers/branch/lock-files writeUpdatedPackageFiles writes updated packa
 Array [
   Array [
     "some-tmp-dir/package.json",
-    "raw contents",
+    "{\\"name\\":\\"dummy\\"}",
   ],
   Array [
     "some-tmp-dir/backend/package.json",
-    "more raw contents",
+    "{\\"name\\":\\"some-other-name\\"}",
   ],
 ]
 `;
