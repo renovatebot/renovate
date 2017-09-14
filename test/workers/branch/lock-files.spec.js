@@ -226,6 +226,16 @@ describe('workers/branch/lock-files', () => {
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile.mock.calls).toHaveLength(0);
     });
+    it('returns if no updated packageFiles are package.json', async () => {
+      config.updatedPackageFiles = [
+        {
+          name: 'Dockerfile',
+          contents: 'some-contents',
+        },
+      ];
+      await writeUpdatedPackageFiles(config);
+      expect(fs.outputFile.mock.calls).toHaveLength(0);
+    });
     it('writes updated packageFiles', async () => {
       config.updatedPackageFiles = [
         {
