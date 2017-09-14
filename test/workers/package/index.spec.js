@@ -2,8 +2,10 @@ const pkgWorker = require('../../../lib/workers/package/index');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const configParser = require('../../../lib/config');
 const logger = require('../../_fixtures/logger');
+const docker = require('../../../lib/workers/package/docker');
 const npm = require('../../../lib/workers/package/npm');
 
+jest.mock('../../../lib/workers/package/docker');
 jest.mock('../../../lib/workers/package/npm');
 
 describe('lib/workers/package/index', () => {
@@ -17,6 +19,12 @@ describe('lib/workers/package/index', () => {
     });
     it('returns empty if package is disabled', async () => {
       config.enabled = false;
+      const res = await pkgWorker.renovatePackage(config);
+      expect(res).toMatchObject([]);
+    });
+    it('calls docker', async () => {
+      docker.renovateDockerImage.mockReturnValueOnce([]);
+      config.depType = 'docker';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });

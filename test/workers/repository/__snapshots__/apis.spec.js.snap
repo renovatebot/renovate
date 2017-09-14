@@ -34,6 +34,13 @@ Array [
 ]
 `;
 
+exports[`workers/repository/apis detectPackageFiles(config) finds Dockerfiles 1`] = `
+Array [
+  "package.json",
+  "Dockerfile",
+]
+`;
+
 exports[`workers/repository/apis detectPackageFiles(config) finds meteor package files 1`] = `
 Array [
   "package.json",

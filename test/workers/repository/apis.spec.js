@@ -216,6 +216,7 @@ describe('workers/repository/apis', () => {
   describe('detectPackageFiles(config)', () => {
     it('adds package files to object', async () => {
       const config = {
+        ...defaultConfig,
         api: {
           findFilePaths: jest.fn(() => [
             'package.json',
@@ -229,11 +230,11 @@ describe('workers/repository/apis', () => {
         warnings: [],
       };
       const res = await apis.detectPackageFiles(config);
-      expect(res).toMatchObject(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
     it('finds meteor package files', async () => {
       const config = {
+        ...defaultConfig,
         api: {
           findFilePaths: jest.fn(),
         },
@@ -248,7 +249,23 @@ describe('workers/repository/apis', () => {
         'modules/something/package.js',
       ]);
       const res = await apis.detectPackageFiles(config);
-      expect(res).toMatchObject(config);
+      expect(res.packageFiles).toMatchSnapshot();
+    });
+    it('finds Dockerfiles', async () => {
+      const config = {
+        ...defaultConfig,
+        api: {
+          findFilePaths: jest.fn(),
+        },
+        docker: {
+          enabled: true,
+        },
+        logger,
+        warnings: [],
+      };
+      config.api.findFilePaths.mockReturnValueOnce(['package.json']);
+      config.api.findFilePaths.mockReturnValueOnce(['Dockerfile']);
+      const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
     it('ignores node modules', async () => {
@@ -327,6 +344,22 @@ describe('workers/repository/apis', () => {
       const res = await apis.resolvePackageFiles(config);
       expect(res.packageFiles).toHaveLength(3);
       expect(res.packageFiles).toMatchSnapshot();
+    });
+    it('handles dockerfile', async () => {
+      config.packageFiles = [{ packageFile: 'Dockerfile' }];
+      config.api.getFileContent.mockReturnValueOnce(
+        '# some content\nFROM node:8\nRUN something'
+      );
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(1);
+    });
+    it('handles dockerfile with no FROM', async () => {
+      config.packageFiles = [{ packageFile: 'Dockerfile' }];
+      config.api.getFileContent.mockReturnValueOnce(
+        '# some content\n# FROM node:8\nRUN something'
+      );
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(0);
     });
   });
 });
