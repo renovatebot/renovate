@@ -114,7 +114,8 @@
       ":app",
       ":automergePatch",
       ":automergeBranchPush",
-      "group:monorepos"
+      "group:monorepos",
+      ":automergeLinters"
     ],
     "labels": [
       "ready"
