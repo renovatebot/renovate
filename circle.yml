@@ -1,10 +1,13 @@
 machine:
+  environment:
+    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
+    YARN_PATH: "$HOME/.yarn"
   node:
     version: 6.11
 
 dependencies:
   pre:
-    - npm i -g yarn
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
     - yarn --version
   override:
     - yarn install --frozen-lockfile
