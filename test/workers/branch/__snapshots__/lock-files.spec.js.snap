@@ -86,7 +86,7 @@ exports[`workers/branch/lock-files writeExistingFiles writes files and removes f
 Array [
   Array [
     "some-tmp-dir/package.json",
-    "{\\"name\\":\\"dummy\\"}",
+    "{\\"name\\":\\"package1\\"}",
   ],
   Array [
     "some-tmp-dir/.npmrc",
@@ -107,7 +107,7 @@ exports[`workers/branch/lock-files writeUpdatedPackageFiles writes updated packa
 Array [
   Array [
     "some-tmp-dir/package.json",
-    "{\\"name\\":\\"dummy\\"}",
+    "{\\"name\\":\\"some-template\\"}",
   ],
   Array [
     "some-tmp-dir/backend/package.json",
