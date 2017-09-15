@@ -3709,9 +3709,9 @@ npm-user-validate@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.0.tgz#8ceca0f5cea04d4e93519ef72d0557a75122e951"
 
-npm@5.4.1:
-  version "5.4.1"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-5.4.1.tgz#6ff580f4895b0bb9ca7c6c64291944e36a2bf053"
+npm@5.4.2:
+  version "5.4.2"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-5.4.2.tgz#830b5cabb5f735264e7cc39b2163b90854b2eaa8"
   dependencies:
     JSONStream "~1.3.1"
     abbrev "~1.1.0"
@@ -3800,7 +3800,7 @@ npm@5.4.1:
     which "~1.3.0"
     worker-farm "~1.5.0"
     wrappy "~1.0.2"
-    write-file-atomic "~2.3.0"
+    write-file-atomic "~2.1.0"
 
 npmconf@^2.1.2:
   version "2.1.2"
@@ -4762,7 +4762,7 @@ slice-ansi@0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/slice-ansi/-/slice-ansi-0.0.4.tgz#edbf8903f66f7ce2f8eafd6ceed65e264c831b35"
 
-slide@^1.1.3, slide@^1.1.6, slide@~1.1.3, slide@~1.1.6:
+slide@^1.1.3, slide@^1.1.5, slide@^1.1.6, slide@~1.1.3, slide@~1.1.6:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
 
@@ -5444,13 +5444,21 @@ wrappy@1, wrappy@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
 
-write-file-atomic@^2.0.0, write-file-atomic@~2.3.0:
+write-file-atomic@^2.0.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/write-file-atomic/-/write-file-atomic-2.3.0.tgz#1ff61575c2e2a4e8e510d6fa4e243cce183999ab"
   dependencies:
     graceful-fs "^4.1.11"
     imurmurhash "^0.1.4"
     signal-exit "^3.0.2"
+
+write-file-atomic@~2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/write-file-atomic/-/write-file-atomic-2.1.0.tgz#1769f4b551eedce419f0505deae2e26763542d37"
+  dependencies:
+    graceful-fs "^4.1.11"
+    imurmurhash "^0.1.4"
+    slide "^1.1.5"
 
 write@^0.2.1:
   version "0.2.1"
