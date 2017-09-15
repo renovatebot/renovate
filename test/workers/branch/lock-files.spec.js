@@ -251,9 +251,6 @@ describe('workers/branch/lock-files', () => {
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(2);
-      expect(fs.outputFile.mock.calls[0][1].includes('"some-template"')).toBe(
-        true
-      );
       expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
     });
   });
