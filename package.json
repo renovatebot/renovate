@@ -60,7 +60,7 @@
     "minimatch": "3.0.4",
     "moment": "2.18.1",
     "moment-timezone": "0.5.13",
-    "npm": "5.4.1",
+    "npm": "5.4.2",
     "registry-auth-token": "3.3.1",
     "root-require": "0.3.1",
     "semver": "5.4.1",
