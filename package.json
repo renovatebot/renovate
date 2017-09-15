@@ -79,7 +79,7 @@
     "chai": "4.1.2",
     "condition-circle": "1.5.0",
     "eslint": "4.6.1",
-    "eslint-config-airbnb-base": "11.3.2",
+    "eslint-config-airbnb-base": "12.0.0",
     "eslint-config-prettier": "2.4.0",
     "eslint-plugin-import": "2.7.0",
     "eslint-plugin-prettier": "2.2.0",
