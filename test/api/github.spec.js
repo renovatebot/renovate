@@ -78,6 +78,12 @@ describe('api/github', () => {
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 403,
+          message: 'API rate limit exceeded for x.',
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 403,
           message:
             'You have triggered an abuse detection mechanism. Please wait a few minutes before you try again.',
         })
