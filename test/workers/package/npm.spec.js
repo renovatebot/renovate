@@ -11,6 +11,7 @@ describe('lib/workers/package/npm', () => {
   describe('renovateNpmPackage', () => {
     let config;
     beforeEach(() => {
+      jest.resetAllMocks();
       config = {
         ...defaultConfig,
         logger,
@@ -24,12 +25,19 @@ describe('lib/workers/package/npm', () => {
       const res = await npm.renovateNpmPackage(config);
       expect(res).toMatchSnapshot();
     });
-    it('returns error if no npm dep found', async () => {
+    it('returns warning if no npm dep found', async () => {
+      const res = await npm.renovateNpmPackage(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].type).toEqual('warning');
+      expect(npmApi.getDependency.mock.calls.length).toBe(1);
+    });
+    it('returns warning if no npm dep found and lock file', async () => {
       config.hasPackageLock = true;
       const res = await npm.renovateNpmPackage(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('error');
+      expect(res[0].type).toEqual('warning');
       expect(npmApi.getDependency.mock.calls.length).toBe(1);
     });
     it('returns error if no npm scoped dep found', async () => {
@@ -38,7 +46,7 @@ describe('lib/workers/package/npm', () => {
       const res = await npm.renovateNpmPackage(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('error');
+      expect(res[0].type).toEqual('warning');
     });
     it('returns warning if warning found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
