@@ -81,7 +81,7 @@ agent-base@2:
     extend "~3.0.0"
     semver "~5.0.1"
 
-agent-base@4, agent-base@^4.0.1, agent-base@^4.1.0:
+agent-base@4, agent-base@^4.1.0:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-4.1.1.tgz#92d8a4fc2524a3b09b3666a33b6c97960f23d6a4"
   dependencies:
@@ -135,9 +135,9 @@ ansi-escapes@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-1.4.0.tgz#d3a8a83b319aa67793662b13e761c7911422306e"
 
-ansi-escapes@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-2.0.0.tgz#5bae52be424878dd9783e8910e3fc2922e83c81b"
+ansi-escapes@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-3.0.0.tgz#ec3e8b4e9f8064fc02c3ac9b65f1c275bda8ef92"
 
 ansi-regex@^2.0.0, ansi-regex@^2.1.1:
   version "2.1.1"
@@ -1449,9 +1449,9 @@ eslint-plugin-import@2.7.0:
     minimatch "^3.0.3"
     read-pkg-up "^2.0.0"
 
-eslint-plugin-prettier@2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-prettier/-/eslint-plugin-prettier-2.3.0.tgz#520a6e57c178c608ed04b75c79a4e7960a91bd2f"
+eslint-plugin-prettier@2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-prettier/-/eslint-plugin-prettier-2.3.1.tgz#e7a746c67e716f335274b88295a9ead9f544e44d"
   dependencies:
     fast-diff "^1.1.1"
     jest-docblock "^21.0.0"
@@ -2295,10 +2295,10 @@ init-package-json@~1.10.1:
     validate-npm-package-name "^3.0.0"
 
 inquirer@^3.0.6:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-3.2.3.tgz#1c7b1731cf77b934ec47d22c9ac5aa8fe7fbe095"
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-3.3.0.tgz#9dd2f2ad765dcab1ff0443b491442a20ba227dc9"
   dependencies:
-    ansi-escapes "^2.0.0"
+    ansi-escapes "^3.0.0"
     chalk "^2.0.0"
     cli-cursor "^2.1.0"
     cli-width "^2.0.0"
@@ -4787,10 +4787,10 @@ sntp@1.x.x:
     hoek "2.x.x"
 
 socks-proxy-agent@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/socks-proxy-agent/-/socks-proxy-agent-3.0.0.tgz#ea23085cd2bde94d084a62448f31139ca7ed6245"
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/socks-proxy-agent/-/socks-proxy-agent-3.0.1.tgz#2eae7cf8e2a82d34565761539a7f9718c5617659"
   dependencies:
-    agent-base "^4.0.1"
+    agent-base "^4.1.0"
     socks "^1.1.10"
 
 socks@^1.1.10:
