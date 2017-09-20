@@ -1889,7 +1889,7 @@ get-func-name@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/get-func-name/-/get-func-name-2.0.0.tgz#ead774abee72e20409433a066366023dd6887a41"
 
-get-installed-path@^3.0.1:
+get-installed-path@3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/get-installed-path/-/get-installed-path-3.0.1.tgz#aa9daf1f1f10c7dcce755e6bc52cfeaa02534060"
   dependencies:
