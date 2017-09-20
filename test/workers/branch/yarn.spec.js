@@ -1,8 +1,12 @@
 const yarnHelper = require('../../../lib/workers/branch/yarn');
 const logger = require('../../_fixtures/logger');
+const getInstalledPath = require('get-installed-path');
 
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('get-installed-path');
+
+getInstalledPath.mockImplementation(() => null);
 
 const fs = require('fs-extra');
 const cp = require('child_process');
