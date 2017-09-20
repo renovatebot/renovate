@@ -41,7 +41,9 @@ describe('generateLockFile', () => {
       throw new Error('not found');
     });
     getInstalledPath.mockImplementationOnce(() => '/node_modules/renovate');
-    getInstalledPath.mockImplementationOnce(() => '/node_modules/renovate/node_modules/yarn');
+    getInstalledPath.mockImplementationOnce(
+      () => '/node_modules/renovate/node_modules/yarn'
+    );
     exec.mockReturnValueOnce({
       stdout: '',
       stderror: '',
