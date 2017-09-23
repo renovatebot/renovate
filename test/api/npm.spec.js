@@ -100,4 +100,13 @@ describe('api/npm', () => {
     const call = got.mock.calls[0];
     expect(call).toMatchSnapshot();
   });
+  it('should use dummy time if missing', async () => {
+    const noTimeResponse = { ...npmResponse };
+    delete noTimeResponse.body.time;
+    got.mockImplementation(() => Promise.resolve(noTimeResponse));
+    const res = await npm.getDependency('foobar', logger);
+    expect(res).toMatchSnapshot();
+    const call = got.mock.calls[0];
+    expect(call).toMatchSnapshot();
+  });
 });
