@@ -33,7 +33,7 @@ describe('lib/workers/package/npm', () => {
       expect(npmApi.getDependency.mock.calls.length).toBe(1);
     });
     it('returns warning if no npm dep found and lock file', async () => {
-      config.hasPackageLock = true;
+      config.packageLock = 'some package lock';
       const res = await npm.renovateNpmPackage(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
@@ -42,7 +42,7 @@ describe('lib/workers/package/npm', () => {
     });
     it('returns error if no npm scoped dep found', async () => {
       config.depName = '@foo/something';
-      config.hasYarnLock = true;
+      config.yarnLock = '# some yarn lock';
       const res = await npm.renovateNpmPackage(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
