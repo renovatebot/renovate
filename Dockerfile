@@ -1,7 +1,7 @@
 # extend node alpine base image
-FROM node:8.4.0-alpine
+FROM node:8-alpine
 
-ENV RENOVATE_VERSION 9.45.10
+ENV RENOVATE_VERSION 9.62.4
 
 MAINTAINER Rhys Arkins <rhys@arkins.net>
 LABEL NAME renovate
