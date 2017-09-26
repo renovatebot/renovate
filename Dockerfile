@@ -3,9 +3,9 @@ FROM node:8-alpine
 
 ENV RENOVATE_VERSION 9.62.4
 
-MAINTAINER Rhys Arkins <rhys@arkins.net>
-LABEL NAME renovate
-LABEL VERSION $RENOVATE_VERSION
+LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
+LABEL name="renovate"
+LABEL version="$RENOVATE_VERSION"
 
 # globally install the specified version of renovate
 RUN set -x \
