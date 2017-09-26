@@ -33,12 +33,14 @@ If for example your repository default branch is `master` but your Pull Requests
 
 ### Support private npm modules
 
-If you are running your own Renovate instance, then the easiest way to support private modules is to make sure the appropriate credentials are in `~/.npmrc`;
+If you are running your own Renovate instance, then the easiest way to support private modules is to make sure the appropriate credentials are in `.npmrc` or `~/.npmrc`;
 
-If you are using hosted Renovate instance, and your repository `package.json` includes private modules, then you can:
+If you are using a hosted Renovate instance (such as the Renovate app), and your `package.json` includes private modules, then you can:
 
 1.  Commit an `.npmrc` file to the repository, and Renovate will use this, or
-2.  If using the [GitHub App hosted service](https://github.com/apps/renovate), authorize the npm user named "renovate" with read-only access to the relevant modules. This "renovate" account is used solely for the purpose of the renovate GitHub App.
+2.  Add the contents of your `.npmrc` file to the config field `npmrc` in your `renovate.json` or `package.json` renovate config
+3. Add a valid npm authToken to the config field `npmToken` in your `renovate.json` or `package.json` renovate config
+4.  If using the [GitHub App hosted service](https://github.com/apps/renovate), authorize the npm user named "renovate" with read-only access to the relevant modules. This "renovate" account is used solely for the purpose of the renovate GitHub App.
 
 ### Control renovate's schedule
 
@@ -193,3 +195,63 @@ Of course, most people don't want *more* PRs, so you would probably want to util
 -   Update minor and major updates weekly
 
 The result of this would hopefully be that you barely notice Renovate during the week while still getting the benefits of patch updates.
+
+### Update Meteor package.js files
+
+Renovate supports Meteor's `package.js` files - specifically, the `Npm.depends` section. As with npm, it will not renovate any `http*` URLs, but will keep all semantic versions up to date. (e.g. update version `1.1.0` to `1.1.1`)
+
+Meteor support is opt-in, meaning Renvoate won't attempt to search for Meteor files by default. To enable it, add `":meteor"` to your Renovate config `extends` array.
+
+e.g. if your renovate.json looks like:
+
+```json
+{
+  "extends": [":library"]
+}
+```
+
+Then update it to be:
+
+```json
+{
+  "extends": [":library", ":meteor"]
+}
+```
+
+Once you've done this, Renovate will:
+
+- Search the repository for all `package.js` files which include `Npm.depends`
+- Check the npm registry for newer versinos for each detected dependency
+- Patch the `package.js` file if updates are found and create an associated branch/PR
+
+If you wish to combine upgrades into one PR or any other similar configuration, you can do this just like with `package.json` dependencies by adding configuration or presets to your `renovate.json` file.
+
+### Update Dockerfile FROM dependencies
+
+Renovate supports updating `FROM` instructions in `Dockerfile`s.
+
+Dockerfile support is opt-in, meaning Renvoate won't attempt to search for Dockerfiles by default. To enable it, add `":docker"` to your Renovate config `extends` array.
+
+e.g. if your renovate.json looks like:
+
+```json
+{
+  "extends": [":library"]
+}
+```
+
+Then update it to be:
+
+```json
+{
+  "extends": [":library", ":docker"]
+}
+```
+
+Once you've done this, Renovate will:
+
+- Search the repository for all `Dockerfile` files that have `FROM x` as the first non-comment line
+- If x includes a digest, Renovate will check the Docker registry to see if a newer digest is available for the same tag and patch the Dockerfile
+- If x does not include a digest, Renovate will look up the current digest for this image/tag and add it to the Dockerfile
+
+If you wish to combine upgrades into one PR or any other similar configuration, you can do this just like with `package.json` dependencies by adding configuration or presets to your `renovate.json` file.

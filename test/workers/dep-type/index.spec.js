@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const packageJson = require('../../../lib/workers/dep-type/package-json');
 const pkgWorker = require('../../../lib/workers/package/index');
 const depTypeWorker = require('../../../lib/workers/dep-type/index');
@@ -14,8 +16,9 @@ describe('lib/workers/dep-type/index', () => {
     let config;
     beforeEach(() => {
       config = {
+        packageFile: 'package.json',
         ignoreDeps: ['a', 'b'],
-        lernaPackages: ['e'],
+        monorepoPackages: ['e'],
       };
     });
     it('returns empty if config is disabled', async () => {
@@ -45,6 +48,21 @@ describe('lib/workers/dep-type/index', () => {
       ]);
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toHaveLength(2);
+    });
+    it('returns upgrades for meteor', async () => {
+      config.packageFile = 'package.js';
+      const content = fs.readFileSync(
+        path.resolve('test/_fixtures/meteor/package-1.js'),
+        'utf8'
+      );
+      const res = await depTypeWorker.renovateDepType(content, config);
+      expect(res).toHaveLength(6);
+    });
+    it('returns upgrades for docker', async () => {
+      config.packageFile = 'Dockerfile';
+      config.currentFrom = 'node';
+      const res = await depTypeWorker.renovateDepType('some-content', config);
+      expect(res).toHaveLength(1);
     });
   });
   describe('getDepConfig(depTypeConfig, dep)', () => {

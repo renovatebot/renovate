@@ -30,18 +30,19 @@ describe('workers/repository/upgrades', () => {
     });
     it('returns array if upgrades found', async () => {
       config.packageFiles = [
-        'package.json',
+        'Dockerfile',
         {
           packageFile: 'backend/package.json',
         },
         {
-          packageFile: 'frontend/package.json',
+          packageFile: 'frontend/package.js',
         },
       ];
-      packageFileWorker.renovatePackageFile.mockReturnValueOnce(['a']);
+      packageFileWorker.renovateDockerfile.mockReturnValueOnce(['a']);
       packageFileWorker.renovatePackageFile.mockReturnValueOnce(['b', 'c']);
+      packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce(['d']);
       const res = await upgrades.determineRepoUpgrades(config);
-      expect(res.length).toBe(3);
+      expect(res).toHaveLength(4);
     });
   });
   describe('generateConfig(branchUpgrades)', () => {

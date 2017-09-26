@@ -13,12 +13,11 @@ describe('packageFileWorker', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        ...{
-          packageFile: 'package.json',
-          content: {},
-          repoIsOnboarded: true,
-          logger,
-        },
+        packageFile: 'package.json',
+        content: {},
+        repoIsOnboarded: true,
+        npmrc: '# nothing',
+        logger,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);
     });
@@ -26,12 +25,6 @@ describe('packageFileWorker', () => {
       config.enabled = false;
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toEqual([]);
-    });
-    it('warns if using workspaces', async () => {
-      config.content.workspaces = {};
-      const res = await packageFileWorker.renovatePackageFile(config);
-      expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('warning');
     });
     it('returns upgrades', async () => {
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}]);
@@ -45,6 +38,53 @@ describe('packageFileWorker', () => {
       config.hasYarnLock = true;
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(1);
+    });
+  });
+  describe('renovateMeteorPackageFile(config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        api: {
+          getFileContent: jest.fn(),
+        },
+        packageFile: 'package.js',
+        repoIsOnboarded: true,
+        logger,
+      };
+      depTypeWorker.renovateDepType.mockReturnValue([]);
+    });
+    it('returns empty if disabled', async () => {
+      config.enabled = false;
+      const res = await packageFileWorker.renovateMeteorPackageFile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns upgrades', async () => {
+      depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
+      const res = await packageFileWorker.renovateMeteorPackageFile(config);
+      expect(res).toHaveLength(2);
+    });
+  });
+  describe('renovateDockerfile', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        packageFile: 'Dockerfile',
+        repoIsOnboarded: true,
+        logger,
+      };
+      depTypeWorker.renovateDepType.mockReturnValue([]);
+    });
+    it('returns empty if disabled', async () => {
+      config.enabled = false;
+      const res = await packageFileWorker.renovateDockerfile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns upgrades', async () => {
+      depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
+      const res = await packageFileWorker.renovateDockerfile(config);
+      expect(res).toHaveLength(2);
     });
   });
 });

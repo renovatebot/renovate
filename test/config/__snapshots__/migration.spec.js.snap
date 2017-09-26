@@ -20,6 +20,9 @@ Object {
     },
   },
   "enabled": true,
+  "ignorePaths": Array [
+    "node_modules/",
+  ],
   "lockFileConfig": Object {
     "automerge": true,
   },
@@ -122,4 +125,11 @@ Object {
     ],
   },
 }
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 2`] = `
+Array [
+  "after 10pm every weekday",
+  "before 7am every weekday",
+]
 `;

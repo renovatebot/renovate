@@ -263,10 +263,11 @@ describe('api/gitlab', () => {
       }));
       glGot.mockImplementationOnce(() => ({
         body: {
-          number: 91,
+          iid: 91,
           additions: 1,
           deletions: 1,
           commits: 1,
+          source_branch: 'some-branch',
           base: {
             sha: '1234',
           },
@@ -399,6 +400,51 @@ describe('api/gitlab', () => {
       expect(glGot.delete.mock.calls.length).toBe(1);
     });
   });
+  describe('getBranchLastCommitTime', () => {
+    it('should return a Date', async () => {
+      await initRepo('some/repo', 'token');
+      glGot.mockReturnValueOnce({
+        body: [
+          {
+            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
+            short_id: 'ed899a2f4b5',
+            title: 'Replace sanitize with escape once',
+            author_name: 'Dmitriy Zaporozhets',
+            author_email: 'dzaporozhets@sphereconsultinginc.com',
+            authored_date: '2012-09-20T11:50:22+03:00',
+            committer_name: 'Administrator',
+            committer_email: 'admin@example.com',
+            committed_date: '2012-09-20T11:50:22+03:00',
+            created_at: '2012-09-20T11:50:22+03:00',
+            message: 'Replace sanitize with escape once',
+            parent_ids: ['6104942438c14ec7bd21c6cd5bd995272b3faff6'],
+          },
+          {
+            id: '6104942438c14ec7bd21c6cd5bd995272b3faff6',
+            short_id: '6104942438c',
+            title: 'Sanitize for network graph',
+            author_name: 'randx',
+            author_email: 'dmitriy.zaporozhets@gmail.com',
+            committer_name: 'Dmitriy',
+            committer_email: 'dmitriy.zaporozhets@gmail.com',
+            created_at: '2012-09-20T09:06:12+03:00',
+            message: 'Sanitize for network graph',
+            parent_ids: ['ae1d9fb46aa2b07ee9836d49862ec4e2c46fbbba'],
+          },
+        ],
+      });
+      const res = await gitlab.getBranchLastCommitTime('some-branch');
+      expect(res).toMatchSnapshot();
+    });
+    it('handles error', async () => {
+      await initRepo('some/repo', 'token');
+      glGot.mockReturnValueOnce({
+        body: [],
+      });
+      const res = await gitlab.getBranchLastCommitTime('some-branch');
+      expect(res).toBeDefined();
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo('some/repo', 'token');
@@ -437,11 +483,11 @@ describe('api/gitlab', () => {
         body: [
           {
             source_branch: 'some-branch',
-            id: 1,
+            iid: 1,
           },
           {
             source_branch: 'some-branch',
-            id: 2,
+            iid: 2,
             title: 'foo',
           },
         ],
@@ -454,11 +500,11 @@ describe('api/gitlab', () => {
         body: [
           {
             source_branch: 'some-branch',
-            id: 1,
+            iid: 1,
           },
           {
             source_branch: 'some-branch',
-            id: 2,
+            iid: 2,
           },
         ],
       });
@@ -529,6 +575,7 @@ describe('api/gitlab', () => {
           description: 'a merge request',
           state: 'merged',
           merge_status: 'cannot_be_merged',
+          source_branch: 'some-branch',
         },
       });
       glGot.mockReturnValueOnce({

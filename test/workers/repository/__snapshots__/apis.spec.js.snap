@@ -7,27 +7,19 @@ Object {
 }
 `;
 
-exports[`workers/repository/apis checkForLerna(config) ignores zero length lerna 1`] = `Object {}`;
-
-exports[`workers/repository/apis checkForLerna(config) implies lerna package path 1`] = `
-Object {
-  "lernaPackages": Array [
-    "a",
-    "b",
-  ],
-}
+exports[`workers/repository/apis checkMonorepos adds lerna packages 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
 `;
 
-exports[`workers/repository/apis checkForLerna(config) returns lerna package names 1`] = `
-Object {
-  "lernaPackages": Array [
-    "a",
-    "b",
-  ],
-}
+exports[`workers/repository/apis checkMonorepos adds yarn workspaces 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
 `;
-
-exports[`workers/repository/apis checkForLerna(config) swallows lerna 404 1`] = `Object {}`;
 
 exports[`workers/repository/apis detectPackageFiles(config) adds package files to object 1`] = `
 Array [
@@ -39,6 +31,20 @@ Array [
 exports[`workers/repository/apis detectPackageFiles(config) defaults to package.json if found 1`] = `
 Array [
   "package.json",
+]
+`;
+
+exports[`workers/repository/apis detectPackageFiles(config) finds Dockerfiles 1`] = `
+Array [
+  "package.json",
+  "Dockerfile",
+]
+`;
+
+exports[`workers/repository/apis detectPackageFiles(config) finds meteor package files 1`] = `
+Array [
+  "package.json",
+  "modules/something/package.js",
 ]
 `;
 
@@ -54,7 +60,7 @@ exports[`workers/repository/apis detectPackageFiles(config) ignores node modules
 Array [
   Object {
     "depName": "packageFiles",
-    "message": "Skipped package.json files found within node_modules subfolders: \`node_modules/backend/package.json\`",
+    "message": "Skipped package.json files found within ignored paths: \`node_modules/backend/package.json\`",
   },
 ]
 `;
@@ -93,7 +99,9 @@ exports[`workers/repository/apis mergeRenovateJson(config) returns warning + err
 exports[`workers/repository/apis resolvePackageFiles includes files with content 1`] = `
 Array [
   Object {
-    "content": Object {},
+    "content": Object {
+      "workspaces": Array [],
+    },
     "errors": Array [],
     "hasPackageLock": true,
     "hasYarnLock": true,
@@ -105,6 +113,9 @@ Array [
     "hasPackageLock": false,
     "hasYarnLock": false,
     "packageFile": "a/package.json",
+  },
+  Object {
+    "packageFile": "module/package.js",
   },
 ]
 `;

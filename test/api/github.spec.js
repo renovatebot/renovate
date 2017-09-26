@@ -78,6 +78,12 @@ describe('api/github', () => {
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 403,
+          message: 'API rate limit exceeded for x.',
+        })
+      );
+      ghGot.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 403,
           message:
             'You have triggered an abuse detection mechanism. Please wait a few minutes before you try again.',
         })
@@ -587,6 +593,7 @@ describe('api/github', () => {
     it('should return empty array if none found', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
+        headers: { link: '' },
         body: {
           items: [],
         },
@@ -598,6 +605,7 @@ describe('api/github', () => {
     it('should return the files matching the fileName', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
+        headers: { link: '' },
         body: {
           items: [
             { name: 'package.json', path: '/package.json' },
@@ -605,6 +613,36 @@ describe('api/github', () => {
               name: 'package.json.something-else',
               path: 'some-dir/package.json.some-thing-else',
             },
+            { name: 'package.json', path: 'src/app/package.json' },
+            { name: 'package.json', path: 'src/otherapp/package.json' },
+          ],
+        },
+      }));
+      const files = await github.findFilePaths('package.json', 'some-content');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(files).toMatchSnapshot();
+    });
+    it('paginates', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        headers: {
+          link:
+            '<https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=2>; rel="next", <https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=2>; rel="last" <https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=1>; rel="first", <https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=1>; rel="prev"',
+        },
+        body: {
+          items: [
+            { name: 'package.json', path: '/package.json' },
+            {
+              name: 'package.json.something-else',
+              path: 'some-dir/package.json.some-thing-else',
+            },
+          ],
+        },
+      }));
+      ghGot.mockImplementationOnce(() => ({
+        headers: { link: '' },
+        body: {
+          items: [
             { name: 'package.json', path: 'src/app/package.json' },
             { name: 'package.json', path: 'src/otherapp/package.json' },
           ],
@@ -1012,6 +1050,32 @@ describe('api/github', () => {
       expect(ghGot.delete.mock.calls).toMatchSnapshot();
     });
   });
+  describe('getBranchLastCommitTime', () => {
+    it('should return a Date', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockReturnValueOnce({
+        body: [
+          {
+            commit: {
+              committer: {
+                date: '2011-04-14T16:00:49Z',
+              },
+            },
+          },
+        ],
+      });
+      const res = await github.getBranchLastCommitTime('some-branch');
+      expect(res).toMatchSnapshot();
+    });
+    it('handles error', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockReturnValueOnce({
+        body: [],
+      });
+      const res = await github.getBranchLastCommitTime('some-branch');
+      expect(res).toBeDefined();
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo('some/repo', 'token');
@@ -1259,7 +1323,7 @@ describe('api/github', () => {
           ref: 'someref',
         },
       };
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(true);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
       expect(ghGot.mock.calls).toHaveLength(4);
@@ -1277,7 +1341,7 @@ describe('api/github', () => {
       ghGot.put.mockImplementationOnce(() => {
         throw new Error('merge error');
       });
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(false);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
       expect(ghGot.mock.calls).toHaveLength(3);
@@ -1331,7 +1395,7 @@ describe('api/github', () => {
           ref: 'someref',
         },
       };
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(true);
       expect(ghGot.put.mock.calls).toHaveLength(1);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
     });
@@ -1362,7 +1426,7 @@ describe('api/github', () => {
       ghGot.put.mockImplementationOnce(() => {
         throw new Error('no squashing allowed');
       });
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(true);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(1);
     });
@@ -1382,7 +1446,7 @@ describe('api/github', () => {
       ghGot.put.mockImplementationOnce(() => {
         throw new Error('no merging allowed');
       });
-      await github.mergePr(pr);
+      expect(await github.mergePr(pr)).toBe(false);
       expect(ghGot.put.mock.calls).toHaveLength(3);
       expect(ghGot.delete.mock.calls).toHaveLength(0);
     });
