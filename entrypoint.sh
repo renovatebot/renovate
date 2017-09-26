@@ -3,7 +3,7 @@
 set -x
 
 # TODO: preprocess environment variables to setup a workable configuration
-# TODO: ...
+# TODO: any other preprocessing?
 
-# execute the main command
-exec "renovate $@"
+# execute the main command passing on the parameters
+exec "renovate" "$@"

@@ -1,0 +1,7 @@
+version: '2'
+services:
+  renovate:
+    build: .
+    environment:
+      GITHUB_TOKEN: <TOKEN>
+    command: <REPO(S)>

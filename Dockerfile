@@ -2,7 +2,7 @@
 # using 8-alpine allows renovate to update
 FROM node:8-alpine
 
-# TODO: use custom renovation
+# TODO: use custom renovation?
 ENV RENOVATE_VERSION 9.62.4
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
@@ -28,17 +28,16 @@ RUN set -x \
   && chmod u+x /entrypoint.sh
 
 # switch to user 1000 (non-root)
-# this prevents several problems in specialized environments
-# and is also generally considered more secure
+# this is generally considered more secure
+# and prevents several problems in specialized environments
 USER 1000
 
 # globally install the specified version of renovate
 RUN set -x \
   && npm install -g renovate@$RENOVATE_VERSION
 
-# define a custom entrypoint
-# handles runtime configuration using env
+# define a custom entrypoint (wrapping script)
 ENTRYPOINT ["/entrypoint.sh"]
 
 # print usage instructions by default
-CMD ["usage"]
+CMD ["--help"]
