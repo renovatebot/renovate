@@ -57,7 +57,6 @@ describe('workers/repository/apis', () => {
       };
     });
     it('adds yarn workspaces', async () => {
-      config.hasYarnWorkspaces = true;
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -79,6 +78,7 @@ describe('workers/repository/apis', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
+          content: {},
         },
         {
           packageFile: 'packages/something/package.json',

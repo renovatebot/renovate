@@ -150,7 +150,7 @@ describe('workers/branch/lock-files', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns root directory if using yarn workspaces', () => {
-      config.hasYarnWorkspaces = true;
+      config.workspaceDir = '.';
       config.upgrades = [{}];
       config.packageFiles = [
         {
