@@ -107,7 +107,7 @@ exports[`workers/branch/lock-files writeUpdatedPackageFiles writes updated packa
 Array [
   Array [
     "some-tmp-dir/package.json",
-    "{\\"name\\":\\"{{some-template}}\\"}",
+    "{\\"name\\":\\"some-template\\"}",
   ],
   Array [
     "some-tmp-dir/backend/package.json",
