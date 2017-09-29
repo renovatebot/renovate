@@ -72,7 +72,7 @@
     "showdown": "1.7.4",
     "tmp": "0.0.33",
     "traverse": "0.6.6",
-    "yarn": "1.0.2"
+    "yarn": "1.1.0"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",

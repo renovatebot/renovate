@@ -47,6 +47,7 @@ describe('workers/repository', () => {
       apis.mergeRenovateJson = jest.fn(input => input);
       apis.detectPackageFiles = jest.fn();
       apis.resolvePackageFiles = jest.fn(input => input);
+      apis.checkMonorepos = jest.fn(input => input);
       onboarding.getOnboardingStatus = jest.fn();
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
