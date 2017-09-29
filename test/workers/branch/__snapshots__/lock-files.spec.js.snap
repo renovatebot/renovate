@@ -85,6 +85,10 @@ Object {
 exports[`workers/branch/lock-files writeExistingFiles writes files and removes files 1`] = `
 Array [
   Array [
+    "some-tmp-dir/.npmrc",
+    "some-npmrc",
+  ],
+  Array [
     "some-tmp-dir/package.json",
     "{\\"name\\":\\"package 1\\"}",
   ],
@@ -95,6 +99,10 @@ Array [
   Array [
     "some-tmp-dir/backend/package.json",
     "{\\"name\\":\\"package-2\\"}",
+  ],
+  Array [
+    "some-tmp-dir/backend/.npmrc",
+    "some-npmrc",
   ],
   Array [
     "some-tmp-dir/backend/.yarnrc",
