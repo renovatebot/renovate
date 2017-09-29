@@ -14,12 +14,21 @@ Array [
 ]
 `;
 
+exports[`workers/repository/apis checkMonorepos adds nested yarn workspaces 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
+`;
+
 exports[`workers/repository/apis checkMonorepos adds yarn workspaces 1`] = `
 Array [
   "@a/b",
   "@a/c",
 ]
 `;
+
+exports[`workers/repository/apis checkMonorepos skips if no lerna packages 1`] = `Array []`;
 
 exports[`workers/repository/apis detectPackageFiles(config) adds package files to object 1`] = `
 Array [

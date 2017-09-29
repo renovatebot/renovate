@@ -74,6 +74,24 @@ describe('workers/repository/apis', () => {
       const res = await apis.checkMonorepos(config);
       expect(res.monorepoPackages).toMatchSnapshot();
     });
+    it('adds nested yarn workspaces', async () => {
+      config.packageFiles = [
+        {
+          packageFile: 'frontend/package.json',
+          content: { workspaces: ['packages/*'] },
+        },
+        {
+          packageFile: 'frontend/packages/something/package.json',
+          content: { name: '@a/b' },
+        },
+        {
+          packageFile: 'frontend/packages/something-else/package.json',
+          content: { name: '@a/c' },
+        },
+      ];
+      const res = await apis.checkMonorepos(config);
+      expect(res.monorepoPackages).toMatchSnapshot();
+    });
     it('adds lerna packages', async () => {
       config.packageFiles = [
         {
@@ -90,6 +108,17 @@ describe('workers/repository/apis', () => {
         },
       ];
       config.api.getFileJson.mockReturnValue({ packages: ['packages/*'] });
+      const res = await apis.checkMonorepos(config);
+      expect(res.monorepoPackages).toMatchSnapshot();
+    });
+    it('skips if no lerna packages', async () => {
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          content: {},
+        },
+      ];
+      config.api.getFileJson.mockReturnValue({});
       const res = await apis.checkMonorepos(config);
       expect(res.monorepoPackages).toMatchSnapshot();
     });
