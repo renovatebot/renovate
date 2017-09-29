@@ -15,6 +15,13 @@ jest.mock('../../../lib/api/npm');
 
 describe('workers/repository/apis', () => {
   describe('getNpmrc', () => {
+    it('Skips if ignoring npmrc', async () => {
+      const config = {
+        foo: 1,
+        ignoreNpmrcFile: true,
+      };
+      expect(await apis.getNpmrc(config)).toMatchObject(config);
+    });
     it('Skips if npmrc not found', async () => {
       const config = {
         api: {
