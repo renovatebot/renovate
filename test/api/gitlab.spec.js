@@ -608,9 +608,9 @@ describe('api/gitlab', () => {
           content: 'foo',
         },
       });
-      const res = await gitlab.getFile('some-path');
+      const res = await gitlab.getFile('some/path');
       expect(res).toMatchSnapshot();
-      expect(glGot.mock.calls[0][0].indexOf('file_path')).toBe(-1);
+      expect(glGot.mock.calls[0][0].indexOf('some%2Fpath')).not.toBe(-1);
     });
     it('gets the file with v3', async () => {
       glGot.mockReturnValueOnce({
