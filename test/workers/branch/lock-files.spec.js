@@ -159,6 +159,7 @@ describe('workers/branch/lock-files', () => {
         },
         {
           packageFile: 'backend/package.json',
+          workspaceDir: '.',
         },
       ];
       config.updatedPackageFiles = [
