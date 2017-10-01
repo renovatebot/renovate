@@ -7,7 +7,7 @@ machine:
 
 dependencies:
   pre:
-    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.0.2
     - yarn --version
   override:
     - yarn install --frozen-lockfile
