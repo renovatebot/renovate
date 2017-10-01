@@ -1,0 +1,9 @@
+/node_modules
+/config.js
+/coverage
+/dist
+/tmp
+.DS_Store
+.cache
+/*.log
+test/_fixtures/
