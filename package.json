@@ -4,8 +4,7 @@
   "version": "0.0.0-semantic-release",
   "bin": "dist/renovate.js",
   "scripts": {
-    "build":
-      "yarn && npm run transpile && cp -R lib/config/templates dist/config",
+    "build": "yarn && npm run transpile && cp -R lib/config/templates dist/config",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "NODE_ENV=test LOG_LEVEL=fatal jest",
@@ -17,18 +16,20 @@
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
-    "test":
-      "npm run prettier -- --list-different && npm run lint && npm run jest",
+    "test": "npm run prettier -- --list-different && npm run lint && npm run jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
     "update-docs": "npm run build && bash bin/update-docs.sh",
-    "semantic-release":
-      "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/singapore/renovate.git"
   },
-  "keywords": ["npm", "outdated", "update"],
+  "keywords": [
+    "npm",
+    "outdated",
+    "update"
+  ],
   "author": "Rhys Arkins <rhys@arkins.net>",
   "license": "MIT",
   "bugs": {
@@ -94,14 +95,23 @@
     "semantic-release": "7.0.2"
   },
   "babel": {
-    "plugins": ["transform-async-to-generator", "transform-object-rest-spread"]
+    "plugins": [
+      "transform-async-to-generator",
+      "transform-object-rest-spread"
+    ]
   },
   "jest": {
     "cacheDirectory": ".cache/jest",
     "coverageDirectory": "./coverage",
     "collectCoverage": true,
-    "collectCoverageFrom": ["lib/**/*.js"],
-    "coverageReporters": ["json", "lcov", "text-summary"],
+    "collectCoverageFrom": [
+      "lib/**/*.js"
+    ],
+    "coverageReporters": [
+      "json",
+      "lcov",
+      "text-summary"
+    ],
     "setupTestFrameworkScriptFile": "./test/chai.js"
   },
   "prettier": {
@@ -116,8 +126,12 @@
       "group:monorepos",
       ":automergeLinters"
     ],
-    "labels": ["ready"],
-    "assignees": ["rarkins"]
+    "labels": [
+      "ready"
+    ],
+    "assignees": [
+      "rarkins"
+    ]
   },
   "release": {
     "verifyConditions": "condition-circle"

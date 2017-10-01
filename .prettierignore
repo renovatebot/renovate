@@ -6,4 +6,5 @@
 .DS_Store
 .cache
 /*.log
+package.json
 test/_fixtures/
