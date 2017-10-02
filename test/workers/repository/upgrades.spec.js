@@ -125,6 +125,7 @@ describe('workers/repository/upgrades', () => {
     it('returns one branch if one input', async () => {
       const input = [
         {
+          depName: 'foo',
           branchName: 'foo-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
@@ -137,16 +138,19 @@ describe('workers/repository/upgrades', () => {
     it('does not group if different compiled branch names', async () => {
       const input = [
         {
+          depName: 'foo',
           branchName: 'foo-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
         },
         {
+          depName: 'foo',
           branchName: 'foo-{{version}}',
           version: '2.0.0',
           prTitle: 'some-title',
         },
         {
+          depName: 'bar',
           branchName: 'bar-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
@@ -159,16 +163,19 @@ describe('workers/repository/upgrades', () => {
     it('groups if same compiled branch names', async () => {
       const input = [
         {
+          depName: 'foo',
           branchName: 'foo',
           version: '1.1.0',
           prTitle: 'some-title',
         },
         {
+          depName: 'foo',
           branchName: 'foo',
           version: '2.0.0',
           prTitle: 'some-title',
         },
         {
+          depName: 'bar',
           branchName: 'bar-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
@@ -181,6 +188,7 @@ describe('workers/repository/upgrades', () => {
     it('groups if same compiled group name', async () => {
       const input = [
         {
+          depName: 'foo',
           branchName: 'foo',
           prTitle: 'some-title',
           version: '1.1.0',
@@ -188,11 +196,13 @@ describe('workers/repository/upgrades', () => {
           group: { branchName: 'renovate/{{groupSlug}}' },
         },
         {
+          depName: 'foo',
           branchName: 'foo',
           prTitle: 'some-title',
           version: '2.0.0',
         },
         {
+          depName: 'bar',
           branchName: 'bar-{{version}}',
           prTitle: 'some-title',
           version: '1.1.0',
@@ -210,17 +220,20 @@ describe('workers/repository/upgrades', () => {
           type: 'error',
         },
         {
+          depName: 'foo',
           branchName: 'foo-{{version}}',
           prTitle: 'some-title',
           version: '1.1.0',
         },
         {
+          depName: 'foo',
           type: 'warning',
           branchName: 'foo-{{version}}',
           prTitle: 'some-title',
           version: '2.0.0',
         },
         {
+          depName: 'bar',
           branchName: 'bar-{{version}}',
           prTitle: 'some-title',
           version: '1.1.0',

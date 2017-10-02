@@ -72,6 +72,8 @@ Object {
     "bar-1.1.0": Array [
       Object {
         "branchName": "bar-{{version}}",
+        "depName": "bar",
+        "depNameSanitized": "bar",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -79,6 +81,8 @@ Object {
     "foo-1.1.0": Array [
       Object {
         "branchName": "foo-{{version}}",
+        "depName": "foo",
+        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -86,6 +90,8 @@ Object {
     "foo-2.0.0": Array [
       Object {
         "branchName": "foo-{{version}}",
+        "depName": "foo",
+        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "2.0.0",
       },
@@ -102,6 +108,8 @@ Object {
     "bar-1.1.0": Array [
       Object {
         "branchName": "bar-{{version}}",
+        "depName": "bar",
+        "depNameSanitized": "bar",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -109,11 +117,15 @@ Object {
     "foo": Array [
       Object {
         "branchName": "foo",
+        "depName": "foo",
+        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "2.0.0",
       },
       Object {
         "branchName": "foo",
+        "depName": "foo",
+        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -130,6 +142,8 @@ Object {
     "foo": Array [
       Object {
         "branchName": "foo",
+        "depName": "foo",
+        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "2.0.0",
       },
@@ -137,6 +151,7 @@ Object {
     "renovate/my-group": Array [
       Object {
         "branchName": "bar-{{version}}",
+        "depName": "bar",
         "group": Object {
           "branchName": "renovate/my-group",
         },
@@ -147,6 +162,7 @@ Object {
       },
       Object {
         "branchName": "foo",
+        "depName": "foo",
         "group": Object {
           "branchName": "renovate/{{groupSlug}}",
         },
@@ -168,6 +184,8 @@ Object {
     "bar-1.1.0": Array [
       Object {
         "branchName": "bar-{{version}}",
+        "depName": "bar",
+        "depNameSanitized": "bar",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -175,6 +193,8 @@ Object {
     "foo-1.1.0": Array [
       Object {
         "branchName": "foo-{{version}}",
+        "depName": "foo",
+        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -188,6 +208,7 @@ Object {
   "warnings": Array [
     Object {
       "branchName": "foo-{{version}}",
+      "depName": "foo",
       "prTitle": "some-title",
       "type": "warning",
       "version": "2.0.0",
@@ -210,6 +231,8 @@ Object {
     "foo-1.1.0": Array [
       Object {
         "branchName": "foo-{{version}}",
+        "depName": "foo",
+        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
