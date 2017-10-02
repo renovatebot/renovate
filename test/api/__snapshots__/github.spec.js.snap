@@ -41,6 +41,9 @@ Array [
           "someotheruser",
         ],
       },
+      "headers": Object {
+        "accept": "application/vnd.github.thor-preview+json",
+      },
     },
   ],
 ]

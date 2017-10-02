@@ -1086,6 +1086,7 @@ describe('api/github', () => {
   describe('addReviewers(issueNo, reviewers)', () => {
     it('should add the given reviewers to the PR', async () => {
       await initRepo('some/repo', 'token');
+      ghGot.post.mockReturnValueOnce({});
       await github.addReviewers(42, ['someuser', 'someotheruser']);
       expect(ghGot.post.mock.calls).toMatchSnapshot();
     });
