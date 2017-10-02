@@ -220,20 +220,17 @@ describe('workers/repository/upgrades', () => {
           type: 'error',
         },
         {
-          depName: 'foo',
           branchName: 'foo-{{version}}',
           prTitle: 'some-title',
           version: '1.1.0',
         },
         {
-          depName: 'foo',
           type: 'warning',
           branchName: 'foo-{{version}}',
           prTitle: 'some-title',
           version: '2.0.0',
         },
         {
-          depName: 'bar',
           branchName: 'bar-{{version}}',
           prTitle: 'some-title',
           version: '1.1.0',
