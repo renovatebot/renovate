@@ -5,7 +5,7 @@ Object {
   "assignees": Array [],
   "automerge": true,
   "automergeType": "pr",
-  "branchName": "{{branchPrefix}}{{depName}}-{{newVersionMajor}}.x",
+  "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
   "currentVersion": "1.0.0",
