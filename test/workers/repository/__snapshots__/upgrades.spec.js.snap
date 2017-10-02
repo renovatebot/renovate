@@ -184,8 +184,6 @@ Object {
     "bar-1.1.0": Array [
       Object {
         "branchName": "bar-{{version}}",
-        "depName": "bar",
-        "depNameSanitized": "bar",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -193,8 +191,6 @@ Object {
     "foo-1.1.0": Array [
       Object {
         "branchName": "foo-{{version}}",
-        "depName": "foo",
-        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -208,7 +204,6 @@ Object {
   "warnings": Array [
     Object {
       "branchName": "foo-{{version}}",
-      "depName": "foo",
       "prTitle": "some-title",
       "type": "warning",
       "version": "2.0.0",
