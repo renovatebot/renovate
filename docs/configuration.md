@@ -83,6 +83,7 @@ $ node renovate --help
     --token <string>                     Repository Auth Token
     --npmrc <string>                     String copy of npmrc file. Use \n instead of line breaks
     --yarnrc <string>                    String copy of yarnrc file. Use \n instead of line breaks
+    --ignore-npmrc-file [boolean]        Whether to ignore any .npmrc file found in repository
     --autodiscover [boolean]             Autodiscover all repositories
     --autodiscover [boolean]             Autodiscover all repositories
     --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
@@ -287,6 +288,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>null</pre></td>
   <td>`RENOVATE_YARNRC`</td>
   <td>`--yarnrc`<td>
+</tr>
+<tr>
+  <td>`ignoreNpmrcFile`</td>
+  <td>Whether to ignore any .npmrc file found in repository</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_IGNORE_NPMRC_FILE`</td>
+  <td>`--ignore-npmrc-file`<td>
 </tr>
 <tr>
   <td>`autodiscover`</td>

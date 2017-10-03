@@ -150,7 +150,7 @@ describe('workers/branch/lock-files', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns root directory if using yarn workspaces', () => {
-      config.hasYarnWorkspaces = true;
+      config.workspaceDir = '.';
       config.upgrades = [{}];
       config.packageFiles = [
         {
@@ -159,6 +159,7 @@ describe('workers/branch/lock-files', () => {
         },
         {
           packageFile: 'backend/package.json',
+          workspaceDir: '.',
         },
       ];
       config.updatedPackageFiles = [
@@ -193,6 +194,7 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toHaveLength(2);
     });
     it('writes files and removes files', async () => {
+      config.npmrc = 'some-npmrc';
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -201,13 +203,14 @@ describe('workers/branch/lock-files', () => {
         },
         {
           packageFile: 'backend/package.json',
+          hasYarnLock: true,
           content: { name: 'package-2', engines: { yarn: '^0.27.5' } },
           yarnrc: 'some yarnrc',
         },
       ];
       await writeExistingFiles(config);
       expect(fs.outputFile.mock.calls).toMatchSnapshot();
-      expect(fs.outputFile.mock.calls).toHaveLength(4);
+      expect(fs.outputFile.mock.calls).toHaveLength(6);
       expect(fs.remove.mock.calls).toHaveLength(4);
     });
   });

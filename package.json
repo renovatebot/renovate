@@ -11,11 +11,12 @@
     "lint-fix": "eslint --fix lib test",
     "lint": "eslint lib test",
     "prepublishOnly": "npm run build",
+    "prettier": "prettier '**/*.{js,json}' --write",
     "start": "node dist/renovate",
     "start-babel": "babel-node lib/renovate",
     "start-raw": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
-    "test": "npm run lint && npm run jest",
+    "test": "npm run prettier -- --list-different && npm run lint && npm run jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
     "update-docs": "npm run build && bash bin/update-docs.sh",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
@@ -58,6 +59,7 @@
     "json-dup-key-validator": "1.0.2",
     "json-stringify-pretty-compact": "1.0.4",
     "jsonwebtoken": "8.0.1",
+    "keyv": "2.0.2",
     "later": "1.2.0",
     "lodash": "4.17.4",
     "minimatch": "3.0.4",
@@ -69,7 +71,7 @@
     "semver": "5.4.1",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.1",
-    "showdown": "1.7.4",
+    "showdown": "1.7.5",
     "tmp": "0.0.33",
     "traverse": "0.6.6",
     "yarn": "1.0.2"
@@ -81,19 +83,21 @@
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "condition-circle": "1.5.0",
-    "eslint": "4.7.2",
-    "eslint-config-airbnb-base": "12.0.0",
-    "eslint-config-prettier": "2.5.0",
+    "eslint": "4.8.0",
+    "eslint-config-airbnb-base": "12.0.1",
+    "eslint-config-prettier": "2.6.0",
     "eslint-plugin-import": "2.7.0",
-    "eslint-plugin-prettier": "2.3.1",
     "eslint-plugin-promise": "3.5.0",
     "jest": "20.0.4",
     "mkdirp": "0.5.1",
     "mockdate": "2.0.2",
-    "prettier": "1.7.0",
+    "prettier": "1.7.3",
     "rimraf": "2.6.2",
-    "semantic-release": "7.0.2"
+    "semantic-release": "8.0.3"
   },
+  "files": [
+    "dist"
+  ],
   "babel": {
     "plugins": [
       "transform-async-to-generator",
@@ -113,6 +117,10 @@
       "text-summary"
     ],
     "setupTestFrameworkScriptFile": "./test/chai.js"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "es5"
   },
   "renovate": {
     "extends": [
