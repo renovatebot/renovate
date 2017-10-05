@@ -1146,6 +1146,14 @@ describe('api/github', () => {
         expect(res).toBe(expected);
       });
     });
+    it(`should return false if error thrown`, async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => {
+        throw new Error('fail');
+      });
+      const res = await github.checkForClosedPr('some-branch', 'some-title');
+      expect(res).toBe(false);
+    });
   });
   describe('createPr(branchName, title, body)', () => {
     it('should create and return a PR object', async () => {
