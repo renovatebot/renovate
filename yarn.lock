@@ -32,8 +32,8 @@
   resolved "https://registry.yarnpkg.com/@semantic-release/error/-/error-2.0.0.tgz#f156ecd509f5288c48bc7425a8abe22f975d1f8b"
 
 "@semantic-release/last-release-npm@^2.0.0":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@semantic-release/last-release-npm/-/last-release-npm-2.0.1.tgz#9d9e40b7dfa2778eb08dc995263da3e366542416"
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@semantic-release/last-release-npm/-/last-release-npm-2.0.2.tgz#c91b1ccb48b0d7095b107be6ebc2c0c08bd88c27"
   dependencies:
     "@semantic-release/error" "^2.0.0"
     npm-registry-client "^8.4.0"
@@ -563,8 +563,8 @@ block-stream@*:
     inherits "~2.0.0"
 
 bluebird@^3.5.0, bluebird@~3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.0.tgz#791420d7f551eea2897453a8a77653f96606d67c"
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.1.tgz#d9551f9de98f1fcda1e683d17ee91a0602ee2eb9"
 
 boom@2.x.x:
   version "2.10.1"
@@ -1347,9 +1347,9 @@ escodegen@^1.6.1:
   optionalDependencies:
     source-map "~0.5.6"
 
-eslint-config-airbnb-base@12.0.1:
-  version "12.0.1"
-  resolved "https://registry.yarnpkg.com/eslint-config-airbnb-base/-/eslint-config-airbnb-base-12.0.1.tgz#abaca7b4536faa7e094add5a9801970fefdd39a4"
+eslint-config-airbnb-base@12.0.2:
+  version "12.0.2"
+  resolved "https://registry.yarnpkg.com/eslint-config-airbnb-base/-/eslint-config-airbnb-base-12.0.2.tgz#45fea317d71b8f1da323c730f3a8471988757793"
   dependencies:
     eslint-restricted-globals "^0.1.1"
 
