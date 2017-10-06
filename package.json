@@ -49,7 +49,7 @@
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
     "fs-extra": "4.0.2",
-    "get-installed-path": "3.0.1",
+    "get-installed-path": "3.0.3",
     "gh-got": "6.0.0",
     "github-url-from-git": "1.5.0",
     "gl-got": "7.0.0",
