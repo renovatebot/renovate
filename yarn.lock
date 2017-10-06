@@ -4712,9 +4712,9 @@ shellwords@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
 
-showdown@1.7.5:
-  version "1.7.5"
-  resolved "https://registry.yarnpkg.com/showdown/-/showdown-1.7.5.tgz#08edefd1aa7af35bd6de18a4e30192e2f5e176cb"
+showdown@1.7.6:
+  version "1.7.6"
+  resolved "https://registry.yarnpkg.com/showdown/-/showdown-1.7.6.tgz#ac3d3de9bec712372d0406487476ad97a27b4c34"
   dependencies:
     yargs "^9.0.1"
 

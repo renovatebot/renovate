@@ -71,7 +71,7 @@
     "semver": "5.4.1",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.1",
-    "showdown": "1.7.5",
+    "showdown": "1.7.6",
     "tmp": "0.0.33",
     "traverse": "0.6.6",
     "yarn": "1.0.2"
