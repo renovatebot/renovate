@@ -2,7 +2,7 @@
 
 # renovate
 
-Keep npm dependencies up-to-date.
+Keep dependencies up-to-date.
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/singapore/renovate/master/license)
 [![codecov](https://codecov.io/gh/singapore/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/singapore/renovate)
@@ -13,12 +13,17 @@ Keep npm dependencies up-to-date.
 ## Why
 
 -   Creates or updates Pull Requests for each dependency that needs updating
--   Discovers and processes all `package.json` files in repository (supports monorepo architecture)
+-   Discovers and processes all `package.json` files in repository (supports monorepo architecture including yarn workspaces)
 -   Supports multiple major versions per-dependency at once
 -   Configurable via file, environment, CLI, and `package.json`
--   Supports `yarn.lock` and `package-lock.json` files
+-   Supports eslint-like preset configs for ease of use
+-   Updates `yarn.lock` and `package-lock.json` files natively
 -   Supports GitHub and GitLab
--   Open source and can be self-hosted
+-   Open source and can be self-hosted or used via GitHub App
+
+## Configuration Help
+
+If you would like help on your Renovate configuration, or simply get someone to review it, we have created a config-help repository https://github.com/renovateapp/config-help/issues where you can post an issue with your config.
 
 ## GitHub App
 
