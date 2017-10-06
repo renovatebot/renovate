@@ -2930,9 +2930,9 @@ jws@^3.1.4:
     jwa "^1.1.4"
     safe-buffer "^5.0.1"
 
-keyv@2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/keyv/-/keyv-2.0.2.tgz#5e23fde48a4c59818eddf028cd829798830242f1"
+keyv@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/keyv/-/keyv-3.0.0.tgz#44923ba39e68b12a7cec7df6c3268c031f2ef373"
   dependencies:
     json-buffer "3.0.0"
 
