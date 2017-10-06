@@ -59,7 +59,7 @@
     "json-dup-key-validator": "1.0.2",
     "json-stringify-pretty-compact": "1.0.4",
     "jsonwebtoken": "8.0.1",
-    "keyv": "2.0.2",
+    "keyv": "3.0.0",
     "later": "1.2.0",
     "lodash": "4.17.4",
     "minimatch": "3.0.4",
