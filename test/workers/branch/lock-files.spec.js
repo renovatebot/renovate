@@ -27,7 +27,7 @@ describe('workers/branch/lock-files', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
-          hasPackageLock: true,
+          packageLock: 'some package lock',
         },
       ];
       expect(hasPackageLock(config, 'package.json')).toBe(true);
@@ -36,7 +36,7 @@ describe('workers/branch/lock-files', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
-          hasPackageLock: true,
+          packageLock: 'some package lock',
         },
         {
           packageFile: 'backend/package.json',
@@ -48,7 +48,7 @@ describe('workers/branch/lock-files', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
-          hasPackageLock: true,
+          packageLock: 'some package lock',
         },
         {
           packageFile: 'backend/package.json',
@@ -75,7 +75,7 @@ describe('workers/branch/lock-files', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
-          hasYarnLock: true,
+          yarnLock: '# some yarn lock',
         },
       ];
       expect(hasYarnLock(config, 'package.json')).toBe(true);
@@ -84,7 +84,7 @@ describe('workers/branch/lock-files', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
-          hasYarnLock: true,
+          yarnLock: '# some yarn lock',
         },
         {
           packageFile: 'backend/package.json',
@@ -96,7 +96,7 @@ describe('workers/branch/lock-files', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
-          hasYarnLock: true,
+          yarnLock: '# some yarn lock',
         },
         {
           packageFile: 'backend/package.json',
@@ -120,11 +120,11 @@ describe('workers/branch/lock-files', () => {
         packageFiles: [
           {
             packageFile: 'package.json',
-            hasYarnLock: true,
+            yarnLock: '# some yarn lock',
           },
           {
             packageFile: 'backend/package.json',
-            hasPackageLock: true,
+            packageLock: 'some package lock',
           },
         ],
       };
@@ -155,7 +155,7 @@ describe('workers/branch/lock-files', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
-          hasYarnLock: true,
+          yarnLock: '# some yarn lock',
         },
         {
           packageFile: 'backend/package.json',
@@ -203,7 +203,7 @@ describe('workers/branch/lock-files', () => {
         },
         {
           packageFile: 'backend/package.json',
-          hasYarnLock: true,
+          hasPackageLock: true,
           content: { name: 'package-2', engines: { yarn: '^0.27.5' } },
           yarnrc: 'some yarnrc',
         },
@@ -212,6 +212,20 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(6);
       expect(fs.remove.mock.calls).toHaveLength(4);
+    });
+    it('writes lock files', async () => {
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          content: { name: 'package 1' },
+          yarnLock: 'some yarn lock',
+          packageLock: 'some package lock',
+        },
+      ];
+      await writeExistingFiles(config);
+      expect(fs.outputFile.mock.calls).toMatchSnapshot();
+      expect(fs.outputFile.mock.calls).toHaveLength(3);
+      expect(fs.remove.mock.calls).toHaveLength(0);
     });
   });
   describe('writeUpdatedPackageFiles', () => {
