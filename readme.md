@@ -60,6 +60,8 @@ See [deployment docs](https://github.com/singapore/renovate/blob/master/docs/dep
 
 The [Configuration](https://github.com/singapore/renovate/blob/master/docs/configuration.md) and [Configuration FAQ](https://github.com/singapore/renovate/blob/master/docs/faq.md) documents should be helpful.
 
+You can also raise an issue in https://github.com/renovateapp/config-help if you'd like to get your config reviewed or ask any questions.
+
 ## Design Decisions
 
 See [design decisions doc](https://github.com/singapore/renovate/blob/master/docs/design-decisions.md) for details.
