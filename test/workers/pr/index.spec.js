@@ -291,10 +291,19 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchSnapshot();
     });
-    it('should create PR if branch automerging failed', async () => {
+    it('should create PR if branch tests failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch-push';
       config.api.getBranchStatus.mockReturnValueOnce('failure');
+      config.api.getBranchPr = jest.fn();
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+    });
+    it('should create PR if branch automerging failed', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch-push';
+      config.api.getBranchStatus.mockReturnValueOnce('success');
+      config.forcePr = true;
       config.api.getBranchPr = jest.fn();
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });

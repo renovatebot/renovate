@@ -1454,7 +1454,7 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 1`] = `[Error: branch-push failed]`;
+exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 1`] = `[Error: branch-merge-commit failed]`;
 
 exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 2`] = `
 Array [

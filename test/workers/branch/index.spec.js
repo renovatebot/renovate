@@ -64,7 +64,7 @@ describe('workers/branch', () => {
         updatedLockFiles: [{}],
       });
       config.api.branchExists.mockReturnValueOnce(true);
-      automerge.tryBranchAutomerge.mockReturnValueOnce(true);
+      automerge.tryBranchAutomerge.mockReturnValueOnce('automerged');
       await branchWorker.processBranch(config);
       expect(statusChecks.setUnpublishable.mock.calls).toHaveLength(1);
       expect(automerge.tryBranchAutomerge.mock.calls).toHaveLength(1);
@@ -77,7 +77,7 @@ describe('workers/branch', () => {
         updatedLockFiles: [{}],
       });
       config.api.branchExists.mockReturnValueOnce(true);
-      automerge.tryBranchAutomerge.mockReturnValueOnce(false);
+      automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
