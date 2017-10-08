@@ -111,6 +111,23 @@ Array [
 ]
 `;
 
+exports[`workers/branch/lock-files writeExistingFiles writes lock files 1`] = `
+Array [
+  Array [
+    "some-tmp-dir/package.json",
+    "{\\"name\\":\\"package 1\\"}",
+  ],
+  Array [
+    "some-tmp-dir/package-lock.json",
+    "some package lock",
+  ],
+  Array [
+    "some-tmp-dir/yarn.lock",
+    "some yarn lock",
+  ],
+]
+`;
+
 exports[`workers/branch/lock-files writeUpdatedPackageFiles writes updated packageFiles 1`] = `
 Array [
   Array [
