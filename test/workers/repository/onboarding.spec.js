@@ -296,7 +296,7 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('skips commit files if existing content matches', async () => {
-      const existingContent = `{\n  "extends": [":library"]\n}\n`;
+      const existingContent = `{\n  "extends": ["config:js-lib"]\n}\n`;
       config.api.getFileContent.mockReturnValueOnce(existingContent);
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual(false);
