@@ -1789,9 +1789,9 @@ get-func-name@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/get-func-name/-/get-func-name-2.0.0.tgz#ead774abee72e20409433a066366023dd6887a41"
 
-get-installed-path@4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/get-installed-path/-/get-installed-path-4.0.3.tgz#5049ab439d74202f77f2c45f65889046ba1d6e0b"
+get-installed-path@4.0.7:
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/get-installed-path/-/get-installed-path-4.0.7.tgz#ce8113dbc88ec7ec7e90c9bd7f345434574089e9"
   dependencies:
     global-modules "1.0.0"
 
