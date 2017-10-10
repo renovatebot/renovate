@@ -311,7 +311,7 @@ Array [
   Array [
     Object {
       "contents": "{
-  \\"extends\\": [\\":library\\"]
+  \\"extends\\": [\\"config:js-lib\\"]
 }
 ",
       "name": "renovate.json",
@@ -327,7 +327,7 @@ Array [
   Array [
     Object {
       "contents": "{
-  \\"extends\\": [\\":library\\"]
+  \\"extends\\": [\\"config:js-lib\\"]
 }
 ",
       "name": "renovate.json",
@@ -343,7 +343,7 @@ Array [
   Array [
     Object {
       "contents": "{
-  \\"extends\\": [\\":app\\"]
+  \\"extends\\": [\\"config:js-app\\"]
 }
 ",
       "name": "renovate.json",
