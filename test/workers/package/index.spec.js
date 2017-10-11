@@ -24,7 +24,7 @@ describe('lib/workers/package/index', () => {
     });
     it('calls docker', async () => {
       docker.renovateDockerImage.mockReturnValueOnce([]);
-      config.depType = 'docker';
+      config.depType = 'Dockerfile';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
