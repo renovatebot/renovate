@@ -112,6 +112,7 @@ $ node renovate --help
     --labels <list>                      Labels to add to Pull Request
     --assignees <list>                   Assignees for Pull Request
     --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
+    --npm <json>                         Configuration object for npm package.json renovation
     --meteor <json>                      Configuration object for meteor package.js renovation
     -h, --help                           output usage information
   Examples:
@@ -730,6 +731,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>[]</pre></td>
   <td>`RENOVATE_REVIEWERS`</td>
   <td>`--reviewers`<td>
+</tr>
+<tr>
+  <td>`npm`</td>
+  <td>Configuration object for npm package.json renovation</td>
+  <td>json</td>
+  <td><pre>{}</pre></td>
+  <td>`RENOVATE_NPM`</td>
+  <td>`--npm`<td>
 </tr>
 <tr>
   <td>`meteor`</td>
