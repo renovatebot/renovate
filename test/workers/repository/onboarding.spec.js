@@ -1,4 +1,3 @@
-const apis = require('../../../lib/workers/repository/apis');
 const onboarding = require('../../../lib/workers/repository/onboarding');
 const logger = require('../../_fixtures/logger');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
@@ -223,7 +222,6 @@ describe('lib/workers/repository/onboarding', () => {
     beforeEach(() => {
       config = { ...defaultConfig };
       jest.resetAllMocks();
-      apis.detectPackageFiles = jest.fn(a => a);
       config.api = {
         commitFilesToBranch: jest.fn(),
         createPr: jest.fn(() => ({ displayNumber: 1 })),
@@ -234,7 +232,6 @@ describe('lib/workers/repository/onboarding', () => {
       };
       config.foundIgnoredPaths = true;
       config.logger = logger;
-      config.types = { npm: true };
       config.detectedPackageFiles = true;
       onboarding.isRepoPrivate = jest.fn();
     });
@@ -276,16 +273,6 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('commits files and returns false if no pr', async () => {
-      const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
-      expect(config.api.findPr.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
-    });
-    it('uses config:base if no npm', async () => {
-      config.types.npm = false;
-      config.types.meteor = true;
-      config.types.docker = true;
       const res = await onboarding.getOnboardingStatus(config);
       expect(res).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
