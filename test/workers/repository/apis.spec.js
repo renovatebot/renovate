@@ -274,9 +274,6 @@ describe('workers/repository/apis', () => {
         api: {
           findFilePaths: jest.fn(),
         },
-        meteor: {
-          enabled: true,
-        },
         logger,
         warnings: [],
       };
@@ -284,6 +281,8 @@ describe('workers/repository/apis', () => {
       config.api.findFilePaths.mockReturnValueOnce([
         'modules/something/package.js',
       ]);
+      config.api.findFilePaths.mockReturnValueOnce([]);
+      config.meteor.enabled = true;
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
@@ -293,14 +292,13 @@ describe('workers/repository/apis', () => {
         api: {
           findFilePaths: jest.fn(),
         },
-        docker: {
-          enabled: true,
-        },
         logger,
         warnings: [],
       };
       config.api.findFilePaths.mockReturnValueOnce(['package.json']);
+      config.api.findFilePaths.mockReturnValueOnce([]);
       config.api.findFilePaths.mockReturnValueOnce(['Dockerfile']);
+      config.docker.enabled = true;
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
