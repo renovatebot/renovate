@@ -129,7 +129,8 @@ describe('api/github', () => {
       );
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
-          statusCode: 502,
+          statusCode: 403,
+          message: 'API rate limit exceeded for x.',
         })
       );
       let err;
@@ -138,7 +139,7 @@ describe('api/github', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.statusCode).toBe(502);
+      expect(err.statusCode).toBe(403);
     });
   });
 
