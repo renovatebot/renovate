@@ -18,7 +18,7 @@ With your current configuration, renovate will initially create the following Pu
 
 | Pull Requests (2) |
 | ------ |
-| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` from \`^1.0.0\` to \`1.1.0\`</li></ul> |
+| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` to \`1.1.0\`</li></ul> |
 | **Upgrade b**<ul><li>Schedule: \\"on monday\\"</li><li>Branch name: \`branch-b\`</li><li>Upgrades b in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
 
 
@@ -202,7 +202,7 @@ With your current configuration, renovate will initially create the following Pu
 
 | Pull Requests (2) |
 | ------ |
-| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` from \`^1.0.0\` to \`1.1.0\`</li></ul> |
+| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` to \`1.1.0\`</li></ul> |
 | **Upgrade b**<ul><li>Branch name: \`branch-b\`</li><li>Upgrades [b](https://b) in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
 
 
@@ -243,7 +243,7 @@ With your current configuration, renovate will initially create the following Pu
 
 | Pull Requests (1) |
 | ------ |
-| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` from \`^1.0.0\` to \`1.1.0\`</li><li>Upgrades [b](https://b) in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
+| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` to \`1.1.0\`</li><li>Upgrades [b](https://b) in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
 
 
 Sometimes you may see multiple options for the same dependency (e.g. pinning in one branch and upgrading in another). This is expected and allows you the flexibility to choose which to merge first. Once you merge any PR, others will be updated or removed the next time Renovate runs.
