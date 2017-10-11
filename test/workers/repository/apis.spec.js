@@ -350,10 +350,11 @@ describe('workers/repository/apis', () => {
     let config;
     beforeEach(() => {
       config = {
+        errors: [],
+        warnings: [],
         packageFiles: ['package.json', { packageFile: 'a/package.json' }],
         api: {
           getFileContent: jest.fn(() => null),
-          getFileJson: jest.fn(),
         },
         logger,
       };
@@ -362,22 +363,31 @@ describe('workers/repository/apis', () => {
       const res = await apis.resolvePackageFiles(config);
       expect(res.packageFiles).toEqual([]);
     });
-    it('includes files with content', async () => {
-      config.packageFiles.push('module/package.js');
-      config.api.getFileJson.mockReturnValueOnce({
-        renovate: {},
-        workspaces: [],
-      });
-      config.api.getFileJson.mockReturnValueOnce({});
-      config.api.getFileContent.mockReturnValueOnce(null);
-      config.api.getFileContent.mockReturnValueOnce(null);
-      config.api.getFileContent.mockReturnValueOnce('some-content');
-      config.api.getFileContent.mockReturnValueOnce('some-content');
-      config.api.getFileContent.mockReturnValueOnce(null);
-      config.api.getFileContent.mockReturnValueOnce(null);
+    it('skips files with invalid JSON', async () => {
+      config.api.getFileContent.mockReturnValueOnce('not json');
       const res = await apis.resolvePackageFiles(config);
-      expect(res.packageFiles).toHaveLength(3);
+      expect(res.packageFiles).toEqual([]);
+    });
+    it('includes files with content', async () => {
+      config.api.getFileContent.mockReturnValueOnce(
+        JSON.stringify({
+          renovate: {},
+          workspaces: [],
+        })
+      );
+      config.api.getFileContent.mockReturnValueOnce('npmrc-1');
+      config.api.getFileContent.mockReturnValueOnce('yarnrc-1');
+      config.api.getFileContent.mockReturnValueOnce('yarnLock-1');
+      config.api.getFileContent.mockReturnValueOnce('packageLock-1');
+      config.api.getFileContent.mockReturnValueOnce('{}');
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(2);
       expect(res.packageFiles).toMatchSnapshot();
+    });
+    it('handles meteor', async () => {
+      config.packageFiles = [{ packageFile: 'package.js' }];
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(1);
     });
     it('handles dockerfile', async () => {
       config.packageFiles = [{ packageFile: 'Dockerfile' }];
