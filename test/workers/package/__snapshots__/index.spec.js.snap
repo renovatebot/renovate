@@ -3,7 +3,7 @@
 exports[`lib/workers/package/index renovatePackage(config) maps type 1`] = `
 Object {
   "assignees": Array [],
-  "automerge": true,
+  "automerge": false,
   "automergeType": "pr",
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
