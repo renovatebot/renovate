@@ -352,3 +352,19 @@ Array [
   "Add renovate.json",
 ]
 `;
+
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) uses config:base if no npm 1`] = `
+Array [
+  "renovate/configure",
+  Array [
+    Object {
+      "contents": "{
+  \\"extends\\": [\\"config:base\\", \\":meteor\\", \\":docker\\"]
+}
+",
+      "name": "renovate.json",
+    },
+  ],
+  "Add renovate.json",
+]
+`;
