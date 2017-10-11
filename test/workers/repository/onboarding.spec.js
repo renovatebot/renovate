@@ -223,7 +223,7 @@ describe('lib/workers/repository/onboarding', () => {
     beforeEach(() => {
       config = { ...defaultConfig };
       jest.resetAllMocks();
-      apis.detectPackageFiles = jest.fn(config => config);
+      apis.detectPackageFiles = jest.fn(a => a);
       config.api = {
         commitFilesToBranch: jest.fn(),
         createPr: jest.fn(() => ({ displayNumber: 1 })),
