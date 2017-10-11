@@ -14,7 +14,7 @@ Object {
   "description": Array [],
   "group": Object {
     "branchName": "{{branchPrefix}}{{groupSlug}}",
-    "commitMessage": "Renovate {{groupName}} packages",
+    "commitMessage": "Pin Dependencies",
     "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \\"{{groupName}}\\".
 
 {{#if schedule}}

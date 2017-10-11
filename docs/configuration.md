@@ -532,7 +532,11 @@ Obviously, you can't set repository or package file location with this method.
   "automerge": true,
   "unpublishSafe": false,
   "groupName": "Pin Dependencies",
-  "group": {"prTitle": "{{groupName}}", "semanticPrefix": "refactor(deps):"}
+  "group": {
+    "commitMessage": "Pin Dependencies",
+    "prTitle": "{{groupName}}",
+    "semanticPrefix": "refactor(deps):"
+  }
 }</pre></td>
   <td>`RENOVATE_PIN`</td>
   <td><td>
