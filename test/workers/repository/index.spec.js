@@ -101,7 +101,7 @@ describe('workers/repository', () => {
         ...{ packageFiles: [] },
       }));
       await repositoryWorker.renovateRepository(config);
-      expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(0);
+      expect(apis.resolvePackageFiles.mock.calls.length).toBe(0);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('does not skip repository if package.json', async () => {

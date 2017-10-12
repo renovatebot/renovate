@@ -225,8 +225,10 @@ describe('lib/workers/repository/onboarding', () => {
       config.api = {
         commitFilesToBranch: jest.fn(),
         createPr: jest.fn(() => ({ displayNumber: 1 })),
+        findFilePaths: jest.fn(() => []),
         findPr: jest.fn(),
         getFileContent: jest.fn(),
+        getFileJson: jest.fn(() => ({})),
         getPr: jest.fn(() => {}),
         getCommitMessages: jest.fn(),
       };
@@ -256,17 +258,8 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
-    it('commits files if pr is not closed and is rebaseable', async () => {
-      config.api.findPr.mockReturnValueOnce({});
-      config.api.getPr.mockReturnValueOnce({ canRebase: true });
-      const res = await onboarding.getOnboardingStatus(config);
-      expect(res.repoIsOnboarded).toEqual(false);
-      expect(config.api.findPr.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-    });
-    it('skips file update if existing pr is not rebaseable', async () => {
-      config.api.findPr.mockReturnValueOnce({});
-      config.api.getPr.mockReturnValueOnce({ canRebase: false });
+    it('skips commit files and returns false if open pr', async () => {
+      config.api.findPr.mockReturnValueOnce({ isClosed: false });
       const res = await onboarding.getOnboardingStatus(config);
       expect(res.repoIsOnboarded).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
@@ -286,22 +279,6 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
-    });
-    it('commits files if existing content does not match', async () => {
-      config.api.getFileContent.mockReturnValueOnce('some-different-content');
-      const res = await onboarding.getOnboardingStatus(config);
-      expect(res.repoIsOnboarded).toEqual(false);
-      expect(config.api.findPr.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
-    });
-    it('skips commit files if existing content matches', async () => {
-      const existingContent = `{\n  "extends": ["config:js-lib"]\n}\n`;
-      config.api.getFileContent.mockReturnValueOnce(existingContent);
-      const res = await onboarding.getOnboardingStatus(config);
-      expect(res.repoIsOnboarded).toEqual(false);
-      expect(config.api.findPr.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
   });
 });

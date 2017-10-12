@@ -384,22 +384,6 @@ Array [
 ]
 `;
 
-exports[`lib/workers/repository/onboarding getOnboardingStatus(config) commits files if existing content does not match 1`] = `
-Array [
-  "renovate/configure",
-  Array [
-    Object {
-      "contents": "{
-  \\"extends\\": [\\"config:js-lib\\"]
-}
-",
-      "name": "renovate.json",
-    },
-  ],
-  "Add renovate.json",
-]
-`;
-
 exports[`lib/workers/repository/onboarding getOnboardingStatus(config) pins private repos 1`] = `
 Array [
   "renovate/configure",
