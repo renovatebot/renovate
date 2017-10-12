@@ -58,6 +58,12 @@ describe('lib/workers/dep-type/index', () => {
       const res = await depTypeWorker.renovateDepType(content, config);
       expect(res).toHaveLength(6);
     });
+    it('handles malformed meteor', async () => {
+      config.packageFile = 'package.js';
+      const content = 'blah';
+      const res = await depTypeWorker.renovateDepType(content, config);
+      expect(res).toHaveLength(0);
+    });
     it('returns upgrades for docker', async () => {
       config.packageFile = 'Dockerfile';
       config.currentFrom = 'node';
