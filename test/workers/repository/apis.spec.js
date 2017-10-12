@@ -369,6 +369,7 @@ describe('workers/repository/apis', () => {
       expect(res.packageFiles).toEqual([]);
     });
     it('includes files with content', async () => {
+      config.repoIsOnboarded = true;
       config.api.getFileContent.mockReturnValueOnce(
         JSON.stringify({
           renovate: {},
