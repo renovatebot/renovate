@@ -11,7 +11,7 @@ describe('workers/branch/automerge', () => {
         api: {
           getBranchPr: jest.fn(),
           getBranchStatus: jest.fn(),
-          mergeBranch: jest.fn()
+          mergeBranch: jest.fn(),
         },
         logger,
       };
@@ -36,7 +36,9 @@ describe('workers/branch/automerge', () => {
       config.automerge = true;
       config.automergeType = 'branch-push';
       config.api.getBranchStatus.mockReturnValueOnce('success');
-      expect(await tryBranchAutomerge(config)).toBe('automerge aborted - PR exists');
+      expect(await tryBranchAutomerge(config)).toBe(
+        'automerge aborted - PR exists'
+      );
     });
     it('returns false if automerge fails', async () => {
       config.automerge = true;
