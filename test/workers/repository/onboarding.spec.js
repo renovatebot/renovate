@@ -238,21 +238,21 @@ describe('lib/workers/repository/onboarding', () => {
     it('returns true if onboarding is false', async () => {
       config.onboarding = false;
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(true);
+      expect(res.repoIsOnboarded).toEqual(true);
       expect(config.api.findPr.mock.calls.length).toBe(0);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('returns true if renovate config present', async () => {
       config.renovateJsonPresent = true;
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(true);
+      expect(res.repoIsOnboarded).toEqual(true);
       expect(config.api.findPr.mock.calls.length).toBe(0);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('returns true if pr and pr is closed', async () => {
       config.api.findPr.mockReturnValueOnce({ isClosed: true });
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(true);
+      expect(res.repoIsOnboarded).toEqual(true);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
@@ -260,7 +260,7 @@ describe('lib/workers/repository/onboarding', () => {
       config.api.findPr.mockReturnValueOnce({});
       config.api.getPr.mockReturnValueOnce({ canRebase: true });
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
+      expect(res.repoIsOnboarded).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
     });
@@ -268,13 +268,13 @@ describe('lib/workers/repository/onboarding', () => {
       config.api.findPr.mockReturnValueOnce({});
       config.api.getPr.mockReturnValueOnce({ canRebase: false });
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
+      expect(res.repoIsOnboarded).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('commits files and returns false if no pr', async () => {
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
+      expect(res.repoIsOnboarded).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
@@ -282,7 +282,7 @@ describe('lib/workers/repository/onboarding', () => {
     it('pins private repos', async () => {
       onboarding.isRepoPrivate.mockReturnValueOnce(true);
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
+      expect(res.repoIsOnboarded).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
@@ -290,7 +290,7 @@ describe('lib/workers/repository/onboarding', () => {
     it('commits files if existing content does not match', async () => {
       config.api.getFileContent.mockReturnValueOnce('some-different-content');
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
+      expect(res.repoIsOnboarded).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
@@ -299,7 +299,7 @@ describe('lib/workers/repository/onboarding', () => {
       const existingContent = `{\n  "extends": ["config:js-lib"]\n}\n`;
       config.api.getFileContent.mockReturnValueOnce(existingContent);
       const res = await onboarding.getOnboardingStatus(config);
-      expect(res).toEqual(false);
+      expect(res.repoIsOnboarded).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });

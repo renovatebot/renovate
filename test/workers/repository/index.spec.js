@@ -48,7 +48,7 @@ describe('workers/repository', () => {
       apis.detectPackageFiles = jest.fn();
       apis.resolvePackageFiles = jest.fn(input => input);
       apis.checkMonorepos = jest.fn(input => input);
-      onboarding.getOnboardingStatus = jest.fn();
+      onboarding.getOnboardingStatus = jest.fn(input => input);
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
       upgrades.branchifyUpgrades = jest.fn(() => ({ branchUpgrades: {} }));
@@ -177,7 +177,10 @@ describe('workers/repository', () => {
     it('calls branchWorker', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
-      onboarding.getOnboardingStatus.mockReturnValueOnce(true);
+      onboarding.getOnboardingStatus.mockImplementation(input => ({
+        ...input,
+        repoIsOnboarded: true,
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
       });
@@ -188,7 +191,10 @@ describe('workers/repository', () => {
     it('skips branchWorker after automerging', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
-      onboarding.getOnboardingStatus.mockReturnValue(true);
+      onboarding.getOnboardingStatus.mockImplementation(input => ({
+        ...input,
+        repoIsOnboarded: true,
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
       });
@@ -210,7 +216,10 @@ describe('workers/repository', () => {
     it('stops branchWorker after lockFileError', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
-      onboarding.getOnboardingStatus.mockReturnValue(true);
+      onboarding.getOnboardingStatus.mockImplementation(input => ({
+        ...input,
+        repoIsOnboarded: true,
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
       });
@@ -223,7 +232,10 @@ describe('workers/repository', () => {
     it('stops branchWorker after pin', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
-      onboarding.getOnboardingStatus.mockReturnValue(true);
+      onboarding.getOnboardingStatus.mockImplementation(input => ({
+        ...input,
+        repoIsOnboarded: true,
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{ type: 'pin' }, {}, {}],
       });
