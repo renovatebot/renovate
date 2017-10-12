@@ -8,7 +8,11 @@ describe('workers/branch/automerge', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: { getBranchStatus: jest.fn(), mergeBranch: jest.fn() },
+        api: {
+          getBranchPr: jest.fn(),
+          getBranchStatus: jest.fn(),
+          mergeBranch: jest.fn(),
+        },
         logger,
       };
     });
@@ -26,6 +30,15 @@ describe('workers/branch/automerge', () => {
       config.automergeType = 'branch-push';
       config.api.getBranchStatus.mockReturnValueOnce('pending');
       expect(await tryBranchAutomerge(config)).toBe('no automerge');
+    });
+    it('returns false if PR exists', async () => {
+      config.api.getBranchPr.mockReturnValueOnce({});
+      config.automerge = true;
+      config.automergeType = 'branch-push';
+      config.api.getBranchStatus.mockReturnValueOnce('success');
+      expect(await tryBranchAutomerge(config)).toBe(
+        'automerge aborted - PR exists'
+      );
     });
     it('returns false if automerge fails', async () => {
       config.automerge = true;
