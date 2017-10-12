@@ -115,11 +115,9 @@ Array [
     "content": Object {
       "workspaces": Array [],
     },
-    "errors": Array [],
     "npmrc": "npmrc-1",
     "packageFile": "package.json",
     "packageLock": "packageLock-1",
-    "warnings": Array [],
     "yarnLock": "yarnLock-1",
     "yarnrc": "yarnrc-1",
   },
