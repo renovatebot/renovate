@@ -26,6 +26,12 @@ Object {
   "lockFileConfig": Object {
     "automerge": true,
   },
+  "major": Object {
+    "automerge": false,
+  },
+  "minor": Object {
+    "automerge": true,
+  },
   "onboarding": false,
   "optionalDependencies": Object {
     "major": Object {
@@ -58,6 +64,9 @@ Object {
       ],
     },
   ],
+  "patch": Object {
+    "automerge": true,
+  },
   "prTitle": "some pr title",
   "schedule": "on the first day of the month",
   "semanticPrefix": "fix(deps):",
