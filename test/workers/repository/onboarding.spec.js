@@ -284,6 +284,7 @@ describe('lib/workers/repository/onboarding', () => {
     it('uses base + docker + meteor', async () => {
       apis.detectPackageFiles = jest.fn(input => ({
         ...input,
+        packageFiles: [{}, {}],
         types: {
           meteor: true,
           docker: true,
@@ -294,6 +295,18 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.findPr.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
+    });
+    it('throws if no packageFiles', async () => {
+      apis.detectPackageFiles = jest.fn(input => ({
+        ...input,
+      }));
+      let e;
+      try {
+        await onboarding.getOnboardingStatus(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
     });
   });
 });

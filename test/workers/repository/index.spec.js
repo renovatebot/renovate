@@ -265,5 +265,18 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
+    it('handles special no package files error', async () => {
+      apis.initApis.mockImplementationOnce(() => {
+        // Create a new object, that prototypically inherits from the Error constructor
+        function MyError() {
+          this.message = 'no package files';
+        }
+        MyError.prototype = Object.create(Error.prototype);
+        MyError.prototype.constructor = MyError;
+        throw new MyError();
+      });
+      await repositoryWorker.renovateRepository(config);
+      expect(config.logger.error.mock.calls.length).toBe(0);
+    });
   });
 });
