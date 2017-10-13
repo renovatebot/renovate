@@ -9,7 +9,7 @@ Array [
 
 This is an onboarding PR to help you understand and configure Renovate before any regular Pull Requests begin. Once you close this Pull Request, Renovate will begin keeping your dependencies up-to-date via automated Pull Requests.
 
-If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first.
+If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first, or feel free to ask the app author @rarkins a question in a comment below.
 
 ---
 
@@ -18,7 +18,7 @@ With your current configuration, renovate will initially create the following Pu
 
 | Pull Requests (2) |
 | ------ |
-| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` from \`^1.0.0\` to \`1.1.0\`</li></ul> |
+| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` to \`1.1.0\`</li></ul> |
 | **Upgrade b**<ul><li>Schedule: \\"on monday\\"</li><li>Branch name: \`branch-b\`</li><li>Upgrades b in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
 
 
@@ -35,6 +35,15 @@ Our [Configuration Docs](https://renovateapp.com/docs/) should be helpful if you
 You are not required to *merge* this Pull Request - Renovate will begin even if this \\"Configure Renovate\\" PR is closed *unmerged* and without a \`renovate.json\` file. However, it's recommended that you add configuration to your repository to ensure behaviour matches what you see described here.
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
+
+#### Want to start over?
+
+If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch - for example if your base branch has had substantial changes - then you need to:
+
+1. (IMPORTANT) Rename this PR to something else, e.g. \\"Configure Renovate - old\\"
+2. Close the PR and delete the branch
+
+If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
     true,
   ],
@@ -50,7 +59,7 @@ Array [
 
 This is an onboarding PR to help you understand and configure Renovate before any regular Pull Requests begin. Once you close this Pull Request, Renovate will begin keeping your dependencies up-to-date via automated Pull Requests.
 
-If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first.
+If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first, or feel free to ask the app author @rarkins a question in a comment below.
 
 ---
 
@@ -71,6 +80,15 @@ Our [Configuration Docs](https://renovateapp.com/docs/) should be helpful if you
 You are not required to *merge* this Pull Request - Renovate will begin even if this \\"Configure Renovate\\" PR is closed *unmerged* and without a \`renovate.json\` file. However, it's recommended that you add configuration to your repository to ensure behaviour matches what you see described here.
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
+
+#### Want to start over?
+
+If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch - for example if your base branch has had substantial changes - then you need to:
+
+1. (IMPORTANT) Rename this PR to something else, e.g. \\"Configure Renovate - old\\"
+2. Close the PR and delete the branch
+
+If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
     true,
   ],
@@ -85,7 +103,7 @@ Array [
 
 This is an onboarding PR to help you understand and configure Renovate before any regular Pull Requests begin. Once you close this Pull Request, Renovate will begin keeping your dependencies up-to-date via automated Pull Requests.
 
-If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first.
+If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first, or feel free to ask the app author @rarkins a question in a comment below.
 
 ---
 
@@ -117,6 +135,15 @@ Our [Configuration Docs](https://renovateapp.com/docs/) should be helpful if you
 You are not required to *merge* this Pull Request - Renovate will begin even if this \\"Configure Renovate\\" PR is closed *unmerged* and without a \`renovate.json\` file. However, it's recommended that you add configuration to your repository to ensure behaviour matches what you see described here.
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
+
+#### Want to start over?
+
+If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch - for example if your base branch has had substantial changes - then you need to:
+
+1. (IMPORTANT) Rename this PR to something else, e.g. \\"Configure Renovate - old\\"
+2. Close the PR and delete the branch
+
+If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
   true,
 ]
@@ -130,7 +157,7 @@ Array [
 
 This is an onboarding PR to help you understand and configure Renovate before any regular Pull Requests begin. Once you close this Pull Request, Renovate will begin keeping your dependencies up-to-date via automated Pull Requests.
 
-If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first.
+If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first, or feel free to ask the app author @rarkins a question in a comment below.
 
 ---
 
@@ -161,6 +188,15 @@ Our [Configuration Docs](https://renovateapp.com/docs/) should be helpful if you
 You are not required to *merge* this Pull Request - Renovate will begin even if this \\"Configure Renovate\\" PR is closed *unmerged* and without a \`renovate.json\` file. However, it's recommended that you add configuration to your repository to ensure behaviour matches what you see described here.
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
+
+#### Want to start over?
+
+If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch - for example if your base branch has had substantial changes - then you need to:
+
+1. (IMPORTANT) Rename this PR to something else, e.g. \\"Configure Renovate - old\\"
+2. Close the PR and delete the branch
+
+If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
   true,
 ]
@@ -175,7 +211,7 @@ Array [
 
 This is an onboarding PR to help you understand and configure Renovate before any regular Pull Requests begin. Once you close this Pull Request, Renovate will begin keeping your dependencies up-to-date via automated Pull Requests.
 
-If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first.
+If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first, or feel free to ask the app author @rarkins a question in a comment below.
 
 ---
 
@@ -202,7 +238,7 @@ With your current configuration, renovate will initially create the following Pu
 
 | Pull Requests (2) |
 | ------ |
-| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` from \`^1.0.0\` to \`1.1.0\`</li></ul> |
+| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` to \`1.1.0\`</li></ul> |
 | **Upgrade b**<ul><li>Branch name: \`branch-b\`</li><li>Upgrades [b](https://b) in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
 
 
@@ -219,6 +255,15 @@ Our [Configuration Docs](https://renovateapp.com/docs/) should be helpful if you
 You are not required to *merge* this Pull Request - Renovate will begin even if this \\"Configure Renovate\\" PR is closed *unmerged* and without a \`renovate.json\` file. However, it's recommended that you add configuration to your repository to ensure behaviour matches what you see described here.
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
+
+#### Want to start over?
+
+If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch - for example if your base branch has had substantial changes - then you need to:
+
+1. (IMPORTANT) Rename this PR to something else, e.g. \\"Configure Renovate - old\\"
+2. Close the PR and delete the branch
+
+If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
     true,
   ],
@@ -234,7 +279,7 @@ Array [
 
 This is an onboarding PR to help you understand and configure Renovate before any regular Pull Requests begin. Once you close this Pull Request, Renovate will begin keeping your dependencies up-to-date via automated Pull Requests.
 
-If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first.
+If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first, or feel free to ask the app author @rarkins a question in a comment below.
 
 ---
 
@@ -243,7 +288,7 @@ With your current configuration, renovate will initially create the following Pu
 
 | Pull Requests (1) |
 | ------ |
-| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` from \`^1.0.0\` to \`1.1.0\`</li><li>Upgrades [b](https://b) in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
+| **Pin a**<ul><li>Branch name: \`branch-a\`</li><li>Pins [a](https://a) in \`undefined\` to \`1.1.0\`</li><li>Upgrades [b](https://b) in \`undefined\` from \`1.0.0\` to \`2.0.0\`</li></ul> |
 
 
 Sometimes you may see multiple options for the same dependency (e.g. pinning in one branch and upgrading in another). This is expected and allows you the flexibility to choose which to merge first. Once you merge any PR, others will be updated or removed the next time Renovate runs.
@@ -259,6 +304,15 @@ Our [Configuration Docs](https://renovateapp.com/docs/) should be helpful if you
 You are not required to *merge* this Pull Request - Renovate will begin even if this \\"Configure Renovate\\" PR is closed *unmerged* and without a \`renovate.json\` file. However, it's recommended that you add configuration to your repository to ensure behaviour matches what you see described here.
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
+
+#### Want to start over?
+
+If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch - for example if your base branch has had substantial changes - then you need to:
+
+1. (IMPORTANT) Rename this PR to something else, e.g. \\"Configure Renovate - old\\"
+2. Close the PR and delete the branch
+
+If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
     true,
   ],
@@ -274,7 +328,7 @@ Array [
 
 This is an onboarding PR to help you understand and configure Renovate before any regular Pull Requests begin. Once you close this Pull Request, Renovate will begin keeping your dependencies up-to-date via automated Pull Requests.
 
-If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first.
+If you have any questions, try reading our [Getting Started Configuring Renovate](https://renovateapp.com/docs/getting-started/configure-renovate) page first, or feel free to ask the app author @rarkins a question in a comment below.
 
 ---
 
@@ -299,6 +353,15 @@ Our [Configuration Docs](https://renovateapp.com/docs/) should be helpful if you
 You are not required to *merge* this Pull Request - Renovate will begin even if this \\"Configure Renovate\\" PR is closed *unmerged* and without a \`renovate.json\` file. However, it's recommended that you add configuration to your repository to ensure behaviour matches what you see described here.
 
 Alternatively, you can add the same configuration settings into a \\"renovate\\" section of your \`package.json\` file(s) in this branch and delete the \`renovate.json\` from this PR. If you make these configuration changes in this branch then the results will be described in this PR after the next time Renovate runs.
+
+#### Want to start over?
+
+If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch - for example if your base branch has had substantial changes - then you need to:
+
+1. (IMPORTANT) Rename this PR to something else, e.g. \\"Configure Renovate - old\\"
+2. Close the PR and delete the branch
+
+If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
     true,
   ],
@@ -311,23 +374,9 @@ Array [
   Array [
     Object {
       "contents": "{
-  \\"extends\\": [\\":library\\"]
-}
-",
-      "name": "renovate.json",
-    },
-  ],
-  "Add renovate.json",
-]
-`;
-
-exports[`lib/workers/repository/onboarding getOnboardingStatus(config) commits files if existing content does not match 1`] = `
-Array [
-  "renovate/configure",
-  Array [
-    Object {
-      "contents": "{
-  \\"extends\\": [\\":library\\"]
+  \\"extends\\": [
+    \\"config:js-lib\\"
+  ]
 }
 ",
       "name": "renovate.json",
@@ -343,7 +392,31 @@ Array [
   Array [
     Object {
       "contents": "{
-  \\"extends\\": [\\":app\\"]
+  \\"extends\\": [
+    \\"config:js-app\\"
+  ]
+}
+",
+      "name": "renovate.json",
+    },
+  ],
+  "Add renovate.json",
+]
+`;
+
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) throws if no packageFiles 1`] = `[Error: no package files]`;
+
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) uses base + docker + meteor 1`] = `
+Array [
+  "renovate/configure",
+  Array [
+    Object {
+      "contents": "{
+  \\"extends\\": [
+    \\"config:base\\",
+    \\":meteor\\",
+    \\":docker\\"
+  ]
 }
 ",
       "name": "renovate.json",

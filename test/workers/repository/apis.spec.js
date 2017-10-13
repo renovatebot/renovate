@@ -15,6 +15,13 @@ jest.mock('../../../lib/api/npm');
 
 describe('workers/repository/apis', () => {
   describe('getNpmrc', () => {
+    it('Skips if ignoring npmrc', async () => {
+      const config = {
+        foo: 1,
+        ignoreNpmrcFile: true,
+      };
+      expect(await apis.getNpmrc(config)).toMatchObject(config);
+    });
     it('Skips if npmrc not found', async () => {
       const config = {
         api: {
@@ -57,7 +64,6 @@ describe('workers/repository/apis', () => {
       };
     });
     it('adds yarn workspaces', async () => {
-      config.hasYarnWorkspaces = true;
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -75,10 +81,29 @@ describe('workers/repository/apis', () => {
       const res = await apis.checkMonorepos(config);
       expect(res.monorepoPackages).toMatchSnapshot();
     });
+    it('adds nested yarn workspaces', async () => {
+      config.packageFiles = [
+        {
+          packageFile: 'frontend/package.json',
+          content: { workspaces: ['packages/*'] },
+        },
+        {
+          packageFile: 'frontend/packages/something/package.json',
+          content: { name: '@a/b' },
+        },
+        {
+          packageFile: 'frontend/packages/something-else/package.json',
+          content: { name: '@a/c' },
+        },
+      ];
+      const res = await apis.checkMonorepos(config);
+      expect(res.monorepoPackages).toMatchSnapshot();
+    });
     it('adds lerna packages', async () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
+          content: {},
         },
         {
           packageFile: 'packages/something/package.json',
@@ -90,6 +115,17 @@ describe('workers/repository/apis', () => {
         },
       ];
       config.api.getFileJson.mockReturnValue({ packages: ['packages/*'] });
+      const res = await apis.checkMonorepos(config);
+      expect(res.monorepoPackages).toMatchSnapshot();
+    });
+    it('skips if no lerna packages', async () => {
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          content: {},
+        },
+      ];
+      config.api.getFileJson.mockReturnValue({});
       const res = await apis.checkMonorepos(config);
       expect(res.monorepoPackages).toMatchSnapshot();
     });
@@ -238,9 +274,6 @@ describe('workers/repository/apis', () => {
         api: {
           findFilePaths: jest.fn(),
         },
-        meteor: {
-          enabled: true,
-        },
         logger,
         warnings: [],
       };
@@ -248,6 +281,8 @@ describe('workers/repository/apis', () => {
       config.api.findFilePaths.mockReturnValueOnce([
         'modules/something/package.js',
       ]);
+      config.api.findFilePaths.mockReturnValueOnce([]);
+      config.meteor.enabled = true;
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
@@ -257,14 +292,13 @@ describe('workers/repository/apis', () => {
         api: {
           findFilePaths: jest.fn(),
         },
-        docker: {
-          enabled: true,
-        },
         logger,
         warnings: [],
       };
       config.api.findFilePaths.mockReturnValueOnce(['package.json']);
+      config.api.findFilePaths.mockReturnValueOnce([]);
       config.api.findFilePaths.mockReturnValueOnce(['Dockerfile']);
+      config.docker.enabled = true;
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
@@ -316,10 +350,11 @@ describe('workers/repository/apis', () => {
     let config;
     beforeEach(() => {
       config = {
+        errors: [],
+        warnings: [],
         packageFiles: ['package.json', { packageFile: 'a/package.json' }],
         api: {
           getFileContent: jest.fn(() => null),
-          getFileJson: jest.fn(),
         },
         logger,
       };
@@ -328,22 +363,32 @@ describe('workers/repository/apis', () => {
       const res = await apis.resolvePackageFiles(config);
       expect(res.packageFiles).toEqual([]);
     });
-    it('includes files with content', async () => {
-      config.packageFiles.push('module/package.js');
-      config.api.getFileJson.mockReturnValueOnce({
-        renovate: {},
-        workspaces: [],
-      });
-      config.api.getFileJson.mockReturnValueOnce({});
-      config.api.getFileContent.mockReturnValueOnce(null);
-      config.api.getFileContent.mockReturnValueOnce(null);
-      config.api.getFileContent.mockReturnValueOnce('some-content');
-      config.api.getFileContent.mockReturnValueOnce('some-content');
-      config.api.getFileContent.mockReturnValueOnce(null);
-      config.api.getFileContent.mockReturnValueOnce(null);
+    it('skips files with invalid JSON', async () => {
+      config.api.getFileContent.mockReturnValueOnce('not json');
       const res = await apis.resolvePackageFiles(config);
-      expect(res.packageFiles).toHaveLength(3);
+      expect(res.packageFiles).toEqual([]);
+    });
+    it('includes files with content', async () => {
+      config.repoIsOnboarded = true;
+      config.api.getFileContent.mockReturnValueOnce(
+        JSON.stringify({
+          renovate: {},
+          workspaces: [],
+        })
+      );
+      config.api.getFileContent.mockReturnValueOnce('npmrc-1');
+      config.api.getFileContent.mockReturnValueOnce('yarnrc-1');
+      config.api.getFileContent.mockReturnValueOnce('yarnLock-1');
+      config.api.getFileContent.mockReturnValueOnce('packageLock-1');
+      config.api.getFileContent.mockReturnValueOnce('{}');
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(2);
       expect(res.packageFiles).toMatchSnapshot();
+    });
+    it('handles meteor', async () => {
+      config.packageFiles = [{ packageFile: 'package.js' }];
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(1);
     });
     it('handles dockerfile', async () => {
       config.packageFiles = [{ packageFile: 'Dockerfile' }];

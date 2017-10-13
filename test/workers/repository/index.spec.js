@@ -47,7 +47,8 @@ describe('workers/repository', () => {
       apis.mergeRenovateJson = jest.fn(input => input);
       apis.detectPackageFiles = jest.fn();
       apis.resolvePackageFiles = jest.fn(input => input);
-      onboarding.getOnboardingStatus = jest.fn();
+      apis.checkMonorepos = jest.fn(input => input);
+      onboarding.getOnboardingStatus = jest.fn(input => input);
       onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
       upgrades.branchifyUpgrades = jest.fn(() => ({ branchUpgrades: {} }));
@@ -100,7 +101,7 @@ describe('workers/repository', () => {
         ...{ packageFiles: [] },
       }));
       await repositoryWorker.renovateRepository(config);
-      expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(0);
+      expect(apis.resolvePackageFiles.mock.calls.length).toBe(0);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('does not skip repository if package.json', async () => {
@@ -176,7 +177,10 @@ describe('workers/repository', () => {
     it('calls branchWorker', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
-      onboarding.getOnboardingStatus.mockReturnValueOnce(true);
+      onboarding.getOnboardingStatus.mockImplementation(input => ({
+        ...input,
+        repoIsOnboarded: true,
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
       });
@@ -187,7 +191,10 @@ describe('workers/repository', () => {
     it('skips branchWorker after automerging', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
-      onboarding.getOnboardingStatus.mockReturnValue(true);
+      onboarding.getOnboardingStatus.mockImplementation(input => ({
+        ...input,
+        repoIsOnboarded: true,
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
       });
@@ -209,7 +216,10 @@ describe('workers/repository', () => {
     it('stops branchWorker after lockFileError', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
-      onboarding.getOnboardingStatus.mockReturnValue(true);
+      onboarding.getOnboardingStatus.mockImplementation(input => ({
+        ...input,
+        repoIsOnboarded: true,
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{}, {}, {}],
       });
@@ -222,7 +232,10 @@ describe('workers/repository', () => {
     it('stops branchWorker after pin', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
-      onboarding.getOnboardingStatus.mockReturnValue(true);
+      onboarding.getOnboardingStatus.mockImplementation(input => ({
+        ...input,
+        repoIsOnboarded: true,
+      }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
         upgrades: [{ type: 'pin' }, {}, {}],
       });
@@ -244,6 +257,19 @@ describe('workers/repository', () => {
         // Create a new object, that prototypically inherits from the Error constructor
         function MyError() {
           this.message = 'uninitiated';
+        }
+        MyError.prototype = Object.create(Error.prototype);
+        MyError.prototype.constructor = MyError;
+        throw new MyError();
+      });
+      await repositoryWorker.renovateRepository(config);
+      expect(config.logger.error.mock.calls.length).toBe(0);
+    });
+    it('handles special no package files error', async () => {
+      apis.initApis.mockImplementationOnce(() => {
+        // Create a new object, that prototypically inherits from the Error constructor
+        function MyError() {
+          this.message = 'no package files';
         }
         MyError.prototype = Object.create(Error.prototype);
         MyError.prototype.constructor = MyError;

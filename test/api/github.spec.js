@@ -129,7 +129,8 @@ describe('api/github', () => {
       );
       ghGot.mockImplementationOnce(() =>
         Promise.reject({
-          statusCode: 502,
+          statusCode: 403,
+          message: 'API rate limit exceeded for x.',
         })
       );
       let err;
@@ -138,7 +139,7 @@ describe('api/github', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.statusCode).toBe(502);
+      expect(err.statusCode).toBe(403);
     });
   });
 
@@ -1086,6 +1087,7 @@ describe('api/github', () => {
   describe('addReviewers(issueNo, reviewers)', () => {
     it('should add the given reviewers to the PR', async () => {
       await initRepo('some/repo', 'token');
+      ghGot.post.mockReturnValueOnce({});
       await github.addReviewers(42, ['someuser', 'someotheruser']);
       expect(ghGot.post.mock.calls).toMatchSnapshot();
     });
@@ -1144,6 +1146,14 @@ describe('api/github', () => {
         const res = await github.checkForClosedPr(branch, title);
         expect(res).toBe(expected);
       });
+    });
+    it(`should return false if error thrown`, async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => {
+        throw new Error('fail');
+      });
+      const res = await github.checkForClosedPr('some-branch', 'some-title');
+      expect(res).toBe(false);
     });
   });
   describe('createPr(branchName, title, body)', () => {
@@ -1483,6 +1493,15 @@ describe('api/github', () => {
           statusCode: 404,
         })
       );
+      const content = await github.getFileContent('package.json');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(content).toBe(null);
+    });
+    it('should return null if getFile returns nothing', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {},
+      }));
       const content = await github.getFileContent('package.json');
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);

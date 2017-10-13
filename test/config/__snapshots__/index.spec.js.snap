@@ -5,6 +5,7 @@ Object {
   "branchName": "{{branchPrefix}}lock-file-maintenance",
   "commitMessage": "Update lock file",
   "enabled": true,
+  "groupName": null,
   "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates \`package.json\` lock files to use the latest dependency versions.
 
 {{#if schedule}}

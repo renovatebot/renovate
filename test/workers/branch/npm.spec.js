@@ -1,6 +1,6 @@
 const npmHelper = require('../../../lib/workers/branch/npm');
 const logger = require('../../_fixtures/logger');
-const getInstalledPath = require('get-installed-path');
+const { getInstalledPath } = require('get-installed-path');
 
 jest.mock('fs-extra');
 jest.mock('child-process-promise');

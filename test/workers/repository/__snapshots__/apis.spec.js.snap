@@ -14,12 +14,21 @@ Array [
 ]
 `;
 
+exports[`workers/repository/apis checkMonorepos adds nested yarn workspaces 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
+`;
+
 exports[`workers/repository/apis checkMonorepos adds yarn workspaces 1`] = `
 Array [
   "@a/b",
   "@a/c",
 ]
 `;
+
+exports[`workers/repository/apis checkMonorepos skips if no lerna packages 1`] = `Array []`;
 
 exports[`workers/repository/apis detectPackageFiles(config) adds package files to object 1`] = `
 Array [
@@ -51,6 +60,10 @@ Array [
 exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 1`] = `
 Array [
   "package.json",
+  "package.json",
+  "node_modules/backend/package.json",
+  "package.json",
+  "node_modules/backend/package.json",
 ]
 `;
 
@@ -102,20 +115,17 @@ Array [
     "content": Object {
       "workspaces": Array [],
     },
-    "errors": Array [],
-    "hasPackageLock": true,
-    "hasYarnLock": true,
+    "npmrc": "npmrc-1",
     "packageFile": "package.json",
-    "warnings": Array [],
+    "packageLock": "packageLock-1",
+    "yarnLock": "yarnLock-1",
+    "yarnrc": "yarnrc-1",
   },
   Object {
     "content": Object {},
-    "hasPackageLock": false,
-    "hasYarnLock": false,
     "packageFile": "a/package.json",
-  },
-  Object {
-    "packageFile": "module/package.js",
+    "packageLock": undefined,
+    "yarnLock": undefined,
   },
 ]
 `;

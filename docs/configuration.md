@@ -77,12 +77,14 @@ $ node renovate --help
     --private-key <string>               Server-side private key
     --encrypted <json>                   A configuration object containing configuration encrypted with project key
     --timezone <string>                  [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+    --update-not-scheduled [boolean]     Whether to update (but not create) branches when not scheduled
     --onboarding [boolean]               Require a Configuration PR first
     --platform <string>                  Platform type of repository
     --endpoint <string>                  Custom endpoint to use
     --token <string>                     Repository Auth Token
     --npmrc <string>                     String copy of npmrc file. Use \n instead of line breaks
     --yarnrc <string>                    String copy of yarnrc file. Use \n instead of line breaks
+    --ignore-npmrc-file [boolean]        Whether to ignore any .npmrc file found in repository
     --autodiscover [boolean]             Autodiscover all repositories
     --autodiscover [boolean]             Autodiscover all repositories
     --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
@@ -111,6 +113,7 @@ $ node renovate --help
     --labels <list>                      Labels to add to Pull Request
     --assignees <list>                   Assignees for Pull Request
     --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
+    --npm <json>                         Configuration object for npm package.json renovation
     --meteor <json>                      Configuration object for meteor package.js renovation
     -h, --help                           output usage information
   Examples:
@@ -241,6 +244,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><td>
 </tr>
 <tr>
+  <td>`updateNotScheduled`</td>
+  <td>Whether to update (but not create) branches when not scheduled</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_UPDATE_NOT_SCHEDULED`</td>
+  <td>`--update-not-scheduled`<td>
+</tr>
+<tr>
   <td>`onboarding`</td>
   <td>Require a Configuration PR first</td>
   <td>boolean</td>
@@ -287,6 +298,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>null</pre></td>
   <td>`RENOVATE_YARNRC`</td>
   <td>`--yarnrc`<td>
+</tr>
+<tr>
+  <td>`ignoreNpmrcFile`</td>
+  <td>Whether to ignore any .npmrc file found in repository</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_IGNORE_NPMRC_FILE`</td>
+  <td>`--ignore-npmrc-file`<td>
 </tr>
 <tr>
   <td>`autodiscover`</td>
@@ -509,7 +528,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>Configuration to apply when an update type is patch. Only applies if `separatePatchReleases` is set to true</td>
   <td>json</td>
   <td><pre>{
-  "branchName": "{{branchPrefix}}{{depName}}-{{newVersionMajor}}.{{newVersionMinor}}.x"
+  "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.{{newVersionMinor}}.x"
 }</pre></td>
   <td>`RENOVATE_PATCH`</td>
   <td><td>
@@ -519,10 +538,13 @@ Obviously, you can't set repository or package file location with this method.
   <td>Configuration to apply when an update type is pin.</td>
   <td>json</td>
   <td><pre>{
-  "automerge": true,
   "unpublishSafe": false,
   "groupName": "Pin Dependencies",
-  "group": {"prTitle": "{{groupName}}", "semanticPrefix": "refactor(deps):"}
+  "group": {
+    "commitMessage": "Pin Dependencies",
+    "prTitle": "{{groupName}}",
+    "semanticPrefix": "refactor(deps):"
+  }
 }</pre></td>
   <td>`RENOVATE_PIN`</td>
   <td><td>
@@ -611,7 +633,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`branchName`</td>
   <td>Branch name template</td>
   <td>string</td>
-  <td><pre>"{{branchPrefix}}{{depName}}-{{newVersionMajor}}.x"</pre></td>
+  <td><pre>"{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x"</pre></td>
   <td>`RENOVATE_BRANCH_NAME`</td>
   <td><td>
 </tr>
@@ -650,7 +672,8 @@ Obviously, you can't set repository or package file location with this method.
   "commitMessage": "Update lock file",
   "prTitle": "Lock file maintenance",
   "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates `package.json` lock files to use the latest dependency versions.\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
-  "schedule": ["before 5am on monday"]
+  "schedule": ["before 5am on monday"],
+  "groupName": null
 }</pre></td>
   <td>`RENOVATE_LOCK_FILE_MAINTENANCE`</td>
   <td><td>
@@ -718,6 +741,14 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--reviewers`<td>
 </tr>
 <tr>
+  <td>`npm`</td>
+  <td>Configuration object for npm package.json renovation</td>
+  <td>json</td>
+  <td><pre>{"enabled": true}</pre></td>
+  <td>`RENOVATE_NPM`</td>
+  <td>`--npm`<td>
+</tr>
+<tr>
   <td>`meteor`</td>
   <td>Configuration object for meteor package.js renovation</td>
   <td>json</td>
@@ -731,7 +762,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>json</td>
   <td><pre>{
   "enabled": false,
-  "branchName": "{{branchPrefix}}docker-{{depName}}-{{currentTag}}",
+  "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{currentTag}}",
   "commitMessage": "Update {{depName}}:{{currentTag}} digest",
   "prTitle": "Update Dockerfile image {{depName}}@{{currentTag}} digest",
   "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image `{{depName}}@{{currentTag}}` to the latest digest (`{{newDigest}}`).\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
