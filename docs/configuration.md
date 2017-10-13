@@ -77,6 +77,7 @@ $ node renovate --help
     --private-key <string>               Server-side private key
     --encrypted <json>                   A configuration object containing configuration encrypted with project key
     --timezone <string>                  [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+    --update-not-scheduled [boolean]     Whether to update (but not create) branches when not scheduled
     --onboarding [boolean]               Require a Configuration PR first
     --platform <string>                  Platform type of repository
     --endpoint <string>                  Custom endpoint to use
@@ -241,6 +242,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>[]</pre></td>
   <td></td>
   <td><td>
+</tr>
+<tr>
+  <td>`updateNotScheduled`</td>
+  <td>Whether to update (but not create) branches when not scheduled</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_UPDATE_NOT_SCHEDULED`</td>
+  <td>`--update-not-scheduled`<td>
 </tr>
 <tr>
   <td>`onboarding`</td>
@@ -529,7 +538,6 @@ Obviously, you can't set repository or package file location with this method.
   <td>Configuration to apply when an update type is pin.</td>
   <td>json</td>
   <td><pre>{
-  "automerge": true,
   "unpublishSafe": false,
   "groupName": "Pin Dependencies",
   "group": {
@@ -736,7 +744,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`npm`</td>
   <td>Configuration object for npm package.json renovation</td>
   <td>json</td>
-  <td><pre>{}</pre></td>
+  <td><pre>{"enabled": true}</pre></td>
   <td>`RENOVATE_NPM`</td>
   <td>`--npm`<td>
 </tr>

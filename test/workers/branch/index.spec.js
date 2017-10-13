@@ -37,12 +37,21 @@ describe('workers/branch', () => {
       };
       schedule.isScheduledNow.mockReturnValue(true);
     });
-    it('skips branch if not scheduled', async () => {
+    it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       await branchWorker.processBranch(config);
       expect(checkExisting.prAlreadyExisted.mock.calls).toHaveLength(0);
     });
+    it('skips branch if not scheduled and not updating out of schedule', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      config.updateNotScheduled = false;
+      config.api.branchExists.mockReturnValueOnce(true);
+      await branchWorker.processBranch(config);
+      expect(checkExisting.prAlreadyExisted.mock.calls).toHaveLength(0);
+    });
     it('skips branch if closed PR found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      config.api.branchExists.mockReturnValueOnce(true);
       checkExisting.prAlreadyExisted.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
