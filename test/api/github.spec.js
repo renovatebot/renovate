@@ -1497,6 +1497,15 @@ describe('api/github', () => {
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
     });
+    it('should return null if getFile returns nothing', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {},
+      }));
+      const content = await github.getFileContent('package.json');
+      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(content).toBe(null);
+    });
     it('should return propagate unknown errors', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => {

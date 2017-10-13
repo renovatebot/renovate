@@ -832,6 +832,35 @@ Array [
 ]
 `;
 
+exports[`api/github getFileContent(filePatch, branchName) should return null if getFile returns nothing 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+    undefined,
+  ],
+  Array [
+    "repos/some/repo/branches/master/protection/required_status_checks",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+    undefined,
+  ],
+]
+`;
+
 exports[`api/github getFileContent(filePatch, branchName) should return the encoded file content 1`] = `
 Array [
   Array [
