@@ -95,6 +95,8 @@ describe('workers/pr', () => {
       config = {
         ...defaultConfig,
         api: {
+          addAssignees: jest.fn(),
+          addReviewers: jest.fn(),
           createPr: jest.fn(() => ({ displayNumber: 'New Pull Request' })),
           getBranchStatus: jest.fn(),
         },
@@ -265,6 +267,27 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(config.api.addAssignees.mock.calls.length).toBe(0);
       expect(config.api.addReviewers.mock.calls.length).toBe(0);
+    });
+    it('should add assignees and reviewers to existing PR', async () => {
+      config.depName = 'dummy';
+      config.automerge = true;
+      config.assignees = ['bar'];
+      config.reviewers = ['baz'];
+      config.isGitHub = true;
+      config.privateRepo = true;
+      config.currentVersion = '1.0.0';
+      config.newVersion = '1.1.0';
+      config.repositoryUrl = 'https://github.com/renovateapp/dummy';
+      config.api.getBranchPr = jest.fn(() => existingPr);
+      config.api.getBranchStatus.mockReturnValueOnce('failure');
+      config.api.updatePr = jest.fn();
+      config.semanticPrefix = '';
+      const pr = await prWorker.ensurePr(config);
+      expect(config.api.updatePr.mock.calls).toMatchSnapshot();
+      expect(config.api.updatePr.mock.calls.length).toBe(0);
+      expect(config.api.addAssignees.mock.calls.length).toBe(1);
+      expect(config.api.addReviewers.mock.calls.length).toBe(1);
+      expect(pr).toMatchObject(existingPr);
     });
     it('should return unmodified existing PR', async () => {
       config.depName = 'dummy';
