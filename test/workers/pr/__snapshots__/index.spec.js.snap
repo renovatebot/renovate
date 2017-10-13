@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/pr ensurePr should add assignees and reviewers to existing PR 1`] = `Array []`;
+
 exports[`workers/pr ensurePr should add assignees and reviewers to new PR 1`] = `
 Array [
   Array [
