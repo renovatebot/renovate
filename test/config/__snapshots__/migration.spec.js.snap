@@ -25,6 +25,7 @@ Object {
   ],
   "lockFileConfig": Object {
     "automerge": true,
+    "schedule": "before 5am",
   },
   "major": Object {
     "automerge": false,
