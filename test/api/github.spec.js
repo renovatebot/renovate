@@ -591,66 +591,46 @@ describe('api/github', () => {
     });
   });
   describe('findFilePaths(fileName)', () => {
-    it('should return empty array if none found', async () => {
+    it('warns if truncated result', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
-        headers: { link: '' },
         body: {
-          items: [],
+          truncated: true,
+          tree: [],
         },
       }));
       const files = await github.findFilePaths('package.json');
-      expect(ghGot.mock.calls).toMatchSnapshot();
+      expect(files.length).toBe(0);
+    });
+    it('caches the result', async () => {
+      await initRepo('some/repo', 'token');
+      ghGot.mockImplementationOnce(() => ({
+        body: {
+          truncated: true,
+          tree: [],
+        },
+      }));
+      let files = await github.findFilePaths('package.json');
+      expect(files.length).toBe(0);
+      files = await github.findFilePaths('package.js');
       expect(files.length).toBe(0);
     });
     it('should return the files matching the fileName', async () => {
       await initRepo('some/repo', 'token');
       ghGot.mockImplementationOnce(() => ({
-        headers: { link: '' },
         body: {
-          items: [
-            { name: 'package.json', path: '/package.json' },
+          tree: [
+            { type: 'blob', path: 'package.json' },
             {
-              name: 'package.json.something-else',
+              type: 'blob',
               path: 'some-dir/package.json.some-thing-else',
             },
-            { name: 'package.json', path: 'src/app/package.json' },
-            { name: 'package.json', path: 'src/otherapp/package.json' },
-          ],
-        },
-      }));
-      const files = await github.findFilePaths('package.json', 'some-content');
-      expect(ghGot.mock.calls).toMatchSnapshot();
-      expect(files).toMatchSnapshot();
-    });
-    it('paginates', async () => {
-      await initRepo('some/repo', 'token');
-      ghGot.mockImplementationOnce(() => ({
-        headers: {
-          link:
-            '<https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=2>; rel="next", <https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=2>; rel="last" <https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=1>; rel="first", <https://api.github.com/search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=1>; rel="prev"',
-        },
-        body: {
-          items: [
-            { name: 'package.json', path: '/package.json' },
-            {
-              name: 'package.json.something-else',
-              path: 'some-dir/package.json.some-thing-else',
-            },
-          ],
-        },
-      }));
-      ghGot.mockImplementationOnce(() => ({
-        headers: { link: '' },
-        body: {
-          items: [
-            { name: 'package.json', path: 'src/app/package.json' },
-            { name: 'package.json', path: 'src/otherapp/package.json' },
+            { type: 'blob', path: 'src/app/package.json' },
+            { type: 'blob', path: 'src/otherapp/package.json' },
           ],
         },
       }));
       const files = await github.findFilePaths('package.json');
-      expect(ghGot.mock.calls).toMatchSnapshot();
       expect(files).toMatchSnapshot();
     });
   });
