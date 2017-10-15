@@ -193,6 +193,14 @@ Array [
 ]
 `;
 
+exports[`api/gitlab findFilePaths(fileName) should return the files matching the fileName 1`] = `
+Array [
+  "package.json",
+  "src/app/package.json",
+  "src/otherapp/package.json",
+]
+`;
+
 exports[`api/gitlab getBranch returns a branch 1`] = `"foo"`;
 
 exports[`api/gitlab getBranchLastCommitTime should return a Date 1`] = `2012-09-20T08:50:22.000Z`;

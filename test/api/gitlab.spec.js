@@ -191,10 +191,39 @@ describe('api/gitlab', () => {
     });
   });
   describe('findFilePaths(fileName)', () => {
-    it('should return empty array', async () => {
+    it('warns if truncated result', async () => {
       await initRepo('some/repo', 'token');
+      glGot.mockImplementationOnce(() => ({
+        body: [],
+      }));
       const files = await gitlab.findFilePaths('package.json');
       expect(files.length).toBe(0);
+    });
+    it('caches the result', async () => {
+      await initRepo('some/repo', 'token');
+      glGot.mockImplementationOnce(() => ({
+        body: [],
+      }));
+      let files = await gitlab.findFilePaths('package.json');
+      expect(files.length).toBe(0);
+      files = await gitlab.findFilePaths('package.js');
+      expect(files.length).toBe(0);
+    });
+    it('should return the files matching the fileName', async () => {
+      await initRepo('some/repo', 'token');
+      glGot.mockImplementationOnce(() => ({
+        body: [
+          { type: 'blob', path: 'package.json' },
+          {
+            type: 'blob',
+            path: 'some-dir/package.json.some-thing-else',
+          },
+          { type: 'blob', path: 'src/app/package.json' },
+          { type: 'blob', path: 'src/otherapp/package.json' },
+        ],
+      }));
+      const files = await gitlab.findFilePaths('package.json');
+      expect(files).toMatchSnapshot();
     });
   });
   describe('branchExists(branchName)', () => {
