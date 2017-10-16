@@ -320,31 +320,6 @@ describe('workers/repository/apis', () => {
       expect(res.foundIgnoredPaths).toMatchSnapshot();
       expect(res.warnings).toMatchSnapshot();
     });
-    it('defaults to package.json if found', async () => {
-      const config = {
-        ...defaultConfig,
-        api: {
-          findFilePaths: jest.fn(() => []),
-          getFileJson: jest.fn(() => ({})),
-        },
-        logger,
-      };
-      const res = await apis.detectPackageFiles(config);
-      expect(res.packageFiles).toHaveLength(1);
-      expect(res.packageFiles).toMatchSnapshot();
-    });
-    it('returns empty if package.json not found', async () => {
-      const config = {
-        ...defaultConfig,
-        api: {
-          findFilePaths: jest.fn(() => []),
-          getFileJson: jest.fn(() => null),
-        },
-        logger,
-      };
-      const res = await apis.detectPackageFiles(config);
-      expect(res.packageFiles).toEqual([]);
-    });
   });
   describe('resolvePackageFiles', () => {
     let config;
