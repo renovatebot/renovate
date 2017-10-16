@@ -47,6 +47,13 @@ Object {
 }
 `;
 
+exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if lock file maintenance exists 1`] = `
+Object {
+  "lockFileError": false,
+  "updatedLockFiles": Array [],
+}
+`;
+
 exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if none updated 1`] = `
 Object {
   "lockFileError": false,

@@ -276,7 +276,10 @@ describe('workers/branch/lock-files', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: { getFileContent: jest.fn(() => 'some lock file contents') },
+        api: {
+          branchExists: jest.fn(),
+          getFileContent: jest.fn(() => 'some lock file contents'),
+        },
         logger,
         tmpDir: { name: 'some-tmp-dir' },
       };
@@ -285,6 +288,14 @@ describe('workers/branch/lock-files', () => {
       yarn.generateLockFile = jest.fn();
       yarn.generateLockFile.mockReturnValue('some lock file contents');
       lockFiles.determineLockFileDirs = jest.fn();
+    });
+    it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
+      config.type = 'lockFileMaintenance';
+      config.api.branchExists.mockReturnValueOnce(true);
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res.lockFileError).toBe(false);
+      expect(res.updatedLockFiles).toHaveLength(0);
     });
     it('returns no error and empty lockfiles if none updated', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
