@@ -267,6 +267,8 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('commits files and returns false if no pr', async () => {
+      config.api.findFilePaths.mockReturnValueOnce(['package.json']);
+      config.api.findFilePaths.mockReturnValue([]);
       const res = await onboarding.getOnboardingStatus(config);
       expect(res.repoIsOnboarded).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
@@ -274,6 +276,8 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('pins private repos', async () => {
+      config.api.findFilePaths.mockReturnValueOnce(['package.json']);
+      config.api.findFilePaths.mockReturnValue([]);
       onboarding.isRepoPrivate.mockReturnValueOnce(true);
       const res = await onboarding.getOnboardingStatus(config);
       expect(res.repoIsOnboarded).toEqual(false);

@@ -37,12 +37,6 @@ Array [
 ]
 `;
 
-exports[`workers/repository/apis detectPackageFiles(config) defaults to package.json if found 1`] = `
-Array [
-  "package.json",
-]
-`;
-
 exports[`workers/repository/apis detectPackageFiles(config) finds Dockerfiles 1`] = `
 Array [
   "package.json",
