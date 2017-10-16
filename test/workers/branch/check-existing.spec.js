@@ -10,7 +10,7 @@ describe('workers/branch/check-existing', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: { checkForClosedPr: jest.fn() },
+        api: { checkForClosedPr: jest.fn(), findPr: jest.fn() },
         logger,
         branchName: 'some-branch',
         prTitle: 'some-title',
@@ -36,6 +36,13 @@ describe('workers/branch/check-existing', () => {
       config.api.checkForClosedPr.mockReturnValueOnce(true);
       expect(await prAlreadyExisted(config)).toBe(true);
       expect(config.api.checkForClosedPr.mock.calls.length).toBe(2);
+    });
+    it('returns false if mistaken', async () => {
+      config.api.checkForClosedPr.mockReturnValueOnce(true);
+      config.api.findPr.mockReturnValueOnce({
+        closed_at: '2017-10-15T21:28:07.000Z',
+      });
+      expect(await prAlreadyExisted(config)).toBe(false);
     });
   });
 });
