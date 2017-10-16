@@ -452,7 +452,106 @@ Array [
 ]
 `;
 
+exports[`api/github findFilePaths(fileName) paginates 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+    undefined,
+  ],
+  Array [
+    "repos/some/repo/branches/master/protection/required_status_checks",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "search/code?q=repo:some/repo+filename:package.json&per_page=100",
+    undefined,
+  ],
+  Array [
+    "search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=2",
+    undefined,
+  ],
+]
+`;
+
+exports[`api/github findFilePaths(fileName) paginates 2`] = `
+Array [
+  "package.json",
+  "src/app/package.json",
+  "src/otherapp/package.json",
+]
+`;
+
+exports[`api/github findFilePaths(fileName) should return empty array if none found 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+    undefined,
+  ],
+  Array [
+    "repos/some/repo/branches/master/protection/required_status_checks",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "search/code?q=repo:some/repo+filename:package.json&per_page=100",
+    undefined,
+  ],
+]
+`;
+
 exports[`api/github findFilePaths(fileName) should return the files matching the fileName 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+    undefined,
+  ],
+  Array [
+    "repos/some/repo/branches/master/protection/required_status_checks",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "search/code?q=some-content+repo:some/repo+filename:package.json&per_page=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`api/github findFilePaths(fileName) should return the files matching the fileName 2`] = `
 Array [
   "package.json",
   "src/app/package.json",
