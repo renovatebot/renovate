@@ -1063,6 +1063,7 @@ Array [
       "headers": Object {
         "accept": "application/vnd.github.machine-man-preview+json",
         "authorization": "Bearer sometoken",
+        "user-agent": "https://github.com/singapore/renovate",
       },
     },
   ],
