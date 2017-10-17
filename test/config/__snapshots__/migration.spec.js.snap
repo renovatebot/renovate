@@ -46,6 +46,7 @@ Object {
   },
   "packageRules": Array [
     Object {
+      "excludePackageNames": "foo",
       "groupName": "angular packages",
       "packagePatterns": "^(@angular|typescript)",
     },

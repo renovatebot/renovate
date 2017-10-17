@@ -23,6 +23,7 @@ describe('config/migration', () => {
           {
             packagePatterns: '^(@angular|typescript)',
             groupName: ['angular packages'],
+            excludedPackageNames: 'foo',
           },
           {
             packagePatterns: ['^foo'],
