@@ -61,7 +61,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -73,7 +72,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -90,7 +88,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -102,7 +99,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -119,7 +115,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -131,7 +126,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -148,7 +142,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -160,7 +153,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -177,7 +169,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -189,7 +180,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -206,7 +196,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -218,7 +207,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -235,7 +223,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -247,15 +234,12 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/commits/1111",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/package.json",
-    undefined,
   ],
 ]
 `;
@@ -325,7 +309,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -337,15 +320,12 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/commits/1111",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/package.json",
-    undefined,
   ],
 ]
 `;
@@ -472,7 +452,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -484,7 +463,6 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?head=theowner:master&state=all",
-    undefined,
   ],
 ]
 `;
@@ -510,7 +488,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -522,7 +499,6 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?head=theowner:master&state=all",
-    undefined,
   ],
 ]
 `;
@@ -539,7 +515,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -551,7 +526,6 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?head=theowner:master&state=all",
-    undefined,
   ],
 ]
 `;
@@ -604,7 +578,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -616,7 +589,6 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
-    undefined,
   ],
 ]
 `;
@@ -633,7 +605,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -645,11 +616,9 @@ Array [
   ],
   Array [
     "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
-    undefined,
   ],
   Array [
     "repos/some/repo/pulls/91",
-    undefined,
   ],
 ]
 `;
@@ -687,7 +656,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -699,7 +667,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -716,7 +683,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -728,7 +694,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -745,7 +710,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -757,7 +721,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -774,7 +737,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -786,7 +748,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -803,7 +764,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -815,7 +775,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -832,7 +791,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -844,7 +802,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -879,82 +836,9 @@ Object {
 }
 `;
 
-exports[`api/github getInstallationToken should retry posts 1`] = `Array []`;
-
-exports[`api/github getInstallationToken should retry posts 2`] = `"aUserToken"`;
-
 exports[`api/github getInstallationToken should return an installation token 1`] = `Array []`;
 
 exports[`api/github getInstallationToken should return an installation token 2`] = `"aUserToken"`;
-
-exports[`api/github getInstallations should retry 502s once 1`] = `
-Array [
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-]
-`;
-
-exports[`api/github getInstallations should retry 502s once 2`] = `
-Array [
-  "a",
-  "b",
-]
-`;
-
-exports[`api/github getInstallations should retry 502s until success 1`] = `
-Array [
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-]
-`;
-
-exports[`api/github getInstallations should retry 502s until success 2`] = `
-Array [
-  "a",
-  "b",
-]
-`;
 
 exports[`api/github getInstallations should return an array of installations 1`] = `
 Array [
@@ -964,7 +848,6 @@ Array [
       "headers": Object {
         "accept": "application/vnd.github.machine-man-preview+json",
         "authorization": "Bearer sometoken",
-        "user-agent": "https://github.com/singapore/renovate",
       },
     },
   ],
@@ -1052,7 +935,6 @@ exports[`api/github getRepos should return an array of repos 1`] = `
 Array [
   Array [
     "user/repos",
-    undefined,
   ],
 ]
 `;
@@ -1068,7 +950,6 @@ exports[`api/github getRepos should support a custom endpoint 1`] = `
 Array [
   Array [
     "user/repos",
-    undefined,
   ],
 ]
 `;
@@ -1092,7 +973,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1104,7 +984,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/some-path",
-    undefined,
   ],
 ]
 `;
@@ -1151,7 +1030,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1184,7 +1062,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1217,7 +1094,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1282,7 +1158,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1294,7 +1169,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
 ]
 `;
@@ -1321,7 +1195,6 @@ exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-m
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -1338,7 +1211,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1350,11 +1222,9 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
 ]
 `;
@@ -1380,7 +1250,6 @@ exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-p
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -1399,7 +1268,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1446,7 +1314,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1458,7 +1325,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -1496,7 +1362,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1529,7 +1394,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1541,7 +1405,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/some-branch",
-    undefined,
   ],
 ]
 `;
