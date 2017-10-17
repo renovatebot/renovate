@@ -959,32 +959,54 @@ describe('api/github', () => {
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
-    it('should return a PR object', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: [{ title: 'PR Title', state: 'open', number: 42 }],
-      }));
-      const pr = await github.findPr('master', 'PR Title');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(pr).toMatchSnapshot();
+    it('returns true if no title and all state', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            head: { ref: 'branch-a' },
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ],
+      });
+      const res = await github.findPr('branch-a', null);
+      expect(res).toBeDefined();
     });
-    it("should return null if no PR's are found", async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: [],
-      }));
-      const pr = await github.findPr('master', 'PR Title');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(pr).toBe(null);
+    it('returns isClosed if closed', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            head: { ref: 'branch-a' },
+            title: 'branch a pr',
+            state: 'closed',
+            closed_at: '2017-01-01',
+          },
+        ],
+      });
+      const res = await github.findPr('branch-a', null);
+      expect(res.isClosed).toBe(true);
     });
-    it('should set the isClosed attribute of the PR to true if the PR is closed', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: [{ title: 'PR Title', state: 'closed', number: 42 }],
-      }));
-      const pr = await github.findPr('master');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(pr).toMatchSnapshot();
+    it('caches pr list', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            head: { ref: 'branch-a' },
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ],
+      });
+      let res = await github.findPr('branch-a', null);
+      expect(res).toBeDefined();
+      res = await github.findPr('branch-a', 'branch a pr');
+      expect(res).toBeDefined();
+      res = await github.findPr('branch-a', 'branch a pr', 'open');
+      expect(res).toBeDefined();
+      res = await github.findPr('branch-b');
+      expect(res).not.toBeDefined();
     });
   });
   describe('createPr(branchName, title, body)', () => {
