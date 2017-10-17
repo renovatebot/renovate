@@ -3,7 +3,7 @@ const logger = require('../_fixtures/logger');
 describe('api/github', () => {
   let github;
   let ghGot;
-  let ghGotRetry;
+  let get;
   beforeEach(() => {
     // clean up env
     delete process.env.GITHUB_TOKEN;
@@ -12,7 +12,7 @@ describe('api/github', () => {
     // reset module
     jest.resetModules();
     jest.mock('gh-got');
-    ghGotRetry = require('../../lib/api/gh-got-retry');
+    get = require('../../lib/api/gh-got-retry');
     github = require('../../lib/api/github');
     ghGot = require('gh-got');
   });
@@ -22,7 +22,7 @@ describe('api/github', () => {
       ghGot.mockImplementationOnce(() => ({
         body: ['a', 'b'],
       }));
-      ghGotRetry.setAppMode(true);
+      get.setAppMode(true);
       const installations = await github.getInstallations('sometoken');
       expect(ghGot.mock.calls).toMatchSnapshot();
       expect(installations).toMatchSnapshot();
