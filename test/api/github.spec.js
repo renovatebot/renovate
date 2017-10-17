@@ -2,7 +2,7 @@ const logger = require('../_fixtures/logger');
 
 describe('api/github', () => {
   let github;
-  let ghGotRetry;
+  let get;
   beforeEach(() => {
     // clean up env
     delete process.env.GITHUB_TOKEN;
@@ -11,21 +11,21 @@ describe('api/github', () => {
     // reset module
     jest.resetModules();
     jest.mock('../../lib/api/gh-got-retry');
-    ghGotRetry = require('../../lib/api/gh-got-retry');
+    get = require('../../lib/api/gh-got-retry');
     github = require('../../lib/api/github');
   });
 
   describe('getInstallations', () => {
     it('should return an array of installations', async () => {
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: ['a', 'b'],
       }));
       const installations = await github.getInstallations('sometoken');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(installations).toMatchSnapshot();
     });
     it('should return a 404', async () => {
-      ghGotRetry.mockImplementationOnce(() =>
+      get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
         })
@@ -42,7 +42,7 @@ describe('api/github', () => {
 
   describe('getInstallationToken', () => {
     it('should return an installation token', async () => {
-      ghGotRetry.post.mockImplementationOnce(() => ({
+      get.post.mockImplementationOnce(() => ({
         body: {
           token: 'aUserToken',
         },
@@ -51,11 +51,11 @@ describe('api/github', () => {
         'sometoken',
         123456
       );
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(installationToken).toMatchSnapshot();
     });
     it('should return an error if given one', async () => {
-      ghGotRetry.post.mockImplementationOnce(() => {
+      get.post.mockImplementationOnce(() => {
         throw new Error('error');
       });
       let err;
@@ -70,7 +70,7 @@ describe('api/github', () => {
 
   describe('getInstallationRepositories', () => {
     it('should return an array of repositories', async () => {
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           total_count: 2,
           repositories: ['a', 'b'],
@@ -79,11 +79,11 @@ describe('api/github', () => {
       const repositories = await github.getInstallationRepositories(
         'sometoken'
       );
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(repositories).toMatchSnapshot();
     });
     it('should return an error if given one', async () => {
-      ghGotRetry.mockImplementationOnce(() => {
+      get.mockImplementationOnce(() => {
         throw new Error('error');
       });
       let err;
@@ -98,7 +98,7 @@ describe('api/github', () => {
 
   async function getRepos(...args) {
     // repo info
-    ghGotRetry.mockImplementationOnce(() => ({
+    get.mockImplementationOnce(() => ({
       body: [
         {
           full_name: 'a/b',
@@ -123,19 +123,19 @@ describe('api/github', () => {
     });
     it('should return an array of repos', async () => {
       const repos = await getRepos('sometoken');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
     it('should support a custom endpoint', async () => {
       const repos = await getRepos('sometoken', 'someendpoint');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
   });
 
   async function initRepo(...args) {
     // repo info
-    ghGotRetry.mockImplementationOnce(() => ({
+    get.mockImplementationOnce(() => ({
       body: {
         owner: {
           login: 'theowner',
@@ -147,7 +147,7 @@ describe('api/github', () => {
       },
     }));
     // getBranchCommit
-    ghGotRetry.mockImplementationOnce(() => ({
+    get.mockImplementationOnce(() => ({
       body: {
         object: {
           sha: '1234',
@@ -155,7 +155,7 @@ describe('api/github', () => {
       },
     }));
     // getBranchProtection
-    ghGotRetry.mockImplementationOnce(() => ({
+    get.mockImplementationOnce(() => ({
       body: {
         strict: false,
       },
@@ -179,7 +179,7 @@ describe('api/github', () => {
           process.env.GITHUB_TOKEN = envToken;
         }
         const config = await initRepo('some/repo', ...args);
-        expect(ghGotRetry.mock.calls).toMatchSnapshot();
+        expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
         expect(process.env.GITHUB_TOKEN).toBe(token);
         expect(process.env.GITHUB_ENDPOINT).toBe(endpoint);
@@ -202,7 +202,7 @@ describe('api/github', () => {
     it('should rebase', async () => {
       async function squashInitRepo(...args) {
         // repo info
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             owner: {
               login: 'theowner',
@@ -214,7 +214,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1234',
@@ -222,7 +222,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             strict: false,
           },
@@ -235,7 +235,7 @@ describe('api/github', () => {
     it('should squash', async () => {
       async function mergeInitRepo(...args) {
         // repo info
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             owner: {
               login: 'theowner',
@@ -247,7 +247,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1234',
@@ -255,7 +255,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             strict: false,
           },
@@ -268,7 +268,7 @@ describe('api/github', () => {
     it('should merge', async () => {
       async function mergeInitRepo(...args) {
         // repo info
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             owner: {
               login: 'theowner',
@@ -280,7 +280,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1234',
@@ -288,7 +288,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             strict: false,
           },
@@ -301,7 +301,7 @@ describe('api/github', () => {
     it('should not guess at merge', async () => {
       async function mergeInitRepo(...args) {
         // repo info
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             owner: {
               login: 'theowner',
@@ -310,7 +310,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1234',
@@ -318,7 +318,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             strict: false,
           },
@@ -331,7 +331,7 @@ describe('api/github', () => {
     it('should detect repoForceRebase', async () => {
       async function mergeInitRepo(...args) {
         // repo info
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             owner: {
               login: 'theowner',
@@ -340,7 +340,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1234',
@@ -348,7 +348,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             strict: true,
           },
@@ -361,7 +361,7 @@ describe('api/github', () => {
     it('should ignore repoForceRebase 404', async () => {
       async function mergeInitRepo(...args) {
         // repo info
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             owner: {
               login: 'theowner',
@@ -370,7 +370,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1234',
@@ -378,7 +378,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGotRetry.mockImplementationOnce(() =>
+        get.mockImplementationOnce(() =>
           Promise.reject({
             statusCode: 404,
           })
@@ -391,7 +391,7 @@ describe('api/github', () => {
     it('should ignore repoForceRebase 403', async () => {
       async function mergeInitRepo(...args) {
         // repo info
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             owner: {
               login: 'theowner',
@@ -400,7 +400,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1234',
@@ -408,7 +408,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGotRetry.mockImplementationOnce(() =>
+        get.mockImplementationOnce(() =>
           Promise.reject({
             statusCode: 403,
           })
@@ -421,7 +421,7 @@ describe('api/github', () => {
     it('should throw repoForceRebase non-404', async () => {
       async function mergeInitRepo(...args) {
         // repo info
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             owner: {
               login: 'theowner',
@@ -430,7 +430,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1234',
@@ -438,7 +438,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchProtection
-        ghGotRetry.mockImplementationOnce(() =>
+        get.mockImplementationOnce(() =>
           Promise.reject({
             statusCode: 600,
           })
@@ -458,7 +458,7 @@ describe('api/github', () => {
     it('sets the base branch', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1238',
@@ -466,13 +466,13 @@ describe('api/github', () => {
         },
       }));
       await github.setBaseBranch('some-branch');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
     });
   });
   describe('findFilePaths(fileName)', () => {
     it('warns if truncated result', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           truncated: true,
           tree: [],
@@ -483,7 +483,7 @@ describe('api/github', () => {
     });
     it('caches the result', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           truncated: true,
           tree: [],
@@ -496,7 +496,7 @@ describe('api/github', () => {
     });
     it('should return the files matching the fileName', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           tree: [
             { type: 'blob', path: 'package.json' },
@@ -516,18 +516,18 @@ describe('api/github', () => {
   describe('branchExists(branchName)', () => {
     it('should return true if the branch exists (one result)', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           ref: 'refs/heads/thebranchname',
         },
       }));
       const exists = await github.branchExists('thebranchname');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(exists).toBe(true);
     });
     it('should return true if the branch exists (multiple results)', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           {
             ref: 'refs/heads/notthebranchname',
@@ -538,23 +538,23 @@ describe('api/github', () => {
         ],
       }));
       const exists = await github.branchExists('thebranchname');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(exists).toBe(true);
     });
     it('should return false if the branch does not exist (one result)', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           ref: 'refs/heads/notthebranchname',
         },
       }));
       const exists = await github.branchExists('thebranchname');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(exists).toBe(false);
     });
     it('should return false if the branch does not exist (multiple results)', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           {
             ref: 'refs/heads/notthebranchname',
@@ -565,23 +565,23 @@ describe('api/github', () => {
         ],
       }));
       const exists = await github.branchExists('thebranchname');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(exists).toBe(false);
     });
     it('should return false if a 404 is returned', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() =>
+      get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
         })
       );
       const exists = await github.branchExists('thebranchname');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(exists).toBe(false);
     });
     it('should propagate unknown errors', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() =>
+      get.mockImplementationOnce(() =>
         Promise.reject(new Error('Something went wrong'))
       );
       let err;
@@ -590,14 +590,14 @@ describe('api/github', () => {
       } catch (e) {
         err = e;
       }
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(err.message).toBe('Something went wrong');
     });
   });
   describe('getAllRenovateBranches()', () => {
     it('should return all renovate branches', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           {
             ref: 'refs/heads/renovate/a',
@@ -618,7 +618,7 @@ describe('api/github', () => {
     it('should return false if same SHA as master', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
@@ -626,7 +626,7 @@ describe('api/github', () => {
         },
       }));
       // getCommitDetails - same as master
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           parents: [
             {
@@ -640,7 +640,7 @@ describe('api/github', () => {
     it('should return true if SHA different from master', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
@@ -648,7 +648,7 @@ describe('api/github', () => {
         },
       }));
       // getCommitDetails - different
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           parents: [
             {
@@ -663,19 +663,19 @@ describe('api/github', () => {
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [],
       }));
       const pr = await github.getBranchPr('somebranch');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toBe(null);
     });
     it('should return the PR object', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [{ number: 91 }],
       }));
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           number: 91,
           additions: 1,
@@ -687,7 +687,7 @@ describe('api/github', () => {
         },
       }));
       const pr = await github.getBranchPr('somebranch');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
     });
   });
@@ -704,7 +704,7 @@ describe('api/github', () => {
     });
     it('should pass through success', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           state: 'success',
         },
@@ -714,7 +714,7 @@ describe('api/github', () => {
     });
     it('should pass through failed', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           state: 'failed',
         },
@@ -727,14 +727,14 @@ describe('api/github', () => {
     it('returns state if found', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
           },
         },
       }));
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           {
             context: 'context-1',
@@ -756,14 +756,14 @@ describe('api/github', () => {
     it('returns null', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
           },
         },
       }));
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           {
             context: 'context-1',
@@ -787,7 +787,7 @@ describe('api/github', () => {
     it('sets branch status', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
@@ -801,23 +801,23 @@ describe('api/github', () => {
         'some-state',
         'some-url'
       );
-      expect(ghGotRetry.post.mock.calls).toHaveLength(1);
+      expect(get.post.mock.calls).toHaveLength(1);
     });
   });
   describe('mergeBranch(branchName, mergeType)', () => {
     it('should perform a branch-push merge', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
           },
         },
       }));
-      ghGotRetry.patch.mockImplementationOnce();
+      get.patch.mockImplementationOnce();
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
@@ -825,25 +825,25 @@ describe('api/github', () => {
         },
       }));
       // deleteBranch
-      ghGotRetry.delete.mockImplementationOnce();
+      get.delete.mockImplementationOnce();
       await github.mergeBranch('thebranchname', 'branch-push');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.patch.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.put.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.delete.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
     });
     it('should throw if branch-push merge throws', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
           },
         },
       }));
-      ghGotRetry.patch.mockImplementationOnce(() => {
+      get.patch.mockImplementationOnce(() => {
         throw new Error('branch-push failed');
       });
       let e;
@@ -853,16 +853,16 @@ describe('api/github', () => {
         e = err;
       }
       expect(e).toMatchSnapshot();
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.patch.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.put.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.delete.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
     });
     it('should perform a branch-merge-commit merge', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
@@ -870,15 +870,15 @@ describe('api/github', () => {
         },
       }));
       await github.mergeBranch('thebranchname', 'branch-merge-commit');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.patch.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.put.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.delete.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
     });
     it('should throw if branch-merge-commit throws', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.post.mockImplementationOnce(() => {
+      get.post.mockImplementationOnce(() => {
         throw new Error('branch-push failed');
       });
       let e;
@@ -888,11 +888,11 @@ describe('api/github', () => {
         e = err;
       }
       expect(e).toMatchSnapshot();
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.patch.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.put.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.delete.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
     });
     it('should throw if unknown merge type', async () => {
       await initRepo('some/repo', 'token');
@@ -903,17 +903,17 @@ describe('api/github', () => {
         e = err;
       }
       expect(e).toMatchSnapshot();
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.patch.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.put.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.delete.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
     });
   });
   describe('getBranchLastCommitTime', () => {
     it('should return a Date', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [
           {
             commit: {
@@ -929,7 +929,7 @@ describe('api/github', () => {
     });
     it('handles error', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [],
       });
       const res = await github.getBranchLastCommitTime('some-branch');
@@ -940,50 +940,50 @@ describe('api/github', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo('some/repo', 'token');
       await github.addAssignees(42, ['someuser', 'someotheruser']);
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
     });
   });
   describe('addReviewers(issueNo, reviewers)', () => {
     it('should add the given reviewers to the PR', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.post.mockReturnValueOnce({});
+      get.post.mockReturnValueOnce({});
       await github.addReviewers(42, ['someuser', 'someotheruser']);
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
     });
   });
   describe('addLabels(issueNo, labels)', () => {
     it('should add the given labels to the issue', async () => {
       await initRepo('some/repo', 'token');
       await github.addLabels(42, ['foo', 'bar']);
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
     it('should return a PR object', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [{ title: 'PR Title', state: 'open', number: 42 }],
       }));
       const pr = await github.findPr('master', 'PR Title');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
     });
     it("should return null if no PR's are found", async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [],
       }));
       const pr = await github.findPr('master', 'PR Title');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toBe(null);
     });
     it('should set the isClosed attribute of the PR to true if the PR is closed', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [{ title: 'PR Title', state: 'closed', number: 42 }],
       }));
       const pr = await github.findPr('master');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
     });
   });
@@ -995,7 +995,7 @@ describe('api/github', () => {
     ].forEach(([branch, title, expected], i) => {
       it(`should return true if a closed PR is found - ${i}`, async () => {
         await initRepo('some/repo', 'token');
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: [
             { title: 'foo', head: { label: 'theowner:some-branch' } },
             { title: 'bar', head: { label: 'theowner:some-other-branch' } },
@@ -1008,7 +1008,7 @@ describe('api/github', () => {
     });
     it(`should return false if error thrown`, async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => {
+      get.mockImplementationOnce(() => {
         throw new Error('fail');
       });
       const res = await github.checkForClosedPr('some-branch', 'some-title');
@@ -1018,7 +1018,7 @@ describe('api/github', () => {
   describe('createPr(branchName, title, body)', () => {
     it('should create and return a PR object', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.post.mockImplementationOnce(() => ({
+      get.post.mockImplementationOnce(() => ({
         body: {
           number: 123,
         },
@@ -1029,11 +1029,11 @@ describe('api/github', () => {
         'Hello world'
       );
       expect(pr).toMatchSnapshot();
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
     });
     it('should use defaultBranch', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.post.mockImplementationOnce(() => ({
+      get.post.mockImplementationOnce(() => ({
         body: {
           number: 123,
         },
@@ -1045,7 +1045,7 @@ describe('api/github', () => {
         true
       );
       expect(pr).toMatchSnapshot();
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
     });
   });
   describe('getPr(prNo)', () => {
@@ -1055,7 +1055,7 @@ describe('api/github', () => {
     });
     it('should return null if no PR is returned from GitHub', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: null,
       }));
       const pr = await github.getPr(1234);
@@ -1074,7 +1074,7 @@ describe('api/github', () => {
     ].forEach((body, i) => {
       it(`should return a PR object - ${i}`, async () => {
         await initRepo('some/repo', 'token');
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body,
         }));
         const pr = await github.getPr(1234);
@@ -1083,7 +1083,7 @@ describe('api/github', () => {
     });
     it('should return a rebaseable PR despite multiple commits', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           number: 1,
           state: 'open',
@@ -1092,7 +1092,7 @@ describe('api/github', () => {
           commits: 2,
         },
       }));
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           {
             author: {
@@ -1106,7 +1106,7 @@ describe('api/github', () => {
     });
     it('should return an unrebaseable PR if multiple authors', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           number: 1,
           state: 'open',
@@ -1115,7 +1115,7 @@ describe('api/github', () => {
           commits: 2,
         },
       }));
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           {
             author: {
@@ -1139,7 +1139,7 @@ describe('api/github', () => {
   describe('getAllPrs()', () => {
     it('maps results to simple array', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           {
             number: 5,
@@ -1172,14 +1172,14 @@ describe('api/github', () => {
     it('should update the PR', async () => {
       await initRepo('some/repo', 'token');
       await github.updatePr(1234, 'The New Title', 'Hello world again');
-      expect(ghGotRetry.patch.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
     });
   });
   describe('mergePr(prNo)', () => {
     it('should merge the PR', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1235',
@@ -1193,9 +1193,9 @@ describe('api/github', () => {
         },
       };
       expect(await github.mergePr(pr)).toBe(true);
-      expect(ghGotRetry.put.mock.calls).toHaveLength(1);
-      expect(ghGotRetry.delete.mock.calls).toHaveLength(1);
-      expect(ghGotRetry.mock.calls).toHaveLength(4);
+      expect(get.put.mock.calls).toHaveLength(1);
+      expect(get.delete.mock.calls).toHaveLength(1);
+      expect(get.mock.calls).toHaveLength(4);
     });
   });
   describe('mergePr(prNo)', () => {
@@ -1207,20 +1207,20 @@ describe('api/github', () => {
           ref: 'someref',
         },
       };
-      ghGotRetry.put.mockImplementationOnce(() => {
+      get.put.mockImplementationOnce(() => {
         throw new Error('merge error');
       });
       expect(await github.mergePr(pr)).toBe(false);
-      expect(ghGotRetry.put.mock.calls).toHaveLength(1);
-      expect(ghGotRetry.delete.mock.calls).toHaveLength(0);
-      expect(ghGotRetry.mock.calls).toHaveLength(3);
+      expect(get.put.mock.calls).toHaveLength(1);
+      expect(get.delete.mock.calls).toHaveLength(0);
+      expect(get.mock.calls).toHaveLength(3);
     });
   });
   describe('mergePr(prNo) - autodetection', () => {
     beforeEach(async () => {
       async function guessInitRepo(...args) {
         // repo info
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             owner: {
               login: 'theowner',
@@ -1229,7 +1229,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1234',
@@ -1237,7 +1237,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1235',
@@ -1245,7 +1245,7 @@ describe('api/github', () => {
           },
         }));
         // getBranchCommit
-        ghGotRetry.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: {
             object: {
               sha: '1235',
@@ -1255,7 +1255,7 @@ describe('api/github', () => {
         return github.initRepo(...args);
       }
       await guessInitRepo('some/repo', 'token');
-      ghGotRetry.put = jest.fn();
+      get.put = jest.fn();
     });
     it('should try rebase first', async () => {
       const pr = {
@@ -1265,8 +1265,8 @@ describe('api/github', () => {
         },
       };
       expect(await github.mergePr(pr)).toBe(true);
-      expect(ghGotRetry.put.mock.calls).toHaveLength(1);
-      expect(ghGotRetry.delete.mock.calls).toHaveLength(1);
+      expect(get.put.mock.calls).toHaveLength(1);
+      expect(get.delete.mock.calls).toHaveLength(1);
     });
     it('should try squash after rebase', async () => {
       const pr = {
@@ -1275,12 +1275,12 @@ describe('api/github', () => {
           ref: 'someref',
         },
       };
-      ghGotRetry.put.mockImplementationOnce(() => {
+      get.put.mockImplementationOnce(() => {
         throw new Error('no rebasing allowed');
       });
       await github.mergePr(pr);
-      expect(ghGotRetry.put.mock.calls).toHaveLength(2);
-      expect(ghGotRetry.delete.mock.calls).toHaveLength(1);
+      expect(get.put.mock.calls).toHaveLength(2);
+      expect(get.delete.mock.calls).toHaveLength(1);
     });
     it('should try merge after squash', async () => {
       const pr = {
@@ -1289,15 +1289,15 @@ describe('api/github', () => {
           ref: 'someref',
         },
       };
-      ghGotRetry.put.mockImplementationOnce(() => {
+      get.put.mockImplementationOnce(() => {
         throw new Error('no rebasing allowed');
       });
-      ghGotRetry.put.mockImplementationOnce(() => {
+      get.put.mockImplementationOnce(() => {
         throw new Error('no squashing allowed');
       });
       expect(await github.mergePr(pr)).toBe(true);
-      expect(ghGotRetry.put.mock.calls).toHaveLength(3);
-      expect(ghGotRetry.delete.mock.calls).toHaveLength(1);
+      expect(get.put.mock.calls).toHaveLength(3);
+      expect(get.delete.mock.calls).toHaveLength(1);
     });
     it('should give up', async () => {
       const pr = {
@@ -1306,68 +1306,68 @@ describe('api/github', () => {
           ref: 'someref',
         },
       };
-      ghGotRetry.put.mockImplementationOnce(() => {
+      get.put.mockImplementationOnce(() => {
         throw new Error('no rebasing allowed');
       });
-      ghGotRetry.put.mockImplementationOnce(() => {
+      get.put.mockImplementationOnce(() => {
         throw new Error('no squashing allowed');
       });
-      ghGotRetry.put.mockImplementationOnce(() => {
+      get.put.mockImplementationOnce(() => {
         throw new Error('no merging allowed');
       });
       expect(await github.mergePr(pr)).toBe(false);
-      expect(ghGotRetry.put.mock.calls).toHaveLength(3);
-      expect(ghGotRetry.delete.mock.calls).toHaveLength(0);
+      expect(get.put.mock.calls).toHaveLength(3);
+      expect(get.delete.mock.calls).toHaveLength(0);
     });
   });
   describe('getFile(filePatch, branchName)', () => {
     it('should return the encoded file content', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           content: 'hello',
         },
       }));
       const content = await github.getFile('package.json');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe('hello');
     });
   });
   describe('getFileContent(filePatch, branchName)', () => {
     it('should return the encoded file content', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('hello world').toString('base64'),
         },
       }));
       const content = await github.getFileContent('package.json');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe('hello world');
     });
     it('should return null if GitHub returns a 404', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() =>
+      get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
         })
       );
       const content = await github.getFileContent('package.json');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
     });
     it('should return null if getFile returns nothing', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {},
       }));
       const content = await github.getFileContent('package.json');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
     });
     it('should return propagate unknown errors', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => {
+      get.mockImplementationOnce(() => {
         throw new Error('Something went wrong');
       });
       let err;
@@ -1382,37 +1382,37 @@ describe('api/github', () => {
   describe('getFileJson(filePatch, branchName)', () => {
     it('should return the file contents parsed as JSON', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('{"hello": "world"}').toString('base64'),
         },
       }));
       const content = await github.getFileJson('package.json');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
   });
   describe('getFileJson(filePatch, branchName)', () => {
     it('should return null if invalid JSON', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('{hello: "world"}').toString('base64'),
         },
       }));
       const content = await github.getFileJson('package.json');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBeNull();
     });
   });
   describe('getSubDirectories(path)', () => {
     it('should return subdirectories', async () => {
       await initRepo('some/repo', 'token');
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [{ type: 'dir', name: 'a' }, { type: 'file', name: 'b' }],
       }));
       const dirList = await github.getSubDirectories('some-path');
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(dirList).toHaveLength(1);
       expect(dirList).toMatchSnapshot();
     });
@@ -1422,7 +1422,7 @@ describe('api/github', () => {
       await initRepo('some/repo', 'token');
 
       // getBranchCommit
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1111',
@@ -1431,7 +1431,7 @@ describe('api/github', () => {
       }));
 
       // getCommitTree
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           tree: {
             sha: '2222',
@@ -1440,21 +1440,21 @@ describe('api/github', () => {
       }));
 
       // createBlob
-      ghGotRetry.post.mockImplementationOnce(() => ({
+      get.post.mockImplementationOnce(() => ({
         body: {
           sha: '3333',
         },
       }));
 
       // createTree
-      ghGotRetry.post.mockImplementationOnce(() => ({
+      get.post.mockImplementationOnce(() => ({
         body: {
           sha: '4444',
         },
       }));
 
       // createCommit
-      ghGotRetry.post.mockImplementationOnce(() => ({
+      get.post.mockImplementationOnce(() => ({
         body: {
           sha: '5555',
         },
@@ -1462,7 +1462,7 @@ describe('api/github', () => {
     });
     it('should add a new commit to the branch', async () => {
       // branchExists
-      ghGotRetry.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           ref: 'refs/heads/package.json',
         },
@@ -1478,13 +1478,13 @@ describe('api/github', () => {
         files,
         'my commit message'
       );
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.patch.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
     });
     it('should add a commit to a new branch if the branch does not already exist', async () => {
       // branchExists
-      ghGotRetry.mockImplementationOnce(() =>
+      get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
         })
@@ -1500,14 +1500,14 @@ describe('api/github', () => {
         files,
         'my other commit message'
       );
-      expect(ghGotRetry.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.post.mock.calls).toMatchSnapshot();
-      expect(ghGotRetry.patch.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
     });
   });
   describe('getCommitMessages()', () => {
     it('returns commits messages', async () => {
-      ghGotRetry.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [
           {
             commit: { message: 'foo' },
@@ -1521,7 +1521,7 @@ describe('api/github', () => {
       expect(res).toMatchSnapshot();
     });
     it('swallows errors', async () => {
-      ghGotRetry.mockImplementationOnce(() => {
+      get.mockImplementationOnce(() => {
         throw new Error('some-error');
       });
       const res = await github.getCommitMessages();
