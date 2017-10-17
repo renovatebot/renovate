@@ -10,8 +10,8 @@ describe('api/github', () => {
 
     // reset module
     jest.resetModules();
-    jest.mock('../../lib/api/gh-got-retry');
-    get = require('../../lib/api/gh-got-retry');
+    jest.mock('../../lib/api/gh-got-wrapper');
+    get = require('../../lib/api/gh-got-wrapper');
     github = require('../../lib/api/github');
   });
 

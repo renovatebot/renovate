@@ -1,9 +1,9 @@
-const get = require('../../lib/api/gh-got-retry');
+const get = require('../../lib/api/gh-got-wrapper');
 const ghGot = require('gh-got');
 
 jest.mock('gh-got');
 
-describe('api/gh-got-retry', () => {
+describe('api/gh-got-wrapper', () => {
   const body = ['a', 'b'];
   beforeEach(() => {
     jest.resetAllMocks();
@@ -27,7 +27,7 @@ describe('api/gh-got-retry', () => {
       headers: {},
       body: ['b'],
     });
-    const res = await get('some-url');
+    const res = await get('some-url', { paginate: true });
     expect(res.body).toHaveLength(2);
   });
   it('warns if body cannot be paginated', async () => {
