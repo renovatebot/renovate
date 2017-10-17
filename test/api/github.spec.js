@@ -392,6 +392,7 @@ describe('api/github', () => {
     it('should merge', async () => {
       async function mergeInitRepo(...args) {
         // repo info
+        ghGotRetry.setAppMode(true);
         ghGot.mockImplementationOnce(() => ({
           body: {
             owner: {
