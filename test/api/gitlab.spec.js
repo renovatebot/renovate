@@ -541,31 +541,6 @@ describe('api/gitlab', () => {
       expect(pr.number).toBe(2);
     });
   });
-  describe('checkForClosedPr(branchName, prTitle)', () => {
-    it('returns true if pr exists', async () => {
-      get.mockReturnValueOnce({
-        body: [
-          {
-            source_branch: 'some-branch',
-            id: 1,
-          },
-          {
-            source_branch: 'some-branch',
-            id: 2,
-          },
-        ],
-      });
-      const res = await gitlab.checkForClosedPr('some-branch');
-      expect(res).toBe(true);
-    });
-    it('returns false if pr does not exist', async () => {
-      get.mockReturnValueOnce({
-        body: [],
-      });
-      const res = await gitlab.checkForClosedPr('some-branch');
-      expect(res).toBe(false);
-    });
-  });
   describe('createPr(branchName, title, body)', () => {
     it('returns the PR', async () => {
       get.post.mockReturnValueOnce({
