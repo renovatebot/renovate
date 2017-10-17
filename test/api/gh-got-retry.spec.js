@@ -16,6 +16,30 @@ describe('api/gh-got-retry', () => {
       'application/vnd.github.machine-man-preview+json, some-accept'
     );
   });
+  it('paginates', async () => {
+    ghGot.mockReturnValueOnce({
+      headers: {
+        link: '<https://api.github.com/something>; rel="next">',
+      },
+      body: ['a'],
+    });
+    ghGot.mockReturnValueOnce({
+      headers: {},
+      body: ['b'],
+    });
+    const res = await get('some-url');
+    expect(res.body).toHaveLength(2);
+  });
+  it('warns if body cannot be paginated', async () => {
+    ghGot.mockReturnValueOnce({
+      headers: {
+        link: '<https://api.github.com/something>; rel="next">',
+      },
+      body: {},
+    });
+    const res = await get('some-url');
+    expect(res.body).toEqual({});
+  });
   it('should retry 502s', async () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
