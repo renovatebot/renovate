@@ -10,9 +10,9 @@ describe('api/gitlab', () => {
 
     // reset module
     jest.resetModules();
-    jest.mock('gl-got');
+    jest.mock('../../lib/api/gl-got-wrapper');
     gitlab = require('../../lib/api/gitlab');
-    get = require('gl-got');
+    get = require('../../lib/api/gl-got-wrapper');
   });
 
   describe('getRepos', () => {
