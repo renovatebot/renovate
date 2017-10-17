@@ -987,34 +987,6 @@ describe('api/github', () => {
       expect(pr).toMatchSnapshot();
     });
   });
-  describe('checkForClosedPr(branchName, prTitle)', () => {
-    [
-      ['some-branch', 'foo', true],
-      ['some-branch', 'bar', false],
-      ['some-branch', 'bop', false],
-    ].forEach(([branch, title, expected], i) => {
-      it(`should return true if a closed PR is found - ${i}`, async () => {
-        await initRepo('some/repo', 'token');
-        get.mockImplementationOnce(() => ({
-          body: [
-            { title: 'foo', head: { label: 'theowner:some-branch' } },
-            { title: 'bar', head: { label: 'theowner:some-other-branch' } },
-            { title: 'baz', head: { label: 'theowner:some-branch' } },
-          ],
-        }));
-        const res = await github.checkForClosedPr(branch, title);
-        expect(res).toBe(expected);
-      });
-    });
-    it(`should return false if error thrown`, async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => {
-        throw new Error('fail');
-      });
-      const res = await github.checkForClosedPr('some-branch', 'some-title');
-      expect(res).toBe(false);
-    });
-  });
   describe('createPr(branchName, title, body)', () => {
     it('should create and return a PR object', async () => {
       await initRepo('some/repo', 'token');
