@@ -19,7 +19,31 @@ describe('api/gh-got-wrapper', () => {
   it('paginates', async () => {
     ghGot.mockReturnValueOnce({
       headers: {
-        link: '<https://api.github.com/something>; rel="next">',
+        link:
+          '<https://api.github.com/search/code?q=addClass+user%3Amozilla&page=2>; rel="next", <https://api.github.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
+      },
+      body: ['a'],
+    });
+    ghGot.mockReturnValueOnce({
+      headers: {
+        link:
+          '<https://api.github.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="next", <https://api.github.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
+      },
+      body: ['b', 'c'],
+    });
+    ghGot.mockReturnValueOnce({
+      headers: {},
+      body: ['d'],
+    });
+    const res = await get('some-url', { paginate: true });
+    expect(res.body).toHaveLength(4);
+    expect(ghGot.mock.calls).toHaveLength(3);
+  });
+  it('attempts to paginate', async () => {
+    ghGot.mockReturnValueOnce({
+      headers: {
+        link:
+          '<https://api.github.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
       },
       body: ['a'],
     });
@@ -28,17 +52,8 @@ describe('api/gh-got-wrapper', () => {
       body: ['b'],
     });
     const res = await get('some-url', { paginate: true });
-    expect(res.body).toHaveLength(2);
-  });
-  it('warns if body cannot be paginated', async () => {
-    ghGot.mockReturnValueOnce({
-      headers: {
-        link: '<https://api.github.com/something>; rel="next">',
-      },
-      body: {},
-    });
-    const res = await get('some-url');
-    expect(res.body).toEqual({});
+    expect(res.body).toHaveLength(1);
+    expect(ghGot.mock.calls).toHaveLength(1);
   });
   it('should retry 502s', async () => {
     ghGot.mockImplementationOnce(() =>
