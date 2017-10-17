@@ -2,7 +2,7 @@ const logger = require('../_fixtures/logger');
 
 describe('api/gitlab', () => {
   let gitlab;
-  let glGot;
+  let get;
   beforeEach(() => {
     // clean up env
     delete process.env.GITLAB_TOKEN;
@@ -12,13 +12,13 @@ describe('api/gitlab', () => {
     jest.resetModules();
     jest.mock('gl-got');
     gitlab = require('../../lib/api/gitlab');
-    glGot = require('gl-got');
+    get = require('gl-got');
   });
 
   describe('getRepos', () => {
     async function getRepos(...args) {
       // repo info
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           {
             path_with_namespace: 'a/b',
@@ -40,7 +40,7 @@ describe('api/gitlab', () => {
       expect(err.message).toBe('No token found for getRepos');
     });
     it('should throw an error if it receives an error', async () => {
-      glGot.mockImplementation(() => {
+      get.mockImplementation(() => {
         throw new Error('getRepos error');
       });
       let err;
@@ -53,12 +53,12 @@ describe('api/gitlab', () => {
     });
     it('should return an array of repos', async () => {
       const repos = await getRepos('sometoken');
-      expect(glGot.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
     it('should support a custom endpoint', async () => {
       const repos = await getRepos('sometoken', 'someendpoint');
-      expect(glGot.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
     it('should fetch multiple pages', async () => {
@@ -67,32 +67,32 @@ describe('api/gitlab', () => {
       for (let i = 0; i < repoCount; i += 1) {
         projects.push({ path_with_namespace: `project${i}` });
       }
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: projects.slice(0, 100),
       }));
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: projects.slice(100, 200),
       }));
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: projects.slice(200),
       }));
       const repos = await gitlab.getRepos('sometoken');
-      expect(glGot.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(repos.length).toBe(repoCount);
     });
   });
 
   async function initRepo(...args) {
     // projects/owned
-    glGot.mockImplementationOnce();
+    get.mockImplementationOnce();
     // projects/${config.repoName
-    glGot.mockImplementationOnce(() => ({
+    get.mockImplementationOnce(() => ({
       body: {
         default_branch: 'master',
       },
     }));
     // user
-    glGot.mockImplementationOnce(() => ({
+    get.mockImplementationOnce(() => ({
       body: {
         email: 'a@b.com',
       },
@@ -116,7 +116,7 @@ describe('api/gitlab', () => {
           process.env.GITLAB_TOKEN = envToken;
         }
         const config = await initRepo('some/repo', ...args);
-        expect(glGot.mock.calls).toMatchSnapshot();
+        expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
         expect(process.env.GITLAB_TOKEN).toBe(token);
         expect(process.env.GITLAB_ENDPOINT).toBe(endpoint);
@@ -143,7 +143,7 @@ describe('api/gitlab', () => {
       );
     });
     it('should throw an error if receiving an error', async () => {
-      glGot.mockImplementation(() => {
+      get.mockImplementation(() => {
         throw new Error('always error');
       });
       let err;
@@ -156,17 +156,17 @@ describe('api/gitlab', () => {
     });
     it('should use api v4', async () => {
       // projects/owned
-      glGot.mockImplementationOnce(() => {
+      get.mockImplementationOnce(() => {
         throw new Error('any error');
       });
       // projects/${config.repoName
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           default_branch: 'master',
         },
       }));
       // user
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           email: 'a@b.com',
         },
@@ -179,7 +179,7 @@ describe('api/gitlab', () => {
     it('sets the base branch', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           object: {
             sha: '1238',
@@ -187,13 +187,13 @@ describe('api/gitlab', () => {
         },
       }));
       await gitlab.setBaseBranch('some-branch');
-      expect(glGot.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
     });
   });
   describe('findFilePaths(fileName)', () => {
     it('warns if truncated result', async () => {
       await initRepo('some/repo', 'token');
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [],
       }));
       const files = await gitlab.findFilePaths('package.json');
@@ -201,7 +201,7 @@ describe('api/gitlab', () => {
     });
     it('caches the result', async () => {
       await initRepo('some/repo', 'token');
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [],
       }));
       let files = await gitlab.findFilePaths('package.json');
@@ -211,7 +211,7 @@ describe('api/gitlab', () => {
     });
     it('should return the files matching the fileName', async () => {
       await initRepo('some/repo', 'token');
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [
           { type: 'blob', path: 'package.json' },
           {
@@ -228,17 +228,17 @@ describe('api/gitlab', () => {
   });
   describe('branchExists(branchName)', () => {
     it('should return true if 200 OK', async () => {
-      glGot.mockImplementationOnce(() => ({ statusCode: 200 }));
+      get.mockImplementationOnce(() => ({ statusCode: 200 }));
       const branchExists = await gitlab.branchExists('foo');
       expect(branchExists).toBe(true);
     });
     it('should return false if not 200 OK', async () => {
-      glGot.mockImplementationOnce(() => ({ statusCode: 500 }));
+      get.mockImplementationOnce(() => ({ statusCode: 500 }));
       const branchExists = await gitlab.branchExists('foo');
       expect(branchExists).toBe(false);
     });
     it('should return false if 404 error received', async () => {
-      glGot.mockImplementationOnce(() =>
+      get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
         })
@@ -247,7 +247,7 @@ describe('api/gitlab', () => {
       expect(branchExists).toBe(false);
     });
     it('should return error if non-404 error thrown', async () => {
-      glGot.mockImplementationOnce(() =>
+      get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 500,
         })
@@ -263,12 +263,12 @@ describe('api/gitlab', () => {
   });
   describe('getBranch', () => {
     it('returns a branch', async () => {
-      glGot.mockReturnValueOnce({ body: 'foo' });
+      get.mockReturnValueOnce({ body: 'foo' });
       const branch = await gitlab.getBranch('branch-name');
       expect(branch).toMatchSnapshot();
     });
     it('nulls on error', async () => {
-      glGot.mockImplementationOnce(() => {
+      get.mockImplementationOnce(() => {
         throw new Error('not found');
       });
       const branch = await gitlab.getBranch('branch-name');
@@ -278,19 +278,19 @@ describe('api/gitlab', () => {
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       await initRepo('some/repo', 'token');
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [],
       }));
       const pr = await gitlab.getBranchPr('somebranch');
-      expect(glGot.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toBe(null);
     });
     it('should return the PR object', async () => {
       await initRepo('some/repo', 'token');
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: [{ number: 91, source_branch: 'somebranch' }],
       }));
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
         body: {
           iid: 91,
           additions: 1,
@@ -303,13 +303,13 @@ describe('api/gitlab', () => {
         },
       }));
       const pr = await gitlab.getBranchPr('somebranch');
-      expect(glGot.mock.calls).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
     });
   });
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     beforeEach(() => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {
           commit: {
             id: 1,
@@ -328,28 +328,28 @@ describe('api/gitlab', () => {
       expect(res).toEqual('failed');
     });
     it('returns pending if no results', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [],
       });
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('pending');
     });
     it('returns success if all are success', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [{ status: 'success' }, { status: 'success' }],
       });
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('success');
     });
     it('returns failure if any are failed', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [{ status: 'success' }, { status: 'failed' }],
       });
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('failure');
     });
     it('returns custom statuses', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [{ status: 'success' }, { status: 'foo' }],
       });
       const res = await gitlab.getBranchStatus('somebranch', []);
@@ -358,7 +358,7 @@ describe('api/gitlab', () => {
   });
   describe('getBranchStatusCheck', () => {
     beforeEach(() => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {
           commit: {
             id: 1,
@@ -367,7 +367,7 @@ describe('api/gitlab', () => {
       });
     });
     it('returns null if no results', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [],
       });
       const res = await gitlab.getBranchStatusCheck(
@@ -377,7 +377,7 @@ describe('api/gitlab', () => {
       expect(res).toEqual(null);
     });
     it('returns null if no matching results', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [{ name: 'context-1', status: 'pending' }],
       });
       const res = await gitlab.getBranchStatusCheck(
@@ -387,7 +387,7 @@ describe('api/gitlab', () => {
       expect(res).toEqual(null);
     });
     it('returns status if name found', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [
           { name: 'context-1', state: 'pending' },
           { name: 'some-context', state: 'success' },
@@ -405,7 +405,7 @@ describe('api/gitlab', () => {
     it('sets branch status', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {
           commit: {
             id: 1,
@@ -419,20 +419,20 @@ describe('api/gitlab', () => {
         'some-state',
         'some-url'
       );
-      expect(glGot.post.mock.calls).toHaveLength(1);
+      expect(get.post.mock.calls).toHaveLength(1);
     });
   });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
-      glGot.delete = jest.fn();
+      get.delete = jest.fn();
       await gitlab.deleteBranch('some-branch');
-      expect(glGot.delete.mock.calls.length).toBe(1);
+      expect(get.delete.mock.calls.length).toBe(1);
     });
   });
   describe('getBranchLastCommitTime', () => {
     it('should return a Date', async () => {
       await initRepo('some/repo', 'token');
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [
           {
             id: 'ed899a2f4b50b4370feeea94676502b42383c746',
@@ -467,7 +467,7 @@ describe('api/gitlab', () => {
     });
     it('handles error', async () => {
       await initRepo('some/repo', 'token');
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [],
       });
       const res = await gitlab.getBranchLastCommitTime('some-branch');
@@ -478,12 +478,12 @@ describe('api/gitlab', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo('some/repo', 'token');
       await gitlab.addAssignees(42, ['someuser']);
-      expect(glGot.put.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
     });
     it('should log error if more than one assignee', async () => {
       await initRepo('some/repo', 'token');
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
-      expect(glGot.put.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
     });
   });
   describe('addReviewers(issueNo, reviewers)', () => {
@@ -496,19 +496,19 @@ describe('api/gitlab', () => {
     it('should add the given labels to the issue', async () => {
       await initRepo('some/repo', 'token');
       await gitlab.addLabels(42, ['foo', 'bar']);
-      expect(glGot.put.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns null if no results', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [],
       });
       const pr = await gitlab.findPr('some-branch');
       expect(pr).toBe(null);
     });
     it('returns null if no matching titles', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [
           {
             source_branch: 'some-branch',
@@ -525,7 +525,7 @@ describe('api/gitlab', () => {
       expect(pr).toBe(null);
     });
     it('returns last result if multiple match', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [
           {
             source_branch: 'some-branch',
@@ -543,7 +543,7 @@ describe('api/gitlab', () => {
   });
   describe('checkForClosedPr(branchName, prTitle)', () => {
     it('returns true if pr exists', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [
           {
             source_branch: 'some-branch',
@@ -559,7 +559,7 @@ describe('api/gitlab', () => {
       expect(res).toBe(true);
     });
     it('returns false if pr does not exist', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [],
       });
       const res = await gitlab.checkForClosedPr('some-branch');
@@ -568,7 +568,7 @@ describe('api/gitlab', () => {
   });
   describe('createPr(branchName, title, body)', () => {
     it('returns the PR', async () => {
-      glGot.post.mockReturnValueOnce({
+      get.post.mockReturnValueOnce({
         body: {
           id: 1,
           iid: 12345,
@@ -576,10 +576,10 @@ describe('api/gitlab', () => {
       });
       const pr = await gitlab.createPr('some-branch', 'some-title', 'the-body');
       expect(pr).toMatchSnapshot();
-      expect(glGot.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
     });
     it('uses default branch', async () => {
-      glGot.post.mockReturnValueOnce({
+      get.post.mockReturnValueOnce({
         body: {
           id: 1,
           iid: 12345,
@@ -592,12 +592,12 @@ describe('api/gitlab', () => {
         true
       );
       expect(pr).toMatchSnapshot();
-      expect(glGot.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
     });
   });
   describe('getPr(prNo)', () => {
     it('returns the PR', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {
           id: 1,
           iid: 12345,
@@ -607,7 +607,7 @@ describe('api/gitlab', () => {
           source_branch: 'some-branch',
         },
       });
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {
           commit: {},
         },
@@ -620,38 +620,38 @@ describe('api/gitlab', () => {
     jest.resetAllMocks();
     it('updates the PR', async () => {
       await gitlab.updatePr(1, 'title', 'body');
-      expect(glGot.put.mock.calls.length).toEqual(1);
+      expect(get.put.mock.calls.length).toEqual(1);
     });
   });
   describe('mergePr(pr)', () => {
     jest.resetAllMocks();
     it('merges the PR', async () => {
       await gitlab.mergePr({ number: 1 });
-      expect(glGot.put.mock.calls.length).toEqual(1);
+      expect(get.put.mock.calls.length).toEqual(1);
     });
   });
   describe('getFile(filePath, branchName)', () => {
     it('gets the file with v4 by default', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {
           content: 'foo',
         },
       });
       const res = await gitlab.getFile('some/path');
       expect(res).toMatchSnapshot();
-      expect(glGot.mock.calls[0][0].indexOf('some%2Fpath')).not.toBe(-1);
+      expect(get.mock.calls[0][0].indexOf('some%2Fpath')).not.toBe(-1);
     });
     it('gets the file with v3', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {},
       });
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {},
       });
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {},
       });
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {
           content: 'foo',
         },
@@ -660,12 +660,12 @@ describe('api/gitlab', () => {
       expect(config).toMatchSnapshot();
       const res = await gitlab.getFile('some-path');
       expect(res).toMatchSnapshot();
-      expect(glGot.mock.calls[3][0].indexOf('file_path')).not.toBe(-1);
+      expect(get.mock.calls[3][0].indexOf('file_path')).not.toBe(-1);
     });
   });
   describe('getFileContent(filePath, branchName)', () => {
     it('gets the file', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {
           content: 'foo',
         },
@@ -674,12 +674,12 @@ describe('api/gitlab', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
-      glGot.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
+      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
       const res = await gitlab.getFileContent('some-path', 'some-branch');
       expect(res).toBe(null);
     });
     it('throws error for non-404', async () => {
-      glGot.mockImplementationOnce(() => Promise.reject({ statusCode: 403 }));
+      get.mockImplementationOnce(() => Promise.reject({ statusCode: 403 }));
       let e;
       try {
         await gitlab.getFileContent('some-path', 'some-branch');
@@ -691,7 +691,7 @@ describe('api/gitlab', () => {
   });
   describe('getFileJson(filePath, branchName)', () => {
     it('returns null for 404', async () => {
-      glGot.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
+      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
       const res = await gitlab.getFileJson('some-path', 'some-branch');
       expect(res).toBe(null);
     });
@@ -704,17 +704,17 @@ describe('api/gitlab', () => {
         'some-contents',
         'some-message'
       );
-      expect(glGot.post.mock.calls).toMatchSnapshot();
-      expect(glGot.post.mock.calls[0][1].body.file_path).not.toBeDefined();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls[0][1].body.file_path).not.toBeDefined();
     });
     it('creates file with v3', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {},
       });
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {},
       });
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: {},
       });
       await gitlab.initRepo('some-repo', 'some-token');
@@ -724,8 +724,8 @@ describe('api/gitlab', () => {
         'some-contents',
         'some-message'
       );
-      expect(glGot.post.mock.calls).toMatchSnapshot();
-      expect(glGot.post.mock.calls[0][1].body.file_path).toBeDefined();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls[0][1].body.file_path).toBeDefined();
     });
     describe('updateFile(branchName, filePath, fileContents, message)', () => {
       it('creates file with v4', async () => {
@@ -735,17 +735,17 @@ describe('api/gitlab', () => {
           'some-contents',
           'some-message'
         );
-        expect(glGot.put.mock.calls).toMatchSnapshot();
-        expect(glGot.put.mock.calls[0][1].body.file_path).not.toBeDefined();
+        expect(get.put.mock.calls).toMatchSnapshot();
+        expect(get.put.mock.calls[0][1].body.file_path).not.toBeDefined();
       });
       it('creates file with v3', async () => {
-        glGot.mockReturnValueOnce({
+        get.mockReturnValueOnce({
           body: {},
         });
-        glGot.mockReturnValueOnce({
+        get.mockReturnValueOnce({
           body: {},
         });
-        glGot.mockReturnValueOnce({
+        get.mockReturnValueOnce({
           body: {},
         });
         await gitlab.initRepo('some-repo', 'some-token');
@@ -755,52 +755,52 @@ describe('api/gitlab', () => {
           'some-contents',
           'some-message'
         );
-        expect(glGot.put.mock.calls).toMatchSnapshot();
-        expect(glGot.put.mock.calls[0][1].body.file_path).toBeDefined();
+        expect(get.put.mock.calls).toMatchSnapshot();
+        expect(get.put.mock.calls[0][1].body.file_path).toBeDefined();
       });
     });
     describe('createBranch(branchName)', () => {
       it('creates file with v4', async () => {
         await gitlab.createBranch('some-branch');
-        expect(glGot.post.mock.calls).toMatchSnapshot();
-        expect(glGot.post.mock.calls[0][1].body.branch_name).not.toBeDefined();
+        expect(get.post.mock.calls).toMatchSnapshot();
+        expect(get.post.mock.calls[0][1].body.branch_name).not.toBeDefined();
       });
       it('creates file with v3', async () => {
-        glGot.mockReturnValueOnce({
+        get.mockReturnValueOnce({
           body: {},
         });
-        glGot.mockReturnValueOnce({
+        get.mockReturnValueOnce({
           body: {},
         });
-        glGot.mockReturnValueOnce({
+        get.mockReturnValueOnce({
           body: {},
         });
         await gitlab.initRepo('some-repo', 'some-token');
         await gitlab.createBranch('some-branch');
-        expect(glGot.post.mock.calls).toMatchSnapshot();
-        expect(glGot.post.mock.calls[0][1].body.branch_name).toBeDefined();
+        expect(get.post.mock.calls).toMatchSnapshot();
+        expect(get.post.mock.calls[0][1].body.branch_name).toBeDefined();
       });
     });
     describe('getSubDirectories(path)', () => {
       it('should return subdirectories', async () => {
         await initRepo('some/repo', 'token');
-        glGot.mockImplementationOnce(() => ({
+        get.mockImplementationOnce(() => ({
           body: [{ type: 'tree', name: 'a' }, { type: 'file', name: 'b' }],
         }));
         const dirList = await gitlab.getSubDirectories('some-path');
-        expect(glGot.mock.calls).toMatchSnapshot();
+        expect(get.mock.calls).toMatchSnapshot();
         expect(dirList).toHaveLength(1);
         expect(dirList).toMatchSnapshot();
       });
     });
     describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
       it('creates branch', async () => {
-        glGot.mockReturnValueOnce({ statusCode: 404 });
+        get.mockReturnValueOnce({ statusCode: 404 });
         await gitlab.commitFilesToBranch('some-branch', [], 'some-message');
       });
       it('does not create branch and updates file', async () => {
-        glGot.mockReturnValueOnce({ statusCode: 200 });
-        glGot.mockReturnValueOnce({
+        get.mockReturnValueOnce({ statusCode: 200 });
+        get.mockReturnValueOnce({
           body: {
             content: 'hello',
           },
@@ -817,8 +817,8 @@ describe('api/gitlab', () => {
         );
       });
       it('does not create branch and creates file', async () => {
-        glGot.mockReturnValueOnce({ statusCode: 200 });
-        glGot.mockReturnValueOnce(Promise.reject({ statusCode: 404 }));
+        get.mockReturnValueOnce({ statusCode: 200 });
+        get.mockReturnValueOnce(Promise.reject({ statusCode: 404 }));
         const file = {
           name: 'foo',
           contents: 'bar',
@@ -834,7 +834,7 @@ describe('api/gitlab', () => {
   });
   describe('getCommitMessages()', () => {
     it('returns commits messages', async () => {
-      glGot.mockReturnValueOnce({
+      get.mockReturnValueOnce({
         body: [
           {
             title: 'foo',
@@ -848,7 +848,7 @@ describe('api/gitlab', () => {
       expect(res).toMatchSnapshot();
     });
     it('swallows errors', async () => {
-      glGot.mockImplementationOnce(() => {
+      get.mockImplementationOnce(() => {
         throw new Error('some-error');
       });
       const res = await gitlab.getCommitMessages();
