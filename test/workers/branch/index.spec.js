@@ -29,7 +29,7 @@ describe('workers/branch', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: { branchExists: jest.fn() },
+        api: { branchExists: jest.fn(), ensureComment: jest.fn() },
         errors: [],
         warnings: [],
         logger,
@@ -49,12 +49,22 @@ describe('workers/branch', () => {
       await branchWorker.processBranch(config);
       expect(checkExisting.prAlreadyExisted.mock.calls).toHaveLength(0);
     });
-    it('skips branch if closed PR found', async () => {
+    it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.api.branchExists.mockReturnValueOnce(true);
-      checkExisting.prAlreadyExisted.mockReturnValueOnce(true);
+      config.isMajor = true;
+      checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
+      expect(config.logger.error.mock.calls).toHaveLength(0);
+    });
+    it('skips branch if closed minor PR found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      config.api.branchExists.mockReturnValueOnce(true);
+      checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
+      await branchWorker.processBranch(config);
+      expect(parent.getParentBranch.mock.calls.length).toBe(0);
+      expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('returns if no branch exists', async () => {
       packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([]);

@@ -432,6 +432,38 @@ Array [
 ]
 `;
 
+exports[`api/github ensureComment add comment if not found 1`] = `
+Array [
+  Array [
+    "repos/some/repo/issues/42/comments",
+    Object {
+      "body": Object {
+        "body": "### some-subject
+
+some
+content",
+      },
+    },
+  ],
+]
+`;
+
+exports[`api/github ensureComment add updates comment if necessary 1`] = `
+Array [
+  Array [
+    "repos/some/repo/issues/comments/1234",
+    Object {
+      "body": Object {
+        "body": "### some-subject
+
+some
+content",
+      },
+    },
+  ],
+]
+`;
+
 exports[`api/github findFilePaths(fileName) should return the files matching the fileName 1`] = `
 Array [
   "package.json",
