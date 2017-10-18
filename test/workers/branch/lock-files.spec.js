@@ -181,7 +181,7 @@ describe('workers/branch/lock-files', () => {
       config = {
         ...defaultConfig,
         logger,
-        tmpDir: { name: 'some-tmp-dir' },
+        tmpDir: { path: 'some-tmp-dir' },
       };
       fs.outputFile = jest.fn();
       fs.remove = jest.fn();
@@ -234,7 +234,7 @@ describe('workers/branch/lock-files', () => {
       config = {
         ...defaultConfig,
         logger,
-        tmpDir: { name: 'some-tmp-dir' },
+        tmpDir: { path: 'some-tmp-dir' },
       };
       fs.outputFile = jest.fn();
     });
@@ -281,7 +281,7 @@ describe('workers/branch/lock-files', () => {
           getFileContent: jest.fn(() => 'some lock file contents'),
         },
         logger,
-        tmpDir: { name: 'some-tmp-dir' },
+        tmpDir: { path: 'some-tmp-dir' },
       };
       npm.generateLockFile = jest.fn();
       npm.generateLockFile.mockReturnValue('some lock file contents');
