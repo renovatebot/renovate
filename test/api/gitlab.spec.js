@@ -61,25 +61,6 @@ describe('api/gitlab', () => {
       expect(get.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
-    it('should fetch multiple pages', async () => {
-      const repoCount = 250;
-      const projects = [];
-      for (let i = 0; i < repoCount; i += 1) {
-        projects.push({ path_with_namespace: `project${i}` });
-      }
-      get.mockImplementationOnce(() => ({
-        body: projects.slice(0, 100),
-      }));
-      get.mockImplementationOnce(() => ({
-        body: projects.slice(100, 200),
-      }));
-      get.mockImplementationOnce(() => ({
-        body: projects.slice(200),
-      }));
-      const repos = await gitlab.getRepos('sometoken');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(repos.length).toBe(repoCount);
-    });
   });
 
   async function initRepo(...args) {
