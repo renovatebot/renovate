@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "bunyan": "1.8.12",
-    "chalk": "2.1.0",
+    "chalk": "2.2.0",
     "changelog": "1.4.0",
     "child-process-promise": "2.2.1",
     "commander": "2.11.0",
@@ -73,7 +73,7 @@
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.1",
     "showdown": "1.7.6",
-    "tmp": "0.0.33",
+    "tmp-promise": "1.0.3",
     "traverse": "0.6.6",
     "yarn": "1.2.1"
   },
