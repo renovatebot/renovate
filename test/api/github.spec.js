@@ -1167,6 +1167,35 @@ describe('api/github', () => {
       const pr = await github.getPr(1234);
       expect(pr).toMatchSnapshot();
     });
+    it('should return a rebaseable PR if web-flow is second author', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockImplementationOnce(() => ({
+        body: {
+          number: 1,
+          state: 'open',
+          mergeable_state: 'dirty',
+          base: { sha: '1234' },
+          commits: 2,
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            author: {
+              login: 'foo',
+            },
+          },
+          {
+            committer: {
+              login: 'web-flow',
+            },
+          },
+        ],
+      }));
+      const pr = await github.getPr(1234);
+      expect(pr.canRebase).toBe(true);
+      expect(pr).toMatchSnapshot();
+    });
   });
   describe('getAllPrs()', () => {
     it('maps results to simple array', async () => {

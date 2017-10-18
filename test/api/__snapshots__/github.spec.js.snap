@@ -849,6 +849,21 @@ Object {
 }
 `;
 
+exports[`api/github getPr(prNo) should return a rebaseable PR if web-flow is second author 1`] = `
+Object {
+  "base": Object {
+    "sha": "1234",
+  },
+  "canRebase": true,
+  "commits": 2,
+  "displayNumber": "Pull Request #1",
+  "isUnmergeable": true,
+  "mergeable_state": "dirty",
+  "number": 1,
+  "state": "open",
+}
+`;
+
 exports[`api/github getPr(prNo) should return an unrebaseable PR if multiple authors 1`] = `
 Object {
   "base": Object {
