@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "bunyan": "1.8.12",
-    "chalk": "2.1.0",
+    "chalk": "2.2.0",
     "changelog": "1.4.0",
     "child-process-promise": "2.2.1",
     "commander": "2.11.0",
