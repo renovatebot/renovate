@@ -469,6 +469,16 @@ describe('api/github', () => {
       expect(get.mock.calls).toMatchSnapshot();
     });
   });
+  describe('getFileList', () => {
+    it('returns empty array if error', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockImplementationOnce(() => {
+        throw new Error('some error');
+      });
+      const files = await github.findFilePaths('someething');
+      expect(files).toEqual([]);
+    });
+  });
   describe('findFilePaths(fileName)', () => {
     it('warns if truncated result', async () => {
       await initRepo('some/repo', 'token');
