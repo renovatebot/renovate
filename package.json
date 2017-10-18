@@ -73,7 +73,7 @@
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.1",
     "showdown": "1.7.6",
-    "tmp": "0.0.33",
+    "tmp-promise": "1.0.3",
     "traverse": "0.6.6",
     "yarn": "1.2.1"
   },
