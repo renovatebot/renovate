@@ -33,7 +33,7 @@ describe('workers/branch', () => {
         errors: [],
         warnings: [],
         logger,
-        upgrades: [{}],
+        upgrades: [{ depName: 'some-dep-name' }],
       };
       schedule.isScheduledNow.mockReturnValue(true);
     });
