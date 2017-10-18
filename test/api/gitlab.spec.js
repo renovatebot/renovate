@@ -191,6 +191,14 @@ describe('api/gitlab', () => {
     });
   });
   describe('findFilePaths(fileName)', () => {
+    it('returns empty array if error', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockImplementationOnce(() => {
+        throw new Error('some error');
+      });
+      const files = await gitlab.findFilePaths('someething');
+      expect(files).toEqual([]);
+    });
     it('warns if truncated result', async () => {
       await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
