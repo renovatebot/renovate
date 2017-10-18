@@ -968,6 +968,34 @@ describe('api/github', () => {
       expect(get.post.mock.calls).toMatchSnapshot();
     });
   });
+  describe('ensureComment', () => {
+    it('add comment if not found', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockReturnValueOnce({ body: [] });
+      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(1);
+      expect(get.post.mock.calls).toMatchSnapshot();
+    });
+    it('add updates comment if necessary', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
+      });
+      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(1);
+      expect(get.patch.mock.calls).toMatchSnapshot();
+    });
+    it('skips comment', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
+      });
+      await github.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(0);
+    });
+  });
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns true if no title and all state', async () => {
       get.mockReturnValueOnce({
