@@ -488,6 +488,11 @@ describe('api/gitlab', () => {
       expect(get.put.mock.calls).toMatchSnapshot();
     });
   });
+  describe('ensureComment', () => {
+    it('exists', async () => {
+      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+    });
+  });
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns null if no results', async () => {
       get.mockReturnValueOnce({
