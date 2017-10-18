@@ -299,24 +299,13 @@ Object {
 }
 `;
 
-exports[`api/gitlab getRepos should fetch multiple pages 1`] = `
-Array [
-  Array [
-    "projects?membership=true&per_page=100&page=1",
-  ],
-  Array [
-    "projects?membership=true&per_page=100&page=2",
-  ],
-  Array [
-    "projects?membership=true&per_page=100&page=3",
-  ],
-]
-`;
-
 exports[`api/gitlab getRepos should return an array of repos 1`] = `
 Array [
   Array [
-    "projects?membership=true&per_page=100&page=1",
+    "projects?membership=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
@@ -331,7 +320,10 @@ Array [
 exports[`api/gitlab getRepos should support a custom endpoint 1`] = `
 Array [
   Array [
-    "projects?membership=true&per_page=100&page=1",
+    "projects?membership=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;

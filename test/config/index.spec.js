@@ -114,6 +114,7 @@ describe('config/index', () => {
         '--token=abc',
       ]);
       get.mockImplementationOnce(() => ({
+        headers: {},
         body: [
           {
             path_with_namespace: 'a/b',
