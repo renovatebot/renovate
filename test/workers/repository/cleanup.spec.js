@@ -13,6 +13,8 @@ describe('workers/repository/cleanup', () => {
         getAllRenovateBranches: jest.fn(),
         getPr: jest.fn(),
         deleteBranch: jest.fn(),
+        findPr: jest.fn(),
+        updatePr: jest.fn(),
       };
       config.logger = logger;
     });
@@ -27,14 +29,16 @@ describe('workers/repository/cleanup', () => {
       await cleanup.pruneStaleBranches(config, branchNames);
       expect(config.api.getAllRenovateBranches.mock.calls).toHaveLength(1);
     });
-    it('deletes remaining branch', async () => {
+    it('renames deletes remaining branch', async () => {
       branchNames = ['renovate/a', 'renovate/b'];
       config.api.getAllRenovateBranches.mockReturnValueOnce(
         branchNames.concat(['renovate/c'])
       );
+      config.api.findPr.mockReturnValueOnce({});
       await cleanup.pruneStaleBranches(config, branchNames);
       expect(config.api.getAllRenovateBranches.mock.calls).toHaveLength(1);
       expect(config.api.deleteBranch.mock.calls).toHaveLength(1);
+      expect(config.api.updatePr.mock.calls).toHaveLength(1);
     });
     it('deletes lock file maintenance if pr is closed', async () => {
       branchNames = ['renovate/lock-file-maintenance'];
