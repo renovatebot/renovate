@@ -481,33 +481,6 @@ Array [
 
 exports[`api/github getBranchLastCommitTime should return a Date 1`] = `2011-04-14T16:00:49.000Z`;
 
-exports[`api/github getBranchPr(branchName) should return null if no PR exists 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
-  ],
-]
-`;
-
 exports[`api/github getBranchPr(branchName) should return the PR object 1`] = `
 Array [
   Array [
@@ -530,27 +503,15 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
-  ],
-  Array [
-    "repos/some/repo/pulls/91",
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
 
-exports[`api/github getBranchPr(branchName) should return the PR object 2`] = `
-Object {
-  "additions": 1,
-  "base": Object {
-    "sha": "1234",
-  },
-  "canRebase": true,
-  "commits": 1,
-  "deletions": 1,
-  "displayNumber": "Pull Request #91",
-  "number": 91,
-}
-`;
+exports[`api/github getBranchPr(branchName) should return the PR object 2`] = `null`;
 
 exports[`api/github getCommitMessages() returns commits messages 1`] = `
 Array [

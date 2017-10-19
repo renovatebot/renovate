@@ -677,13 +677,12 @@ describe('api/github', () => {
         body: [],
       }));
       const pr = await github.getBranchPr('somebranch');
-      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toBe(null);
     });
     it('should return the PR object', async () => {
       await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
-        body: [{ number: 91 }],
+        body: [{ number: 91, head: {} }],
       }));
       get.mockImplementationOnce(() => ({
         body: {
