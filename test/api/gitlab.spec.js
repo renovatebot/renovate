@@ -493,6 +493,11 @@ describe('api/gitlab', () => {
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
     });
   });
+  describe('ensureCommentRemoval', () => {
+    it('exists', async () => {
+      await gitlab.ensureCommentRemoval(42, 'some-subject');
+    });
+  });
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns null if no results', async () => {
       get.mockReturnValueOnce({

@@ -19,9 +19,10 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const lockFile = await npmHelper.generateLockFile('some-dir', logger);
+    const res = await npmHelper.generateLockFile('some-dir', logger);
     expect(fs.readFile.mock.calls.length).toEqual(1);
-    expect(lockFile).toEqual('package-lock-contents');
+    expect(res.error).not.toBeDefined();
+    expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/npm');
@@ -32,9 +33,10 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => {
       throw new Error('not found');
     });
-    const lockFile = await npmHelper.generateLockFile('some-dir', logger);
+    const res = await npmHelper.generateLockFile('some-dir', logger);
     expect(fs.readFile.mock.calls.length).toEqual(1);
-    expect(lockFile).toBe(null);
+    expect(res.error).toBe(true);
+    expect(res.lockFile).not.toBeDefined();
   });
   it('finds npm embedded in renovate', async () => {
     getInstalledPath.mockImplementationOnce(() => {
@@ -49,9 +51,9 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const lockFile = await npmHelper.generateLockFile('some-dir', logger);
+    const res = await npmHelper.generateLockFile('some-dir', logger);
     expect(fs.readFile.mock.calls.length).toEqual(1);
-    expect(lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('finds npm globally', async () => {
     getInstalledPath.mockImplementationOnce(() => {
@@ -67,9 +69,9 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const lockFile = await npmHelper.generateLockFile('some-dir', logger);
+    const res = await npmHelper.generateLockFile('some-dir', logger);
     expect(fs.readFile.mock.calls.length).toEqual(1);
-    expect(lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('uses fallback npm', async () => {
     getInstalledPath.mockImplementationOnce(() => {
@@ -87,8 +89,8 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const lockFile = await npmHelper.generateLockFile('some-dir', logger);
+    const res = await npmHelper.generateLockFile('some-dir', logger);
     expect(fs.readFile.mock.calls.length).toEqual(1);
-    expect(lockFile).toEqual('package-lock-contents');
+    expect(res.lockFile).toEqual('package-lock-contents');
   });
 });
