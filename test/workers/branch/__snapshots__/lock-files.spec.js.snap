@@ -33,14 +33,14 @@ Object {
 
 exports[`workers/branch/lock-files getUpdatedLockFiles adds multiple lock files 1`] = `
 Object {
-  "lockFileError": false,
+  "lockFileErrors": Array [],
   "updatedLockFiles": Array [
     Object {
-      "contents": "some new lock file contents",
+      "contents": undefined,
       "name": "a/package-lock.json",
     },
     Object {
-      "contents": "some new lock file contents",
+      "contents": undefined,
       "name": "c/yarn.lock",
     },
   ],
@@ -49,42 +49,37 @@ Object {
 
 exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if lock file maintenance exists 1`] = `
 Object {
-  "lockFileError": false,
+  "lockFileErrors": Array [],
   "updatedLockFiles": Array [],
 }
 `;
 
 exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if none updated 1`] = `
 Object {
-  "lockFileError": false,
-  "updatedLockFiles": Array [],
-}
-`;
-
-exports[`workers/branch/lock-files getUpdatedLockFiles returns npm errors 1`] = `
-Object {
-  "lockFileError": true,
-  "updatedLockFiles": Array [],
-}
-`;
-
-exports[`workers/branch/lock-files getUpdatedLockFiles returns yarn errors 1`] = `
-Object {
-  "lockFileError": true,
+  "lockFileErrors": Array [],
   "updatedLockFiles": Array [],
 }
 `;
 
 exports[`workers/branch/lock-files getUpdatedLockFiles sets error if receiving null 1`] = `
 Object {
-  "lockFileError": true,
+  "lockFileErrors": Array [
+    Object {
+      "lockFile": "a/package-lock.json",
+      "stderr": undefined,
+    },
+    Object {
+      "lockFile": "c/yarn.lock",
+      "stderr": undefined,
+    },
+  ],
   "updatedLockFiles": Array [],
 }
 `;
 
 exports[`workers/branch/lock-files getUpdatedLockFiles tries multiple lock files 1`] = `
 Object {
-  "lockFileError": false,
+  "lockFileErrors": Array [],
   "updatedLockFiles": Array [],
 }
 `;
