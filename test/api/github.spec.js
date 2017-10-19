@@ -1197,38 +1197,6 @@ describe('api/github', () => {
       expect(pr).toMatchSnapshot();
     });
   });
-  describe('getAllPrs()', () => {
-    it('maps results to simple array', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            number: 5,
-            foo: 'bar',
-            head: {
-              ref: 'renovate/a',
-            },
-          },
-          {
-            number: 6,
-            foo: 'bar',
-            head: {
-              ref: 'not-renovate',
-            },
-          },
-          {
-            number: 9,
-            foo: 'baz',
-            head: {
-              ref: 'renovate/b',
-            },
-          },
-        ],
-      }));
-      const res = await github.getAllPrs();
-      expect(res).toMatchSnapshot();
-    });
-  });
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
       await initRepo('some/repo', 'token');
