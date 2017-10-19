@@ -27,9 +27,15 @@ describe('workers/branch', () => {
   describe('processBranch', () => {
     let config;
     beforeEach(() => {
+      prWorker.ensurePr = jest.fn();
+      prWorker.checkAutoMerge = jest.fn();
       config = {
         ...defaultConfig,
-        api: { branchExists: jest.fn(), ensureComment: jest.fn() },
+        api: {
+          branchExists: jest.fn(),
+          ensureComment: jest.fn(),
+          ensureCommentRemoval: jest.fn(),
+        },
         errors: [],
         warnings: [],
         logger,
@@ -101,7 +107,43 @@ describe('workers/branch', () => {
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
       expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
+      expect(config.api.ensureCommentRemoval.mock.calls).toHaveLength(1);
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(1);
+    });
+    it('ensures PR and adds lock file error comment', async () => {
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+        lockFileError: false,
+        updatedLockFiles: [{}],
+      });
+      config.api.branchExists.mockReturnValueOnce(true);
+      automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
+      prWorker.ensurePr.mockReturnValueOnce({});
+      prWorker.checkAutoMerge.mockReturnValueOnce(true);
+      config.lockFileErrors = [{}];
+      await branchWorker.processBranch(config);
+      expect(config.api.ensureComment.mock.calls).toHaveLength(1);
+      expect(config.api.ensureCommentRemoval.mock.calls).toHaveLength(0);
+      expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
+      expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
+    });
+    it('ensures PR and adds lock file error comment recreate closed', async () => {
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+        lockFileError: false,
+        updatedLockFiles: [{}],
+      });
+      config.recreateClosed = true;
+      config.api.branchExists.mockReturnValueOnce(true);
+      automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
+      prWorker.ensurePr.mockReturnValueOnce({});
+      prWorker.checkAutoMerge.mockReturnValueOnce(true);
+      config.lockFileErrors = [{}];
+      await branchWorker.processBranch(config);
+      expect(config.api.ensureComment.mock.calls).toHaveLength(1);
+      expect(config.api.ensureCommentRemoval.mock.calls).toHaveLength(0);
+      expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
+      expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
     });
     it('swallows branch errors', async () => {
       packageFiles.getUpdatedPackageFiles.mockImplementationOnce(() => {
