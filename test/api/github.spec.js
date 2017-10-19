@@ -995,6 +995,16 @@ describe('api/github', () => {
       expect(get.patch.mock.calls).toHaveLength(0);
     });
   });
+  describe('ensureCommentRemoval', () => {
+    it('deletes comment if found', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
+      });
+      await github.ensureCommentRemoval(42, 'some-subject');
+      expect(get.delete.mock.calls).toHaveLength(1);
+    });
+  });
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns true if no title and all state', async () => {
       get.mockReturnValueOnce({
