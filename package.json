@@ -144,8 +144,15 @@
     "analyzeCommits": {
       "preset": "angular",
       "releaseRules": [
-        {"type": "docs", "scope": "readme.md", "release": "patch"},
-        {"type": "refactor", "release": "patch"}
+        {
+          "type": "docs",
+          "scope": "readme.md",
+          "release": "patch"
+        },
+        {
+          "type": "refactor",
+          "release": "patch"
+        }
       ]
     }
   }
