@@ -406,7 +406,7 @@ Array [
 
 exports[`lib/workers/repository/onboarding getOnboardingStatus(config) throws if no packageFiles 1`] = `[Error: no package files]`;
 
-exports[`lib/workers/repository/onboarding getOnboardingStatus(config) uses base + docker + meteor 1`] = `
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) uses base + docker 1`] = `
 Array [
   "renovate/configure",
   Array [
@@ -414,7 +414,6 @@ Array [
       "contents": "{
   \\"extends\\": [
     \\"config:base\\",
-    \\":meteor\\",
     \\":docker\\"
   ]
 }
