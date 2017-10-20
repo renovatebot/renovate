@@ -99,6 +99,12 @@ describe('api/gh-got-wrapper', () => {
     );
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
+        statusCode: 401,
+        message: 'Bad credentials',
+      })
+    );
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
         statusCode: 403,
         message:
           'You have triggered an abuse detection mechanism. Please wait a few minutes before you try again.',
