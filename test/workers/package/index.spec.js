@@ -34,9 +34,13 @@ describe('lib/workers/package/index', () => {
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
-    it('maps type', async () => {
+    it('maps and filters type', async () => {
       config.depType = 'npm';
-      npm.renovateNpmPackage.mockReturnValueOnce([{ type: 'pin' }]);
+      config.major.enabled = false;
+      npm.renovateNpmPackage.mockReturnValueOnce([
+        { type: 'pin' },
+        { type: 'major' },
+      ]);
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toHaveLength(1);
       expect(res[0]).toMatchSnapshot();

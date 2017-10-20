@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/workers/package/index renovatePackage(config) maps type 1`] = `
+exports[`lib/workers/package/index renovatePackage(config) maps and filters type 1`] = `
 Object {
   "assignees": Array [],
   "automerge": false,
