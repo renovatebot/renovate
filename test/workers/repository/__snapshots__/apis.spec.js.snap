@@ -66,6 +66,8 @@ Array [
 ]
 `;
 
+exports[`workers/repository/apis detectPackageFiles(config) skips meteor package files with no json 1`] = `Array []`;
+
 exports[`workers/repository/apis initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
 
 exports[`workers/repository/apis mergeRenovateJson(config) returns error in JSON.parse 1`] = `

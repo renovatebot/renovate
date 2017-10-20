@@ -279,10 +279,22 @@ describe('workers/repository/apis', () => {
         'modules/something/package.js',
       ]); // meteor
       config.api.findFilePaths.mockReturnValueOnce([]); // Dockerfile
-      config.api.getFileContent.mockReturnValueOnce('Npm.depends()');
+      config.api.getFileContent.mockReturnValueOnce('Npm.depends( {} )');
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
       expect(res.packageFiles).toHaveLength(1);
+    });
+    it('skips meteor package files with no json', async () => {
+      config.meteor.enabled = true;
+      config.api.findFilePaths.mockReturnValueOnce([]); // package.json
+      config.api.findFilePaths.mockReturnValueOnce([
+        'modules/something/package.js',
+      ]); // meteor
+      config.api.findFilePaths.mockReturnValueOnce([]); // Dockerfile
+      config.api.getFileContent.mockReturnValueOnce('Npm.depends(packages)');
+      const res = await apis.detectPackageFiles(config);
+      expect(res.packageFiles).toMatchSnapshot();
+      expect(res.packageFiles).toHaveLength(0);
     });
     it('finds Dockerfiles', async () => {
       config.api.findFilePaths.mockReturnValueOnce([]);
