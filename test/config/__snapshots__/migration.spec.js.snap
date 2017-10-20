@@ -30,6 +30,9 @@ Object {
   "major": Object {
     "automerge": false,
   },
+  "meteor": Object {
+    "enabled": true,
+  },
   "minor": Object {
     "automerge": true,
   },
