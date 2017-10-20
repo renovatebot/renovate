@@ -285,12 +285,11 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
-    it('uses base + docker + meteor', async () => {
+    it('uses base + docker', async () => {
       apis.detectPackageFiles = jest.fn(input => ({
         ...input,
         packageFiles: [{}, {}],
         types: {
-          meteor: true,
           docker: true,
         },
       }));
