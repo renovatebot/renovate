@@ -509,6 +509,7 @@ describe('api/github', () => {
       get.mockImplementationOnce(() => ({
         body: {
           tree: [
+            { type: 'blob', path: 'symlinks/package.json', mode: '12000' },
             { type: 'blob', path: 'package.json' },
             {
               type: 'blob',
