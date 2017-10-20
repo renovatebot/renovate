@@ -13,6 +13,7 @@ describe('config/migration', () => {
         automergeMinor: true,
         automergePatch: true,
         ignoreNodeModules: true,
+        meteor: true,
         autodiscover: 'true',
         schedule: 'on the last day of the month',
         commitMessage: '{{semanticPrefix}}some commit message',
