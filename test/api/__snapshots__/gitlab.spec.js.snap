@@ -217,7 +217,10 @@ Array [
     "user",
   ],
   Array [
-    "projects/some%2Frepo/merge_requests?state=opened",
+    "projects/some%2Frepo/merge_requests?state=opened&per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
@@ -234,7 +237,10 @@ Array [
     "user",
   ],
   Array [
-    "projects/some%2Frepo/merge_requests?state=opened",
+    "projects/some%2Frepo/merge_requests?state=opened&per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
   Array [
     "projects/some%2Frepo/merge_requests/undefined",
