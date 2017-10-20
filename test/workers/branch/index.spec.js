@@ -64,6 +64,15 @@ describe('workers/branch', () => {
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
       expect(config.logger.error.mock.calls).toHaveLength(0);
     });
+    it('skips branch if closed digest PR found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      config.api.branchExists.mockReturnValueOnce(true);
+      config.isDigest = true;
+      checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
+      await branchWorker.processBranch(config);
+      expect(parent.getParentBranch.mock.calls.length).toBe(0);
+      expect(config.logger.error.mock.calls).toHaveLength(0);
+    });
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.api.branchExists.mockReturnValueOnce(true);
