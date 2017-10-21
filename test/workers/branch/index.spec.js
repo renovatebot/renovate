@@ -82,7 +82,9 @@ describe('workers/branch', () => {
       expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('returns if no branch exists', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([]);
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [],
+      });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [],
@@ -92,7 +94,9 @@ describe('workers/branch', () => {
       expect(commit.commitFilesToBranch.mock.calls).toHaveLength(1);
     });
     it('returns if branch automerged', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
@@ -105,7 +109,9 @@ describe('workers/branch', () => {
       expect(prWorker.ensurePr.mock.calls).toHaveLength(0);
     });
     it('ensures PR and tries automerge', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
@@ -120,7 +126,9 @@ describe('workers/branch', () => {
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(1);
     });
     it('ensures PR and adds lock file error comment', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
@@ -137,7 +145,9 @@ describe('workers/branch', () => {
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
     });
     it('ensures PR and adds lock file error comment recreate closed', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
@@ -161,7 +171,9 @@ describe('workers/branch', () => {
       await branchWorker.processBranch(config);
     });
     it('throws and swallows branch errors', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
         lockFileError: true,
         updatedLockFiles: [{}],
@@ -169,7 +181,9 @@ describe('workers/branch', () => {
       await branchWorker.processBranch(config);
     });
     it('swallows pr errors', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce([{}]);
+      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
