@@ -86,6 +86,35 @@ describe('workers/repository/upgrades', () => {
       expect(res.groupName).toBeDefined();
       expect(res).toMatchSnapshot();
     });
+    it('does not group same upgrades', () => {
+      const branchUpgrades = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+      ];
+      const res = upgrades.generateConfig(branchUpgrades);
+      expect(res.foo).toBe(1);
+      expect(res.groupName).toBeUndefined();
+    });
     it('groups multiple upgrades', () => {
       const branchUpgrades = [
         {
