@@ -243,10 +243,13 @@ describe('workers/repository/apis', () => {
       jsonValidator.validate = jest.fn();
       jsonValidator.validate.mockReturnValueOnce(false);
       jsonValidator.validate.mockReturnValueOnce(false);
-      const returnConfig = await apis.mergeRenovateJson(config);
-      expect(returnConfig.foo).toBeUndefined();
-      expect(returnConfig.renovateJsonPresent).toBeUndefined();
-      expect(returnConfig.errors).toMatchSnapshot();
+      let e;
+      try {
+        await apis.mergeRenovateJson(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
   });
   describe('detectPackageFiles(config)', () => {
