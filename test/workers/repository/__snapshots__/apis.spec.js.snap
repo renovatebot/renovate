@@ -70,15 +70,6 @@ exports[`workers/repository/apis detectPackageFiles(config) skips meteor package
 
 exports[`workers/repository/apis initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
 
-exports[`workers/repository/apis mergeRenovateJson(config) returns error in JSON.parse 1`] = `
-Array [
-  Object {
-    "depName": "renovate.json",
-    "message": "Could not parse repository's renovate.json file",
-  },
-]
-`;
-
 exports[`workers/repository/apis mergeRenovateJson(config) returns error in config if renovate.json cannot be parsed 1`] = `
 Array [
   Object {
