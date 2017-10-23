@@ -73,7 +73,6 @@ Object {
       Object {
         "branchName": "bar-{{version}}",
         "depName": "bar",
-        "depNameSanitized": "bar",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -82,7 +81,6 @@ Object {
       Object {
         "branchName": "foo-{{version}}",
         "depName": "foo",
-        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -91,7 +89,6 @@ Object {
       Object {
         "branchName": "foo-{{version}}",
         "depName": "foo",
-        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "2.0.0",
       },
@@ -109,7 +106,6 @@ Object {
       Object {
         "branchName": "bar-{{version}}",
         "depName": "bar",
-        "depNameSanitized": "bar",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -118,14 +114,12 @@ Object {
       Object {
         "branchName": "foo",
         "depName": "foo",
-        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "2.0.0",
       },
       Object {
         "branchName": "foo",
         "depName": "foo",
-        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -143,7 +137,6 @@ Object {
       Object {
         "branchName": "foo",
         "depName": "foo",
-        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "2.0.0",
       },
@@ -227,7 +220,6 @@ Object {
       Object {
         "branchName": "foo-{{version}}",
         "depName": "foo",
-        "depNameSanitized": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
