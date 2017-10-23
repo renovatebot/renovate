@@ -213,7 +213,7 @@ describe('workers/repository', () => {
       expect(branchWorker.processBranch.mock.calls).toHaveLength(3);
       expect(config.logger.error.mock.calls).toHaveLength(0);
     });
-    it('stops branchWorker after lockFileError', async () => {
+    it('only processes pins first', async () => {
       config.packageFiles = ['package.json'];
       config.hasRenovateJson = true;
       onboarding.getOnboardingStatus.mockImplementation(input => ({
@@ -221,23 +221,7 @@ describe('workers/repository', () => {
         repoIsOnboarded: true,
       }));
       upgrades.branchifyUpgrades.mockReturnValueOnce({
-        upgrades: [{}, {}, {}],
-      });
-      branchWorker.processBranch.mockReturnValue('lockFileError');
-      await repositoryWorker.renovateRepository(config);
-      expect(upgrades.branchifyUpgrades.mock.calls).toHaveLength(1);
-      expect(branchWorker.processBranch.mock.calls).toHaveLength(1);
-      expect(config.logger.error.mock.calls).toHaveLength(0);
-    });
-    it('stops branchWorker after pin', async () => {
-      config.packageFiles = ['package.json'];
-      config.hasRenovateJson = true;
-      onboarding.getOnboardingStatus.mockImplementation(input => ({
-        ...input,
-        repoIsOnboarded: true,
-      }));
-      upgrades.branchifyUpgrades.mockReturnValueOnce({
-        upgrades: [{ type: 'pin' }, {}, {}],
+        upgrades: [{ isPin: true }, {}, {}],
       });
       branchWorker.processBranch.mockReturnValue('done');
       await repositoryWorker.renovateRepository(config);

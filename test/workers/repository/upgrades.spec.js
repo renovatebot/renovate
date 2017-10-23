@@ -38,9 +38,16 @@ describe('workers/repository/upgrades', () => {
           packageFile: 'frontend/package.js',
         },
       ];
-      packageFileWorker.renovateDockerfile.mockReturnValueOnce(['a']);
-      packageFileWorker.renovatePackageFile.mockReturnValueOnce(['b', 'c']);
-      packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce(['d']);
+      packageFileWorker.renovateDockerfile.mockReturnValueOnce([
+        { depName: 'a' },
+      ]);
+      packageFileWorker.renovatePackageFile.mockReturnValueOnce([
+        { depName: 'b' },
+        { depName: 'c' },
+      ]);
+      packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce([
+        { foo: 'd' },
+      ]);
       const res = await upgrades.determineRepoUpgrades(config);
       expect(res).toHaveLength(4);
     });
