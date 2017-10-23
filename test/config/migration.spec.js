@@ -19,7 +19,6 @@ describe('config/migration', () => {
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
-        semanticCommits: false,
         packageRules: [
           {
             packagePatterns: '^(@angular|typescript)',
