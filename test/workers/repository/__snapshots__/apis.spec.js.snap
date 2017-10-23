@@ -55,16 +55,9 @@ Array [
 ]
 `;
 
-exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 2`] = `true`;
+exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 2`] = `undefined`;
 
-exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 3`] = `
-Array [
-  Object {
-    "depName": "packageFiles",
-    "message": "Skipped package.json files found within ignored paths: \`node_modules/backend/package.json\`",
-  },
-]
-`;
+exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 3`] = `Array []`;
 
 exports[`workers/repository/apis detectPackageFiles(config) skips meteor package files with no json 1`] = `Array []`;
 
