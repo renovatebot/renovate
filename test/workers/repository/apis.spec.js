@@ -243,107 +243,83 @@ describe('workers/repository/apis', () => {
       jsonValidator.validate = jest.fn();
       jsonValidator.validate.mockReturnValueOnce(false);
       jsonValidator.validate.mockReturnValueOnce(false);
-      const returnConfig = await apis.mergeRenovateJson(config);
-      expect(returnConfig.foo).toBeUndefined();
-      expect(returnConfig.renovateJsonPresent).toBeUndefined();
-      expect(returnConfig.errors).toMatchSnapshot();
+      let e;
+      try {
+        await apis.mergeRenovateJson(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
   });
   describe('detectPackageFiles(config)', () => {
-    it('adds package files to object', async () => {
-      const config = {
+    let config;
+    beforeEach(() => {
+      config = {
         ...defaultConfig,
         api: {
-          findFilePaths: jest.fn(() => [
-            'package.json',
-            'backend/package.json',
-          ]),
-        },
-        meteor: {
-          enabled: false,
+          findFilePaths: jest.fn(),
+          getFileContent: jest.fn(),
         },
         logger,
         warnings: [],
       };
+      config.api.findFilePaths.mockReturnValue([]);
+    });
+    it('adds package files to object', async () => {
+      config.api.findFilePaths.mockReturnValueOnce([
+        'package.json',
+        'backend/package.json',
+      ]);
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
+      expect(res.packageFiles).toHaveLength(2);
     });
     it('finds meteor package files', async () => {
-      const config = {
-        ...defaultConfig,
-        api: {
-          findFilePaths: jest.fn(),
-        },
-        logger,
-        warnings: [],
-      };
-      config.api.findFilePaths.mockReturnValueOnce(['package.json']);
+      config.meteor.enabled = true;
+      config.api.findFilePaths.mockReturnValueOnce([]); // package.json
       config.api.findFilePaths.mockReturnValueOnce([
         'modules/something/package.js',
-      ]);
-      config.api.findFilePaths.mockReturnValueOnce([]);
-      config.meteor.enabled = true;
+      ]); // meteor
+      config.api.findFilePaths.mockReturnValueOnce([]); // Dockerfile
+      config.api.getFileContent.mockReturnValueOnce('Npm.depends( {} )');
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
+      expect(res.packageFiles).toHaveLength(1);
+    });
+    it('skips meteor package files with no json', async () => {
+      config.meteor.enabled = true;
+      config.api.findFilePaths.mockReturnValueOnce([]); // package.json
+      config.api.findFilePaths.mockReturnValueOnce([
+        'modules/something/package.js',
+      ]); // meteor
+      config.api.findFilePaths.mockReturnValueOnce([]); // Dockerfile
+      config.api.getFileContent.mockReturnValueOnce('Npm.depends(packages)');
+      const res = await apis.detectPackageFiles(config);
+      expect(res.packageFiles).toMatchSnapshot();
+      expect(res.packageFiles).toHaveLength(0);
     });
     it('finds Dockerfiles', async () => {
-      const config = {
-        ...defaultConfig,
-        api: {
-          findFilePaths: jest.fn(),
-        },
-        logger,
-        warnings: [],
-      };
-      config.api.findFilePaths.mockReturnValueOnce(['package.json']);
+      config.api.findFilePaths.mockReturnValueOnce([]);
       config.api.findFilePaths.mockReturnValueOnce([]);
       config.api.findFilePaths.mockReturnValueOnce(['Dockerfile']);
       config.docker.enabled = true;
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
+      expect(res.packageFiles).toHaveLength(1);
     });
     it('ignores node modules', async () => {
-      const config = {
-        ...defaultConfig,
-        ignorePaths: ['node_modules/'],
-        api: {
-          findFilePaths: jest.fn(() => [
-            'package.json',
-            'node_modules/backend/package.json',
-          ]),
-        },
-        logger,
-        warnings: [],
-      };
+      config.api.findFilePaths.mockReturnValueOnce([
+        'package.json',
+        'node_modules/backend/package.json',
+      ]);
+      config.api.findFilePaths.mockReturnValueOnce([]);
+      config.api.findFilePaths.mockReturnValueOnce([]);
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
+      expect(res.packageFiles).toHaveLength(1);
       expect(res.foundIgnoredPaths).toMatchSnapshot();
       expect(res.warnings).toMatchSnapshot();
-    });
-    it('defaults to package.json if found', async () => {
-      const config = {
-        ...defaultConfig,
-        api: {
-          findFilePaths: jest.fn(() => []),
-          getFileJson: jest.fn(() => ({})),
-        },
-        logger,
-      };
-      const res = await apis.detectPackageFiles(config);
-      expect(res.packageFiles).toHaveLength(1);
-      expect(res.packageFiles).toMatchSnapshot();
-    });
-    it('returns empty if package.json not found', async () => {
-      const config = {
-        ...defaultConfig,
-        api: {
-          findFilePaths: jest.fn(() => []),
-          getFileJson: jest.fn(() => null),
-        },
-        logger,
-      };
-      const res = await apis.detectPackageFiles(config);
-      expect(res.packageFiles).toEqual([]);
     });
   });
   describe('resolvePackageFiles', () => {

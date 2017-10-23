@@ -38,9 +38,16 @@ describe('workers/repository/upgrades', () => {
           packageFile: 'frontend/package.js',
         },
       ];
-      packageFileWorker.renovateDockerfile.mockReturnValueOnce(['a']);
-      packageFileWorker.renovatePackageFile.mockReturnValueOnce(['b', 'c']);
-      packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce(['d']);
+      packageFileWorker.renovateDockerfile.mockReturnValueOnce([
+        { depName: 'a' },
+      ]);
+      packageFileWorker.renovatePackageFile.mockReturnValueOnce([
+        { depName: 'b' },
+        { depName: 'c' },
+      ]);
+      packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce([
+        { foo: 'd' },
+      ]);
       const res = await upgrades.determineRepoUpgrades(config);
       expect(res).toHaveLength(4);
     });
@@ -85,6 +92,35 @@ describe('workers/repository/upgrades', () => {
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
       expect(res).toMatchSnapshot();
+    });
+    it('does not group same upgrades', () => {
+      const branchUpgrades = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+      ];
+      const res = upgrades.generateConfig(branchUpgrades);
+      expect(res.foo).toBe(1);
+      expect(res.groupName).toBeUndefined();
     });
     it('groups multiple upgrades', () => {
       const branchUpgrades = [

@@ -193,6 +193,14 @@ Array [
 ]
 `;
 
+exports[`api/gitlab findFilePaths(fileName) should return the files matching the fileName 1`] = `
+Array [
+  "package.json",
+  "src/app/package.json",
+  "src/otherapp/package.json",
+]
+`;
+
 exports[`api/gitlab getBranch returns a branch 1`] = `"foo"`;
 
 exports[`api/gitlab getBranchLastCommitTime should return a Date 1`] = `2012-09-20T08:50:22.000Z`;
@@ -209,7 +217,10 @@ Array [
     "user",
   ],
   Array [
-    "projects/some%2Frepo/merge_requests?state=opened",
+    "projects/some%2Frepo/merge_requests?state=opened&per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
@@ -226,7 +237,10 @@ Array [
     "user",
   ],
   Array [
-    "projects/some%2Frepo/merge_requests?state=opened",
+    "projects/some%2Frepo/merge_requests?state=opened&per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
   Array [
     "projects/some%2Frepo/merge_requests/undefined",
@@ -291,24 +305,13 @@ Object {
 }
 `;
 
-exports[`api/gitlab getRepos should fetch multiple pages 1`] = `
-Array [
-  Array [
-    "projects?membership=true&per_page=100&page=1",
-  ],
-  Array [
-    "projects?membership=true&per_page=100&page=2",
-  ],
-  Array [
-    "projects?membership=true&per_page=100&page=3",
-  ],
-]
-`;
-
 exports[`api/gitlab getRepos should return an array of repos 1`] = `
 Array [
   Array [
-    "projects?membership=true&per_page=100&page=1",
+    "projects?membership=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
@@ -323,7 +326,10 @@ Array [
 exports[`api/gitlab getRepos should support a custom endpoint 1`] = `
 Array [
   Array [
-    "projects?membership=true&per_page=100&page=1",
+    "projects?membership=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;

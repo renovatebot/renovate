@@ -40,6 +40,7 @@ Array [
           "someuser",
           "someotheruser",
         ],
+        "team_reviewers": Array [],
       },
       "headers": Object {
         "accept": "application/vnd.github.thor-preview+json",
@@ -61,7 +62,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -73,7 +73,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -90,7 +89,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -102,7 +100,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -119,7 +116,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -131,7 +127,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -148,7 +143,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -160,7 +154,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -177,7 +170,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -189,7 +181,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -206,7 +197,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -218,7 +208,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -235,7 +224,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -247,15 +235,12 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/commits/1111",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/package.json",
-    undefined,
   ],
 ]
 `;
@@ -325,7 +310,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -337,15 +321,12 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/commits/1111",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/package.json",
-    undefined,
   ],
 ]
 `;
@@ -452,233 +433,43 @@ Array [
 ]
 `;
 
-exports[`api/github findFilePaths(fileName) paginates 1`] = `
+exports[`api/github ensureComment add comment if not found 1`] = `
 Array [
   Array [
-    "repos/some/repo",
+    "repos/some/repo/issues/42/comments",
     Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
+      "body": Object {
+        "body": "### some-subject
+
+some
+content",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-    undefined,
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "search/code?q=repo:some/repo+filename:package.json&per_page=100",
-    undefined,
-  ],
-  Array [
-    "search/code?q=repo%3Arenovate-tests%2Fonboarding-1+filename%3Apackage.json&per_page=2&page=2",
-    undefined,
   ],
 ]
 `;
 
-exports[`api/github findFilePaths(fileName) paginates 2`] = `
+exports[`api/github ensureComment add updates comment if necessary 1`] = `
 Array [
-  "package.json",
-  "src/app/package.json",
-  "src/otherapp/package.json",
-]
-`;
+  Array [
+    "repos/some/repo/issues/comments/1234",
+    Object {
+      "body": Object {
+        "body": "### some-subject
 
-exports[`api/github findFilePaths(fileName) should return empty array if none found 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
+some
+content",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-    undefined,
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "search/code?q=repo:some/repo+filename:package.json&per_page=100",
-    undefined,
   ],
 ]
 `;
 
 exports[`api/github findFilePaths(fileName) should return the files matching the fileName 1`] = `
 Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-    undefined,
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "search/code?q=some-content+repo:some/repo+filename:package.json&per_page=100",
-    undefined,
-  ],
-]
-`;
-
-exports[`api/github findFilePaths(fileName) should return the files matching the fileName 2`] = `
-Array [
   "package.json",
   "src/app/package.json",
   "src/otherapp/package.json",
-]
-`;
-
-exports[`api/github findPr(branchName, prTitle, state) should return a PR object 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-    undefined,
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?head=theowner:master&state=all",
-    undefined,
-  ],
-]
-`;
-
-exports[`api/github findPr(branchName, prTitle, state) should return a PR object 2`] = `
-Object {
-  "displayNumber": "Pull Request #42",
-  "number": 42,
-  "state": "open",
-  "title": "PR Title",
-}
-`;
-
-exports[`api/github findPr(branchName, prTitle, state) should return null if no PR's are found 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-    undefined,
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?head=theowner:master&state=all",
-    undefined,
-  ],
-]
-`;
-
-exports[`api/github findPr(branchName, prTitle, state) should set the isClosed attribute of the PR to true if the PR is closed 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-    undefined,
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?head=theowner:master&state=all",
-    undefined,
-  ],
-]
-`;
-
-exports[`api/github findPr(branchName, prTitle, state) should set the isClosed attribute of the PR to true if the PR is closed 2`] = `
-Object {
-  "displayNumber": "Pull Request #42",
-  "isClosed": true,
-  "number": 42,
-  "state": "closed",
-  "title": "PR Title",
-}
-`;
-
-exports[`api/github getAllPrs() maps results to simple array 1`] = `
-Array [
-  Object {
-    "branchName": "renovate/a",
-    "number": 5,
-  },
-  Object {
-    "branchName": "not-renovate",
-    "number": 6,
-  },
-  Object {
-    "branchName": "renovate/b",
-    "number": 9,
-  },
 ]
 `;
 
@@ -690,35 +481,6 @@ Array [
 `;
 
 exports[`api/github getBranchLastCommitTime should return a Date 1`] = `2011-04-14T16:00:49.000Z`;
-
-exports[`api/github getBranchPr(branchName) should return null if no PR exists 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-    undefined,
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
-    undefined,
-  ],
-]
-`;
 
 exports[`api/github getBranchPr(branchName) should return the PR object 1`] = `
 Array [
@@ -732,7 +494,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -743,29 +504,15 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/pulls?state=open&base=master&head=theowner:somebranch",
-    undefined,
-  ],
-  Array [
-    "repos/some/repo/pulls/91",
-    undefined,
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
 
-exports[`api/github getBranchPr(branchName) should return the PR object 2`] = `
-Object {
-  "additions": 1,
-  "base": Object {
-    "sha": "1234",
-  },
-  "canRebase": true,
-  "commits": 1,
-  "deletions": 1,
-  "displayNumber": "Pull Request #91",
-  "number": 91,
-}
-`;
+exports[`api/github getBranchPr(branchName) should return the PR object 2`] = `null`;
 
 exports[`api/github getCommitMessages() returns commits messages 1`] = `
 Array [
@@ -786,7 +533,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -798,7 +544,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -815,7 +560,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -827,7 +571,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -844,7 +587,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -856,7 +598,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -873,7 +614,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -885,7 +625,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -902,7 +641,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -914,7 +652,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -931,7 +668,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -943,7 +679,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
-    undefined,
   ],
 ]
 `;
@@ -978,82 +713,9 @@ Object {
 }
 `;
 
-exports[`api/github getInstallationToken should retry posts 1`] = `Array []`;
-
-exports[`api/github getInstallationToken should retry posts 2`] = `"aUserToken"`;
-
 exports[`api/github getInstallationToken should return an installation token 1`] = `Array []`;
 
 exports[`api/github getInstallationToken should return an installation token 2`] = `"aUserToken"`;
-
-exports[`api/github getInstallations should retry 502s once 1`] = `
-Array [
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-]
-`;
-
-exports[`api/github getInstallations should retry 502s once 2`] = `
-Array [
-  "a",
-  "b",
-]
-`;
-
-exports[`api/github getInstallations should retry 502s until success 1`] = `
-Array [
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-  Array [
-    "app/installations",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.machine-man-preview+json",
-        "authorization": "Bearer sometoken",
-      },
-    },
-  ],
-]
-`;
-
-exports[`api/github getInstallations should retry 502s until success 2`] = `
-Array [
-  "a",
-  "b",
-]
-`;
 
 exports[`api/github getInstallations should return an array of installations 1`] = `
 Array [
@@ -1132,6 +794,21 @@ Object {
 }
 `;
 
+exports[`api/github getPr(prNo) should return a rebaseable PR if web-flow is second author 1`] = `
+Object {
+  "base": Object {
+    "sha": "1234",
+  },
+  "canRebase": true,
+  "commits": 2,
+  "displayNumber": "Pull Request #1",
+  "isUnmergeable": true,
+  "mergeable_state": "dirty",
+  "number": 1,
+  "state": "open",
+}
+`;
+
 exports[`api/github getPr(prNo) should return an unrebaseable PR if multiple authors 1`] = `
 Object {
   "base": Object {
@@ -1150,7 +827,6 @@ exports[`api/github getRepos should return an array of repos 1`] = `
 Array [
   Array [
     "user/repos",
-    undefined,
   ],
 ]
 `;
@@ -1166,7 +842,6 @@ exports[`api/github getRepos should support a custom endpoint 1`] = `
 Array [
   Array [
     "user/repos",
-    undefined,
   ],
 ]
 `;
@@ -1190,7 +865,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1202,7 +876,6 @@ Array [
   ],
   Array [
     "repos/some/repo/contents/some-path",
-    undefined,
   ],
 ]
 `;
@@ -1249,7 +922,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1282,7 +954,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1315,7 +986,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1380,7 +1050,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1392,7 +1061,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
 ]
 `;
@@ -1419,7 +1087,6 @@ exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-m
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -1436,7 +1103,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1448,11 +1114,9 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
 ]
 `;
@@ -1478,7 +1142,6 @@ exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-p
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -1497,7 +1160,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1544,7 +1206,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1556,7 +1217,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
   ],
 ]
 `;
@@ -1594,7 +1254,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1627,7 +1286,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
-    undefined,
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1639,7 +1297,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/some-branch",
-    undefined,
   ],
 ]
 `;
