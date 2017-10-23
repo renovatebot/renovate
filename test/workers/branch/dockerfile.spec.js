@@ -18,5 +18,19 @@ describe('workers/branch/dockerfile', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('returns null on error', () => {
+      const currentFileContent = null;
+      const depName = 'node';
+      const currentVersion = 'node:8';
+      const newVersion = 'node:8@sha256:abcdefghijklmnop';
+      const res = dockerfile.setNewValue(
+        currentFileContent,
+        depName,
+        currentVersion,
+        newVersion,
+        logger
+      );
+      expect(res).toBe(null);
+    });
   });
 });
