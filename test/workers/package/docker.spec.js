@@ -72,17 +72,5 @@ describe('lib/workers/package/docker', () => {
       expect(res[1].type).toEqual('minor');
       expect(res[1].newVersion).toEqual('1.1.0-something');
     });
-    it('skips if disabled', async () => {
-      delete config.currentDigest;
-      config.upgradeVersions = false;
-      config.currentTag = '1.0.0-something';
-      dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
-      dockerApi.getTags.mockReturnValueOnce([
-        '1.1.0-something',
-        '1.2.0-otherthing',
-      ]);
-      const res = await docker.renovateDockerImage(config);
-      expect(res).toHaveLength(0);
-    });
   });
 });

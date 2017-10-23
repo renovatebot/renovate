@@ -40,6 +40,7 @@ describe('lib/workers/package/index', () => {
       npm.renovateNpmPackage.mockReturnValueOnce([
         { type: 'pin' },
         { type: 'major' },
+        { type: 'minor', isMinor: true, upgradeVersions: false },
       ]);
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toHaveLength(1);
