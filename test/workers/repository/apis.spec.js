@@ -302,8 +302,16 @@ describe('workers/repository/apis', () => {
     it('finds Dockerfiles', async () => {
       config.api.findFilePaths.mockReturnValueOnce([]);
       config.api.findFilePaths.mockReturnValueOnce([]);
-      config.api.findFilePaths.mockReturnValueOnce(['Dockerfile']);
-      config.docker.enabled = true;
+      config.api.findFilePaths.mockReturnValueOnce([
+        'Dockerfile',
+        'other/Dockerfile',
+      ]);
+      config.api.getFileContent.mockReturnValueOnce(
+        '### comment\nFROM something\nRUN something'
+      );
+      config.api.getFileContent.mockReturnValueOnce(
+        'ARG foo\nFROM something\nRUN something'
+      );
       const res = await apis.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
       expect(res.packageFiles).toHaveLength(1);
