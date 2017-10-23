@@ -11,6 +11,7 @@ Array [
     "type": "pin",
   },
   Object {
+    "currentVersion": "1.0.0-something",
     "isMinor": true,
     "newDigest": undefined,
     "newFrom": "some-dep:1.1.0-something@undefined",
@@ -25,6 +26,7 @@ Array [
 exports[`lib/workers/package/docker renovateDockerImage returns major and minor upgrades 1`] = `
 Array [
   Object {
+    "currentVersion": "1.0.0",
     "isMinor": true,
     "newDigest": "sha256:one",
     "newFrom": "some-dep:1.2.0@sha256:one",
@@ -34,6 +36,7 @@ Array [
     "type": "minor",
   },
   Object {
+    "currentVersion": "1.0.0",
     "isMajor": true,
     "newDigest": "sha256:two",
     "newFrom": "some-dep:2.0.0@sha256:two",
@@ -43,6 +46,7 @@ Array [
     "type": "major",
   },
   Object {
+    "currentVersion": "1.0.0",
     "isMajor": true,
     "newDigest": "sha256:three",
     "newFrom": "some-dep:3.0.0@sha256:three",
