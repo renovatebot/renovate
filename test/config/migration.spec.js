@@ -36,12 +36,13 @@ describe('config/migration', () => {
             enabled: false,
           },
         ],
-        lockFileConfig: {
+        lockFileMaintenance: {
           automerge: 'any',
           schedule: 'before 5am every day',
         },
         devDependencies: {
           automerge: 'minor',
+          schedule: null,
         },
         depTypes: [
           'dependencies',
