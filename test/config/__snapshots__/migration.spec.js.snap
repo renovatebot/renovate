@@ -18,12 +18,13 @@ Object {
     "minor": Object {
       "automerge": true,
     },
+    "schedule": Array [],
   },
   "enabled": true,
   "ignorePaths": Array [
     "node_modules/",
   ],
-  "lockFileConfig": Object {
+  "lockFileMaintenance": Object {
     "automerge": true,
     "schedule": "before 5am",
   },
