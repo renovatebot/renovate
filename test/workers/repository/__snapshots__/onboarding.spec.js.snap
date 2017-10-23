@@ -413,8 +413,7 @@ Array [
     Object {
       "contents": "{
   \\"extends\\": [
-    \\"config:base\\",
-    \\":docker\\"
+    \\"config:base\\"
   ]
 }
 ",
