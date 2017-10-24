@@ -3,10 +3,10 @@ const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const configParser = require('../../../lib/config');
 const logger = require('../../_fixtures/logger');
 const docker = require('../../../lib/manager/docker/package');
-const npm = require('../../../lib/workers/package/npm');
+const npm = require('../../../lib/manager/npm/package');
 
 jest.mock('../../../lib/manager/docker/package');
-jest.mock('../../../lib/workers/package/npm');
+jest.mock('../../../lib/manager/npm/package');
 
 describe('lib/workers/package/index', () => {
   describe('renovatePackage(config)', () => {

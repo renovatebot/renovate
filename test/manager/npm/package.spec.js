@@ -1,6 +1,6 @@
 const npmApi = require('../../../lib/manager/npm/registry');
 const versions = require('../../../lib/workers/package/versions');
-const npm = require('../../../lib/workers/package/npm');
+const npm = require('../../../lib/manager/npm/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const logger = require('../../_fixtures/logger');
 
