@@ -23,21 +23,21 @@ describe('lib/workers/package/index', () => {
       expect(res).toMatchObject([]);
     });
     it('calls docker', async () => {
-      docker.renovateDockerImage.mockReturnValueOnce([]);
-      config.depType = 'Dockerfile';
+      docker.getPackageUpdates.mockReturnValueOnce([]);
+      config.packageFile = 'Dockerfile';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
-    it('calls npm', async () => {
-      npm.renovateNpmPackage.mockReturnValueOnce([]);
-      config.depType = 'npm';
+    it('calls meteor', async () => {
+      npm.getPackageUpdates.mockReturnValueOnce([]);
+      config.packageFile = 'package.js';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
     it('maps and filters type', async () => {
-      config.depType = 'npm';
+      config.packageFile = 'package.json';
       config.major.enabled = false;
-      npm.renovateNpmPackage.mockReturnValueOnce([
+      npm.getPackageUpdates.mockReturnValueOnce([
         { type: 'pin' },
         { type: 'major' },
         { type: 'minor', enabled: false },
@@ -46,6 +46,17 @@ describe('lib/workers/package/index', () => {
       expect(res).toHaveLength(1);
       expect(res[0]).toMatchSnapshot();
       expect(res[0].groupName).toEqual('Pin Dependencies');
+    });
+    it('throws', async () => {
+      npm.getPackageUpdates.mockReturnValueOnce([]);
+      config.packageFile = 'something-else';
+      let e;
+      try {
+        await pkgWorker.renovatePackage(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
   });
 });
