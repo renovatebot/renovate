@@ -382,6 +382,11 @@ describe('workers/repository/apis', () => {
       const res = await apis.resolvePackageFiles(config);
       expect(res.packageFiles).toHaveLength(1);
     });
+    it('handles dockerfile with no content', async () => {
+      config.packageFiles = [{ packageFile: 'Dockerfile' }];
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(0);
+    });
     it('handles dockerfile with no FROM', async () => {
       config.packageFiles = [{ packageFile: 'Dockerfile' }];
       config.api.getFileContent.mockReturnValueOnce(
