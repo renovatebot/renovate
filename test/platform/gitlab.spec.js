@@ -171,13 +171,13 @@ describe('platform/gitlab', () => {
       expect(get.mock.calls).toMatchSnapshot();
     });
   });
-  describe('findFilePaths(fileName)', () => {
+  describe('getFileList', () => {
     it('returns empty array if error', async () => {
       await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      const files = await gitlab.findFilePaths('someething');
+      const files = await gitlab.getFileList();
       expect(files).toEqual([]);
     });
     it('warns if truncated result', async () => {
@@ -185,7 +185,7 @@ describe('platform/gitlab', () => {
       get.mockImplementationOnce(() => ({
         body: [],
       }));
-      const files = await gitlab.findFilePaths('package.json');
+      const files = await gitlab.getFileList();
       expect(files.length).toBe(0);
     });
     it('caches the result', async () => {
@@ -193,9 +193,9 @@ describe('platform/gitlab', () => {
       get.mockImplementationOnce(() => ({
         body: [],
       }));
-      let files = await gitlab.findFilePaths('package.json');
+      let files = await gitlab.getFileList();
       expect(files.length).toBe(0);
-      files = await gitlab.findFilePaths('package.js');
+      files = await gitlab.getFileList();
       expect(files.length).toBe(0);
     });
     it('should return the files matching the fileName', async () => {
@@ -212,7 +212,7 @@ describe('platform/gitlab', () => {
           { type: 'blob', path: 'src/otherapp/package.json' },
         ],
       }));
-      const files = await gitlab.findFilePaths('package.json');
+      const files = await gitlab.getFileList();
       expect(files).toMatchSnapshot();
     });
   });

@@ -465,14 +465,6 @@ content",
 ]
 `;
 
-exports[`platform/github findFilePaths(fileName) should return the files matching the fileName 1`] = `
-Array [
-  "package.json",
-  "src/app/package.json",
-  "src/otherapp/package.json",
-]
-`;
-
 exports[`platform/github getAllRenovateBranches() should return all renovate branches 1`] = `
 Array [
   "renovate/a",
@@ -687,6 +679,15 @@ exports[`platform/github getFileJson(filePatch, branchName) should return the fi
 Object {
   "hello": "world",
 }
+`;
+
+exports[`platform/github getFileList should return the files matching the fileName 1`] = `
+Array [
+  "package.json",
+  "some-dir/package.json.some-thing-else",
+  "src/app/package.json",
+  "src/otherapp/package.json",
+]
 `;
 
 exports[`platform/github getInstallationRepositories should return an array of repositories 1`] = `
