@@ -6,7 +6,7 @@ describe('config/index', () => {
     let configParser;
     let defaultArgv;
     let ghGot;
-    let glGot;
+    let get;
     let githubApp;
     beforeEach(() => {
       jest.resetModules();
@@ -15,7 +15,7 @@ describe('config/index', () => {
       jest.mock('gh-got');
       ghGot = require('gh-got');
       jest.mock('gl-got');
-      glGot = require('gl-got');
+      get = require('gl-got');
       jest.mock('../../lib/config/github-app');
       githubApp = require('../../lib/config/github-app');
       githubApp.getRepositories = jest.fn();
@@ -104,7 +104,7 @@ describe('config/index', () => {
       }));
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(1);
-      expect(glGot.mock.calls.length).toBe(0);
+      expect(get.mock.calls.length).toBe(0);
     });
     it('autodiscovers gitlab platform', async () => {
       const env = {};
@@ -113,7 +113,8 @@ describe('config/index', () => {
         '--platform=gitlab',
         '--token=abc',
       ]);
-      glGot.mockImplementationOnce(() => ({
+      get.mockImplementationOnce(() => ({
+        headers: {},
         body: [
           {
             path_with_namespace: 'a/b',
@@ -122,7 +123,7 @@ describe('config/index', () => {
       }));
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(0);
-      expect(glGot.mock.calls.length).toBe(1);
+      expect(get.mock.calls.length).toBe(1);
     });
     it('logs if no autodiscovered repositories', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
@@ -132,7 +133,7 @@ describe('config/index', () => {
       }));
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(1);
-      expect(glGot.mock.calls.length).toBe(0);
+      expect(get.mock.calls.length).toBe(0);
     });
     it('adds a log file', async () => {
       const env = { GITHUB_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
@@ -142,7 +143,7 @@ describe('config/index', () => {
       }));
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(1);
-      expect(glGot.mock.calls.length).toBe(0);
+      expect(get.mock.calls.length).toBe(0);
     });
   });
   describe('mergeChildConfig(parentConfig, childConfig)', () => {
@@ -172,6 +173,48 @@ describe('config/index', () => {
       const configParser = require('../../lib/config/index.js');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.depTypes).toMatchSnapshot();
+    });
+    it('merges packageRules', () => {
+      const parentConfig = { ...defaultConfig };
+      Object.assign(parentConfig, {
+        packageRules: [{ a: 1 }, { a: 2 }],
+      });
+      const childConfig = {
+        packageRules: [{ a: 3 }, { a: 4 }],
+      };
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.packageRules.map(rule => rule.a)).toMatchObject([
+        1,
+        2,
+        3,
+        4,
+      ]);
+    });
+    it('handles null parent packageRules', () => {
+      const parentConfig = { ...defaultConfig };
+      Object.assign(parentConfig, {
+        packageRules: null,
+      });
+      const childConfig = {
+        packageRules: [{ a: 3 }, { a: 4 }],
+      };
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.packageRules).toHaveLength(2);
+    });
+    it('handles null child packageRules', () => {
+      const parentConfig = { ...defaultConfig };
+      parentConfig.packageRules = [{ a: 3 }, { a: 4 }];
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, {});
+      expect(config.packageRules).toHaveLength(2);
+    });
+    it('handles undefined childConfig', () => {
+      const parentConfig = { ...defaultConfig };
+      const configParser = require('../../lib/config/index.js');
+      const config = configParser.mergeChildConfig(parentConfig, undefined);
+      expect(config).toMatchObject(parentConfig);
     });
   });
 });

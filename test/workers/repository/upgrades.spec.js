@@ -30,18 +30,26 @@ describe('workers/repository/upgrades', () => {
     });
     it('returns array if upgrades found', async () => {
       config.packageFiles = [
-        'package.json',
+        'Dockerfile',
         {
           packageFile: 'backend/package.json',
         },
         {
-          packageFile: 'frontend/package.json',
+          packageFile: 'frontend/package.js',
         },
       ];
-      packageFileWorker.renovatePackageFile.mockReturnValueOnce(['a']);
-      packageFileWorker.renovatePackageFile.mockReturnValueOnce(['b', 'c']);
+      packageFileWorker.renovateDockerfile.mockReturnValueOnce([
+        { depName: 'a' },
+      ]);
+      packageFileWorker.renovatePackageFile.mockReturnValueOnce([
+        { depName: 'b' },
+        { depName: 'c' },
+      ]);
+      packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce([
+        { foo: 'd' },
+      ]);
       const res = await upgrades.determineRepoUpgrades(config);
-      expect(res.length).toBe(3);
+      expect(res).toHaveLength(4);
     });
   });
   describe('generateConfig(branchUpgrades)', () => {
@@ -53,6 +61,7 @@ describe('workers/repository/upgrades', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           semanticCommits: true,
+          semanticPrefix: 'some-prefix:',
           lazyGrouping: true,
           foo: 1,
           group: {
@@ -84,36 +93,65 @@ describe('workers/repository/upgrades', () => {
       expect(res.groupName).toBeDefined();
       expect(res).toMatchSnapshot();
     });
-  });
-  it('groups multiple upgrades', () => {
-    const branchUpgrades = [
-      {
-        depName: 'some-dep',
-        groupName: 'some-group',
-        branchName: 'some-branch',
-        prTitle: 'some-title',
-        lazyGrouping: true,
-        foo: 1,
-        group: {
-          foo: 2,
+    it('does not group same upgrades', () => {
+      const branchUpgrades = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
         },
-      },
-      {
-        depName: 'some-other-dep',
-        groupName: 'some-group',
-        branchName: 'some-branch',
-        prTitle: 'some-title',
-        lazyGrouping: true,
-        foo: 1,
-        group: {
-          foo: 2,
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
         },
-      },
-    ];
-    const res = upgrades.generateConfig(branchUpgrades);
-    expect(res.foo).toBe(2);
-    expect(res.groupName).toBeDefined();
-    expect(res).toMatchSnapshot();
+      ];
+      const res = upgrades.generateConfig(branchUpgrades);
+      expect(res.foo).toBe(1);
+      expect(res.groupName).toBeUndefined();
+    });
+    it('groups multiple upgrades', () => {
+      const branchUpgrades = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+        {
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+      ];
+      const res = upgrades.generateConfig(branchUpgrades);
+      expect(res.foo).toBe(2);
+      expect(res.groupName).toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('groupByBranch(upgrades)', () => {
     it('returns empty object if no input array', async () => {
@@ -123,6 +161,7 @@ describe('workers/repository/upgrades', () => {
     it('returns one branch if one input', async () => {
       const input = [
         {
+          depName: 'foo',
           branchName: 'foo-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
@@ -135,16 +174,19 @@ describe('workers/repository/upgrades', () => {
     it('does not group if different compiled branch names', async () => {
       const input = [
         {
+          depName: 'foo',
           branchName: 'foo-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
         },
         {
+          depName: 'foo',
           branchName: 'foo-{{version}}',
           version: '2.0.0',
           prTitle: 'some-title',
         },
         {
+          depName: 'bar',
           branchName: 'bar-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
@@ -157,16 +199,19 @@ describe('workers/repository/upgrades', () => {
     it('groups if same compiled branch names', async () => {
       const input = [
         {
+          depName: 'foo',
           branchName: 'foo',
           version: '1.1.0',
           prTitle: 'some-title',
         },
         {
+          depName: 'foo',
           branchName: 'foo',
           version: '2.0.0',
           prTitle: 'some-title',
         },
         {
+          depName: 'bar',
           branchName: 'bar-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
@@ -179,6 +224,7 @@ describe('workers/repository/upgrades', () => {
     it('groups if same compiled group name', async () => {
       const input = [
         {
+          depName: 'foo',
           branchName: 'foo',
           prTitle: 'some-title',
           version: '1.1.0',
@@ -186,11 +232,13 @@ describe('workers/repository/upgrades', () => {
           group: { branchName: 'renovate/{{groupSlug}}' },
         },
         {
+          depName: 'foo',
           branchName: 'foo',
           prTitle: 'some-title',
           version: '2.0.0',
         },
         {
+          depName: 'bar',
           branchName: 'bar-{{version}}',
           prTitle: 'some-title',
           version: '1.1.0',

@@ -5,15 +5,43 @@ Object {
   "branchName": "some-branch",
   "depName": "some-dep",
   "foo": 1,
-  "prTitle": "some-title",
+  "prTitle": "some-prefix: some-title",
   "semanticCommits": true,
+  "semanticPrefix": "some-prefix:",
   "upgrades": Array [
     Object {
       "branchName": "some-branch",
       "depName": "some-dep",
       "foo": 1,
-      "prTitle": "some-title",
+      "prTitle": "some-prefix: some-title",
       "semanticCommits": true,
+      "semanticPrefix": "some-prefix:",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/upgrades generateConfig(branchUpgrades) groups multiple upgrades 1`] = `
+Object {
+  "branchName": "some-branch",
+  "depName": "some-dep",
+  "foo": 2,
+  "groupName": "some-group",
+  "prTitle": "some-title",
+  "upgrades": Array [
+    Object {
+      "branchName": "some-branch",
+      "depName": "some-dep",
+      "foo": 2,
+      "groupName": "some-group",
+      "prTitle": "some-title",
+    },
+    Object {
+      "branchName": "some-branch",
+      "depName": "some-other-dep",
+      "foo": 2,
+      "groupName": "some-group",
+      "prTitle": "some-title",
     },
   ],
 }
@@ -44,6 +72,7 @@ Object {
     "bar-1.1.0": Array [
       Object {
         "branchName": "bar-{{version}}",
+        "depName": "bar",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -51,6 +80,7 @@ Object {
     "foo-1.1.0": Array [
       Object {
         "branchName": "foo-{{version}}",
+        "depName": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -58,6 +88,7 @@ Object {
     "foo-2.0.0": Array [
       Object {
         "branchName": "foo-{{version}}",
+        "depName": "foo",
         "prTitle": "some-title",
         "version": "2.0.0",
       },
@@ -74,6 +105,7 @@ Object {
     "bar-1.1.0": Array [
       Object {
         "branchName": "bar-{{version}}",
+        "depName": "bar",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -81,11 +113,13 @@ Object {
     "foo": Array [
       Object {
         "branchName": "foo",
+        "depName": "foo",
         "prTitle": "some-title",
         "version": "2.0.0",
       },
       Object {
         "branchName": "foo",
+        "depName": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -102,6 +136,7 @@ Object {
     "foo": Array [
       Object {
         "branchName": "foo",
+        "depName": "foo",
         "prTitle": "some-title",
         "version": "2.0.0",
       },
@@ -109,6 +144,7 @@ Object {
     "renovate/my-group": Array [
       Object {
         "branchName": "bar-{{version}}",
+        "depName": "bar",
         "group": Object {
           "branchName": "renovate/my-group",
         },
@@ -119,6 +155,7 @@ Object {
       },
       Object {
         "branchName": "foo",
+        "depName": "foo",
         "group": Object {
           "branchName": "renovate/{{groupSlug}}",
         },
@@ -182,6 +219,7 @@ Object {
     "foo-1.1.0": Array [
       Object {
         "branchName": "foo-{{version}}",
+        "depName": "foo",
         "prTitle": "some-title",
         "version": "1.1.0",
       },
@@ -189,31 +227,5 @@ Object {
   },
   "errors": Array [],
   "warnings": Array [],
-}
-`;
-
-exports[`workers/repository/upgrades groups multiple upgrades 1`] = `
-Object {
-  "branchName": "some-branch",
-  "depName": "some-dep",
-  "foo": 2,
-  "groupName": "some-group",
-  "prTitle": "some-title",
-  "upgrades": Array [
-    Object {
-      "branchName": "some-branch",
-      "depName": "some-dep",
-      "foo": 2,
-      "groupName": "some-group",
-      "prTitle": "some-title",
-    },
-    Object {
-      "branchName": "some-branch",
-      "depName": "some-other-dep",
-      "foo": 2,
-      "groupName": "some-group",
-      "prTitle": "some-title",
-    },
-  ],
 }
 `;

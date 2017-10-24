@@ -1,12 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`config/migration migrateConfig(config) it migrates config 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
 Object {
+  "schedule": "after 5:00pm on wednesday and thursday",
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
+Object {
+  "autodiscover": true,
+  "automerge": false,
+  "commitMessage": "some commit message",
+  "devDependencies": Object {
+    "major": Object {
+      "automerge": false,
+    },
+    "minor": Object {
+      "automerge": true,
+    },
+    "schedule": Array [],
+  },
   "enabled": true,
+  "ignorePaths": Array [
+    "node_modules/",
+  ],
+  "lockFileMaintenance": Object {
+    "automerge": true,
+    "schedule": "before 5am",
+  },
+  "major": Object {
+    "automerge": false,
+  },
+  "meteor": Object {
+    "enabled": true,
+  },
+  "minor": Object {
+    "automerge": true,
+  },
+  "onboarding": false,
   "optionalDependencies": Object {
+    "major": Object {
+      "automerge": false,
+    },
+    "minor": Object {
+      "automerge": true,
+    },
     "respectLatest": false,
+    "schedule": "before 5am on Monday",
   },
   "packageRules": Array [
+    Object {
+      "excludePackageNames": "foo",
+      "groupName": "angular packages",
+      "packagePatterns": "^(@angular|typescript)",
+    },
+    Object {
+      "groupName": "foo",
+      "packagePatterns": Array [
+        "^foo",
+      ],
+    },
     Object {
       "enabled": false,
       "packageNames": Array [
@@ -17,13 +70,27 @@ Object {
       ],
     },
   ],
-  "schedule": Array [
-    "after 5pm",
+  "patch": Object {
+    "automerge": true,
+  },
+  "prTitle": "some pr title",
+  "schedule": "on the first day of the month",
+  "semanticPrefix": "fix(deps):",
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it migrates packages 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "groupName": "angular packages",
+      "packagePatterns": "^(@angular|typescript)",
+    },
   ],
 }
 `;
 
-exports[`config/migration migrateConfig(config) it migrates subconfig 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) it migrates subconfig 1`] = `
 Object {
   "lockFileMaintenance": Object {
     "optionalDependencies": Object {
@@ -31,4 +98,53 @@ Object {
     },
   },
 }
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it overrides existing automerge setting 1`] = `
+Object {
+  "major": Object {
+    "automerge": false,
+  },
+  "minor": Object {
+    "automerge": true,
+  },
+  "packageRules": Array [
+    Object {
+      "major": Object {
+        "automerge": false,
+      },
+      "minor": Object {
+        "automerge": false,
+      },
+      "packagePatterns": "^(@angular|typescript)",
+      "patch": Object {
+        "automerge": true,
+      },
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
+Object {
+  "dependencies": Object {
+    "schedule": Array [
+      "after 10pm",
+      "before 7am",
+    ],
+  },
+  "devDependencies": Object {
+    "schedule": Array [
+      "after 10pm every weekday",
+      "before 7am every weekday",
+    ],
+  },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 2`] = `
+Array [
+  "after 10pm every weekday",
+  "before 7am every weekday",
+]
 `;

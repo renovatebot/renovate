@@ -2,7 +2,7 @@
 
 # renovate
 
-Keep npm dependencies up-to-date.
+Keep dependencies up-to-date.
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/singapore/renovate/master/license)
 [![codecov](https://codecov.io/gh/singapore/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/singapore/renovate)
@@ -13,12 +13,17 @@ Keep npm dependencies up-to-date.
 ## Why
 
 -   Creates or updates Pull Requests for each dependency that needs updating
--   Discovers and processes all `package.json` files in repository (supports monorepo architecture)
+-   Discovers and processes all `package.json` files in repository (supports monorepo architecture including yarn workspaces)
 -   Supports multiple major versions per-dependency at once
 -   Configurable via file, environment, CLI, and `package.json`
--   Supports `yarn.lock` and `package-lock.json` files
--   Supports GitHub and GitLab and vsts (soon!)
--   Open source and can be self-hosted
+-   Supports eslint-like preset configs for ease of use
+-   Updates `yarn.lock` and `package-lock.json` files natively
+-   Supports GitHub and GitLab (and vsts soon!)
+-   Open source and can be self-hosted or used via GitHub App (or in VSTS marketplace)
+
+## Configuration Help
+
+If you would like help on your Renovate configuration, or simply get someone to review it, we have created a config-help repository https://github.com/renovateapp/config-help/issues where you can post an issue with your config.
 
 ## GitHub App
 
@@ -32,7 +37,7 @@ $ npm install -g renovate
 
 ## Authentication
 
-You need to select a repository user for `renovate` to assume the identity of, and generate a Personal Access Token. It's recommended that you use a dedicated "bot" account for this to avoid user confusion.
+You need to select a repository user for `renovate` to assume the identity of, and generate a Personal Access Token. It's strongly recommended that you use a dedicated "bot" account for this to avoid user confusion and to avoid the Renovate bot mistaking changes you have made or PRs you have raised for its own.
 
 You can find instructions for GitHub [here](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) (select "repo" permissions)
 
@@ -56,6 +61,8 @@ See [deployment docs](https://github.com/singapore/renovate/blob/master/docs/dep
 ## Configuration
 
 The [Configuration](https://github.com/singapore/renovate/blob/master/docs/configuration.md) and [Configuration FAQ](https://github.com/singapore/renovate/blob/master/docs/faq.md) documents should be helpful.
+
+You can also raise an issue in https://github.com/renovateapp/config-help if you'd like to get your config reviewed or ask any questions.
 
 ## Design Decisions
 

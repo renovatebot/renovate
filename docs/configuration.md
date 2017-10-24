@@ -74,35 +74,48 @@ $ node renovate --help
     --log-file <string>                  Log file path
     --log-file-level <string>            Log file log level
     --onboarding [boolean]               Require a Configuration PR first
+    --private-key <string>               Server-side private key
+    --encrypted <json>                   A configuration object containing configuration encrypted with project key
     --timezone <string>                  [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+    --update-not-scheduled [boolean]     Whether to update (but not create) branches when not scheduled
     --onboarding [boolean]               Require a Configuration PR first
     --platform <string>                  Platform type of repository
     --endpoint <string>                  Custom endpoint to use
     --token <string>                     Repository Auth Token
+    --npmrc <string>                     String copy of npmrc file. Use \n instead of line breaks
+    --yarnrc <string>                    String copy of yarnrc file. Use \n instead of line breaks
+    --ignore-npmrc-file [boolean]        Whether to ignore any .npmrc file found in repository
+    --autodiscover [boolean]             Autodiscover all repositories
     --autodiscover [boolean]             Autodiscover all repositories
     --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
     --github-app-key <string>            GitHub App Private Key (.pem file contents)
     --package-files <list>               Package file paths
-    --ignore-node-modules [boolean]      Skip any package.json files found within node_modules folders
+    --ignore-paths <list>                Skip any package.json whose path matches one of these.
     --ignore-deps <list>                 Dependencies to ignore
+    --pin-digests [boolean]              Whether to add digests to Dockerfile source images
     --pin-versions [boolean]             Convert ranged versions in package.json to pinned versions
     --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches
     --separate-patch-releases [boolean]  If set to true, it will separate minor and patch updates into separate branches
     --ignore-future [boolean]            Ignore versions tagged as "future"
     --ignore-unstable [boolean]          Ignore versions with unstable semver
     --respect-latest [boolean]           Ignore versions newer than npm "latest" version
+    --branch-prefix <string>             Prefix to use for all branch names
     --semantic-commits [boolean]         Enable semantic commit prefixes for commits and PR titles
     --semantic-prefix <string>           Prefix to use if semantic commits are enabled
     --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
     --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
+    --unpublish-safe [boolean]           Set a status check for unpublish-safe upgrades
     --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
-    --automerge <string>                 What types of upgrades to merge to base branch automatically. Values: none, patch, minor or any
+    --pr-not-pending-hours <integer>     Timeout in hours for when prCreation=not-pending
+    --automerge [boolean]                Whether to automerge branches/PRs automatically, without human intervention
     --automerge-type <string>            How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only
     --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
     --group-name <string>                Human understandable name for the dependency group
     --labels <list>                      Labels to add to Pull Request
     --assignees <list>                   Assignees for Pull Request
     --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
+    --npm <json>                         Configuration object for npm package.json renovation
+    --meteor <json>                      Configuration object for meteor package.js renovation
     -h, --help                           output usage information
   Examples:
 
@@ -145,6 +158,22 @@ Obviously, you can't set repository or package file location with this method.
   <th>CLI</th>
 </tr>
 <tr>
+  <td>`extends`</td>
+  <td>Configuration presets to use/extend</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td>`RENOVATE_EXTENDS`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`description`</td>
+  <td>Plain text description for a config or preset</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
   <td>`enabled`</td>
   <td>Enable or disable renovate</td>
   <td>boolean</td>
@@ -185,6 +214,22 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--onboarding`<td>
 </tr>
 <tr>
+  <td>`privateKey`</td>
+  <td>Server-side private key</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_PRIVATE_KEY`</td>
+  <td>`--private-key`<td>
+</tr>
+<tr>
+  <td>`encrypted`</td>
+  <td>A configuration object containing configuration encrypted with project key</td>
+  <td>json</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_ENCRYPTED`</td>
+  <td>`--encrypted`<td>
+</tr>
+<tr>
   <td>`timezone`</td>
   <td>[IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)</td>
   <td>string</td>
@@ -199,6 +244,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>[]</pre></td>
   <td></td>
   <td><td>
+</tr>
+<tr>
+  <td>`updateNotScheduled`</td>
+  <td>Whether to update (but not create) branches when not scheduled</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_UPDATE_NOT_SCHEDULED`</td>
+  <td>`--update-not-scheduled`<td>
 </tr>
 <tr>
   <td>`onboarding`</td>
@@ -231,6 +284,38 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>null</pre></td>
   <td>`RENOVATE_TOKEN`</td>
   <td>`--token`<td>
+</tr>
+<tr>
+  <td>`npmrc`</td>
+  <td>String copy of npmrc file. Use \n instead of line breaks</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_NPMRC`</td>
+  <td>`--npmrc`<td>
+</tr>
+<tr>
+  <td>`yarnrc`</td>
+  <td>String copy of yarnrc file. Use \n instead of line breaks</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_YARNRC`</td>
+  <td>`--yarnrc`<td>
+</tr>
+<tr>
+  <td>`ignoreNpmrcFile`</td>
+  <td>Whether to ignore any .npmrc file found in repository</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_IGNORE_NPMRC_FILE`</td>
+  <td>`--ignore-npmrc-file`<td>
+</tr>
+<tr>
+  <td>`autodiscover`</td>
+  <td>Autodiscover all repositories</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_AUTODISCOVER`</td>
+  <td>`--autodiscover`<td>
 </tr>
 <tr>
   <td>`autodiscover`</td>
@@ -281,18 +366,18 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--package-files`<td>
 </tr>
 <tr>
-  <td>`ignoreNodeModules`</td>
-  <td>Skip any package.json files found within node_modules folders</td>
-  <td>boolean</td>
-  <td><pre>true</pre></td>
-  <td>`RENOVATE_IGNORE_NODE_MODULES`</td>
-  <td>`--ignore-node-modules`<td>
+  <td>`ignorePaths`</td>
+  <td>Skip any package.json whose path matches one of these.</td>
+  <td>list</td>
+  <td><pre>["node_modules/"]</pre></td>
+  <td>`RENOVATE_IGNORE_PATHS`</td>
+  <td>`--ignore-paths`<td>
 </tr>
 <tr>
   <td>`dependencies`</td>
   <td>Configuration specifically for `package.json`>`dependencies`</td>
   <td>json</td>
-  <td><pre>{}</pre></td>
+  <td><pre>{"semanticPrefix": "fix(deps):"}</pre></td>
   <td>`RENOVATE_DEPENDENCIES`</td>
   <td><td>
 </tr>
@@ -300,7 +385,14 @@ Obviously, you can't set repository or package file location with this method.
   <td>`devDependencies`</td>
   <td>Configuration specifically for `package.json`>`devDependencies`</td>
   <td>json</td>
-  <td><pre>{}</pre></td>
+  <td><pre>{
+  "pin": {
+    "group": {
+      "commitMessage": "Pin devDependencies",
+      "prTitle": "Pin devDependencies"
+    }
+  }
+}</pre></td>
   <td>`RENOVATE_DEV_DEPENDENCIES`</td>
   <td><td>
 </tr>
@@ -369,6 +461,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><td>
 </tr>
 <tr>
+  <td>`pinDigests`</td>
+  <td>Whether to add digests to Dockerfile source images</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_PIN_DIGESTS`</td>
+  <td>`--pin-digests`<td>
+</tr>
+<tr>
   <td>`pinVersions`</td>
   <td>Convert ranged versions in package.json to pinned versions</td>
   <td>boolean</td>
@@ -417,6 +517,14 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--respect-latest`<td>
 </tr>
 <tr>
+  <td>`branchPrefix`</td>
+  <td>Prefix to use for all branch names</td>
+  <td>string</td>
+  <td><pre>"renovate/"</pre></td>
+  <td>`RENOVATE_BRANCH_PREFIX`</td>
+  <td>`--branch-prefix`<td>
+</tr>
+<tr>
   <td>`major`</td>
   <td>Configuration to apply when an update type is major</td>
   <td>json</td>
@@ -436,15 +544,34 @@ Obviously, you can't set repository or package file location with this method.
   <td>`patch`</td>
   <td>Configuration to apply when an update type is patch. Only applies if `separatePatchReleases` is set to true</td>
   <td>json</td>
-  <td><pre>{"branchName": "renovate/{{depName}}-{{newVersionMajor}}.{{newVersionMinor}}.x"}</pre></td>
+  <td><pre>{
+  "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.{{newVersionMinor}}.x"
+}</pre></td>
   <td>`RENOVATE_PATCH`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`pin`</td>
+  <td>Configuration to apply when an update type is pin.</td>
+  <td>json</td>
+  <td><pre>{
+  "unpublishSafe": false,
+  "recreateClosed": true,
+  "groupName": "Pin Dependencies",
+  "group": {
+    "commitMessage": "Pin Dependencies",
+    "prTitle": "{{groupName}}",
+    "semanticPrefix": "refactor(deps):"
+  }
+}</pre></td>
+  <td>`RENOVATE_PIN`</td>
   <td><td>
 </tr>
 <tr>
   <td>`semanticCommits`</td>
   <td>Enable semantic commit prefixes for commits and PR titles</td>
   <td>boolean</td>
-  <td><pre>false</pre></td>
+  <td><pre>null</pre></td>
   <td>`RENOVATE_SEMANTIC_COMMITS`</td>
   <td>`--semantic-commits`<td>
 </tr>
@@ -452,7 +579,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`semanticPrefix`</td>
   <td>Prefix to use if semantic commits are enabled</td>
   <td>string</td>
-  <td><pre>"chore(deps): "</pre></td>
+  <td><pre>"chore(deps):"</pre></td>
   <td>`RENOVATE_SEMANTIC_PREFIX`</td>
   <td>`--semantic-prefix`<td>
 </tr>
@@ -473,6 +600,14 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--rebase-stale-prs`<td>
 </tr>
 <tr>
+  <td>`unpublishSafe`</td>
+  <td>Set a status check for unpublish-safe upgrades</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_UNPUBLISH_SAFE`</td>
+  <td>`--unpublish-safe`<td>
+</tr>
+<tr>
   <td>`prCreation`</td>
   <td>When to create the PR for a branch. Values: immediate, not-pending, status-success.</td>
   <td>string</td>
@@ -481,10 +616,18 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--pr-creation`<td>
 </tr>
 <tr>
+  <td>`prNotPendingHours`</td>
+  <td>Timeout in hours for when prCreation=not-pending</td>
+  <td>integer</td>
+  <td><pre>12</pre></td>
+  <td>`RENOVATE_PR_NOT_PENDING_HOURS`</td>
+  <td>`--pr-not-pending-hours`<td>
+</tr>
+<tr>
   <td>`automerge`</td>
-  <td>What types of upgrades to merge to base branch automatically. Values: none, patch, minor or any</td>
-  <td>string</td>
-  <td><pre>"none"</pre></td>
+  <td>Whether to automerge branches/PRs automatically, without human intervention</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
   <td>`RENOVATE_AUTOMERGE`</td>
   <td>`--automerge`<td>
 </tr>
@@ -508,7 +651,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`branchName`</td>
   <td>Branch name template</td>
   <td>string</td>
-  <td><pre>"renovate/{{depName}}-{{newVersionMajor}}.x"</pre></td>
+  <td><pre>"{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x"</pre></td>
   <td>`RENOVATE_BRANCH_NAME`</td>
   <td><td>
 </tr>
@@ -516,7 +659,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`commitMessage`</td>
   <td>Commit message template</td>
   <td>string</td>
-  <td><pre>"{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}"</pre></td>
+  <td><pre>"Update dependency {{depName}} to v{{newVersion}}"</pre></td>
   <td>`RENOVATE_COMMIT_MESSAGE`</td>
   <td><td>
 </tr>
@@ -524,7 +667,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`prTitle`</td>
   <td>Pull Request title template</td>
   <td>string</td>
-  <td><pre>"{{semanticPrefix}}{{#if isPin}}Pin{{else}}{{#if isRollback}}Roll back{{else}}Update{{/if}}{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}"</pre></td>
+  <td><pre>"{{#if isPin}}Pin{{else}}{{#if isRollback}}Roll back{{else}}Update{{/if}}{{/if}} dependency {{depName}} to {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newVersion}}{{/if}}{{/if}}"</pre></td>
   <td>`RENOVATE_PR_TITLE`</td>
   <td><td>
 </tr>
@@ -532,16 +675,8 @@ Obviously, you can't set repository or package file location with this method.
   <td>`prBody`</td>
   <td>Pull Request body template</td>
   <td>string</td>
-  <td><pre>"This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{depName}}]({{repositoryUrl}}){{else}}`{{depName}}`{{/if}} from version `{{currentVersion}}` to `{{newVersion}}`{{#if isRollback}}. This is necessary and important because version `{{currentVersion}}` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}\n{{#if releases.length}}\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n### Commits\n\n<details>\n<summary>{{githubName}}</summary>\n\n{{#each releases as |release|}}\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com)."</pre></td>
+  <td><pre>"This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{depName}}]({{repositoryUrl}}){{else}}`{{depName}}`{{/if}} from `{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{currentVersion}}` to `{{#unless isRange}}v{{/unless}}{{newVersion}}`{{#if isRollback}}. This is necessary and important because `v{{currentVersion}}` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}\n{{#if releases.length}}\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n### Commits\n\n<details>\n<summary>{{githubName}}</summary>\n\n{{#each releases as |release|}}\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com)."</pre></td>
   <td>`RENOVATE_PR_BODY`</td>
-  <td><td>
-</tr>
-<tr>
-  <td>`yarnCacheFolder`</td>
-  <td>Location of yarn cache folder to use. Set to empty string to disable</td>
-  <td>string</td>
-  <td><pre>"/tmp/yarn-cache"</pre></td>
-  <td>`RENOVATE_YARN_CACHE_FOLDER`</td>
   <td><td>
 </tr>
 <tr>
@@ -550,13 +685,13 @@ Obviously, you can't set repository or package file location with this method.
   <td>json</td>
   <td><pre>{
   "enabled": true,
-  "groupName": "Lock File Maintenance",
   "recreateClosed": true,
-  "branchName": "renovate/lock-files",
-  "commitMessage": "{{semanticPrefix}}Update lock file",
-  "prTitle": "{{semanticPrefix}}Lock file maintenance",
+  "branchName": "{{branchPrefix}}lock-file-maintenance",
+  "commitMessage": "Update lock file",
+  "prTitle": "Lock file maintenance",
   "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates `package.json` lock files to use the latest dependency versions.\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
-  "schedule": ["before 5am on monday"]
+  "schedule": ["before 5am on monday"],
+  "groupName": null
 }</pre></td>
   <td>`RENOVATE_LOCK_FILE_MAINTENANCE`</td>
   <td><td>
@@ -591,9 +726,9 @@ Obviously, you can't set repository or package file location with this method.
   <td>json</td>
   <td><pre>{
   "recreateClosed": true,
-  "branchName": "renovate/{{groupSlug}}",
-  "commitMessage": "{{semanticPrefix}}Renovate {{groupName}} packages",
-  "prTitle": "{{semanticPrefix}}Renovate {{groupName}} packages",
+  "branchName": "{{branchPrefix}}{{groupSlug}}",
+  "commitMessage": "Renovate {{groupName}} packages",
+  "prTitle": "Renovate {{groupName}} packages",
   "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \"{{groupName}}\".\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#each upgrades as |upgrade|}}\n-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}`{{depName}}`{{/if}}: from `{{upgrade.currentVersion}}` to `{{upgrade.newVersion}}`\n{{/each}}\n\n{{#unless isPin}}\n### Commits\n\n{{#each upgrades as |upgrade|}}\n{{#if upgrade.releases.length}}\n<details>\n<summary>{{upgrade.githubName}}</summary>\n{{#each upgrade.releases as |release|}}\n\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}){{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n{{/each}}\n{{/unless}}\n<br />\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com)."
 }</pre></td>
   <td></td>
@@ -622,4 +757,51 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>[]</pre></td>
   <td>`RENOVATE_REVIEWERS`</td>
   <td>`--reviewers`<td>
+</tr>
+<tr>
+  <td>`npm`</td>
+  <td>Configuration object for npm package.json renovation</td>
+  <td>json</td>
+  <td><pre>{"enabled": true}</pre></td>
+  <td>`RENOVATE_NPM`</td>
+  <td>`--npm`<td>
+</tr>
+<tr>
+  <td>`meteor`</td>
+  <td>Configuration object for meteor package.js renovation</td>
+  <td>json</td>
+  <td><pre>{"enabled": true}</pre></td>
+  <td>`RENOVATE_METEOR`</td>
+  <td>`--meteor`<td>
+</tr>
+<tr>
+  <td>`docker`</td>
+  <td>Configuration object for Dockerfile renovation</td>
+  <td>json</td>
+  <td><pre>{
+  "enabled": true,
+  "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{newVersionMajor}}.x",
+  "commitMessage": "Update {{depName}}:{{currentTag}} digest",
+  "prTitle": "Update Dockerfile {{depName}} image tag to {{newTag}}",
+  "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image `{{depName}}@{{currentTag}}` to the latest digest (`{{newDigest}}`).\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+  "major": {"enabled": false},
+  "minor": {"enabled": false},
+  "patch": {"enabled": false},
+  "pin": {
+    "branchName": "{{branchPrefix}}docker-pin-{{depNameSanitized}}-{{currentTag}}",
+    "prTitle": "Pin Dockerfile {{depName}}@{{currentTag}} image digest",
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Docker base image `{{depName}}@{{currentTag}}` to use a digest (`{{newDigest}}`).\nThis digest will then be kept updated via Pull Requests whenever the image is updated on the Docker registry.\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "groupName": "Pin Docker Digests",
+    "group": {
+      "prTitle": "Pin Docker digests",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Dockerfiles to use image digests.\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#each upgrades as |upgrade|}}\n-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}`{{depName}}`{{/if}}: `{{upgrade.newDigest}}`\n{{/each}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com)."
+    }
+  },
+  "group": {
+    "prTitle": "Update Docker {{groupName}} digests",
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Dockerfiles to use image digests.\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#each upgrades as |upgrade|}}\n-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}`{{depName}}`{{/if}}: `{{upgrade.newDigest}}`\n{{/each}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com)."
+  }
+}</pre></td>
+  <td>`RENOVATE_DOCKER`</td>
+  <td><td>
 </tr>

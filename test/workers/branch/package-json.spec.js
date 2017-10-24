@@ -57,5 +57,15 @@ describe('workers/branch/package-json', () => {
       );
       testContent.should.equal(input01Content);
     });
+    it('returns null if throws error', () => {
+      const testContent = packageJson.setNewValue(
+        input01Content,
+        'blah',
+        'angular-touch-not',
+        '1.5.8',
+        logger
+      );
+      expect(testContent).toBe(null);
+    });
   });
 });

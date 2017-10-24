@@ -3,13 +3,12 @@ machine:
     PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
     YARN_PATH: "$HOME/.yarn"
   node:
-    version: 6.9
+    version: 8
 
 dependencies:
   pre:
-    - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 0.27.5
+    - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.0.2
     - yarn --version
-    - npm i -g npm@5
   override:
     - yarn install --frozen-lockfile
   cache_directories:
@@ -19,7 +18,7 @@ dependencies:
 
 test:
   override:
-    - npm test
+    - yarn test
   post:
     - bash <(curl -s https://codecov.io/bash)
 
@@ -27,4 +26,4 @@ deployment:
   npm:
     branch: master
     commands:
-      - npm run semantic-release || true
+      - yarn run semantic-release || true

@@ -1,22 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/apis checkForLerna(config) ignores zero length lerna 1`] = `Object {}`;
-
-exports[`workers/repository/apis checkForLerna(config) returns lerna package names 1`] = `
+exports[`migrateAndValidate returns empty config 1`] = `
 Object {
-  "lernaPackages": Array [
-    "a",
-    "b",
-  ],
+  "errors": Array [],
+  "warnings": Array [],
 }
 `;
 
-exports[`workers/repository/apis checkForLerna(config) swallows lerna 404 1`] = `Object {}`;
+exports[`workers/repository/apis checkMonorepos adds lerna packages 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
+`;
+
+exports[`workers/repository/apis checkMonorepos adds nested yarn workspaces 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
+`;
+
+exports[`workers/repository/apis checkMonorepos adds yarn workspaces 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
+`;
+
+exports[`workers/repository/apis checkMonorepos skips if no lerna packages 1`] = `Array []`;
 
 exports[`workers/repository/apis detectPackageFiles(config) adds package files to object 1`] = `
 Array [
   "package.json",
   "backend/package.json",
+]
+`;
+
+exports[`workers/repository/apis detectPackageFiles(config) finds Dockerfiles 1`] = `
+Array [
+  "Dockerfile",
+]
+`;
+
+exports[`workers/repository/apis detectPackageFiles(config) finds meteor package files 1`] = `
+Array [
+  "modules/something/package.js",
 ]
 `;
 
@@ -26,27 +55,13 @@ Array [
 ]
 `;
 
-exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 2`] = `true`;
+exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 2`] = `undefined`;
 
-exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 3`] = `
-Array [
-  Object {
-    "depName": "packageFiles",
-    "message": "Skipped package.json files found within node_modules subfolders: \`node_modules/backend/package.json\`",
-  },
-]
-`;
+exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 3`] = `Array []`;
+
+exports[`workers/repository/apis detectPackageFiles(config) skips meteor package files with no json 1`] = `Array []`;
 
 exports[`workers/repository/apis initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
-
-exports[`workers/repository/apis mergeRenovateJson(config) returns error in JSON.parse 1`] = `
-Array [
-  Object {
-    "depName": "renovate.json",
-    "message": "Could not parse repository's renovate.json file",
-  },
-]
-`;
 
 exports[`workers/repository/apis mergeRenovateJson(config) returns error in config if renovate.json cannot be parsed 1`] = `
 Array [
@@ -67,3 +82,24 @@ Array [
 `;
 
 exports[`workers/repository/apis mergeRenovateJson(config) returns warning + error plus extended config if unknown keys 1`] = `Array []`;
+
+exports[`workers/repository/apis resolvePackageFiles includes files with content 1`] = `
+Array [
+  Object {
+    "content": Object {
+      "workspaces": Array [],
+    },
+    "npmrc": "npmrc-1",
+    "packageFile": "package.json",
+    "packageLock": "packageLock-1",
+    "yarnLock": "yarnLock-1",
+    "yarnrc": "yarnrc-1",
+  },
+  Object {
+    "content": Object {},
+    "packageFile": "a/package.json",
+    "packageLock": undefined,
+    "yarnLock": undefined,
+  },
+]
+`;

@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const packageJson = require('../../../lib/workers/dep-type/package-json');
 const pkgWorker = require('../../../lib/workers/package/index');
 const depTypeWorker = require('../../../lib/workers/dep-type/index');
@@ -14,8 +16,9 @@ describe('lib/workers/dep-type/index', () => {
     let config;
     beforeEach(() => {
       config = {
+        packageFile: 'package.json',
         ignoreDeps: ['a', 'b'],
-        lernaPackages: ['e'],
+        monorepoPackages: ['e'],
       };
     });
     it('returns empty if config is disabled', async () => {
@@ -46,6 +49,27 @@ describe('lib/workers/dep-type/index', () => {
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toHaveLength(2);
     });
+    it('returns upgrades for meteor', async () => {
+      config.packageFile = 'package.js';
+      const content = fs.readFileSync(
+        path.resolve('test/_fixtures/meteor/package-1.js'),
+        'utf8'
+      );
+      const res = await depTypeWorker.renovateDepType(content, config);
+      expect(res).toHaveLength(6);
+    });
+    it('handles malformed meteor', async () => {
+      config.packageFile = 'package.js';
+      const content = 'blah';
+      const res = await depTypeWorker.renovateDepType(content, config);
+      expect(res).toHaveLength(0);
+    });
+    it('returns upgrades for docker', async () => {
+      config.packageFile = 'Dockerfile';
+      config.currentFrom = 'node';
+      const res = await depTypeWorker.renovateDepType('some-content', config);
+      expect(res).toHaveLength(1);
+    });
   });
   describe('getDepConfig(depTypeConfig, dep)', () => {
     const depTypeConfig = {
@@ -64,22 +88,22 @@ describe('lib/workers/dep-type/index', () => {
         },
       ],
     };
-    it('applies only one rule for a', () => {
+    it('applies both rules for a', () => {
       const dep = {
         depName: 'a',
       };
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
-      expect(res.y).toBeUndefined();
+      expect(res.y).toBe(2);
       expect(res.packageRules).toBeUndefined();
     });
-    it('applies only one rule for b', () => {
+    it('applies both rules for b', () => {
       const dep = {
         depName: 'b',
       };
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
-      expect(res.y).toBeUndefined();
+      expect(res.y).toBe(2);
       expect(res.packageRules).toBeUndefined();
     });
     it('applies the second rule', () => {

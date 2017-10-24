@@ -1,17 +1,19 @@
-const npmApi = require('../../../lib/api/npm');
-const versions = require('../../../lib/workers/package/versions');
 const pkgWorker = require('../../../lib/workers/package/index');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const configParser = require('../../../lib/config');
+const logger = require('../../_fixtures/logger');
+const docker = require('../../../lib/manager/docker/package');
+const npm = require('../../../lib/manager/npm/package');
 
-jest.mock('../../../lib/workers/branch/schedule');
-jest.mock('../../../lib/api/npm');
+jest.mock('../../../lib/manager/docker/package');
+jest.mock('../../../lib/manager/npm/package');
 
 describe('lib/workers/package/index', () => {
   describe('renovatePackage(config)', () => {
     let config;
     beforeEach(() => {
       config = configParser.filterConfig(defaultConfig, 'package');
+      config.logger = logger;
       config.depName = 'foo';
       config.currentVersion = '1.0.0';
     });
@@ -20,52 +22,41 @@ describe('lib/workers/package/index', () => {
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
-    it('returns warning if using invalid version', async () => {
-      config.currentVersion =
-        'git+ssh://git@github.com/joefraley/eslint-config-meridian.git';
+    it('calls docker', async () => {
+      docker.getPackageUpdates.mockReturnValueOnce([]);
+      config.packageFile = 'Dockerfile';
       const res = await pkgWorker.renovatePackage(config);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject([]);
     });
-    it('returns error if no npm dep found', async () => {
-      config.repoIsOnboarded = true;
-      config.schedule = 'some schedule';
+    it('calls meteor', async () => {
+      npm.getPackageUpdates.mockReturnValueOnce([]);
+      config.packageFile = 'package.js';
       const res = await pkgWorker.renovatePackage(config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('error');
-      expect(npmApi.getDependency.mock.calls.length).toBe(1);
+      expect(res).toMatchObject([]);
     });
-    it('returns warning if warning found', async () => {
-      npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades = jest.fn(() => [
-        {
-          type: 'warning',
-          message: 'bad version',
-        },
+    it('maps and filters type', async () => {
+      config.packageFile = 'package.json';
+      config.major.enabled = false;
+      npm.getPackageUpdates.mockReturnValueOnce([
+        { type: 'pin' },
+        { type: 'major' },
+        { type: 'minor', enabled: false },
       ]);
       const res = await pkgWorker.renovatePackage(config);
-      expect(res[0].type).toEqual('warning');
-    });
-    it('returns array if upgrades found', async () => {
-      npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades = jest.fn(() => [{}]);
-      const res = await pkgWorker.renovatePackage(config);
       expect(res).toHaveLength(1);
-      expect(Object.keys(res[0])).toMatchSnapshot();
+      expect(res[0]).toMatchSnapshot();
+      expect(res[0].groupName).toEqual('Pin Dependencies');
     });
-    it('merges type', async () => {
-      npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades = jest.fn(() => [
-        { isMajor: true },
-        { isMinor: true },
-        { isPatch: true },
-      ]);
-      const res = await pkgWorker.renovatePackage(config);
-      expect(res).toHaveLength(3);
-      expect(Object.keys(res[0])).toMatchSnapshot();
-      expect(res[0].branchName.indexOf('newVersionMinor')).toBe(-1);
-      expect(res[1].branchName.indexOf('newVersionMinor')).toBe(-1);
-      expect(res[2].branchName.indexOf('newVersionMinor')).not.toBe(-1);
+    it('throws', async () => {
+      npm.getPackageUpdates.mockReturnValueOnce([]);
+      config.packageFile = 'something-else';
+      let e;
+      try {
+        await pkgWorker.renovatePackage(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
   });
 });
