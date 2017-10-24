@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/workers/package/docker renovateDockerImage adds digest 1`] = `
+Array [
+  Object {
+    "isPin": true,
+    "newDigest": "sha256:one",
+    "newFrom": "some-dep:1.0.0-something@sha256:one",
+    "newTag": "1.0.0-something",
+    "newVersion": "sha256:one",
+    "type": "pin",
+  },
+  Object {
+    "currentVersion": "1.0.0-something",
+    "isMinor": true,
+    "newDigest": undefined,
+    "newFrom": "some-dep:1.1.0-something@undefined",
+    "newTag": "1.1.0-something",
+    "newVersion": "1.1.0-something",
+    "newVersionMajor": "1",
+    "type": "minor",
+  },
+]
+`;
+
+exports[`lib/workers/package/docker renovateDockerImage returns major and minor upgrades 1`] = `
+Array [
+  Object {
+    "currentVersion": "1.0.0",
+    "isMinor": true,
+    "newDigest": "sha256:one",
+    "newFrom": "some-dep:1.2.0@sha256:one",
+    "newTag": "1.2.0",
+    "newVersion": "1.2.0",
+    "newVersionMajor": "1",
+    "type": "minor",
+  },
+  Object {
+    "currentVersion": "1.0.0",
+    "isMajor": true,
+    "newDigest": "sha256:two",
+    "newFrom": "some-dep:2.0.0@sha256:two",
+    "newTag": "2.0.0",
+    "newVersion": "2.0.0",
+    "newVersionMajor": "2",
+    "type": "major",
+  },
+  Object {
+    "currentVersion": "1.0.0",
+    "isMajor": true,
+    "newDigest": "sha256:three",
+    "newFrom": "some-dep:3.0.0@sha256:three",
+    "newTag": "3.0.0",
+    "newVersion": "3.0.0",
+    "newVersionMajor": "3",
+    "type": "major",
+  },
+]
+`;

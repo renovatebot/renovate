@@ -36,4 +36,23 @@ describe('api/docker', () => {
       expect(res).toBe('some-digest');
     });
   });
+  describe('getTags', () => {
+    it('returns null if no token', async () => {
+      got.mockReturnValueOnce({ body: {} });
+      const res = await docker.getTags('node', logger);
+      expect(res).toBe(null);
+    });
+    it('returns tags', async () => {
+      const tags = ['a', 'b'];
+      got.mockReturnValueOnce({ body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ body: { tags } });
+      const res = await docker.getTags('my/node', logger);
+      expect(res).toBe(tags);
+    });
+    it('returns null on error', async () => {
+      got.mockReturnValueOnce({});
+      const res = await docker.getTags('node', logger);
+      expect(res).toBe(null);
+    });
+  });
 });
