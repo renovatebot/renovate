@@ -1,7 +1,7 @@
-const npm = require('../../lib/registry/npm');
+const npm = require('../../../lib/manager/npm/registry');
 const got = require('got');
 const registryAuthToken = require('registry-auth-token');
-const logger = require('../_fixtures/logger');
+const logger = require('../../_fixtures/logger');
 
 jest.mock('registry-auth-token');
 jest.mock('got');
