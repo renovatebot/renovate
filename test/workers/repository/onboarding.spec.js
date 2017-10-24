@@ -227,7 +227,6 @@ describe('lib/workers/repository/onboarding', () => {
         commitFilesToBranch: jest.fn(),
         createPr: jest.fn(() => ({ displayNumber: 1 })),
         getFileList: jest.fn(() => []),
-        getFileList: jest.fn(() => []),
         findPr: jest.fn(),
         getFileContent: jest.fn(),
         getFileJson: jest.fn(() => ({})),
