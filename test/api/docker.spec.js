@@ -1,4 +1,4 @@
-const docker = require('../../lib/api/docker');
+const docker = require('../../lib/registry/docker');
 const got = require('got');
 const logger = require('../_fixtures/logger');
 

@@ -1,4 +1,4 @@
-const npm = require('../../lib/api/npm');
+const npm = require('../../lib/registry/npm');
 const got = require('got');
 const registryAuthToken = require('registry-auth-token');
 const logger = require('../_fixtures/logger');
