@@ -1,6 +1,6 @@
 const logger = require('../_fixtures/logger');
 
-describe('api/github', () => {
+describe('platform/github', () => {
   let github;
   let get;
   beforeEach(() => {
@@ -10,9 +10,9 @@ describe('api/github', () => {
 
     // reset module
     jest.resetModules();
-    jest.mock('../../lib/api/gh-got-wrapper');
-    get = require('../../lib/api/gh-got-wrapper');
-    github = require('../../lib/api/github');
+    jest.mock('../../lib/platform/gh-got-wrapper');
+    get = require('../../lib/platform/gh-got-wrapper');
+    github = require('../../lib/platform/github');
   });
 
   describe('getInstallations', () => {

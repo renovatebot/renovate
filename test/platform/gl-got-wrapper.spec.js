@@ -1,9 +1,9 @@
-const get = require('../../lib/api/gl-got-wrapper');
+const get = require('../../lib/platform/gl-got-wrapper');
 const glGot = require('gl-got');
 
 jest.mock('gl-got');
 
-describe('api/gl-got-wrapper', () => {
+describe('platform/gl-got-wrapper', () => {
   const body = ['a', 'b'];
   beforeEach(() => {
     jest.resetAllMocks();

@@ -1,6 +1,6 @@
 const logger = require('../_fixtures/logger');
 
-describe('api/gitlab', () => {
+describe('platform/gitlab', () => {
   let gitlab;
   let get;
   beforeEach(() => {
@@ -10,9 +10,9 @@ describe('api/gitlab', () => {
 
     // reset module
     jest.resetModules();
-    jest.mock('../../lib/api/gl-got-wrapper');
-    gitlab = require('../../lib/api/gitlab');
-    get = require('../../lib/api/gl-got-wrapper');
+    jest.mock('../../lib/platform/gl-got-wrapper');
+    gitlab = require('../../lib/platform/gitlab');
+    get = require('../../lib/platform/gl-got-wrapper');
   });
 
   describe('getRepos', () => {

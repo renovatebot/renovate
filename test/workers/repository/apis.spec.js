@@ -3,14 +3,14 @@ const jsonValidator = require('json-dup-key-validator');
 const apis = require('../../../lib/workers/repository/apis');
 const logger = require('../../_fixtures/logger');
 
-const githubApi = require('../../../lib/api/github');
-const gitlabApi = require('../../../lib/api/gitlab');
+const githubApi = require('../../../lib/platform/github');
+const gitlabApi = require('../../../lib/platform/gitlab');
 const npmApi = require('../../../lib/api/npm');
 
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
-jest.mock('../../../lib/api/github');
-jest.mock('../../../lib/api/gitlab');
+jest.mock('../../../lib/platform/github');
+jest.mock('../../../lib/platform/gitlab');
 jest.mock('../../../lib/api/npm');
 
 describe('workers/repository/apis', () => {
