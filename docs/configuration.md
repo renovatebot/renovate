@@ -92,6 +92,7 @@ $ node renovate --help
     --package-files <list>               Package file paths
     --ignore-paths <list>                Skip any package.json whose path matches one of these.
     --ignore-deps <list>                 Dependencies to ignore
+    --pin-digests [boolean]              Whether to add digests to Dockerfile source images
     --pin-versions [boolean]             Convert ranged versions in package.json to pinned versions
     --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches
     --separate-patch-releases [boolean]  If set to true, it will separate minor and patch updates into separate branches
@@ -457,6 +458,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>[]</pre></td>
   <td></td>
   <td><td>
+</tr>
+<tr>
+  <td>`pinDigests`</td>
+  <td>Whether to add digests to Dockerfile source images</td>
+  <td>boolean</td>
+  <td><pre>true</pre></td>
+  <td>`RENOVATE_PIN_DIGESTS`</td>
+  <td>`--pin-digests`<td>
 </tr>
 <tr>
   <td>`pinVersions`</td>
