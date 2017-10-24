@@ -1,4 +1,4 @@
-const npm = require('../../lib/api/npm');
+const npm = require('../../lib/registry/npm');
 const presets = require('../../lib/config/presets');
 const logger = require('../_fixtures/logger');
 const presetDefaults = require('../_fixtures/npm/renovate-config-default');

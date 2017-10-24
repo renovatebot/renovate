@@ -1,9 +1,9 @@
-const dockerApi = require('../../../lib/api/docker');
+const dockerApi = require('../../../lib/registry/docker');
 const docker = require('../../../lib/workers/package/docker');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const logger = require('../../_fixtures/logger');
 
-// jest.mock('../../../lib/api/docker');
+// jest.mock('../../../lib/registry/docker');
 dockerApi.getDigest = jest.fn();
 dockerApi.getTags = jest.fn();
 

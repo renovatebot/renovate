@@ -5,13 +5,13 @@ const logger = require('../../_fixtures/logger');
 
 const githubApi = require('../../../lib/platform/github');
 const gitlabApi = require('../../../lib/platform/gitlab');
-const npmApi = require('../../../lib/api/npm');
+const npmApi = require('../../../lib/registry/npm');
 
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 jest.mock('../../../lib/platform/github');
 jest.mock('../../../lib/platform/gitlab');
-jest.mock('../../../lib/api/npm');
+jest.mock('../../../lib/registry/npm');
 
 describe('workers/repository/apis', () => {
   describe('getNpmrc', () => {
