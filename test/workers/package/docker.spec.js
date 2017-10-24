@@ -39,6 +39,11 @@ describe('lib/workers/package/docker', () => {
       expect(res).toHaveLength(1);
       expect(res[0].type).toEqual('pin');
     });
+    it('returns empty if current tag is not valid version', async () => {
+      config.currentTag = 'some-text-tag';
+      dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
+      expect(await docker.renovateDockerImage(config)).toEqual([]);
+    });
     it('returns major and minor upgrades', async () => {
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
