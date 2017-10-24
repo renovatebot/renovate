@@ -1,5 +1,5 @@
 const dockerApi = require('../../../lib/manager/docker/registry');
-const docker = require('../../../lib/workers/package/docker');
+const docker = require('../../../lib/manager/docker/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const logger = require('../../_fixtures/logger');
 
