@@ -1,9 +1,9 @@
 const githubApp = require('../../lib/config/github-app');
-const ghApi = require('../../lib/api/github');
+const ghApi = require('../../lib/platform/github');
 const fs = require('fs');
 const path = require('path');
 
-jest.mock('../../lib/api/github');
+jest.mock('../../lib/platform/github');
 
 const examplePrivateKey = fs.readFileSync(
   path.resolve(__dirname, '../_fixtures/jwt/example.pem')

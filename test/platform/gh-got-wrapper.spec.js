@@ -1,9 +1,9 @@
-const get = require('../../lib/api/gh-got-wrapper');
+const get = require('../../lib/platform/gh-got-wrapper');
 const ghGot = require('gh-got');
 
 jest.mock('gh-got');
 
-describe('api/gh-got-wrapper', () => {
+describe('platform/gh-got-wrapper', () => {
   const body = ['a', 'b'];
   beforeEach(() => {
     jest.resetAllMocks();

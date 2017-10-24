@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`api/github addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
+exports[`platform/github addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
 Array [
   Array [
     "repos/some/repo/issues/42/assignees",
@@ -16,7 +16,7 @@ Array [
 ]
 `;
 
-exports[`api/github addLabels(issueNo, labels) should add the given labels to the issue 1`] = `
+exports[`platform/github addLabels(issueNo, labels) should add the given labels to the issue 1`] = `
 Array [
   Array [
     "repos/some/repo/issues/42/labels",
@@ -30,7 +30,7 @@ Array [
 ]
 `;
 
-exports[`api/github addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `
+exports[`platform/github addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `
 Array [
   Array [
     "repos/some/repo/pulls/42/requested_reviewers",
@@ -50,7 +50,7 @@ Array [
 ]
 `;
 
-exports[`api/github branchExists(branchName) should propagate unknown errors 1`] = `
+exports[`platform/github branchExists(branchName) should propagate unknown errors 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -77,7 +77,7 @@ Array [
 ]
 `;
 
-exports[`api/github branchExists(branchName) should return false if a 404 is returned 1`] = `
+exports[`platform/github branchExists(branchName) should return false if a 404 is returned 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -104,7 +104,7 @@ Array [
 ]
 `;
 
-exports[`api/github branchExists(branchName) should return false if the branch does not exist (multiple results) 1`] = `
+exports[`platform/github branchExists(branchName) should return false if the branch does not exist (multiple results) 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -131,7 +131,7 @@ Array [
 ]
 `;
 
-exports[`api/github branchExists(branchName) should return false if the branch does not exist (one result) 1`] = `
+exports[`platform/github branchExists(branchName) should return false if the branch does not exist (one result) 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -158,7 +158,7 @@ Array [
 ]
 `;
 
-exports[`api/github branchExists(branchName) should return true if the branch exists (multiple results) 1`] = `
+exports[`platform/github branchExists(branchName) should return true if the branch exists (multiple results) 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -185,7 +185,7 @@ Array [
 ]
 `;
 
-exports[`api/github branchExists(branchName) should return true if the branch exists (one result) 1`] = `
+exports[`platform/github branchExists(branchName) should return true if the branch exists (one result) 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -212,7 +212,7 @@ Array [
 ]
 `;
 
-exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 1`] = `
+exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -245,7 +245,7 @@ Array [
 ]
 `;
 
-exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 2`] = `
+exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 2`] = `
 Array [
   Array [
     "repos/some/repo/git/blobs",
@@ -296,9 +296,9 @@ Array [
 ]
 `;
 
-exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 3`] = `Array []`;
+exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 3`] = `Array []`;
 
-exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 1`] = `
+exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -331,7 +331,7 @@ Array [
 ]
 `;
 
-exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 2`] = `
+exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 2`] = `
 Array [
   Array [
     "repos/some/repo/git/blobs",
@@ -373,7 +373,7 @@ Array [
 ]
 `;
 
-exports[`api/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 3`] = `
+exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 3`] = `
 Array [
   Array [
     "repos/some/repo/git/refs/heads/package.json",
@@ -387,14 +387,14 @@ Array [
 ]
 `;
 
-exports[`api/github createPr(branchName, title, body) should create and return a PR object 1`] = `
+exports[`platform/github createPr(branchName, title, body) should create and return a PR object 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
   "number": 123,
 }
 `;
 
-exports[`api/github createPr(branchName, title, body) should create and return a PR object 2`] = `
+exports[`platform/github createPr(branchName, title, body) should create and return a PR object 2`] = `
 Array [
   Array [
     "repos/some/repo/pulls",
@@ -410,14 +410,14 @@ Array [
 ]
 `;
 
-exports[`api/github createPr(branchName, title, body) should use defaultBranch 1`] = `
+exports[`platform/github createPr(branchName, title, body) should use defaultBranch 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
   "number": 123,
 }
 `;
 
-exports[`api/github createPr(branchName, title, body) should use defaultBranch 2`] = `
+exports[`platform/github createPr(branchName, title, body) should use defaultBranch 2`] = `
 Array [
   Array [
     "repos/some/repo/pulls",
@@ -433,7 +433,7 @@ Array [
 ]
 `;
 
-exports[`api/github ensureComment add comment if not found 1`] = `
+exports[`platform/github ensureComment add comment if not found 1`] = `
 Array [
   Array [
     "repos/some/repo/issues/42/comments",
@@ -449,7 +449,7 @@ content",
 ]
 `;
 
-exports[`api/github ensureComment add updates comment if necessary 1`] = `
+exports[`platform/github ensureComment add updates comment if necessary 1`] = `
 Array [
   Array [
     "repos/some/repo/issues/comments/1234",
@@ -465,7 +465,7 @@ content",
 ]
 `;
 
-exports[`api/github findFilePaths(fileName) should return the files matching the fileName 1`] = `
+exports[`platform/github findFilePaths(fileName) should return the files matching the fileName 1`] = `
 Array [
   "package.json",
   "src/app/package.json",
@@ -473,16 +473,16 @@ Array [
 ]
 `;
 
-exports[`api/github getAllRenovateBranches() should return all renovate branches 1`] = `
+exports[`platform/github getAllRenovateBranches() should return all renovate branches 1`] = `
 Array [
   "renovate/a",
   "renovate/b",
 ]
 `;
 
-exports[`api/github getBranchLastCommitTime should return a Date 1`] = `2011-04-14T16:00:49.000Z`;
+exports[`platform/github getBranchLastCommitTime should return a Date 1`] = `2011-04-14T16:00:49.000Z`;
 
-exports[`api/github getBranchPr(branchName) should return the PR object 1`] = `
+exports[`platform/github getBranchPr(branchName) should return the PR object 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -512,16 +512,16 @@ Array [
 ]
 `;
 
-exports[`api/github getBranchPr(branchName) should return the PR object 2`] = `null`;
+exports[`platform/github getBranchPr(branchName) should return the PR object 2`] = `null`;
 
-exports[`api/github getCommitMessages() returns commits messages 1`] = `
+exports[`platform/github getCommitMessages() returns commits messages 1`] = `
 Array [
   "foo",
   "bar",
 ]
 `;
 
-exports[`api/github getFile(filePatch, branchName) should return the encoded file content 1`] = `
+exports[`platform/github getFile(filePatch, branchName) should return the encoded file content 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -548,7 +548,7 @@ Array [
 ]
 `;
 
-exports[`api/github getFileContent(filePatch, branchName) should return null if GitHub returns a 404 1`] = `
+exports[`platform/github getFileContent(filePatch, branchName) should return null if GitHub returns a 404 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -575,7 +575,7 @@ Array [
 ]
 `;
 
-exports[`api/github getFileContent(filePatch, branchName) should return null if getFile returns nothing 1`] = `
+exports[`platform/github getFileContent(filePatch, branchName) should return null if getFile returns nothing 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -602,7 +602,7 @@ Array [
 ]
 `;
 
-exports[`api/github getFileContent(filePatch, branchName) should return the encoded file content 1`] = `
+exports[`platform/github getFileContent(filePatch, branchName) should return the encoded file content 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -629,7 +629,7 @@ Array [
 ]
 `;
 
-exports[`api/github getFileJson(filePatch, branchName) should return null if invalid JSON 1`] = `
+exports[`platform/github getFileJson(filePatch, branchName) should return null if invalid JSON 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -656,7 +656,7 @@ Array [
 ]
 `;
 
-exports[`api/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 1`] = `
+exports[`platform/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -683,13 +683,13 @@ Array [
 ]
 `;
 
-exports[`api/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 2`] = `
+exports[`platform/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 2`] = `
 Object {
   "hello": "world",
 }
 `;
 
-exports[`api/github getInstallationRepositories should return an array of repositories 1`] = `
+exports[`platform/github getInstallationRepositories should return an array of repositories 1`] = `
 Array [
   Array [
     "installation/repositories",
@@ -703,7 +703,7 @@ Array [
 ]
 `;
 
-exports[`api/github getInstallationRepositories should return an array of repositories 2`] = `
+exports[`platform/github getInstallationRepositories should return an array of repositories 2`] = `
 Object {
   "repositories": Array [
     "a",
@@ -713,11 +713,11 @@ Object {
 }
 `;
 
-exports[`api/github getInstallationToken should return an installation token 1`] = `Array []`;
+exports[`platform/github getInstallationToken should return an installation token 1`] = `Array []`;
 
-exports[`api/github getInstallationToken should return an installation token 2`] = `"aUserToken"`;
+exports[`platform/github getInstallationToken should return an installation token 2`] = `"aUserToken"`;
 
-exports[`api/github getInstallations should return an array of installations 1`] = `
+exports[`platform/github getInstallations should return an array of installations 1`] = `
 Array [
   Array [
     "app/installations",
@@ -731,14 +731,14 @@ Array [
 ]
 `;
 
-exports[`api/github getInstallations should return an array of installations 2`] = `
+exports[`platform/github getInstallations should return an array of installations 2`] = `
 Array [
   "a",
   "b",
 ]
 `;
 
-exports[`api/github getPr(prNo) should return a PR object - 0 1`] = `
+exports[`platform/github getPr(prNo) should return a PR object - 0 1`] = `
 Object {
   "base": Object {
     "sha": "1234",
@@ -750,7 +750,7 @@ Object {
 }
 `;
 
-exports[`api/github getPr(prNo) should return a PR object - 1 1`] = `
+exports[`platform/github getPr(prNo) should return a PR object - 1 1`] = `
 Object {
   "base": Object {
     "sha": "1234",
@@ -765,7 +765,7 @@ Object {
 }
 `;
 
-exports[`api/github getPr(prNo) should return a PR object - 2 1`] = `
+exports[`platform/github getPr(prNo) should return a PR object - 2 1`] = `
 Object {
   "base": Object {
     "sha": "5678",
@@ -779,7 +779,7 @@ Object {
 }
 `;
 
-exports[`api/github getPr(prNo) should return a rebaseable PR despite multiple commits 1`] = `
+exports[`platform/github getPr(prNo) should return a rebaseable PR despite multiple commits 1`] = `
 Object {
   "base": Object {
     "sha": "1234",
@@ -794,7 +794,7 @@ Object {
 }
 `;
 
-exports[`api/github getPr(prNo) should return a rebaseable PR if web-flow is second author 1`] = `
+exports[`platform/github getPr(prNo) should return a rebaseable PR if web-flow is second author 1`] = `
 Object {
   "base": Object {
     "sha": "1234",
@@ -809,7 +809,7 @@ Object {
 }
 `;
 
-exports[`api/github getPr(prNo) should return an unrebaseable PR if multiple authors 1`] = `
+exports[`platform/github getPr(prNo) should return an unrebaseable PR if multiple authors 1`] = `
 Object {
   "base": Object {
     "sha": "1234",
@@ -823,7 +823,7 @@ Object {
 }
 `;
 
-exports[`api/github getRepos should return an array of repos 1`] = `
+exports[`platform/github getRepos should return an array of repos 1`] = `
 Array [
   Array [
     "user/repos",
@@ -831,14 +831,14 @@ Array [
 ]
 `;
 
-exports[`api/github getRepos should return an array of repos 2`] = `
+exports[`platform/github getRepos should return an array of repos 2`] = `
 Array [
   "a/b",
   "c/d",
 ]
 `;
 
-exports[`api/github getRepos should support a custom endpoint 1`] = `
+exports[`platform/github getRepos should support a custom endpoint 1`] = `
 Array [
   Array [
     "user/repos",
@@ -846,14 +846,14 @@ Array [
 ]
 `;
 
-exports[`api/github getRepos should support a custom endpoint 2`] = `
+exports[`platform/github getRepos should support a custom endpoint 2`] = `
 Array [
   "a/b",
   "c/d",
 ]
 `;
 
-exports[`api/github getSubDirectories(path) should return subdirectories 1`] = `
+exports[`platform/github getSubDirectories(path) should return subdirectories 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -880,13 +880,13 @@ Array [
 ]
 `;
 
-exports[`api/github getSubDirectories(path) should return subdirectories 2`] = `
+exports[`platform/github getSubDirectories(path) should return subdirectories 2`] = `
 Array [
   "a",
 ]
 `;
 
-exports[`api/github initRepo should detect repoForceRebase 1`] = `
+exports[`platform/github initRepo should detect repoForceRebase 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -894,7 +894,7 @@ Object {
 }
 `;
 
-exports[`api/github initRepo should ignore repoForceRebase 403 1`] = `
+exports[`platform/github initRepo should ignore repoForceRebase 403 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -902,7 +902,7 @@ Object {
 }
 `;
 
-exports[`api/github initRepo should ignore repoForceRebase 404 1`] = `
+exports[`platform/github initRepo should ignore repoForceRebase 404 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -910,7 +910,7 @@ Object {
 }
 `;
 
-exports[`api/github initRepo should initialise the config for the repo - 0 1`] = `
+exports[`platform/github initRepo should initialise the config for the repo - 0 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -934,7 +934,7 @@ Array [
 ]
 `;
 
-exports[`api/github initRepo should initialise the config for the repo - 0 2`] = `
+exports[`platform/github initRepo should initialise the config for the repo - 0 2`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -942,7 +942,7 @@ Object {
 }
 `;
 
-exports[`api/github initRepo should initialise the config for the repo - 1 1`] = `
+exports[`platform/github initRepo should initialise the config for the repo - 1 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -966,7 +966,7 @@ Array [
 ]
 `;
 
-exports[`api/github initRepo should initialise the config for the repo - 1 2`] = `
+exports[`platform/github initRepo should initialise the config for the repo - 1 2`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -974,7 +974,7 @@ Object {
 }
 `;
 
-exports[`api/github initRepo should initialise the config for the repo - 2 1`] = `
+exports[`platform/github initRepo should initialise the config for the repo - 2 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -998,7 +998,7 @@ Array [
 ]
 `;
 
-exports[`api/github initRepo should initialise the config for the repo - 2 2`] = `
+exports[`platform/github initRepo should initialise the config for the repo - 2 2`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -1006,7 +1006,7 @@ Object {
 }
 `;
 
-exports[`api/github initRepo should merge 1`] = `
+exports[`platform/github initRepo should merge 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -1014,7 +1014,7 @@ Object {
 }
 `;
 
-exports[`api/github initRepo should not guess at merge 1`] = `
+exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -1022,7 +1022,7 @@ Object {
 }
 `;
 
-exports[`api/github initRepo should rebase 1`] = `
+exports[`platform/github initRepo should rebase 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -1030,7 +1030,7 @@ Object {
 }
 `;
 
-exports[`api/github initRepo should squash 1`] = `
+exports[`platform/github initRepo should squash 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
@@ -1038,7 +1038,7 @@ Object {
 }
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 1`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -1065,9 +1065,9 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 2`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 2`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 3`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 3`] = `
 Array [
   Array [
     "repos/some/repo/merges",
@@ -1081,9 +1081,9 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 4`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 4`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 5`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 5`] = `
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -1091,7 +1091,7 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-push merge 1`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -1121,7 +1121,7 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-push merge 2`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 2`] = `
 Array [
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -1134,11 +1134,11 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-push merge 3`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 3`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-push merge 4`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 4`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should perform a branch-push merge 5`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 5`] = `
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -1146,9 +1146,9 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 1`] = `[Error: branch-merge-commit failed]`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 1`] = `[Error: branch-merge-commit failed]`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 2`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 2`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -1172,9 +1172,9 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 3`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 3`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 4`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 4`] = `
 Array [
   Array [
     "repos/some/repo/merges",
@@ -1188,13 +1188,13 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 5`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 5`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 6`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 6`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 1`] = `[Error: branch-push failed]`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 1`] = `[Error: branch-push failed]`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 2`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 2`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -1221,7 +1221,7 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 3`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 3`] = `
 Array [
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -1234,15 +1234,15 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 4`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 4`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 5`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 5`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 6`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 6`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 1`] = `[Error: Unsupported branch merge type: wrong-merge-type]`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if unknown merge type 1`] = `[Error: Unsupported branch merge type: wrong-merge-type]`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 2`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if unknown merge type 2`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -1266,15 +1266,15 @@ Array [
 ]
 `;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 3`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if unknown merge type 3`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 4`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if unknown merge type 4`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 5`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if unknown merge type 5`] = `Array []`;
 
-exports[`api/github mergeBranch(branchName, mergeType) should throw if unknown merge type 6`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if unknown merge type 6`] = `Array []`;
 
-exports[`api/github setBaseBranch(branchName) sets the base branch 1`] = `
+exports[`platform/github setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -1301,7 +1301,7 @@ Array [
 ]
 `;
 
-exports[`api/github updatePr(prNo, title, body) should update the PR 1`] = `
+exports[`platform/github updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Array [
     "repos/some/repo/pulls/1234",
