@@ -1,5 +1,5 @@
 const onboarding = require('../../../lib/workers/repository/onboarding');
-const apis = require('../../../lib/workers/repository/apis');
+const manager = require('../../../lib/manager');
 const logger = require('../../_fixtures/logger');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
@@ -284,7 +284,7 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('uses base + docker', async () => {
-      apis.detectPackageFiles = jest.fn(input => ({
+      manager.detectPackageFiles = jest.fn(input => ({
         ...input,
         packageFiles: [{}, {}],
         types: {
@@ -298,7 +298,7 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('throws if no packageFiles', async () => {
-      apis.detectPackageFiles = jest.fn(input => ({
+      manager.detectPackageFiles = jest.fn(input => ({
         ...input,
       }));
       let e;

@@ -2,6 +2,7 @@ const repositoryWorker = require('../../../lib/workers/repository/index');
 const branchWorker = require('../../../lib/workers/branch');
 
 const apis = require('../../../lib/workers/repository/apis');
+const manager = require('../../../lib/manager');
 const onboarding = require('../../../lib/workers/repository/onboarding');
 const upgrades = require('../../../lib/workers/repository/upgrades');
 
@@ -45,7 +46,7 @@ describe('workers/repository', () => {
       jest.resetAllMocks();
       apis.initApis = jest.fn(input => input);
       apis.mergeRenovateJson = jest.fn(input => input);
-      apis.detectPackageFiles = jest.fn();
+      manager.detectPackageFiles = jest.fn();
       apis.resolvePackageFiles = jest.fn(input => input);
       apis.checkMonorepos = jest.fn(input => input);
       onboarding.getOnboardingStatus = jest.fn(input => input);
@@ -67,18 +68,18 @@ describe('workers/repository', () => {
     it('skips repository if config is disabled', async () => {
       config.enabled = false;
       await repositoryWorker.renovateRepository(config);
-      expect(apis.detectPackageFiles.mock.calls.length).toBe(0);
+      expect(manager.detectPackageFiles.mock.calls.length).toBe(0);
     });
     it('skips repository if its unconfigured fork', async () => {
       config.isFork = true;
       config.renovateJsonPresent = false;
       await repositoryWorker.renovateRepository(config);
-      expect(apis.detectPackageFiles.mock.calls.length).toBe(0);
+      expect(manager.detectPackageFiles.mock.calls.length).toBe(0);
     });
     it('sets custom base branch', async () => {
       config.baseBranch = 'some-branch';
       config.api.branchExists.mockReturnValueOnce(true);
-      apis.detectPackageFiles.mockImplementationOnce(input => ({
+      manager.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
         ...{ packageFiles: [] },
       }));
@@ -88,7 +89,7 @@ describe('workers/repository', () => {
     it('errors when missing custom base branch', async () => {
       config.baseBranch = 'some-branch';
       config.api.branchExists.mockReturnValueOnce(false);
-      apis.detectPackageFiles.mockImplementationOnce(input => ({
+      manager.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
         ...{ packageFiles: [] },
       }));
@@ -96,7 +97,7 @@ describe('workers/repository', () => {
       expect(config.api.setBaseBranch.mock.calls).toHaveLength(0);
     });
     it('skips repository if no package.json', async () => {
-      apis.detectPackageFiles.mockImplementationOnce(input => ({
+      manager.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
         ...{ packageFiles: [] },
       }));
@@ -105,7 +106,7 @@ describe('workers/repository', () => {
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('does not skip repository if package.json', async () => {
-      apis.detectPackageFiles.mockImplementationOnce(input => ({
+      manager.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
         ...{ packageFiles: ['package.json'] },
       }));
@@ -128,7 +129,7 @@ describe('workers/repository', () => {
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('uses onboarding custom baseBranch', async () => {
-      apis.detectPackageFiles.mockImplementationOnce(input => ({
+      manager.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
         ...{ packageFiles: ['package.json'] },
       }));
@@ -152,7 +153,7 @@ describe('workers/repository', () => {
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('errors onboarding custom baseBranch', async () => {
-      apis.detectPackageFiles.mockImplementationOnce(input => ({
+      manager.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
         ...{ packageFiles: ['package.json'] },
       }));
