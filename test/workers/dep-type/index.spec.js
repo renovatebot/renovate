@@ -19,6 +19,7 @@ describe('lib/workers/dep-type/index', () => {
         packageFile: 'package.json',
         ignoreDeps: ['a', 'b'],
         monorepoPackages: ['e'],
+        logger,
       };
     });
     it('returns empty if config is disabled', async () => {
