@@ -1,6 +1,6 @@
 const packageJsonHelper = require('../../../lib/workers/branch/package-json');
 const packageJsHelper = require('../../../lib/workers/branch/package-js');
-const dockerHelper = require('../../../lib/workers/branch/dockerfile');
+const dockerHelper = require('../../../lib/manager/docker/update');
 const {
   getUpdatedPackageFiles,
 } = require('../../../lib/workers/branch/package-files');
