@@ -1,4 +1,4 @@
-const dockerfile = require('../../../lib/workers/branch/dockerfile');
+const dockerfile = require('../../../lib/manager/docker/update');
 const logger = require('../../_fixtures/logger');
 
 describe('workers/branch/dockerfile', () => {

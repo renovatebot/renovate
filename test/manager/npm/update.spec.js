@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const packageJson = require('../../../lib/workers/branch/package-json');
+const npmUpdater = require('../../../lib/manager/npm/update');
 const logger = require('../../_fixtures/logger');
 
 function readFixture(fixture) {
@@ -16,7 +16,7 @@ describe('workers/branch/package-json', () => {
   describe('.setNewValue(currentFileContent, depType, depName, newVersion, logger)', () => {
     it('replaces a dependency value', () => {
       const outputContent = readFixture('outputs/011.json');
-      const testContent = packageJson.setNewValue(
+      const testContent = npmUpdater.setNewValue(
         input01Content,
         'dependencies',
         'cheerio',
@@ -27,7 +27,7 @@ describe('workers/branch/package-json', () => {
     });
     it('replaces only the first instance of a value', () => {
       const outputContent = readFixture('outputs/012.json');
-      const testContent = packageJson.setNewValue(
+      const testContent = npmUpdater.setNewValue(
         input01Content,
         'devDependencies',
         'angular-touch',
@@ -38,7 +38,7 @@ describe('workers/branch/package-json', () => {
     });
     it('replaces only the second instance of a value', () => {
       const outputContent = readFixture('outputs/013.json');
-      const testContent = packageJson.setNewValue(
+      const testContent = npmUpdater.setNewValue(
         input01Content,
         'devDependencies',
         'angular-sanitize',
@@ -48,7 +48,7 @@ describe('workers/branch/package-json', () => {
       testContent.should.equal(outputContent);
     });
     it('handles the case where the desired version is already supported', () => {
-      const testContent = packageJson.setNewValue(
+      const testContent = npmUpdater.setNewValue(
         input01Content,
         'devDependencies',
         'angular-touch',
@@ -58,7 +58,7 @@ describe('workers/branch/package-json', () => {
       testContent.should.equal(input01Content);
     });
     it('returns null if throws error', () => {
-      const testContent = packageJson.setNewValue(
+      const testContent = npmUpdater.setNewValue(
         input01Content,
         'blah',
         'angular-touch-not',
