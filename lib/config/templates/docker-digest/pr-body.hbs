@@ -1,4 +1,4 @@
-This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image `{{depName}}` from tag `{{currentTag}}` to new tag `{{newTag}}`.
+This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image `{{depName}}@{{currentTag}}` to the latest digest (`{{newDigest}}`).
 
 {{#if schedule}}
 **Note**: This PR was created on a configured schedule ("{{schedule}}"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.
