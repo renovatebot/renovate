@@ -4,17 +4,17 @@ const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const schedule = require('../../../lib/workers/branch/schedule');
 const checkExisting = require('../../../lib/workers/branch/check-existing');
 const parent = require('../../../lib/workers/branch/parent');
-const packageFiles = require('../../../lib/workers/branch/package-files');
+const manager = require('../../../lib/manager');
 const lockFiles = require('../../../lib/workers/branch/lock-files');
 const commit = require('../../../lib/workers/branch/commit');
 const statusChecks = require('../../../lib/workers/branch/status-checks');
 const automerge = require('../../../lib/workers/branch/automerge');
 const prWorker = require('../../../lib/workers/pr');
 
+jest.mock('../../../lib/manager');
 jest.mock('../../../lib/workers/branch/schedule');
 jest.mock('../../../lib/workers/branch/check-existing');
 jest.mock('../../../lib/workers/branch/parent');
-jest.mock('../../../lib/workers/branch/package-files');
 jest.mock('../../../lib/workers/branch/lock-files');
 jest.mock('../../../lib/workers/branch/commit');
 jest.mock('../../../lib/workers/branch/status-checks');
@@ -82,7 +82,7 @@ describe('workers/branch', () => {
       expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('returns if no branch exists', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [],
       });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
@@ -94,7 +94,7 @@ describe('workers/branch', () => {
       expect(commit.commitFilesToBranch.mock.calls).toHaveLength(1);
     });
     it('returns if branch automerged', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
@@ -109,7 +109,7 @@ describe('workers/branch', () => {
       expect(prWorker.ensurePr.mock.calls).toHaveLength(0);
     });
     it('ensures PR and tries automerge', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
@@ -126,7 +126,7 @@ describe('workers/branch', () => {
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(1);
     });
     it('ensures PR and adds lock file error comment', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
@@ -145,7 +145,7 @@ describe('workers/branch', () => {
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
     });
     it('ensures PR and adds lock file error comment recreate closed', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
@@ -165,13 +165,13 @@ describe('workers/branch', () => {
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
     });
     it('swallows branch errors', async () => {
-      packageFiles.getUpdatedPackageFiles.mockImplementationOnce(() => {
+      manager.getUpdatedPackageFiles.mockImplementationOnce(() => {
         throw new Error('some error');
       });
       await branchWorker.processBranch(config);
     });
     it('throws and swallows branch errors', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
@@ -181,7 +181,7 @@ describe('workers/branch', () => {
       await branchWorker.processBranch(config);
     });
     it('swallows pr errors', async () => {
-      packageFiles.getUpdatedPackageFiles.mockReturnValueOnce({
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
       lockFiles.getUpdatedLockFiles.mockReturnValueOnce({

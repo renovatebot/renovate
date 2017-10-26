@@ -475,11 +475,9 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      const files = await github.findFilePaths('someething');
+      const files = await github.getFileList();
       expect(files).toEqual([]);
     });
-  });
-  describe('findFilePaths(fileName)', () => {
     it('warns if truncated result', async () => {
       await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
@@ -488,7 +486,7 @@ describe('platform/github', () => {
           tree: [],
         },
       }));
-      const files = await github.findFilePaths('package.json');
+      const files = await github.getFileList();
       expect(files.length).toBe(0);
     });
     it('caches the result', async () => {
@@ -499,9 +497,9 @@ describe('platform/github', () => {
           tree: [],
         },
       }));
-      let files = await github.findFilePaths('package.json');
+      let files = await github.getFileList();
       expect(files.length).toBe(0);
-      files = await github.findFilePaths('package.js');
+      files = await github.getFileList();
       expect(files.length).toBe(0);
     });
     it('should return the files matching the fileName', async () => {
@@ -520,7 +518,7 @@ describe('platform/github', () => {
           ],
         },
       }));
-      const files = await github.findFilePaths('package.json');
+      const files = await github.getFileList();
       expect(files).toMatchSnapshot();
     });
   });

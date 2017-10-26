@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager detectPackageFiles(config) adds package files to object 1`] = `
+Array [
+  "package.json",
+  "backend/package.json",
+]
+`;
+
+exports[`manager detectPackageFiles(config) finds Dockerfiles 1`] = `
+Array [
+  "Dockerfile",
+]
+`;
+
+exports[`manager detectPackageFiles(config) finds meteor package files 1`] = `
+Array [
+  "modules/something/package.js",
+]
+`;
+
+exports[`manager detectPackageFiles(config) ignores node modules 1`] = `
+Array [
+  "package.json",
+]
+`;
+
+exports[`manager detectPackageFiles(config) ignores node modules 2`] = `undefined`;
+
+exports[`manager detectPackageFiles(config) ignores node modules 3`] = `Array []`;
+
+exports[`manager detectPackageFiles(config) skips meteor package files with no json 1`] = `Array []`;

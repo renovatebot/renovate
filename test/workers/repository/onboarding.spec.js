@@ -1,5 +1,5 @@
 const onboarding = require('../../../lib/workers/repository/onboarding');
-const apis = require('../../../lib/workers/repository/apis');
+const manager = require('../../../lib/manager');
 const logger = require('../../_fixtures/logger');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
@@ -226,7 +226,7 @@ describe('lib/workers/repository/onboarding', () => {
       config.api = {
         commitFilesToBranch: jest.fn(),
         createPr: jest.fn(() => ({ displayNumber: 1 })),
-        findFilePaths: jest.fn(() => []),
+        getFileList: jest.fn(() => []),
         findPr: jest.fn(),
         getFileContent: jest.fn(),
         getFileJson: jest.fn(() => ({})),
@@ -267,8 +267,7 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('commits files and returns false if no pr', async () => {
-      config.api.findFilePaths.mockReturnValueOnce(['package.json']);
-      config.api.findFilePaths.mockReturnValue([]);
+      config.api.getFileList.mockReturnValueOnce(['package.json']);
       const res = await onboarding.getOnboardingStatus(config);
       expect(res.repoIsOnboarded).toEqual(false);
       expect(config.api.findPr.mock.calls.length).toBe(1);
@@ -276,8 +275,7 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('pins private repos', async () => {
-      config.api.findFilePaths.mockReturnValueOnce(['package.json']);
-      config.api.findFilePaths.mockReturnValue([]);
+      config.api.getFileList.mockReturnValueOnce(['package.json']);
       onboarding.isRepoPrivate.mockReturnValueOnce(true);
       const res = await onboarding.getOnboardingStatus(config);
       expect(res.repoIsOnboarded).toEqual(false);
@@ -286,7 +284,7 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('uses base + docker', async () => {
-      apis.detectPackageFiles = jest.fn(input => ({
+      manager.detectPackageFiles = jest.fn(input => ({
         ...input,
         packageFiles: [{}, {}],
         types: {
@@ -300,7 +298,7 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('throws if no packageFiles', async () => {
-      apis.detectPackageFiles = jest.fn(input => ({
+      manager.detectPackageFiles = jest.fn(input => ({
         ...input,
       }));
       let e;
