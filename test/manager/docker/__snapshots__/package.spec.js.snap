@@ -5,6 +5,7 @@ Array [
   Object {
     "isPin": true,
     "newDigest": "sha256:one",
+    "newDigestShort": "one",
     "newFrom": "some-dep:1.0.0-something@sha256:one",
     "newTag": "1.0.0-something",
     "newVersion": "sha256:one",
