@@ -34,6 +34,23 @@ describe('packageFileWorker', () => {
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(3);
     });
+    it('autodetects dependency pinning true if private', async () => {
+      config.pinVersions = null;
+      config.content.private = true;
+      const res = await packageFileWorker.renovatePackageFile(config);
+      expect(res).toHaveLength(0);
+    });
+    it('autodetects dependency pinning true if no main', async () => {
+      config.pinVersions = null;
+      const res = await packageFileWorker.renovatePackageFile(config);
+      expect(res).toHaveLength(0);
+    });
+    it('autodetects dependency pinning true', async () => {
+      config.pinVersions = null;
+      config.content.main = 'something';
+      const res = await packageFileWorker.renovatePackageFile(config);
+      expect(res).toHaveLength(0);
+    });
     it('maintains lock files', async () => {
       config.yarnLock = '# some yarn lock';
       const res = await packageFileWorker.renovatePackageFile(config);
