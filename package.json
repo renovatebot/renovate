@@ -19,7 +19,8 @@
     "test": "npm run prettier -- --list-different && npm run lint && npm run jest",
     "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
     "update-docs": "npm run build && bash bin/update-docs.sh",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
+    "jyc": "SET LOG_LEVEL=info&& yarn run start-raw tmpDS --token yz4rdk6bmhjbdjzvslxh4f267sbsxopuatjdobl3ljiqcd6ikwwq --platform vsts --endpoint https://jycouet.visualstudio.com/DefaultCollection"
   },
   "repository": {
     "type": "git",
