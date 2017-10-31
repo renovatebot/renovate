@@ -6,3 +6,4 @@
 .DS_Store
 .cache
 /*.log
+/.vscode
