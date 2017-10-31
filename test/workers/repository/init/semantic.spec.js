@@ -1,0 +1,36 @@
+let config;
+beforeEach(() => {
+  jest.resetAllMocks();
+  config = require('../../../_fixtures/config');
+  config.errors = [];
+  config.warnings = [];
+});
+
+const {
+  detectSemanticCommits,
+} = require('../../../../lib/workers/repository/init/semantic');
+
+describe('workers/repository/init/semantic', () => {
+  describe('detectSemanticCommits()', () => {
+    it('returns config if already set', async () => {
+      config.semanticCommits = true;
+      const res = await detectSemanticCommits(config);
+      expect(res).toBe(config);
+    });
+    it('detects false if unknown', async () => {
+      config.semanticCommits = null;
+      config.api.getCommitMessages.mockReturnValue(['foo', 'bar']);
+      const res = await detectSemanticCommits(config);
+      expect(res.semanticCommits).toBe(false);
+    });
+    it('detects true if known', async () => {
+      config.semanticCommits = null;
+      config.api.getCommitMessages.mockReturnValue([
+        'fix: foo',
+        'refactor: bar',
+      ]);
+      const res = await detectSemanticCommits(config);
+      expect(res.semanticCommits).toBe(true);
+    });
+  });
+});

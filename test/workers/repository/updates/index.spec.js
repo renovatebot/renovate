@@ -1,57 +1,25 @@
-const upgrades = require('../../../lib/workers/repository/upgrades');
-const packageFileWorker = require('../../../lib/workers/package-file');
-const logger = require('../../_fixtures/logger');
+jest.mock('../../../../lib/workers/repository/updates/determine');
+jest.mock('../../../../lib/workers/repository/updates/branchify');
 
-jest.mock('../../../lib/workers/package-file');
+let config;
+beforeEach(() => {
+  jest.resetAllMocks();
+  config = require('../../../_fixtures/config');
+});
 
-describe('workers/repository/upgrades', () => {
-  describe('determineRepoUpgrades(config)', () => {
-    let config;
-    beforeEach(() => {
-      config = {
-        logger,
-      };
-    });
-    it('returns empty array if no packageFiles', async () => {
-      config.packageFiles = [];
-      const res = await upgrades.determineRepoUpgrades(config);
-      expect(res.length).toBe(0);
-    });
-    it('returns empty array if none found', async () => {
-      config.packageFiles = [
-        'package.json',
-        {
-          packageFile: 'backend/package.json',
-        },
-      ];
-      packageFileWorker.renovatePackageFile.mockReturnValue([]);
-      const res = await upgrades.determineRepoUpgrades(config);
-      expect(res.length).toBe(0);
-    });
-    it('returns array if upgrades found', async () => {
-      config.packageFiles = [
-        'Dockerfile',
-        {
-          packageFile: 'backend/package.json',
-        },
-        {
-          packageFile: 'frontend/package.js',
-        },
-      ];
-      packageFileWorker.renovateDockerfile.mockReturnValueOnce([
-        { depName: 'a' },
-      ]);
-      packageFileWorker.renovatePackageFile.mockReturnValueOnce([
-        { depName: 'b' },
-        { depName: 'c' },
-      ]);
-      packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce([
-        { foo: 'd' },
-      ]);
-      const res = await upgrades.determineRepoUpgrades(config);
-      expect(res).toHaveLength(4);
+const {
+  determineUpdates,
+} = require('../../../../lib/workers/repository/updates');
+
+describe('workers/repository/updates', () => {
+  describe('determineUpdates()', () => {
+    it('runs', async () => {
+      await determineUpdates(config, 'some-token');
     });
   });
+});
+
+/*
   describe('generateConfig(branchUpgrades)', () => {
     it('does not group single upgrade', () => {
       const branchUpgrades = [
@@ -304,3 +272,4 @@ describe('workers/repository/upgrades', () => {
     });
   });
 });
+*/

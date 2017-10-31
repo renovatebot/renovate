@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/init/config mergeRenovateJson() returns error if cannot parse 1`] = `
+Object {
+  "depName": "renovate.json",
+  "message": "Syntax error near cannot par",
+}
+`;
+
+exports[`workers/repository/init/config mergeRenovateJson() returns error if duplicate keys 1`] = `
+Object {
+  "depName": "renovate.json",
+  "message": "Syntax error: duplicated keys \\"enabled\\" near \\": false }",
+}
+`;

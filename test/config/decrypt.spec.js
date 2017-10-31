@@ -5,33 +5,33 @@ const fs = require('fs');
 
 const privateKey = fs.readFileSync('test/_fixtures/keys/private.pem');
 
-describe('config/massage', () => {
-  describe('massageConfig', () => {
+describe('config/decrypt', () => {
+  describe('decryptConfig()', () => {
     let config;
     beforeEach(() => {
-      config = { ...defaultConfig, logger };
+      config = { ...defaultConfig };
     });
     it('returns empty with no privateKey', () => {
       delete config.encrypted;
-      const res = decryptConfig(config);
+      const res = decryptConfig(config, logger, privateKey);
       expect(res).toMatchObject(config);
     });
     it('warns if no privateKey found', () => {
       config.encrypted = { a: '1' };
-      const res = decryptConfig(config);
+      const res = decryptConfig(config, logger);
       expect(res.encrypted).not.toBeDefined();
       expect(res.a).not.toBeDefined();
     });
     it('handles invalid encrypted type', () => {
       config.encrypted = 1;
       config.privateKey = privateKey;
-      const res = decryptConfig(config);
+      const res = decryptConfig(config, logger, privateKey);
       expect(res.encrypted).not.toBeDefined();
     });
     it('handles invalid encrypted value', () => {
       config.encrypted = { a: 1 };
       config.privateKey = privateKey;
-      const res = decryptConfig(config);
+      const res = decryptConfig(config, logger, privateKey);
       expect(res.encrypted).not.toBeDefined();
       expect(res.a).not.toBeDefined();
     });
@@ -50,7 +50,7 @@ describe('config/massage', () => {
           },
         },
       ];
-      const res = decryptConfig(config);
+      const res = decryptConfig(config, logger, privateKey);
       expect(res.encrypted).not.toBeDefined();
       expect(res.packageFiles[0].devDependencies.encrypted).not.toBeDefined();
       expect(res.packageFiles[0].devDependencies.branchPrefix).toEqual(
