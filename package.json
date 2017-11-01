@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/singapore/renovate#readme",
   "engines": {
-    "node": ">=6.11.1",
+    "node": ">=8",
     "npm": "5"
   },
   "dependencies": {
