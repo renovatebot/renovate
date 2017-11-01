@@ -75,6 +75,10 @@
     "yarn": "1.2.1"
   },
   "devDependencies": {
+    "babel-cli": "6.26.0",
+    "babel-jest": "20.0.3",
+    "babel-plugin-transform-async-to-generator": "6.24.1",
+    "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "condition-circle": "1.5.0",
     "eslint": "4.10.0",
@@ -92,6 +96,12 @@
   "files": [
     "lib"
   ],
+  "babel": {
+    "plugins": [
+      "transform-async-to-generator",
+      "transform-object-rest-spread"
+    ]
+  },
   "jest": {
     "cacheDirectory": ".cache/jest",
     "coverageDirectory": "./coverage",
