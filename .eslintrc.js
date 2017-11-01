@@ -8,6 +8,7 @@ module.exports = {
     'no-use-before-define': 0,
     'no-restricted-syntax': 0,
     'no-await-in-loop': 0,
+    'prefer-template': 'off',
     'promise/always-return': 'error',
     'promise/no-return-wrap': 'error',
     'promise/param-names': 'error',

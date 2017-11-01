@@ -45,6 +45,7 @@ If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch
 
 If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
+    Array [],
     true,
   ],
 ]
@@ -90,6 +91,7 @@ If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch
 
 If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
+    Array [],
     true,
   ],
 ]
@@ -145,6 +147,7 @@ If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch
 
 If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
+  Array [],
   true,
 ]
 `;
@@ -198,6 +201,7 @@ If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch
 
 If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
+  Array [],
   true,
 ]
 `;
@@ -265,6 +269,7 @@ If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch
 
 If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
+    Array [],
     true,
   ],
 ]
@@ -314,6 +319,7 @@ If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch
 
 If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
+    Array [],
     true,
   ],
 ]
@@ -363,50 +369,13 @@ If you'd like Renovate to recreate this \\"Configure Renovate\\" PR from scratch
 
 If later on you ever wish to reconfigure Renovate then you can use this same trick of renaming the PR, but you'll also need to delete any \`renovate.json\` file too. You should then get a new \\"Configure Renovate\\" PR like this.
 ",
+    Array [],
     true,
   ],
 ]
 `;
 
 exports[`lib/workers/repository/onboarding getOnboardingStatus(config) commits files and returns false if no pr 1`] = `
-Array [
-  "renovate/configure",
-  Array [
-    Object {
-      "contents": "{
-  \\"extends\\": [
-    \\"config:js-lib\\"
-  ]
-}
-",
-      "name": "renovate.json",
-    },
-  ],
-  "Add renovate.json",
-]
-`;
-
-exports[`lib/workers/repository/onboarding getOnboardingStatus(config) pins private repos 1`] = `
-Array [
-  "renovate/configure",
-  Array [
-    Object {
-      "contents": "{
-  \\"extends\\": [
-    \\"config:js-app\\"
-  ]
-}
-",
-      "name": "renovate.json",
-    },
-  ],
-  "Add renovate.json",
-]
-`;
-
-exports[`lib/workers/repository/onboarding getOnboardingStatus(config) throws if no packageFiles 1`] = `[Error: no package files]`;
-
-exports[`lib/workers/repository/onboarding getOnboardingStatus(config) uses base + docker 1`] = `
 Array [
   "renovate/configure",
   Array [
@@ -423,3 +392,5 @@ Array [
   "Add renovate.json",
 ]
 `;
+
+exports[`lib/workers/repository/onboarding getOnboardingStatus(config) throws if no packageFiles 1`] = `[Error: no package files]`;
