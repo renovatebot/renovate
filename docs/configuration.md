@@ -691,7 +691,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>Configuration for lock file maintenance</td>
   <td>json</td>
   <td><pre>{
-  "enabled": true,
+  "enabled": false,
   "recreateClosed": true,
   "branchName": "{{branchPrefix}}lock-file-maintenance",
   "commitMessage": "Update lock file",

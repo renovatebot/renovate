@@ -52,6 +52,7 @@ describe('packageFileWorker', () => {
       expect(res).toHaveLength(0);
     });
     it('maintains lock files', async () => {
+      config.lockFileMaintenance.enabled = true;
       config.yarnLock = '# some yarn lock';
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(1);
