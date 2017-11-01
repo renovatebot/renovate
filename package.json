@@ -148,7 +148,7 @@
     "tag": "latest"
   },
   "release": {
-    "branch": "master",
+    "branch": "9x",
     "verifyConditions": "condition-circle",
     "analyzeCommits": {
       "preset": "angular",
