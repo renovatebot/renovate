@@ -481,13 +481,6 @@ describe('api/gitlab', () => {
       await gitlab.addReviewers(42, ['someuser', 'someotheruser']);
     });
   });
-  describe('addLabels(issueNo, labels)', () => {
-    it('should add the given labels to the issue', async () => {
-      await initRepo('some/repo', 'token');
-      await gitlab.addLabels(42, ['foo', 'bar']);
-      expect(get.put.mock.calls).toMatchSnapshot();
-    });
-  });
   describe('ensureComment', () => {
     it('exists', async () => {
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
