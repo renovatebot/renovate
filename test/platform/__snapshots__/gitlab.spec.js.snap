@@ -16,14 +16,6 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab addLabels(issueNo, labels) should add the given labels to the issue 1`] = `
-Array [
-  Array [
-    "projects/some%2Frepo/merge_requests/42?labels=foo,bar",
-  ],
-]
-`;
-
 exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) createBranch(branchName) creates branch 1`] = `
 Array [
   Array [
@@ -106,6 +98,7 @@ Array [
     Object {
       "body": Object {
         "description": "the-body",
+        "labels": null,
         "remove_source_branch": true,
         "source_branch": "some-branch",
         "target_branch": undefined,
@@ -132,6 +125,7 @@ Array [
     Object {
       "body": Object {
         "description": "the-body",
+        "labels": null,
         "remove_source_branch": true,
         "source_branch": "some-branch",
         "target_branch": undefined,

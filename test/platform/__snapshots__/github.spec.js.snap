@@ -16,20 +16,6 @@ Array [
 ]
 `;
 
-exports[`platform/github addLabels(issueNo, labels) should add the given labels to the issue 1`] = `
-Array [
-  Array [
-    "repos/some/repo/issues/42/labels",
-    Object {
-      "body": Array [
-        "foo",
-        "bar",
-      ],
-    },
-  ],
-]
-`;
-
 exports[`platform/github addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `
 Array [
   Array [
@@ -387,14 +373,14 @@ Array [
 ]
 `;
 
-exports[`platform/github createPr(branchName, title, body) should create and return a PR object 1`] = `
+exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
   "number": 123,
 }
 `;
 
-exports[`platform/github createPr(branchName, title, body) should create and return a PR object 2`] = `
+exports[`platform/github createPr() should create and return a PR object 2`] = `
 Array [
   Array [
     "repos/some/repo/pulls",
@@ -407,17 +393,26 @@ Array [
       },
     },
   ],
+  Array [
+    "repos/some/repo/issues/123/labels",
+    Object {
+      "body": Array [
+        "deps",
+        "renovate",
+      ],
+    },
+  ],
 ]
 `;
 
-exports[`platform/github createPr(branchName, title, body) should use defaultBranch 1`] = `
+exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
   "number": 123,
 }
 `;
 
-exports[`platform/github createPr(branchName, title, body) should use defaultBranch 2`] = `
+exports[`platform/github createPr() should use defaultBranch 2`] = `
 Array [
   Array [
     "repos/some/repo/pulls",

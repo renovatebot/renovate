@@ -878,13 +878,6 @@ describe('platform/github', () => {
       expect(get.post.mock.calls).toMatchSnapshot();
     });
   });
-  describe('addLabels(issueNo, labels)', () => {
-    it('should add the given labels to the issue', async () => {
-      await initRepo('some/repo', 'token');
-      await github.addLabels(42, ['foo', 'bar']);
-      expect(get.post.mock.calls).toMatchSnapshot();
-    });
-  });
   describe('ensureComment', () => {
     it('add comment if not found', async () => {
       await initRepo('some/repo', 'token');
@@ -974,7 +967,7 @@ describe('platform/github', () => {
       expect(res).not.toBeDefined();
     });
   });
-  describe('createPr(branchName, title, body)', () => {
+  describe('createPr()', () => {
     it('should create and return a PR object', async () => {
       await initRepo('some/repo', 'token');
       get.post.mockImplementationOnce(() => ({
@@ -985,7 +978,8 @@ describe('platform/github', () => {
       const pr = await github.createPr(
         'some-branch',
         'The Title',
-        'Hello world'
+        'Hello world',
+        ['deps', 'renovate']
       );
       expect(pr).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();
