@@ -8,6 +8,7 @@ let config;
 describe('workers/package/versions', () => {
   beforeEach(() => {
     config = require('../../../lib/config/defaults').getConfig();
+    config.pinVersions = true;
   });
 
   describe('.determineUpgrades(npmDep, config)', () => {
