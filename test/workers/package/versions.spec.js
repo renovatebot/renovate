@@ -177,12 +177,6 @@ describe('workers/package/versions', () => {
       config.currentVersion = '1.4.1';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
-    it('supports future versions if configured', () => {
-      config.ignoreFuture = false;
-      config.respectLatest = false;
-      config.currentVersion = '1.4.1';
-      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
-    });
     it('supports future versions if already future', () => {
       config.currentVersion = '^2.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
