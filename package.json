@@ -2,23 +2,18 @@
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "0.0.0-semantic-release",
-  "bin": "dist/renovate.js",
+  "bin": "lib/renovate.js",
   "scripts": {
-    "build": "yarn && npm run transpile && cp -R lib/config/templates dist/config",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "NODE_ENV=test LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --fix lib test",
     "lint": "eslint lib test",
-    "prepublishOnly": "npm run build",
     "prettier": "prettier '**/*.{js,json}' --write",
-    "start": "node dist/renovate",
-    "start-babel": "babel-node lib/renovate",
-    "start-raw": "node lib/renovate",
+    "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
     "test": "npm run prettier -- --list-different && npm run lint && npm run jest",
-    "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
-    "update-docs": "npm run build && bash bin/update-docs.sh",
+    "update-docs": "bash bin/update-docs.sh",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
@@ -37,7 +32,7 @@
   },
   "homepage": "https://github.com/singapore/renovate#readme",
   "engines": {
-    "node": ">=6.11.1",
+    "node": ">=8",
     "npm": "5"
   },
   "dependencies": {
@@ -80,9 +75,6 @@
     "yarn": "1.2.1"
   },
   "devDependencies": {
-    "babel-cli": "6.26.0",
-    "babel-jest": "20.0.3",
-    "babel-plugin-transform-async-to-generator": "6.24.1",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "condition-circle": "1.5.0",
@@ -99,12 +91,10 @@
     "semantic-release": "8.2.0"
   },
   "files": [
-    "dist",
     "lib"
   ],
   "babel": {
     "plugins": [
-      "transform-async-to-generator",
       "transform-object-rest-spread"
     ]
   },
