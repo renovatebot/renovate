@@ -1942,9 +1942,9 @@ github@~0.1.10:
   version "0.1.16"
   resolved "https://registry.yarnpkg.com/github/-/github-0.1.16.tgz#895d2a85b0feb7980d89ac0ce4f44dcaa03f17b5"
 
-gl-got@7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/gl-got/-/gl-got-7.0.0.tgz#f0183d81aace8c3b77dcea13812837b6506cb0bb"
+gl-got@8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/gl-got/-/gl-got-8.0.0.tgz#aebf93387af0ed2066f8f296f9ff324a82138a9c"
   dependencies:
     got "^7.0.0"
     is-plain-obj "^1.1.0"
