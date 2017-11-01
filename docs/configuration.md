@@ -64,64 +64,6 @@ module.exports = {
 
 ```
 $ node renovate --help
-
-  Usage: renovate [options] [repositories...]
-
-
-  Options:
-
-    --log-level <string>                 Logging level
-    --log-file <string>                  Log file path
-    --log-file-level <string>            Log file log level
-    --onboarding [boolean]               Require a Configuration PR first
-    --private-key <string>               Server-side private key
-    --encrypted <json>                   A configuration object containing configuration encrypted with project key
-    --timezone <string>                  [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
-    --update-not-scheduled [boolean]     Whether to update (but not create) branches when not scheduled
-    --onboarding [boolean]               Require a Configuration PR first
-    --platform <string>                  Platform type of repository
-    --endpoint <string>                  Custom endpoint to use
-    --token <string>                     Repository Auth Token
-    --npmrc <string>                     String copy of npmrc file. Use \n instead of line breaks
-    --yarnrc <string>                    String copy of yarnrc file. Use \n instead of line breaks
-    --ignore-npmrc-file [boolean]        Whether to ignore any .npmrc file found in repository
-    --autodiscover [boolean]             Autodiscover all repositories
-    --autodiscover [boolean]             Autodiscover all repositories
-    --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
-    --github-app-key <string>            GitHub App Private Key (.pem file contents)
-    --package-files <list>               Package file paths
-    --ignore-paths <list>                Skip any package.json whose path matches one of these.
-    --ignore-deps <list>                 Dependencies to ignore
-    --pin-digests [boolean]              Whether to add digests to Dockerfile source images
-    --pin-versions [boolean]             Convert ranged versions to pinned versions
-    --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches
-    --separate-patch-releases [boolean]  If set to true, it will separate minor and patch updates into separate branches
-    --ignore-future [boolean]            Ignore versions tagged as "future"
-    --ignore-unstable [boolean]          Ignore versions with unstable semver
-    --respect-latest [boolean]           Ignore versions newer than npm "latest" version
-    --branch-prefix <string>             Prefix to use for all branch names
-    --semantic-commits [boolean]         Enable semantic commit prefixes for commits and PR titles
-    --semantic-prefix <string>           Prefix to use if semantic commits are enabled
-    --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
-    --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
-    --unpublish-safe [boolean]           Set a status check for unpublish-safe upgrades
-    --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
-    --pr-not-pending-hours <integer>     Timeout in hours for when prCreation=not-pending
-    --automerge [boolean]                Whether to automerge branches/PRs automatically, without human intervention
-    --automerge-type <string>            How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only
-    --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
-    --group-name <string>                Human understandable name for the dependency group
-    --labels <list>                      Labels to add to Pull Request
-    --assignees <list>                   Assignees for Pull Request
-    --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
-    --npm <json>                         Configuration object for npm package.json renovation
-    --meteor <json>                      Configuration object for meteor package.js renovation
-    -h, --help                           output usage information
-  Examples:
-
-    $ renovate --token abc123 singapore/lint-condo
-    $ renovate --labels=renovate,dependency --ignore-unstable=false --log-level verbose singapore/lint-condo
-    $ renovate singapore/lint-condo singapore/package-test
 ```
 
 To configure any `<list>` items, separate with commas. E.g. `renovate --labels=renovate,dependency`.
@@ -323,22 +265,6 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>false</pre></td>
   <td>`RENOVATE_AUTODISCOVER`</td>
   <td>`--autodiscover`<td>
-</tr>
-<tr>
-  <td>`githubAppId`</td>
-  <td>GitHub App ID (enables GitHub App functionality if set)</td>
-  <td>integer</td>
-  <td><pre>undefined</pre></td>
-  <td>`RENOVATE_GITHUB_APP_ID`</td>
-  <td>`--github-app-id`<td>
-</tr>
-<tr>
-  <td>`githubAppKey`</td>
-  <td>GitHub App Private Key (.pem file contents)</td>
-  <td>string</td>
-  <td><pre>null</pre></td>
-  <td>`RENOVATE_GITHUB_APP_KEY`</td>
-  <td>`--github-app-key`<td>
 </tr>
 <tr>
   <td>`repositories`</td>

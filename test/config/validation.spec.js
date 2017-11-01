@@ -23,7 +23,6 @@ describe('config/validation', () => {
         schedule: ['every 15 mins every weekday'],
         labels: 5,
         semanticPrefix: 7,
-        githubAppId: 'none',
         lockFileMaintenance: false,
         packageRules: [
           {
@@ -36,7 +35,7 @@ describe('config/validation', () => {
         logger
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(7);
+      expect(errors).toHaveLength(6);
       expect(errors).toMatchSnapshot();
     });
   });
