@@ -155,6 +155,14 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--onboarding`<td>
 </tr>
 <tr>
+  <td>`renovateFork`</td>
+  <td>Whether to renovate a forked repository or not.</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_RENOVATE_FORK`</td>
+  <td>`--renovate-fork`<td>
+</tr>
+<tr>
   <td>`privateKey`</td>
   <td>Server-side private key</td>
   <td>string</td>
