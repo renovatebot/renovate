@@ -24,21 +24,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) createBranch(branchName) creates file with v3 1`] = `
-Array [
-  Array [
-    "projects/some-repo/repository/branches",
-    Object {
-      "body": Object {
-        "branch_name": "some-branch",
-        "ref": undefined,
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) createBranch(branchName) creates file with v4 1`] = `
+exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) createBranch(branchName) creates branch 1`] = `
 Array [
   Array [
     "projects/undefined/repository/branches",
@@ -52,24 +38,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) creates file with v3 1`] = `
-Array [
-  Array [
-    "projects/some-repo/repository/files",
-    Object {
-      "body": Object {
-        "branch_name": "some-branch",
-        "commit_message": "some-message",
-        "content": "c29tZS1jb250ZW50cw==",
-        "encoding": "base64",
-        "file_path": "some-path",
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) creates file with v4 1`] = `
+exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) creates file 1`] = `
 Array [
   Array [
     "projects/undefined/repository/files/some-path",
@@ -88,9 +57,6 @@ Array [
 exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) getSubDirectories(path) should return subdirectories 1`] = `
 Array [
   Array [
-    "projects/owned",
-  ],
-  Array [
     "projects/some%2Frepo",
   ],
   Array [
@@ -108,24 +74,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) updateFile(branchName, filePath, fileContents, message) creates file with v3 1`] = `
-Array [
-  Array [
-    "projects/some-repo/repository/files",
-    Object {
-      "body": Object {
-        "branch_name": "some-branch",
-        "commit_message": "some-message",
-        "content": "c29tZS1jb250ZW50cw==",
-        "encoding": "base64",
-        "file_path": "some-path",
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) updateFile(branchName, filePath, fileContents, message) creates file with v4 1`] = `
+exports[`platform/gitlab createFile(branchName, filePath, fileContents, message) updateFile(branchName, filePath, fileContents, message) updates file 1`] = `
 Array [
   Array [
     "projects/undefined/repository/files/some-path",
@@ -200,9 +149,6 @@ exports[`platform/gitlab getBranchLastCommitTime should return a Date 1`] = `201
 exports[`platform/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
 Array [
   Array [
-    "projects/owned",
-  ],
-  Array [
     "projects/some%2Frepo",
   ],
   Array [
@@ -219,9 +165,6 @@ Array [
 
 exports[`platform/gitlab getBranchPr(branchName) should return the PR object 1`] = `
 Array [
-  Array [
-    "projects/owned",
-  ],
   Array [
     "projects/some%2Frepo",
   ],
@@ -254,7 +197,7 @@ Object {
   "deletions": 1,
   "displayNumber": "Merge Request #91",
   "iid": 91,
-  "number": undefined,
+  "number": 91,
   "source_branch": "some-branch",
 }
 `;
@@ -266,11 +209,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab getFile(filePath, branchName) gets the file with v3 1`] = `Object {}`;
-
-exports[`platform/gitlab getFile(filePath, branchName) gets the file with v3 2`] = `"foo"`;
-
-exports[`platform/gitlab getFile(filePath, branchName) gets the file with v4 by default 1`] = `"foo"`;
+exports[`platform/gitlab getFile(filePath, branchName) gets the file 1`] = `"foo"`;
 
 exports[`platform/gitlab getFileContent(filePath, branchName) gets the file 1`] = `"~�"`;
 
@@ -345,9 +284,6 @@ Array [
 exports[`platform/gitlab initRepo should initialise the config for the repo - 0 1`] = `
 Array [
   Array [
-    "projects/owned",
-  ],
-  Array [
     "projects/some%2Frepo",
   ],
   Array [
@@ -360,9 +296,6 @@ exports[`platform/gitlab initRepo should initialise the config for the repo - 0 
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 1 1`] = `
 Array [
-  Array [
-    "projects/owned",
-  ],
   Array [
     "projects/some%2Frepo",
   ],
@@ -377,9 +310,6 @@ exports[`platform/gitlab initRepo should initialise the config for the repo - 1 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 2 1`] = `
 Array [
   Array [
-    "projects/owned",
-  ],
-  Array [
     "projects/some%2Frepo",
   ],
   Array [
@@ -390,15 +320,10 @@ Array [
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 2 2`] = `Object {}`;
 
-exports[`platform/gitlab initRepo should use api v4 1`] = `Object {}`;
-
 exports[`platform/gitlab initRepo uses provided logger 1`] = `Object {}`;
 
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
-  Array [
-    "projects/owned",
-  ],
   Array [
     "projects/some%2Frepo",
   ],
