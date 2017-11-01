@@ -78,7 +78,7 @@ describe('workers/repository', () => {
     });
     it('does not skip repository if its a configured fork', async () => {
       config.isFork = true;
-      config.renovateJsonPresent = true;
+      config.renovateFork = true;
       manager.detectPackageFiles.mockImplementationOnce(input => ({
         ...input,
         ...{ packageFiles: [] },
