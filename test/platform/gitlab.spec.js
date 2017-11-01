@@ -64,8 +64,6 @@ describe('platform/gitlab', () => {
   });
 
   async function initRepo(...args) {
-    // projects/owned
-    get.mockImplementationOnce();
     // projects/${config.repoName
     get.mockImplementationOnce(() => ({
       body: {
@@ -134,26 +132,6 @@ describe('platform/gitlab', () => {
         err = e;
       }
       expect(err.message).toBe('always error');
-    });
-    it('should use api v4', async () => {
-      // projects/owned
-      get.mockImplementationOnce(() => {
-        throw new Error('any error');
-      });
-      // projects/${config.repoName
-      get.mockImplementationOnce(() => ({
-        body: {
-          default_branch: 'master',
-        },
-      }));
-      // user
-      get.mockImplementationOnce(() => ({
-        body: {
-          email: 'a@b.com',
-        },
-      }));
-      const config = await initRepo('some/repo', 'some_token');
-      expect(config).toMatchSnapshot();
     });
   });
   describe('setBaseBranch(branchName)', () => {
@@ -606,7 +584,7 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getFile(filePath, branchName)', () => {
-    it('gets the file with v4 by default', async () => {
+    it('gets the file', async () => {
       get.mockReturnValueOnce({
         body: {
           content: 'foo',
@@ -615,27 +593,6 @@ describe('platform/gitlab', () => {
       const res = await gitlab.getFile('some/path');
       expect(res).toMatchSnapshot();
       expect(get.mock.calls[0][0].indexOf('some%2Fpath')).not.toBe(-1);
-    });
-    it('gets the file with v3', async () => {
-      get.mockReturnValueOnce({
-        body: {},
-      });
-      get.mockReturnValueOnce({
-        body: {},
-      });
-      get.mockReturnValueOnce({
-        body: {},
-      });
-      get.mockReturnValueOnce({
-        body: {
-          content: 'foo',
-        },
-      });
-      const config = await gitlab.initRepo('some-repo', 'some-token');
-      expect(config).toMatchSnapshot();
-      const res = await gitlab.getFile('some-path');
-      expect(res).toMatchSnapshot();
-      expect(get.mock.calls[3][0].indexOf('file_path')).not.toBe(-1);
     });
   });
   describe('getFileContent(filePath, branchName)', () => {
@@ -672,7 +629,7 @@ describe('platform/gitlab', () => {
     });
   });
   describe('createFile(branchName, filePath, fileContents, message)', () => {
-    it('creates file with v4', async () => {
+    it('creates file', async () => {
       await gitlab.createFile(
         'some-branch',
         'some-path',
@@ -682,28 +639,8 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.post.mock.calls[0][1].body.file_path).not.toBeDefined();
     });
-    it('creates file with v3', async () => {
-      get.mockReturnValueOnce({
-        body: {},
-      });
-      get.mockReturnValueOnce({
-        body: {},
-      });
-      get.mockReturnValueOnce({
-        body: {},
-      });
-      await gitlab.initRepo('some-repo', 'some-token');
-      await gitlab.createFile(
-        'some-branch',
-        'some-path',
-        'some-contents',
-        'some-message'
-      );
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls[0][1].body.file_path).toBeDefined();
-    });
     describe('updateFile(branchName, filePath, fileContents, message)', () => {
-      it('creates file with v4', async () => {
+      it('updates file', async () => {
         await gitlab.updateFile(
           'some-branch',
           'some-path',
@@ -713,47 +650,12 @@ describe('platform/gitlab', () => {
         expect(get.put.mock.calls).toMatchSnapshot();
         expect(get.put.mock.calls[0][1].body.file_path).not.toBeDefined();
       });
-      it('creates file with v3', async () => {
-        get.mockReturnValueOnce({
-          body: {},
-        });
-        get.mockReturnValueOnce({
-          body: {},
-        });
-        get.mockReturnValueOnce({
-          body: {},
-        });
-        await gitlab.initRepo('some-repo', 'some-token');
-        await gitlab.updateFile(
-          'some-branch',
-          'some-path',
-          'some-contents',
-          'some-message'
-        );
-        expect(get.put.mock.calls).toMatchSnapshot();
-        expect(get.put.mock.calls[0][1].body.file_path).toBeDefined();
-      });
     });
     describe('createBranch(branchName)', () => {
-      it('creates file with v4', async () => {
+      it('creates branch', async () => {
         await gitlab.createBranch('some-branch');
         expect(get.post.mock.calls).toMatchSnapshot();
         expect(get.post.mock.calls[0][1].body.branch_name).not.toBeDefined();
-      });
-      it('creates file with v3', async () => {
-        get.mockReturnValueOnce({
-          body: {},
-        });
-        get.mockReturnValueOnce({
-          body: {},
-        });
-        get.mockReturnValueOnce({
-          body: {},
-        });
-        await gitlab.initRepo('some-repo', 'some-token');
-        await gitlab.createBranch('some-branch');
-        expect(get.post.mock.calls).toMatchSnapshot();
-        expect(get.post.mock.calls[0][1].body.branch_name).toBeDefined();
       });
     });
     describe('getSubDirectories(path)', () => {
