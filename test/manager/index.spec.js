@@ -70,10 +70,11 @@ describe('manager', () => {
       config.api.getFileList.mockReturnValueOnce([
         'package.json',
         'node_modules/backend/package.json',
+        'not_node_mldules/backend/package.json',
       ]);
       const res = await manager.detectPackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(1);
+      expect(res.packageFiles).toHaveLength(2);
       expect(res.foundIgnoredPaths).toMatchSnapshot();
       expect(res.warnings).toMatchSnapshot();
     });

@@ -22,6 +22,7 @@ Array [
 exports[`manager detectPackageFiles(config) ignores node modules 1`] = `
 Array [
   "package.json",
+  "not_node_mldules/backend/package.json",
 ]
 `;
 
