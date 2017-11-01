@@ -144,7 +144,11 @@
       "rarkins"
     ]
   },
+  "publishConfig": {
+    "tag": "latest"
+  },
   "release": {
+    "branch": "master",
     "verifyConditions": "condition-circle",
     "analyzeCommits": {
       "preset": "angular",
