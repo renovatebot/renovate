@@ -162,5 +162,16 @@ describe('workers/branch/schedule', () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
+    it('rejects first day of the month', () => {
+      config.schedule = ['before 11am on the first day of the month'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(false);
+    });
+    it('approves first day of the month', () => {
+      config.schedule = ['before 11am on the first day of the month'];
+      mockDate.set(1506835566000); // Sunday, 1 October 2017 05:26:06
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
   });
 });

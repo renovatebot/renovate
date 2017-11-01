@@ -64,63 +64,6 @@ module.exports = {
 
 ```
 $ node renovate --help
-
-  Usage: renovate [options] [repositories...]
-
-
-  Options:
-
-    --log-level <string>                 Logging level
-    --log-file <string>                  Log file path
-    --log-file-level <string>            Log file log level
-    --onboarding [boolean]               Require a Configuration PR first
-    --private-key <string>               Server-side private key
-    --encrypted <json>                   A configuration object containing configuration encrypted with project key
-    --timezone <string>                  [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
-    --update-not-scheduled [boolean]     Whether to update (but not create) branches when not scheduled
-    --onboarding [boolean]               Require a Configuration PR first
-    --platform <string>                  Platform type of repository
-    --endpoint <string>                  Custom endpoint to use
-    --token <string>                     Repository Auth Token
-    --npmrc <string>                     String copy of npmrc file. Use \n instead of line breaks
-    --yarnrc <string>                    String copy of yarnrc file. Use \n instead of line breaks
-    --ignore-npmrc-file [boolean]        Whether to ignore any .npmrc file found in repository
-    --autodiscover [boolean]             Autodiscover all repositories
-    --autodiscover [boolean]             Autodiscover all repositories
-    --github-app-id <integer>            GitHub App ID (enables GitHub App functionality if set)
-    --github-app-key <string>            GitHub App Private Key (.pem file contents)
-    --package-files <list>               Package file paths
-    --ignore-paths <list>                Skip any package.json whose path matches one of these.
-    --ignore-deps <list>                 Dependencies to ignore
-    --pin-versions [boolean]             Convert ranged versions in package.json to pinned versions
-    --separate-major-releases [boolean]  If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches
-    --separate-patch-releases [boolean]  If set to true, it will separate minor and patch updates into separate branches
-    --ignore-future [boolean]            Ignore versions tagged as "future"
-    --ignore-unstable [boolean]          Ignore versions with unstable semver
-    --respect-latest [boolean]           Ignore versions newer than npm "latest" version
-    --branch-prefix <string>             Prefix to use for all branch names
-    --semantic-commits [boolean]         Enable semantic commit prefixes for commits and PR titles
-    --semantic-prefix <string>           Prefix to use if semantic commits are enabled
-    --recreate-closed [boolean]          Recreate PRs even if same ones were closed previously
-    --rebase-stale-prs [boolean]         Rebase stale PRs (GitHub only)
-    --unpublish-safe [boolean]           Set a status check for unpublish-safe upgrades
-    --pr-creation <string>               When to create the PR for a branch. Values: immediate, not-pending, status-success.
-    --pr-not-pending-hours <integer>     Timeout in hours for when prCreation=not-pending
-    --automerge [boolean]                Whether to automerge branches/PRs automatically, without human intervention
-    --automerge-type <string>            How to automerge - "branch-merge-commit", "branch-push" or "pr". Branch support is GitHub-only
-    --lazy-grouping [boolean]            Use group names only when multiple dependencies upgraded
-    --group-name <string>                Human understandable name for the dependency group
-    --labels <list>                      Labels to add to Pull Request
-    --assignees <list>                   Assignees for Pull Request
-    --reviewers <list>                   Requested reviewers for Pull Requests (GitHub only)
-    --npm <json>                         Configuration object for npm package.json renovation
-    --meteor <json>                      Configuration object for meteor package.js renovation
-    -h, --help                           output usage information
-  Examples:
-
-    $ renovate --token abc123 singapore/lint-condo
-    $ renovate --labels=renovate,dependency --ignore-unstable=false --log-level verbose singapore/lint-condo
-    $ renovate singapore/lint-condo singapore/package-test
 ```
 
 To configure any `<list>` items, separate with commas. E.g. `renovate --labels=renovate,dependency`.
@@ -210,6 +153,14 @@ Obviously, you can't set repository or package file location with this method.
   <td><pre>true</pre></td>
   <td>`RENOVATE_ONBOARDING`</td>
   <td>`--onboarding`<td>
+</tr>
+<tr>
+  <td>`renovateFork`</td>
+  <td>Whether to renovate a forked repository or not.</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_RENOVATE_FORK`</td>
+  <td>`--renovate-fork`<td>
 </tr>
 <tr>
   <td>`privateKey`</td>
@@ -324,22 +275,6 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--autodiscover`<td>
 </tr>
 <tr>
-  <td>`githubAppId`</td>
-  <td>GitHub App ID (enables GitHub App functionality if set)</td>
-  <td>integer</td>
-  <td><pre>undefined</pre></td>
-  <td>`RENOVATE_GITHUB_APP_ID`</td>
-  <td>`--github-app-id`<td>
-</tr>
-<tr>
-  <td>`githubAppKey`</td>
-  <td>GitHub App Private Key (.pem file contents)</td>
-  <td>string</td>
-  <td><pre>null</pre></td>
-  <td>`RENOVATE_GITHUB_APP_KEY`</td>
-  <td>`--github-app-key`<td>
-</tr>
-<tr>
   <td>`repositories`</td>
   <td>List of Repositories</td>
   <td>list</td>
@@ -365,9 +300,9 @@ Obviously, you can't set repository or package file location with this method.
 </tr>
 <tr>
   <td>`ignorePaths`</td>
-  <td>Skip any package.json whose path matches one of these.</td>
+  <td>Skip any package.json whose path matches one of these. Can be string or glob pattern</td>
   <td>list</td>
-  <td><pre>["node_modules/"]</pre></td>
+  <td><pre>["**/node_modules/**"]</pre></td>
   <td>`RENOVATE_IGNORE_PATHS`</td>
   <td>`--ignore-paths`<td>
 </tr>
@@ -383,7 +318,14 @@ Obviously, you can't set repository or package file location with this method.
   <td>`devDependencies`</td>
   <td>Configuration specifically for `package.json`>`devDependencies`</td>
   <td>json</td>
-  <td><pre>{}</pre></td>
+  <td><pre>{
+  "pin": {
+    "group": {
+      "commitMessage": "Pin devDependencies",
+      "prTitle": "Pin devDependencies"
+    }
+  }
+}</pre></td>
   <td>`RENOVATE_DEV_DEPENDENCIES`</td>
   <td><td>
 </tr>
@@ -452,10 +394,18 @@ Obviously, you can't set repository or package file location with this method.
   <td><td>
 </tr>
 <tr>
-  <td>`pinVersions`</td>
-  <td>Convert ranged versions in package.json to pinned versions</td>
+  <td>`pinDigests`</td>
+  <td>Whether to add digests to Dockerfile source images</td>
   <td>boolean</td>
   <td><pre>true</pre></td>
+  <td>`RENOVATE_PIN_DIGESTS`</td>
+  <td>`--pin-digests`<td>
+</tr>
+<tr>
+  <td>`pinVersions`</td>
+  <td>Convert ranged versions to pinned versions</td>
+  <td>boolean</td>
+  <td><pre>null</pre></td>
   <td>`RENOVATE_PIN_VERSIONS`</td>
   <td>`--pin-versions`<td>
 </tr>
@@ -539,6 +489,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>json</td>
   <td><pre>{
   "unpublishSafe": false,
+  "recreateClosed": true,
   "groupName": "Pin Dependencies",
   "group": {
     "commitMessage": "Pin Dependencies",
@@ -547,6 +498,14 @@ Obviously, you can't set repository or package file location with this method.
   }
 }</pre></td>
   <td>`RENOVATE_PIN`</td>
+  <td><td>
+</tr>
+<tr>
+  <td>`digest`</td>
+  <td>Configuration to apply when updating a Docker digest (same tag)</td>
+  <td>json</td>
+  <td><pre>{"semanticPrefix": "refactor(deps):"}</pre></td>
+  <td>`RENOVATE_DIGEST`</td>
   <td><td>
 </tr>
 <tr>
@@ -657,7 +616,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`prBody`</td>
   <td>Pull Request body template</td>
   <td>string</td>
-  <td><pre>"This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{depName}}]({{repositoryUrl}}){{else}}`{{depName}}`{{/if}} from `v{{currentVersion}}` to `v{{newVersion}}`{{#if isRollback}}. This is necessary and important because `v{{currentVersion}}` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}\n{{#if releases.length}}\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n### Commits\n\n<details>\n<summary>{{githubName}}</summary>\n\n{{#each releases as |release|}}\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com)."</pre></td>
+  <td><pre>"This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{depName}}]({{repositoryUrl}}){{else}}`{{depName}}`{{/if}} from `{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{currentVersion}}` to `{{#unless isRange}}v{{/unless}}{{newVersion}}`{{#if isRollback}}. This is necessary and important because `v{{currentVersion}}` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}\n{{#if releases.length}}\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n### Commits\n\n<details>\n<summary>{{githubName}}</summary>\n\n{{#each releases as |release|}}\n#### {{release.version}}\n{{#each release.commits as |commit|}}\n-   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}\n{{/each}}\n{{/each}}\n\n</details>\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com)."</pre></td>
   <td>`RENOVATE_PR_BODY`</td>
   <td><td>
 </tr>
@@ -666,7 +625,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>Configuration for lock file maintenance</td>
   <td>json</td>
   <td><pre>{
-  "enabled": true,
+  "enabled": false,
   "recreateClosed": true,
   "branchName": "{{branchPrefix}}lock-file-maintenance",
   "commitMessage": "Update lock file",
@@ -752,7 +711,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`meteor`</td>
   <td>Configuration object for meteor package.js renovation</td>
   <td>json</td>
-  <td><pre>{"enabled": false}</pre></td>
+  <td><pre>{"enabled": true}</pre></td>
   <td>`RENOVATE_METEOR`</td>
   <td>`--meteor`<td>
 </tr>
@@ -761,13 +720,23 @@ Obviously, you can't set repository or package file location with this method.
   <td>Configuration object for Dockerfile renovation</td>
   <td>json</td>
   <td><pre>{
-  "enabled": false,
-  "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{currentTag}}",
-  "commitMessage": "Update {{depName}}:{{currentTag}} digest",
-  "prTitle": "Update Dockerfile image {{depName}}@{{currentTag}} digest",
-  "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image `{{depName}}@{{currentTag}}` to the latest digest (`{{newDigest}}`).\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+  "enabled": true,
+  "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{newVersionMajor}}.x",
+  "commitMessage": "Update {{depName}} to tag {{newTag}}",
+  "prTitle": "Update Dockerfile {{depName}} image tag to {{newTag}}",
+  "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image `{{depName}}` from tag `{{currentTag}}` to new tag `{{newTag}}`.\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+  "major": {"enabled": false},
+  "minor": {"enabled": false},
+  "patch": {"enabled": false},
+  "digest": {
+    "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{currentTag}}",
+    "commitMessage": "Update {{depName}}:{{currentTag}} digest",
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image `{{depName}}@{{currentTag}}` to the latest digest (`{{newDigest}}`).\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Update Dockerfile {{depName}} image {{currentTag}} digest ({{newDigestShort}})"
+  },
   "pin": {
-    "prTitle": "Pin Dockerfile image {{depName}}@{{currentTag}} digest",
+    "branchName": "{{branchPrefix}}docker-pin-{{depNameSanitized}}-{{currentTag}}",
+    "prTitle": "Pin Dockerfile {{depName}}@{{currentTag}} image digest",
     "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Docker base image `{{depName}}@{{currentTag}}` to use a digest (`{{newDigest}}`).\nThis digest will then be kept updated via Pull Requests whenever the image is updated on the Docker registry.\n\n{{#if schedule}}\n**Note**: This PR was created on a configured schedule (\"{{schedule}}\"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.\n{{/if}}\n\n{{#if hasErrors}}\n\n---\n\n### Errors\n\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\n\n{{#each errors as |error|}}\n-   `{{error.depName}}`: {{error.message}}\n{{/each}}\n{{/if}}\n\n{{#if hasWarnings}}\n\n---\n\n### Warnings\n\nPlease make sure the following warnings are safe to ignore:\n\n{{#each warnings as |warning|}}\n-   `{{warning.depName}}`: {{warning.message}}\n{{/each}}\n{{/if}}\n\n---\n\nThis {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
     "groupName": "Pin Docker Digests",
     "group": {

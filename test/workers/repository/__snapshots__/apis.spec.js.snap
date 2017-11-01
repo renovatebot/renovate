@@ -30,52 +30,7 @@ Array [
 
 exports[`workers/repository/apis checkMonorepos skips if no lerna packages 1`] = `Array []`;
 
-exports[`workers/repository/apis detectPackageFiles(config) adds package files to object 1`] = `
-Array [
-  "package.json",
-  "backend/package.json",
-]
-`;
-
-exports[`workers/repository/apis detectPackageFiles(config) finds Dockerfiles 1`] = `
-Array [
-  "Dockerfile",
-]
-`;
-
-exports[`workers/repository/apis detectPackageFiles(config) finds meteor package files 1`] = `
-Array [
-  "modules/something/package.js",
-]
-`;
-
-exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 1`] = `
-Array [
-  "package.json",
-]
-`;
-
-exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 2`] = `true`;
-
-exports[`workers/repository/apis detectPackageFiles(config) ignores node modules 3`] = `
-Array [
-  Object {
-    "depName": "packageFiles",
-    "message": "Skipped package.json files found within ignored paths: \`node_modules/backend/package.json\`",
-  },
-]
-`;
-
 exports[`workers/repository/apis initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
-
-exports[`workers/repository/apis mergeRenovateJson(config) returns error in JSON.parse 1`] = `
-Array [
-  Object {
-    "depName": "renovate.json",
-    "message": "Could not parse repository's renovate.json file",
-  },
-]
-`;
 
 exports[`workers/repository/apis mergeRenovateJson(config) returns error in config if renovate.json cannot be parsed 1`] = `
 Array [

@@ -13,12 +13,12 @@ describe('config/migration', () => {
         automergeMinor: true,
         automergePatch: true,
         ignoreNodeModules: true,
+        meteor: true,
         autodiscover: 'true',
         schedule: 'on the last day of the month',
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
-        semanticCommits: false,
         packageRules: [
           {
             packagePatterns: '^(@angular|typescript)',
@@ -35,12 +35,13 @@ describe('config/migration', () => {
             enabled: false,
           },
         ],
-        lockFileConfig: {
+        lockFileMaintenance: {
           automerge: 'any',
           schedule: 'before 5am every day',
         },
         devDependencies: {
           automerge: 'minor',
+          schedule: null,
         },
         depTypes: [
           'dependencies',

@@ -2,23 +2,18 @@
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "0.0.0-semantic-release",
-  "bin": "dist/renovate.js",
+  "bin": "lib/renovate.js",
   "scripts": {
-    "build": "yarn && npm run transpile && cp -R lib/config/templates dist/config",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "NODE_ENV=test LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --fix lib test",
     "lint": "eslint lib test",
-    "prepublishOnly": "npm run build",
     "prettier": "prettier '**/*.{js,json}' --write",
-    "start": "node dist/renovate",
-    "start-babel": "babel-node lib/renovate",
-    "start-raw": "node lib/renovate",
+    "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
     "test": "npm run prettier -- --list-different && npm run lint && npm run jest",
-    "transpile": "rimraf dist && mkdirp dist && babel lib --out-dir dist",
-    "update-docs": "npm run build && bash bin/update-docs.sh",
+    "update-docs": "bash bin/update-docs.sh",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
@@ -37,22 +32,24 @@
   },
   "homepage": "https://github.com/singapore/renovate#readme",
   "engines": {
-    "node": ">=6.11.1",
+    "node": ">=8",
     "npm": "5"
   },
   "dependencies": {
     "bunyan": "1.8.12",
-    "chalk": "2.2.0",
+    "chalk": "2.3.0",
     "changelog": "1.4.0",
     "child-process-promise": "2.2.1",
     "commander": "2.11.0",
+    "compare-versions": "3.1.0",
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
+    "deepcopy": "0.6.3",
     "fs-extra": "4.0.2",
     "get-installed-path": "4.0.8",
     "gh-got": "6.0.0",
     "github-url-from-git": "1.5.0",
-    "gl-got": "7.0.0",
+    "gl-got": "8.0.0",
     "got": "7.1.0",
     "handlebars": "4.0.11",
     "ini": "1.3.4",
@@ -64,7 +61,7 @@
     "lodash": "4.17.4",
     "minimatch": "3.0.4",
     "moment": "2.19.1",
-    "moment-timezone": "0.5.13",
+    "moment-timezone": "0.5.14",
     "npm": "5.5.1",
     "parse-link-header": "1.0.1",
     "registry-auth-token": "3.3.1",
@@ -72,19 +69,16 @@
     "semver": "5.4.1",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.1",
-    "showdown": "1.7.6",
+    "showdown": "1.8.0",
     "tmp-promise": "1.0.3",
     "traverse": "0.6.6",
     "yarn": "1.2.1"
   },
   "devDependencies": {
-    "babel-cli": "6.26.0",
-    "babel-jest": "20.0.3",
-    "babel-plugin-transform-async-to-generator": "6.24.1",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "condition-circle": "1.5.0",
-    "eslint": "4.9.0",
+    "eslint": "4.10.0",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-config-prettier": "2.6.0",
     "eslint-plugin-import": "2.8.0",
@@ -97,12 +91,10 @@
     "semantic-release": "8.2.0"
   },
   "files": [
-    "dist",
     "lib"
   ],
   "babel": {
     "plugins": [
-      "transform-async-to-generator",
       "transform-object-rest-spread"
     ]
   },
@@ -135,11 +127,18 @@
     "labels": [
       "ready"
     ],
+    "reviewers": [
+      "rarkins"
+    ],
     "assignees": [
       "rarkins"
     ]
   },
+  "publishConfig": {
+    "tag": "next"
+  },
   "release": {
+    "branch": "master",
     "verifyConditions": "condition-circle",
     "analyzeCommits": {
       "preset": "angular",

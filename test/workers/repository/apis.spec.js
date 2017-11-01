@@ -3,15 +3,15 @@ const jsonValidator = require('json-dup-key-validator');
 const apis = require('../../../lib/workers/repository/apis');
 const logger = require('../../_fixtures/logger');
 
-const githubApi = require('../../../lib/api/github');
-const gitlabApi = require('../../../lib/api/gitlab');
-const npmApi = require('../../../lib/api/npm');
+const githubApi = require('../../../lib/platform/github');
+const gitlabApi = require('../../../lib/platform/gitlab');
+const npmApi = require('../../../lib/manager/npm/registry');
 
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
-jest.mock('../../../lib/api/github');
-jest.mock('../../../lib/api/gitlab');
-jest.mock('../../../lib/api/npm');
+jest.mock('../../../lib/platform/github');
+jest.mock('../../../lib/platform/gitlab');
+jest.mock('../../../lib/manager/npm/registry');
 
 describe('workers/repository/apis', () => {
   describe('getNpmrc', () => {
@@ -243,68 +243,13 @@ describe('workers/repository/apis', () => {
       jsonValidator.validate = jest.fn();
       jsonValidator.validate.mockReturnValueOnce(false);
       jsonValidator.validate.mockReturnValueOnce(false);
-      const returnConfig = await apis.mergeRenovateJson(config);
-      expect(returnConfig.foo).toBeUndefined();
-      expect(returnConfig.renovateJsonPresent).toBeUndefined();
-      expect(returnConfig.errors).toMatchSnapshot();
-    });
-  });
-  describe('detectPackageFiles(config)', () => {
-    let config;
-    beforeEach(() => {
-      config = {
-        ...defaultConfig,
-        api: {
-          findFilePaths: jest.fn(),
-          getFileContent: jest.fn(),
-        },
-        logger,
-        warnings: [],
-      };
-      config.api.findFilePaths.mockReturnValue([]);
-    });
-    it('adds package files to object', async () => {
-      config.api.findFilePaths.mockReturnValueOnce([
-        'package.json',
-        'backend/package.json',
-      ]);
-      const res = await apis.detectPackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(2);
-    });
-    it('finds meteor package files', async () => {
-      config.meteor.enabled = true;
-      config.api.findFilePaths.mockReturnValueOnce([]); // package.json
-      config.api.findFilePaths.mockReturnValueOnce([
-        'modules/something/package.js',
-      ]); // meteor
-      config.api.findFilePaths.mockReturnValueOnce([]); // Dockerfile
-      config.api.getFileContent.mockReturnValueOnce('Npm.depends()');
-      const res = await apis.detectPackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(1);
-    });
-    it('finds Dockerfiles', async () => {
-      config.api.findFilePaths.mockReturnValueOnce([]);
-      config.api.findFilePaths.mockReturnValueOnce([]);
-      config.api.findFilePaths.mockReturnValueOnce(['Dockerfile']);
-      config.docker.enabled = true;
-      const res = await apis.detectPackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(1);
-    });
-    it('ignores node modules', async () => {
-      config.api.findFilePaths.mockReturnValueOnce([
-        'package.json',
-        'node_modules/backend/package.json',
-      ]);
-      config.api.findFilePaths.mockReturnValueOnce([]);
-      config.api.findFilePaths.mockReturnValueOnce([]);
-      const res = await apis.detectPackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(1);
-      expect(res.foundIgnoredPaths).toMatchSnapshot();
-      expect(res.warnings).toMatchSnapshot();
+      let e;
+      try {
+        await apis.mergeRenovateJson(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
   });
   describe('resolvePackageFiles', () => {
@@ -358,6 +303,11 @@ describe('workers/repository/apis', () => {
       );
       const res = await apis.resolvePackageFiles(config);
       expect(res.packageFiles).toHaveLength(1);
+    });
+    it('handles dockerfile with no content', async () => {
+      config.packageFiles = [{ packageFile: 'Dockerfile' }];
+      const res = await apis.resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(0);
     });
     it('handles dockerfile with no FROM', async () => {
       config.packageFiles = [{ packageFile: 'Dockerfile' }];

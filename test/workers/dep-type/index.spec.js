@@ -19,6 +19,7 @@ describe('lib/workers/dep-type/index', () => {
         packageFile: 'package.json',
         ignoreDeps: ['a', 'b'],
         monorepoPackages: ['e'],
+        logger,
       };
     });
     it('returns empty if config is disabled', async () => {
@@ -67,8 +68,20 @@ describe('lib/workers/dep-type/index', () => {
     it('returns upgrades for docker', async () => {
       config.packageFile = 'Dockerfile';
       config.currentFrom = 'node';
-      const res = await depTypeWorker.renovateDepType('some-content', config);
+      const res = await depTypeWorker.renovateDepType(
+        '# a comment\nFROM something\n',
+        config
+      );
       expect(res).toHaveLength(1);
+    });
+    it('ignores Dockerfiles with no FROM', async () => {
+      config.packageFile = 'Dockerfile';
+      config.currentFrom = 'node';
+      const res = await depTypeWorker.renovateDepType(
+        '# a comment\nRUN something\n',
+        config
+      );
+      expect(res).toHaveLength(0);
     });
   });
   describe('getDepConfig(depTypeConfig, dep)', () => {
