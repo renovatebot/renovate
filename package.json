@@ -4,16 +4,12 @@
   "version": "0.0.0-semantic-release",
   "bin": "lib/renovate.js",
   "scripts": {
-    "build": "yarn && npm run transpile && cp -R lib/config/templates dist/config",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "NODE_ENV=test LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --fix lib test",
     "lint": "eslint lib test",
-    "prepublishOnly": "npm run build",
     "prettier": "prettier '**/*.{js,json}' --write",
-    "start-babel": "babel-node lib/renovate",
-    "start-raw": "node lib/renovate",
     "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
     "test": "npm run prettier -- --list-different && npm run lint && npm run jest",
@@ -80,10 +76,6 @@
     "yarn": "1.2.1"
   },
   "devDependencies": {
-    "babel-cli": "6.26.0",
-    "babel-jest": "20.0.3",
-    "babel-plugin-transform-async-to-generator": "6.24.1",
-    "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "condition-circle": "1.5.0",
     "eslint": "4.10.0",
@@ -99,15 +91,8 @@
     "semantic-release": "8.2.0"
   },
   "files": [
-    "dist",
     "lib"
   ],
-  "babel": {
-    "plugins": [
-      "transform-async-to-generator",
-      "transform-object-rest-spread"
-    ]
-  },
   "jest": {
     "cacheDirectory": ".cache/jest",
     "coverageDirectory": "./coverage",
