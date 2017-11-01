@@ -334,9 +334,9 @@ exports[`workers/package/versions .determineUpgrades(npmDep, config) supports > 
 Array [
   Object {
     "changeLogFromVersion": "1.4.1",
-    "changeLogToVersion": "2.0.1",
+    "changeLogToVersion": "2.0.3",
     "isMajor": true,
-    "newVersion": "2.0.1",
+    "newVersion": "2.0.3",
     "newVersionMajor": 2,
     "newVersionMinor": 0,
     "type": "major",
@@ -352,21 +352,6 @@ Array [
     "newVersion": "2.0.3",
     "newVersionMajor": 2,
     "type": "pin",
-    "unpublishable": false,
-  },
-]
-`;
-
-exports[`workers/package/versions .determineUpgrades(npmDep, config) supports future versions if configured 1`] = `
-Array [
-  Object {
-    "changeLogFromVersion": "1.4.1",
-    "changeLogToVersion": "2.0.3",
-    "isMajor": true,
-    "newVersion": "2.0.3",
-    "newVersionMajor": 2,
-    "newVersionMinor": 0,
-    "type": "major",
     "unpublishable": false,
   },
 ]
