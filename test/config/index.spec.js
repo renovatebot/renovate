@@ -7,7 +7,6 @@ describe('config/index', () => {
     let defaultArgv;
     let ghGot;
     let get;
-    let githubApp;
     beforeEach(() => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
@@ -16,9 +15,6 @@ describe('config/index', () => {
       ghGot = require('gh-got');
       jest.mock('gl-got');
       get = require('gl-got');
-      jest.mock('../../lib/config/github-app');
-      githubApp = require('../../lib/config/github-app');
-      githubApp.getRepositories = jest.fn();
     });
     it('throws for invalid platform', async () => {
       const env = {};
@@ -59,35 +55,6 @@ describe('config/index', () => {
       defaultArgv = defaultArgv.concat(['--token=abc']);
       const env = {};
       await configParser.parseConfigs(env, defaultArgv);
-    });
-    it('throws if no GitHub App key defined', async () => {
-      defaultArgv = defaultArgv.concat(['--github-app-id=5']);
-      const env = {};
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('A GitHub App Private Key must be provided');
-    });
-    it('supports github app', async () => {
-      const env = {};
-      defaultArgv = defaultArgv.concat([
-        '--github-app-id=5',
-        '--github-app-key=abc',
-      ]);
-      githubApp.getRepositories.mockImplementationOnce(() => {
-        const result = [
-          {
-            repository: 'a/b',
-            token: 'token_a',
-          },
-        ];
-        return result;
-      });
-      await configParser.parseConfigs(env, defaultArgv);
-      expect(githubApp.getRepositories.mock.calls.length).toBe(1);
     });
     it('autodiscovers github platform', async () => {
       const env = {};
