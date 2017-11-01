@@ -292,9 +292,9 @@ Obviously, you can't set repository or package file location with this method.
 </tr>
 <tr>
   <td>`ignorePaths`</td>
-  <td>Skip any package.json whose path matches one of these.</td>
+  <td>Skip any package.json whose path matches one of these. Can be string or glob pattern</td>
   <td>list</td>
-  <td><pre>["node_modules/"]</pre></td>
+  <td><pre>["**/node_modules/**"]</pre></td>
   <td>`RENOVATE_IGNORE_PATHS`</td>
   <td>`--ignore-paths`<td>
 </tr>
