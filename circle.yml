@@ -23,7 +23,11 @@ test:
     - bash <(curl -s https://codecov.io/bash)
 
 deployment:
-  npm:
+  10x:
     branch: master
+    commands:
+      - yarn run semantic-release || true
+  9x:
+    branch: 9x
     commands:
       - yarn run semantic-release || true
