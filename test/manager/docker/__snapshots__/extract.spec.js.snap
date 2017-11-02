@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/docker/extract extractDependencies() handles comments 1`] = `
+Array [
+  Object {
+    "currentDigest": undefined,
+    "currentFrom": "FROM node",
+    "currentTag": undefined,
+    "depName": "node",
+    "depType": "Dockerfile",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles digest 1`] = `
+Array [
+  Object {
+    "currentDigest": "sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentFrom": "FROM node@sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentTag": undefined,
+    "depName": "node",
+    "depType": "Dockerfile",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles from as 1`] = `
+Array [
+  Object {
+    "currentDigest": undefined,
+    "currentFrom": "FROM node:8.9.0-alpine as base",
+    "currentTag": "8.9.0-alpine",
+    "depName": "node",
+    "depType": "Dockerfile",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles naked dep 1`] = `
+Array [
+  Object {
+    "currentDigest": undefined,
+    "currentFrom": "FROM node",
+    "currentTag": undefined,
+    "depName": "node",
+    "depType": "Dockerfile",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles tag 1`] = `
+Array [
+  Object {
+    "currentDigest": undefined,
+    "currentFrom": "FROM node:8.9.0-alpine",
+    "currentTag": "8.9.0-alpine",
+    "depName": "node",
+    "depType": "Dockerfile",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles tag and digest 1`] = `
+Array [
+  Object {
+    "currentDigest": "sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentFrom": "FROM node:8.9.0@sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentTag": "8.9.0",
+    "depName": "node",
+    "depType": "Dockerfile",
+  },
+]
+`;
