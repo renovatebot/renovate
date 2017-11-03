@@ -1,28 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/apis checkMonorepos adds lerna packages 1`] = `
-Array [
-  "@a/b",
-  "@a/c",
-]
-`;
-
-exports[`workers/repository/apis checkMonorepos adds nested yarn workspaces 1`] = `
-Array [
-  "@a/b",
-  "@a/c",
-]
-`;
-
-exports[`workers/repository/apis checkMonorepos adds yarn workspaces 1`] = `
-Array [
-  "@a/b",
-  "@a/c",
-]
-`;
-
-exports[`workers/repository/apis checkMonorepos skips if no lerna packages 1`] = `Array []`;
-
 exports[`workers/repository/apis initApis(config) throws if unknown platform 1`] = `"Unknown platform: foo"`;
 
 exports[`workers/repository/apis mergeRenovateJson(config) returns error in config if renovate.json cannot be parsed 1`] = `

@@ -7,8 +7,6 @@ const githubApi = require('../../../lib/platform/github');
 const gitlabApi = require('../../../lib/platform/gitlab');
 const npmApi = require('../../../lib/manager/npm/registry');
 
-const defaultConfig = require('../../../lib/config/defaults').getConfig();
-
 jest.mock('../../../lib/platform/github');
 jest.mock('../../../lib/platform/gitlab');
 jest.mock('../../../lib/manager/npm/registry');
@@ -50,84 +48,6 @@ describe('workers/repository/apis', () => {
         logger,
       };
       expect(await apis.getNpmrc(config)).toMatchObject(config);
-    });
-  });
-  describe('checkMonorepos', () => {
-    let config;
-    beforeEach(() => {
-      config = {
-        ...defaultConfig,
-        api: {
-          getFileJson: jest.fn(),
-        },
-        logger,
-      };
-    });
-    it('adds yarn workspaces', async () => {
-      config.packageFiles = [
-        {
-          packageFile: 'package.json',
-          content: { workspaces: ['packages/*'] },
-        },
-        {
-          packageFile: 'packages/something/package.json',
-          content: { name: '@a/b' },
-        },
-        {
-          packageFile: 'packages/something-else/package.json',
-          content: { name: '@a/c' },
-        },
-      ];
-      const res = await apis.checkMonorepos(config);
-      expect(res.monorepoPackages).toMatchSnapshot();
-    });
-    it('adds nested yarn workspaces', async () => {
-      config.packageFiles = [
-        {
-          packageFile: 'frontend/package.json',
-          content: { workspaces: ['packages/*'] },
-        },
-        {
-          packageFile: 'frontend/packages/something/package.json',
-          content: { name: '@a/b' },
-        },
-        {
-          packageFile: 'frontend/packages/something-else/package.json',
-          content: { name: '@a/c' },
-        },
-      ];
-      const res = await apis.checkMonorepos(config);
-      expect(res.monorepoPackages).toMatchSnapshot();
-    });
-    it('adds lerna packages', async () => {
-      config.packageFiles = [
-        {
-          packageFile: 'package.json',
-          content: {},
-        },
-        {
-          packageFile: 'packages/something/package.json',
-          content: { name: '@a/b' },
-        },
-        {
-          packageFile: 'packages/something-else/package.json',
-          content: { name: '@a/c' },
-        },
-      ];
-      config.api.getFileJson.mockReturnValue({ packages: ['packages/*'] });
-      const res = await apis.checkMonorepos(config);
-      expect(res.monorepoPackages).toMatchSnapshot();
-    });
-    it('skips if no lerna packages', async () => {
-      config.packageFiles = [
-        {
-          packageFile: 'package.json',
-          content: {},
-        },
-      ];
-      config.api.getFileJson.mockReturnValue({});
-      const res = await apis.checkMonorepos(config);
-      expect(res.monorepoPackages).toMatchSnapshot();
     });
   });
   describe('detectSemanticCommits', () => {
