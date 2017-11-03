@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/onboarding/pr/config-description getConfigDesc() assignees, labels and schedule 1`] = `
+"
+## Configuration Summary
+
+Based on the currently configured presets, Renovate will:
+
+  - Start dependency updates once this Configure Renovate PR is merged or closed
+  - Assign PRs to @someone and @someone-else
+  - Apply labels \`renovate\` and \`deps\` to PRs
+  - Run Renovate on following schedule: before 5am
+
+Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch and this Pull Request description will be updated the next time Renovate runs. 
+
+---
+"
+`;
+
+exports[`workers/repository/onboarding/pr/config-description getConfigDesc() returns a list 1`] = `
+"
+## Configuration Summary
+
+Based on the currently configured presets, Renovate will:
+
+  - Start dependency updates once this Configure Renovate PR is merged or closed
+  - description 1
+  - description two
+  - something else
+
+Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch and this Pull Request description will be updated the next time Renovate runs. 
+
+---
+"
+`;
+
+exports[`workers/repository/onboarding/pr/config-description getConfigDesc() returns empty 1`] = `""`;
