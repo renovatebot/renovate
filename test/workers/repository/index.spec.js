@@ -51,37 +51,6 @@ const upgrades = require('../../../lib/workers/repository/upgrades');
 const logger = require('../../_fixtures/logger');
 
 describe('workers/repository', () => {
-  describe('pinDependenciesFirst', () => {
-    it('returns sorted if no pin', () => {
-      const arr = [
-        { branchName: 'a' },
-        { branchName: 'c' },
-        { branchName: 'b' },
-      ];
-      arr.sort(repositoryWorker.pinDependenciesFirst);
-      expect(arr).toMatchSnapshot();
-    });
-    it('returns pin first', () => {
-      const arr = [
-        { branchName: 'a' },
-        { branchName: 'c' },
-        { branchName: 'd', type: 'pin' },
-        { branchName: 'b' },
-      ];
-      arr.sort(repositoryWorker.pinDependenciesFirst);
-      expect(arr).toMatchSnapshot();
-    });
-    it('returns pin first', () => {
-      const arr = [
-        { branchName: 'd', type: 'pin' },
-        { branchName: 'a' },
-        { branchName: 'c' },
-        { branchName: 'b' },
-      ];
-      arr.sort(repositoryWorker.pinDependenciesFirst);
-      expect(arr).toMatchSnapshot();
-    });
-  });
   describe('renovateRepository', () => {
     let config;
     beforeEach(() => {

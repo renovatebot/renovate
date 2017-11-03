@@ -16,7 +16,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
         logger,
       };
     });
-    it('returns warning text', async () => {
+    it('returns warning text', () => {
       config.warnings = [
         {
           depName: 'foo',
@@ -36,7 +36,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
         logger,
       };
     });
-    it('returns error text', async () => {
+    it('returns error text', () => {
       config.errors = [
         {
           depName: 'renovate.json',

@@ -16,7 +16,7 @@ describe('platform/gitlab', () => {
   });
 
   describe('getRepos', () => {
-    async function getRepos(...args) {
+    function getRepos(...args) {
       // repo info
       get.mockImplementationOnce(() => ({
         body: [
@@ -63,7 +63,7 @@ describe('platform/gitlab', () => {
     });
   });
 
-  async function initRepo(...args) {
+  function initRepo(...args) {
     // projects/${config.repoName
     get.mockImplementationOnce(() => ({
       body: {

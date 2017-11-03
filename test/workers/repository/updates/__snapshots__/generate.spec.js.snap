@@ -24,21 +24,21 @@ Object {
 exports[`workers/repository/updates/generate generateBranchConfig() groups multiple upgrades 1`] = `
 Object {
   "branchName": "some-branch",
-  "depName": "some-other-dep",
+  "depName": "some-dep",
   "foo": 2,
   "groupName": "some-group",
   "prTitle": "some-title",
   "upgrades": Array [
     Object {
       "branchName": "some-branch",
-      "depName": "some-other-dep",
+      "depName": "some-dep",
       "foo": 2,
       "groupName": "some-group",
       "prTitle": "some-title",
     },
     Object {
       "branchName": "some-branch",
-      "depName": "some-dep",
+      "depName": "some-other-dep",
       "foo": 2,
       "groupName": "some-group",
       "prTitle": "some-title",
