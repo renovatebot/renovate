@@ -28,8 +28,8 @@ describe('manager', () => {
         'backend/package.json',
       ]);
       const res = await manager.detectPackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(2);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
     });
     it('finds meteor package files', async () => {
       config.meteor.enabled = true;
@@ -38,8 +38,8 @@ describe('manager', () => {
       ]); // meteor
       config.api.getFileContent.mockReturnValueOnce('Npm.depends( {} )');
       const res = await manager.detectPackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(1);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
     });
     it('skips meteor package files with no json', async () => {
       config.meteor.enabled = true;
@@ -48,8 +48,8 @@ describe('manager', () => {
       ]); // meteor
       config.api.getFileContent.mockReturnValueOnce('Npm.depends(packages)');
       const res = await manager.detectPackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(0);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(0);
     });
     it('finds Dockerfiles', async () => {
       config.api.getFileList.mockReturnValueOnce([
@@ -63,18 +63,17 @@ describe('manager', () => {
         'ARG foo\nFROM something\nRUN something'
       );
       const res = await manager.detectPackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(1);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
     });
     it('ignores node modules', async () => {
       config.api.getFileList.mockReturnValueOnce([
         'package.json',
         'node_modules/backend/package.json',
-        'not_node_mldules/backend/package.json',
       ]);
       const res = await manager.detectPackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.packageFiles).toHaveLength(2);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
       expect(res.foundIgnoredPaths).toMatchSnapshot();
       expect(res.warnings).toMatchSnapshot();
     });
