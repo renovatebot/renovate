@@ -15,7 +15,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         logger,
       };
     });
-    it('has special lock file maintenance description', async () => {
+    it('has special lock file maintenance description', () => {
       config.branches = [
         {
           prTitle: 'Lock file maintenance',
@@ -31,7 +31,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       const res = getPrList(config);
       expect(res).toMatchSnapshot();
     });
-    it('handles multiple', async () => {
+    it('handles multiple', () => {
       config.branches = [
         {
           prTitle: 'Pin dependencies',

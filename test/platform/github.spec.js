@@ -15,7 +15,7 @@ describe('platform/github', () => {
     github = require('../../lib/platform/github');
   });
 
-  async function getRepos(...args) {
+  function getRepos(...args) {
     // repo info
     get.mockImplementationOnce(() => ({
       body: [
@@ -52,7 +52,7 @@ describe('platform/github', () => {
     });
   });
 
-  async function initRepo(...args) {
+  function initRepo(...args) {
     // repo info
     get.mockImplementationOnce(() => ({
       body: {
@@ -119,7 +119,7 @@ describe('platform/github', () => {
       );
     });
     it('should rebase', async () => {
-      async function squashInitRepo(...args) {
+      function squashInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -152,7 +152,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should squash', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -185,7 +185,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should merge', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -218,7 +218,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should not guess at merge', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -248,7 +248,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should detect repoForceRebase', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -278,7 +278,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should ignore repoForceRebase 404', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -308,7 +308,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should ignore repoForceRebase 403', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -338,7 +338,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should throw repoForceRebase non-404', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -1168,7 +1168,7 @@ describe('platform/github', () => {
   });
   describe('mergePr(prNo) - autodetection', () => {
     beforeEach(async () => {
-      async function guessInitRepo(...args) {
+      function guessInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {

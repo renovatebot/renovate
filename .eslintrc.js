@@ -5,6 +5,7 @@ module.exports = {
   extends: ['airbnb-base', 'prettier'],
   plugins: ['import', 'promise'],
   rules: {
+    'require-await': 'error',
     'no-use-before-define': 0,
     'no-restricted-syntax': 0,
     'no-await-in-loop': 0,
