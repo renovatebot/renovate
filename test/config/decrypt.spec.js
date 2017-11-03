@@ -1,5 +1,4 @@
 const { decryptConfig } = require('../../lib/config/decrypt.js');
-const defaultConfig = require('../../lib/config/defaults').getConfig();
 const logger = require('../_fixtures/logger');
 const fs = require('fs');
 
@@ -9,11 +8,11 @@ describe('config/decrypt', () => {
   describe('decryptConfig()', () => {
     let config;
     beforeEach(() => {
-      config = { ...defaultConfig };
+      config = {};
     });
     it('returns empty with no privateKey', () => {
       delete config.encrypted;
-      const res = decryptConfig(config, logger, privateKey);
+      const res = decryptConfig(config, logger);
       expect(res).toMatchObject(config);
     });
     it('warns if no privateKey found', () => {
