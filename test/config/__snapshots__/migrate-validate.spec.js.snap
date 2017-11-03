@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/migrate-validate migrateAndValidate() handles empty 1`] = `
+Object {
+  "errors": Array [],
+  "warnings": Array [],
+}
+`;
+
+exports[`config/migrate-validate migrateAndValidate() handles invalid 1`] = `
+Object {
+  "errors": Array [
+    Object {
+      "depName": "Configuration Error",
+      "message": "Invalid configuration option: \`foo\`",
+    },
+  ],
+  "foo": "none",
+  "warnings": Array [],
+}
+`;
+
+exports[`config/migrate-validate migrateAndValidate() handles migration 1`] = `
+Object {
+  "automerge": false,
+  "errors": Array [],
+  "warnings": Array [],
+}
+`;

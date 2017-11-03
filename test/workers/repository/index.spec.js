@@ -7,39 +7,11 @@ const onboarding = require('../../../lib/workers/repository/onboarding');
 const upgrades = require('../../../lib/workers/repository/upgrades');
 
 const logger = require('../../_fixtures/logger');
+const onboardingPr = require('../../../lib/workers/repository/onboarding/pr');
+
+jest.mock('../../../lib/workers/repository/onboarding/pr');
 
 describe('workers/repository', () => {
-  describe('pinDependenciesFirst', () => {
-    it('returns sorted if no pin', () => {
-      const arr = [
-        { branchName: 'a' },
-        { branchName: 'c' },
-        { branchName: 'b' },
-      ];
-      arr.sort(repositoryWorker.pinDependenciesFirst);
-      expect(arr).toMatchSnapshot();
-    });
-    it('returns pin first', () => {
-      const arr = [
-        { branchName: 'a' },
-        { branchName: 'c' },
-        { branchName: 'd', type: 'pin' },
-        { branchName: 'b' },
-      ];
-      arr.sort(repositoryWorker.pinDependenciesFirst);
-      expect(arr).toMatchSnapshot();
-    });
-    it('returns pin first', () => {
-      const arr = [
-        { branchName: 'd', type: 'pin' },
-        { branchName: 'a' },
-        { branchName: 'c' },
-        { branchName: 'b' },
-      ];
-      arr.sort(repositoryWorker.pinDependenciesFirst);
-      expect(arr).toMatchSnapshot();
-    });
-  });
   describe('renovateRepository', () => {
     let config;
     beforeEach(() => {
@@ -50,7 +22,6 @@ describe('workers/repository', () => {
       apis.resolvePackageFiles = jest.fn(input => input);
       apis.checkMonorepos = jest.fn(input => input);
       onboarding.getOnboardingStatus = jest.fn(input => input);
-      onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
       upgrades.branchifyUpgrades = jest.fn(() => ({ branchUpgrades: {} }));
       branchWorker.processBranch = jest.fn(() => 'done');
@@ -78,47 +49,32 @@ describe('workers/repository', () => {
     });
     it('does not skip repository if its a configured fork', async () => {
       config.isFork = true;
-      config.renovateJsonPresent = true;
-      manager.detectPackageFiles.mockImplementationOnce(input => ({
-        ...input,
-        ...{ packageFiles: [] },
-      }));
+      config.renovateFork = true;
+      manager.detectPackageFiles.mockReturnValueOnce([]);
       await repositoryWorker.renovateRepository(config);
     });
     it('sets custom base branch', async () => {
       config.baseBranch = 'some-branch';
       config.api.branchExists.mockReturnValueOnce(true);
-      manager.detectPackageFiles.mockImplementationOnce(input => ({
-        ...input,
-        ...{ packageFiles: [] },
-      }));
+      manager.detectPackageFiles.mockReturnValueOnce([]);
       await repositoryWorker.renovateRepository(config);
       expect(config.api.setBaseBranch.mock.calls).toHaveLength(1);
     });
     it('errors when missing custom base branch', async () => {
       config.baseBranch = 'some-branch';
       config.api.branchExists.mockReturnValueOnce(false);
-      manager.detectPackageFiles.mockImplementationOnce(input => ({
-        ...input,
-        ...{ packageFiles: [] },
-      }));
+      manager.detectPackageFiles.mockReturnValueOnce([]);
       await repositoryWorker.renovateRepository(config);
       expect(config.api.setBaseBranch.mock.calls).toHaveLength(0);
     });
     it('skips repository if no package.json', async () => {
-      manager.detectPackageFiles.mockImplementationOnce(input => ({
-        ...input,
-        ...{ packageFiles: [] },
-      }));
+      manager.detectPackageFiles.mockReturnValueOnce([]);
       await repositoryWorker.renovateRepository(config);
       expect(apis.resolvePackageFiles.mock.calls.length).toBe(0);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('does not skip repository if package.json', async () => {
-      manager.detectPackageFiles.mockImplementationOnce(input => ({
-        ...input,
-        ...{ packageFiles: ['package.json'] },
-      }));
+      manager.detectPackageFiles.mockReturnValueOnce(['package.json']);
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
       apis.mergeRenovateJson.mockImplementationOnce(input => ({
         ...input,
@@ -134,19 +90,13 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
       expect(branchWorker.processBranch.mock.calls.length).toBe(0);
-      expect(onboarding.ensurePr.mock.calls.length).toBe(1);
+      expect(onboardingPr.ensureOnboardingPr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('uses onboarding custom baseBranch', async () => {
-      manager.detectPackageFiles.mockImplementationOnce(input => ({
-        ...input,
-        ...{ packageFiles: ['package.json'] },
-      }));
+      manager.detectPackageFiles.mockReturnValueOnce(['package.json']);
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
-      apis.mergeRenovateJson.mockImplementationOnce(input => ({
-        ...input,
-        ...{ packageFiles: ['package.json'] },
-      }));
+      manager.detectPackageFiles.mockReturnValueOnce(['package.json']);
       apis.mergeRenovateJson.mockImplementationOnce(input => ({
         ...input,
         ...{ packageFiles: ['package.json'], baseBranch: 'next' },
@@ -158,14 +108,11 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
       expect(branchWorker.processBranch.mock.calls.length).toBe(0);
-      expect(onboarding.ensurePr.mock.calls.length).toBe(1);
+      expect(onboardingPr.ensureOnboardingPr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('errors onboarding custom baseBranch', async () => {
-      manager.detectPackageFiles.mockImplementationOnce(input => ({
-        ...input,
-        ...{ packageFiles: ['package.json'] },
-      }));
+      manager.detectPackageFiles.mockReturnValueOnce(['package.json']);
       config.api.getFileJson = jest.fn(() => ({ a: 1 }));
       apis.mergeRenovateJson.mockImplementationOnce(input => ({
         ...input,
@@ -181,7 +128,7 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
       expect(branchWorker.processBranch.mock.calls.length).toBe(0);
-      expect(onboarding.ensurePr.mock.calls.length).toBe(1);
+      expect(onboardingPr.ensureOnboardingPr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('calls branchWorker', async () => {

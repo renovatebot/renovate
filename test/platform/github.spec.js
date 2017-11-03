@@ -15,88 +15,7 @@ describe('platform/github', () => {
     github = require('../../lib/platform/github');
   });
 
-  describe('getInstallations', () => {
-    it('should return an array of installations', async () => {
-      get.mockImplementationOnce(() => ({
-        body: ['a', 'b'],
-      }));
-      const installations = await github.getInstallations('sometoken');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(installations).toMatchSnapshot();
-    });
-    it('should return a 404', async () => {
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
-      let err;
-      try {
-        await github.getInstallations('sometoken');
-      } catch (e) {
-        err = e;
-      }
-      expect(err.statusCode).toBe(404);
-    });
-  });
-
-  describe('getInstallationToken', () => {
-    it('should return an installation token', async () => {
-      get.post.mockImplementationOnce(() => ({
-        body: {
-          token: 'aUserToken',
-        },
-      }));
-      const installationToken = await github.getInstallationToken(
-        'sometoken',
-        123456
-      );
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(installationToken).toMatchSnapshot();
-    });
-    it('should return an error if given one', async () => {
-      get.post.mockImplementationOnce(() => {
-        throw new Error('error');
-      });
-      let err;
-      try {
-        await github.getInstallationToken('sometoken', 123456);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('error');
-    });
-  });
-
-  describe('getInstallationRepositories', () => {
-    it('should return an array of repositories', async () => {
-      get.mockImplementationOnce(() => ({
-        body: {
-          total_count: 2,
-          repositories: ['a', 'b'],
-        },
-      }));
-      const repositories = await github.getInstallationRepositories(
-        'sometoken'
-      );
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(repositories).toMatchSnapshot();
-    });
-    it('should return an error if given one', async () => {
-      get.mockImplementationOnce(() => {
-        throw new Error('error');
-      });
-      let err;
-      try {
-        await github.getInstallationRepositories('sometoken');
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('error');
-    });
-  });
-
-  async function getRepos(...args) {
+  function getRepos(...args) {
     // repo info
     get.mockImplementationOnce(() => ({
       body: [
@@ -133,7 +52,7 @@ describe('platform/github', () => {
     });
   });
 
-  async function initRepo(...args) {
+  function initRepo(...args) {
     // repo info
     get.mockImplementationOnce(() => ({
       body: {
@@ -200,7 +119,7 @@ describe('platform/github', () => {
       );
     });
     it('should rebase', async () => {
-      async function squashInitRepo(...args) {
+      function squashInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -233,7 +152,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should squash', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -266,7 +185,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should merge', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -299,7 +218,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should not guess at merge', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -329,7 +248,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should detect repoForceRebase', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -359,7 +278,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should ignore repoForceRebase 404', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -389,7 +308,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should ignore repoForceRebase 403', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -419,7 +338,7 @@ describe('platform/github', () => {
       expect(config).toMatchSnapshot();
     });
     it('should throw repoForceRebase non-404', async () => {
-      async function mergeInitRepo(...args) {
+      function mergeInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {
@@ -959,13 +878,6 @@ describe('platform/github', () => {
       expect(get.post.mock.calls).toMatchSnapshot();
     });
   });
-  describe('addLabels(issueNo, labels)', () => {
-    it('should add the given labels to the issue', async () => {
-      await initRepo('some/repo', 'token');
-      await github.addLabels(42, ['foo', 'bar']);
-      expect(get.post.mock.calls).toMatchSnapshot();
-    });
-  });
   describe('ensureComment', () => {
     it('add comment if not found', async () => {
       await initRepo('some/repo', 'token');
@@ -1055,7 +967,7 @@ describe('platform/github', () => {
       expect(res).not.toBeDefined();
     });
   });
-  describe('createPr(branchName, title, body)', () => {
+  describe('createPr()', () => {
     it('should create and return a PR object', async () => {
       await initRepo('some/repo', 'token');
       get.post.mockImplementationOnce(() => ({
@@ -1066,7 +978,8 @@ describe('platform/github', () => {
       const pr = await github.createPr(
         'some-branch',
         'The Title',
-        'Hello world'
+        'Hello world',
+        ['deps', 'renovate']
       );
       expect(pr).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();
@@ -1255,7 +1168,7 @@ describe('platform/github', () => {
   });
   describe('mergePr(prNo) - autodetection', () => {
     beforeEach(async () => {
-      async function guessInitRepo(...args) {
+      function guessInitRepo(...args) {
         // repo info
         get.mockImplementationOnce(() => ({
           body: {

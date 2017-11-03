@@ -186,22 +186,6 @@ describe('workers/pr', () => {
         config.api.createPr.mock.calls[0][2].indexOf('Warnings</h3>')
       ).toEqual(-1);
     });
-    it('should add labels to new PR', async () => {
-      config.api.getBranchPr = jest.fn();
-      config.api.addLabels = jest.fn();
-      config.labels = ['foo'];
-      const pr = await prWorker.ensurePr(config);
-      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      expect(config.api.addLabels.mock.calls.length).toBe(1);
-    });
-    it('should add not labels to new PR if empty', async () => {
-      config.api.getBranchPr = jest.fn();
-      config.api.addLabels = jest.fn();
-      config.labels = [];
-      const pr = await prWorker.ensurePr(config);
-      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      expect(config.api.addLabels.mock.calls.length).toBe(0);
-    });
     it('should add assignees and reviewers to new PR', async () => {
       config.api.getBranchPr = jest.fn();
       config.api.addAssignees = jest.fn();

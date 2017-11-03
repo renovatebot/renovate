@@ -20,10 +20,6 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`githubAppId\` should be an integer",
-  },
-  Object {
-    "depName": "Configuration Error",
     "message": "Configuration option \`lockFileMaintenance\` should be a json object",
   },
   Object {

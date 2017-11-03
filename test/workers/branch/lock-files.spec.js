@@ -23,7 +23,7 @@ describe('workers/branch/lock-files', () => {
         logger,
       };
     });
-    it('returns true if found and true', async () => {
+    it('returns true if found and true', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -32,7 +32,7 @@ describe('workers/branch/lock-files', () => {
       ];
       expect(hasPackageLock(config, 'package.json')).toBe(true);
     });
-    it('returns false if found and false', async () => {
+    it('returns false if found and false', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -44,7 +44,7 @@ describe('workers/branch/lock-files', () => {
       ];
       expect(hasPackageLock(config, 'backend/package.json')).toBe(false);
     });
-    it('throws error if not found', async () => {
+    it('throws error if not found', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -71,7 +71,7 @@ describe('workers/branch/lock-files', () => {
         logger,
       };
     });
-    it('returns true if found and true', async () => {
+    it('returns true if found and true', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -80,7 +80,7 @@ describe('workers/branch/lock-files', () => {
       ];
       expect(hasYarnLock(config, 'package.json')).toBe(true);
     });
-    it('returns false if found and false', async () => {
+    it('returns false if found and false', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -92,7 +92,7 @@ describe('workers/branch/lock-files', () => {
       ];
       expect(hasYarnLock(config, 'backend/package.json')).toBe(false);
     });
-    it('throws error if not found', async () => {
+    it('throws error if not found', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',

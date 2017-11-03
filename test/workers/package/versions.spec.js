@@ -8,6 +8,7 @@ let config;
 describe('workers/package/versions', () => {
   beforeEach(() => {
     config = require('../../../lib/config/defaults').getConfig();
+    config.pinVersions = true;
   });
 
   describe('.determineUpgrades(npmDep, config)', () => {
@@ -173,12 +174,6 @@ describe('workers/package/versions', () => {
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('supports > latest versions if configured', () => {
-      config.respectLatest = false;
-      config.currentVersion = '1.4.1';
-      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
-    });
-    it('supports future versions if configured', () => {
-      config.ignoreFuture = false;
       config.respectLatest = false;
       config.currentVersion = '1.4.1';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
