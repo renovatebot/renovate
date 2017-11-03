@@ -15,7 +15,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
         logger,
       };
     });
-    it('returns empty', async () => {
+    it('returns empty', () => {
       delete config.description;
       const res = getConfigDesc(config);
       expect(res).toMatchSnapshot();
