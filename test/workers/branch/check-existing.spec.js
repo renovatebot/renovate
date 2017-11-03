@@ -10,7 +10,7 @@ describe('workers/branch/check-existing', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: { findPr: jest.fn() },
+        api: { findPr: jest.fn(), updatePr: jest.fn() },
         logger,
         branchName: 'some-branch',
         prTitle: 'some-title',
@@ -39,9 +39,11 @@ describe('workers/branch/check-existing', () => {
     });
     it('returns false if mistaken', async () => {
       config.api.findPr.mockReturnValueOnce({
+        title: 'some title',
         closed_at: '2017-10-15T21:28:07.000Z',
       });
       expect(await prAlreadyExisted(config)).toBe(null);
+      expect(config.api.updatePr.mock.calls).toHaveLength(1);
     });
   });
 });
