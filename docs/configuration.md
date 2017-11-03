@@ -172,7 +172,7 @@ Obviously, you can't set repository or package file location with this method.
 </tr>
 <tr>
   <td>`encrypted`</td>
-  <td>A configuration object containing configuration encrypted with project key</td>
+  <td>A configuration object containing configuration encrypted with project key. Valid inside renovate.json only</td>
   <td>json</td>
   <td><pre>null</pre></td>
   <td>`RENOVATE_ENCRYPTED`</td>
