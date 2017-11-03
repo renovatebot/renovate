@@ -1,12 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`migrateAndValidate returns empty config 1`] = `
-Object {
-  "errors": Array [],
-  "warnings": Array [],
-}
-`;
-
 exports[`workers/repository/apis checkMonorepos adds lerna packages 1`] = `
 Array [
   "@a/b",

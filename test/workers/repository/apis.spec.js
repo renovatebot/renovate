@@ -319,17 +319,3 @@ describe('workers/repository/apis', () => {
     });
   });
 });
-describe('migrateAndValidate', () => {
-  it('returns empty config', () => {
-    const renovateJson = {};
-    const res = apis.migrateAndValidate(defaultConfig, renovateJson);
-    expect(res).toMatchSnapshot();
-  });
-  it('massages string to array', () => {
-    const renovateJson = {
-      schedule: 'before 5am',
-    };
-    const res = apis.migrateAndValidate(defaultConfig, renovateJson);
-    expect(Array.isArray(res.schedule)).toBe(true);
-  });
-});
