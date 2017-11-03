@@ -248,9 +248,7 @@ describe('lib/workers/repository/onboarding', () => {
       expect(config.api.commitFilesToBranch.mock.calls[0]).toMatchSnapshot();
     });
     it('throws if no packageFiles', async () => {
-      manager.detectPackageFiles = jest.fn(input => ({
-        ...input,
-      }));
+      manager.detectPackageFiles = jest.fn(() => []);
       let e;
       try {
         await onboarding.getOnboardingStatus(config);
