@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/onboarding/pr/pr-list getPrList() handles multiple 1`] = `
+"
+### What to Expect
+
+With your current configuration, Renovate will create 2 Pull Requests:
+
+1. **Pin dependencies**
+
+  - Branch name: \`renovate/pin-dependencies\`
+  - Pins [a](https://a) in \`devDependencies\` to \`1.1.0\`
+  - Pins b in \`devDependencies\` to \`1.5.3\`
+
+
+2. **Update a to v2**
+
+  - Branch name: \`renovate/a-2.x\`
+  - Upgrades [a](https://a) in \`devDependencies\` from \`^1.0.0\` to \`2.0.1\`
+
+
+"
+`;
+
+exports[`workers/repository/onboarding/pr/pr-list getPrList() has special lock file maintenance description 1`] = `
+"
+### What to Expect
+
+With your current configuration, Renovate will create 1 Pull Request:
+
+1. **Lock file maintenance**
+
+  - Schedule: [\\"before 5am\\"]
+  - Branch name: \`renovate/lock-file-maintenance\`
+  - Regenerates lock file to use latest dependency versions
+
+"
+`;

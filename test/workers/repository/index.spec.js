@@ -7,6 +7,9 @@ const onboarding = require('../../../lib/workers/repository/onboarding');
 const upgrades = require('../../../lib/workers/repository/upgrades');
 
 const logger = require('../../_fixtures/logger');
+const onboardingPr = require('../../../lib/workers/repository/onboarding/pr');
+
+jest.mock('../../../lib/workers/repository/onboarding/pr');
 
 describe('workers/repository', () => {
   describe('pinDependenciesFirst', () => {
@@ -50,7 +53,6 @@ describe('workers/repository', () => {
       apis.resolvePackageFiles = jest.fn(input => input);
       apis.checkMonorepos = jest.fn(input => input);
       onboarding.getOnboardingStatus = jest.fn(input => input);
-      onboarding.ensurePr = jest.fn();
       upgrades.determineRepoUpgrades = jest.fn(() => []);
       upgrades.branchifyUpgrades = jest.fn(() => ({ branchUpgrades: {} }));
       branchWorker.processBranch = jest.fn(() => 'done');
@@ -119,7 +121,7 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
       expect(branchWorker.processBranch.mock.calls.length).toBe(0);
-      expect(onboarding.ensurePr.mock.calls.length).toBe(1);
+      expect(onboardingPr.ensureOnboardingPr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('uses onboarding custom baseBranch', async () => {
@@ -137,7 +139,7 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
       expect(branchWorker.processBranch.mock.calls.length).toBe(0);
-      expect(onboarding.ensurePr.mock.calls.length).toBe(1);
+      expect(onboardingPr.ensureOnboardingPr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('errors onboarding custom baseBranch', async () => {
@@ -157,7 +159,7 @@ describe('workers/repository', () => {
       await repositoryWorker.renovateRepository(config);
       expect(onboarding.getOnboardingStatus.mock.calls.length).toBe(1);
       expect(branchWorker.processBranch.mock.calls.length).toBe(0);
-      expect(onboarding.ensurePr.mock.calls.length).toBe(1);
+      expect(onboardingPr.ensureOnboardingPr.mock.calls.length).toBe(1);
       expect(config.logger.error.mock.calls.length).toBe(0);
     });
     it('calls branchWorker', async () => {
