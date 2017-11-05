@@ -1,4 +1,4 @@
-const get = require('../../lib/platform/gl-got-wrapper');
+const get = require('../../../lib/platform/gitlab/gl-got-wrapper');
 const glGot = require('gl-got');
 
 jest.mock('gl-got');

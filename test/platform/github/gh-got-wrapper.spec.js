@@ -1,4 +1,4 @@
-const get = require('../../lib/platform/gh-got-wrapper');
+const get = require('../../../lib/platform/github/gh-got-wrapper');
 const ghGot = require('gh-got');
 
 jest.mock('gh-got');

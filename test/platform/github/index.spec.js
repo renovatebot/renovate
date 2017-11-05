@@ -1,4 +1,4 @@
-const logger = require('../_fixtures/logger');
+const logger = require('../../_fixtures/logger');
 
 describe('platform/github', () => {
   let github;
@@ -10,9 +10,9 @@ describe('platform/github', () => {
 
     // reset module
     jest.resetModules();
-    jest.mock('../../lib/platform/gh-got-wrapper');
-    get = require('../../lib/platform/gh-got-wrapper');
-    github = require('../../lib/platform/github');
+    jest.mock('../../../lib/platform/github/gh-got-wrapper');
+    get = require('../../../lib/platform/github/gh-got-wrapper');
+    github = require('../../../lib/platform/github');
   });
 
   function getRepos(...args) {
