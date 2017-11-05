@@ -1,4 +1,4 @@
-This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Docker base image `{{depName}}@{{currentTag}}` to use a digest (`{{newDigest}}`).
+This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Docker base image `{{depName}}:{{currentTag}}` to use a digest (`{{newDigest}}`).
 This digest will then be kept updated via Pull Requests whenever the image is updated on the Docker registry.
 
 {{#if schedule}}
