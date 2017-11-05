@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository renovateRepository() ensures onboarding pr 1`] = `"onboarding"`;
+
+exports[`workers/repository renovateRepository() exits after 6 loops 1`] = `"loops>5"`;
+
+exports[`workers/repository renovateRepository() writes 1`] = `"onboarded"`;

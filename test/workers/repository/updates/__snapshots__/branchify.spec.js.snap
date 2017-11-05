@@ -1,0 +1,2949 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/updates/branchify branchifyUpgrades() does not group if different compiled branch names 1`] = `
+Object {
+  "api": Object {
+    "addAssignees": [Function],
+    "addComment": [Function],
+    "addReviewers": [Function],
+    "branchExists": [Function],
+    "commitFilesToBranch": [Function],
+    "createPr": [Function],
+    "deleteBranch": [Function],
+    "deleteComment": [Function],
+    "editComment": [Function],
+    "ensureComment": [Function],
+    "ensureCommentRemoval": [Function],
+    "findPr": [Function],
+    "getAllRenovateBranches": [Function],
+    "getBranchCommit": [Function],
+    "getBranchLastCommitTime": [Function],
+    "getBranchPr": [Function],
+    "getBranchStatus": [Function],
+    "getBranchStatusCheck": [Function],
+    "getComments": [Function],
+    "getCommitDetails": [Function],
+    "getCommitMessages": [Function],
+    "getFile": [Function],
+    "getFileContent": [Function],
+    "getFileJson": [Function],
+    "getFileList": [Function],
+    "getPr": [Function],
+    "getPrList": [Function],
+    "getRepos": [Function],
+    "getSubDirectories": [Function],
+    "initRepo": [Function],
+    "isBranchStale": [Function],
+    "mergeBranch": [Function],
+    "mergePr": [Function],
+    "setBaseBranch": [Function],
+    "setBranchStatus": [Function],
+    "updatePr": [Function],
+  },
+  "assignees": Array [],
+  "autodiscover": false,
+  "automerge": false,
+  "automergeType": "pr",
+  "baseBranch": null,
+  "branchList": undefined,
+  "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
+  "branchPrefix": "renovate/",
+  "branches": Array [
+    Object {
+      "branchName": "foo-1.1.0",
+      "depName": "foo",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "foo-1.1.0",
+          "depName": "foo",
+          "prTitle": "some-title",
+          "version": "1.1.0",
+        },
+      ],
+      "version": "1.1.0",
+    },
+    Object {
+      "branchName": "foo-2.0.0",
+      "depName": "foo",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "foo-2.0.0",
+          "depName": "foo",
+          "prTitle": "some-title",
+          "version": "2.0.0",
+        },
+      ],
+      "version": "2.0.0",
+    },
+    Object {
+      "branchName": "bar-1.1.0",
+      "depName": "bar",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "bar-1.1.0",
+          "depName": "bar",
+          "prTitle": "some-title",
+          "version": "1.1.0",
+        },
+      ],
+      "version": "1.1.0",
+    },
+  ],
+  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "dependencies": Object {
+    "semanticPrefix": "fix(deps):",
+  },
+  "description": Array [],
+  "devDependencies": Object {
+    "pin": Object {
+      "group": Object {
+        "commitMessage": "Pin devDependencies",
+        "prTitle": "Pin devDependencies",
+      },
+    },
+  },
+  "digest": Object {
+    "semanticPrefix": "refactor(deps):",
+  },
+  "docker": Object {
+    "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{newVersionMajor}}.x",
+    "commitMessage": "Update {{depName}} to tag {{newTag}}",
+    "digest": Object {
+      "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{currentTag}}",
+      "commitMessage": "Update {{depName}}:{{currentTag}} digest",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}@{{currentTag}}\` to the latest digest (\`{{newDigest}}\`).
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Dockerfile {{depName}} image {{currentTag}} digest ({{newDigestShort}})",
+    },
+    "enabled": true,
+    "group": Object {
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Docker {{groupName}} digests",
+    },
+    "major": Object {
+      "enabled": false,
+    },
+    "minor": Object {
+      "enabled": false,
+    },
+    "patch": Object {
+      "enabled": false,
+    },
+    "pin": Object {
+      "branchName": "{{branchPrefix}}docker-pin-{{depNameSanitized}}-{{currentTag}}",
+      "group": Object {
+        "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+        "prTitle": "Pin Docker digests",
+      },
+      "groupName": "Pin Docker Digests",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Docker base image \`{{depName}}@{{currentTag}}\` to use a digest (\`{{newDigest}}\`).
+This digest will then be kept updated via Pull Requests whenever the image is updated on the Docker registry.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Pin Dockerfile {{depName}}@{{currentTag}} image digest",
+    },
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}\` from tag \`{{currentTag}}\` to new tag \`{{newTag}}\`.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Update {{depName}} Dockerfile tag to {{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newTag}}{{/if}}",
+  },
+  "enabled": true,
+  "encrypted": null,
+  "endpoint": null,
+  "errors": Array [],
+  "excludePackageNames": Array [],
+  "excludePackagePatterns": Array [],
+  "extends": Array [],
+  "group": Object {
+    "branchName": "{{branchPrefix}}{{groupSlug}}",
+    "commitMessage": "Renovate {{groupName}} packages",
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \\"{{groupName}}\\".
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: from \`{{upgrade.currentVersion}}\` to \`{{upgrade.newVersion}}\`
+{{/each}}
+
+{{#unless isPin}}
+### Commits
+
+{{#each upgrades as |upgrade|}}
+{{#if upgrade.releases.length}}
+<details>
+<summary>{{upgrade.githubName}}</summary>
+{{#each upgrade.releases as |release|}}
+
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}){{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+{{/each}}
+{{/unless}}
+<br />
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Renovate {{groupName}} packages",
+    "recreateClosed": true,
+  },
+  "groupName": null,
+  "groupSlug": null,
+  "ignoreDeps": Array [],
+  "ignoreFuture": true,
+  "ignoreNpmrcFile": false,
+  "ignorePaths": Array [
+    "**/node_modules/**",
+  ],
+  "ignoreUnstable": true,
+  "labels": Array [],
+  "lazyGrouping": true,
+  "lockFileMaintenance": Object {
+    "branchName": "{{branchPrefix}}lock-file-maintenance",
+    "commitMessage": "Update lock file",
+    "enabled": false,
+    "groupName": null,
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates \`package.json\` lock files to use the latest dependency versions.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Lock file maintenance",
+    "recreateClosed": true,
+    "schedule": Array [
+      "before 5am on monday",
+    ],
+  },
+  "logFile": null,
+  "logFileLevel": "debug",
+  "logLevel": "info",
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "major": Object {},
+  "meteor": Object {
+    "enabled": true,
+  },
+  "minor": Object {},
+  "npm": Object {
+    "enabled": true,
+    "pin": Object {
+      "automerge": true,
+    },
+  },
+  "npmrc": null,
+  "onboarding": true,
+  "optionalDependencies": Object {},
+  "packageFiles": Array [],
+  "packageNames": Array [],
+  "packagePatterns": Array [],
+  "packageRules": Array [],
+  "patch": Object {
+    "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.{{newVersionMinor}}.x",
+  },
+  "peerDependencies": Object {
+    "enabled": false,
+  },
+  "pin": Object {
+    "group": Object {
+      "commitMessage": "Pin Dependencies",
+      "prTitle": "{{groupName}}",
+      "semanticPrefix": "refactor(deps):",
+    },
+    "groupName": "Pin Dependencies",
+    "rebaseStalePrs": true,
+    "recreateClosed": true,
+    "unpublishSafe": false,
+  },
+  "pinDigests": true,
+  "pinVersions": null,
+  "platform": "github",
+  "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{depName}}]({{repositoryUrl}}){{else}}\`{{depName}}\`{{/if}} from \`{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{currentVersion}}\` to \`{{#unless isRange}}v{{/unless}}{{newVersion}}\`{{#if isRollback}}. This is necessary and important because \`v{{currentVersion}}\` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}
+{{#if releases.length}}
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+### Commits
+
+<details>
+<summary>{{githubName}}</summary>
+
+{{#each releases as |release|}}
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}) {{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+  "prCreation": "immediate",
+  "prNotPendingHours": 12,
+  "prTitle": "{{#if isPin}}Pin{{else}}{{#if isRollback}}Roll back{{else}}Update{{/if}}{{/if}} dependency {{depName}} to {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newVersion}}{{/if}}{{/if}}",
+  "privateKey": null,
+  "rebaseStalePrs": false,
+  "recreateClosed": false,
+  "renovateFork": false,
+  "repositories": Array [],
+  "requiredStatusChecks": Array [],
+  "respectLatest": true,
+  "reviewers": Array [],
+  "schedule": Array [],
+  "semanticCommits": null,
+  "semanticPrefix": "chore(deps):",
+  "separateMajorReleases": true,
+  "separatePatchReleases": false,
+  "timezone": null,
+  "token": null,
+  "unpublishSafe": false,
+  "updateNotScheduled": true,
+  "upgrades": null,
+  "warnings": Array [],
+  "yarnrc": null,
+}
+`;
+
+exports[`workers/repository/updates/branchify branchifyUpgrades() groups if same compiled branch names 1`] = `
+Object {
+  "api": Object {
+    "addAssignees": [Function],
+    "addComment": [Function],
+    "addReviewers": [Function],
+    "branchExists": [Function],
+    "commitFilesToBranch": [Function],
+    "createPr": [Function],
+    "deleteBranch": [Function],
+    "deleteComment": [Function],
+    "editComment": [Function],
+    "ensureComment": [Function],
+    "ensureCommentRemoval": [Function],
+    "findPr": [Function],
+    "getAllRenovateBranches": [Function],
+    "getBranchCommit": [Function],
+    "getBranchLastCommitTime": [Function],
+    "getBranchPr": [Function],
+    "getBranchStatus": [Function],
+    "getBranchStatusCheck": [Function],
+    "getComments": [Function],
+    "getCommitDetails": [Function],
+    "getCommitMessages": [Function],
+    "getFile": [Function],
+    "getFileContent": [Function],
+    "getFileJson": [Function],
+    "getFileList": [Function],
+    "getPr": [Function],
+    "getPrList": [Function],
+    "getRepos": [Function],
+    "getSubDirectories": [Function],
+    "initRepo": [Function],
+    "isBranchStale": [Function],
+    "mergeBranch": [Function],
+    "mergePr": [Function],
+    "setBaseBranch": [Function],
+    "setBranchStatus": [Function],
+    "updatePr": [Function],
+  },
+  "assignees": Array [],
+  "autodiscover": false,
+  "automerge": false,
+  "automergeType": "pr",
+  "baseBranch": null,
+  "branchList": undefined,
+  "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
+  "branchPrefix": "renovate/",
+  "branches": Array [
+    Object {
+      "branchName": "foo",
+      "depName": "foo",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "foo",
+          "depName": "foo",
+          "prTitle": "some-title",
+          "version": "2.0.0",
+        },
+        Object {
+          "branchName": "foo",
+          "depName": "foo",
+          "prTitle": "some-title",
+          "version": "1.1.0",
+        },
+      ],
+      "version": "2.0.0",
+    },
+    Object {
+      "branchName": "bar-1.1.0",
+      "depName": "bar",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "bar-1.1.0",
+          "depName": "bar",
+          "prTitle": "some-title",
+          "version": "1.1.0",
+        },
+      ],
+      "version": "1.1.0",
+    },
+  ],
+  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "dependencies": Object {
+    "semanticPrefix": "fix(deps):",
+  },
+  "description": Array [],
+  "devDependencies": Object {
+    "pin": Object {
+      "group": Object {
+        "commitMessage": "Pin devDependencies",
+        "prTitle": "Pin devDependencies",
+      },
+    },
+  },
+  "digest": Object {
+    "semanticPrefix": "refactor(deps):",
+  },
+  "docker": Object {
+    "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{newVersionMajor}}.x",
+    "commitMessage": "Update {{depName}} to tag {{newTag}}",
+    "digest": Object {
+      "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{currentTag}}",
+      "commitMessage": "Update {{depName}}:{{currentTag}} digest",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}@{{currentTag}}\` to the latest digest (\`{{newDigest}}\`).
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Dockerfile {{depName}} image {{currentTag}} digest ({{newDigestShort}})",
+    },
+    "enabled": true,
+    "group": Object {
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Docker {{groupName}} digests",
+    },
+    "major": Object {
+      "enabled": false,
+    },
+    "minor": Object {
+      "enabled": false,
+    },
+    "patch": Object {
+      "enabled": false,
+    },
+    "pin": Object {
+      "branchName": "{{branchPrefix}}docker-pin-{{depNameSanitized}}-{{currentTag}}",
+      "group": Object {
+        "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+        "prTitle": "Pin Docker digests",
+      },
+      "groupName": "Pin Docker Digests",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Docker base image \`{{depName}}@{{currentTag}}\` to use a digest (\`{{newDigest}}\`).
+This digest will then be kept updated via Pull Requests whenever the image is updated on the Docker registry.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Pin Dockerfile {{depName}}@{{currentTag}} image digest",
+    },
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}\` from tag \`{{currentTag}}\` to new tag \`{{newTag}}\`.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Update {{depName}} Dockerfile tag to {{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newTag}}{{/if}}",
+  },
+  "enabled": true,
+  "encrypted": null,
+  "endpoint": null,
+  "errors": Array [],
+  "excludePackageNames": Array [],
+  "excludePackagePatterns": Array [],
+  "extends": Array [],
+  "group": Object {
+    "branchName": "{{branchPrefix}}{{groupSlug}}",
+    "commitMessage": "Renovate {{groupName}} packages",
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \\"{{groupName}}\\".
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: from \`{{upgrade.currentVersion}}\` to \`{{upgrade.newVersion}}\`
+{{/each}}
+
+{{#unless isPin}}
+### Commits
+
+{{#each upgrades as |upgrade|}}
+{{#if upgrade.releases.length}}
+<details>
+<summary>{{upgrade.githubName}}</summary>
+{{#each upgrade.releases as |release|}}
+
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}){{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+{{/each}}
+{{/unless}}
+<br />
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Renovate {{groupName}} packages",
+    "recreateClosed": true,
+  },
+  "groupName": null,
+  "groupSlug": null,
+  "ignoreDeps": Array [],
+  "ignoreFuture": true,
+  "ignoreNpmrcFile": false,
+  "ignorePaths": Array [
+    "**/node_modules/**",
+  ],
+  "ignoreUnstable": true,
+  "labels": Array [],
+  "lazyGrouping": true,
+  "lockFileMaintenance": Object {
+    "branchName": "{{branchPrefix}}lock-file-maintenance",
+    "commitMessage": "Update lock file",
+    "enabled": false,
+    "groupName": null,
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates \`package.json\` lock files to use the latest dependency versions.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Lock file maintenance",
+    "recreateClosed": true,
+    "schedule": Array [
+      "before 5am on monday",
+    ],
+  },
+  "logFile": null,
+  "logFileLevel": "debug",
+  "logLevel": "info",
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "major": Object {},
+  "meteor": Object {
+    "enabled": true,
+  },
+  "minor": Object {},
+  "npm": Object {
+    "enabled": true,
+    "pin": Object {
+      "automerge": true,
+    },
+  },
+  "npmrc": null,
+  "onboarding": true,
+  "optionalDependencies": Object {},
+  "packageFiles": Array [],
+  "packageNames": Array [],
+  "packagePatterns": Array [],
+  "packageRules": Array [],
+  "patch": Object {
+    "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.{{newVersionMinor}}.x",
+  },
+  "peerDependencies": Object {
+    "enabled": false,
+  },
+  "pin": Object {
+    "group": Object {
+      "commitMessage": "Pin Dependencies",
+      "prTitle": "{{groupName}}",
+      "semanticPrefix": "refactor(deps):",
+    },
+    "groupName": "Pin Dependencies",
+    "rebaseStalePrs": true,
+    "recreateClosed": true,
+    "unpublishSafe": false,
+  },
+  "pinDigests": true,
+  "pinVersions": null,
+  "platform": "github",
+  "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{depName}}]({{repositoryUrl}}){{else}}\`{{depName}}\`{{/if}} from \`{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{currentVersion}}\` to \`{{#unless isRange}}v{{/unless}}{{newVersion}}\`{{#if isRollback}}. This is necessary and important because \`v{{currentVersion}}\` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}
+{{#if releases.length}}
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+### Commits
+
+<details>
+<summary>{{githubName}}</summary>
+
+{{#each releases as |release|}}
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}) {{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+  "prCreation": "immediate",
+  "prNotPendingHours": 12,
+  "prTitle": "{{#if isPin}}Pin{{else}}{{#if isRollback}}Roll back{{else}}Update{{/if}}{{/if}} dependency {{depName}} to {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newVersion}}{{/if}}{{/if}}",
+  "privateKey": null,
+  "rebaseStalePrs": false,
+  "recreateClosed": false,
+  "renovateFork": false,
+  "repositories": Array [],
+  "requiredStatusChecks": Array [],
+  "respectLatest": true,
+  "reviewers": Array [],
+  "schedule": Array [],
+  "semanticCommits": null,
+  "semanticPrefix": "chore(deps):",
+  "separateMajorReleases": true,
+  "separatePatchReleases": false,
+  "timezone": null,
+  "token": null,
+  "unpublishSafe": false,
+  "updateNotScheduled": true,
+  "upgrades": null,
+  "warnings": Array [],
+  "yarnrc": null,
+}
+`;
+
+exports[`workers/repository/updates/branchify branchifyUpgrades() groups if same compiled group name 1`] = `
+Object {
+  "api": Object {
+    "addAssignees": [Function],
+    "addComment": [Function],
+    "addReviewers": [Function],
+    "branchExists": [Function],
+    "commitFilesToBranch": [Function],
+    "createPr": [Function],
+    "deleteBranch": [Function],
+    "deleteComment": [Function],
+    "editComment": [Function],
+    "ensureComment": [Function],
+    "ensureCommentRemoval": [Function],
+    "findPr": [Function],
+    "getAllRenovateBranches": [Function],
+    "getBranchCommit": [Function],
+    "getBranchLastCommitTime": [Function],
+    "getBranchPr": [Function],
+    "getBranchStatus": [Function],
+    "getBranchStatusCheck": [Function],
+    "getComments": [Function],
+    "getCommitDetails": [Function],
+    "getCommitMessages": [Function],
+    "getFile": [Function],
+    "getFileContent": [Function],
+    "getFileJson": [Function],
+    "getFileList": [Function],
+    "getPr": [Function],
+    "getPrList": [Function],
+    "getRepos": [Function],
+    "getSubDirectories": [Function],
+    "initRepo": [Function],
+    "isBranchStale": [Function],
+    "mergeBranch": [Function],
+    "mergePr": [Function],
+    "setBaseBranch": [Function],
+    "setBranchStatus": [Function],
+    "updatePr": [Function],
+  },
+  "assignees": Array [],
+  "autodiscover": false,
+  "automerge": false,
+  "automergeType": "pr",
+  "baseBranch": null,
+  "branchList": undefined,
+  "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
+  "branchPrefix": "renovate/",
+  "branches": Array [
+    Object {
+      "branchName": "renovate/my-group",
+      "depName": "bar",
+      "groupName": "My Group",
+      "groupSlug": "my-group",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "renovate/my-group",
+          "depName": "bar",
+          "groupName": "My Group",
+          "groupSlug": "my-group",
+          "prTitle": "some-title",
+          "version": "1.1.0",
+        },
+        Object {
+          "branchName": "renovate/my-group",
+          "depName": "foo",
+          "groupName": "My Group",
+          "groupSlug": "my-group",
+          "prTitle": "some-title",
+          "version": "1.1.0",
+        },
+      ],
+      "version": "1.1.0",
+    },
+    Object {
+      "branchName": "foo",
+      "depName": "foo",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "foo",
+          "depName": "foo",
+          "prTitle": "some-title",
+          "version": "2.0.0",
+        },
+      ],
+      "version": "2.0.0",
+    },
+  ],
+  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "dependencies": Object {
+    "semanticPrefix": "fix(deps):",
+  },
+  "description": Array [],
+  "devDependencies": Object {
+    "pin": Object {
+      "group": Object {
+        "commitMessage": "Pin devDependencies",
+        "prTitle": "Pin devDependencies",
+      },
+    },
+  },
+  "digest": Object {
+    "semanticPrefix": "refactor(deps):",
+  },
+  "docker": Object {
+    "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{newVersionMajor}}.x",
+    "commitMessage": "Update {{depName}} to tag {{newTag}}",
+    "digest": Object {
+      "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{currentTag}}",
+      "commitMessage": "Update {{depName}}:{{currentTag}} digest",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}@{{currentTag}}\` to the latest digest (\`{{newDigest}}\`).
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Dockerfile {{depName}} image {{currentTag}} digest ({{newDigestShort}})",
+    },
+    "enabled": true,
+    "group": Object {
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Docker {{groupName}} digests",
+    },
+    "major": Object {
+      "enabled": false,
+    },
+    "minor": Object {
+      "enabled": false,
+    },
+    "patch": Object {
+      "enabled": false,
+    },
+    "pin": Object {
+      "branchName": "{{branchPrefix}}docker-pin-{{depNameSanitized}}-{{currentTag}}",
+      "group": Object {
+        "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+        "prTitle": "Pin Docker digests",
+      },
+      "groupName": "Pin Docker Digests",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Docker base image \`{{depName}}@{{currentTag}}\` to use a digest (\`{{newDigest}}\`).
+This digest will then be kept updated via Pull Requests whenever the image is updated on the Docker registry.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Pin Dockerfile {{depName}}@{{currentTag}} image digest",
+    },
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}\` from tag \`{{currentTag}}\` to new tag \`{{newTag}}\`.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Update {{depName}} Dockerfile tag to {{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newTag}}{{/if}}",
+  },
+  "enabled": true,
+  "encrypted": null,
+  "endpoint": null,
+  "errors": Array [],
+  "excludePackageNames": Array [],
+  "excludePackagePatterns": Array [],
+  "extends": Array [],
+  "group": Object {
+    "branchName": "{{branchPrefix}}{{groupSlug}}",
+    "commitMessage": "Renovate {{groupName}} packages",
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \\"{{groupName}}\\".
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: from \`{{upgrade.currentVersion}}\` to \`{{upgrade.newVersion}}\`
+{{/each}}
+
+{{#unless isPin}}
+### Commits
+
+{{#each upgrades as |upgrade|}}
+{{#if upgrade.releases.length}}
+<details>
+<summary>{{upgrade.githubName}}</summary>
+{{#each upgrade.releases as |release|}}
+
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}){{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+{{/each}}
+{{/unless}}
+<br />
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Renovate {{groupName}} packages",
+    "recreateClosed": true,
+  },
+  "groupName": null,
+  "groupSlug": null,
+  "ignoreDeps": Array [],
+  "ignoreFuture": true,
+  "ignoreNpmrcFile": false,
+  "ignorePaths": Array [
+    "**/node_modules/**",
+  ],
+  "ignoreUnstable": true,
+  "labels": Array [],
+  "lazyGrouping": true,
+  "lockFileMaintenance": Object {
+    "branchName": "{{branchPrefix}}lock-file-maintenance",
+    "commitMessage": "Update lock file",
+    "enabled": false,
+    "groupName": null,
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates \`package.json\` lock files to use the latest dependency versions.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Lock file maintenance",
+    "recreateClosed": true,
+    "schedule": Array [
+      "before 5am on monday",
+    ],
+  },
+  "logFile": null,
+  "logFileLevel": "debug",
+  "logLevel": "info",
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "major": Object {},
+  "meteor": Object {
+    "enabled": true,
+  },
+  "minor": Object {},
+  "npm": Object {
+    "enabled": true,
+    "pin": Object {
+      "automerge": true,
+    },
+  },
+  "npmrc": null,
+  "onboarding": true,
+  "optionalDependencies": Object {},
+  "packageFiles": Array [],
+  "packageNames": Array [],
+  "packagePatterns": Array [],
+  "packageRules": Array [],
+  "patch": Object {
+    "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.{{newVersionMinor}}.x",
+  },
+  "peerDependencies": Object {
+    "enabled": false,
+  },
+  "pin": Object {
+    "group": Object {
+      "commitMessage": "Pin Dependencies",
+      "prTitle": "{{groupName}}",
+      "semanticPrefix": "refactor(deps):",
+    },
+    "groupName": "Pin Dependencies",
+    "rebaseStalePrs": true,
+    "recreateClosed": true,
+    "unpublishSafe": false,
+  },
+  "pinDigests": true,
+  "pinVersions": null,
+  "platform": "github",
+  "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{depName}}]({{repositoryUrl}}){{else}}\`{{depName}}\`{{/if}} from \`{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{currentVersion}}\` to \`{{#unless isRange}}v{{/unless}}{{newVersion}}\`{{#if isRollback}}. This is necessary and important because \`v{{currentVersion}}\` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}
+{{#if releases.length}}
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+### Commits
+
+<details>
+<summary>{{githubName}}</summary>
+
+{{#each releases as |release|}}
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}) {{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+  "prCreation": "immediate",
+  "prNotPendingHours": 12,
+  "prTitle": "{{#if isPin}}Pin{{else}}{{#if isRollback}}Roll back{{else}}Update{{/if}}{{/if}} dependency {{depName}} to {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newVersion}}{{/if}}{{/if}}",
+  "privateKey": null,
+  "rebaseStalePrs": false,
+  "recreateClosed": false,
+  "renovateFork": false,
+  "repositories": Array [],
+  "requiredStatusChecks": Array [],
+  "respectLatest": true,
+  "reviewers": Array [],
+  "schedule": Array [],
+  "semanticCommits": null,
+  "semanticPrefix": "chore(deps):",
+  "separateMajorReleases": true,
+  "separatePatchReleases": false,
+  "timezone": null,
+  "token": null,
+  "unpublishSafe": false,
+  "updateNotScheduled": true,
+  "upgrades": null,
+  "warnings": Array [],
+  "yarnrc": null,
+}
+`;
+
+exports[`workers/repository/updates/branchify branchifyUpgrades() mixes errors and warnings 1`] = `
+Object {
+  "api": Object {
+    "addAssignees": [Function],
+    "addComment": [Function],
+    "addReviewers": [Function],
+    "branchExists": [Function],
+    "commitFilesToBranch": [Function],
+    "createPr": [Function],
+    "deleteBranch": [Function],
+    "deleteComment": [Function],
+    "editComment": [Function],
+    "ensureComment": [Function],
+    "ensureCommentRemoval": [Function],
+    "findPr": [Function],
+    "getAllRenovateBranches": [Function],
+    "getBranchCommit": [Function],
+    "getBranchLastCommitTime": [Function],
+    "getBranchPr": [Function],
+    "getBranchStatus": [Function],
+    "getBranchStatusCheck": [Function],
+    "getComments": [Function],
+    "getCommitDetails": [Function],
+    "getCommitMessages": [Function],
+    "getFile": [Function],
+    "getFileContent": [Function],
+    "getFileJson": [Function],
+    "getFileList": [Function],
+    "getPr": [Function],
+    "getPrList": [Function],
+    "getRepos": [Function],
+    "getSubDirectories": [Function],
+    "initRepo": [Function],
+    "isBranchStale": [Function],
+    "mergeBranch": [Function],
+    "mergePr": [Function],
+    "setBaseBranch": [Function],
+    "setBranchStatus": [Function],
+    "updatePr": [Function],
+  },
+  "assignees": Array [],
+  "autodiscover": false,
+  "automerge": false,
+  "automergeType": "pr",
+  "baseBranch": null,
+  "branchList": undefined,
+  "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
+  "branchPrefix": "renovate/",
+  "branches": Array [
+    Object {
+      "branchName": "foo-1.1.0",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "foo-1.1.0",
+          "prTitle": "some-title",
+          "version": "1.1.0",
+        },
+      ],
+      "version": "1.1.0",
+    },
+    Object {
+      "branchName": "bar-1.1.0",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "bar-1.1.0",
+          "prTitle": "some-title",
+          "version": "1.1.0",
+        },
+      ],
+      "version": "1.1.0",
+    },
+  ],
+  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "dependencies": Object {
+    "semanticPrefix": "fix(deps):",
+  },
+  "description": Array [],
+  "devDependencies": Object {
+    "pin": Object {
+      "group": Object {
+        "commitMessage": "Pin devDependencies",
+        "prTitle": "Pin devDependencies",
+      },
+    },
+  },
+  "digest": Object {
+    "semanticPrefix": "refactor(deps):",
+  },
+  "docker": Object {
+    "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{newVersionMajor}}.x",
+    "commitMessage": "Update {{depName}} to tag {{newTag}}",
+    "digest": Object {
+      "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{currentTag}}",
+      "commitMessage": "Update {{depName}}:{{currentTag}} digest",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}@{{currentTag}}\` to the latest digest (\`{{newDigest}}\`).
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Dockerfile {{depName}} image {{currentTag}} digest ({{newDigestShort}})",
+    },
+    "enabled": true,
+    "group": Object {
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Docker {{groupName}} digests",
+    },
+    "major": Object {
+      "enabled": false,
+    },
+    "minor": Object {
+      "enabled": false,
+    },
+    "patch": Object {
+      "enabled": false,
+    },
+    "pin": Object {
+      "branchName": "{{branchPrefix}}docker-pin-{{depNameSanitized}}-{{currentTag}}",
+      "group": Object {
+        "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+        "prTitle": "Pin Docker digests",
+      },
+      "groupName": "Pin Docker Digests",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Docker base image \`{{depName}}@{{currentTag}}\` to use a digest (\`{{newDigest}}\`).
+This digest will then be kept updated via Pull Requests whenever the image is updated on the Docker registry.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Pin Dockerfile {{depName}}@{{currentTag}} image digest",
+    },
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}\` from tag \`{{currentTag}}\` to new tag \`{{newTag}}\`.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Update {{depName}} Dockerfile tag to {{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newTag}}{{/if}}",
+  },
+  "enabled": true,
+  "encrypted": null,
+  "endpoint": null,
+  "errors": Array [
+    Object {
+      "type": "error",
+    },
+  ],
+  "excludePackageNames": Array [],
+  "excludePackagePatterns": Array [],
+  "extends": Array [],
+  "group": Object {
+    "branchName": "{{branchPrefix}}{{groupSlug}}",
+    "commitMessage": "Renovate {{groupName}} packages",
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \\"{{groupName}}\\".
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: from \`{{upgrade.currentVersion}}\` to \`{{upgrade.newVersion}}\`
+{{/each}}
+
+{{#unless isPin}}
+### Commits
+
+{{#each upgrades as |upgrade|}}
+{{#if upgrade.releases.length}}
+<details>
+<summary>{{upgrade.githubName}}</summary>
+{{#each upgrade.releases as |release|}}
+
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}){{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+{{/each}}
+{{/unless}}
+<br />
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Renovate {{groupName}} packages",
+    "recreateClosed": true,
+  },
+  "groupName": null,
+  "groupSlug": null,
+  "ignoreDeps": Array [],
+  "ignoreFuture": true,
+  "ignoreNpmrcFile": false,
+  "ignorePaths": Array [
+    "**/node_modules/**",
+  ],
+  "ignoreUnstable": true,
+  "labels": Array [],
+  "lazyGrouping": true,
+  "lockFileMaintenance": Object {
+    "branchName": "{{branchPrefix}}lock-file-maintenance",
+    "commitMessage": "Update lock file",
+    "enabled": false,
+    "groupName": null,
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates \`package.json\` lock files to use the latest dependency versions.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Lock file maintenance",
+    "recreateClosed": true,
+    "schedule": Array [
+      "before 5am on monday",
+    ],
+  },
+  "logFile": null,
+  "logFileLevel": "debug",
+  "logLevel": "info",
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "major": Object {},
+  "meteor": Object {
+    "enabled": true,
+  },
+  "minor": Object {},
+  "npm": Object {
+    "enabled": true,
+    "pin": Object {
+      "automerge": true,
+    },
+  },
+  "npmrc": null,
+  "onboarding": true,
+  "optionalDependencies": Object {},
+  "packageFiles": Array [],
+  "packageNames": Array [],
+  "packagePatterns": Array [],
+  "packageRules": Array [],
+  "patch": Object {
+    "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.{{newVersionMinor}}.x",
+  },
+  "peerDependencies": Object {
+    "enabled": false,
+  },
+  "pin": Object {
+    "group": Object {
+      "commitMessage": "Pin Dependencies",
+      "prTitle": "{{groupName}}",
+      "semanticPrefix": "refactor(deps):",
+    },
+    "groupName": "Pin Dependencies",
+    "rebaseStalePrs": true,
+    "recreateClosed": true,
+    "unpublishSafe": false,
+  },
+  "pinDigests": true,
+  "pinVersions": null,
+  "platform": "github",
+  "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{depName}}]({{repositoryUrl}}){{else}}\`{{depName}}\`{{/if}} from \`{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{currentVersion}}\` to \`{{#unless isRange}}v{{/unless}}{{newVersion}}\`{{#if isRollback}}. This is necessary and important because \`v{{currentVersion}}\` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}
+{{#if releases.length}}
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+### Commits
+
+<details>
+<summary>{{githubName}}</summary>
+
+{{#each releases as |release|}}
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}) {{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+  "prCreation": "immediate",
+  "prNotPendingHours": 12,
+  "prTitle": "{{#if isPin}}Pin{{else}}{{#if isRollback}}Roll back{{else}}Update{{/if}}{{/if}} dependency {{depName}} to {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newVersion}}{{/if}}{{/if}}",
+  "privateKey": null,
+  "rebaseStalePrs": false,
+  "recreateClosed": false,
+  "renovateFork": false,
+  "repositories": Array [],
+  "requiredStatusChecks": Array [],
+  "respectLatest": true,
+  "reviewers": Array [],
+  "schedule": Array [],
+  "semanticCommits": null,
+  "semanticPrefix": "chore(deps):",
+  "separateMajorReleases": true,
+  "separatePatchReleases": false,
+  "timezone": null,
+  "token": null,
+  "unpublishSafe": false,
+  "updateNotScheduled": true,
+  "upgrades": null,
+  "warnings": Array [
+    Object {
+      "branchName": "foo-{{version}}",
+      "prTitle": "some-title",
+      "type": "warning",
+      "version": "2.0.0",
+    },
+  ],
+  "yarnrc": null,
+}
+`;
+
+exports[`workers/repository/updates/branchify branchifyUpgrades() returns one branch if one input 1`] = `
+Object {
+  "api": Object {
+    "addAssignees": [Function],
+    "addComment": [Function],
+    "addReviewers": [Function],
+    "branchExists": [Function],
+    "commitFilesToBranch": [Function],
+    "createPr": [Function],
+    "deleteBranch": [Function],
+    "deleteComment": [Function],
+    "editComment": [Function],
+    "ensureComment": [Function],
+    "ensureCommentRemoval": [Function],
+    "findPr": [Function],
+    "getAllRenovateBranches": [Function],
+    "getBranchCommit": [Function],
+    "getBranchLastCommitTime": [Function],
+    "getBranchPr": [Function],
+    "getBranchStatus": [Function],
+    "getBranchStatusCheck": [Function],
+    "getComments": [Function],
+    "getCommitDetails": [Function],
+    "getCommitMessages": [Function],
+    "getFile": [Function],
+    "getFileContent": [Function],
+    "getFileJson": [Function],
+    "getFileList": [Function],
+    "getPr": [Function],
+    "getPrList": [Function],
+    "getRepos": [Function],
+    "getSubDirectories": [Function],
+    "initRepo": [Function],
+    "isBranchStale": [Function],
+    "mergeBranch": [Function],
+    "mergePr": [Function],
+    "setBaseBranch": [Function],
+    "setBranchStatus": [Function],
+    "updatePr": [Function],
+  },
+  "assignees": Array [],
+  "autodiscover": false,
+  "automerge": false,
+  "automergeType": "pr",
+  "baseBranch": null,
+  "branchList": Array [
+    "foo-1.1.0",
+  ],
+  "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
+  "branchPrefix": "renovate/",
+  "branches": Array [
+    Object {
+      "branchName": "foo-1.1.0",
+      "depName": "foo",
+      "logger": Object {
+        "child": [Function],
+        "debug": [Function],
+        "error": [Function],
+        "fatal": [Function],
+        "info": [Function],
+        "trace": [Function],
+        "warn": [Function],
+      },
+      "prTitle": "some-title",
+      "upgrades": Array [
+        Object {
+          "branchName": "foo-1.1.0",
+          "depName": "foo",
+          "prTitle": "some-title",
+          "version": "1.1.0",
+        },
+      ],
+      "version": "1.1.0",
+    },
+  ],
+  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "dependencies": Object {
+    "semanticPrefix": "fix(deps):",
+  },
+  "description": Array [],
+  "devDependencies": Object {
+    "pin": Object {
+      "group": Object {
+        "commitMessage": "Pin devDependencies",
+        "prTitle": "Pin devDependencies",
+      },
+    },
+  },
+  "digest": Object {
+    "semanticPrefix": "refactor(deps):",
+  },
+  "docker": Object {
+    "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{newVersionMajor}}.x",
+    "commitMessage": "Update {{depName}} to tag {{newTag}}",
+    "digest": Object {
+      "branchName": "{{branchPrefix}}docker-{{depNameSanitized}}-{{currentTag}}",
+      "commitMessage": "Update {{depName}}:{{currentTag}} digest",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}@{{currentTag}}\` to the latest digest (\`{{newDigest}}\`).
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Dockerfile {{depName}} image {{currentTag}} digest ({{newDigestShort}})",
+    },
+    "enabled": true,
+    "group": Object {
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Update Docker {{groupName}} digests",
+    },
+    "major": Object {
+      "enabled": false,
+    },
+    "minor": Object {
+      "enabled": false,
+    },
+    "patch": Object {
+      "enabled": false,
+    },
+    "pin": Object {
+      "branchName": "{{branchPrefix}}docker-pin-{{depNameSanitized}}-{{currentTag}}",
+      "group": Object {
+        "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Dockerfiles to use image digests.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: \`{{upgrade.newDigest}}\`
+{{/each}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+        "prTitle": "Pin Docker digests",
+      },
+      "groupName": "Pin Docker Digests",
+      "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request pins Docker base image \`{{depName}}@{{currentTag}}\` to use a digest (\`{{newDigest}}\`).
+This digest will then be kept updated via Pull Requests whenever the image is updated on the Docker registry.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+      "prTitle": "Pin Dockerfile {{depName}}@{{currentTag}} image digest",
+    },
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates Docker base image \`{{depName}}\` from tag \`{{currentTag}}\` to new tag \`{{newTag}}\`.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Update {{depName}} Dockerfile tag to {{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newTag}}{{/if}}",
+  },
+  "enabled": true,
+  "encrypted": null,
+  "endpoint": null,
+  "errors": Array [],
+  "excludePackageNames": Array [],
+  "excludePackagePatterns": Array [],
+  "extends": Array [],
+  "group": Object {
+    "branchName": "{{branchPrefix}}{{groupSlug}}",
+    "commitMessage": "Renovate {{groupName}} packages",
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request renovates the package group \\"{{groupName}}\\".
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{depName}}\`{{/if}}: from \`{{upgrade.currentVersion}}\` to \`{{upgrade.newVersion}}\`
+{{/each}}
+
+{{#unless isPin}}
+### Commits
+
+{{#each upgrades as |upgrade|}}
+{{#if upgrade.releases.length}}
+<details>
+<summary>{{upgrade.githubName}}</summary>
+{{#each upgrade.releases as |release|}}
+
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}){{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+{{/each}}
+{{/unless}}
+<br />
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Renovate {{groupName}} packages",
+    "recreateClosed": true,
+  },
+  "groupName": null,
+  "groupSlug": null,
+  "ignoreDeps": Array [],
+  "ignoreFuture": true,
+  "ignoreNpmrcFile": false,
+  "ignorePaths": Array [
+    "**/node_modules/**",
+  ],
+  "ignoreUnstable": true,
+  "labels": Array [],
+  "lazyGrouping": true,
+  "lockFileMaintenance": Object {
+    "branchName": "{{branchPrefix}}lock-file-maintenance",
+    "commitMessage": "Update lock file",
+    "enabled": false,
+    "groupName": null,
+    "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request updates \`package.json\` lock files to use the latest dependency versions.
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+    "prTitle": "Lock file maintenance",
+    "recreateClosed": true,
+    "schedule": Array [
+      "before 5am on monday",
+    ],
+  },
+  "logFile": null,
+  "logFileLevel": "debug",
+  "logLevel": "info",
+  "logger": Object {
+    "child": [Function],
+    "debug": [Function],
+    "error": [Function],
+    "fatal": [Function],
+    "info": [Function],
+    "trace": [Function],
+    "warn": [Function],
+  },
+  "major": Object {},
+  "meteor": Object {
+    "enabled": true,
+  },
+  "minor": Object {},
+  "npm": Object {
+    "enabled": true,
+    "pin": Object {
+      "automerge": true,
+    },
+  },
+  "npmrc": null,
+  "onboarding": true,
+  "optionalDependencies": Object {},
+  "packageFiles": Array [],
+  "packageNames": Array [],
+  "packagePatterns": Array [],
+  "packageRules": Array [],
+  "patch": Object {
+    "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.{{newVersionMinor}}.x",
+  },
+  "peerDependencies": Object {
+    "enabled": false,
+  },
+  "pin": Object {
+    "group": Object {
+      "commitMessage": "Pin Dependencies",
+      "prTitle": "{{groupName}}",
+      "semanticPrefix": "refactor(deps):",
+    },
+    "groupName": "Pin Dependencies",
+    "rebaseStalePrs": true,
+    "recreateClosed": true,
+    "unpublishSafe": false,
+  },
+  "pinDigests": true,
+  "pinVersions": null,
+  "platform": "github",
+  "prBody": "This {{#if isGitHub}}Pull{{else}}Merge{{/if}} Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{depName}}]({{repositoryUrl}}){{else}}\`{{depName}}\`{{/if}} from \`{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{currentVersion}}\` to \`{{#unless isRange}}v{{/unless}}{{newVersion}}\`{{#if isRollback}}. This is necessary and important because \`v{{currentVersion}}\` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}
+{{#if releases.length}}
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+### Commits
+
+<details>
+<summary>{{githubName}}</summary>
+
+{{#each releases as |release|}}
+#### {{release.version}}
+{{#each release.commits as |commit|}}
+-   [\`{{commit.shortSha}}\`]({{commit.url}}) {{commit.message}}
+{{/each}}
+{{/each}}
+
+</details>
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+### Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   \`{{error.depName}}\`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+### Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   \`{{warning.depName}}\`: {{warning.message}}
+{{/each}}
+{{/if}}
+
+---
+
+This {{#if isGitHub}}PR{{else}}MR{{/if}} has been generated by [Renovate Bot](https://renovateapp.com).",
+  "prCreation": "immediate",
+  "prNotPendingHours": 12,
+  "prTitle": "{{#if isPin}}Pin{{else}}{{#if isRollback}}Roll back{{else}}Update{{/if}}{{/if}} dependency {{depName}} to {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}v{{newVersionMajor}}{{else}}v{{newVersion}}{{/if}}{{/if}}",
+  "privateKey": null,
+  "rebaseStalePrs": false,
+  "recreateClosed": false,
+  "renovateFork": false,
+  "repoIsOnboarded": true,
+  "repositories": Array [],
+  "requiredStatusChecks": Array [],
+  "respectLatest": true,
+  "reviewers": Array [],
+  "schedule": Array [],
+  "semanticCommits": null,
+  "semanticPrefix": "chore(deps):",
+  "separateMajorReleases": true,
+  "separatePatchReleases": false,
+  "timezone": null,
+  "token": null,
+  "unpublishSafe": false,
+  "updateNotScheduled": true,
+  "upgrades": null,
+  "warnings": Array [],
+  "yarnrc": null,
+}
+`;

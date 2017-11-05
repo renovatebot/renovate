@@ -48,6 +48,7 @@ describe('config/decrypt', () => {
             },
           },
         },
+        'backend/package.json',
       ];
       const res = decryptConfig(config, logger, privateKey);
       expect(res.encrypted).not.toBeDefined();
