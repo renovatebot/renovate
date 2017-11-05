@@ -523,7 +523,12 @@ describe('platform/gitlab', () => {
           iid: 12345,
         },
       });
-      const pr = await gitlab.createPr('some-branch', 'some-title', 'the-body');
+      const pr = await gitlab.createPr(
+        'some-branch',
+        'some-title',
+        'the-body',
+        null
+      );
       expect(pr).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();
     });
@@ -538,6 +543,7 @@ describe('platform/gitlab', () => {
         'some-branch',
         'some-title',
         'the-body',
+        [],
         true
       );
       expect(pr).toMatchSnapshot();

@@ -59,7 +59,7 @@ Array [
     Object {
       "body": Object {
         "description": "the-body",
-        "labels": null,
+        "labels": "",
         "remove_source_branch": true,
         "source_branch": "some-branch",
         "target_branch": undefined,
