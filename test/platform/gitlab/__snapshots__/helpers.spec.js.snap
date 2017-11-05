@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/gitlab/helpers createFile(branchName, filePath, fileContents, message) creates file 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/files/some-path",
+    Object {
+      "body": Object {
+        "branch": "some-branch",
+        "commit_message": "some-message",
+        "content": "c29tZS1jb250ZW50cw==",
+        "encoding": "base64",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab/helpers updateFile(branchName, filePath, fileContents, message) updates file 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/files/some-path",
+    Object {
+      "body": Object {
+        "branch": "some-branch",
+        "commit_message": "some-message",
+        "content": "c29tZS1jb250ZW50cw==",
+        "encoding": "base64",
+      },
+    },
+  ],
+]
+`;

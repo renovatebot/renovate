@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/npm/monorepo checkMonorepos adds lerna packages 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
+`;
+
+exports[`manager/npm/monorepo checkMonorepos adds nested yarn workspaces 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
+`;
+
+exports[`manager/npm/monorepo checkMonorepos adds yarn workspaces 1`] = `
+Array [
+  "@a/b",
+  "@a/c",
+]
+`;
+
+exports[`manager/npm/monorepo checkMonorepos skips if no lerna packages 1`] = `Array []`;
