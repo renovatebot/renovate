@@ -29,6 +29,16 @@ describe('workers/repository/onboarding/branch', () => {
       }
       expect(e).toBeDefined();
     });
+    it('throws if fork', async () => {
+      config.isFork = true;
+      let e;
+      try {
+        await checkOnboardingBranch(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
     it('detects repo is onboarded via file', async () => {
       config.api.getFileList.mockReturnValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
