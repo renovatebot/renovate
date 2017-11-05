@@ -20,16 +20,14 @@ describe('platform/vsts', () => {
 
   function getRepos(token, endpoint) {
     gitApi.mockImplementationOnce(() => ({
-      getRepositories: jest.fn(() =>
-        [
-          {
-            name: 'a/b',
-          },
-          {
-            name: 'c/d',
-          },
-        ]
-      ),
+      getRepositories: jest.fn(() => [
+        {
+          name: 'a/b',
+        },
+        {
+          name: 'c/d',
+        },
+      ]),
     }));
     return vsts.getRepos(token, endpoint);
   }
@@ -47,25 +45,21 @@ describe('platform/vsts', () => {
 
   function initRepo(...args) {
     gitApi.mockImplementationOnce(() => ({
-      getRepositories: jest.fn(() => (
-        [
-          {
-            name: 'a/b',
-            id: '1',
-            privateRepo: true,
-            isFork: false,
-            defaultBranch: 'defBr',
-          },
-          {
-            name: 'c/d',
-          },
-        ]
-      ))
+      getRepositories: jest.fn(() => [
+        {
+          name: 'a/b',
+          id: '1',
+          privateRepo: true,
+          isFork: false,
+          defaultBranch: 'defBr',
+        },
+        {
+          name: 'c/d',
+        },
+      ]),
     }));
     gitApi.mockImplementationOnce(() => ({
-      getBranch: jest.fn(() => (
-        { commit: { commitId: '1234' } }
-      )),
+      getBranch: jest.fn(() => ({ commit: { commitId: '1234' } })),
     }));
 
     return vsts.initRepo(...args);
@@ -90,7 +84,7 @@ describe('platform/vsts', () => {
       // getBranchCommit
       gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({
-          commit: { commitId: '1234' }
+          commit: { commitId: '1234' },
         })),
       }));
       await vsts.setBaseBranch('some-branch');
@@ -108,13 +102,11 @@ describe('platform/vsts', () => {
       );
       expect(config.repoId).toBe('1');
       gitApi.mockImplementationOnce(() => ({
-        getCommits: jest.fn(() => (
-          [
-            { comment: 'com1' },
-            { comment: 'com2' },
-            { comment: 'com3' },
-          ]
-        )),
+        getCommits: jest.fn(() => [
+          { comment: 'com1' },
+          { comment: 'com2' },
+          { comment: 'com3' },
+        ]),
       }));
       const msg = await vsts.getCommitMessages();
       expect(msg).toMatchSnapshot();
@@ -139,7 +131,7 @@ describe('platform/vsts', () => {
     });
     it('should return null if invalid JSON', async () => {
       await initRepo('some/repo', 'token');
-      vstsHelper.getFile.mockImplementationOnce(() => `{"content"= "hello"}`);// notice the = ^^
+      vstsHelper.getFile.mockImplementationOnce(() => `{"content"= "hello"}`); // notice the = ^^
       const content = await vsts.getFileJson('package.json');
       expect(content).toBeNull();
     });
@@ -148,26 +140,24 @@ describe('platform/vsts', () => {
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns true if no title and all state', async () => {
       gitApi.mockImplementationOnce(() => ({
-        getPullRequests: jest.fn(() => (
-          [
-            {
-              pullRequestId: 1,
-              sourceRefName: 'refs/heads/branch-a',
-              title: 'branch a pr',
-              status: 2,
-            },
-          ]
-        )),
+        getPullRequests: jest.fn(() => [
+          {
+            pullRequestId: 1,
+            sourceRefName: 'refs/heads/branch-a',
+            title: 'branch a pr',
+            status: 2,
+          },
+        ]),
       }));
-      vstsHelper.getNewBranchName.mockImplementationOnce(() => 'refs/heads/branch-a');
-      vstsHelper.getRenovatePRFormat.mockImplementationOnce(() => (
-        {
-          number: 1,
-          head: { ref: 'branch-a' },
-          title: 'branch a pr',
-          state: 'open',
-        }
-      ));
+      vstsHelper.getNewBranchName.mockImplementationOnce(
+        () => 'refs/heads/branch-a'
+      );
+      vstsHelper.getRenovatePRFormat.mockImplementationOnce(() => ({
+        number: 1,
+        head: { ref: 'branch-a' },
+        title: 'branch a pr',
+        state: 'open',
+      }));
       const res = await vsts.findPr('branch-a', 'branch a pr');
       expect(res).toBeDefined();
     });
