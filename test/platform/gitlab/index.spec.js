@@ -1,4 +1,4 @@
-const logger = require('../_fixtures/logger');
+const logger = require('../../_fixtures/logger');
 
 describe('platform/gitlab', () => {
   let gitlab;
@@ -10,9 +10,10 @@ describe('platform/gitlab', () => {
 
     // reset module
     jest.resetModules();
-    jest.mock('../../lib/platform/gl-got-wrapper');
-    gitlab = require('../../lib/platform/gitlab');
-    get = require('../../lib/platform/gl-got-wrapper');
+    jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
+    jest.mock('../../../lib/platform/gitlab/helpers');
+    gitlab = require('../../../lib/platform/gitlab');
+    get = require('../../../lib/platform/gitlab/gl-got-wrapper');
   });
 
   describe('getRepos', () => {
@@ -229,18 +230,14 @@ describe('platform/gitlab', () => {
       expect(e.statusCode).toBe(500);
     });
   });
-  describe('getBranch', () => {
-    it('returns a branch', async () => {
-      get.mockReturnValueOnce({ body: 'foo' });
-      const branch = await gitlab.getBranch('branch-name');
-      expect(branch).toMatchSnapshot();
+  describe('getAllRenovateBranches()', () => {
+    it('exists', () => {
+      gitlab.getAllRenovateBranches();
     });
-    it('nulls on error', async () => {
-      get.mockImplementationOnce(() => {
-        throw new Error('not found');
-      });
-      const branch = await gitlab.getBranch('branch-name');
-      expect(branch).toBe(null);
+  });
+  describe('isBranchStale()', () => {
+    it('exists', () => {
+      gitlab.isBranchStale();
     });
   });
   describe('getBranchPr(branchName)', () => {
@@ -255,10 +252,10 @@ describe('platform/gitlab', () => {
     });
     it('should return the PR object', async () => {
       await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
+      get.mockReturnValueOnce({
         body: [{ number: 91, source_branch: 'somebranch' }],
-      }));
-      get.mockImplementationOnce(() => ({
+      });
+      get.mockReturnValueOnce({
         body: {
           iid: 91,
           additions: 1,
@@ -269,7 +266,8 @@ describe('platform/gitlab', () => {
             sha: '1234',
           },
         },
-      }));
+      });
+      get.mockReturnValueOnce({ body: 'foo' });
       const pr = await gitlab.getBranchPr('somebranch');
       expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
@@ -397,6 +395,11 @@ describe('platform/gitlab', () => {
       expect(get.delete.mock.calls.length).toBe(1);
     });
   });
+  describe('mergeBranch()', () => {
+    it('exists', () => {
+      gitlab.mergeBranch();
+    });
+  });
   describe('getBranchLastCommitTime', () => {
     it('should return a Date', async () => {
       await initRepo('some/repo', 'token');
@@ -520,7 +523,12 @@ describe('platform/gitlab', () => {
           iid: 12345,
         },
       });
-      const pr = await gitlab.createPr('some-branch', 'some-title', 'the-body');
+      const pr = await gitlab.createPr(
+        'some-branch',
+        'some-title',
+        'the-body',
+        null
+      );
       expect(pr).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();
     });
@@ -535,6 +543,7 @@ describe('platform/gitlab', () => {
         'some-branch',
         'some-title',
         'the-body',
+        [],
         true
       );
       expect(pr).toMatchSnapshot();
@@ -621,85 +630,54 @@ describe('platform/gitlab', () => {
       expect(res).toBe(null);
     });
   });
-  describe('createFile(branchName, filePath, fileContents, message)', () => {
-    it('creates file', async () => {
-      await gitlab.createFile(
+  describe('getSubDirectories(path)', () => {
+    it('should return subdirectories', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockImplementationOnce(() => ({
+        body: [{ type: 'tree', name: 'a' }, { type: 'file', name: 'b' }],
+      }));
+      const dirList = await gitlab.getSubDirectories('some-path');
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(dirList).toHaveLength(1);
+      expect(dirList).toMatchSnapshot();
+    });
+  });
+  describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
+    it('creates branch', async () => {
+      get.mockReturnValueOnce({ statusCode: 404 });
+      await gitlab.commitFilesToBranch('some-branch', [], 'some-message');
+    });
+    it('does not create branch and updates file', async () => {
+      get.mockReturnValueOnce({ statusCode: 200 });
+      get.mockReturnValueOnce({
+        body: {
+          content: 'hello',
+        },
+      });
+      const file = {
+        name: 'foo',
+        contents: 'bar',
+      };
+      await gitlab.commitFilesToBranch(
         'some-branch',
-        'some-path',
-        'some-contents',
-        'some-message'
+        [file],
+        'some-message',
+        'parent-branch'
       );
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls[0][1].body.file_path).not.toBeDefined();
     });
-    describe('updateFile(branchName, filePath, fileContents, message)', () => {
-      it('updates file', async () => {
-        await gitlab.updateFile(
-          'some-branch',
-          'some-path',
-          'some-contents',
-          'some-message'
-        );
-        expect(get.put.mock.calls).toMatchSnapshot();
-        expect(get.put.mock.calls[0][1].body.file_path).not.toBeDefined();
-      });
-    });
-    describe('createBranch(branchName)', () => {
-      it('creates branch', async () => {
-        await gitlab.createBranch('some-branch');
-        expect(get.post.mock.calls).toMatchSnapshot();
-        expect(get.post.mock.calls[0][1].body.branch_name).not.toBeDefined();
-      });
-    });
-    describe('getSubDirectories(path)', () => {
-      it('should return subdirectories', async () => {
-        await initRepo('some/repo', 'token');
-        get.mockImplementationOnce(() => ({
-          body: [{ type: 'tree', name: 'a' }, { type: 'file', name: 'b' }],
-        }));
-        const dirList = await gitlab.getSubDirectories('some-path');
-        expect(get.mock.calls).toMatchSnapshot();
-        expect(dirList).toHaveLength(1);
-        expect(dirList).toMatchSnapshot();
-      });
-    });
-    describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
-      it('creates branch', async () => {
-        get.mockReturnValueOnce({ statusCode: 404 });
-        await gitlab.commitFilesToBranch('some-branch', [], 'some-message');
-      });
-      it('does not create branch and updates file', async () => {
-        get.mockReturnValueOnce({ statusCode: 200 });
-        get.mockReturnValueOnce({
-          body: {
-            content: 'hello',
-          },
-        });
-        const file = {
-          name: 'foo',
-          contents: 'bar',
-        };
-        await gitlab.commitFilesToBranch(
-          'some-branch',
-          [file],
-          'some-message',
-          'parent-branch'
-        );
-      });
-      it('does not create branch and creates file', async () => {
-        get.mockReturnValueOnce({ statusCode: 200 });
-        get.mockReturnValueOnce(Promise.reject({ statusCode: 404 }));
-        const file = {
-          name: 'foo',
-          contents: 'bar',
-        };
-        await gitlab.commitFilesToBranch(
-          'some-branch',
-          [file],
-          'some-message',
-          'parent-branch'
-        );
-      });
+    it('does not create branch and creates file', async () => {
+      get.mockReturnValueOnce({ statusCode: 200 });
+      get.mockReturnValueOnce(Promise.reject({ statusCode: 404 }));
+      const file = {
+        name: 'foo',
+        contents: 'bar',
+      };
+      await gitlab.commitFilesToBranch(
+        'some-branch',
+        [file],
+        'some-message',
+        'parent-branch'
+      );
     });
   });
   describe('getCommitMessages()', () => {
