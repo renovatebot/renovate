@@ -4,7 +4,7 @@ This file documents the design choices as well as configuration options.
 
 #### Stateless
 
-No state storage is needed on `renovate` or GitHub/GitLab apart from what you see publicly in GitHub (branches, Pull Requests). It therefore doesn't matter if you stop/restart the script and would even still work if you had it running from two different locations, as long as their configuration was the same.
+No state storage is needed on `renovate` or the source code repository apart from what you see publicly (branches, Pull Requests). It therefore doesn't matter if you stop/restart the script and would even still work if you had it running from two different locations, as long as their configuration was the same.
 
 #### API only
 
