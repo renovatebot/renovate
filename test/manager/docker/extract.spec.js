@@ -46,5 +46,12 @@ describe('lib/manager/docker/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('handles custom hosts', () => {
+      const res = extractDependencies(
+        'FROM registry2.something.info:5005/node:8\n',
+        config
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
 });
