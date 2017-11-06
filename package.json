@@ -38,7 +38,7 @@
   "dependencies": {
     "bunyan": "1.8.12",
     "chalk": "2.3.0",
-    "changelog": "1.4.0",
+    "changelog": "1.4.1",
     "child-process-promise": "2.2.1",
     "commander": "2.11.0",
     "compare-versions": "3.1.0",
