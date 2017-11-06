@@ -138,7 +138,7 @@
     "tag": "next"
   },
   "release": {
-    "branch": "9x",
+    "branch": "master",
     "verifyConditions": "condition-circle",
     "analyzeCommits": {
       "preset": "angular",
