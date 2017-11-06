@@ -1159,10 +1159,6 @@ diff@^3.2.0:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.3.1.tgz#aa8567a6eed03c531fc89d3f711cd0e5259dec75"
 
-docker-parse-image@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/docker-parse-image/-/docker-parse-image-3.0.1.tgz#33dc69291eac3414f84871f2d59d77b6f6948be4"
-
 doctrine@1.5.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-1.5.0.tgz#379dce730f6166f76cefa4e6707a159b02c5a6fa"
