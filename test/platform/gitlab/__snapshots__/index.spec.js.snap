@@ -1,0 +1,280 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/gitlab addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42?assignee_id=someuser",
+  ],
+]
+`;
+
+exports[`platform/gitlab addAssignees(issueNo, assignees) should log error if more than one assignee 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42?assignee_id=someuser",
+  ],
+]
+`;
+
+exports[`platform/gitlab createPr(branchName, title, body) returns the PR 1`] = `
+Object {
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "number": 1,
+}
+`;
+
+exports[`platform/gitlab createPr(branchName, title, body) returns the PR 2`] = `
+Array [
+  Array [
+    "projects/undefined/merge_requests",
+    Object {
+      "body": Object {
+        "description": "the-body",
+        "labels": null,
+        "remove_source_branch": true,
+        "source_branch": "some-branch",
+        "target_branch": undefined,
+        "title": "some-title",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab createPr(branchName, title, body) uses default branch 1`] = `
+Object {
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "number": 1,
+}
+`;
+
+exports[`platform/gitlab createPr(branchName, title, body) uses default branch 2`] = `
+Array [
+  Array [
+    "projects/undefined/merge_requests",
+    Object {
+      "body": Object {
+        "description": "the-body",
+        "labels": "",
+        "remove_source_branch": true,
+        "source_branch": "some-branch",
+        "target_branch": undefined,
+        "title": "some-title",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab getBranchLastCommitTime should return a Date 1`] = `2012-09-20T08:50:22.000Z`;
+
+exports[`platform/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?state=opened&per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab getBranchPr(branchName) should return the PR object 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?state=opened&per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests/undefined",
+  ],
+  Array [
+    "projects/some%2Frepo/repository/branches/some-branch",
+  ],
+]
+`;
+
+exports[`platform/gitlab getBranchPr(branchName) should return the PR object 2`] = `
+Object {
+  "additions": 1,
+  "base": Object {
+    "sha": "1234",
+  },
+  "body": undefined,
+  "commits": 1,
+  "deletions": 1,
+  "displayNumber": "Merge Request #91",
+  "iid": 91,
+  "number": 91,
+  "source_branch": "some-branch",
+}
+`;
+
+exports[`platform/gitlab getCommitMessages() returns commits messages 1`] = `
+Array [
+  "foo",
+  "bar",
+]
+`;
+
+exports[`platform/gitlab getFile(filePath, branchName) gets the file 1`] = `"foo"`;
+
+exports[`platform/gitlab getFileContent(filePath, branchName) gets the file 1`] = `"~�"`;
+
+exports[`platform/gitlab getFileContent(filePath, branchName) throws error for non-404 1`] = `
+Object {
+  "statusCode": 403,
+}
+`;
+
+exports[`platform/gitlab getFileList should return the files matching the fileName 1`] = `
+Array [
+  "package.json",
+  "some-dir/package.json.some-thing-else",
+  "src/app/package.json",
+  "src/otherapp/package.json",
+]
+`;
+
+exports[`platform/gitlab getPr(prNo) returns the PR 1`] = `
+Object {
+  "body": "a merge request",
+  "canRebase": true,
+  "description": "a merge request",
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "isClosed": true,
+  "isUnmergeable": true,
+  "merge_status": "cannot_be_merged",
+  "number": 12345,
+  "source_branch": "some-branch",
+  "state": "merged",
+}
+`;
+
+exports[`platform/gitlab getRepos should return an array of repos 1`] = `
+Array [
+  Array [
+    "projects?membership=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab getRepos should return an array of repos 2`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
+
+exports[`platform/gitlab getRepos should support a custom endpoint 1`] = `
+Array [
+  Array [
+    "projects?membership=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab getRepos should support a custom endpoint 2`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
+
+exports[`platform/gitlab getSubDirectories(path) should return subdirectories 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/repository/tree?path=some-path",
+  ],
+]
+`;
+
+exports[`platform/gitlab getSubDirectories(path) should return subdirectories 2`] = `
+Array [
+  "a",
+]
+`;
+
+exports[`platform/gitlab initRepo should initialise the config for the repo - 0 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;
+
+exports[`platform/gitlab initRepo should initialise the config for the repo - 0 2`] = `Object {}`;
+
+exports[`platform/gitlab initRepo should initialise the config for the repo - 1 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;
+
+exports[`platform/gitlab initRepo should initialise the config for the repo - 1 2`] = `Object {}`;
+
+exports[`platform/gitlab initRepo should initialise the config for the repo - 2 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;
+
+exports[`platform/gitlab initRepo should initialise the config for the repo - 2 2`] = `Object {}`;
+
+exports[`platform/gitlab initRepo uses provided logger 1`] = `Object {}`;
+
+exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;

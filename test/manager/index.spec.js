@@ -66,6 +66,12 @@ describe('manager', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
+    it('skips Dockerfiles with no content', async () => {
+      config.api.getFileList.mockReturnValueOnce(['Dockerfile']);
+      config.api.getFileContent.mockReturnValueOnce(null);
+      const res = await manager.detectPackageFiles(config);
+      expect(res).toHaveLength(0);
+    });
     it('ignores node modules', async () => {
       config.api.getFileList.mockReturnValueOnce([
         'package.json',
