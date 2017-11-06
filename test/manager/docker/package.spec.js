@@ -15,6 +15,8 @@ describe('lib/workers/package/docker', () => {
         ...defaultConfig,
         logger,
         depName: 'some-dep',
+        currentFrom: 'some-dep:1.0.0@sha256:abcdefghijklmnop',
+        currentDepTag: 'some-dep:1.0.0',
         currentTag: '1.0.0',
         currentDigest: 'sha256:abcdefghijklmnop',
       };
