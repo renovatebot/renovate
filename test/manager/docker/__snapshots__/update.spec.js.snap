@@ -6,3 +6,10 @@ FROM node:8@sha256:abcdefghijklmnop
 RUN something
 "
 `;
+
+exports[`workers/branch/dockerfile setNewValue replaces existing value with suffix 1`] = `
+"# comment FROM node:8
+FROM node:8@sha256:abcdefghijklmnop as base
+RUN something
+"
+`;

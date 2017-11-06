@@ -15,6 +15,8 @@ describe('lib/workers/package/docker', () => {
         ...defaultConfig,
         logger,
         depName: 'some-dep',
+        currentFrom: 'some-dep:1.0.0@sha256:abcdefghijklmnop',
+        currentDepTag: 'some-dep:1.0.0',
         currentTag: '1.0.0',
         currentDigest: 'sha256:abcdefghijklmnop',
       };
@@ -27,6 +29,13 @@ describe('lib/workers/package/docker', () => {
       expect(await docker.getPackageUpdates(config)).toEqual([]);
     });
     it('returns a digest', async () => {
+      dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toHaveLength(1);
+      expect(res[0].type).toEqual('digest');
+    });
+    it('adds latest tag', async () => {
+      delete config.currentTag;
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
       const res = await docker.getPackageUpdates(config);
       expect(res).toHaveLength(1);
@@ -76,6 +85,12 @@ describe('lib/workers/package/docker', () => {
       expect(res).toHaveLength(2);
       expect(res[1].type).toEqual('minor');
       expect(res[1].newVersion).toEqual('1.1.0-something');
+    });
+    it('ignores deps with custom registry', async () => {
+      delete config.currentDigest;
+      config.dockerRegistry = 'registry.something.info:5005';
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toHaveLength(0);
     });
   });
 });

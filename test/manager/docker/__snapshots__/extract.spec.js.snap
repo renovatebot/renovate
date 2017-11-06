@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/docker/extract extractDependencies() handles comments 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node",
+    "currentDepTagDigest": "node",
+    "currentDigest": undefined,
+    "currentFrom": "node",
+    "currentTag": undefined,
+    "depName": "node",
+    "depType": "Dockerfile",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node",
+    "fromPrefix": "FROM",
+    "fromSuffix": "",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles custom hosts 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node:8",
+    "currentDepTagDigest": "node:8",
+    "currentDigest": undefined,
+    "currentFrom": "registry2.something.info:5005/node:8",
+    "currentTag": "8",
+    "depName": "node",
+    "depType": "Dockerfile",
+    "dockerRegistry": "registry2.something.info:5005",
+    "fromLine": "FROM registry2.something.info:5005/node:8",
+    "fromPrefix": "FROM",
+    "fromSuffix": "",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles digest 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node",
+    "currentDepTagDigest": "node@sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentDigest": "sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentFrom": "node@sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentTag": undefined,
+    "depName": "node",
+    "depType": "Dockerfile",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node@sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "fromPrefix": "FROM",
+    "fromSuffix": "",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles from as 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node:8.9.0-alpine",
+    "currentDepTagDigest": "node:8.9.0-alpine",
+    "currentDigest": undefined,
+    "currentFrom": "node:8.9.0-alpine",
+    "currentTag": "8.9.0-alpine",
+    "depName": "node",
+    "depType": "Dockerfile",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node:8.9.0-alpine as base",
+    "fromPrefix": "FROM",
+    "fromSuffix": "as base",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles naked dep 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node",
+    "currentDepTagDigest": "node",
+    "currentDigest": undefined,
+    "currentFrom": "node",
+    "currentTag": undefined,
+    "depName": "node",
+    "depType": "Dockerfile",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node",
+    "fromPrefix": "FROM",
+    "fromSuffix": "",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles tag 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node:8.9.0-alpine",
+    "currentDepTagDigest": "node:8.9.0-alpine",
+    "currentDigest": undefined,
+    "currentFrom": "node:8.9.0-alpine",
+    "currentTag": "8.9.0-alpine",
+    "depName": "node",
+    "depType": "Dockerfile",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node:8.9.0-alpine",
+    "fromPrefix": "FROM",
+    "fromSuffix": "",
+  },
+]
+`;
+
+exports[`lib/manager/docker/extract extractDependencies() handles tag and digest 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node:8.9.0",
+    "currentDepTagDigest": "node:8.9.0@sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentDigest": "sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentFrom": "node:8.9.0@sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "currentTag": "8.9.0",
+    "depName": "node",
+    "depType": "Dockerfile",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node:8.9.0@sha256:aaaaaaaabbbbbbbbccccccccddddddd",
+    "fromPrefix": "FROM",
+    "fromSuffix": "",
+  },
+]
+`;
