@@ -110,6 +110,9 @@
       "lcov",
       "text-summary"
     ],
+    "setupFiles": [
+      "./test/platform.js"
+    ],
     "setupTestFrameworkScriptFile": "./test/chai.js"
   },
   "prettier": {
