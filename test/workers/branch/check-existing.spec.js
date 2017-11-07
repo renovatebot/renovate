@@ -2,7 +2,6 @@ const {
   prAlreadyExisted,
 } = require('../../../lib/workers/branch/check-existing');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-const logger = require('../../_fixtures/logger');
 
 describe('workers/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {
@@ -10,7 +9,6 @@ describe('workers/branch/check-existing', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         branchName: 'some-branch',
         prTitle: 'some-title',
       };

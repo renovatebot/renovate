@@ -1,6 +1,5 @@
 const { commitFilesToBranch } = require('../../../lib/workers/branch/commit');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-const logger = require('../../_fixtures/logger');
 
 describe('workers/branch/automerge', () => {
   describe('commitFilesToBranch', () => {
@@ -8,7 +7,6 @@ describe('workers/branch/automerge', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
         semanticCommits: false,

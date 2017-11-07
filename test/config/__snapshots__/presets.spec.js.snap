@@ -220,15 +220,6 @@ Object {
 
 exports[`config/presets resolvePreset combines two package alls 1`] = `
 Object {
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
   "packagePatterns": Array [
     "^eslint",
     "^stylelint",
@@ -270,15 +261,6 @@ Object {
     "schedule": Array [
       "before 8am on Monday",
     ],
-  },
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
   },
   "major": Object {
     "automerge": false,
@@ -348,15 +330,6 @@ Object {
   "lockFileMaintenance": Object {
     "enabled": false,
   },
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
   "optionalDependencies": Object {
     "description": Array [
       "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
@@ -380,15 +353,6 @@ Object {
 
 exports[`config/presets resolvePreset resolves eslint 1`] = `
 Object {
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
   "packagePatterns": Array [
     "^eslint",
   ],
@@ -397,15 +361,6 @@ Object {
 
 exports[`config/presets resolvePreset resolves group monorepos 1`] = `
 Object {
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
   "packageRules": Array [
     Object {
       "description": Array [
@@ -679,15 +634,6 @@ Object {
   "description": Array [
     "All lint-related packages",
   ],
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
   "packageNames": Array [
     "remark-lint",
   ],
@@ -703,15 +649,6 @@ Object {
   "description": Array [
     "Update lint packages automatically if tests pass",
   ],
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
   "packageRules": Array [
     Object {
       "automerge": true,
@@ -732,15 +669,6 @@ Object {
 
 exports[`config/presets resolvePreset resolves packageRule 1`] = `
 Object {
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
   "packageRules": Array [
     Object {
       "groupName": "eslint",
@@ -755,30 +683,12 @@ Object {
 exports[`config/presets resolvePreset returns same if invalid preset 1`] = `
 Object {
   "foo": 1,
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
 }
 `;
 
 exports[`config/presets resolvePreset returns same if no presets 1`] = `
 Object {
   "foo": 1,
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
 }
 `;
 
@@ -788,15 +698,6 @@ Object {
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
   "foo": 1,
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
   "pinVersions": true,
 }
 `;
@@ -807,15 +708,6 @@ Object {
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
   "foo": 1,
-  "logger": Object {
-    "child": [Function],
-    "debug": [Function],
-    "error": [Function],
-    "fatal": [Function],
-    "info": [Function],
-    "trace": [Function],
-    "warn": [Function],
-  },
   "pinVersions": true,
 }
 `;

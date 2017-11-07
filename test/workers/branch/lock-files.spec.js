@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const lockFiles = require('../../../lib/workers/branch/lock-files');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-const logger = require('../../_fixtures/logger');
+
 const npm = require('../../../lib/workers/branch/npm');
 const yarn = require('../../../lib/workers/branch/yarn');
 
@@ -20,7 +20,6 @@ describe('workers/branch/lock-files', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
       };
     });
     it('returns true if found and true', () => {
@@ -68,7 +67,6 @@ describe('workers/branch/lock-files', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
       };
     });
     it('returns true if found and true', () => {
@@ -116,7 +114,6 @@ describe('workers/branch/lock-files', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         packageFiles: [
           {
             packageFile: 'package.json',
@@ -180,7 +177,6 @@ describe('workers/branch/lock-files', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         tmpDir: { path: 'some-tmp-dir' },
       };
       fs.outputFile = jest.fn();
@@ -233,7 +229,6 @@ describe('workers/branch/lock-files', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         tmpDir: { path: 'some-tmp-dir' },
       };
       fs.outputFile = jest.fn();
@@ -276,7 +271,6 @@ describe('workers/branch/lock-files', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         tmpDir: { path: 'some-tmp-dir' },
       };
       platform.getFileContent.mockReturnValue('some lock file contents');

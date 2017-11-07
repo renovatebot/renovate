@@ -8,13 +8,6 @@ Object {
 }
 `;
 
-exports[`logger/config-serializer replaces functions 1`] = `
-Object {
-  "logger": "[Function]",
-  "nottoken": "b",
-}
-`;
-
 exports[`logger/config-serializer squashes templates 1`] = `
 Object {
   "nottoken": "b",

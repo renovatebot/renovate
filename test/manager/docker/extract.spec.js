@@ -1,13 +1,10 @@
 const { extractDependencies } = require('../../../lib/manager/docker/extract');
-const logger = require('../../_fixtures/logger');
 
 describe('lib/manager/docker/extract', () => {
   describe('extractDependencies()', () => {
     let config;
     beforeEach(() => {
-      config = {
-        logger,
-      };
+      config = {};
     });
     it('handles naked dep', () => {
       const res = extractDependencies('FROM node\n', config);

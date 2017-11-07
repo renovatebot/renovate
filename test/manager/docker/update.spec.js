@@ -1,5 +1,4 @@
 const dockerfile = require('../../../lib/manager/docker/update');
-const logger = require('../../_fixtures/logger');
 
 describe('workers/branch/dockerfile', () => {
   describe('setNewValue', () => {
@@ -13,7 +12,7 @@ describe('workers/branch/dockerfile', () => {
         fromSuffix: '',
         newFrom: 'node:8@sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.setNewValue(currentFileContent, upgrade, logger);
+      const res = dockerfile.setNewValue(currentFileContent, upgrade);
       expect(res).toMatchSnapshot();
     });
     it('replaces existing value with suffix', () => {
@@ -26,7 +25,7 @@ describe('workers/branch/dockerfile', () => {
         fromSuffix: 'as base',
         newFrom: 'node:8@sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.setNewValue(currentFileContent, upgrade, logger);
+      const res = dockerfile.setNewValue(currentFileContent, upgrade);
       expect(res).toMatchSnapshot();
     });
     it('returns null on error', () => {
@@ -38,7 +37,7 @@ describe('workers/branch/dockerfile', () => {
         fromSuffix: '',
         newFrom: 'node:8@sha256:abcdefghijklmnop',
       };
-      const res = dockerfile.setNewValue(currentFileContent, upgrade, logger);
+      const res = dockerfile.setNewValue(currentFileContent, upgrade);
       expect(res).toBe(null);
     });
   });

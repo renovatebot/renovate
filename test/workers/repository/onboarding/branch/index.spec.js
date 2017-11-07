@@ -1,4 +1,3 @@
-const logger = require('../../../../_fixtures/logger');
 const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
 const {
   checkOnboardingBranch,
@@ -11,7 +10,6 @@ describe('workers/repository/onboarding/branch', () => {
       jest.resetAllMocks();
       config = {
         ...defaultConfig,
-        logger,
       };
       platform.getFileList.mockReturnValue([]);
     });

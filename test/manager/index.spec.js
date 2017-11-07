@@ -1,7 +1,5 @@
-const logger = require('../_fixtures/logger');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 const manager = require('../../lib/manager');
-
 const npmUpdater = require('../../lib/manager/npm/update');
 const meteorUpdater = require('../../lib/manager/meteor/update');
 const dockerUpdater = require('../../lib/manager/docker/update');
@@ -14,7 +12,6 @@ describe('manager', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         warnings: [],
       };
     });
@@ -85,7 +82,6 @@ describe('manager', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         parentBranch: 'some-branch',
       };
       npmUpdater.setNewValue = jest.fn();

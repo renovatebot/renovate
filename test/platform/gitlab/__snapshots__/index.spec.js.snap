@@ -266,8 +266,6 @@ Array [
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 2 2`] = `Object {}`;
 
-exports[`platform/gitlab initRepo uses provided logger 1`] = `Object {}`;
-
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
