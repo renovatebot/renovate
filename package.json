@@ -38,7 +38,7 @@
   "dependencies": {
     "bunyan": "1.8.12",
     "chalk": "2.3.0",
-    "changelog": "1.4.0",
+    "changelog": "1.4.1",
     "child-process-promise": "2.2.1",
     "commander": "2.11.0",
     "compare-versions": "3.1.0",
@@ -70,7 +70,7 @@
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.1",
     "showdown": "1.8.1",
-    "tmp-promise": "1.0.3",
+    "tmp-promise": "1.0.4",
     "traverse": "0.6.6",
     "yarn": "1.2.1"
   },
