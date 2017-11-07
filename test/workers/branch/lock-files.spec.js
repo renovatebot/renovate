@@ -276,13 +276,10 @@ describe('workers/branch/lock-files', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: {
-          branchExists: jest.fn(),
-          getFileContent: jest.fn(() => 'some lock file contents'),
-        },
         logger,
         tmpDir: { path: 'some-tmp-dir' },
       };
+      platform.getFileContent.mockReturnValue('some lock file contents');
       npm.generateLockFile = jest.fn();
       npm.generateLockFile.mockReturnValue({
         lockFile: 'some lock file contents',
@@ -293,9 +290,12 @@ describe('workers/branch/lock-files', () => {
       });
       lockFiles.determineLockFileDirs = jest.fn();
     });
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.type = 'lockFileMaintenance';
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       const res = await getUpdatedLockFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(0);
@@ -322,7 +322,7 @@ describe('workers/branch/lock-files', () => {
       expect(res.updatedLockFiles).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(config.api.getFileContent.mock.calls).toHaveLength(4);
+      expect(platform.getFileContent.mock.calls).toHaveLength(4);
     });
     it('sets error if receiving null', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
@@ -337,7 +337,7 @@ describe('workers/branch/lock-files', () => {
       expect(res.updatedLockFiles).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(config.api.getFileContent.mock.calls).toHaveLength(2);
+      expect(platform.getFileContent.mock.calls).toHaveLength(2);
     });
     it('adds multiple lock files', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
@@ -352,7 +352,7 @@ describe('workers/branch/lock-files', () => {
       expect(res.updatedLockFiles).toHaveLength(2);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(config.api.getFileContent.mock.calls).toHaveLength(4);
+      expect(platform.getFileContent.mock.calls).toHaveLength(4);
     });
   });
 });

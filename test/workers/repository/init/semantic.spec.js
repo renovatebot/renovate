@@ -19,16 +19,13 @@ describe('workers/repository/init/semantic', () => {
     });
     it('detects false if unknown', async () => {
       config.semanticCommits = null;
-      config.api.getCommitMessages.mockReturnValue(['foo', 'bar']);
+      platform.getCommitMessages.mockReturnValue(['foo', 'bar']);
       const res = await detectSemanticCommits(config);
       expect(res.semanticCommits).toBe(false);
     });
     it('detects true if known', async () => {
       config.semanticCommits = null;
-      config.api.getCommitMessages.mockReturnValue([
-        'fix: foo',
-        'refactor: bar',
-      ]);
+      platform.getCommitMessages.mockReturnValue(['fix: foo', 'refactor: bar']);
       const res = await detectSemanticCommits(config);
       expect(res.semanticCommits).toBe(true);
     });

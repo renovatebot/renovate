@@ -11,7 +11,6 @@ describe('logger/config-serializer', () => {
   });
   it('replaces functions', () => {
     const config = {
-      api: 'a',
       nottoken: 'b',
       logger: {},
     };
@@ -19,7 +18,6 @@ describe('logger/config-serializer', () => {
   });
   it('squashes templates', () => {
     const config = {
-      api: 'a',
       nottoken: 'b',
       prBody: 'foo',
     };

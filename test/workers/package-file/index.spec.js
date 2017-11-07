@@ -63,9 +63,6 @@ describe('packageFileWorker', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: {
-          getFileContent: jest.fn(),
-        },
         packageFile: 'package.js',
         repoIsOnboarded: true,
         logger,

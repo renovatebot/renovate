@@ -10,7 +10,6 @@ Object {
 
 exports[`logger/config-serializer replaces functions 1`] = `
 Object {
-  "api": "[Function]",
   "logger": "[Function]",
   "nottoken": "b",
 }
@@ -18,7 +17,6 @@ Object {
 
 exports[`logger/config-serializer squashes templates 1`] = `
 Object {
-  "api": "[Function]",
   "nottoken": "b",
   "prBody": "[Template]",
 }

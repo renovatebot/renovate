@@ -24,7 +24,7 @@ describe('manager/resolve', () => {
       manager.detectPackageFiles = jest.fn(() => [
         { packageFile: 'package.json' },
       ]);
-      config.api.getFileContent.mockReturnValueOnce('not json');
+      platform.getFileContent.mockReturnValueOnce('not json');
       const res = await resolvePackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.warnings).toHaveLength(1);
@@ -38,7 +38,7 @@ describe('manager/resolve', () => {
           automerge: true,
         },
       };
-      config.api.getFileContent.mockReturnValueOnce(JSON.stringify(pJson));
+      platform.getFileContent.mockReturnValueOnce(JSON.stringify(pJson));
       const res = await resolvePackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
@@ -47,11 +47,11 @@ describe('manager/resolve', () => {
       manager.detectPackageFiles = jest.fn(() => [
         { packageFile: 'package.json' },
       ]);
-      config.api.getFileContent.mockReturnValueOnce('{"name": "package.json"}');
-      config.api.getFileContent.mockReturnValueOnce('npmrc');
-      config.api.getFileContent.mockReturnValueOnce('yarnrc');
-      config.api.getFileContent.mockReturnValueOnce('# yarn.lock');
-      config.api.getFileContent.mockReturnValueOnce(
+      platform.getFileContent.mockReturnValueOnce('{"name": "package.json"}');
+      platform.getFileContent.mockReturnValueOnce('npmrc');
+      platform.getFileContent.mockReturnValueOnce('yarnrc');
+      platform.getFileContent.mockReturnValueOnce('# yarn.lock');
+      platform.getFileContent.mockReturnValueOnce(
         '{"name": "packge-lock.json"}'
       );
       const res = await resolvePackageFiles(config);
@@ -60,13 +60,13 @@ describe('manager/resolve', () => {
     });
     it('detects meteor and docker', async () => {
       config.packageFiles = ['package.js', 'Dockerfile'];
-      config.api.getFileContent.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile
+      platform.getFileContent.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
       expect(res).toMatchSnapshot();
     });
     it('skips docker if no content or no match', async () => {
       config.packageFiles = ['Dockerfile', 'other/Dockerfile'];
-      config.api.getFileContent.mockReturnValueOnce('# comment\n'); // Dockerfile
+      platform.getFileContent.mockReturnValueOnce('# comment\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
       expect(res).toMatchSnapshot();
     });
