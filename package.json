@@ -86,7 +86,7 @@
     "jest": "20.0.4",
     "mkdirp": "0.5.1",
     "mockdate": "2.0.2",
-    "prettier": "1.8.0",
+    "prettier": "1.8.1",
     "rimraf": "2.6.2",
     "semantic-release": "8.2.0"
   },
