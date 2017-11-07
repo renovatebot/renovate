@@ -10,43 +10,45 @@ describe('workers/branch/status-checks', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: { getBranchStatusCheck: jest.fn(), setBranchStatus: jest.fn() },
         logger,
         upgrades: [],
       };
     });
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
     it('defaults to unpublishable', async () => {
       await setUnpublishable(config);
-      expect(config.api.getBranchStatusCheck.mock.calls.length).toBe(1);
-      expect(config.api.setBranchStatus.mock.calls.length).toBe(0);
+      expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
+      expect(platform.setBranchStatus.mock.calls.length).toBe(0);
     });
     it('finds unpublishable true', async () => {
       config.upgrades = [{ unpublishable: true }];
       await setUnpublishable(config);
-      expect(config.api.getBranchStatusCheck.mock.calls.length).toBe(1);
-      expect(config.api.setBranchStatus.mock.calls.length).toBe(0);
+      expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
+      expect(platform.setBranchStatus.mock.calls.length).toBe(0);
     });
     it('removes status check', async () => {
       config.upgrades = [{ unpublishable: true }];
-      config.api.getBranchStatusCheck.mockReturnValueOnce('pending');
+      platform.getBranchStatusCheck.mockReturnValueOnce('pending');
       await setUnpublishable(config);
-      expect(config.api.getBranchStatusCheck.mock.calls.length).toBe(1);
-      expect(config.api.setBranchStatus.mock.calls.length).toBe(1);
+      expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
+      expect(platform.setBranchStatus.mock.calls.length).toBe(1);
     });
     it('finds unpublishable false and sets status', async () => {
       config.unpublishSafe = true;
       config.upgrades = [{ unpublishable: true }, { unpublishable: false }];
       await setUnpublishable(config);
-      expect(config.api.getBranchStatusCheck.mock.calls.length).toBe(1);
-      expect(config.api.setBranchStatus.mock.calls.length).toBe(1);
+      expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
+      expect(platform.setBranchStatus.mock.calls.length).toBe(1);
     });
     it('finds unpublishable false and skips status', async () => {
       config.unpublishSafe = true;
       config.upgrades = [{ unpublishable: true }, { unpublishable: false }];
-      config.api.getBranchStatusCheck.mockReturnValueOnce('pending');
+      platform.getBranchStatusCheck.mockReturnValueOnce('pending');
       await setUnpublishable(config);
-      expect(config.api.getBranchStatusCheck.mock.calls.length).toBe(1);
-      expect(config.api.setBranchStatus.mock.calls.length).toBe(0);
+      expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
+      expect(platform.setBranchStatus.mock.calls.length).toBe(0);
     });
   });
 });

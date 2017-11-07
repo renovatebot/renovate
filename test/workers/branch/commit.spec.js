@@ -8,7 +8,6 @@ describe('workers/branch/automerge', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: { commitFilesToBranch: jest.fn() },
         logger,
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
@@ -17,10 +16,11 @@ describe('workers/branch/automerge', () => {
         updatedPackageFiles: [],
         updatedLockFiles: [],
       };
+      jest.resetAllMocks();
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(0);
+      expect(platform.commitFilesToBranch.mock.calls.length).toBe(0);
     });
     it('commits files', async () => {
       config.updatedPackageFiles.push({
@@ -28,8 +28,8 @@ describe('workers/branch/automerge', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls).toMatchSnapshot();
+      expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(platform.commitFilesToBranch.mock.calls).toMatchSnapshot();
     });
     it('applies semantic prefix', async () => {
       config.updatedPackageFiles.push({
@@ -38,8 +38,8 @@ describe('workers/branch/automerge', () => {
       });
       config.semanticCommits = true;
       await commitFilesToBranch(config);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls).toMatchSnapshot();
+      expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(platform.commitFilesToBranch.mock.calls).toMatchSnapshot();
     });
     it('lowercases only the first line when applying semantic prefix', async () => {
       config.updatedPackageFiles.push({
@@ -49,8 +49,8 @@ describe('workers/branch/automerge', () => {
       config.commitMessage = 'Foo\n\nBar';
       config.semanticCommits = true;
       await commitFilesToBranch(config);
-      expect(config.api.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(config.api.commitFilesToBranch.mock.calls[0][2]).toEqual(
+      expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(platform.commitFilesToBranch.mock.calls[0][2]).toEqual(
         'some-prefix foo\n\nBar'
       );
     });

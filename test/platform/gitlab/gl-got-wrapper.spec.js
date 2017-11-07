@@ -1,11 +1,9 @@
 const get = require('../../../lib/platform/gitlab/gl-got-wrapper');
 const glGot = require('gl-got');
 
-jest.mock('gl-got');
-
 describe('platform/gl-got-wrapper', () => {
   const body = ['a', 'b'];
-  beforeEach(() => {
+  afterEach(() => {
     jest.resetAllMocks();
   });
   it('paginates', async () => {

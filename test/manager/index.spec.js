@@ -14,16 +14,12 @@ describe('manager', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: {
-          getFileList: jest.fn(() => []),
-          getFileContent: jest.fn(),
-        },
         logger,
         warnings: [],
       };
     });
     it('adds package files to object', async () => {
-      config.api.getFileList.mockReturnValueOnce([
+      platform.getFileList.mockReturnValueOnce([
         'package.json',
         'backend/package.json',
       ]);
@@ -33,33 +29,33 @@ describe('manager', () => {
     });
     it('finds meteor package files', async () => {
       config.meteor.enabled = true;
-      config.api.getFileList.mockReturnValueOnce([
+      platform.getFileList.mockReturnValueOnce([
         'modules/something/package.js',
       ]); // meteor
-      config.api.getFileContent.mockReturnValueOnce('Npm.depends( {} )');
+      platform.getFileContent.mockReturnValueOnce('Npm.depends( {} )');
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
     it('skips meteor package files with no json', async () => {
       config.meteor.enabled = true;
-      config.api.getFileList.mockReturnValueOnce([
+      platform.getFileList.mockReturnValueOnce([
         'modules/something/package.js',
       ]); // meteor
-      config.api.getFileContent.mockReturnValueOnce('Npm.depends(packages)');
+      platform.getFileContent.mockReturnValueOnce('Npm.depends(packages)');
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(0);
     });
     it('finds Dockerfiles', async () => {
-      config.api.getFileList.mockReturnValueOnce([
+      platform.getFileList.mockReturnValueOnce([
         'Dockerfile',
         'other/Dockerfile',
       ]);
-      config.api.getFileContent.mockReturnValueOnce(
+      platform.getFileContent.mockReturnValueOnce(
         '### comment\nFROM something\nRUN something'
       );
-      config.api.getFileContent.mockReturnValueOnce(
+      platform.getFileContent.mockReturnValueOnce(
         'ARG foo\nFROM something\nRUN something'
       );
       const res = await manager.detectPackageFiles(config);
@@ -67,13 +63,13 @@ describe('manager', () => {
       expect(res).toHaveLength(1);
     });
     it('skips Dockerfiles with no content', async () => {
-      config.api.getFileList.mockReturnValueOnce(['Dockerfile']);
-      config.api.getFileContent.mockReturnValueOnce(null);
+      platform.getFileList.mockReturnValueOnce(['Dockerfile']);
+      platform.getFileContent.mockReturnValueOnce(null);
       const res = await manager.detectPackageFiles(config);
       expect(res).toHaveLength(0);
     });
     it('ignores node modules', async () => {
-      config.api.getFileList.mockReturnValueOnce([
+      platform.getFileList.mockReturnValueOnce([
         'package.json',
         'node_modules/backend/package.json',
       ]);
@@ -89,7 +85,6 @@ describe('manager', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: { getFileContent: jest.fn() },
         logger,
         parentBranch: 'some-branch',
       };
@@ -129,10 +124,10 @@ describe('manager', () => {
         { packageFile: 'Dockerfile' },
         { packageFile: 'packages/foo/package.js' },
       ];
-      config.api.getFileContent.mockReturnValueOnce('old content 1');
-      config.api.getFileContent.mockReturnValueOnce('old content 1');
-      config.api.getFileContent.mockReturnValueOnce('old content 2');
-      config.api.getFileContent.mockReturnValueOnce('old content 3');
+      platform.getFileContent.mockReturnValueOnce('old content 1');
+      platform.getFileContent.mockReturnValueOnce('old content 1');
+      platform.getFileContent.mockReturnValueOnce('old content 2');
+      platform.getFileContent.mockReturnValueOnce('old content 3');
       npmUpdater.setNewValue.mockReturnValueOnce('new content 1');
       npmUpdater.setNewValue.mockReturnValueOnce('new content 1+');
       dockerUpdater.setNewValue.mockReturnValueOnce('new content 2');

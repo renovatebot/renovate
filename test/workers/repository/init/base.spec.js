@@ -19,10 +19,10 @@ describe('workers/repository/init/base', () => {
     });
     it('sets baseBranch', async () => {
       config.baseBranch = 'ssome-base';
-      config.api.branchExists.mockReturnValue(true);
+      platform.branchExists.mockReturnValue(true);
       const res = await checkBaseBranch(config);
       expect(res.errors).toHaveLength(0);
-      expect(config.api.setBaseBranch.mock.calls).toHaveLength(1);
+      expect(platform.setBaseBranch.mock.calls).toHaveLength(1);
     });
   });
 });
