@@ -1,4 +1,5 @@
 const renovateWorker = require('../lib/workers/global');
+require('../lib/.eslintrc');
 
 renovateWorker.start = jest.fn();
 
