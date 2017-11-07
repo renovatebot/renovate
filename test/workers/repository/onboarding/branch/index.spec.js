@@ -46,7 +46,6 @@ describe('workers/repository/onboarding/branch', () => {
     });
     it('creates onboaring branch', async () => {
       platform.getFileList.mockReturnValue(['package.json']);
-      platform.commitFilesToBranch = jest.fn();
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
