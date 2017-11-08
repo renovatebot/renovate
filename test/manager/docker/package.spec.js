@@ -7,6 +7,21 @@ dockerApi.getDigest = jest.fn();
 dockerApi.getTags = jest.fn();
 
 describe('lib/workers/package/docker', () => {
+  describe('isStable', () => {
+    it('returns true if no pattern', () => {
+      expect(docker.isStable('8', null)).toBe(true);
+    });
+    it('returns true if no match', () => {
+      const unstablePattern = '^\\d*[13579]($|.)';
+      expect(docker.isStable('8', unstablePattern)).toBe(true);
+      expect(docker.isStable('8.9.1', unstablePattern)).toBe(true);
+    });
+    it('returns false if match', () => {
+      const unstablePattern = '^\\d*[13579]($|.)';
+      expect(docker.isStable('9.0', unstablePattern)).toBe(false);
+      expect(docker.isStable('15.04', unstablePattern)).toBe(false);
+    });
+  });
   describe('getPackageUpdates', () => {
     let config;
     beforeEach(() => {
@@ -69,6 +84,24 @@ describe('lib/workers/package/docker', () => {
       expect(res[0].newVersion).toEqual('1.2.0');
       expect(res[1].type).toEqual('major');
       expect(res[2].newVersionMajor).toEqual('3');
+    });
+    it('ignores unstable upgrades', async () => {
+      config = {
+        ...defaultConfig,
+        depName: 'node',
+        currentFrom: 'node:6',
+        currentDepTag: 'node:6',
+        currentTag: '6',
+        currentDigest: undefined,
+        pinDigests: false,
+        unstablePattern: '^\\d*[13579]($|.)',
+      };
+      dockerApi.getTags.mockReturnValueOnce(['4', '6', '6.1', '7', '8', '9']);
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].type).toEqual('major');
+      expect(res[0].newVersion).toEqual('8');
     });
     it('adds digest', async () => {
       delete config.currentDigest;

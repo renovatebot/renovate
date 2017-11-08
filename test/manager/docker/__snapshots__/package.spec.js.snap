@@ -23,6 +23,20 @@ Array [
 ]
 `;
 
+exports[`lib/workers/package/docker getPackageUpdates ignores unstable upgrades 1`] = `
+Array [
+  Object {
+    "isMajor": true,
+    "newDepTag": "node:8",
+    "newFrom": "node:8",
+    "newTag": "8",
+    "newVersion": "8",
+    "newVersionMajor": "8",
+    "type": "major",
+  },
+]
+`;
+
 exports[`lib/workers/package/docker getPackageUpdates returns major and minor upgrades 1`] = `
 Array [
   Object {
