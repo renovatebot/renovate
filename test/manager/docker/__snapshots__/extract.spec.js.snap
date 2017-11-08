@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/docker/extract extractDependencies() handles abnoral spacing 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node:8.7.0",
+    "currentDepTagDigest": "node:8.7.0",
+    "currentDigest": undefined,
+    "currentFrom": "registry.allmine.info:5005/node:8.7.0",
+    "currentTag": "8.7.0",
+    "depName": "node",
+    "depType": "Dockerfile",
+    "dockerRegistry": "registry.allmine.info:5005",
+    "fromLine": "FROM    registry.allmine.info:5005/node:8.7.0",
+    "fromPrefix": "FROM",
+    "fromSuffix": "",
+  },
+]
+`;
+
 exports[`lib/manager/docker/extract extractDependencies() handles comments 1`] = `
 Array [
   Object {
