@@ -73,5 +73,11 @@ describe('lib/manager/docker/extract', () => {
       expect(res[0].dockerRegistry).toEqual('registry2.something.info');
       expect(res[0].depName).toEqual('someaccount/node');
     });
+    it('handles abnoral spacing', () => {
+      const res = extractDependencies(
+        'FROM    registry.allmine.info:5005/node:8.7.0\n\n'
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
 });

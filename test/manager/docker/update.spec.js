@@ -28,6 +28,19 @@ describe('workers/branch/dockerfile', () => {
       const res = dockerfile.setNewValue(currentFileContent, upgrade);
       expect(res).toMatchSnapshot();
     });
+    it('handles strange whitespace', () => {
+      const currentFileContent =
+        '# comment FROM node:8\nFROM   node:8 as base\nRUN something\n';
+      const upgrade = {
+        depName: 'node',
+        currentVersion: 'node:8',
+        fromPrefix: 'FROM',
+        fromSuffix: 'as base',
+        newFrom: 'node:8@sha256:abcdefghijklmnop',
+      };
+      const res = dockerfile.setNewValue(currentFileContent, upgrade);
+      expect(res).toMatchSnapshot();
+    });
     it('returns null on error', () => {
       const currentFileContent = null;
       const upgrade = {
