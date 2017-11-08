@@ -173,11 +173,11 @@ describe('platform/vsts', () => {
       await initRepo('some/repo', 'token');
       gitApi.mockImplementationOnce(() => ({
         getItems: jest.fn(() => [
-          { path: 'symlinks/package.json' },
-          { isFolder: false, path: 'package.json' },
-          { isFolder: true, path: 'some-dir' },
-          { type: 'blob', path: 'src/app/package.json' },
-          { type: 'blob', path: 'src/otherapp/package.json' },
+          { path: '/symlinks/package.json' },
+          { isFolder: false, path: '/package.json' },
+          { isFolder: true, path: '/some-dir' },
+          { type: 'blob', path: '/src/app/package.json' },
+          { type: 'blob', path: '/src/otherapp/package.json' },
         ]),
       }));
       let files = await vsts.getFileList();
@@ -189,11 +189,11 @@ describe('platform/vsts', () => {
       await initRepo('some/repo', 'token');
       gitApi.mockImplementationOnce(() => ({
         getItems: jest.fn(() => [
-          { path: 'symlinks/package.json' },
-          { isFolder: false, path: 'package.json' },
-          { isFolder: true, path: 'some-dir' },
-          { type: 'blob', path: 'src/app/package.json' },
-          { type: 'blob', path: 'src/otherapp/package.json' },
+          { path: '/symlinks/package.json' },
+          { isFolder: false, path: '/package.json' },
+          { isFolder: true, path: '/some-dir' },
+          { type: 'blob', path: '/src/app/package.json' },
+          { type: 'blob', path: '/src/otherapp/package.json' },
         ]),
       }));
       const files = await vsts.getFileList();
