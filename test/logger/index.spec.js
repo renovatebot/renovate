@@ -22,4 +22,11 @@ describe('logger', () => {
   it('sets meta', () => {
     global.logger.setMeta({ some: 'meta', and: 'more' });
   });
+  it('adds stream', () => {
+    global.logger.addStream({
+      name: 'logfile',
+      path: 'fatal.log',
+      level: 'fatal',
+    });
+  });
 });
