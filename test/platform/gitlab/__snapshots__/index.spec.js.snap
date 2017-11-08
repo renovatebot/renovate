@@ -135,9 +135,9 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab getFileContent(filePath, branchName) gets the file 1`] = `"~�"`;
+exports[`platform/gitlab getFile(filePath, branchName) gets the file 1`] = `"~�"`;
 
-exports[`platform/gitlab getFileContent(filePath, branchName) throws error for non-404 1`] = `
+exports[`platform/gitlab getFile(filePath, branchName) throws error for non-404 1`] = `
 Object {
   "statusCode": 403,
 }

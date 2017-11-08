@@ -1265,7 +1265,7 @@ describe('platform/github', () => {
       expect(get.delete.mock.calls).toHaveLength(0);
     });
   });
-  describe('getFileContent(filePatch, branchName)', () => {
+  describe('getFile(filePatch, branchName)', () => {
     it('should return the encoded file content', async () => {
       await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
@@ -1273,7 +1273,7 @@ describe('platform/github', () => {
           content: Buffer.from('hello world').toString('base64'),
         },
       }));
-      const content = await github.getFileContent('package.json');
+      const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe('hello world');
     });
@@ -1284,7 +1284,7 @@ describe('platform/github', () => {
           statusCode: 404,
         })
       );
-      const content = await github.getFileContent('package.json');
+      const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
     });
@@ -1293,7 +1293,7 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => ({
         body: {},
       }));
-      const content = await github.getFileContent('package.json');
+      const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
     });
@@ -1304,7 +1304,7 @@ describe('platform/github', () => {
       });
       let err;
       try {
-        await github.getFileContent('package.json');
+        await github.getFile('package.json');
       } catch (e) {
         err = e;
       }

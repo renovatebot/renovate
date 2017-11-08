@@ -574,26 +574,26 @@ describe('platform/gitlab', () => {
       expect(get.put.mock.calls.length).toEqual(1);
     });
   });
-  describe('getFileContent(filePath, branchName)', () => {
+  describe('getFile(filePath, branchName)', () => {
     it('gets the file', async () => {
       get.mockReturnValueOnce({
         body: {
           content: 'foo',
         },
       });
-      const res = await gitlab.getFileContent('some-path', 'some-branch');
+      const res = await gitlab.getFile('some-path', 'some-branch');
       expect(res).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
-      const res = await gitlab.getFileContent('some-path', 'some-branch');
+      const res = await gitlab.getFile('some-path', 'some-branch');
       expect(res).toBe(null);
     });
     it('throws error for non-404', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 403 }));
       let e;
       try {
-        await gitlab.getFileContent('some-path', 'some-branch');
+        await gitlab.getFile('some-path', 'some-branch');
       } catch (err) {
         e = err;
       }

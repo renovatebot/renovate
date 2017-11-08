@@ -508,7 +508,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getFileContent(filePatch, branchName) should return null if GitHub returns a 404 1`] = `
+exports[`platform/github getFile(filePatch, branchName) should return null if GitHub returns a 404 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -535,7 +535,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getFileContent(filePatch, branchName) should return null if getFile returns nothing 1`] = `
+exports[`platform/github getFile(filePatch, branchName) should return null if getFile returns nothing 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -562,7 +562,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getFileContent(filePatch, branchName) should return the encoded file content 1`] = `
+exports[`platform/github getFile(filePatch, branchName) should return the encoded file content 1`] = `
 Array [
   Array [
     "repos/some/repo",

@@ -27,7 +27,7 @@ Array [
   "mergePr",
   "getSubDirectories",
   "commitFilesToBranch",
-  "getFileContent",
+  "getFile",
   "getFileJson",
   "getCommitMessages",
 ]
@@ -60,7 +60,7 @@ Array [
   "mergePr",
   "getSubDirectories",
   "commitFilesToBranch",
-  "getFileContent",
+  "getFile",
   "getFileJson",
   "getCommitMessages",
 ]
