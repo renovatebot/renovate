@@ -600,13 +600,6 @@ describe('platform/gitlab', () => {
       expect(e).toMatchSnapshot();
     });
   });
-  describe('getFileJson(filePath, branchName)', () => {
-    it('returns null for 404', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
-      const res = await gitlab.getFileJson('some-path', 'some-branch');
-      expect(res).toBe(null);
-    });
-  });
   describe('getSubDirectories(path)', () => {
     it('should return subdirectories', async () => {
       await initRepo('some/repo', 'token');

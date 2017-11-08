@@ -589,66 +589,6 @@ Array [
 ]
 `;
 
-exports[`platform/github getFileJson(filePatch, branchName) should return null if invalid JSON 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 2`] = `
-Object {
-  "hello": "world",
-}
-`;
-
 exports[`platform/github getFileList should return the files matching the fileName 1`] = `
 Array [
   "package.json",

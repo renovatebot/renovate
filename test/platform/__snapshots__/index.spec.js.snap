@@ -28,7 +28,6 @@ Array [
   "getSubDirectories",
   "commitFilesToBranch",
   "getFile",
-  "getFileJson",
   "getCommitMessages",
 ]
 `;
@@ -61,7 +60,6 @@ Array [
   "getSubDirectories",
   "commitFilesToBranch",
   "getFile",
-  "getFileJson",
   "getCommitMessages",
 ]
 `;
