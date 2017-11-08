@@ -135,11 +135,9 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab getFile(filePath, branchName) gets the file 1`] = `"foo"`;
+exports[`platform/gitlab getFile(filePath, branchName) gets the file 1`] = `"~�"`;
 
-exports[`platform/gitlab getFileContent(filePath, branchName) gets the file 1`] = `"~�"`;
-
-exports[`platform/gitlab getFileContent(filePath, branchName) throws error for non-404 1`] = `
+exports[`platform/gitlab getFile(filePath, branchName) throws error for non-404 1`] = `
 Object {
   "statusCode": 403,
 }
@@ -204,26 +202,6 @@ exports[`platform/gitlab getRepos should support a custom endpoint 2`] = `
 Array [
   "a/b",
   "c/d",
-]
-`;
-
-exports[`platform/gitlab getSubDirectories(path) should return subdirectories 1`] = `
-Array [
-  Array [
-    "projects/some%2Frepo",
-  ],
-  Array [
-    "user",
-  ],
-  Array [
-    "projects/some%2Frepo/repository/tree?path=some-path",
-  ],
-]
-`;
-
-exports[`platform/gitlab getSubDirectories(path) should return subdirectories 2`] = `
-Array [
-  "a",
 ]
 `;
 
