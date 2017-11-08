@@ -2,8 +2,6 @@ const packageFileWorker = require('../../../lib/workers/package-file');
 const depTypeWorker = require('../../../lib/workers/dep-type');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
-const logger = require('../../_fixtures/logger');
-
 jest.mock('../../../lib/workers/dep-type');
 jest.mock('../../../lib/workers/branch/schedule');
 
@@ -17,7 +15,6 @@ describe('packageFileWorker', () => {
         content: {},
         repoIsOnboarded: true,
         npmrc: '# nothing',
-        logger,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);
     });
@@ -63,12 +60,8 @@ describe('packageFileWorker', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        api: {
-          getFileContent: jest.fn(),
-        },
         packageFile: 'package.js',
         repoIsOnboarded: true,
-        logger,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);
     });
@@ -90,7 +83,6 @@ describe('packageFileWorker', () => {
         ...defaultConfig,
         packageFile: 'Dockerfile',
         repoIsOnboarded: true,
-        logger,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);
     });

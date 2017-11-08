@@ -1,4 +1,3 @@
-const logger = require('../../../../_fixtures/logger');
 const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
 const {
   checkOnboardingBranch,
@@ -11,14 +10,8 @@ describe('workers/repository/onboarding/branch', () => {
       jest.resetAllMocks();
       config = {
         ...defaultConfig,
-        logger,
-        api: {
-          commitFilesToBranch: jest.fn(),
-          findPr: jest.fn(),
-          getFileList: jest.fn(() => []),
-          setBaseBranch: jest.fn(),
-        },
       };
+      platform.getFileList.mockReturnValue([]);
     });
     it('throws if no package files', async () => {
       let e;
@@ -40,22 +33,21 @@ describe('workers/repository/onboarding/branch', () => {
       expect(e).toBeDefined();
     });
     it('detects repo is onboarded via file', async () => {
-      config.api.getFileList.mockReturnValueOnce(['renovate.json']);
+      platform.getFileList.mockReturnValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
     it('detects repo is onboarded via PR', async () => {
-      config.api.findPr.mockReturnValue(true);
+      platform.findPr.mockReturnValue(true);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
     it('creates onboaring branch', async () => {
-      config.api.getFileList.mockReturnValue(['package.json']);
-      config.api.commitFilesToBranch = jest.fn();
+      platform.getFileList.mockReturnValue(['package.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
-      expect(config.api.setBaseBranch.mock.calls).toHaveLength(1);
+      expect(platform.setBaseBranch.mock.calls).toHaveLength(1);
     });
   });
 });

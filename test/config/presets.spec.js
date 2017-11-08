@@ -1,6 +1,5 @@
 const npm = require('../../lib/manager/npm/registry');
 const presets = require('../../lib/config/presets');
-const logger = require('../_fixtures/logger');
 const presetDefaults = require('../_fixtures/npm/renovate-config-default');
 const presetPackages = require('../_fixtures/npm/renovate-config-packages');
 const presetGroup = require('../_fixtures/npm/renovate-config-group');
@@ -66,9 +65,7 @@ describe('config/presets', () => {
   describe('resolvePreset', () => {
     let config;
     beforeEach(() => {
-      config = {
-        logger,
-      };
+      config = {};
     });
     it('returns same if no presets', async () => {
       config.foo = 1;
@@ -266,40 +263,37 @@ describe('config/presets', () => {
   });
   describe('getPreset', () => {
     it('gets linters', async () => {
-      const res = await presets.getPreset('packages:linters', logger);
+      const res = await presets.getPreset('packages:linters');
       expect(res).toMatchSnapshot();
       expect(res.packageNames).toHaveLength(1);
       expect(res.extends).toHaveLength(2);
     });
     it('gets parameterised configs', async () => {
-      const res = await presets.getPreset(
-        ':group(packages:eslint, eslint)',
-        logger
-      );
+      const res = await presets.getPreset(':group(packages:eslint, eslint)');
       expect(res).toMatchSnapshot();
     });
     it('handles missing params', async () => {
-      const res = await presets.getPreset(':group()', logger);
+      const res = await presets.getPreset(':group()');
       expect(res).toMatchSnapshot();
     });
     it('ignores irrelevant params', async () => {
-      const res = await presets.getPreset(':pinVersions(foo, bar)', logger);
+      const res = await presets.getPreset(':pinVersions(foo, bar)');
       expect(res).toMatchSnapshot();
     });
     it('handles 404 packages', async () => {
-      const res = await presets.getPreset('notfound:foo', logger);
+      const res = await presets.getPreset('notfound:foo');
       expect(res).toMatchSnapshot();
     });
     it('handles no config', async () => {
-      const res = await presets.getPreset('noconfig:foo', logger);
+      const res = await presets.getPreset('noconfig:foo');
       expect(res).toMatchSnapshot();
     });
     it('handles throw errors', async () => {
-      const res = await presets.getPreset('throw:foo', logger);
+      const res = await presets.getPreset('throw:foo');
       expect(res).toMatchSnapshot();
     });
     it('handles preset not found', async () => {
-      const res = await presets.getPreset('wrongpreset:foo', logger);
+      const res = await presets.getPreset('wrongpreset:foo');
       expect(res).toMatchSnapshot();
     });
   });

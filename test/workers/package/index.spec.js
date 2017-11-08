@@ -1,7 +1,7 @@
 const pkgWorker = require('../../../lib/workers/package/index');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const configParser = require('../../../lib/config');
-const logger = require('../../_fixtures/logger');
+
 const docker = require('../../../lib/manager/docker/package');
 const npm = require('../../../lib/manager/npm/package');
 
@@ -13,7 +13,6 @@ describe('lib/workers/package/index', () => {
     let config;
     beforeEach(() => {
       config = configParser.filterConfig(defaultConfig, 'package');
-      config.logger = logger;
       config.depName = 'foo';
       config.currentVersion = '1.0.0';
     });

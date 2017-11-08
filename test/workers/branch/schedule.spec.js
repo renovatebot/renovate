@@ -1,6 +1,5 @@
 const mockDate = require('mockdate');
 const schedule = require('../../../lib/workers/branch/schedule');
-const logger = require('../../_fixtures/logger');
 
 describe('workers/branch/schedule', () => {
   describe('hasValidSchedule(schedule)', () => {
@@ -52,34 +51,27 @@ describe('workers/branch/schedule', () => {
     });
     it('returns true if schedule has a start and end time', () => {
       expect(
-        schedule.hasValidSchedule(
-          ['after 11:00pm and before 6:00am'],
-          logger
-        )[0]
+        schedule.hasValidSchedule(['after 11:00pm and before 6:00am'])[0]
       ).toBe(true);
     });
     it('returns true if schedule has days and a start and end time', () => {
       expect(
-        schedule.hasValidSchedule(
-          ['after 11:00pm and before 6:00am every weekday'],
-          logger
-        )[0]
+        schedule.hasValidSchedule([
+          'after 11:00pm and before 6:00am every weekday',
+        ])[0]
       ).toBe(true);
     });
     it('supports hours shorthand', () => {
-      const [res] = schedule.hasValidSchedule(
-        [
-          'after 11pm and before 6am every weekend',
-          'after 11pm',
-          'after 10pm and before 5:00am',
-          'after 10pm and before 5am every weekday',
-          'after 11pm and before 6am',
-          'after 9pm on friday and saturday',
-          'before 5am every weekday',
-          'every weekend',
-        ],
-        logger
-      );
+      const [res] = schedule.hasValidSchedule([
+        'after 11pm and before 6am every weekend',
+        'after 11pm',
+        'after 10pm and before 5:00am',
+        'after 10pm and before 5am every weekday',
+        'after 11pm and before 6am',
+        'after 9pm on friday and saturday',
+        'before 5am every weekday',
+        'every weekend',
+      ]);
       expect(res).toBe(true);
     });
   });
@@ -88,9 +80,7 @@ describe('workers/branch/schedule', () => {
     beforeEach(() => {
       mockDate.set(1498812608678); // 2017-06-30 10:50am
       jest.resetAllMocks();
-      config = {
-        logger,
-      };
+      config = {};
     });
     it('returns true if no schedule', () => {
       const res = schedule.isScheduledNow(config);

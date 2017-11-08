@@ -1,5 +1,4 @@
 const configValidation = require('../../lib/config/validation.js');
-const logger = require('../_fixtures/logger');
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
@@ -30,10 +29,7 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings, errors } = configValidation.validateConfig(
-        config,
-        logger
-      );
+      const { warnings, errors } = configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(6);
       expect(errors).toMatchSnapshot();

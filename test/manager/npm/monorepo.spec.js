@@ -61,7 +61,7 @@ describe('manager/npm/monorepo', () => {
           content: { name: '@a/c' },
         },
       ];
-      config.api.getFileJson.mockReturnValue({ packages: ['packages/*'] });
+      platform.getFileJson.mockReturnValue({ packages: ['packages/*'] });
       const res = await checkMonorepos(config);
       expect(res.monorepoPackages).toMatchSnapshot();
     });
@@ -72,7 +72,7 @@ describe('manager/npm/monorepo', () => {
           content: {},
         },
       ];
-      config.api.getFileJson.mockReturnValue({});
+      platform.getFileJson.mockReturnValue({});
       const res = await checkMonorepos(config);
       expect(res.monorepoPackages).toMatchSnapshot();
     });

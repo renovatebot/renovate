@@ -21,8 +21,6 @@ jest.mock('../../../lib/workers/branch/status-checks');
 jest.mock('../../../lib/workers/branch/automerge');
 jest.mock('../../../lib/workers/pr');
 
-const logger = require('../../_fixtures/logger');
-
 describe('workers/branch', () => {
   describe('processBranch', () => {
     let config;
@@ -31,17 +29,15 @@ describe('workers/branch', () => {
       prWorker.checkAutoMerge = jest.fn();
       config = {
         ...defaultConfig,
-        api: {
-          branchExists: jest.fn(),
-          ensureComment: jest.fn(),
-          ensureCommentRemoval: jest.fn(),
-        },
         errors: [],
         warnings: [],
-        logger,
         upgrades: [{ depName: 'some-dep-name' }],
       };
       schedule.isScheduledNow.mockReturnValue(true);
+    });
+    afterEach(() => {
+      platform.ensureComment.mockClear();
+      platform.ensureCommentRemoval.mockClear();
     });
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -51,35 +47,32 @@ describe('workers/branch', () => {
     it('skips branch if not scheduled and not updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = false;
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
       expect(checkExisting.prAlreadyExisted.mock.calls).toHaveLength(0);
     });
     it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       config.isMajor = true;
       checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
-      expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       config.isDigest = true;
       checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
-      expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
-      expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('returns if no branch exists', async () => {
       manager.getUpdatedPackageFiles.mockReturnValueOnce({
@@ -89,7 +82,7 @@ describe('workers/branch', () => {
         lockFileError: false,
         updatedLockFiles: [],
       });
-      config.api.branchExists.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(false);
       await branchWorker.processBranch(config);
       expect(commit.commitFilesToBranch.mock.calls).toHaveLength(1);
     });
@@ -101,7 +94,7 @@ describe('workers/branch', () => {
         lockFileError: false,
         updatedLockFiles: [{}],
       });
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce('automerged');
       await branchWorker.processBranch(config);
       expect(statusChecks.setUnpublishable.mock.calls).toHaveLength(1);
@@ -116,13 +109,13 @@ describe('workers/branch', () => {
         lockFileError: false,
         updatedLockFiles: [{}],
       });
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
       expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
-      expect(config.api.ensureCommentRemoval.mock.calls).toHaveLength(1);
+      expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(1);
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(1);
     });
     it('ensures PR and adds lock file error comment', async () => {
@@ -133,14 +126,14 @@ describe('workers/branch', () => {
         lockFileError: false,
         updatedLockFiles: [{}],
       });
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       config.lockFileErrors = [{}];
       await branchWorker.processBranch(config);
-      expect(config.api.ensureComment.mock.calls).toHaveLength(1);
-      expect(config.api.ensureCommentRemoval.mock.calls).toHaveLength(0);
+      expect(platform.ensureComment.mock.calls).toHaveLength(1);
+      expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
     });
@@ -153,14 +146,14 @@ describe('workers/branch', () => {
         updatedLockFiles: [{}],
       });
       config.recreateClosed = true;
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       config.lockFileErrors = [{}];
       await branchWorker.processBranch(config);
-      expect(config.api.ensureComment.mock.calls).toHaveLength(1);
-      expect(config.api.ensureCommentRemoval.mock.calls).toHaveLength(0);
+      expect(platform.ensureComment.mock.calls).toHaveLength(1);
+      expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
     });
@@ -188,7 +181,7 @@ describe('workers/branch', () => {
         lockFileError: false,
         updatedLockFiles: [{}],
       });
-      config.api.branchExists.mockReturnValueOnce(true);
+      platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce(false);
       prWorker.ensurePr.mockImplementationOnce(() => {
         throw new Error('some error');
