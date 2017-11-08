@@ -508,6 +508,60 @@ Array [
 ]
 `;
 
+exports[`platform/github getFile(filePatch, branchName) should return null if GitHub returns a 404 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/branches/master/protection/required_status_checks",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
+]
+`;
+
+exports[`platform/github getFile(filePatch, branchName) should return null if getFile returns nothing 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
+  Array [
+    "repos/some/repo/branches/master/protection/required_status_checks",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
+]
+`;
+
 exports[`platform/github getFile(filePatch, branchName) should return the encoded file content 1`] = `
 Array [
   Array [
@@ -533,147 +587,6 @@ Array [
     "repos/some/repo/contents/package.json?ref=master",
   ],
 ]
-`;
-
-exports[`platform/github getFileContent(filePatch, branchName) should return null if GitHub returns a 404 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFileContent(filePatch, branchName) should return null if getFile returns nothing 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFileContent(filePatch, branchName) should return the encoded file content 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFileJson(filePatch, branchName) should return null if invalid JSON 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFileJson(filePatch, branchName) should return the file contents parsed as JSON 2`] = `
-Object {
-  "hello": "world",
-}
 `;
 
 exports[`platform/github getFileList should return the files matching the fileName 1`] = `
@@ -797,39 +710,6 @@ exports[`platform/github getRepos should support a custom endpoint 2`] = `
 Array [
   "a/b",
   "c/d",
-]
-`;
-
-exports[`platform/github getSubDirectories(path) should return subdirectories 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/contents/some-path",
-  ],
-]
-`;
-
-exports[`platform/github getSubDirectories(path) should return subdirectories 2`] = `
-Array [
-  "a",
 ]
 `;
 

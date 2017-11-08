@@ -1270,23 +1270,10 @@ describe('platform/github', () => {
       await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
         body: {
-          content: 'hello',
-        },
-      }));
-      const content = await github.getFile('package.json');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(content).toBe('hello');
-    });
-  });
-  describe('getFileContent(filePatch, branchName)', () => {
-    it('should return the encoded file content', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: {
           content: Buffer.from('hello world').toString('base64'),
         },
       }));
-      const content = await github.getFileContent('package.json');
+      const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe('hello world');
     });
@@ -1297,7 +1284,7 @@ describe('platform/github', () => {
           statusCode: 404,
         })
       );
-      const content = await github.getFileContent('package.json');
+      const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
     });
@@ -1306,7 +1293,7 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => ({
         body: {},
       }));
-      const content = await github.getFileContent('package.json');
+      const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
     });
@@ -1317,49 +1304,11 @@ describe('platform/github', () => {
       });
       let err;
       try {
-        await github.getFileContent('package.json');
+        await github.getFile('package.json');
       } catch (e) {
         err = e;
       }
       expect(err.message).toBe('Something went wrong');
-    });
-  });
-  describe('getFileJson(filePatch, branchName)', () => {
-    it('should return the file contents parsed as JSON', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: {
-          content: Buffer.from('{"hello": "world"}').toString('base64'),
-        },
-      }));
-      const content = await github.getFileJson('package.json');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(content).toMatchSnapshot();
-    });
-  });
-  describe('getFileJson(filePatch, branchName)', () => {
-    it('should return null if invalid JSON', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: {
-          content: Buffer.from('{hello: "world"}').toString('base64'),
-        },
-      }));
-      const content = await github.getFileJson('package.json');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(content).toBeNull();
-    });
-  });
-  describe('getSubDirectories(path)', () => {
-    it('should return subdirectories', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: [{ type: 'dir', name: 'a' }, { type: 'file', name: 'b' }],
-      }));
-      const dirList = await github.getSubDirectories('some-path');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(dirList).toHaveLength(1);
-      expect(dirList).toMatchSnapshot();
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {

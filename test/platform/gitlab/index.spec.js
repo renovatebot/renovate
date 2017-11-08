@@ -581,54 +581,23 @@ describe('platform/gitlab', () => {
           content: 'foo',
         },
       });
-      const res = await gitlab.getFile('some/path');
-      expect(res).toMatchSnapshot();
-      expect(get.mock.calls[0][0].indexOf('some%2Fpath')).not.toBe(-1);
-    });
-  });
-  describe('getFileContent(filePath, branchName)', () => {
-    it('gets the file', async () => {
-      get.mockReturnValueOnce({
-        body: {
-          content: 'foo',
-        },
-      });
-      const res = await gitlab.getFileContent('some-path', 'some-branch');
+      const res = await gitlab.getFile('some-path');
       expect(res).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
-      const res = await gitlab.getFileContent('some-path', 'some-branch');
+      const res = await gitlab.getFile('some-path', 'some-branch');
       expect(res).toBe(null);
     });
     it('throws error for non-404', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 403 }));
       let e;
       try {
-        await gitlab.getFileContent('some-path', 'some-branch');
+        await gitlab.getFile('some-path', 'some-branch');
       } catch (err) {
         e = err;
       }
       expect(e).toMatchSnapshot();
-    });
-  });
-  describe('getFileJson(filePath, branchName)', () => {
-    it('returns null for 404', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
-      const res = await gitlab.getFileJson('some-path', 'some-branch');
-      expect(res).toBe(null);
-    });
-  });
-  describe('getSubDirectories(path)', () => {
-    it('should return subdirectories', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: [{ type: 'tree', name: 'a' }, { type: 'file', name: 'b' }],
-      }));
-      const dirList = await gitlab.getSubDirectories('some-path');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(dirList).toHaveLength(1);
-      expect(dirList).toMatchSnapshot();
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {

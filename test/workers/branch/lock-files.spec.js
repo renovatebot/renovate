@@ -273,7 +273,7 @@ describe('workers/branch/lock-files', () => {
         ...defaultConfig,
         tmpDir: { path: 'some-tmp-dir' },
       };
-      platform.getFileContent.mockReturnValue('some lock file contents');
+      platform.getFile.mockReturnValue('some lock file contents');
       npm.generateLockFile = jest.fn();
       npm.generateLockFile.mockReturnValue({
         lockFile: 'some lock file contents',
@@ -316,7 +316,7 @@ describe('workers/branch/lock-files', () => {
       expect(res.updatedLockFiles).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(platform.getFileContent.mock.calls).toHaveLength(4);
+      expect(platform.getFile.mock.calls).toHaveLength(4);
     });
     it('sets error if receiving null', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
@@ -331,7 +331,7 @@ describe('workers/branch/lock-files', () => {
       expect(res.updatedLockFiles).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(platform.getFileContent.mock.calls).toHaveLength(2);
+      expect(platform.getFile.mock.calls).toHaveLength(2);
     });
     it('adds multiple lock files', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
@@ -346,7 +346,7 @@ describe('workers/branch/lock-files', () => {
       expect(res.updatedLockFiles).toHaveLength(2);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(platform.getFileContent.mock.calls).toHaveLength(4);
+      expect(platform.getFile.mock.calls).toHaveLength(4);
     });
   });
 });
