@@ -581,7 +581,7 @@ describe('platform/gitlab', () => {
           content: 'foo',
         },
       });
-      const res = await gitlab.getFile('some-path', 'some-branch');
+      const res = await gitlab.getFile('some-path');
       expect(res).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
