@@ -1,5 +1,3 @@
-const logger = require('../../_fixtures/logger');
-
 describe('platform/vsts', () => {
   let vsts;
   let gitApi;
@@ -70,8 +68,7 @@ describe('platform/vsts', () => {
       const config = await initRepo(
         'some/repo',
         'token',
-        'https://my.custom.endpoint/',
-        logger
+        'https://my.custom.endpoint/'
       );
       expect(gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
@@ -97,8 +94,7 @@ describe('platform/vsts', () => {
       const config = await initRepo(
         'some/repo',
         'token',
-        'https://my.custom.endpoint/',
-        logger
+        'https://my.custom.endpoint/'
       );
       expect(config.repoId).toBe('1');
       gitApi.mockImplementationOnce(() => ({
