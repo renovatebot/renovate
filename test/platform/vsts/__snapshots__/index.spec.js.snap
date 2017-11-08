@@ -1,5 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/vsts createPr() should create and return a PR object 1`] = `
+Object {
+  "displayNumber": "Pull Request #456",
+  "pullRequestId": 456,
+}
+`;
+
+exports[`platform/vsts ensureComment add comment 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
 exports[`platform/vsts getCommitMessages() returns commits messages 1`] = `
 Array [
   "com1",
@@ -9,6 +25,21 @@ Array [
 `;
 
 exports[`platform/vsts getFile(filePatch, branchName) should return the encoded file content 1`] = `"Hello Renovate!"`;
+
+exports[`platform/vsts getFileList should return the files matching the fileName 1`] = `
+Array [
+  "package.json",
+  "src/app/package.json",
+  "src/otherapp/package.json",
+  "symlinks/package.json",
+]
+`;
+
+exports[`platform/vsts getPr(prNo) should return a pr in the right format 1`] = `
+Object {
+  "pullRequestId": 1234,
+}
+`;
 
 exports[`platform/vsts getRepos should return an array of repos 1`] = `
 Array [
@@ -48,6 +79,14 @@ Object {
 `;
 
 exports[`platform/vsts setBaseBranch(branchName) sets the base branch 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/vsts updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Array [],
   Array [],

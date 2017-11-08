@@ -1,5 +1,7 @@
 describe('platform/vsts/helpers', () => {
   let vstsHelper;
+  let gitApi;
+
   beforeEach(() => {
     // clean up env
     delete process.env.VSTS_TOKEN;
@@ -9,6 +11,7 @@ describe('platform/vsts/helpers', () => {
     jest.resetModules();
     jest.mock('../../../lib/platform/vsts/vsts-got-wrapper');
     vstsHelper = require('../../../lib/platform/vsts/vsts-helper');
+    gitApi = require('../../../lib/platform/vsts/vsts-got-wrapper');
   });
 
   describe('getRepos', () => {
@@ -60,6 +63,97 @@ describe('platform/vsts/helpers', () => {
     it('should return the input', () => {
       const res = vstsHelper.getBranchNameWithoutRefsheadsPrefix('testBB');
       expect(res).toBe('testBB');
+    });
+  });
+
+  describe('getRef', () => {
+    it('should be get the ref', () => {
+      gitApi.mockImplementationOnce(() => ({
+        getRefs: jest.fn(() => [{ objectId: 132 }]),
+      }));
+      const res = vstsHelper.getRef('123', 'branch');
+      expect(res).toMatchSnapshot();
+    });
+    it('should be get 0 ref', () => {
+      gitApi.mockImplementationOnce(() => ({
+        getRefs: jest.fn(() => []),
+      }));
+      const res = vstsHelper.getRef('123');
+      expect(res.length).toBe(0);
+    });
+    it('should be get the ref', () => {
+      gitApi.mockImplementationOnce(() => ({
+        getRefs: jest.fn(() => [{ objectId: 132 }]),
+      }));
+      const res = vstsHelper.getRef('123', 'refs/head/branch1');
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('getVSTSBranchObj', () => {
+    it('should be the branch object formated', () => {
+      const res = vstsHelper.getVSTSBranchObj('branchName', '132');
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('getVSTSCommitObj', () => {
+    it('should be get the commit obj formated', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getItemText: jest.fn(() => ({
+          readable: true,
+          read: jest.fn(() =>
+            Buffer.from('{"hello": "test"}').toString('base64')
+          ),
+        })),
+      }));
+
+      const res = await vstsHelper.getVSTSCommitObj(
+        'Commit msg',
+        './myFilePath/test',
+        'Hello world!',
+        '123',
+        'repoName',
+        'branchName'
+      );
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('max4000Chars', () => {
+    it('should be the same', () => {
+      const res = vstsHelper.max4000Chars('Hello');
+      expect(res).toMatchSnapshot();
+    });
+    it('should be truncated', () => {
+      let str = '';
+      for (let i = 0; i < 5000; i += 1) {
+        str += 'a';
+      }
+      const res = vstsHelper.max4000Chars(str);
+      expect(res.length).toBe(3999);
+    });
+  });
+
+  describe('getRenovatePRFormat', () => {
+    it('should be formated (closed)', () => {
+      const res = vstsHelper.getRenovatePRFormat({ status: 2 });
+      expect(res).toMatchSnapshot();
+    });
+
+    it('should be formated (closed v2)', () => {
+      const res = vstsHelper.getRenovatePRFormat({ status: 3 });
+      expect(res).toMatchSnapshot();
+    });
+
+    it('should be formated (not closed)', () => {
+      const res = vstsHelper.getRenovatePRFormat({ status: 1 });
+      expect(res).toMatchSnapshot();
+    });
+
+    it('should be formated (isUnmergeable)', () => {
+      const res = vstsHelper.getRenovatePRFormat({ mergeStatus: 2 });
+      expect(res).toMatchSnapshot();
     });
   });
 });
