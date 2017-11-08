@@ -109,27 +109,12 @@ describe('platform/vsts', () => {
     });
   });
 
-  describe('getFileContent(filePatch, branchName)', () => {
+  describe('getFile(filePatch, branchName)', () => {
     it('should return the encoded file content', async () => {
       await initRepo('some/repo', 'token');
       vstsHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);
-      const content = await vsts.getFileContent('package.json');
+      const content = await vsts.getFile('package.json');
       expect(content).toMatchSnapshot();
-    });
-  });
-
-  describe('getFileJson(filePatch, branchName)', () => {
-    it('should return the file contents parsed as JSON', async () => {
-      await initRepo('some/repo', 'token');
-      vstsHelper.getFile.mockImplementationOnce(() => `{"content": "hello"}`);
-      const content = await vsts.getFileJson('package.json');
-      expect(content).toMatchSnapshot();
-    });
-    it('should return null if invalid JSON', async () => {
-      await initRepo('some/repo', 'token');
-      vstsHelper.getFile.mockImplementationOnce(() => `{"content"= "hello"}`); // notice the = ^^
-      const content = await vsts.getFileJson('package.json');
-      expect(content).toBeNull();
     });
   });
 
@@ -202,11 +187,6 @@ describe('platform/vsts', () => {
 
     it('mergePr', async () => {
       const res = await vsts.mergePr();
-      expect(res).toBeUndefined();
-    });
-
-    it('getSubDirectories', async () => {
-      const res = await vsts.getSubDirectories();
       expect(res).toBeUndefined();
     });
   });
