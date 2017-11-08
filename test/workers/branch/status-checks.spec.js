@@ -2,7 +2,6 @@ const {
   setUnpublishable,
 } = require('../../../lib/workers/branch/status-checks');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-const logger = require('../../_fixtures/logger');
 
 describe('workers/branch/status-checks', () => {
   describe('setUnpublishable', () => {
@@ -10,7 +9,6 @@ describe('workers/branch/status-checks', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         upgrades: [],
       };
     });

@@ -1,7 +1,6 @@
 const dockerApi = require('../../../lib/manager/docker/registry');
 const docker = require('../../../lib/manager/docker/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-const logger = require('../../_fixtures/logger');
 
 // jest.mock('../../../lib/manager/docker/registry');
 dockerApi.getDigest = jest.fn();
@@ -13,7 +12,6 @@ describe('lib/workers/package/docker', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
         depName: 'some-dep',
         currentFrom: 'some-dep:1.0.0@sha256:abcdefghijklmnop',
         currentDepTag: 'some-dep:1.0.0',

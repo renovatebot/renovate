@@ -4,8 +4,6 @@ const packageJson = require('../../../lib/workers/dep-type/package-json');
 const pkgWorker = require('../../../lib/workers/package/index');
 const depTypeWorker = require('../../../lib/workers/dep-type/index');
 
-const logger = require('../../_fixtures/logger');
-
 jest.mock('../../../lib/workers/dep-type/package-json');
 jest.mock('../../../lib/workers/package/index');
 
@@ -19,7 +17,6 @@ describe('lib/workers/dep-type/index', () => {
         packageFile: 'package.json',
         ignoreDeps: ['a', 'b'],
         monorepoPackages: ['e'],
-        logger,
       };
     });
     it('returns empty if config is disabled', async () => {
@@ -87,7 +84,7 @@ describe('lib/workers/dep-type/index', () => {
   describe('getDepConfig(depTypeConfig, dep)', () => {
     const depTypeConfig = {
       foo: 'bar',
-      logger,
+
       packageRules: [
         {
           packageNames: ['a', 'b'],

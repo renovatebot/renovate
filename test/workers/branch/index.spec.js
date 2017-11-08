@@ -21,8 +21,6 @@ jest.mock('../../../lib/workers/branch/status-checks');
 jest.mock('../../../lib/workers/branch/automerge');
 jest.mock('../../../lib/workers/pr');
 
-const logger = require('../../_fixtures/logger');
-
 describe('workers/branch', () => {
   describe('processBranch', () => {
     let config;
@@ -33,7 +31,6 @@ describe('workers/branch', () => {
         ...defaultConfig,
         errors: [],
         warnings: [],
-        logger,
         upgrades: [{ depName: 'some-dep-name' }],
       };
       schedule.isScheduledNow.mockReturnValue(true);
@@ -61,7 +58,6 @@ describe('workers/branch', () => {
       checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
-      expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -70,7 +66,6 @@ describe('workers/branch', () => {
       checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
-      expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -78,7 +73,6 @@ describe('workers/branch', () => {
       checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
-      expect(config.logger.error.mock.calls).toHaveLength(0);
     });
     it('returns if no branch exists', async () => {
       manager.getUpdatedPackageFiles.mockReturnValueOnce({

@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const npmUpdater = require('../../../lib/manager/npm/update');
-const logger = require('../../_fixtures/logger');
 
 function readFixture(fixture) {
   return fs.readFileSync(
@@ -13,15 +12,14 @@ function readFixture(fixture) {
 const input01Content = readFixture('inputs/01.json');
 
 describe('workers/branch/package-json', () => {
-  describe('.setNewValue(currentFileContent, depType, depName, newVersion, logger)', () => {
+  describe('.setNewValue(currentFileContent, depType, depName, newVersion)', () => {
     it('replaces a dependency value', () => {
       const outputContent = readFixture('outputs/011.json');
       const testContent = npmUpdater.setNewValue(
         input01Content,
         'dependencies',
         'cheerio',
-        '0.22.1',
-        logger
+        '0.22.1'
       );
       testContent.should.equal(outputContent);
     });
@@ -31,8 +29,7 @@ describe('workers/branch/package-json', () => {
         input01Content,
         'devDependencies',
         'angular-touch',
-        '1.6.1',
-        logger
+        '1.6.1'
       );
       testContent.should.equal(outputContent);
     });
@@ -42,8 +39,7 @@ describe('workers/branch/package-json', () => {
         input01Content,
         'devDependencies',
         'angular-sanitize',
-        '1.6.1',
-        logger
+        '1.6.1'
       );
       testContent.should.equal(outputContent);
     });
@@ -52,8 +48,7 @@ describe('workers/branch/package-json', () => {
         input01Content,
         'devDependencies',
         'angular-touch',
-        '1.5.8',
-        logger
+        '1.5.8'
       );
       testContent.should.equal(input01Content);
     });
@@ -62,8 +57,7 @@ describe('workers/branch/package-json', () => {
         input01Content,
         'blah',
         'angular-touch-not',
-        '1.5.8',
-        logger
+        '1.5.8'
       );
       expect(testContent).toBe(null);
     });

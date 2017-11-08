@@ -1,5 +1,3 @@
-const logger = require('../../_fixtures/logger');
-
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
@@ -101,15 +99,6 @@ describe('platform/gitlab', () => {
         expect(process.env.GITLAB_TOKEN).toBe(token);
         expect(process.env.GITLAB_ENDPOINT).toBe(endpoint);
       });
-    });
-    it('uses provided logger', async () => {
-      const config = await initRepo(
-        'some/repo',
-        'some_token',
-        'an_endpoint',
-        logger
-      );
-      expect(config).toMatchSnapshot();
     });
     it('should throw an error if no token is provided', async () => {
       let err;

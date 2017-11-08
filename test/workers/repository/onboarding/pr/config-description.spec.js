@@ -1,4 +1,3 @@
-const logger = require('../../../../_fixtures/logger');
 const defaultConfig = require('../../../../../lib/config/defaults').getConfig();
 
 const {
@@ -12,7 +11,6 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       jest.resetAllMocks();
       config = {
         ...defaultConfig,
-        logger,
       };
     });
     it('returns empty', () => {

@@ -2,7 +2,6 @@ const {
   checkStale,
   getParentBranch,
 } = require('../../../lib/workers/branch/parent');
-const logger = require('../../_fixtures/logger');
 
 describe('workers/branch/parent', () => {
   describe('checkStale', () => {
@@ -24,7 +23,6 @@ describe('workers/branch/parent', () => {
     beforeEach(() => {
       config = {
         branchName: 'renovate/some-branch',
-        logger,
       };
     });
     afterEach(() => {

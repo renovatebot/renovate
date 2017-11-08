@@ -9,13 +9,6 @@ describe('logger/config-serializer', () => {
     };
     expect(configSerializer(config)).toMatchSnapshot();
   });
-  it('replaces functions', () => {
-    const config = {
-      nottoken: 'b',
-      logger: {},
-    };
-    expect(configSerializer(config)).toMatchSnapshot();
-  });
   it('squashes templates', () => {
     const config = {
       nottoken: 'b',

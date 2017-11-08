@@ -1,5 +1,3 @@
-const logger = require('../../_fixtures/logger');
-
 describe('platform/github', () => {
   let github;
   let get;
@@ -103,9 +101,6 @@ describe('platform/github', () => {
         expect(process.env.GITHUB_TOKEN).toBe(token);
         expect(process.env.GITHUB_ENDPOINT).toBe(endpoint);
       });
-    });
-    it('uses provided logger', async () => {
-      await initRepo('some/repo', 'some_token', 'an_endpoint', logger);
     });
     it('should throw an error if no token is provided', async () => {
       let err;

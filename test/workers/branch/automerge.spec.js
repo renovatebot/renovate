@@ -1,6 +1,5 @@
 const { tryBranchAutomerge } = require('../../../lib/workers/branch/automerge');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
-const logger = require('../../_fixtures/logger');
 
 describe('workers/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
@@ -8,7 +7,6 @@ describe('workers/branch/automerge', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        logger,
       };
     });
     it('returns false if not configured for automerge', async () => {

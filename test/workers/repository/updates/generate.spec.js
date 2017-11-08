@@ -1,7 +1,5 @@
-let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../../_fixtures/config');
 });
 
 const {
@@ -26,7 +24,7 @@ describe('workers/repository/updates/generate', () => {
           },
         },
       ];
-      const res = generateBranchConfig(branch, config.logger);
+      const res = generateBranchConfig(branch);
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
       expect(res).toMatchSnapshot();
@@ -45,7 +43,7 @@ describe('workers/repository/updates/generate', () => {
           },
         },
       ];
-      const res = generateBranchConfig(branch, config.logger);
+      const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
       expect(res).toMatchSnapshot();
@@ -75,7 +73,7 @@ describe('workers/repository/updates/generate', () => {
           },
         },
       ];
-      const res = generateBranchConfig(branch, config.logger);
+      const res = generateBranchConfig(branch);
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
     });
@@ -104,7 +102,7 @@ describe('workers/repository/updates/generate', () => {
           },
         },
       ];
-      const res = generateBranchConfig(branch, config.logger);
+      const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
       expect(res).toMatchSnapshot();
