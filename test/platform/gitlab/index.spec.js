@@ -574,18 +574,6 @@ describe('platform/gitlab', () => {
       expect(get.put.mock.calls.length).toEqual(1);
     });
   });
-  describe('getFile(filePath, branchName)', () => {
-    it('gets the file', async () => {
-      get.mockReturnValueOnce({
-        body: {
-          content: 'foo',
-        },
-      });
-      const res = await gitlab.getFile('some/path');
-      expect(res).toMatchSnapshot();
-      expect(get.mock.calls[0][0].indexOf('some%2Fpath')).not.toBe(-1);
-    });
-  });
   describe('getFileContent(filePath, branchName)', () => {
     it('gets the file', async () => {
       get.mockReturnValueOnce({

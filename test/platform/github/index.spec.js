@@ -1265,19 +1265,6 @@ describe('platform/github', () => {
       expect(get.delete.mock.calls).toHaveLength(0);
     });
   });
-  describe('getFile(filePatch, branchName)', () => {
-    it('should return the encoded file content', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: {
-          content: 'hello',
-        },
-      }));
-      const content = await github.getFile('package.json');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(content).toBe('hello');
-    });
-  });
   describe('getFileContent(filePatch, branchName)', () => {
     it('should return the encoded file content', async () => {
       await initRepo('some/repo', 'token');
