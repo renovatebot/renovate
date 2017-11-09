@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/vsts/helpers getCommitDetails should get commit details 1`] = `
+Object {
+  "parents": Array [
+    "123456",
+  ],
+}
+`;
+
 exports[`platform/vsts/helpers getRef should be get the ref 1`] = `
 Array [
   Object {

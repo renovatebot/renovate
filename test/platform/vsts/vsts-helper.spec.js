@@ -156,4 +156,16 @@ describe('platform/vsts/helpers', () => {
       expect(res).toMatchSnapshot();
     });
   });
+
+  describe('getCommitDetails', () => {
+    it('should get commit details', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getCommit: jest.fn(() => ({
+          parents: ['123456'],
+        })),
+      }));
+      const res = await vstsHelper.getCommitDetails('123', '123456');
+      expect(res).toMatchSnapshot();
+    });
+  });
 });

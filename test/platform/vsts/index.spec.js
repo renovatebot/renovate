@@ -338,8 +338,7 @@ describe('platform/vsts', () => {
     it('add comment', async () => {
       await initRepo('some/repo', 'token');
       gitApi.mockImplementation(() => ({
-        getThreads: jest.fn(() => [{ id: 123 }]),
-        createComment: jest.fn(),
+        createThread: jest.fn(() => [{ id: 123 }]),
       }));
       await vsts.ensureComment(42, 'some-subject', 'some\ncontent');
       expect(gitApi.mock.calls).toMatchSnapshot();
@@ -371,24 +370,68 @@ describe('platform/vsts', () => {
     });
   });
 
+  describe('getAllRenovateBranches()', () => {
+    it('should return all renovate branches', async () => {
+      await initRepo('some/repo', 'token');
+      gitApi.mockImplementationOnce(() => ({
+        getBranches: jest.fn(() => [
+          { name: 'master' },
+          { name: 'renovate/a' },
+          { name: 'renovate/b' },
+        ]),
+      }));
+      const res = await vsts.getAllRenovateBranches('renovate/');
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('ensureCommentRemoval', () => {
+    it('deletes comment if found', async () => {
+      await initRepo('some/repo', 'token');
+      gitApi.mockImplementation(() => ({
+        getThreads: jest.fn(() => [
+          { comments: [{ content: '### some-subject\n\nblabla' }], id: 123 },
+        ]),
+        updateThread: jest.fn(),
+      }));
+      await vsts.ensureCommentRemoval(42, 'some-subject');
+      expect(gitApi.mock.calls.length).toBe(4);
+    });
+  });
+
+  describe('getBranchLastCommitTime', () => {
+    it('should return a Date', async () => {
+      await initRepo('some/repo', 'token');
+      gitApi.mockImplementationOnce(() => ({
+        getBranch: jest.fn(() => ({
+          commit: { committer: { date: '1986-11-07T00:00:00Z' } },
+        })),
+      }));
+      const res = await vsts.getBranchLastCommitTime('some-branch');
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('deleteBranch', () => {
+    it('should delete the branch', async () => {
+      vstsHelper.getRef.mockImplementation(() => [{ objectId: '123' }]);
+      gitApi.mockImplementationOnce(() => ({
+        updateRefs: jest.fn(() => [
+          {
+            name: 'refs/head/testBranch',
+            oldObjectId: '123456',
+            newObjectId: '0000000000000000000000000000000000000000',
+          },
+        ]),
+      }));
+      const res = await vsts.deleteBranch();
+      expect(res).toMatchSnapshot();
+    });
+  });
+
   describe('Not supported by VSTS (yet!)', () => {
     it('setBranchStatus', () => {
       const res = vsts.setBranchStatus();
-      expect(res).toBeUndefined();
-    });
-
-    it('ensureCommentRemoval', async () => {
-      const res = await vsts.ensureCommentRemoval();
-      expect(res).toBeUndefined();
-    });
-
-    it('getAllRenovateBranches', async () => {
-      const res = await vsts.getAllRenovateBranches();
-      expect(res).toBeUndefined();
-    });
-
-    it('deleteBranch', async () => {
-      const res = await vsts.deleteBranch();
       expect(res).toBeUndefined();
     });
 
@@ -397,8 +440,8 @@ describe('platform/vsts', () => {
       expect(res).toBeUndefined();
     });
 
-    it('getBranchLastCommitTime', async () => {
-      const res = await vsts.getBranchLastCommitTime();
+    it('mergePr', async () => {
+      const res = await vsts.mergePr();
       expect(res).toBeUndefined();
     });
 
@@ -409,11 +452,6 @@ describe('platform/vsts', () => {
 
     it('addReviewers', async () => {
       const res = await vsts.addReviewers();
-      expect(res).toBeUndefined();
-    });
-
-    it('mergePr', async () => {
-      const res = await vsts.mergePr();
       expect(res).toBeUndefined();
     });
   });
