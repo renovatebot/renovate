@@ -47,6 +47,13 @@ Object {
 exports[`workers/package/versions .determineUpgrades(npmDep, config) ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
+    "isPin": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "type": "pin",
+    "unpublishable": false,
+  },
+  Object {
     "changeLogFromVersion": "0.9.7",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -54,13 +61,6 @@ Array [
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "major",
-    "unpublishable": false,
-  },
-  Object {
-    "isPin": true,
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "type": "pin",
     "unpublishable": false,
   },
 ]
@@ -114,6 +114,13 @@ Array [
     "unpublishable": false,
   },
   Object {
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "type": "pin",
+    "unpublishable": false,
+  },
+  Object {
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -121,13 +128,6 @@ Array [
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "major",
-    "unpublishable": false,
-  },
-  Object {
-    "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
-    "type": "pin",
     "unpublishable": false,
   },
 ]
@@ -216,22 +216,22 @@ Array [
   },
   Object {
     "changeLogFromVersion": "0.8.0",
-    "changeLogToVersion": "1.4.1",
-    "isMajor": true,
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
-    "type": "major",
-    "unpublishable": false,
-  },
-  Object {
-    "changeLogFromVersion": "0.8.0",
     "changeLogToVersion": "0.8.12",
     "isPatch": true,
     "newVersion": "0.8.12",
     "newVersionMajor": 0,
     "newVersionMinor": 8,
     "type": "patch",
+    "unpublishable": false,
+  },
+  Object {
+    "changeLogFromVersion": "0.8.0",
+    "changeLogToVersion": "1.4.1",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "major",
     "unpublishable": false,
   },
 ]
@@ -241,22 +241,22 @@ exports[`workers/package/versions .determineUpgrades(npmDep, config) returns pat
 Array [
   Object {
     "changeLogFromVersion": "0.9.0",
-    "changeLogToVersion": "1.4.1",
-    "isMajor": true,
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
-    "type": "major",
-    "unpublishable": false,
-  },
-  Object {
-    "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "0.9.7",
     "isPatch": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
     "type": "patch",
+    "unpublishable": false,
+  },
+  Object {
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "1.4.1",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "major",
     "unpublishable": false,
   },
 ]
@@ -266,22 +266,22 @@ exports[`workers/package/versions .determineUpgrades(npmDep, config) returns pat
 Array [
   Object {
     "changeLogFromVersion": "0.9.0",
-    "changeLogToVersion": "1.4.1",
-    "isMajor": true,
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
-    "type": "major",
-    "unpublishable": false,
-  },
-  Object {
-    "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "0.9.7",
     "isPatch": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
     "type": "patch",
+    "unpublishable": false,
+  },
+  Object {
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "1.4.1",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "major",
     "unpublishable": false,
   },
 ]
@@ -370,6 +370,13 @@ Array [
     "unpublishable": false,
   },
   Object {
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "type": "pin",
+    "unpublishable": false,
+  },
+  Object {
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -377,13 +384,6 @@ Array [
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "major",
-    "unpublishable": false,
-  },
-  Object {
-    "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
-    "type": "pin",
     "unpublishable": false,
   },
 ]
@@ -402,6 +402,13 @@ Array [
     "unpublishable": false,
   },
   Object {
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "type": "pin",
+    "unpublishable": false,
+  },
+  Object {
     "changeLogFromVersion": "0.4.4",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
@@ -409,13 +416,6 @@ Array [
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "major",
-    "unpublishable": false,
-  },
-  Object {
-    "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
-    "type": "pin",
     "unpublishable": false,
   },
 ]

@@ -71,3 +71,43 @@ Array [
   },
 ]
 `;
+
+exports[`lib/workers/package/docker getPackageUpdates returns only one major 1`] = `
+Array [
+  Object {
+    "isMinor": true,
+    "newDepTag": "some-dep:1.2.0",
+    "newDigest": "sha256:one",
+    "newFrom": "some-dep:1.2.0@sha256:one",
+    "newTag": "1.2.0",
+    "newVersion": "1.2.0",
+    "newVersionMajor": "1",
+    "type": "minor",
+  },
+  Object {
+    "isMajor": true,
+    "newDepTag": "some-dep:3.0.0",
+    "newDigest": "sha256:two",
+    "newFrom": "some-dep:3.0.0@sha256:two",
+    "newTag": "3.0.0",
+    "newVersion": "3.0.0",
+    "newVersionMajor": "3",
+    "type": "major",
+  },
+]
+`;
+
+exports[`lib/workers/package/docker getPackageUpdates returns only one upgrade 1`] = `
+Array [
+  Object {
+    "isMajor": true,
+    "newDepTag": "some-dep:3.0.0",
+    "newDigest": "sha256:one",
+    "newFrom": "some-dep:3.0.0@sha256:one",
+    "newTag": "3.0.0",
+    "newVersion": "3.0.0",
+    "newVersionMajor": "3",
+    "type": "major",
+  },
+]
+`;
