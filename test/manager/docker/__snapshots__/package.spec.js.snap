@@ -72,6 +72,21 @@ Array [
 ]
 `;
 
+exports[`lib/workers/package/docker getPackageUpdates returns only one upgrade if automerging major 1`] = `
+Array [
+  Object {
+    "isMajor": true,
+    "newDepTag": "some-dep:3.0.0",
+    "newDigest": "sha256:one",
+    "newFrom": "some-dep:3.0.0@sha256:one",
+    "newTag": "3.0.0",
+    "newVersion": "3.0.0",
+    "newVersionMajor": "3",
+    "type": "major",
+  },
+]
+`;
+
 exports[`lib/workers/package/docker getPackageUpdates upgrades from unstable to stable 1`] = `
 Array [
   Object {
