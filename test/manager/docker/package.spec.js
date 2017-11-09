@@ -103,6 +103,41 @@ describe('lib/workers/package/docker', () => {
       expect(res[0].type).toEqual('major');
       expect(res[0].newVersion).toEqual('8');
     });
+    it('upgrades from unstable to stable', async () => {
+      config = {
+        ...defaultConfig,
+        depName: 'node',
+        currentFrom: 'node:7',
+        currentDepTag: 'node:7',
+        currentTag: '7',
+        currentDigest: undefined,
+        pinDigests: false,
+        unstablePattern: '^\\d*[13579]($|.)',
+      };
+      dockerApi.getTags.mockReturnValueOnce(['4', '6', '6.1', '7', '8', '9']);
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].type).toEqual('major');
+      expect(res[0].newVersion).toEqual('8');
+    });
+    it('upgrades from unstable to unstable if not ignoring', async () => {
+      config = {
+        ...defaultConfig,
+        depName: 'node',
+        currentFrom: 'node:7',
+        currentDepTag: 'node:7',
+        currentTag: '7',
+        currentDigest: undefined,
+        pinDigests: false,
+        unstablePattern: '^\\d*[13579]($|.)',
+        ignoreUnstable: false,
+      };
+      dockerApi.getTags.mockReturnValueOnce(['4', '6', '6.1', '7', '8', '9']);
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
+    });
     it('adds digest', async () => {
       delete config.currentDigest;
       config.currentTag = '1.0.0-something';
