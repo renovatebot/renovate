@@ -3,7 +3,7 @@
 FROM node:8-alpine
 
 # TODO: use custom renovation?
-ENV RENOVATE_VERSION 9.97.11
+ENV RENOVATE_VERSION 10.6.1
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
