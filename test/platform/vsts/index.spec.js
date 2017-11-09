@@ -346,6 +346,31 @@ describe('platform/vsts', () => {
     });
   });
 
+  describe('isBranchStale', () => {
+    it('should return true', async () => {
+      await initRepo('some/repo', 'token');
+      gitApi.mockImplementationOnce(() => ({
+        getBranch: jest.fn(() => ({ commit: { commitId: '123456' } })),
+      }));
+      vstsHelper.getCommitDetails.mockImplementation(() => ({
+        parents: ['789654'],
+      }));
+      const res = await vsts.isBranchStale();
+      expect(res).toBe(true);
+    });
+    it('should return false', async () => {
+      await initRepo('some/repo', 'token');
+      gitApi.mockImplementationOnce(() => ({
+        getBranch: jest.fn(() => ({ commit: { commitId: '123457' } })),
+      }));
+      vstsHelper.getCommitDetails.mockImplementation(() => ({
+        parents: ['1234'],
+      }));
+      const res = await vsts.isBranchStale('branch');
+      expect(res).toBe(false);
+    });
+  });
+
   describe('Not supported by VSTS (yet!)', () => {
     it('setBranchStatus', () => {
       const res = vsts.setBranchStatus();
@@ -359,11 +384,6 @@ describe('platform/vsts', () => {
 
     it('getAllRenovateBranches', async () => {
       const res = await vsts.getAllRenovateBranches();
-      expect(res).toBeUndefined();
-    });
-
-    it('isBranchStale', async () => {
-      const res = await vsts.isBranchStale();
       expect(res).toBeUndefined();
     });
 
