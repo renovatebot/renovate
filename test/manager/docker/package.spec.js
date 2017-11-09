@@ -66,6 +66,22 @@ describe('lib/workers/package/docker', () => {
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       expect(await docker.getPackageUpdates(config)).toEqual([]);
     });
+    it('returns only one upgrade if automerging major', async () => {
+      dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
+      dockerApi.getDigest.mockReturnValueOnce('sha256:one');
+      dockerApi.getTags.mockReturnValueOnce([
+        '1.1.0',
+        '1.2.0',
+        '2.0.0',
+        '3.0.0',
+      ]);
+      config.major.automerge = true;
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].newVersionMajor).toEqual('3');
+      config.major.automerge = false;
+    });
     it('returns major and minor upgrades', async () => {
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
