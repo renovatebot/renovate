@@ -83,7 +83,7 @@
     "eslint-config-prettier": "2.7.0",
     "eslint-plugin-import": "2.8.0",
     "eslint-plugin-promise": "3.6.0",
-    "jest": "20.0.4",
+    "jest": "21.2.1",
     "mkdirp": "0.5.1",
     "mockdate": "2.0.2",
     "prettier": "1.8.2",
