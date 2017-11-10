@@ -3,6 +3,8 @@ const {
   checkOnboardingBranch,
 } = require('../../../../../lib/workers/repository/onboarding/branch');
 
+jest.mock('../../../../../lib/workers/repository/onboarding/branch/rebase');
+
 describe('workers/repository/onboarding/branch', () => {
   describe('checkOnboardingBranch', () => {
     let config;
@@ -42,8 +44,17 @@ describe('workers/repository/onboarding/branch', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
-    it('creates onboaring branch', async () => {
+    it('creates onboarding branch', async () => {
       platform.getFileList.mockReturnValue(['package.json']);
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(false);
+      expect(res.branchList).toEqual(['renovate/configure']);
+      expect(platform.setBaseBranch.mock.calls).toHaveLength(1);
+    });
+    it('updates onboarding branch', async () => {
+      platform.getFileList.mockReturnValue(['package.json']);
+      platform.findPr.mockReturnValueOnce(null);
+      platform.findPr.mockReturnValueOnce({});
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
