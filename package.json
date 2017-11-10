@@ -78,7 +78,7 @@
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "condition-circle": "1.5.0",
-    "eslint": "4.10.0",
+    "eslint": "4.11.0",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-config-prettier": "2.7.0",
     "eslint-plugin-import": "2.8.0",
