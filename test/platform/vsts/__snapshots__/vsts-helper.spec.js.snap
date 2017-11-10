@@ -8,6 +8,8 @@ Object {
 }
 `;
 
+exports[`platform/vsts/helpers getFile should return the file content because it is not a json 1`] = `"{\\"hello\\"= \\"test\\"}"`;
+
 exports[`platform/vsts/helpers getRef should be get the ref 1`] = `
 Array [
   Object {

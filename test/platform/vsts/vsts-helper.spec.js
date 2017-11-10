@@ -43,8 +43,12 @@ describe('platform/vsts/helpers', () => {
   });
 
   describe('getNewBranchName', () => {
-    it('should getNewBranchName', () => {
+    it('should add refs/heads', () => {
       const res = vstsHelper.getNewBranchName('testBB');
+      expect(res).toBe(`refs/heads/testBB`);
+    });
+    it('should be the same', () => {
+      const res = vstsHelper.getNewBranchName('refs/heads/testBB');
       expect(res).toBe(`refs/heads/testBB`);
     });
   });
@@ -117,6 +121,85 @@ describe('platform/vsts/helpers', () => {
         'branchName'
       );
       expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('getFile', () => {
+    it('should return null error GitItemNotFoundException', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getItemText: jest.fn(() => ({
+          readable: true,
+          read: jest.fn(() =>
+            Buffer.from('{"typeKey": "GitItemNotFoundException"}').toString(
+              'base64'
+            )
+          ),
+        })),
+      }));
+
+      const res = await vstsHelper.getFile(
+        '123',
+        'repoName',
+        './myFilePath/test',
+        'branchName'
+      );
+      expect(res).toBeNull();
+    });
+
+    it('should return null error GitUnresolvableToCommitException', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getItemText: jest.fn(() => ({
+          readable: true,
+          read: jest.fn(() =>
+            Buffer.from(
+              '{"typeKey": "GitUnresolvableToCommitException"}'
+            ).toString('base64')
+          ),
+        })),
+      }));
+
+      const res = await vstsHelper.getFile(
+        '123',
+        'repoName',
+        './myFilePath/test',
+        'branchName'
+      );
+      expect(res).toBeNull();
+    });
+
+    it('should return the file content because it is not a json', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getItemText: jest.fn(() => ({
+          readable: true,
+          read: jest.fn(() =>
+            Buffer.from('{"hello"= "test"}').toString('base64')
+          ),
+        })),
+      }));
+
+      const res = await vstsHelper.getFile(
+        '123',
+        'repoName',
+        './myFilePath/test',
+        'branchName'
+      );
+      expect(res).toMatchSnapshot();
+    });
+
+    it('should return null because the file is not readable', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getItemText: jest.fn(() => ({
+          readable: false,
+        })),
+      }));
+
+      const res = await vstsHelper.getFile(
+        '123',
+        'repoName',
+        './myFilePath/test',
+        'branchName'
+      );
+      expect(res).toBeNull();
     });
   });
 
