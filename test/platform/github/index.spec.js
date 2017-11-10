@@ -1066,8 +1066,8 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => ({
         body: [
           {
-            author: {
-              login: 'foo',
+            committer: {
+              login: 'web-flow',
             },
           },
           {
@@ -1105,12 +1105,33 @@ describe('platform/github', () => {
             committer: {
               login: 'web-flow',
             },
+            commit: {
+              message: "Merge branch 'master' into renovate/foo",
+            },
+            parents: [1, 2],
           },
         ],
       }));
       const pr = await github.getPr(1234);
       expect(pr.canRebase).toBe(true);
       expect(pr).toMatchSnapshot();
+    });
+  });
+  describe('getPrFiles()', () => {
+    it('should return empty if no prNo is passed', async () => {
+      const prFiles = await github.getPrFiles(null);
+      expect(prFiles).toEqual([]);
+    });
+    it('returns files', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          { filename: 'renovate.json' },
+          { filename: 'not renovate.json' },
+        ],
+      });
+      const prFiles = await github.getPrFiles(123);
+      expect(prFiles).toMatchSnapshot();
+      expect(prFiles).toHaveLength(2);
     });
   });
   describe('updatePr(prNo, title, body)', () => {
