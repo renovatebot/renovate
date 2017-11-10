@@ -140,6 +140,7 @@ describe('workers/pr', () => {
     });
     it('should delete branch and return null if creating PR fails', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
+      platform.createPr = jest.fn();
       platform.createPr.mockImplementationOnce(() => {
         throw new Error('failed to create PR');
       });
