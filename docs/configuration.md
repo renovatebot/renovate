@@ -418,6 +418,14 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--separate-major-releases`<td>
 </tr>
 <tr>
+  <td>`multipleMajorPrs`</td>
+  <td>If set to true, PRs will be raised separately for each available major upgrade version</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_MULTIPLE_MAJOR_UPGRADES`</td>
+  <td>`--multiple-major-upgrades`<td>
+</tr>
+<tr>
   <td>`separatePatchReleases`</td>
   <td>If set to true, it will separate minor and patch updates into separate branches</td>
   <td>boolean</td>
