@@ -15,6 +15,12 @@ describe('workers/pr/changelog', () => {
         await changelogHelper.getChangeLogJSON('renovate', '1.0.0', '1.0.0')
       ).toBe(null);
     });
+    it('logs when no JSON', async () => {
+      changelog.generate = jest.fn(() => null);
+      expect(
+        await changelogHelper.getChangeLogJSON('renovate', '1.0.0', '1.5.0')
+      ).toBe(null);
+    });
     it('returns JSON', async () => {
       changelog.generate = jest.fn(() => ({ a: 1 }));
       expect(
