@@ -3,8 +3,6 @@ const changelogHelper = require('../../../lib/workers/pr/changelog');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 jest.mock('../../../lib/workers/pr/changelog');
-changelogHelper.getChangeLog = jest.fn();
-changelogHelper.getChangeLog.mockReturnValue('Mocked changelog');
 changelogHelper.getChangeLogJSON = jest.fn();
 changelogHelper.getChangeLogJSON.mockReturnValue({
   project: {
@@ -132,7 +130,7 @@ describe('workers/pr', () => {
     it('should convert to HTML PR for gitlab', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       config.prCreation = 'status-success';
-      config.platform = 'gitlab';
+      config.isGitLab = true;
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
@@ -151,6 +149,7 @@ describe('workers/pr', () => {
     });
     it('should delete branch and return null if creating PR fails', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
+      platform.createPr = jest.fn();
       platform.createPr.mockImplementationOnce(() => {
         throw new Error('failed to create PR');
       });

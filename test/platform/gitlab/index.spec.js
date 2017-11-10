@@ -437,13 +437,25 @@ describe('platform/gitlab', () => {
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo('some/repo', 'token');
+      get.mockReturnValueOnce({
+        body: [{ id: 123 }],
+      });
       await gitlab.addAssignees(42, ['someuser']);
       expect(get.put.mock.calls).toMatchSnapshot();
     });
-    it('should log error if more than one assignee', async () => {
+    it('should warn if more than one assignee', async () => {
       await initRepo('some/repo', 'token');
+      get.mockReturnValueOnce({
+        body: [{ id: 123 }],
+      });
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(get.put.mock.calls).toMatchSnapshot();
+    });
+    it('should swallow error', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockImplementationOnce({});
+      await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
+      expect(get.put.mock.calls).toHaveLength(0);
     });
   });
   describe('addReviewers(issueNo, reviewers)', () => {
@@ -558,6 +570,12 @@ describe('platform/gitlab', () => {
       });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+    });
+  });
+  describe('getPrFiles()', () => {
+    it('should return empty', async () => {
+      const prFiles = await gitlab.getPrFiles();
+      expect(prFiles).toEqual([]);
     });
   });
   describe('updatePr(prNo, title, body)', () => {

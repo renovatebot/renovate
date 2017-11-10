@@ -2,6 +2,7 @@ const versions = require('../../../lib/workers/package/versions');
 const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
 const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
+const webpackJson = require('../../_fixtures/npm/webpack.json');
 
 let config;
 
@@ -227,6 +228,17 @@ describe('workers/package/versions', () => {
       const res = versions.determineUpgrades(coffeelintJson, config);
       expect(res).toHaveLength(1);
       expect(res[0]).toMatchSnapshot();
+    });
+    it('should upgrade to only one major', () => {
+      config.currentVersion = '1.0.0';
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toHaveLength(2);
+    });
+    it('should upgrade to two majors', () => {
+      config.currentVersion = '1.0.0';
+      config.multipleMajorPrs = true;
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toHaveLength(3);
     });
   });
   describe('.isRange(input)', () => {
