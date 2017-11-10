@@ -38,18 +38,25 @@ describe('workers/branch', () => {
     afterEach(() => {
       platform.ensureComment.mockClear();
       platform.ensureCommentRemoval.mockClear();
+      jest.resetAllMocks();
     });
     it('skips branch if not scheduled and branch does not exist', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      await branchWorker.processBranch(config);
-      expect(checkExisting.prAlreadyExisted.mock.calls).toHaveLength(0);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('not-scheduled');
     });
     it('skips branch if not scheduled and not updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = false;
       platform.branchExists.mockReturnValueOnce(true);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('not-scheduled');
+    });
+    it('processes branch if not scheduled but updating out of schedule', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      config.updateNotScheduled = true;
+      platform.branchExists.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
-      expect(checkExisting.prAlreadyExisted.mock.calls).toHaveLength(0);
     });
     it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
