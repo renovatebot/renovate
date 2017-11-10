@@ -45,7 +45,7 @@ describe('platform/vsts', () => {
     gitApi.mockImplementationOnce(() => ({
       getRepositories: jest.fn(() => [
         {
-          name: 'a/b',
+          name: 'some/repo',
           id: '1',
           privateRepo: true,
           isFork: false,
