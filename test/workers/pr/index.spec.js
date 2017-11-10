@@ -3,8 +3,6 @@ const changelogHelper = require('../../../lib/workers/pr/changelog');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 jest.mock('../../../lib/workers/pr/changelog');
-changelogHelper.getChangeLog = jest.fn();
-changelogHelper.getChangeLog.mockReturnValue('Mocked changelog');
 changelogHelper.getChangeLogJSON = jest.fn();
 changelogHelper.getChangeLogJSON.mockReturnValue({
   project: {
