@@ -1066,8 +1066,8 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => ({
         body: [
           {
-            author: {
-              login: 'foo',
+            committer: {
+              login: 'web-flow',
             },
           },
           {
@@ -1105,6 +1105,10 @@ describe('platform/github', () => {
             committer: {
               login: 'web-flow',
             },
+            commit: {
+              message: "Merge branch 'master' into renovate/foo",
+            },
+            parents: [1, 2],
           },
         ],
       }));
