@@ -83,6 +83,7 @@ describe('lib/workers/package/docker', () => {
       config.major.automerge = false;
     });
     it('returns major and minor upgrades', async () => {
+      config.multipleMajorPrs = true;
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
       dockerApi.getDigest.mockReturnValueOnce('sha256:two');
@@ -100,6 +101,40 @@ describe('lib/workers/package/docker', () => {
       expect(res[0].newVersion).toEqual('1.2.0');
       expect(res[1].type).toEqual('major');
       expect(res[2].newVersionMajor).toEqual('3');
+    });
+    it('returns only one major', async () => {
+      dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
+      dockerApi.getDigest.mockReturnValueOnce('sha256:one');
+      dockerApi.getDigest.mockReturnValueOnce('sha256:two');
+      dockerApi.getTags.mockReturnValueOnce([
+        '1.1.0',
+        '1.2.0',
+        '2.0.0',
+        '3.0.0',
+      ]);
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
+      expect(res[0].type).toEqual('minor');
+      expect(res[0].newVersion).toEqual('1.2.0');
+      expect(res[1].type).toEqual('major');
+      expect(res[1].newVersionMajor).toEqual('3');
+    });
+    it('returns only one upgrade', async () => {
+      dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
+      dockerApi.getDigest.mockReturnValueOnce('sha256:one');
+      dockerApi.getTags.mockReturnValueOnce([
+        '1.1.0',
+        '1.2.0',
+        '2.0.0',
+        '3.0.0',
+      ]);
+      config.major.automerge = true;
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].type).toEqual('major');
+      expect(res[0].newVersionMajor).toEqual('3');
     });
     it('ignores unstable upgrades', async () => {
       config = {
@@ -152,7 +187,8 @@ describe('lib/workers/package/docker', () => {
       dockerApi.getTags.mockReturnValueOnce(['4', '6', '6.1', '7', '8', '9']);
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toHaveLength(1);
+      expect(res[0].newVersionMajor).toEqual('9');
     });
     it('adds digest', async () => {
       delete config.currentDigest;
