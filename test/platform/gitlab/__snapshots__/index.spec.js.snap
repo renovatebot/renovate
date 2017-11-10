@@ -3,15 +3,15 @@
 exports[`platform/gitlab addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
 Array [
   Array [
-    "projects/some%2Frepo/merge_requests/42?assignee_id=someuser",
+    "projects/some%2Frepo/merge_requests/42?assignee_id=123",
   ],
 ]
 `;
 
-exports[`platform/gitlab addAssignees(issueNo, assignees) should log error if more than one assignee 1`] = `
+exports[`platform/gitlab addAssignees(issueNo, assignees) should warn if more than one assignee 1`] = `
 Array [
   Array [
-    "projects/some%2Frepo/merge_requests/42?assignee_id=someuser",
+    "projects/some%2Frepo/merge_requests/42?assignee_id=123",
   ],
 ]
 `;
