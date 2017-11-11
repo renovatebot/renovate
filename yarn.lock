@@ -3425,7 +3425,11 @@ moment@2.17.1:
   version "2.17.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.17.1.tgz#fed9506063f36b10f066c8b59a144d7faebe1d82"
 
-moment@2.19.1, "moment@>= 2.9.0", moment@^2.10.6:
+moment@2.19.2:
+  version "2.19.2"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.19.2.tgz#8a7f774c95a64550b4c7ebd496683908f9419dbe"
+
+"moment@>= 2.9.0", moment@^2.10.6:
   version "2.19.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.19.1.tgz#56da1a2d1cbf01d38b7e1afc31c10bcfa1929167"
 
@@ -4704,9 +4708,9 @@ shellwords@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
 
-showdown@1.8.1:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/showdown/-/showdown-1.8.1.tgz#2d8afd12847c80be32bce0a0dbb0e8dc06ba9469"
+showdown@1.8.2:
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/showdown/-/showdown-1.8.2.tgz#788ced4a57d76ed436cbc404464148c4cd674d89"
   dependencies:
     yargs "^10.0.3"
 
