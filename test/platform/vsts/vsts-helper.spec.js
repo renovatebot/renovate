@@ -71,32 +71,46 @@ describe('platform/vsts/helpers', () => {
   });
 
   describe('getRef', () => {
-    it('should be get the ref', () => {
+    it('should get the ref', async () => {
       gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => [{ objectId: 132 }]),
       }));
-      const res = vstsHelper.getRef('123', 'branch');
+      const res = await vstsHelper.getRefs('123', 'branch');
       expect(res).toMatchSnapshot();
     });
-    it('should be get 0 ref', () => {
+    it('should get 0 ref', async () => {
       gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => []),
       }));
-      const res = vstsHelper.getRef('123');
+      const res = await vstsHelper.getRefs('123');
       expect(res.length).toBe(0);
     });
-    it('should be get the ref', () => {
+    it('should get the ref', async () => {
       gitApi.mockImplementationOnce(() => ({
-        getRefs: jest.fn(() => [{ objectId: 132 }]),
+        getRefs: jest.fn(() => [{ objectId: '132' }]),
       }));
-      const res = vstsHelper.getRef('123', 'refs/head/branch1');
+      const res = await vstsHelper.getRefs('123', 'refs/head/branch1');
       expect(res).toMatchSnapshot();
     });
   });
 
   describe('getVSTSBranchObj', () => {
-    it('should be the branch object formated', () => {
-      const res = vstsHelper.getVSTSBranchObj('branchName', '132');
+    it('should be the branch object formated', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getRefs: jest.fn(() => [{ objectId: '132' }]),
+      }));
+      const res = await vstsHelper.getVSTSBranchObj(
+        '123',
+        'branchName',
+        'base'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('should be the branch object formated', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getRefs: jest.fn(() => []),
+      }));
+      const res = await vstsHelper.getVSTSBranchObj('123', 'branchName');
       expect(res).toMatchSnapshot();
     });
   });

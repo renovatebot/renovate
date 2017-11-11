@@ -10,7 +10,7 @@ Object {
 
 exports[`platform/vsts/helpers getFile should return the file content because it is not a json 1`] = `"{\\"hello\\"= \\"test\\"}"`;
 
-exports[`platform/vsts/helpers getRef should be get the ref 1`] = `
+exports[`platform/vsts/helpers getRef should get the ref 1`] = `
 Array [
   Object {
     "objectId": 132,
@@ -18,10 +18,10 @@ Array [
 ]
 `;
 
-exports[`platform/vsts/helpers getRef should be get the ref 2`] = `
+exports[`platform/vsts/helpers getRef should get the ref 2`] = `
 Array [
   Object {
-    "objectId": 132,
+    "objectId": "132",
   },
 ]
 `;
@@ -67,6 +67,13 @@ exports[`platform/vsts/helpers getVSTSBranchObj should be the branch object form
 Object {
   "name": "refs/heads/branchName",
   "oldObjectId": "132",
+}
+`;
+
+exports[`platform/vsts/helpers getVSTSBranchObj should be the branch object formated 2`] = `
+Object {
+  "name": "refs/heads/branchName",
+  "oldObjectId": "0000000000000000000000000000000000000000",
 }
 `;
 

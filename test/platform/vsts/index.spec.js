@@ -127,7 +127,7 @@ describe('platform/vsts', () => {
   });
 
   describe('findPr(branchName, prTitle, state)', () => {
-    it('returns true if no title and all state', async () => {
+    it('returns pr if found it open', async () => {
       gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [
           {
@@ -145,10 +145,79 @@ describe('platform/vsts', () => {
         number: 1,
         head: { ref: 'branch-a' },
         title: 'branch a pr',
-        state: 'open',
+        isClosed: false,
+      }));
+      const res = await vsts.findPr('branch-a', 'branch a pr', 'open');
+      expect(res).toMatchSnapshot();
+    });
+    it('returns pr if found it close', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getPullRequests: jest.fn(() => [
+          {
+            pullRequestId: 1,
+            sourceRefName: 'refs/heads/branch-a',
+            title: 'branch a pr',
+            status: 2,
+          },
+        ]),
+      }));
+      vstsHelper.getNewBranchName.mockImplementationOnce(
+        () => 'refs/heads/branch-a'
+      );
+      vstsHelper.getRenovatePRFormat.mockImplementationOnce(() => ({
+        number: 1,
+        head: { ref: 'branch-a' },
+        title: 'branch a pr',
+        isClosed: true,
+      }));
+      const res = await vsts.findPr('branch-a', 'branch a pr', 'closed');
+      expect(res).toMatchSnapshot();
+    });
+    it('returns pr if found it all state', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getPullRequests: jest.fn(() => [
+          {
+            pullRequestId: 1,
+            sourceRefName: 'refs/heads/branch-a',
+            title: 'branch a pr',
+            status: 2,
+          },
+        ]),
+      }));
+      vstsHelper.getNewBranchName.mockImplementationOnce(
+        () => 'refs/heads/branch-a'
+      );
+      vstsHelper.getRenovatePRFormat.mockImplementationOnce(() => ({
+        number: 1,
+        head: { ref: 'branch-a' },
+        title: 'branch a pr',
+        isClosed: true,
       }));
       const res = await vsts.findPr('branch-a', 'branch a pr');
-      expect(res).toBeDefined();
+      expect(res).toMatchSnapshot();
+    });
+    it('returns pr if found it but add an error', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getPullRequests: jest.fn(() => [
+          {
+            pullRequestId: 1,
+            sourceRefName: 'refs/heads/branch-a',
+            title: 'branch a pr',
+            status: 2,
+          },
+        ]),
+      }));
+      vstsHelper.getNewBranchName.mockImplementationOnce(
+        () => 'refs/heads/branch-a'
+      );
+      vstsHelper.getRenovatePRFormat.mockImplementationOnce(() => ({
+        number: 1,
+        head: { ref: 'branch-a' },
+        title: 'branch a pr',
+        isClosed: true,
+      }));
+      const res = await vsts.findPr('branch-a', 'branch a pr', 'blabla');
+      expect(res).toMatchSnapshot();
     });
     it('returns null if error', async () => {
       await initRepo('some/repo', 'token');
@@ -209,7 +278,7 @@ describe('platform/vsts', () => {
         createPush: jest.fn(() => true),
       }));
       vstsHelper.getVSTSBranchObj.mockImplementationOnce(() => 'newBranch');
-      vstsHelper.getRef.mockImplementation(() => [{ objectId: '123' }]);
+      vstsHelper.getRefs.mockImplementation(() => [{ objectId: '123' }]);
 
       const files = [
         {
@@ -229,7 +298,7 @@ describe('platform/vsts', () => {
   describe('branchExists(branchName)', () => {
     it('should return false if the branch does not exist', async () => {
       await initRepo('some/repo', 'token');
-      vstsHelper.getRef.mockImplementation(() => []);
+      vstsHelper.getRefs.mockImplementation(() => []);
       const exists = await vsts.branchExists('thebranchname');
       expect(exists).toBe(false);
     });
@@ -414,7 +483,7 @@ describe('platform/vsts', () => {
 
   describe('deleteBranch', () => {
     it('should delete the branch', async () => {
-      vstsHelper.getRef.mockImplementation(() => [{ objectId: '123' }]);
+      vstsHelper.getRefs.mockImplementation(() => [{ objectId: '123' }]);
       gitApi.mockImplementationOnce(() => ({
         updateRefs: jest.fn(() => [
           {

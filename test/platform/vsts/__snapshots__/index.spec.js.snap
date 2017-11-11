@@ -25,6 +25,50 @@ Array [
 ]
 `;
 
+exports[`platform/vsts findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "isClosed": true,
+  "number": 1,
+  "title": "branch a pr",
+}
+`;
+
+exports[`platform/vsts findPr(branchName, prTitle, state) returns pr if found it but add an error 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "isClosed": true,
+  "number": 1,
+  "title": "branch a pr",
+}
+`;
+
+exports[`platform/vsts findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "isClosed": true,
+  "number": 1,
+  "title": "branch a pr",
+}
+`;
+
+exports[`platform/vsts findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "isClosed": false,
+  "number": 1,
+  "title": "branch a pr",
+}
+`;
+
 exports[`platform/vsts getAllRenovateBranches() should return all renovate branches 1`] = `
 Array [
   "renovate/a",
