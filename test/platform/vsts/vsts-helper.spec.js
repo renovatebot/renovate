@@ -24,6 +24,18 @@ describe('platform/vsts/helpers', () => {
       }
       expect(err.message).toBe('No token found for vsts');
     });
+    it('should throw an error if no endpoint provided (with env variable on token)', async () => {
+      let err;
+      process.env.VSTS_TOKEN = 'token123';
+      try {
+        await vstsHelper.setTokenAndEndpoint();
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe(
+        'You need an endpoint with vsts. Something like this: https://{instance}.VisualStudio.com/{collection} (https://fabrikam.visualstudio.com/DefaultCollection)'
+      );
+    });
     it('should throw an error if no endpoint is provided', async () => {
       let err;
       try {
@@ -116,7 +128,7 @@ describe('platform/vsts/helpers', () => {
   });
 
   describe('getVSTSCommitObj', () => {
-    it('should be get the commit obj formated', async () => {
+    it('should be get the commit obj formated (file to update)', async () => {
       gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => ({
           readable: true,
@@ -124,6 +136,21 @@ describe('platform/vsts/helpers', () => {
             Buffer.from('{"hello": "test"}').toString('base64')
           ),
         })),
+      }));
+
+      const res = await vstsHelper.getVSTSCommitObj(
+        'Commit msg',
+        './myFilePath/test',
+        'Hello world!',
+        '123',
+        'repoName',
+        'branchName'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('should be get the commit obj formated (file to create)', async () => {
+      gitApi.mockImplementationOnce(() => ({
+        getItemText: jest.fn(() => null),
       }));
 
       const res = await vstsHelper.getVSTSCommitObj(

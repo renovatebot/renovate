@@ -77,7 +77,31 @@ Object {
 }
 `;
 
-exports[`platform/vsts/helpers getVSTSCommitObj should be get the commit obj formated 1`] = `
+exports[`platform/vsts/helpers getVSTSCommitObj should be get the commit obj formated (file to create) 1`] = `
+Object {
+  "author": Object {
+    "name": "VSTS Renovate",
+  },
+  "changes": Array [
+    Object {
+      "changeType": 1,
+      "item": Object {
+        "path": "./myFilePath/test",
+      },
+      "newContent": Object {
+        "Content": "Hello world!",
+        "ContentType": 0,
+      },
+    },
+  ],
+  "comment": "Commit msg",
+  "committer": Object {
+    "name": "VSTS Renovate",
+  },
+}
+`;
+
+exports[`platform/vsts/helpers getVSTSCommitObj should be get the commit obj formated (file to update) 1`] = `
 Object {
   "author": Object {
     "name": "VSTS Renovate",

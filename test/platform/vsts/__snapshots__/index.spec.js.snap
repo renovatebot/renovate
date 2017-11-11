@@ -8,6 +8,14 @@ Object {
 }
 `;
 
+exports[`platform/vsts createPr() should create and return a PR object from base branch 1`] = `
+Object {
+  "displayNumber": "Pull Request #456",
+  "number": 456,
+  "pullRequestId": 456,
+}
+`;
+
 exports[`platform/vsts deleteBranch should delete the branch 1`] = `
 Array [
   Object {
@@ -79,6 +87,18 @@ Array [
 
 exports[`platform/vsts getBranchLastCommitTime should return a Date 1`] = `"1986-11-07T00:00:00Z"`;
 
+exports[`platform/vsts getBranchPr(branchName) should return the pr 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "isClosed": false,
+  "number": 1,
+  "pullRequestId": 1,
+  "title": "branch a pr",
+}
+`;
+
 exports[`platform/vsts getCommitMessages() returns commits messages 1`] = `
 Array [
   "com1",
@@ -144,6 +164,13 @@ Object {
 exports[`platform/vsts setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [],
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/vsts setBaseBranch(branchName) sets the base branch 2`] = `
+Array [
   Array [],
   Array [],
 ]

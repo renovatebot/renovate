@@ -87,6 +87,17 @@ describe('platform/vsts', () => {
       await vsts.setBaseBranch('some-branch');
       expect(gitApi.mock.calls).toMatchSnapshot();
     });
+    it('sets the base branch', async () => {
+      await initRepo('some/repo', 'token');
+      // getBranchCommit
+      gitApi.mockImplementationOnce(() => ({
+        getBranch: jest.fn(() => ({
+          commit: { commitId: '1234' },
+        })),
+      }));
+      await vsts.setBaseBranch();
+      expect(gitApi.mock.calls).toMatchSnapshot();
+    });
   });
 
   describe('getCommitMessages()', () => {
@@ -274,11 +285,31 @@ describe('platform/vsts', () => {
     it('should add a new commit to the branch', async () => {
       await initRepo('some/repo', 'token');
       gitApi.mockImplementationOnce(() => ({
-        branchExists: jest.fn(() => true),
         createPush: jest.fn(() => true),
       }));
       vstsHelper.getVSTSBranchObj.mockImplementationOnce(() => 'newBranch');
       vstsHelper.getRefs.mockImplementation(() => [{ objectId: '123' }]);
+
+      const files = [
+        {
+          name: 'package.json',
+          contents: 'hello world',
+        },
+      ];
+      await vsts.commitFilesToBranch(
+        'package.json',
+        files,
+        'my commit message'
+      );
+      expect(gitApi.mock.calls.length).toBe(3);
+    });
+    it('should add a new commit to an existing branch', async () => {
+      await initRepo('some/repo', 'token');
+      gitApi.mockImplementationOnce(() => ({
+        createPush: jest.fn(() => true),
+      }));
+      vstsHelper.getVSTSBranchObj.mockImplementationOnce(() => 'newBranch');
+      vstsHelper.getRefs.mockImplementation(() => []);
 
       const files = [
         {
@@ -315,6 +346,31 @@ describe('platform/vsts', () => {
       }));
       const pr = await vsts.getBranchPr('somebranch');
       expect(pr).toBe(null);
+    });
+    it('should return the pr', async () => {
+      await initRepo('some/repo', 'token');
+      gitApi.mockImplementation(() => ({
+        getPullRequests: jest.fn(() => [
+          {
+            pullRequestId: 1,
+            sourceRefName: 'refs/heads/branch-a',
+            title: 'branch a pr',
+            status: 2,
+          },
+        ]),
+      }));
+      vstsHelper.getNewBranchName.mockImplementation(
+        () => 'refs/heads/branch-a'
+      );
+      vstsHelper.getRenovatePRFormat.mockImplementation(() => ({
+        pullRequestId: 1,
+        number: 1,
+        head: { ref: 'branch-a' },
+        title: 'branch a pr',
+        isClosed: false,
+      }));
+      const pr = await vsts.getBranchPr('somebranch');
+      expect(pr).toMatchSnapshot();
     });
   });
 
@@ -395,6 +451,28 @@ describe('platform/vsts', () => {
       );
       expect(pr).toMatchSnapshot();
     });
+    it('should create and return a PR object from base branch', async () => {
+      await initRepo('some/repo', 'token');
+      gitApi.mockImplementationOnce(() => ({
+        createPullRequest: jest.fn(() => ({
+          pullRequestId: 456,
+          displayNumber: `Pull Request #456`,
+        })),
+      }));
+      vstsHelper.getRenovatePRFormat.mockImplementation(() => ({
+        displayNumber: 'Pull Request #456',
+        number: 456,
+        pullRequestId: 456,
+      }));
+      const pr = await vsts.createPr(
+        'some-branch',
+        'The Title',
+        'Hello world',
+        ['deps', 'renovate'],
+        true
+      );
+      expect(pr).toMatchSnapshot();
+    });
   });
 
   describe('updatePr(prNo, title, body)', () => {
@@ -470,6 +548,21 @@ describe('platform/vsts', () => {
       }));
       await vsts.ensureCommentRemoval(42, 'some-subject');
       expect(gitApi.mock.calls.length).toBe(4);
+    });
+    it('nothing should happen, no number', async () => {
+      await vsts.ensureCommentRemoval();
+      expect(gitApi.mock.calls.length).toBe(0);
+    });
+    it('comment not found', async () => {
+      await initRepo('some/repo', 'token');
+      gitApi.mockImplementation(() => ({
+        getThreads: jest.fn(() => [
+          { comments: [{ content: 'stupid comment' }], id: 123 },
+        ]),
+        updateThread: jest.fn(),
+      }));
+      await vsts.ensureCommentRemoval(42, 'some-subject');
+      expect(gitApi.mock.calls.length).toBe(3);
     });
   });
 
