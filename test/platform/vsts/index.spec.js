@@ -382,6 +382,11 @@ describe('platform/vsts', () => {
           displayNumber: `Pull Request #456`,
         })),
       }));
+      vstsHelper.getRenovatePRFormat.mockImplementation(() => ({
+        displayNumber: 'Pull Request #456',
+        number: 456,
+        pullRequestId: 456,
+      }));
       const pr = await vsts.createPr(
         'some-branch',
         'The Title',

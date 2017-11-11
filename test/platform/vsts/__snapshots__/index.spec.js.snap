@@ -3,6 +3,7 @@
 exports[`platform/vsts createPr() should create and return a PR object 1`] = `
 Object {
   "displayNumber": "Pull Request #456",
+  "number": 456,
   "pullRequestId": 456,
 }
 `;
