@@ -7,6 +7,8 @@ describe('config/index', () => {
     let defaultArgv;
     let ghGot;
     let get;
+    let gitApi;
+    let vstsHelper;
     beforeEach(() => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
@@ -15,6 +17,10 @@ describe('config/index', () => {
       ghGot = require('gh-got');
       jest.mock('gl-got');
       get = require('gl-got');
+      jest.mock('../../lib/platform/vsts/vsts-got-wrapper');
+      gitApi = require('../../lib/platform/vsts/vsts-got-wrapper');
+      jest.mock('../../lib/platform/vsts/vsts-helper');
+      vstsHelper = require('../../lib/platform/vsts/vsts-helper');
     });
     it('throws for invalid platform', async () => {
       const env = {};
@@ -46,6 +52,16 @@ describe('config/index', () => {
         err = e;
       }
       expect(err.message).toBe('You need to supply a GitLab token.');
+    });
+    it('throws for no vsts token', async () => {
+      const env = { RENOVATE_PLATFORM: 'vsts' };
+      let err;
+      try {
+        await configParser.parseConfigs(env, defaultArgv);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('You need to supply a VSTS token.');
     });
     it('supports token in env', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
@@ -91,6 +107,29 @@ describe('config/index', () => {
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(0);
       expect(get.mock.calls.length).toBe(1);
+    });
+    it('autodiscovers vsts platform', async () => {
+      const env = {};
+      defaultArgv = defaultArgv.concat([
+        '--autodiscover',
+        '--platform=vsts',
+        '--token=abc',
+      ]);
+      vstsHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);
+      gitApi.mockImplementationOnce(() => ({
+        getRepositories: jest.fn(() => [
+          {
+            name: 'a/b',
+          },
+          {
+            name: 'c/d',
+          },
+        ]),
+      }));
+      await configParser.parseConfigs(env, defaultArgv);
+      expect(ghGot.mock.calls.length).toBe(0);
+      expect(get.mock.calls.length).toBe(0);
+      expect(gitApi.mock.calls.length).toBe(1);
     });
     it('logs if no autodiscovered repositories', async () => {
       const env = { GITHUB_TOKEN: 'abc' };

@@ -26,5 +26,17 @@ describe('workers/repository/init/apis', () => {
       glGot.mockReturnValueOnce({ body: {} });
       await initApis(config, 'some-token');
     });
+    it('runs vsts', async () => {
+      config.platform = 'vsts';
+      config.repository = 'some/name';
+      // config.endpoint = 'https://fabrikam.visualstudio.com/DefaultCollection';
+      try {
+        await initApis(config, 'some-token');
+      } catch (error) {
+        expect(error.message).toBe(
+          'You need an endpoint with vsts. Something like this: https://{instance}.VisualStudio.com/{collection} (https://fabrikam.visualstudio.com/DefaultCollection)'
+        );
+      }
+    });
   });
 });

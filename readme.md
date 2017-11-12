@@ -18,7 +18,7 @@ Keep dependencies up-to-date.
 -   Configurable via file, environment, CLI, and `package.json`
 -   Supports eslint-like preset configs for ease of use
 -   Updates `yarn.lock` and `package-lock.json` files natively
--   Supports GitHub and GitLab
+-   Supports GitHub, GitLab and VSTS (in beta)
 -   Open source and can be self-hosted or used via GitHub App
 
 ## Configuration Help
@@ -43,8 +43,10 @@ You can find instructions for GitHub [here](https://help.github.com/articles/cre
 
 You can find instructions for GitLab [here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens).
 
+You can find instructions for VSTS [vsts](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
+
 This token needs to be configured via file, environment variable, or CLI. See [docs/configuration.md](docs/configuration.md) for details.
-The simplest way is to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN`.
+The simplest way is to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN` or `VSTS_TOKEN`.
 
 ## Usage
 

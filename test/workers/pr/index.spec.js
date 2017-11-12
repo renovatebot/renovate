@@ -138,6 +138,15 @@ describe('workers/pr', () => {
         -1
       );
     });
+    it('should strip HTML PR for vsts', async () => {
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      config.prCreation = 'status-success';
+      config.isVsts = true;
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0][2].indexOf('<details>')).toBe(-1);
+    });
     it('should delete branch and return null if creating PR fails', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       platform.createPr = jest.fn();

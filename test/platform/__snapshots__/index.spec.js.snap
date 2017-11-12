@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform has same API for github and gitlab 1`] = `
+exports[`platform has a list of supported methods for github 1`] = `
 Array [
   "getRepos",
   "initRepo",
@@ -32,7 +32,39 @@ Array [
 ]
 `;
 
-exports[`platform has same API for github and gitlab 2`] = `
+exports[`platform has a list of supported methods for gitlab 1`] = `
+Array [
+  "getRepos",
+  "initRepo",
+  "setBaseBranch",
+  "getFileList",
+  "branchExists",
+  "getAllRenovateBranches",
+  "isBranchStale",
+  "getBranchPr",
+  "getBranchStatus",
+  "getBranchStatusCheck",
+  "setBranchStatus",
+  "deleteBranch",
+  "mergeBranch",
+  "getBranchLastCommitTime",
+  "addAssignees",
+  "addReviewers",
+  "ensureComment",
+  "ensureCommentRemoval",
+  "findPr",
+  "createPr",
+  "getPr",
+  "getPrFiles",
+  "updatePr",
+  "mergePr",
+  "commitFilesToBranch",
+  "getFile",
+  "getCommitMessages",
+]
+`;
+
+exports[`platform has a list of supported methods for vsts 1`] = `
 Array [
   "getRepos",
   "initRepo",
