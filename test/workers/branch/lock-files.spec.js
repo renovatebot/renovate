@@ -205,7 +205,6 @@ describe('workers/branch/lock-files', () => {
         },
       ];
       await writeExistingFiles(config);
-      expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(6);
       expect(fs.remove.mock.calls).toHaveLength(4);
     });
@@ -219,7 +218,6 @@ describe('workers/branch/lock-files', () => {
         },
       ];
       await writeExistingFiles(config);
-      expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(3);
       expect(fs.remove.mock.calls).toHaveLength(0);
     });
@@ -261,7 +259,6 @@ describe('workers/branch/lock-files', () => {
         },
       ];
       await writeUpdatedPackageFiles(config);
-      expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(2);
       expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
     });
@@ -326,7 +323,6 @@ describe('workers/branch/lock-files', () => {
       npm.generateLockFile.mockReturnValueOnce({ error: true });
       yarn.generateLockFile.mockReturnValueOnce({ error: true });
       const res = await getUpdatedLockFiles(config);
-      expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(2);
       expect(res.updatedLockFiles).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
@@ -341,7 +337,6 @@ describe('workers/branch/lock-files', () => {
       npm.generateLockFile.mockReturnValueOnce('some new lock file contents');
       yarn.generateLockFile.mockReturnValueOnce('some new lock file contents');
       const res = await getUpdatedLockFiles(config);
-      expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(2);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);

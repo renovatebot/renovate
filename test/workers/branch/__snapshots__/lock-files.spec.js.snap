@@ -31,22 +31,6 @@ Object {
 }
 `;
 
-exports[`workers/branch/lock-files getUpdatedLockFiles adds multiple lock files 1`] = `
-Object {
-  "lockFileErrors": Array [],
-  "updatedLockFiles": Array [
-    Object {
-      "contents": undefined,
-      "name": "a/package-lock.json",
-    },
-    Object {
-      "contents": undefined,
-      "name": "c/yarn.lock",
-    },
-  ],
-}
-`;
-
 exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if lock file maintenance exists 1`] = `
 Object {
   "lockFileErrors": Array [],
@@ -61,84 +45,9 @@ Object {
 }
 `;
 
-exports[`workers/branch/lock-files getUpdatedLockFiles sets error if receiving null 1`] = `
-Object {
-  "lockFileErrors": Array [
-    Object {
-      "lockFile": "a/package-lock.json",
-      "stderr": undefined,
-    },
-    Object {
-      "lockFile": "c/yarn.lock",
-      "stderr": undefined,
-    },
-  ],
-  "updatedLockFiles": Array [],
-}
-`;
-
 exports[`workers/branch/lock-files getUpdatedLockFiles tries multiple lock files 1`] = `
 Object {
   "lockFileErrors": Array [],
   "updatedLockFiles": Array [],
 }
-`;
-
-exports[`workers/branch/lock-files writeExistingFiles writes files and removes files 1`] = `
-Array [
-  Array [
-    "some-tmp-dir/.npmrc",
-    "some-npmrc",
-  ],
-  Array [
-    "some-tmp-dir/package.json",
-    "{\\"name\\":\\"package 1\\"}",
-  ],
-  Array [
-    "some-tmp-dir/.npmrc",
-    "some npmrc",
-  ],
-  Array [
-    "some-tmp-dir/backend/package.json",
-    "{\\"name\\":\\"package-2\\"}",
-  ],
-  Array [
-    "some-tmp-dir/backend/.npmrc",
-    "some-npmrc",
-  ],
-  Array [
-    "some-tmp-dir/backend/.yarnrc",
-    "some yarnrc",
-  ],
-]
-`;
-
-exports[`workers/branch/lock-files writeExistingFiles writes lock files 1`] = `
-Array [
-  Array [
-    "some-tmp-dir/package.json",
-    "{\\"name\\":\\"package 1\\"}",
-  ],
-  Array [
-    "some-tmp-dir/package-lock.json",
-    "some package lock",
-  ],
-  Array [
-    "some-tmp-dir/yarn.lock",
-    "some yarn lock",
-  ],
-]
-`;
-
-exports[`workers/branch/lock-files writeUpdatedPackageFiles writes updated packageFiles 1`] = `
-Array [
-  Array [
-    "some-tmp-dir/package.json",
-    "{\\"name\\":\\"some-template\\"}",
-  ],
-  Array [
-    "some-tmp-dir/backend/package.json",
-    "{\\"name\\":\\"some-other-name\\"}",
-  ],
-]
 `;
