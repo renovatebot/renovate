@@ -1,4 +1,5 @@
 const fs = require('fs-extra');
+const path = require('path');
 const lockFiles = require('../../../lib/workers/branch/lock-files');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
@@ -190,6 +191,19 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toHaveLength(2);
     });
     it('writes files and removes files', async () => {
+      jest
+        .spyOn(path, 'join')
+        .mockImplementationOnce(() => 'some-tmp-dir/.npmrc')
+        .mockImplementationOnce(() => 'some-tmp-dir/.yarnrc')
+        .mockImplementationOnce(() => 'some-tmp-dir/package.json')
+        .mockImplementationOnce(() => 'some-tmp-dir/.npmrc')
+        .mockImplementationOnce(() => 'NOT_CHEKED')
+        .mockImplementationOnce(() => 'NOT_CHEKED')
+        .mockImplementationOnce(() => 'NOT_CHEKED')
+        .mockImplementationOnce(() => 'some-tmp-dir/backend/package.json')
+        .mockImplementationOnce(() => 'some-tmp-dir/backend/.npmrc')
+        .mockImplementationOnce(() => 'some-tmp-dir/backend/.yarnrc');
+
       config.npmrc = 'some-npmrc';
       config.packageFiles = [
         {
@@ -208,8 +222,15 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(6);
       expect(fs.remove.mock.calls).toHaveLength(4);
+      jest.restoreAllMocks();
     });
     it('writes lock files', async () => {
+      jest
+        .spyOn(path, 'join')
+        .mockImplementationOnce(() => 'some-tmp-dir/backend/package.json')
+        .mockImplementationOnce(() => 'some-tmp-dir/package.json')
+        .mockImplementationOnce(() => 'some-tmp-dir/package-lock.json')
+        .mockImplementation(() => 'some-tmp-dir/yarn.lock');
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -222,6 +243,7 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(3);
       expect(fs.remove.mock.calls).toHaveLength(0);
+      jest.restoreAllMocks();
     });
   });
   describe('writeUpdatedPackageFiles', () => {
@@ -249,6 +271,10 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toHaveLength(0);
     });
     it('writes updated packageFiles', async () => {
+      jest
+        .spyOn(path, 'join')
+        .mockImplementationOnce(() => 'some-tmp-dir/package.json')
+        .mockImplementationOnce(() => 'some-tmp-dir/backend/package.json');
       config.updatedPackageFiles = [
         {
           name: 'package.json',
@@ -264,6 +290,7 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toMatchSnapshot();
       expect(fs.outputFile.mock.calls).toHaveLength(2);
       expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
+      jest.restoreAllMocks();
     });
   });
   describe('getUpdatedLockFiles', () => {
@@ -319,6 +346,11 @@ describe('workers/branch/lock-files', () => {
       expect(platform.getFile.mock.calls).toHaveLength(4);
     });
     it('sets error if receiving null', async () => {
+      jest
+        .spyOn(path, 'join')
+        .mockImplementationOnce(() => 'a/package-lock.json')
+        .mockImplementation(() => 'c/yarn.lock');
+
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: ['a', 'b'],
         yarnLockFileDirs: ['c', 'd'],
@@ -332,8 +364,14 @@ describe('workers/branch/lock-files', () => {
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
       expect(platform.getFile.mock.calls).toHaveLength(2);
+      jest.restoreAllMocks();
     });
     it('adds multiple lock files', async () => {
+      jest
+        .spyOn(path, 'join')
+        .mockImplementationOnce(() => 'a/package-lock.json')
+        .mockImplementation(() => 'c/yarn.lock');
+
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: ['a', 'b'],
         yarnLockFileDirs: ['c', 'd'],
@@ -347,6 +385,7 @@ describe('workers/branch/lock-files', () => {
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
       expect(platform.getFile.mock.calls).toHaveLength(4);
+      jest.restoreAllMocks();
     });
   });
 });
