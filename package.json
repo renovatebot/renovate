@@ -26,6 +26,9 @@
     "update"
   ],
   "author": "Rhys Arkins <rhys@arkins.net>",
+  "contributors": [
+    "Jean-Yves Couët <jycouet@gmail.com>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/singapore/renovate/issues"
