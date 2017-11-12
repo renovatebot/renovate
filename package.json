@@ -6,7 +6,7 @@
   "scripts": {
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "jest": "cross-env NODE_ENV=test cross-env LOG_LEVEL=fatal jest",
+    "jest": "cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --fix lib test",
     "lint": "eslint lib test",
     "prettier": "prettier \"**/*.{js,json}\" --write",
