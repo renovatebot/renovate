@@ -18,7 +18,7 @@ Keep dependencies up-to-date.
 -   Configurable via file, environment, CLI, and `package.json`
 -   Supports eslint-like preset configs for ease of use
 -   Updates `yarn.lock` and `package-lock.json` files natively
--   Supports GitHub, GitLab and VSTS (in beta)
+-   Supports GitHub, GitLab and VSTS
 -   Open source and can be self-hosted or used via GitHub App
 
 ## Configuration Help
