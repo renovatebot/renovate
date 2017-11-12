@@ -261,7 +261,6 @@ describe('workers/branch/lock-files', () => {
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile.mock.calls).toHaveLength(2);
       expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
-      jest.restoreAllMocks();
     });
   });
   describe('getUpdatedLockFiles', () => {
