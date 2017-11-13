@@ -142,9 +142,6 @@
       "rarkins"
     ]
   },
-  "publishConfig": {
-    "tag": "next"
-  },
   "release": {
     "branch": "master",
     "verifyConditions": "condition-circle",
