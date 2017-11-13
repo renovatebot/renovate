@@ -4,6 +4,7 @@
   "version": "0.0.0-semantic-release",
   "bin": "lib/renovate.js",
   "scripts": {
+    "clean-cache": "node bin/clean-cache.js",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
