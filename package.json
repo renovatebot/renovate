@@ -4,9 +4,10 @@
   "version": "0.0.0-semantic-release",
   "bin": "lib/renovate.js",
   "scripts": {
+    "clean-cache": "node bin/clean-cache.js",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "jest": "cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
+    "jest": "npm run clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --fix lib test",
     "lint": "eslint lib test",
     "prettier": "prettier \"**/*.{js,json}\" --write",
@@ -40,6 +41,7 @@
   },
   "dependencies": {
     "bunyan": "1.8.12",
+    "cacache": "10.0.0",
     "chalk": "2.3.0",
     "changelog": "1.4.1",
     "child-process-promise": "2.2.1",
@@ -59,7 +61,6 @@
     "json-dup-key-validator": "1.0.2",
     "json-stringify-pretty-compact": "1.0.4",
     "jsonwebtoken": "8.1.0",
-    "keyv": "3.0.0",
     "later": "1.2.0",
     "lodash": "4.17.4",
     "make-fetch-happen": "2.5.0",
