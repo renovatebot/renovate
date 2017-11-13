@@ -27,7 +27,6 @@ describe('api/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
-    npm.resetCache();
   });
   it('should fetch package info from npm', async () => {
     nock('https://registry.npmjs.org')

@@ -3282,7 +3282,7 @@ make-dir@^1.0.0:
   dependencies:
     pify "^3.0.0"
 
-make-fetch-happen@^2.4.13, make-fetch-happen@^2.5.0:
+make-fetch-happen@2.5.0, make-fetch-happen@^2.4.13, make-fetch-happen@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/make-fetch-happen/-/make-fetch-happen-2.5.0.tgz#08c22d499f4f30111addba79fe87c98cf01b6bc8"
   dependencies:
