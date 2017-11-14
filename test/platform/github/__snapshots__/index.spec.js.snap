@@ -604,7 +604,6 @@ Object {
     "sha": "1234",
   },
   "displayNumber": "Pull Request #1",
-  "isClosed": true,
   "number": 1,
   "state": "closed",
 }
