@@ -926,21 +926,6 @@ describe('platform/github', () => {
       const res = await github.findPr('branch-a', null);
       expect(res).toBeDefined();
     });
-    it('returns isClosed if closed', async () => {
-      get.mockReturnValueOnce({
-        body: [
-          {
-            number: 1,
-            head: { ref: 'branch-a' },
-            title: 'branch a pr',
-            state: 'closed',
-            closed_at: '2017-01-01',
-          },
-        ],
-      });
-      const res = await github.findPr('branch-a', null);
-      expect(res.isClosed).toBe(true);
-    });
     it('caches pr list', async () => {
       get.mockReturnValueOnce({
         body: [
