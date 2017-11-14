@@ -475,45 +475,39 @@ describe('platform/gitlab', () => {
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
-    it('returns null if no results', async () => {
-      get.mockReturnValueOnce({
-        body: [],
-      });
-      const pr = await gitlab.findPr('some-branch');
-      expect(pr).toBe(null);
-    });
-    it('returns null if no matching titles', async () => {
+    it('returns true if no title and all state', async () => {
       get.mockReturnValueOnce({
         body: [
           {
-            source_branch: 'some-branch',
-            iid: 1,
-          },
-          {
-            source_branch: 'some-branch',
-            iid: 2,
-            title: 'foo',
+            number: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'opened',
           },
         ],
       });
-      const pr = await gitlab.findPr('some-branch', 'some-title');
-      expect(pr).toBe(null);
+      const res = await gitlab.findPr('branch-a', null);
+      expect(res).toBeDefined();
     });
-    it('returns last result if multiple match', async () => {
+    it('caches pr list', async () => {
       get.mockReturnValueOnce({
         body: [
           {
-            source_branch: 'some-branch',
-            iid: 1,
-          },
-          {
-            source_branch: 'some-branch',
-            iid: 2,
+            number: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'opened',
           },
         ],
       });
-      const pr = await gitlab.findPr('some-branch');
-      expect(pr.number).toBe(2);
+      let res = await gitlab.findPr('branch-a', null);
+      expect(res).toBeDefined();
+      res = await gitlab.findPr('branch-a', 'branch a pr');
+      expect(res).toBeDefined();
+      res = await gitlab.findPr('branch-a', 'branch a pr', 'open');
+      expect(res).toBeDefined();
+      res = await gitlab.findPr('branch-b');
+      expect(res).not.toBeDefined();
     });
   });
   describe('createPr(branchName, title, body)', () => {
