@@ -34,7 +34,7 @@ Array [
 <h3 id=\\"commits\\">Commits</h3>
 <p><details><br />
 <summary>renovateapp/dummy</summary></p>
-<h4 id=\\"110\\">1.1.0 </h4>
+**1.1.0**
 <ul>
 <li><a href=\\"https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz\\"><code>abcdefg</code></a> foo <a href=\\"https://github.com/renovateapp/dummy/issues/3\\">#3</a></li>
 </ul>
