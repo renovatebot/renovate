@@ -8,26 +8,26 @@ beforeEach(() => {
 
 const {
   detectSemanticCommits,
-} = require('../../../../lib/workers/repository/init/semantic');
+} = require('../../../../lib/workers/repository/updates/semantic');
 
 describe('workers/repository/init/semantic', () => {
   describe('detectSemanticCommits()', () => {
     it('returns config if already set', async () => {
       config.semanticCommits = true;
       const res = await detectSemanticCommits(config);
-      expect(res).toBe(config);
+      expect(res).toBe(true);
     });
     it('detects false if unknown', async () => {
       config.semanticCommits = null;
       platform.getCommitMessages.mockReturnValue(['foo', 'bar']);
       const res = await detectSemanticCommits(config);
-      expect(res.semanticCommits).toBe(false);
+      expect(res).toBe(false);
     });
     it('detects true if known', async () => {
       config.semanticCommits = null;
       platform.getCommitMessages.mockReturnValue(['fix: foo', 'refactor: bar']);
       const res = await detectSemanticCommits(config);
-      expect(res.semanticCommits).toBe(true);
+      expect(res).toBe(true);
     });
   });
 });
