@@ -124,6 +124,11 @@ describe('platform/gitlab', () => {
       expect(err.message).toBe('always error');
     });
   });
+  describe('getRepoForceRebase', () => {
+    it('should return false', () => {
+      expect(gitlab.getRepoForceRebase()).toBe(false);
+    });
+  });
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch', async () => {
       await initRepo('some/repo', 'token');
