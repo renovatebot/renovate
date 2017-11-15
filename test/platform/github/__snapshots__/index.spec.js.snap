@@ -47,14 +47,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -64,14 +56,6 @@ exports[`platform/github branchExists(branchName) should return false if a 404 i
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
@@ -95,14 +79,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -112,14 +88,6 @@ exports[`platform/github branchExists(branchName) should return false if the bra
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
@@ -143,14 +111,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -167,14 +127,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -184,14 +136,6 @@ exports[`platform/github commitFilesToBranch(branchName, files, message, parentB
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
@@ -267,14 +211,6 @@ exports[`platform/github commitFilesToBranch(branchName, files, message, parentB
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
@@ -456,14 +392,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
     "repos/some/repo/pulls?per_page=100&state=all",
     Object {
       "paginate": true,
@@ -492,14 +420,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
     "repos/some/repo/contents/package.json?ref=master",
   ],
 ]
@@ -516,14 +436,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
     "repos/some/repo/contents/package.json?ref=master",
   ],
 ]
@@ -533,14 +445,6 @@ exports[`platform/github getFile(filePatch, branchName) should return the encode
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
@@ -683,42 +587,10 @@ Array [
 ]
 `;
 
-exports[`platform/github initRepo should detect repoForceRebase 1`] = `
-Object {
-  "isFork": false,
-  "privateRepo": false,
-  "repoForceRebase": true,
-}
-`;
-
-exports[`platform/github initRepo should ignore repoForceRebase 403 1`] = `
-Object {
-  "isFork": false,
-  "privateRepo": false,
-  "repoForceRebase": false,
-}
-`;
-
-exports[`platform/github initRepo should ignore repoForceRebase 404 1`] = `
-Object {
-  "isFork": false,
-  "privateRepo": false,
-  "repoForceRebase": false,
-}
-`;
-
 exports[`platform/github initRepo should initialise the config for the repo - 0 1`] = `
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
@@ -732,7 +604,6 @@ exports[`platform/github initRepo should initialise the config for the repo - 0 
 Object {
   "isFork": false,
   "privateRepo": false,
-  "repoForceRebase": false,
 }
 `;
 
@@ -746,14 +617,6 @@ Array [
       },
     },
   ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
 ]
 `;
 
@@ -761,7 +624,6 @@ exports[`platform/github initRepo should initialise the config for the repo - 1 
 Object {
   "isFork": false,
   "privateRepo": false,
-  "repoForceRebase": false,
 }
 `;
 
@@ -775,14 +637,6 @@ Array [
       },
     },
   ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
 ]
 `;
 
@@ -790,7 +644,6 @@ exports[`platform/github initRepo should initialise the config for the repo - 2 
 Object {
   "isFork": false,
   "privateRepo": false,
-  "repoForceRebase": false,
 }
 `;
 
@@ -798,7 +651,6 @@ exports[`platform/github initRepo should merge 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
-  "repoForceRebase": false,
 }
 `;
 
@@ -806,7 +658,6 @@ exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
-  "repoForceRebase": false,
 }
 `;
 
@@ -814,7 +665,6 @@ exports[`platform/github initRepo should rebase 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
-  "repoForceRebase": false,
 }
 `;
 
@@ -822,7 +672,6 @@ exports[`platform/github initRepo should squash 1`] = `
 Object {
   "isFork": false,
   "privateRepo": false,
-  "repoForceRebase": false,
 }
 `;
 
@@ -830,14 +679,6 @@ exports[`platform/github mergeBranch(branchName, mergeType) should perform a bra
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
@@ -877,14 +718,6 @@ exports[`platform/github mergeBranch(branchName, mergeType) should perform a bra
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
@@ -934,14 +767,6 @@ Array [
       },
     },
   ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
 ]
 `;
 
@@ -971,14 +796,6 @@ exports[`platform/github mergeBranch(branchName, mergeType) should throw if bran
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
@@ -1022,14 +839,6 @@ Array [
       },
     },
   ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
 ]
 `;
 
@@ -1045,14 +854,6 @@ exports[`platform/github setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",

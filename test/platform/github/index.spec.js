@@ -63,12 +63,6 @@ describe('platform/github', () => {
         allow_merge_commit: true,
       },
     }));
-    // getBranchProtection
-    get.mockImplementationOnce(() => ({
-      body: {
-        strict: false,
-      },
-    }));
     return github.initRepo(...args);
   }
 
@@ -119,12 +113,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        // getBranchProtection
-        get.mockImplementationOnce(() => ({
-          body: {
-            strict: false,
-          },
-        }));
         return github.initRepo(...args);
       }
       const config = await squashInitRepo('some/repo', 'token');
@@ -142,12 +130,6 @@ describe('platform/github', () => {
             allow_rebase_merge: false,
             allow_squash_merge: true,
             allow_merge_commit: true,
-          },
-        }));
-        // getBranchProtection
-        get.mockImplementationOnce(() => ({
-          body: {
-            strict: false,
           },
         }));
         return github.initRepo(...args);
@@ -169,12 +151,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        // getBranchProtection
-        get.mockImplementationOnce(() => ({
-          body: {
-            strict: false,
-          },
-        }));
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo('some/repo', 'token');
@@ -191,109 +167,53 @@ describe('platform/github', () => {
             default_branch: 'master',
           },
         }));
-        // getBranchProtection
-        get.mockImplementationOnce(() => ({
-          body: {
-            strict: false,
-          },
-        }));
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo('some/repo', 'token');
       expect(config).toMatchSnapshot();
     });
+  });
+  describe('getRepoForceRebase', () => {
     it('should detect repoForceRebase', async () => {
-      function mergeInitRepo(...args) {
-        // repo info
-        get.mockImplementationOnce(() => ({
-          body: {
-            owner: {
-              login: 'theowner',
-            },
-            default_branch: 'master',
-          },
-        }));
-        // getBranchProtection
-        get.mockImplementationOnce(() => ({
-          body: {
-            strict: true,
-          },
-        }));
-        return github.initRepo(...args);
-      }
-      const config = await mergeInitRepo('some/repo', 'token');
-      expect(config).toMatchSnapshot();
+      get.mockImplementationOnce(() => ({
+        body: {
+          strict: true,
+        },
+      }));
+      const res = await github.getRepoForceRebase();
+      expect(res).toBe(true);
     });
-    it('should ignore repoForceRebase 404', async () => {
-      function mergeInitRepo(...args) {
-        // repo info
-        get.mockImplementationOnce(() => ({
-          body: {
-            owner: {
-              login: 'theowner',
-            },
-            default_branch: 'master',
-          },
-        }));
-        // getBranchProtection
-        get.mockImplementationOnce(() =>
-          Promise.reject({
-            statusCode: 404,
-          })
-        );
-        return github.initRepo(...args);
-      }
-      const config = await mergeInitRepo('some/repo', 'token');
-      expect(config).toMatchSnapshot();
+    it('should handle 404', async () => {
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      const res = await github.getRepoForceRebase();
+      expect(res).toBe(false);
     });
-    it('should ignore repoForceRebase 403', async () => {
-      function mergeInitRepo(...args) {
-        // repo info
-        get.mockImplementationOnce(() => ({
-          body: {
-            owner: {
-              login: 'theowner',
-            },
-            default_branch: 'master',
-          },
-        }));
-        // getBranchProtection
-        get.mockImplementationOnce(() =>
-          Promise.reject({
-            statusCode: 403,
-          })
-        );
-        return github.initRepo(...args);
-      }
-      const config = await mergeInitRepo('some/repo', 'token');
-      expect(config).toMatchSnapshot();
+    it('should handle 403', async () => {
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 403,
+        })
+      );
+      const res = await github.getRepoForceRebase();
+      expect(res).toBe(false);
     });
-    it('should throw repoForceRebase non-404', async () => {
-      function mergeInitRepo(...args) {
-        // repo info
-        get.mockImplementationOnce(() => ({
-          body: {
-            owner: {
-              login: 'theowner',
-            },
-            default_branch: 'master',
-          },
-        }));
-        // getBranchProtection
-        get.mockImplementationOnce(() =>
-          Promise.reject({
-            statusCode: 600,
-          })
-        );
-        return github.initRepo(...args);
-      }
+    it('should throw 401', async () => {
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 401,
+        })
+      );
       let e;
       try {
-        await mergeInitRepo('some/repo', 'token');
+        await github.getRepoForceRebase();
       } catch (err) {
         e = err;
       }
-      expect(e.statusCode).toBe(600);
+      expect(e).toBeDefined();
     });
   });
   describe('setBaseBranch(branchName)', () => {
@@ -1122,7 +1042,7 @@ describe('platform/github', () => {
       expect(await github.mergePr(pr)).toBe(true);
       expect(get.put.mock.calls).toHaveLength(1);
       expect(get.delete.mock.calls).toHaveLength(1);
-      expect(get.mock.calls).toHaveLength(2);
+      expect(get.mock.calls).toHaveLength(1);
     });
     it('should handle merge error', async () => {
       await initRepo('some/repo', 'token');
@@ -1138,7 +1058,7 @@ describe('platform/github', () => {
       expect(await github.mergePr(pr)).toBe(false);
       expect(get.put.mock.calls).toHaveLength(1);
       expect(get.delete.mock.calls).toHaveLength(0);
-      expect(get.mock.calls).toHaveLength(2);
+      expect(get.mock.calls).toHaveLength(1);
     });
   });
   describe('mergePr(prNo) - autodetection', () => {

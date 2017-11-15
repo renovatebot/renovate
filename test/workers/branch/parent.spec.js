@@ -1,23 +1,6 @@
-const {
-  checkStale,
-  getParentBranch,
-} = require('../../../lib/workers/branch/parent');
+const { getParentBranch } = require('../../../lib/workers/branch/parent');
 
 describe('workers/branch/parent', () => {
-  describe('checkStale', () => {
-    it('returns true if rebaseStalePrs', () => {
-      const config = { rebaseStalePrs: true };
-      expect(checkStale(config)).toBe(true);
-    });
-    it('returns true if repoForceRebase', () => {
-      const config = { repoForceRebase: true };
-      expect(checkStale(config)).toBe(true);
-    });
-    it('returns true if repoForceRebase', () => {
-      const config = { automerge: true, automergeType: 'branch-push' };
-      expect(checkStale(config)).toBe(true);
-    });
-  });
   describe('getParentBranch(config)', () => {
     let config;
     beforeEach(() => {
