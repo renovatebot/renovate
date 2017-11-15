@@ -47,9 +47,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -72,9 +69,6 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -101,9 +95,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -126,9 +117,6 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -155,9 +143,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -182,9 +167,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -207,9 +189,6 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -293,9 +272,6 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -480,9 +456,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -519,9 +492,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -546,9 +516,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -571,9 +538,6 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -754,9 +718,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -786,9 +747,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -816,9 +774,6 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -882,18 +837,12 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
 ]
 `;
@@ -935,9 +884,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -947,9 +893,6 @@ Array [
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
 ]
 `;
@@ -990,9 +933,6 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1036,9 +976,6 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
   ],
   Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
@@ -1086,9 +1023,6 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
@@ -1118,18 +1052,12 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
     "repos/some/repo/branches/master/protection/required_status_checks",
     Object {
       "headers": Object {
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/some-branch",
   ],
 ]
 `;

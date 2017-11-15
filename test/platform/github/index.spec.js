@@ -63,14 +63,6 @@ describe('platform/github', () => {
         allow_merge_commit: true,
       },
     }));
-    // getBranchCommit
-    get.mockImplementationOnce(() => ({
-      body: {
-        object: {
-          sha: '1234',
-        },
-      },
-    }));
     // getBranchProtection
     get.mockImplementationOnce(() => ({
       body: {
@@ -127,14 +119,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        // getBranchCommit
-        get.mockImplementationOnce(() => ({
-          body: {
-            object: {
-              sha: '1234',
-            },
-          },
-        }));
         // getBranchProtection
         get.mockImplementationOnce(() => ({
           body: {
@@ -158,14 +142,6 @@ describe('platform/github', () => {
             allow_rebase_merge: false,
             allow_squash_merge: true,
             allow_merge_commit: true,
-          },
-        }));
-        // getBranchCommit
-        get.mockImplementationOnce(() => ({
-          body: {
-            object: {
-              sha: '1234',
-            },
           },
         }));
         // getBranchProtection
@@ -193,14 +169,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        // getBranchCommit
-        get.mockImplementationOnce(() => ({
-          body: {
-            object: {
-              sha: '1234',
-            },
-          },
-        }));
         // getBranchProtection
         get.mockImplementationOnce(() => ({
           body: {
@@ -221,14 +189,6 @@ describe('platform/github', () => {
               login: 'theowner',
             },
             default_branch: 'master',
-          },
-        }));
-        // getBranchCommit
-        get.mockImplementationOnce(() => ({
-          body: {
-            object: {
-              sha: '1234',
-            },
           },
         }));
         // getBranchProtection
@@ -253,14 +213,6 @@ describe('platform/github', () => {
             default_branch: 'master',
           },
         }));
-        // getBranchCommit
-        get.mockImplementationOnce(() => ({
-          body: {
-            object: {
-              sha: '1234',
-            },
-          },
-        }));
         // getBranchProtection
         get.mockImplementationOnce(() => ({
           body: {
@@ -281,14 +233,6 @@ describe('platform/github', () => {
               login: 'theowner',
             },
             default_branch: 'master',
-          },
-        }));
-        // getBranchCommit
-        get.mockImplementationOnce(() => ({
-          body: {
-            object: {
-              sha: '1234',
-            },
           },
         }));
         // getBranchProtection
@@ -313,14 +257,6 @@ describe('platform/github', () => {
             default_branch: 'master',
           },
         }));
-        // getBranchCommit
-        get.mockImplementationOnce(() => ({
-          body: {
-            object: {
-              sha: '1234',
-            },
-          },
-        }));
         // getBranchProtection
         get.mockImplementationOnce(() =>
           Promise.reject({
@@ -341,14 +277,6 @@ describe('platform/github', () => {
               login: 'theowner',
             },
             default_branch: 'master',
-          },
-        }));
-        // getBranchCommit
-        get.mockImplementationOnce(() => ({
-          body: {
-            object: {
-              sha: '1234',
-            },
           },
         }));
         // getBranchProtection
@@ -558,6 +486,14 @@ describe('platform/github', () => {
           ],
         },
       }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1234',
+          },
+        },
+      }));
       expect(await github.isBranchStale('thebranchname')).toBe(false);
     });
     it('should return true if SHA different from master', async () => {
@@ -578,6 +514,14 @@ describe('platform/github', () => {
               sha: '12345678',
             },
           ],
+        },
+      }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1234',
+          },
         },
       }));
       expect(await github.isBranchStale('thebranchname')).toBe(true);
@@ -1010,6 +954,14 @@ describe('platform/github', () => {
         get.mockImplementationOnce(() => ({
           body,
         }));
+        // getBranchCommit
+        get.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
         const pr = await github.getPr(1234);
         expect(pr).toMatchSnapshot();
       });
@@ -1033,6 +985,14 @@ describe('platform/github', () => {
             },
           },
         ],
+      }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1234',
+          },
+        },
       }));
       const pr = await github.getPr(1234);
       expect(pr).toMatchSnapshot();
@@ -1065,6 +1025,14 @@ describe('platform/github', () => {
           {},
         ],
       }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1234',
+          },
+        },
+      }));
       const pr = await github.getPr(1234);
       expect(pr).toMatchSnapshot();
     });
@@ -1096,6 +1064,14 @@ describe('platform/github', () => {
             parents: [1, 2],
           },
         ],
+      }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1234',
+          },
+        },
       }));
       const pr = await github.getPr(1234);
       expect(pr.canRebase).toBe(true);
@@ -1146,10 +1122,8 @@ describe('platform/github', () => {
       expect(await github.mergePr(pr)).toBe(true);
       expect(get.put.mock.calls).toHaveLength(1);
       expect(get.delete.mock.calls).toHaveLength(1);
-      expect(get.mock.calls).toHaveLength(4);
+      expect(get.mock.calls).toHaveLength(2);
     });
-  });
-  describe('mergePr(prNo)', () => {
     it('should handle merge error', async () => {
       await initRepo('some/repo', 'token');
       const pr = {
@@ -1164,7 +1138,7 @@ describe('platform/github', () => {
       expect(await github.mergePr(pr)).toBe(false);
       expect(get.put.mock.calls).toHaveLength(1);
       expect(get.delete.mock.calls).toHaveLength(0);
-      expect(get.mock.calls).toHaveLength(3);
+      expect(get.mock.calls).toHaveLength(2);
     });
   });
   describe('mergePr(prNo) - autodetection', () => {
