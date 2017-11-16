@@ -175,4 +175,13 @@ describe('platform/gh-got-wrapper', () => {
     const res = await get.post('some-url');
     expect(res.body).toEqual(body);
   });
+  it('returns cached', async () => {
+    get.reset();
+    ghGot.mockReturnValueOnce({
+      body: {},
+    });
+    const res1 = await get('repos/foo');
+    const res2 = await get('repos/foo');
+    expect(res1).toEqual(res2);
+  });
 });
