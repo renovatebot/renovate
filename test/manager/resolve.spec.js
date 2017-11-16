@@ -11,6 +11,11 @@ beforeEach(() => {
 
 describe('manager/resolve', () => {
   describe('resolvePackageFiles()', () => {
+    it('handles wrong filenames', async () => {
+      config.packageFiles = ['wrong.txt'];
+      const res = await resolvePackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
     it('uses packageFiles if already configured and raises error if not found', async () => {
       config.packageFiles = [
         'package.json',
