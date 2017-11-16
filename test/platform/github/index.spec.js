@@ -63,6 +63,21 @@ describe('platform/github', () => {
         allow_merge_commit: true,
       },
     }));
+    // getPrList
+    get.mockImplementationOnce(() => ({
+      body: [],
+    }));
+    // getFileList
+    get.mockImplementationOnce(() => ({
+      body: {
+        tree: [
+          {
+            type: 'blob',
+            path: 'package.json',
+          },
+        ],
+      },
+    }));
     return github.initRepo(...args);
   }
 
@@ -113,6 +128,14 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
+        // getPrList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getFileList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
         return github.initRepo(...args);
       }
       const config = await squashInitRepo('some/repo', 'token');
@@ -131,6 +154,14 @@ describe('platform/github', () => {
             allow_squash_merge: true,
             allow_merge_commit: true,
           },
+        }));
+        // getPrList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getFileList
+        get.mockImplementationOnce(() => ({
+          body: [],
         }));
         return github.initRepo(...args);
       }
@@ -151,6 +182,14 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
+        // getPrList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getFileList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo('some/repo', 'token');
@@ -166,6 +205,14 @@ describe('platform/github', () => {
             },
             default_branch: 'master',
           },
+        }));
+        // getPrList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getFileList
+        get.mockImplementationOnce(() => ({
+          body: [],
         }));
         return github.initRepo(...args);
       }
@@ -233,7 +280,6 @@ describe('platform/github', () => {
   });
   describe('getFileList', () => {
     it('returns empty array if error', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => {
         throw new Error('some error');
       });
@@ -241,7 +287,6 @@ describe('platform/github', () => {
       expect(files).toEqual([]);
     });
     it('warns if truncated result', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
         body: {
           truncated: true,
@@ -252,7 +297,6 @@ describe('platform/github', () => {
       expect(files.length).toBe(0);
     });
     it('caches the result', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
         body: {
           truncated: true,
@@ -265,7 +309,6 @@ describe('platform/github', () => {
       expect(files.length).toBe(0);
     });
     it('should return the files matching the fileName', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
         body: {
           tree: [
@@ -1044,7 +1087,7 @@ describe('platform/github', () => {
       expect(await github.mergePr(pr)).toBe(true);
       expect(get.put.mock.calls).toHaveLength(1);
       expect(get.delete.mock.calls).toHaveLength(1);
-      expect(get.mock.calls).toHaveLength(1);
+      expect(get.mock.calls).toHaveLength(3);
     });
     it('should handle merge error', async () => {
       await initRepo('some/repo', 'token');
@@ -1060,7 +1103,7 @@ describe('platform/github', () => {
       expect(await github.mergePr(pr)).toBe(false);
       expect(get.put.mock.calls).toHaveLength(1);
       expect(get.delete.mock.calls).toHaveLength(0);
-      expect(get.mock.calls).toHaveLength(1);
+      expect(get.mock.calls).toHaveLength(3);
     });
   });
   describe('mergePr(prNo) - autodetection', () => {
@@ -1074,6 +1117,14 @@ describe('platform/github', () => {
             },
             default_branch: 'master',
           },
+        }));
+        // getPrList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getFileList
+        get.mockImplementationOnce(() => ({
+          body: [],
         }));
         // getBranchCommit
         get.mockImplementationOnce(() => ({
@@ -1167,7 +1218,7 @@ describe('platform/github', () => {
       expect(get.delete.mock.calls).toHaveLength(0);
     });
   });
-  describe('getFile(filePatch, branchName)', () => {
+  describe('getFile()', () => {
     it('should return the encoded file content', async () => {
       await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
@@ -1178,6 +1229,11 @@ describe('platform/github', () => {
       const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe('hello world');
+    });
+    it('should return null if not in file list', async () => {
+      await initRepo('some/repo', 'token');
+      const content = await github.getFile('.npmrc');
+      expect(content).toBe(null);
     });
     it('should return null if GitHub returns a 404', async () => {
       await initRepo('some/repo', 'token');

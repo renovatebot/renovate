@@ -1,7 +1,8 @@
 const { initApis } = require('../../../../lib/workers/repository/init/apis');
 
-const ghGot = require('gh-got');
 const glGot = require('gl-got');
+
+jest.mock('../../../../lib/platform/github');
 
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {
@@ -12,10 +13,6 @@ describe('workers/repository/init/apis', () => {
       config.warnings = [];
     });
     it('runs', async () => {
-      // initRepo
-      ghGot.mockReturnValueOnce({ body: { owner: {} } });
-      ghGot.mockReturnValueOnce({ body: { object: {} } });
-      ghGot.mockReturnValueOnce({ body: {} });
       await initApis(config, 'some-token');
     });
     it('runs gitlab', async () => {
