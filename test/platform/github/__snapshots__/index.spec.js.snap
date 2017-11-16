@@ -36,156 +36,6 @@ Array [
 ]
 `;
 
-exports[`platform/github branchExists(branchName) should propagate unknown errors 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-]
-`;
-
-exports[`platform/github branchExists(branchName) should return false if a 404 is returned 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-]
-`;
-
-exports[`platform/github branchExists(branchName) should return false if the branch does not exist (multiple results) 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-]
-`;
-
-exports[`platform/github branchExists(branchName) should return false if the branch does not exist (one result) 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-]
-`;
-
-exports[`platform/github branchExists(branchName) should return true if the branch exists (multiple results) 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-]
-`;
-
-exports[`platform/github branchExists(branchName) should return true if the branch exists (one result) 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-]
-`;
-
 exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 1`] = `
 Array [
   Array [
@@ -212,7 +62,10 @@ Array [
     "repos/some/repo/git/commits/1111",
   ],
   Array [
-    "repos/some/repo/git/refs/heads/package.json",
+    "repos/some/repo/branches?per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
@@ -260,7 +113,7 @@ Array [
     "repos/some/repo/git/refs",
     Object {
       "body": Object {
-        "ref": "refs/heads/package.json",
+        "ref": "refs/heads/the-branch",
         "sha": "5555",
       },
     },
@@ -296,7 +149,10 @@ Array [
     "repos/some/repo/git/commits/1111",
   ],
   Array [
-    "repos/some/repo/git/refs/heads/package.json",
+    "repos/some/repo/branches?per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
@@ -346,7 +202,7 @@ Array [
 exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 3`] = `
 Array [
   Array [
-    "repos/some/repo/git/refs/heads/package.json",
+    "repos/some/repo/git/refs/heads/the-branch",
     Object {
       "body": Object {
         "force": true,

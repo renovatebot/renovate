@@ -331,81 +331,14 @@ describe('platform/github', () => {
     it('should return true if the branch exists (one result)', async () => {
       await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
-        body: {
-          ref: 'refs/heads/thebranchname',
-        },
-      }));
-      const exists = await github.branchExists('thebranchname');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(exists).toBe(true);
-    });
-    it('should return true if the branch exists (multiple results)', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
         body: [
           {
-            ref: 'refs/heads/notthebranchname',
-          },
-          {
-            ref: 'refs/heads/thebranchname',
+            name: 'thebranchname',
           },
         ],
       }));
       const exists = await github.branchExists('thebranchname');
-      expect(get.mock.calls).toMatchSnapshot();
       expect(exists).toBe(true);
-    });
-    it('should return false if the branch does not exist (one result)', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: {
-          ref: 'refs/heads/notthebranchname',
-        },
-      }));
-      const exists = await github.branchExists('thebranchname');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(exists).toBe(false);
-    });
-    it('should return false if the branch does not exist (multiple results)', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            ref: 'refs/heads/notthebranchname',
-          },
-          {
-            ref: 'refs/heads/alsonotthebranchname',
-          },
-        ],
-      }));
-      const exists = await github.branchExists('thebranchname');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(exists).toBe(false);
-    });
-    it('should return false if a 404 is returned', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
-      const exists = await github.branchExists('thebranchname');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(exists).toBe(false);
-    });
-    it('should propagate unknown errors', async () => {
-      await initRepo('some/repo', 'token');
-      get.mockImplementationOnce(() =>
-        Promise.reject(new Error('Something went wrong'))
-      );
-      let err;
-      try {
-        await github.branchExists('thebranchname');
-      } catch (e) {
-        err = e;
-      }
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(err.message).toBe('Something went wrong');
     });
   });
   describe('getAllRenovateBranches()', () => {
@@ -1313,9 +1246,14 @@ describe('platform/github', () => {
     it('should add a new commit to the branch', async () => {
       // branchExists
       get.mockImplementationOnce(() => ({
-        body: {
-          ref: 'refs/heads/package.json',
-        },
+        body: [
+          {
+            name: 'master',
+          },
+          {
+            name: 'the-branch',
+          },
+        ],
       }));
       const files = [
         {
@@ -1324,7 +1262,7 @@ describe('platform/github', () => {
         },
       ];
       await github.commitFilesToBranch(
-        'package.json',
+        'the-branch',
         files,
         'my commit message'
       );
@@ -1334,11 +1272,13 @@ describe('platform/github', () => {
     });
     it('should add a commit to a new branch if the branch does not already exist', async () => {
       // branchExists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            name: 'master',
+          },
+        ],
+      }));
       const files = [
         {
           name: 'package.json',
@@ -1346,7 +1286,7 @@ describe('platform/github', () => {
         },
       ];
       await github.commitFilesToBranch(
-        'package.json',
+        'the-branch',
         files,
         'my other commit message'
       );
