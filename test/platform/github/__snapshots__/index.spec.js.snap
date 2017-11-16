@@ -47,6 +47,15 @@ Array [
     },
   ],
   Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
+  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -61,6 +70,15 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -79,6 +97,15 @@ Array [
     },
   ],
   Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
+  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -93,6 +120,15 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -111,6 +147,15 @@ Array [
     },
   ],
   Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
+  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -127,6 +172,15 @@ Array [
     },
   ],
   Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
+  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -141,6 +195,15 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -216,6 +279,15 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -397,6 +469,9 @@ Array [
       "paginate": true,
     },
   ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
 ]
 `;
 
@@ -406,6 +481,81 @@ exports[`platform/github getCommitMessages() returns commits messages 1`] = `
 Array [
   "foo",
   "bar",
+]
+`;
+
+exports[`platform/github getFile() should return null if GitHub returns a 404 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
+]
+`;
+
+exports[`platform/github getFile() should return null if getFile returns nothing 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
+]
+`;
+
+exports[`platform/github getFile() should return the encoded file content 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.github.loki-preview+json",
+      },
+    },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
+  Array [
+    "repos/some/repo/contents/package.json?ref=master",
+  ],
 ]
 `;
 
@@ -420,7 +570,13 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/contents/package.json?ref=master",
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
 ]
 `;
@@ -434,6 +590,15 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
@@ -450,6 +615,15 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/contents/package.json?ref=master",
@@ -597,6 +771,15 @@ Array [
       },
     },
   ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
 ]
 `;
 
@@ -617,6 +800,15 @@ Array [
       },
     },
   ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
 ]
 `;
 
@@ -636,6 +828,15 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
 ]
 `;
@@ -685,6 +886,15 @@ Array [
       },
     },
   ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
 ]
 `;
 
@@ -723,6 +933,15 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -767,6 +986,15 @@ Array [
       },
     },
   ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
 ]
 `;
 
@@ -801,6 +1029,15 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -839,6 +1076,15 @@ Array [
       },
     },
   ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
 ]
 `;
 
@@ -859,6 +1105,18 @@ Array [
         "accept": "application/vnd.github.loki-preview+json",
       },
     },
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
+  Array [
+    "repos/some/repo/git/trees/some-branch?recursive=true",
   ],
 ]
 `;
