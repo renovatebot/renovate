@@ -1039,8 +1039,6 @@ describe('platform/github', () => {
       const pr = await github.getPr(1234);
       expect(pr.canRebase).toBe(true);
       expect(pr).toMatchSnapshot();
-      const cachedPr = await github.getPr(1234);
-      expect(cachedPr).toEqual(pr);
     });
   });
   describe('getPrFiles()', () => {
