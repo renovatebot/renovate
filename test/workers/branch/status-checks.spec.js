@@ -15,20 +15,12 @@ describe('workers/branch/status-checks', () => {
     afterEach(() => {
       jest.resetAllMocks();
     });
+    it('returns if not configured', async () => {
+      await setUnpublishable(config);
+      expect(platform.getBranchStatusCheck.mock.calls.length).toBe(0);
+    });
     it('defaults to unpublishable', async () => {
-      await setUnpublishable(config);
-      expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
-      expect(platform.setBranchStatus.mock.calls.length).toBe(0);
-    });
-    it('finds unpublishable true', async () => {
-      config.upgrades = [{ unpublishable: true }];
-      await setUnpublishable(config);
-      expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
-      expect(platform.setBranchStatus.mock.calls.length).toBe(0);
-    });
-    it('removes status check', async () => {
-      config.upgrades = [{ unpublishable: true }];
-      platform.getBranchStatusCheck.mockReturnValueOnce('pending');
+      config.unpublishSafe = true;
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
       expect(platform.setBranchStatus.mock.calls.length).toBe(1);
