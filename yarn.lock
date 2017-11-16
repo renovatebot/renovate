@@ -569,7 +569,7 @@ bunyan@1.8.12:
     mv "~2"
     safe-json-stringify "~1"
 
-cacache@10.0.0:
+cacache@10.0.0, cacache@^10.0.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/cacache/-/cacache-10.0.0.tgz#3bba88bf62b0773fd9a691605f60c9d3c595e853"
   dependencies:
@@ -2188,7 +2188,7 @@ html-encoding-sniffer@^1.0.1:
   dependencies:
     whatwg-encoding "^1.0.1"
 
-http-cache-semantics@^3.7.3:
+http-cache-semantics@^3.7.3, http-cache-semantics@^3.8.0:
   version "3.8.0"
   resolved "https://registry.yarnpkg.com/http-cache-semantics/-/http-cache-semantics-3.8.0.tgz#1e3ce248730e189ac692a6697b9e3fdea2ff8da3"
 
@@ -3290,7 +3290,23 @@ make-dir@^1.0.0:
   dependencies:
     pify "^3.0.0"
 
-make-fetch-happen@2.5.0, make-fetch-happen@^2.4.13, make-fetch-happen@^2.5.0:
+make-fetch-happen@2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/make-fetch-happen/-/make-fetch-happen-2.6.0.tgz#8474aa52198f6b1ae4f3094c04e8370d35ea8a38"
+  dependencies:
+    agentkeepalive "^3.3.0"
+    cacache "^10.0.0"
+    http-cache-semantics "^3.8.0"
+    http-proxy-agent "^2.0.0"
+    https-proxy-agent "^2.1.0"
+    lru-cache "^4.1.1"
+    mississippi "^1.2.0"
+    node-fetch-npm "^2.0.2"
+    promise-retry "^1.1.1"
+    socks-proxy-agent "^3.0.1"
+    ssri "^5.0.0"
+
+make-fetch-happen@^2.4.13, make-fetch-happen@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/make-fetch-happen/-/make-fetch-happen-2.5.0.tgz#08c22d499f4f30111addba79fe87c98cf01b6bc8"
   dependencies:
@@ -3531,7 +3547,7 @@ nock@9.1.0:
     qs "^6.0.2"
     semver "^5.3.0"
 
-node-fetch-npm@^2.0.1:
+node-fetch-npm@^2.0.1, node-fetch-npm@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/node-fetch-npm/-/node-fetch-npm-2.0.2.tgz#7258c9046182dca345b4208eda918daf33697ff7"
   dependencies:
@@ -4799,7 +4815,7 @@ sntp@2.x.x:
   dependencies:
     hoek "4.x.x"
 
-socks-proxy-agent@^3.0.0:
+socks-proxy-agent@^3.0.0, socks-proxy-agent@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/socks-proxy-agent/-/socks-proxy-agent-3.0.1.tgz#2eae7cf8e2a82d34565761539a7f9718c5617659"
   dependencies:

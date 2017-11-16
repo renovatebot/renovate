@@ -63,7 +63,7 @@
     "jsonwebtoken": "8.1.0",
     "later": "1.2.0",
     "lodash": "4.17.4",
-    "make-fetch-happen": "2.5.0",
+    "make-fetch-happen": "2.6.0",
     "minimatch": "3.0.4",
     "moment": "2.19.2",
     "moment-timezone": "0.5.14",
