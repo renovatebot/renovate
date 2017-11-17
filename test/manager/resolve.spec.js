@@ -44,19 +44,22 @@ describe('manager/resolve', () => {
         },
       };
       platform.getFile.mockReturnValueOnce(JSON.stringify(pJson));
+      platform.getFileList.mockReturnValueOnce([]);
       const res = await resolvePackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
-    it('downloads accompanying files', async () => {
+    it('detects accompanying files', async () => {
       manager.detectPackageFiles = jest.fn(() => [
         { packageFile: 'package.json' },
+      ]);
+      platform.getFileList.mockReturnValueOnce([
+        'yarn.lock',
+        'package-lock.json',
       ]);
       platform.getFile.mockReturnValueOnce('{"name": "package.json"}');
       platform.getFile.mockReturnValueOnce('npmrc');
       platform.getFile.mockReturnValueOnce('yarnrc');
-      platform.getFile.mockReturnValueOnce('# yarn.lock');
-      platform.getFile.mockReturnValueOnce('{"name": "packge-lock.json"}');
       const res = await resolvePackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
