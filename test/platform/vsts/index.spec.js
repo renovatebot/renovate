@@ -1,6 +1,6 @@
 describe('platform/vsts', () => {
   let vsts;
-  let gitApi;
+  let vstsApi;
   let vstsHelper;
   beforeEach(() => {
     // clean up env
@@ -12,12 +12,12 @@ describe('platform/vsts', () => {
     jest.mock('../../../lib/platform/vsts/vsts-got-wrapper');
     jest.mock('../../../lib/platform/vsts/vsts-helper');
     vsts = require('../../../lib/platform/vsts');
-    gitApi = require('../../../lib/platform/vsts/vsts-got-wrapper');
+    vstsApi = require('../../../lib/platform/vsts/vsts-got-wrapper');
     vstsHelper = require('../../../lib/platform/vsts/vsts-helper');
   });
 
   function getRepos(token, endpoint) {
-    gitApi.mockImplementationOnce(() => ({
+    vstsApi.gitApi.mockImplementationOnce(() => ({
       getRepositories: jest.fn(() => [
         {
           name: 'a/b',
@@ -36,13 +36,13 @@ describe('platform/vsts', () => {
         'sometoken',
         'https://fabrikam.VisualStudio.com/DefaultCollection'
       );
-      expect(gitApi.mock.calls).toMatchSnapshot();
+      expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
   });
 
   function initRepo(...args) {
-    gitApi.mockImplementationOnce(() => ({
+    vstsApi.gitApi.mockImplementationOnce(() => ({
       getRepositories: jest.fn(() => [
         {
           name: 'some/repo',
@@ -56,7 +56,7 @@ describe('platform/vsts', () => {
         },
       ]),
     }));
-    gitApi.mockImplementationOnce(() => ({
+    vstsApi.gitApi.mockImplementationOnce(() => ({
       getBranch: jest.fn(() => ({ commit: { commitId: '1234' } })),
     }));
 
@@ -70,7 +70,7 @@ describe('platform/vsts', () => {
         'token',
         'https://my.custom.endpoint/'
       );
-      expect(gitApi.mock.calls).toMatchSnapshot();
+      expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
     });
   });
@@ -85,24 +85,24 @@ describe('platform/vsts', () => {
     it('sets the base branch', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({
           commit: { commitId: '1234' },
         })),
       }));
       await vsts.setBaseBranch('some-branch');
-      expect(gitApi.mock.calls).toMatchSnapshot();
+      expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
     });
     it('sets the base branch', async () => {
       await initRepo('some/repo', 'token');
       // getBranchCommit
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({
           commit: { commitId: '1234' },
         })),
       }));
       await vsts.setBaseBranch();
-      expect(gitApi.mock.calls).toMatchSnapshot();
+      expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
     });
   });
 
@@ -114,7 +114,7 @@ describe('platform/vsts', () => {
         'https://my.custom.endpoint/'
       );
       expect(config.repoId).toBe('1');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getCommits: jest.fn(() => [
           { comment: 'com1' },
           { comment: 'com2' },
@@ -126,7 +126,7 @@ describe('platform/vsts', () => {
     });
     it('returns empty array if error', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => {
+      vstsApi.gitApi.mockImplementationOnce(() => {
         throw new Error('some error');
       });
       const msgs = await vsts.getCommitMessages();
@@ -145,7 +145,7 @@ describe('platform/vsts', () => {
 
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns pr if found it open', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [
           {
             pullRequestId: 1,
@@ -168,7 +168,7 @@ describe('platform/vsts', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it close', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [
           {
             pullRequestId: 1,
@@ -191,7 +191,7 @@ describe('platform/vsts', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it all state', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [
           {
             pullRequestId: 1,
@@ -214,7 +214,7 @@ describe('platform/vsts', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it but add an error', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [
           {
             pullRequestId: 1,
@@ -238,7 +238,7 @@ describe('platform/vsts', () => {
     });
     it('returns null if error', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => {
+      vstsApi.gitApi.mockImplementationOnce(() => {
         throw new Error('some error');
       });
       const pr = await vsts.findPr('branch-a', 'branch a pr');
@@ -249,7 +249,7 @@ describe('platform/vsts', () => {
   describe('getFileList', () => {
     it('returns empty array if error', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => {
+      vstsApi.gitApi.mockImplementationOnce(() => {
         throw new Error('some error');
       });
       const files = await vsts.getFileList();
@@ -257,7 +257,7 @@ describe('platform/vsts', () => {
     });
     it('caches the result', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getItems: jest.fn(() => [
           { path: '/symlinks/package.json' },
           { isFolder: false, path: '/package.json' },
@@ -273,7 +273,7 @@ describe('platform/vsts', () => {
     });
     it('should return the files matching the fileName', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getItems: jest.fn(() => [
           { path: '/symlinks/package.json' },
           { isFolder: false, path: '/package.json' },
@@ -290,7 +290,7 @@ describe('platform/vsts', () => {
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
     it('should add a new commit to the branch', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         createPush: jest.fn(() => true),
       }));
       vstsHelper.getVSTSBranchObj.mockImplementationOnce(() => 'newBranch');
@@ -307,11 +307,11 @@ describe('platform/vsts', () => {
         files,
         'my commit message'
       );
-      expect(gitApi.mock.calls.length).toBe(3);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(3);
     });
     it('should add a new commit to an existing branch', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         createPush: jest.fn(() => true),
       }));
       vstsHelper.getVSTSBranchObj.mockImplementationOnce(() => 'newBranch');
@@ -328,7 +328,7 @@ describe('platform/vsts', () => {
         files,
         'my commit message'
       );
-      expect(gitApi.mock.calls.length).toBe(3);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(3);
     });
   });
 
@@ -344,7 +344,7 @@ describe('platform/vsts', () => {
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         findPr: jest.fn(() => false),
         getPr: jest.fn(() => {
           'myPRName';
@@ -355,7 +355,7 @@ describe('platform/vsts', () => {
     });
     it('should return the pr', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementation(() => ({
+      vstsApi.gitApi.mockImplementation(() => ({
         getPullRequests: jest.fn(() => [
           {
             pullRequestId: 1,
@@ -393,7 +393,7 @@ describe('platform/vsts', () => {
     });
     it('should pass through success', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({ aheadCount: 0 })),
       }));
       const res = await vsts.getBranchStatus('somebranch', []);
@@ -401,7 +401,7 @@ describe('platform/vsts', () => {
     });
     it('should pass through failed', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({ aheadCount: 123 })),
       }));
       const res = await vsts.getBranchStatus('somebranch', []);
@@ -416,7 +416,7 @@ describe('platform/vsts', () => {
     });
     it('should return null if no PR is returned from vsts', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => []),
       }));
       const pr = await vsts.getPr(1234);
@@ -424,7 +424,7 @@ describe('platform/vsts', () => {
     });
     it('should return a pr in the right format', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [{ pullRequestId: 1234 }]),
       }));
       vstsHelper.getRenovatePRFormat.mockImplementation(() => ({
@@ -438,7 +438,7 @@ describe('platform/vsts', () => {
   describe('createPr()', () => {
     it('should create and return a PR object', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         createPullRequest: jest.fn(() => ({
           pullRequestId: 456,
           displayNumber: `Pull Request #456`,
@@ -459,7 +459,7 @@ describe('platform/vsts', () => {
     });
     it('should create and return a PR object from base branch', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         createPullRequest: jest.fn(() => ({
           pullRequestId: 456,
           displayNumber: `Pull Request #456`,
@@ -484,29 +484,29 @@ describe('platform/vsts', () => {
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         updatePullRequest: jest.fn(),
       }));
       await vsts.updatePr(1234, 'The New Title', 'Hello world again');
-      expect(gitApi.mock.calls).toMatchSnapshot();
+      expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
     });
   });
 
   describe('ensureComment', () => {
     it('add comment', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementation(() => ({
+      vstsApi.gitApi.mockImplementation(() => ({
         createThread: jest.fn(() => [{ id: 123 }]),
       }));
       await vsts.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(gitApi.mock.calls).toMatchSnapshot();
+      expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
     });
   });
 
   describe('isBranchStale', () => {
     it('should return true', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({ commit: { commitId: '123456' } })),
       }));
       vstsHelper.getCommitDetails.mockImplementation(() => ({
@@ -517,7 +517,7 @@ describe('platform/vsts', () => {
     });
     it('should return false', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({ commit: { commitId: '123457' } })),
       }));
       vstsHelper.getCommitDetails.mockImplementation(() => ({
@@ -531,7 +531,7 @@ describe('platform/vsts', () => {
   describe('getAllRenovateBranches()', () => {
     it('should return all renovate branches', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranches: jest.fn(() => [
           { name: 'master' },
           { name: 'renovate/a' },
@@ -546,36 +546,36 @@ describe('platform/vsts', () => {
   describe('ensureCommentRemoval', () => {
     it('deletes comment if found', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementation(() => ({
+      vstsApi.gitApi.mockImplementation(() => ({
         getThreads: jest.fn(() => [
           { comments: [{ content: '### some-subject\n\nblabla' }], id: 123 },
         ]),
         updateThread: jest.fn(),
       }));
       await vsts.ensureCommentRemoval(42, 'some-subject');
-      expect(gitApi.mock.calls.length).toBe(4);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(4);
     });
     it('nothing should happen, no number', async () => {
       await vsts.ensureCommentRemoval();
-      expect(gitApi.mock.calls.length).toBe(0);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(0);
     });
     it('comment not found', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementation(() => ({
+      vstsApi.gitApi.mockImplementation(() => ({
         getThreads: jest.fn(() => [
           { comments: [{ content: 'stupid comment' }], id: 123 },
         ]),
         updateThread: jest.fn(),
       }));
       await vsts.ensureCommentRemoval(42, 'some-subject');
-      expect(gitApi.mock.calls.length).toBe(3);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(3);
     });
   });
 
   describe('getBranchLastCommitTime', () => {
     it('should return a Date', async () => {
       await initRepo('some/repo', 'token');
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({
           commit: { committer: { date: '1986-11-07T00:00:00Z' } },
         })),
@@ -588,7 +588,7 @@ describe('platform/vsts', () => {
   describe('deleteBranch', () => {
     it('should delete the branch', async () => {
       vstsHelper.getRefs.mockImplementation(() => [{ objectId: '123' }]);
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         updateRefs: jest.fn(() => [
           {
             name: 'refs/head/testBranch',
