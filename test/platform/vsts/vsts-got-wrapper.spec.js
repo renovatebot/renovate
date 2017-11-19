@@ -1,5 +1,5 @@
 describe('platform/vsts/vsts-got-wrapper', () => {
-  let gitApi;
+  let vsts;
   beforeEach(() => {
     // clean up env
     delete process.env.VSTS_TOKEN;
@@ -7,14 +7,14 @@ describe('platform/vsts/vsts-got-wrapper', () => {
 
     // reset module
     jest.resetModules();
-    gitApi = require('../../../lib/platform/vsts/vsts-got-wrapper');
+    vsts = require('../../../lib/platform/vsts/vsts-got-wrapper');
   });
 
   describe('gitApi', () => {
     it('should throw an error if no token is provided', async () => {
       let err;
       try {
-        await gitApi();
+        await vsts.gitApi();
       } catch (e) {
         err = e;
       }
@@ -24,7 +24,7 @@ describe('platform/vsts/vsts-got-wrapper', () => {
       let err;
       try {
         process.env.VSTS_TOKEN = 'myToken';
-        await gitApi();
+        await vsts.gitApi();
       } catch (e) {
         err = e;
       }
@@ -35,7 +35,20 @@ describe('platform/vsts/vsts-got-wrapper', () => {
     it('should set token and endpoint', async () => {
       process.env.VSTS_TOKEN = 'myToken';
       process.env.VSTS_ENDPOINT = 'myEndpoint';
-      const res = await gitApi();
+      const res = await vsts.gitApi();
+
+      // We will track if the lib vso-node-api change
+      expect(res).toMatchSnapshot();
+      expect(process.env.VSTS_TOKEN).toBe(`myToken`);
+      expect(process.env.VSTS_ENDPOINT).toBe(`myEndpoint`);
+    });
+  });
+
+  describe('gitApi', () => {
+    it('should set token and endpoint', async () => {
+      process.env.VSTS_TOKEN = 'myToken';
+      process.env.VSTS_ENDPOINT = 'myEndpoint';
+      const res = await vsts.getCoreApi();
 
       // We will track if the lib vso-node-api change
       expect(res).toMatchSnapshot();

@@ -7,7 +7,7 @@ describe('config/index', () => {
     let defaultArgv;
     let ghGot;
     let get;
-    let gitApi;
+    let vstsApi;
     let vstsHelper;
     beforeEach(() => {
       jest.resetModules();
@@ -18,7 +18,7 @@ describe('config/index', () => {
       jest.mock('gl-got');
       get = require('gl-got');
       jest.mock('../../lib/platform/vsts/vsts-got-wrapper');
-      gitApi = require('../../lib/platform/vsts/vsts-got-wrapper');
+      vstsApi = require('../../lib/platform/vsts/vsts-got-wrapper');
       jest.mock('../../lib/platform/vsts/vsts-helper');
       vstsHelper = require('../../lib/platform/vsts/vsts-helper');
     });
@@ -116,7 +116,7 @@ describe('config/index', () => {
         '--token=abc',
       ]);
       vstsHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getRepositories: jest.fn(() => [
           {
             name: 'a/b',
@@ -129,7 +129,7 @@ describe('config/index', () => {
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(0);
       expect(get.mock.calls.length).toBe(0);
-      expect(gitApi.mock.calls.length).toBe(1);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(1);
     });
     it('logs if no autodiscovered repositories', async () => {
       const env = { GITHUB_TOKEN: 'abc' };

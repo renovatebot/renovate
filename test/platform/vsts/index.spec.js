@@ -619,13 +619,26 @@ describe('platform/vsts', () => {
     });
 
     it('addAssignees', async () => {
-      const res = await vsts.addAssignees();
-      expect(res).toBeUndefined();
+      await initRepo('some/repo', 'token');
+      vstsApi.gitApi.mockImplementation(() => ({
+        createThread: jest.fn(() => [{ id: 123 }]),
+      }));
+      await vsts.addAssignees(123, ['test@bonjour.fr']);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(3);
     });
 
     it('addReviewers', async () => {
-      const res = await vsts.addReviewers();
-      expect(res).toBeUndefined();
+      await initRepo('some/repo', 'token');
+      vstsApi.gitApi.mockImplementation(() => ({
+        getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
+        createPullRequestReviewer: jest.fn(),
+      }));
+      vstsApi.getCoreApi.mockImplementation(() => ({
+        getTeams: jest.fn(() => [{ id: 3 }, { id: 4 }]),
+        getTeamMembers: jest.fn(() => [{ displayName: 'jyc' }]),
+      }));
+      await vsts.addReviewers(123, ['test@bonjour.fr', 'jyc']);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(5);
     });
 
     // to become async?
