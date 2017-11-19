@@ -127,7 +127,7 @@ describe('platform/vsts/helpers', () => {
     });
   });
 
-  describe('getVSTSCommitObj', () => {
+  describe('getChanges', () => {
     it('should be get the commit obj formated (file to update)', async () => {
       gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => ({
@@ -138,10 +138,13 @@ describe('platform/vsts/helpers', () => {
         })),
       }));
 
-      const res = await vstsHelper.getVSTSCommitObj(
-        'Commit msg',
-        './myFilePath/test',
-        'Hello world!',
+      const res = await vstsHelper.getChanges(
+        [
+          {
+            name: './myFilePath/test',
+            contents: 'Hello world!',
+          },
+        ],
         '123',
         'repoName',
         'branchName'
@@ -153,10 +156,13 @@ describe('platform/vsts/helpers', () => {
         getItemText: jest.fn(() => null),
       }));
 
-      const res = await vstsHelper.getVSTSCommitObj(
-        'Commit msg',
-        './myFilePath/test',
-        'Hello world!',
+      const res = await vstsHelper.getChanges(
+        [
+          {
+            name: './myFilePath/test',
+            contents: 'Hello world!',
+          },
+        ],
         '123',
         'repoName',
         'branchName'

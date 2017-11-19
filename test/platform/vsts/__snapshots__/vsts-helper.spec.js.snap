@@ -1,5 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/vsts/helpers getChanges should be get the commit obj formated (file to create) 1`] = `
+Array [
+  Object {
+    "changeType": 1,
+    "item": Object {
+      "path": "./myFilePath/test",
+    },
+    "newContent": Object {
+      "Content": "Hello world!",
+      "ContentType": 0,
+    },
+  },
+]
+`;
+
+exports[`platform/vsts/helpers getChanges should be get the commit obj formated (file to update) 1`] = `
+Array [
+  Object {
+    "changeType": 2,
+    "item": Object {
+      "path": "./myFilePath/test",
+    },
+    "newContent": Object {
+      "Content": "Hello world!",
+      "ContentType": 0,
+    },
+  },
+]
+`;
+
 exports[`platform/vsts/helpers getCommitDetails should get commit details 1`] = `
 Object {
   "parents": Array [
@@ -78,54 +108,6 @@ exports[`platform/vsts/helpers getVSTSBranchObj should be the branch object form
 Object {
   "name": "refs/heads/branchName",
   "oldObjectId": "0000000000000000000000000000000000000000",
-}
-`;
-
-exports[`platform/vsts/helpers getVSTSCommitObj should be get the commit obj formated (file to create) 1`] = `
-Object {
-  "author": Object {
-    "name": "VSTS Renovate",
-  },
-  "changes": Array [
-    Object {
-      "changeType": 1,
-      "item": Object {
-        "path": "./myFilePath/test",
-      },
-      "newContent": Object {
-        "Content": "Hello world!",
-        "ContentType": 0,
-      },
-    },
-  ],
-  "comment": "Commit msg",
-  "committer": Object {
-    "name": "VSTS Renovate",
-  },
-}
-`;
-
-exports[`platform/vsts/helpers getVSTSCommitObj should be get the commit obj formated (file to update) 1`] = `
-Object {
-  "author": Object {
-    "name": "VSTS Renovate",
-  },
-  "changes": Array [
-    Object {
-      "changeType": 2,
-      "item": Object {
-        "path": "./myFilePath/test",
-      },
-      "newContent": Object {
-        "Content": "Hello world!",
-        "ContentType": 0,
-      },
-    },
-  ],
-  "comment": "Commit msg",
-  "committer": Object {
-    "name": "VSTS Renovate",
-  },
 }
 `;
 
