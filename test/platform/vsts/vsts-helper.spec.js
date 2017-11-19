@@ -298,4 +298,26 @@ describe('platform/vsts/helpers', () => {
       expect(res).toMatchSnapshot();
     });
   });
+
+  describe('getProjectAndRepo', () => {
+    it('should return the object with same strings', async () => {
+      const res = await vstsHelper.getProjectAndRepo('myRepoName');
+      expect(res).toMatchSnapshot();
+    });
+    it('should return the object with project and repo', async () => {
+      const res = await vstsHelper.getProjectAndRepo('prjName/myRepoName');
+      expect(res).toMatchSnapshot();
+    });
+    it('should return an error', async () => {
+      let err;
+      try {
+        await vstsHelper.getProjectAndRepo('prjName/myRepoName/blalba');
+      } catch (error) {
+        err = error;
+      }
+      expect(err.message).toBe(
+        `prjName/myRepoName/blalba can be only structured this way : 'repoName' or 'projectName/repoName'!`
+      );
+    });
+  });
 });
