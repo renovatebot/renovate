@@ -14,14 +14,7 @@ Object {
     "semanticPrefix": "fix(deps):",
   },
   "description": Array [],
-  "devDependencies": Object {
-    "pin": Object {
-      "group": Object {
-        "commitMessage": "Pin devDependencies",
-        "prTitle": "Pin devDependencies",
-      },
-    },
-  },
+  "devDependencies": Object {},
   "digest": Object {
     "semanticPrefix": "refactor(deps):",
   },
@@ -503,14 +496,7 @@ Object {
     "semanticPrefix": "fix(deps):",
   },
   "description": Array [],
-  "devDependencies": Object {
-    "pin": Object {
-      "group": Object {
-        "commitMessage": "Pin devDependencies",
-        "prTitle": "Pin devDependencies",
-      },
-    },
-  },
+  "devDependencies": Object {},
   "digest": Object {
     "semanticPrefix": "refactor(deps):",
   },
@@ -998,14 +984,7 @@ Object {
     "semanticPrefix": "fix(deps):",
   },
   "description": Array [],
-  "devDependencies": Object {
-    "pin": Object {
-      "group": Object {
-        "commitMessage": "Pin devDependencies",
-        "prTitle": "Pin devDependencies",
-      },
-    },
-  },
+  "devDependencies": Object {},
   "digest": Object {
     "semanticPrefix": "refactor(deps):",
   },
@@ -1701,14 +1680,7 @@ Object {
     "semanticPrefix": "fix(deps):",
   },
   "description": Array [],
-  "devDependencies": Object {
-    "pin": Object {
-      "group": Object {
-        "commitMessage": "Pin devDependencies",
-        "prTitle": "Pin devDependencies",
-      },
-    },
-  },
+  "devDependencies": Object {},
   "digest": Object {
     "semanticPrefix": "refactor(deps):",
   },
@@ -2193,14 +2165,7 @@ Object {
     "semanticPrefix": "fix(deps):",
   },
   "description": Array [],
-  "devDependencies": Object {
-    "pin": Object {
-      "group": Object {
-        "commitMessage": "Pin devDependencies",
-        "prTitle": "Pin devDependencies",
-      },
-    },
-  },
+  "devDependencies": Object {},
   "digest": Object {
     "semanticPrefix": "refactor(deps):",
   },
@@ -2677,14 +2642,7 @@ Object {
     "semanticPrefix": "fix(deps):",
   },
   "description": Array [],
-  "devDependencies": Object {
-    "pin": Object {
-      "group": Object {
-        "commitMessage": "Pin devDependencies",
-        "prTitle": "Pin devDependencies",
-      },
-    },
-  },
+  "devDependencies": Object {},
   "digest": Object {
     "semanticPrefix": "refactor(deps):",
   },
@@ -3161,14 +3119,7 @@ Object {
     "semanticPrefix": "fix(deps):",
   },
   "description": Array [],
-  "devDependencies": Object {
-    "pin": Object {
-      "group": Object {
-        "commitMessage": "Pin devDependencies",
-        "prTitle": "Pin devDependencies",
-      },
-    },
-  },
+  "devDependencies": Object {},
   "digest": Object {
     "semanticPrefix": "refactor(deps):",
   },
