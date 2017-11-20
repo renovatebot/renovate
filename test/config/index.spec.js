@@ -76,6 +76,7 @@ describe('config/index', () => {
       const env = {};
       defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);
       ghGot.mockImplementationOnce(() => ({
+        headers: {},
         body: [
           {
             full_name: 'a/b',
@@ -145,6 +146,7 @@ describe('config/index', () => {
       const env = { GITHUB_TOKEN: 'abc' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
       ghGot.mockImplementationOnce(() => ({
+        headers: {},
         body: [],
       }));
       await configParser.parseConfigs(env, defaultArgv);
@@ -155,6 +157,7 @@ describe('config/index', () => {
       const env = { GITHUB_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
       ghGot.mockImplementationOnce(() => ({
+        headers: {},
         body: [],
       }));
       await configParser.parseConfigs(env, defaultArgv);
