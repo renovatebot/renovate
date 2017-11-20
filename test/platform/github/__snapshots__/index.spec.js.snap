@@ -519,6 +519,9 @@ exports[`platform/github getRepos should return an array of repos 1`] = `
 Array [
   Array [
     "user/repos",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
@@ -534,6 +537,9 @@ exports[`platform/github getRepos should support a custom endpoint 1`] = `
 Array [
   Array [
     "user/repos",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
