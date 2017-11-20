@@ -40,6 +40,20 @@ Object {
 
 exports[`platform/vsts/helpers getFile should return the file content because it is not a json 1`] = `"{\\"hello\\"= \\"test\\"}"`;
 
+exports[`platform/vsts/helpers getProjectAndRepo should return the object with project and repo 1`] = `
+Object {
+  "project": "prjName",
+  "repo": "myRepoName",
+}
+`;
+
+exports[`platform/vsts/helpers getProjectAndRepo should return the object with same strings 1`] = `
+Object {
+  "project": "myRepoName",
+  "repo": "myRepoName",
+}
+`;
+
 exports[`platform/vsts/helpers getRef should get the ref 1`] = `
 Array [
   Object {
