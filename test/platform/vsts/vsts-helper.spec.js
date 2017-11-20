@@ -134,18 +134,19 @@ describe('platform/vsts/helpers', () => {
       let eventCount = 0;
       const mockEventStream = new Readable({
         objectMode: true,
-        read: function (size) {
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
           if (eventCount < 1) {
-            eventCount = eventCount + 1;
-            return this.push('{"hello": "test"}')
-          } else {
-            return this.push(null);
+            eventCount += 1;
+            return this.push('{"hello": "test"}');
           }
-        }
+          return this.push(null);
+        },
       });
 
       gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => mockEventStream)
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getChanges(
@@ -183,22 +184,22 @@ describe('platform/vsts/helpers', () => {
 
   describe('getFile', () => {
     it('should return null error GitItemNotFoundException', async () => {
-
       let eventCount = 0;
       const mockEventStream = new Readable({
         objectMode: true,
-        read: function (size) {
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
           if (eventCount < 1) {
-            eventCount = eventCount + 1;
-            return this.push('{"typeKey": "GitItemNotFoundException"}')
-          } else {
-            return this.push(null);
+            eventCount += 1;
+            return this.push('{"typeKey": "GitItemNotFoundException"}');
           }
-        }
+          return this.push(null);
+        },
       });
 
       gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => mockEventStream)
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getFile(
@@ -211,22 +212,22 @@ describe('platform/vsts/helpers', () => {
     });
 
     it('should return null error GitUnresolvableToCommitException', async () => {
-
       let eventCount = 0;
       const mockEventStream = new Readable({
         objectMode: true,
-        read: function (size) {
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
           if (eventCount < 1) {
-            eventCount = eventCount + 1;
-            return this.push('{"typeKey": "GitUnresolvableToCommitException"}')
-          } else {
-            return this.push(null);
+            eventCount += 1;
+            return this.push('{"typeKey": "GitUnresolvableToCommitException"}');
           }
-        }
+          return this.push(null);
+        },
       });
 
       gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => mockEventStream)
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getFile(
@@ -242,18 +243,19 @@ describe('platform/vsts/helpers', () => {
       let eventCount = 0;
       const mockEventStream = new Readable({
         objectMode: true,
-        read: function (size) {
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
           if (eventCount < 1) {
-            eventCount = eventCount + 1;
-            return this.push('{"hello"= "test"}')
-          } else {
-            return this.push(null);
+            eventCount += 1;
+            return this.push('{"hello"= "test"}');
           }
-        }
+          return this.push(null);
+        },
       });
 
       gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => mockEventStream)
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getFile(
