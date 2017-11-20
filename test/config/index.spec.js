@@ -119,12 +119,22 @@ describe('config/index', () => {
       gitApi.mockImplementationOnce(() => ({
         getRepositories: jest.fn(() => [
           {
-            name: 'a/b',
+            name: 'repo1',
+            project: {
+              name: 'prj1',
+            },
           },
           {
-            name: 'c/d',
+            name: 'repo2',
+            project: {
+              name: 'prj1',
+            },
           },
         ]),
+      }));
+      vstsHelper.getProjectAndRepo.mockImplementationOnce(() => ({
+        project: 'prj1',
+        repo: 'repo1',
       }));
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(0);
