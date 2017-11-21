@@ -1,3 +1,5 @@
+const { Readable } = require('stream');
+
 describe('platform/vsts/helpers', () => {
   let vstsHelper;
   let gitApi;
@@ -129,13 +131,22 @@ describe('platform/vsts/helpers', () => {
 
   describe('getChanges', () => {
     it('should be get the commit obj formated (file to update)', async () => {
+      let eventCount = 0;
+      const mockEventStream = new Readable({
+        objectMode: true,
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
+          if (eventCount < 1) {
+            eventCount += 1;
+            return this.push('{"hello": "test"}');
+          }
+          return this.push(null);
+        },
+      });
+
       gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => ({
-          readable: true,
-          read: jest.fn(() =>
-            Buffer.from('{"hello": "test"}').toString('base64')
-          ),
-        })),
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getChanges(
@@ -173,15 +184,22 @@ describe('platform/vsts/helpers', () => {
 
   describe('getFile', () => {
     it('should return null error GitItemNotFoundException', async () => {
+      let eventCount = 0;
+      const mockEventStream = new Readable({
+        objectMode: true,
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
+          if (eventCount < 1) {
+            eventCount += 1;
+            return this.push('{"typeKey": "GitItemNotFoundException"}');
+          }
+          return this.push(null);
+        },
+      });
+
       gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => ({
-          readable: true,
-          read: jest.fn(() =>
-            Buffer.from('{"typeKey": "GitItemNotFoundException"}').toString(
-              'base64'
-            )
-          ),
-        })),
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getFile(
@@ -194,15 +212,22 @@ describe('platform/vsts/helpers', () => {
     });
 
     it('should return null error GitUnresolvableToCommitException', async () => {
+      let eventCount = 0;
+      const mockEventStream = new Readable({
+        objectMode: true,
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
+          if (eventCount < 1) {
+            eventCount += 1;
+            return this.push('{"typeKey": "GitUnresolvableToCommitException"}');
+          }
+          return this.push(null);
+        },
+      });
+
       gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => ({
-          readable: true,
-          read: jest.fn(() =>
-            Buffer.from(
-              '{"typeKey": "GitUnresolvableToCommitException"}'
-            ).toString('base64')
-          ),
-        })),
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getFile(
@@ -215,13 +240,22 @@ describe('platform/vsts/helpers', () => {
     });
 
     it('should return the file content because it is not a json', async () => {
+      let eventCount = 0;
+      const mockEventStream = new Readable({
+        objectMode: true,
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
+          if (eventCount < 1) {
+            eventCount += 1;
+            return this.push('{"hello"= "test"}');
+          }
+          return this.push(null);
+        },
+      });
+
       gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => ({
-          readable: true,
-          read: jest.fn(() =>
-            Buffer.from('{"hello"= "test"}').toString('base64')
-          ),
-        })),
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getFile(
