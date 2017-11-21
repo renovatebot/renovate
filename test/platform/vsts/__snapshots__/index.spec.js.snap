@@ -132,8 +132,8 @@ Array [
 
 exports[`platform/vsts getRepos should return an array of repos 2`] = `
 Array [
-  "a/b",
-  "c/d",
+  "prj1/repo1",
+  "prj1/repo2",
 ]
 `;
 
@@ -157,7 +157,7 @@ Object {
   "privateRepo": true,
   "repoForceRebase": false,
   "repoId": "1",
-  "repoName": "some/repo",
+  "repoName": "some-repo",
 }
 `;
 

@@ -20,10 +20,16 @@ describe('platform/vsts', () => {
     vstsApi.gitApi.mockImplementationOnce(() => ({
       getRepositories: jest.fn(() => [
         {
-          name: 'a/b',
+          name: 'repo1',
+          project: {
+            name: 'prj1',
+          },
         },
         {
-          name: 'c/d',
+          name: 'repo2',
+          project: {
+            name: 'prj1',
+          },
         },
       ]),
     }));
@@ -45,19 +51,29 @@ describe('platform/vsts', () => {
     vstsApi.gitApi.mockImplementationOnce(() => ({
       getRepositories: jest.fn(() => [
         {
-          name: 'some/repo',
+          name: 'some-repo',
           id: '1',
           privateRepo: true,
           isFork: false,
           defaultBranch: 'defBr',
+          project: {
+            name: 'some-repo',
+          },
         },
         {
-          name: 'c/d',
+          name: 'repo2',
+          project: {
+            name: 'prj2',
+          },
         },
       ]),
     }));
     vstsApi.gitApi.mockImplementationOnce(() => ({
       getBranch: jest.fn(() => ({ commit: { commitId: '1234' } })),
+    }));
+    vstsHelper.getProjectAndRepo.mockImplementationOnce(() => ({
+      project: 'some-repo',
+      repo: 'some-repo',
     }));
 
     return vsts.initRepo(...args);
@@ -66,7 +82,7 @@ describe('platform/vsts', () => {
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {
       const config = await initRepo(
-        'some/repo',
+        'some-repo',
         'token',
         'https://my.custom.endpoint/'
       );
@@ -83,7 +99,7 @@ describe('platform/vsts', () => {
 
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch', async () => {
-      await initRepo('some/repo', 'token');
+      await initRepo('some-repo', 'token');
       // getBranchCommit
       vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({
@@ -94,7 +110,7 @@ describe('platform/vsts', () => {
       expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
     });
     it('sets the base branch', async () => {
-      await initRepo('some/repo', 'token');
+      await initRepo('some-repo', 'token');
       // getBranchCommit
       vstsApi.gitApi.mockImplementationOnce(() => ({
         getBranch: jest.fn(() => ({
@@ -109,7 +125,7 @@ describe('platform/vsts', () => {
   describe('getCommitMessages()', () => {
     it('returns commits messages', async () => {
       const config = await initRepo(
-        'some/repo',
+        'some-repo',
         'token',
         'https://my.custom.endpoint/'
       );
@@ -136,7 +152,7 @@ describe('platform/vsts', () => {
 
   describe('getFile(filePatch, branchName)', () => {
     it('should return the encoded file content', async () => {
-      await initRepo('some/repo', 'token');
+      await initRepo('some-repo', 'token');
       vstsHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);
       const content = await vsts.getFile('package.json');
       expect(content).toMatchSnapshot();
@@ -334,7 +350,7 @@ describe('platform/vsts', () => {
 
   describe('branchExists(branchName)', () => {
     it('should return false if the branch does not exist', async () => {
-      await initRepo('some/repo', 'token');
+      await initRepo('some-repo', 'token');
       vstsHelper.getRefs.mockImplementation(() => []);
       const exists = await vsts.branchExists('thebranchname');
       expect(exists).toBe(false);
@@ -382,12 +398,12 @@ describe('platform/vsts', () => {
 
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('return success if requiredStatusChecks null', async () => {
-      await initRepo('some/repo', 'token');
+      await initRepo('some-repo', 'token');
       const res = await vsts.getBranchStatus('somebranch', null);
       expect(res).toEqual('success');
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo('some/repo', 'token');
+      await initRepo('some-repo', 'token');
       const res = await vsts.getBranchStatus('somebranch', ['foo']);
       expect(res).toEqual('failed');
     });

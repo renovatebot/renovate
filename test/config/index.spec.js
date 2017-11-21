@@ -76,6 +76,7 @@ describe('config/index', () => {
       const env = {};
       defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);
       ghGot.mockImplementationOnce(() => ({
+        headers: {},
         body: [
           {
             full_name: 'a/b',
@@ -119,12 +120,22 @@ describe('config/index', () => {
       vstsApi.gitApi.mockImplementationOnce(() => ({
         getRepositories: jest.fn(() => [
           {
-            name: 'a/b',
+            name: 'repo1',
+            project: {
+              name: 'prj1',
+            },
           },
           {
-            name: 'c/d',
+            name: 'repo2',
+            project: {
+              name: 'prj1',
+            },
           },
         ]),
+      }));
+      vstsHelper.getProjectAndRepo.mockImplementationOnce(() => ({
+        project: 'prj1',
+        repo: 'repo1',
       }));
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(0);
@@ -135,6 +146,7 @@ describe('config/index', () => {
       const env = { GITHUB_TOKEN: 'abc' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
       ghGot.mockImplementationOnce(() => ({
+        headers: {},
         body: [],
       }));
       await configParser.parseConfigs(env, defaultArgv);
@@ -145,6 +157,7 @@ describe('config/index', () => {
       const env = { GITHUB_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
       ghGot.mockImplementationOnce(() => ({
+        headers: {},
         body: [],
       }));
       await configParser.parseConfigs(env, defaultArgv);

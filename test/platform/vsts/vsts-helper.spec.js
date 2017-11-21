@@ -1,3 +1,5 @@
+const { Readable } = require('stream');
+
 describe('platform/vsts/helpers', () => {
   let vstsHelper;
   let vstsApi;
@@ -129,13 +131,22 @@ describe('platform/vsts/helpers', () => {
 
   describe('getChanges', () => {
     it('should be get the commit obj formated (file to update)', async () => {
+      let eventCount = 0;
+      const mockEventStream = new Readable({
+        objectMode: true,
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
+          if (eventCount < 1) {
+            eventCount += 1;
+            return this.push('{"hello": "test"}');
+          }
+          return this.push(null);
+        },
+      });
+
       vstsApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => ({
-          readable: true,
-          read: jest.fn(() =>
-            Buffer.from('{"hello": "test"}').toString('base64')
-          ),
-        })),
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getChanges(
@@ -173,15 +184,22 @@ describe('platform/vsts/helpers', () => {
 
   describe('getFile', () => {
     it('should return null error GitItemNotFoundException', async () => {
+      let eventCount = 0;
+      const mockEventStream = new Readable({
+        objectMode: true,
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
+          if (eventCount < 1) {
+            eventCount += 1;
+            return this.push('{"typeKey": "GitItemNotFoundException"}');
+          }
+          return this.push(null);
+        },
+      });
+
       vstsApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => ({
-          readable: true,
-          read: jest.fn(() =>
-            Buffer.from('{"typeKey": "GitItemNotFoundException"}').toString(
-              'base64'
-            )
-          ),
-        })),
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getFile(
@@ -194,15 +212,22 @@ describe('platform/vsts/helpers', () => {
     });
 
     it('should return null error GitUnresolvableToCommitException', async () => {
+      let eventCount = 0;
+      const mockEventStream = new Readable({
+        objectMode: true,
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
+          if (eventCount < 1) {
+            eventCount += 1;
+            return this.push('{"typeKey": "GitUnresolvableToCommitException"}');
+          }
+          return this.push(null);
+        },
+      });
+
       vstsApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => ({
-          readable: true,
-          read: jest.fn(() =>
-            Buffer.from(
-              '{"typeKey": "GitUnresolvableToCommitException"}'
-            ).toString('base64')
-          ),
-        })),
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getFile(
@@ -215,13 +240,22 @@ describe('platform/vsts/helpers', () => {
     });
 
     it('should return the file content because it is not a json', async () => {
+      let eventCount = 0;
+      const mockEventStream = new Readable({
+        objectMode: true,
+        /* eslint-disable func-names */
+        /* eslint-disable object-shorthand */
+        read: function() {
+          if (eventCount < 1) {
+            eventCount += 1;
+            return this.push('{"hello"= "test"}');
+          }
+          return this.push(null);
+        },
+      });
+
       vstsApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => ({
-          readable: true,
-          read: jest.fn(() =>
-            Buffer.from('{"hello"= "test"}').toString('base64')
-          ),
-        })),
+        getItemText: jest.fn(() => mockEventStream),
       }));
 
       const res = await vstsHelper.getFile(
@@ -296,6 +330,28 @@ describe('platform/vsts/helpers', () => {
       }));
       const res = await vstsHelper.getCommitDetails('123', '123456');
       expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('getProjectAndRepo', () => {
+    it('should return the object with same strings', async () => {
+      const res = await vstsHelper.getProjectAndRepo('myRepoName');
+      expect(res).toMatchSnapshot();
+    });
+    it('should return the object with project and repo', async () => {
+      const res = await vstsHelper.getProjectAndRepo('prjName/myRepoName');
+      expect(res).toMatchSnapshot();
+    });
+    it('should return an error', async () => {
+      let err;
+      try {
+        await vstsHelper.getProjectAndRepo('prjName/myRepoName/blalba');
+      } catch (error) {
+        err = error;
+      }
+      expect(err.message).toBe(
+        `prjName/myRepoName/blalba can be only structured this way : 'repoName' or 'projectName/repoName'!`
+      );
     });
   });
 });
