@@ -318,14 +318,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`devDependencies`</td>
   <td>Configuration specifically for `package.json`>`devDependencies`</td>
   <td>json</td>
-  <td><pre>{
-  "pin": {
-    "group": {
-      "commitMessage": "Pin devDependencies",
-      "prTitle": "Pin devDependencies"
-    }
-  }
-}</pre></td>
+  <td><pre>{}</pre></td>
   <td>`RENOVATE_DEV_DEPENDENCIES`</td>
   <td><td>
 </tr>
@@ -702,7 +695,7 @@ Obviously, you can't set repository or package file location with this method.
 </tr>
 <tr>
   <td>`assignees`</td>
-  <td>Assignees for Pull Request</td>
+  <td>Assignees for Pull Request (user name in GitHub/GitLab, email address in VSTS)</td>
   <td>list</td>
   <td><pre>[]</pre></td>
   <td>`RENOVATE_ASSIGNEES`</td>
@@ -710,7 +703,7 @@ Obviously, you can't set repository or package file location with this method.
 </tr>
 <tr>
   <td>`reviewers`</td>
-  <td>Requested reviewers for Pull Requests (GitHub only)</td>
+  <td>Requested reviewers for Pull Requests (user name in GitHub/GitLab, email or user name in VSTS)</td>
   <td>list</td>
   <td><pre>[]</pre></td>
   <td>`RENOVATE_REVIEWERS`</td>

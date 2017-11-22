@@ -2,7 +2,7 @@ const { Readable } = require('stream');
 
 describe('platform/vsts/helpers', () => {
   let vstsHelper;
-  let gitApi;
+  let vstsApi;
 
   beforeEach(() => {
     // clean up env
@@ -13,7 +13,7 @@ describe('platform/vsts/helpers', () => {
     jest.resetModules();
     jest.mock('../../../lib/platform/vsts/vsts-got-wrapper');
     vstsHelper = require('../../../lib/platform/vsts/vsts-helper');
-    gitApi = require('../../../lib/platform/vsts/vsts-got-wrapper');
+    vstsApi = require('../../../lib/platform/vsts/vsts-got-wrapper');
   });
 
   describe('getRepos', () => {
@@ -86,21 +86,21 @@ describe('platform/vsts/helpers', () => {
 
   describe('getRef', () => {
     it('should get the ref', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => [{ objectId: 132 }]),
       }));
       const res = await vstsHelper.getRefs('123', 'branch');
       expect(res).toMatchSnapshot();
     });
     it('should get 0 ref', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => []),
       }));
       const res = await vstsHelper.getRefs('123');
       expect(res.length).toBe(0);
     });
     it('should get the ref', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => [{ objectId: '132' }]),
       }));
       const res = await vstsHelper.getRefs('123', 'refs/head/branch1');
@@ -110,7 +110,7 @@ describe('platform/vsts/helpers', () => {
 
   describe('getVSTSBranchObj', () => {
     it('should be the branch object formated', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => [{ objectId: '132' }]),
       }));
       const res = await vstsHelper.getVSTSBranchObj(
@@ -121,7 +121,7 @@ describe('platform/vsts/helpers', () => {
       expect(res).toMatchSnapshot();
     });
     it('should be the branch object formated', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => []),
       }));
       const res = await vstsHelper.getVSTSBranchObj('123', 'branchName');
@@ -145,7 +145,7 @@ describe('platform/vsts/helpers', () => {
         },
       });
 
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => mockEventStream),
       }));
 
@@ -163,7 +163,7 @@ describe('platform/vsts/helpers', () => {
       expect(res).toMatchSnapshot();
     });
     it('should be get the commit obj formated (file to create)', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => null),
       }));
 
@@ -198,7 +198,7 @@ describe('platform/vsts/helpers', () => {
         },
       });
 
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => mockEventStream),
       }));
 
@@ -226,7 +226,7 @@ describe('platform/vsts/helpers', () => {
         },
       });
 
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => mockEventStream),
       }));
 
@@ -254,7 +254,7 @@ describe('platform/vsts/helpers', () => {
         },
       });
 
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => mockEventStream),
       }));
 
@@ -268,7 +268,7 @@ describe('platform/vsts/helpers', () => {
     });
 
     it('should return null because the file is not readable', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => ({
           readable: false,
         })),
@@ -323,7 +323,7 @@ describe('platform/vsts/helpers', () => {
 
   describe('getCommitDetails', () => {
     it('should get commit details', async () => {
-      gitApi.mockImplementationOnce(() => ({
+      vstsApi.gitApi.mockImplementationOnce(() => ({
         getCommit: jest.fn(() => ({
           parents: ['123456'],
         })),

@@ -26,6 +26,7 @@ describe('api/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
+    npm.resetCache();
   });
   it('should fetch package info from npm', async () => {
     nock('https://registry.npmjs.org')
@@ -44,14 +45,6 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobarhome');
     expect(res).toMatchSnapshot();
   });
-  it('should cache package info from npm', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
-    const res1 = await npm.getDependency('foobar');
-    const res2 = await npm.getDependency('foobar');
-    expect(res1).toEqual(res2);
-  });
   it('should return null if lookup fails', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
@@ -65,7 +58,6 @@ describe('api/npm', () => {
       token: '1234',
     }));
     nock('https://registry.npmjs.org')
-      .matchHeader('authorization', 'Basic 1234')
       .get('/foobar')
       .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
@@ -73,7 +65,6 @@ describe('api/npm', () => {
   });
   it('should use NPM_TOKEN if provided', async () => {
     nock('https://registry.npmjs.org')
-      .matchHeader('authorization', 'Bearer some-token')
       .get('/foobar')
       .reply(200, npmResponse);
     const oldToken = process.env.NPM_TOKEN;
@@ -83,7 +74,7 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
   });
   it('should fetch package info from custom registry', async () => {
-    nock('https://npm.mycustomregistry.com')
+    nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
     npm.setNpmrc('registry=https://npm.mycustomregistry.com/');
@@ -106,5 +97,14 @@ describe('api/npm', () => {
       .reply(200, noTimeResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
+  });
+  it('should cache package info from npm', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
+    const res1 = await npm.getDependency('foobar');
+    const res2 = await npm.getDependency('foobar');
+    expect(res1).not.toBe(null);
+    expect(res1).toEqual(res2);
   });
 });
