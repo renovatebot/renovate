@@ -318,14 +318,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`devDependencies`</td>
   <td>Configuration specifically for `package.json`>`devDependencies`</td>
   <td>json</td>
-  <td><pre>{
-  "pin": {
-    "group": {
-      "commitMessage": "Pin devDependencies",
-      "prTitle": "Pin devDependencies"
-    }
-  }
-}</pre></td>
+  <td><pre>{}</pre></td>
   <td>`RENOVATE_DEV_DEPENDENCIES`</td>
   <td><td>
 </tr>

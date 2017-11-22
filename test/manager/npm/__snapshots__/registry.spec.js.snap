@@ -5,16 +5,26 @@ Object {
   "dist-tags": Object {
     "latest": "0.0.1",
   },
-  "homepage": undefined,
+  "homepage": "https://google.com",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://google.com",
   "versions": Object {
     "0.0.1": Object {
       "time": "",
     },
   },
 }
+`;
+
+exports[`api/npm should fetch package info from custom registry 2`] = `
+Array [
+  "https://npm.mycustomregistry.com/foobar",
+  Object {
+    "headers": Object {},
+    "json": true,
+  },
+]
 `;
 
 exports[`api/npm should fetch package info from npm 1`] = `
@@ -34,21 +44,43 @@ Object {
 }
 `;
 
+exports[`api/npm should fetch package info from npm 2`] = `
+Array [
+  "https://registry.npmjs.org/foobar",
+  Object {
+    "headers": Object {},
+    "json": true,
+  },
+]
+`;
+
 exports[`api/npm should send an authorization header if provided 1`] = `
 Object {
   "dist-tags": Object {
     "latest": "0.0.1",
   },
-  "homepage": undefined,
+  "homepage": "https://google.com",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://google.com",
   "versions": Object {
     "0.0.1": Object {
       "time": "",
     },
   },
 }
+`;
+
+exports[`api/npm should send an authorization header if provided 2`] = `
+Array [
+  "https://registry.npmjs.org/foobar",
+  Object {
+    "headers": Object {
+      "authorization": "Basic 1234",
+    },
+    "json": true,
+  },
+]
 `;
 
 exports[`api/npm should use NPM_TOKEN if provided 1`] = `
@@ -56,16 +88,28 @@ Object {
   "dist-tags": Object {
     "latest": "0.0.1",
   },
-  "homepage": undefined,
+  "homepage": "https://google.com",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://google.com",
   "versions": Object {
     "0.0.1": Object {
       "time": "",
     },
   },
 }
+`;
+
+exports[`api/npm should use NPM_TOKEN if provided 2`] = `
+Array [
+  "https://registry.npmjs.org/foobar",
+  Object {
+    "headers": Object {
+      "authorization": "Bearer some-token",
+    },
+    "json": true,
+  },
+]
 `;
 
 exports[`api/npm should use default registry if missing from npmrc 1`] = `
@@ -73,10 +117,10 @@ Object {
   "dist-tags": Object {
     "latest": "0.0.1",
   },
-  "homepage": undefined,
+  "homepage": "https://google.com",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://google.com",
   "versions": Object {
     "0.0.1": Object {
       "time": "",
@@ -85,21 +129,41 @@ Object {
 }
 `;
 
+exports[`api/npm should use default registry if missing from npmrc 2`] = `
+Array [
+  "https://registry.npmjs.org/foobar",
+  Object {
+    "headers": Object {},
+    "json": true,
+  },
+]
+`;
+
 exports[`api/npm should use dummy time if missing 1`] = `
 Object {
   "dist-tags": Object {
     "latest": "0.0.1",
   },
-  "homepage": undefined,
+  "homepage": "https://google.com",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://google.com",
   "versions": Object {
     "0.0.1": Object {
       "time": "2017-01-01T12:00:00.000Z",
     },
   },
 }
+`;
+
+exports[`api/npm should use dummy time if missing 2`] = `
+Array [
+  "https://registry.npmjs.org/foobar",
+  Object {
+    "headers": Object {},
+    "json": true,
+  },
+]
 `;
 
 exports[`api/npm should use homepage 1`] = `
@@ -117,4 +181,14 @@ Object {
     },
   },
 }
+`;
+
+exports[`api/npm should use homepage 2`] = `
+Array [
+  "https://registry.npmjs.org/foobarhome",
+  Object {
+    "headers": Object {},
+    "json": true,
+  },
+]
 `;
