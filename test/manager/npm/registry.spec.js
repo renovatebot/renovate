@@ -1,27 +1,24 @@
 const npm = require('../../../lib/manager/npm/registry');
-const got = require('got');
 const registryAuthToken = require('registry-auth-token');
+const nock = require('nock');
 
 jest.mock('registry-auth-token');
-jest.mock('got');
 
 const npmResponse = {
-  body: {
-    versions: {
-      '0.0.1': {
-        foo: 1,
-      },
+  versions: {
+    '0.0.1': {
+      foo: 1,
     },
-    repository: {
-      type: 'git',
-      url: 'git://github.com/renovateapp/dummy.git',
-    },
-    'dist-tags': {
-      latest: '0.0.1',
-    },
-    time: {
-      '0.0.1': '',
-    },
+  },
+  repository: {
+    type: 'git',
+    url: 'git://github.com/renovateapp/dummy.git',
+  },
+  'dist-tags': {
+    latest: '0.0.1',
+  },
+  time: {
+    '0.0.1': '',
   },
 };
 
@@ -32,33 +29,26 @@ describe('api/npm', () => {
     npm.resetCache();
   });
   it('should fetch package info from npm', async () => {
-    got.mockImplementation(() => Promise.resolve(npmResponse));
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    const call = got.mock.calls[0];
-    expect(call).toMatchSnapshot();
   });
   it('should use homepage', async () => {
     const npmResponseHomepage = { ...npmResponse };
-    npmResponseHomepage.body.repository.url = '';
-    npmResponseHomepage.body.homepage = 'https://google.com';
-    got.mockImplementationOnce(() => Promise.resolve(npmResponseHomepage));
+    npmResponseHomepage.repository.url = '';
+    npmResponseHomepage.homepage = 'https://google.com';
+    nock('https://registry.npmjs.org')
+      .get('/foobarhome')
+      .reply(200, npmResponseHomepage);
     const res = await npm.getDependency('foobarhome');
     expect(res).toMatchSnapshot();
-    const call = got.mock.calls[0];
-    expect(call).toMatchSnapshot();
-  });
-  it('should cache package info from npm', async () => {
-    got.mockImplementation(() => Promise.resolve(npmResponse));
-    const res1 = await npm.getDependency('foobar');
-    const res2 = await npm.getDependency('foobar');
-    expect(res1).toEqual(res2);
-    expect(got.mock.calls.length).toEqual(1);
   });
   it('should return null if lookup fails', async () => {
-    got.mockImplementation(() => {
-      throw new Error('not found');
-    });
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(404);
     const res = await npm.getDependency('foobar');
     expect(res).toBeNull();
   });
@@ -67,45 +57,54 @@ describe('api/npm', () => {
       type: 'Basic',
       token: '1234',
     }));
-    got.mockImplementation(() => Promise.resolve(npmResponse));
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    const call = got.mock.calls[0];
-    expect(call).toMatchSnapshot();
   });
   it('should use NPM_TOKEN if provided', async () => {
-    got.mockImplementation(() => Promise.resolve(npmResponse));
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
     const oldToken = process.env.NPM_TOKEN;
     process.env.NPM_TOKEN = 'some-token';
     const res = await npm.getDependency('foobar');
     process.env.NPM_TOKEN = oldToken;
     expect(res).toMatchSnapshot();
-    const call = got.mock.calls[0];
-    expect(call).toMatchSnapshot();
   });
   it('should fetch package info from custom registry', async () => {
-    got.mockImplementation(() => Promise.resolve(npmResponse));
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
     npm.setNpmrc('registry=https://npm.mycustomregistry.com/');
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    const call = got.mock.calls[0];
-    expect(call).toMatchSnapshot();
   });
   it('should use default registry if missing from npmrc', async () => {
-    got.mockImplementation(() => Promise.resolve(npmResponse));
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
     npm.setNpmrc('foo=bar');
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    const call = got.mock.calls[0];
-    expect(call).toMatchSnapshot();
   });
   it('should use dummy time if missing', async () => {
     const noTimeResponse = { ...npmResponse };
-    delete noTimeResponse.body.time;
-    got.mockImplementation(() => Promise.resolve(noTimeResponse));
+    delete noTimeResponse.time;
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, noTimeResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    const call = got.mock.calls[0];
-    expect(call).toMatchSnapshot();
+  });
+  it('should cache package info from npm', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
+    const res1 = await npm.getDependency('foobar');
+    const res2 = await npm.getDependency('foobar');
+    expect(res1).not.toBe(null);
+    expect(res1).toEqual(res2);
   });
 });
