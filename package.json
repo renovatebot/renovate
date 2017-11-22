@@ -61,9 +61,9 @@
     "json-dup-key-validator": "1.0.2",
     "json-stringify-pretty-compact": "1.0.4",
     "jsonwebtoken": "8.1.0",
+    "keyv": "3.0.0",
     "later": "1.2.0",
     "lodash": "4.17.4",
-    "make-fetch-happen": "2.6.0",
     "minimatch": "3.0.4",
     "moment": "2.19.2",
     "moment-timezone": "0.5.14",
@@ -93,7 +93,6 @@
     "jest": "21.2.1",
     "mkdirp": "0.5.1",
     "mockdate": "2.0.2",
-    "nock": "9.1.0",
     "prettier": "1.8.2",
     "rimraf": "2.6.2",
     "semantic-release": "8.2.0"
