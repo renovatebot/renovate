@@ -27,8 +27,6 @@ jobs:
   include:
     - script: yarn run prettier --list-different
     - script: yarn run lint
-    - script: yarn run jest --maxWorkers=4
-    - stage: coverage
-      script: bash <(curl -s https://codecov.io/bash)
+    - script: yarn run jest --maxWorkers=4 && yarn run codecov
     - stage: deploy
       script: yarn run semantic-release
