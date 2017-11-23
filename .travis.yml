@@ -17,14 +17,10 @@ cache:
     - ".eslintcache"
     - "node_modules"
 
-stages:
-  - test
-  - name: deploy
-    if: branch = master AND type = push
+script:
+  - yarn run prettier -- --list-different
+  - yarn run lint
+  - yarn run jest --maxWorkers=4
 
-jobs:
-  include:
-    - stage: test
-      script: yarn test && yarn codecov
-    - stage: deploy
-      script: yarn run semantic-release
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
