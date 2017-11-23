@@ -14,7 +14,8 @@
     "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
     "test": "npm run prettier -- --list-different && npm run lint && npm run jest",
-    "update-docs": "bash bin/update-docs.sh"
+    "update-docs": "bash bin/update-docs.sh",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
     "type": "git",
@@ -93,7 +94,7 @@
     "mockdate": "2.0.2",
     "prettier": "1.8.2",
     "rimraf": "2.6.2",
-    "semantic-release": "9.1.1"
+    "semantic-release": "^8.2.0"
   },
   "files": [
     "lib"
