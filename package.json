@@ -148,7 +148,6 @@
   },
   "release": {
     "branch": "master",
-    "verifyConditions": "condition-circle",
     "analyzeCommits": {
       "preset": "angular",
       "releaseRules": [
