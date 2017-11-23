@@ -20,7 +20,7 @@ cache:
 script:
   - yarn run prettier -- --list-different
   - yarn run lint
-  - yarn run jest
+  - yarn run jest --maxWorkers=4
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
