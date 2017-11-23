@@ -1,3 +1,5 @@
+notifications:
+  email: false
 
 language: node_js
 
@@ -5,6 +7,8 @@ node_js:
   - "8"
 
 sudo: false
+
+if: tag IS blank
 
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
@@ -23,7 +27,7 @@ script:
   - yarn run jest --maxWorkers=4
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - yarn run codecov
 
 deploy:
   provider: script
