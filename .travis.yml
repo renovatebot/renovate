@@ -25,6 +25,6 @@ stages:
 jobs:
   include:
     - stage: test
-      script: yarn test
+      script: yarn test && yarn codecov
     - stage: deploy
       script: yarn run semantic-release
