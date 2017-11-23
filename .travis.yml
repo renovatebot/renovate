@@ -21,3 +21,6 @@ script:
   - yarn run prettier -- --list-different
   - yarn run lint
   - yarn run jest
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
