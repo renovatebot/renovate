@@ -13,8 +13,11 @@ before_install:
 cache:
   yarn: true
   directories:
+    - ".cache"
     - ".eslintcache"
     - "node_modules"
 
 script:
-  - yarn test
+  - yarn run prettier -- --list-different
+  - yarn run lint
+  - yarn run jest
