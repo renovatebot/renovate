@@ -17,11 +17,18 @@ cache:
     - ".eslintcache"
     - "node_modules"
 
-script:
-  - yarn run prettier -- --list-different
-  - yarn run lint
-  - yarn run jest --maxWorkers=4
+stages:
+  - test
+  - coverage
+  - name: deploy
+    if: branch = master
 
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
-  - yarn run semantic-release
+jobs:
+  include:
+    - script: yarn run prettier --list-different
+    - script: yarn run lint
+    - script: yarn run jest --maxWorkers=4
+    - stage: coverage
+      script: bash <(curl -s https://codecov.io/bash)
+    - stage: deploy
+      script: yarn run semantic-release
