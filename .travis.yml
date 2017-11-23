@@ -21,7 +21,7 @@ stages:
   - test
   - coverage
   - name: deploy
-    if: branch = master
+    if: branch = master AND type = push
 
 jobs:
   include:
