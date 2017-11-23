@@ -94,7 +94,7 @@
     "mockdate": "2.0.2",
     "prettier": "1.8.2",
     "rimraf": "2.6.2",
-    "semantic-release": "8.2.0"
+    "semantic-release": "9.1.1"
   },
   "files": [
     "lib"
@@ -148,7 +148,6 @@
   },
   "release": {
     "branch": "master",
-    "verifyConditions": "condition-circle",
     "analyzeCommits": {
       "preset": "angular",
       "releaseRules": [
