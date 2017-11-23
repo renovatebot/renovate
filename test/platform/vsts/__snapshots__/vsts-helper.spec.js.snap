@@ -74,9 +74,8 @@ exports[`platform/vsts/helpers getRenovatePRFormat should be formated (closed v2
 Object {
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
-  "isClosed": true,
   "number": undefined,
-  "status": 3,
+  "status": "merged",
 }
 `;
 
@@ -84,9 +83,8 @@ exports[`platform/vsts/helpers getRenovatePRFormat should be formated (closed) 1
 Object {
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
-  "isClosed": true,
   "number": undefined,
-  "status": 2,
+  "status": "closed",
 }
 `;
 
@@ -94,10 +92,10 @@ exports[`platform/vsts/helpers getRenovatePRFormat should be formated (isUnmerge
 Object {
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
-  "isClosed": false,
   "isUnmergeable": true,
   "mergeStatus": 2,
   "number": undefined,
+  "status": "open",
 }
 `;
 
@@ -105,9 +103,8 @@ exports[`platform/vsts/helpers getRenovatePRFormat should be formated (not close
 Object {
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
-  "isClosed": false,
   "number": undefined,
-  "status": 1,
+  "status": "open",
 }
 `;
 
