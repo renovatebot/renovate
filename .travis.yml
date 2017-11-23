@@ -13,7 +13,7 @@ before_install:
 cache:
   yarn: true
   directories:
-    - ".jestcache"
+    - ".cache"
     - ".eslintcache"
     - "node_modules"
 
