@@ -14,8 +14,7 @@
     "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
     "test": "npm run prettier -- --list-different && npm run lint && npm run jest",
-    "update-docs": "bash bin/update-docs.sh",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "update-docs": "bash bin/update-docs.sh"
   },
   "repository": {
     "type": "git",
@@ -45,7 +44,7 @@
     "chalk": "2.3.0",
     "changelog": "1.4.1",
     "child-process-promise": "2.2.1",
-    "commander": "2.11.0",
+    "commander": "2.12.1",
     "compare-versions": "3.1.0",
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
@@ -84,7 +83,6 @@
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
-    "condition-circle": "1.5.0",
     "cross-env": "5.1.1",
     "eslint": "4.11.0",
     "eslint-config-airbnb-base": "12.1.0",
@@ -96,7 +94,7 @@
     "mockdate": "2.0.2",
     "prettier": "1.8.2",
     "rimraf": "2.6.2",
-    "semantic-release": "8.2.0"
+    "semantic-release": "9.1.1"
   },
   "files": [
     "lib"
@@ -150,7 +148,6 @@
   },
   "release": {
     "branch": "master",
-    "verifyConditions": "condition-circle",
     "analyzeCommits": {
       "preset": "angular",
       "releaseRules": [
