@@ -19,13 +19,12 @@ cache:
 
 stages:
   - test
-  - coverage
   - name: deploy
     if: branch = master AND type = push
 
 jobs:
   include:
-    - script: yarn run prettier --list-different && yarn run lint
-    - script: yarn run jest --maxWorkers=4 && yarn run codecov
+    - stage: test
+      script: yarn test
     - stage: deploy
       script: yarn run semantic-release
