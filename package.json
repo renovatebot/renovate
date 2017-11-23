@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/singapore/renovate.git"
+    "url": "https://github.com/renovateapp/renovate.git"
   },
   "keywords": [
     "npm",
@@ -31,9 +31,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/singapore/renovate/issues"
+    "url": "https://github.com/renovateapp/renovate/issues"
   },
-  "homepage": "https://github.com/singapore/renovate#readme",
+  "homepage": "https://github.com/renovateapp/renovate#readme",
   "engines": {
     "node": ">=8.8.0",
     "npm": "5"

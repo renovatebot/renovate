@@ -4,11 +4,11 @@ module.exports = {
   repositories: [
     'singapore/lint-condo',
     {
-      repository: 'singapore/renovate',
+      repository: 'renovateapp/renovate',
       packageFiles: ['package2.json'],
     },
     {
-      repository: 'singapore/renovate',
+      repository: 'renovateapp/renovate',
       packageFiles: [
         {
           packageFile: 'package.json',
