@@ -6,9 +6,7 @@ node_js:
 
 sudo: false
 
-branches:
-  except:
-    - /^v[0-9]/
+if: tag IS blank
 
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
