@@ -25,8 +25,7 @@ stages:
 
 jobs:
   include:
-    - script: yarn run prettier --list-different
-    - script: yarn run lint
+    - script: yarn run prettier --list-different && yarn run lint
     - script: yarn run jest --maxWorkers=4 && yarn run codecov
     - stage: deploy
       script: yarn run semantic-release
