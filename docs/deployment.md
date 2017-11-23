@@ -27,7 +27,7 @@ Heroku free dynos provide a good way to host this for free. Set it up with the f
 The best way to deploy to Heroku is via git and Heroku CLI.
 
 ```
-$ git clone https://github.com/singapore/renovate
+$ git clone https://github.com/renovateapp/renovate
 $ cd renovate
 $ heroku create [app name]
 $ git push heroku master
