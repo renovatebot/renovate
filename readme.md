@@ -4,10 +4,10 @@
 
 Keep dependencies up-to-date.
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/singapore/renovate/master/license)
-[![codecov](https://codecov.io/gh/singapore/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/singapore/renovate)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/renovateapp/renovate/master/license)
+[![codecov](https://codecov.io/gh/renovateapp/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovateapp/renovate)
 [![Join the chat at https://gitter.im/renovate-app/Lobby](https://badges.gitter.im/renovate-app/Lobby.svg)](https://gitter.im/renovate-app/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![David](https://david-dm.org/singapore/renovate.svg)](https://david-dm.org/singapore/renovate)
+[![David](https://david-dm.org/renovateapp/renovate.svg)](https://david-dm.org/renovateapp/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 
 ## Why
@@ -56,14 +56,14 @@ Note: The first time you run `renovate` on a repository, it will not upgrade any
 
 ## Deployment
 
-See [deployment docs](https://github.com/singapore/renovate/blob/master/docs/deployment.md) for details.
+See [deployment docs](https://github.com/renovateapp/renovate/blob/master/docs/deployment.md) for details.
 
 ## Configuration
 
-The [Configuration](https://github.com/singapore/renovate/blob/master/docs/configuration.md) and [Configuration FAQ](https://github.com/singapore/renovate/blob/master/docs/faq.md) documents should be helpful.
+The [Configuration](https://github.com/renovateapp/renovate/blob/master/docs/configuration.md) and [Configuration FAQ](https://github.com/renovateapp/renovate/blob/master/docs/faq.md) documents should be helpful.
 
 You can also raise an issue in https://github.com/renovateapp/config-help if you'd like to get your config reviewed or ask any questions.
 
 ## Design Decisions
 
-See [design decisions doc](https://github.com/singapore/renovate/blob/master/docs/design-decisions.md) for details.
+See [design decisions doc](https://github.com/renovateapp/renovate/blob/master/docs/design-decisions.md) for details.

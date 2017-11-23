@@ -268,10 +268,10 @@ describe('workers/package/versions', () => {
       versions.isValidVersion('>1.2.3').should.eql(true);
     });
     it('should reject github repositories', () => {
-      versions.isValidVersion('singapore/renovate').should.eql(false);
-      versions.isValidVersion('singapore/renovate#master').should.eql(false);
+      versions.isValidVersion('renovateapp/renovate').should.eql(false);
+      versions.isValidVersion('renovateapp/renovate#master').should.eql(false);
       versions
-        .isValidVersion('https://github.com/singapore/renovate.git')
+        .isValidVersion('https://github.com/renovateapp/renovate.git')
         .should.eql(false);
     });
   });

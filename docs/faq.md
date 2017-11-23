@@ -1,6 +1,6 @@
 # FAQ
 
-If you need a specific behaviour and it's not mentioned here - or it's more complicated - feel free to raise an [Issue](https://github.com/singapore/renovate/issues) - configuration questions are welcome in this repository.
+If you need a specific behaviour and it's not mentioned here - or it's more complicated - feel free to raise an [Issue](https://github.com/renovateapp/renovate/issues) - configuration questions are welcome in this repository.
 
 ## What Is The Default Behaviour?
 
