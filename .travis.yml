@@ -18,4 +18,6 @@ cache:
     - "node_modules"
 
 script:
-  - yarn test
+  - yarn run prettier -- --list-different
+  - yarn run lint
+  - yarn run jest
