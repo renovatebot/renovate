@@ -1847,11 +1847,11 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
-gh-got@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/gh-got/-/gh-got-6.0.0.tgz#d74353004c6ec466647520a10bd46f7299d268d0"
+gh-got@7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/gh-got/-/gh-got-7.0.0.tgz#f6cce302e850327ed2d11c00080c56656f1e2432"
   dependencies:
-    got "^7.0.0"
+    got "^8.0.0"
     is-plain-obj "^1.1.0"
 
 git-head@^1.2.1:
@@ -1986,7 +1986,7 @@ globby@^5.0.0:
     pify "^2.0.0"
     pinkie-promise "^2.0.0"
 
-got@8.0.0:
+got@8.0.0, got@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/got/-/got-8.0.0.tgz#57a11f841edc58e3f3eba4b3ac220faf5133770f"
   dependencies:
