@@ -212,13 +212,19 @@ describe('workers/branch/lock-files', () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
-          content: { name: 'package 1' },
+          content: {
+            name: 'package 1',
+            dependencies: {
+              test: 'file:../test.tgz',
+              testFolder: 'file:../test',
+            },
+          },
           yarnLock: 'some yarn lock',
           packageLock: 'some package lock',
         },
       ];
       await writeExistingFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(3);
+      expect(fs.outputFile.mock.calls).toHaveLength(4);
       expect(fs.remove.mock.calls).toHaveLength(0);
     });
   });
