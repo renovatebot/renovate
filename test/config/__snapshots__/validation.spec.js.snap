@@ -16,7 +16,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`semanticPrefix\` should be a string",
+    "message": "Configuration option \`semanticCommitType\` should be a string",
   },
   Object {
     "depName": "Configuration Error",

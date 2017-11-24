@@ -310,7 +310,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`dependencies`</td>
   <td>Configuration specifically for `package.json`>`dependencies`</td>
   <td>json</td>
-  <td><pre>{"semanticPrefix": "fix(deps):"}</pre></td>
+  <td><pre>{"semanticCommitType": "fix"}</pre></td>
   <td>`RENOVATE_DEPENDENCIES`</td>
   <td><td>
 </tr>
@@ -501,11 +501,8 @@ Obviously, you can't set repository or package file location with this method.
   "recreateClosed": true,
   "rebaseStalePrs": true,
   "groupName": "Pin Dependencies",
-  "group": {
-    "commitMessage": "Pin Dependencies",
-    "prTitle": "{{groupName}}",
-    "semanticPrefix": "refactor(deps):"
-  }
+  "semanticCommitType": "refactor",
+  "group": {"commitMessage": "Pin Dependencies", "prTitle": "{{groupName}}"}
 }</pre></td>
   <td>`RENOVATE_PIN`</td>
   <td><td>
@@ -514,7 +511,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`digest`</td>
   <td>Configuration to apply when updating a Docker digest (same tag)</td>
   <td>json</td>
-  <td><pre>{"semanticPrefix": "refactor(deps):"}</pre></td>
+  <td><pre>{"semanticCommitType": "refactor"}</pre></td>
   <td>`RENOVATE_DIGEST`</td>
   <td><td>
 </tr>
@@ -527,12 +524,20 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--semantic-commits`<td>
 </tr>
 <tr>
-  <td>`semanticPrefix`</td>
-  <td>Prefix to use if semantic commits are enabled</td>
+  <td>`semanticCommitType`</td>
+  <td>Commit type to use if semantic commits is enabled</td>
   <td>string</td>
-  <td><pre>"chore(deps):"</pre></td>
-  <td>`RENOVATE_SEMANTIC_PREFIX`</td>
-  <td>`--semantic-prefix`<td>
+  <td><pre>"chore"</pre></td>
+  <td>`RENOVATE_SEMANTIC_COMMIT_TYPE`</td>
+  <td>`--semantic-commit-type`<td>
+</tr>
+<tr>
+  <td>`semanticCommitScope`</td>
+  <td>Conmmit scope to use if semantic commits are enabled</td>
+  <td>string</td>
+  <td><pre>"deps"</pre></td>
+  <td>`RENOVATE_SEMANTIC_COMMIT_SCOPE`</td>
+  <td>`--semantic-commit-scope`<td>
 </tr>
 <tr>
   <td>`recreateClosed`</td>

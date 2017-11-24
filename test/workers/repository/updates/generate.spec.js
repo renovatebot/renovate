@@ -15,8 +15,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          semanticCommits: true,
-          semanticPrefix: 'some-prefix:',
           lazyGrouping: true,
           foo: 1,
           group: {
@@ -27,7 +25,6 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
-      expect(res).toMatchSnapshot();
     });
     it('groups single upgrade if not lazyGrouping', () => {
       const branch = [
@@ -46,7 +43,6 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
-      expect(res).toMatchSnapshot();
     });
     it('does not group same upgrades', () => {
       const branch = [
@@ -105,7 +101,26 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
-      expect(res).toMatchSnapshot();
+    });
+    it('uses semantic commits', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          semanticCommits: true,
+          semanticCommitType: 'chore',
+          semanticCommitScope: 'package',
+          lazyGrouping: true,
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toEqual('chore(package): some-title');
     });
   });
 });

@@ -236,7 +236,8 @@ Object {
       "Preserve (but continue to upgrade) any existing semver ranges",
     ],
     "pinVersions": false,
-    "semanticPrefix": "fix(deps):",
+    "semanticCommitScope": "deps",
+    "semanticCommitType": "fix",
   },
   "description": Array [
     "Use <code>renovate/</code> as prefix for all branch names",
@@ -249,7 +250,8 @@ Object {
       "Use version pinning (maintain a single version only and not semver ranges)",
     ],
     "pinVersions": true,
-    "semanticPrefix": "chore(deps):",
+    "semanticCommitScope": "deps",
+    "semanticCommitType": "chore",
   },
   "ignoreUnstable": true,
   "labels": Array [
@@ -273,14 +275,16 @@ Object {
       "Preserve (but continue to upgrade) any existing semver ranges",
     ],
     "pinVersions": false,
-    "semanticPrefix": "chore(deps):",
+    "semanticCommitScope": "deps",
+    "semanticCommitType": "chore",
   },
   "peerDependencies": Object {
     "description": Array [
       "Preserve (but continue to upgrade) any existing semver ranges",
     ],
     "pinVersions": false,
-    "semanticPrefix": "chore(deps):",
+    "semanticCommitScope": "deps",
+    "semanticCommitType": "chore",
   },
   "prCreation": "immediate",
   "rebaseStalePrs": true,
@@ -305,7 +309,8 @@ Object {
     "description": Array [
       "Use <code>fix(deps):</code> as semantic prefix for commit messages and PR titles",
     ],
-    "semanticPrefix": "fix(deps):",
+    "semanticCommitScope": "deps",
+    "semanticCommitType": "fix",
   },
   "description": Array [
     "Use version pinning (maintain a single version only and not semver ranges)",
@@ -324,7 +329,8 @@ Object {
     "description": Array [
       "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
     ],
-    "semanticPrefix": "chore(deps):",
+    "semanticCommitScope": "deps",
+    "semanticCommitType": "chore",
   },
   "ignoreUnstable": true,
   "lockFileMaintenance": Object {
@@ -334,13 +340,15 @@ Object {
     "description": Array [
       "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
     ],
-    "semanticPrefix": "chore(deps):",
+    "semanticCommitScope": "deps",
+    "semanticCommitType": "chore",
   },
   "peerDependencies": Object {
     "description": Array [
       "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
     ],
-    "semanticPrefix": "chore(deps):",
+    "semanticCommitScope": "deps",
+    "semanticCommitType": "chore",
   },
   "pinVersions": true,
   "prCreation": "not-pending",

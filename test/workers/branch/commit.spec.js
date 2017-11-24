@@ -10,7 +10,8 @@ describe('workers/branch/automerge', () => {
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
         semanticCommits: false,
-        semanticPrefix: 'some-prefix',
+        semanticCommitType: 'a',
+        semanticCommitScope: 'b',
         updatedPackageFiles: [],
         updatedLockFiles: [],
       };
@@ -49,7 +50,7 @@ describe('workers/branch/automerge', () => {
       await commitFilesToBranch(config);
       expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(platform.commitFilesToBranch.mock.calls[0][2]).toEqual(
-        'some-prefix foo\n\nBar'
+        'a(b): foo\n\nBar'
       );
     });
   });
