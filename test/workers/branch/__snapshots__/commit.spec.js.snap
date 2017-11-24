@@ -10,7 +10,7 @@ Array [
         "name": "package.json",
       },
     ],
-    "some-prefix some commit message",
+    "a(b): some commit message",
     undefined,
   ],
 ]

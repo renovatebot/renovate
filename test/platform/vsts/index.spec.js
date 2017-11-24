@@ -167,7 +167,7 @@ describe('platform/vsts', () => {
             pullRequestId: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            status: 2,
+            state: 'open',
           },
         ]),
       }));
@@ -178,9 +178,32 @@ describe('platform/vsts', () => {
         number: 1,
         head: { ref: 'branch-a' },
         title: 'branch a pr',
-        isClosed: false,
+        state: 'open',
       }));
       const res = await vsts.findPr('branch-a', 'branch a pr', 'open');
+      expect(res).toMatchSnapshot();
+    });
+    it('returns pr if found not open', async () => {
+      vstsApi.gitApi.mockImplementationOnce(() => ({
+        getPullRequests: jest.fn(() => [
+          {
+            pullRequestId: 1,
+            sourceRefName: 'refs/heads/branch-a',
+            title: 'branch a pr',
+            state: 'closed',
+          },
+        ]),
+      }));
+      vstsHelper.getNewBranchName.mockImplementationOnce(
+        () => 'refs/heads/branch-a'
+      );
+      vstsHelper.getRenovatePRFormat.mockImplementationOnce(() => ({
+        number: 1,
+        head: { ref: 'branch-a' },
+        title: 'branch a pr',
+        state: 'closed',
+      }));
+      const res = await vsts.findPr('branch-a', 'branch a pr', '!open');
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it close', async () => {
@@ -190,7 +213,7 @@ describe('platform/vsts', () => {
             pullRequestId: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            status: 2,
+            state: 'closed',
           },
         ]),
       }));
@@ -201,7 +224,7 @@ describe('platform/vsts', () => {
         number: 1,
         head: { ref: 'branch-a' },
         title: 'branch a pr',
-        isClosed: true,
+        state: 'closed',
       }));
       const res = await vsts.findPr('branch-a', 'branch a pr', 'closed');
       expect(res).toMatchSnapshot();
@@ -213,7 +236,7 @@ describe('platform/vsts', () => {
             pullRequestId: 1,
             sourceRefName: 'refs/heads/branch-a',
             title: 'branch a pr',
-            status: 2,
+            state: 'closed',
           },
         ]),
       }));
@@ -224,11 +247,12 @@ describe('platform/vsts', () => {
         number: 1,
         head: { ref: 'branch-a' },
         title: 'branch a pr',
-        isClosed: true,
+        state: 'closed',
       }));
       const res = await vsts.findPr('branch-a', 'branch a pr');
       expect(res).toMatchSnapshot();
     });
+    /*
     it('returns pr if found it but add an error', async () => {
       vstsApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [
@@ -260,6 +284,7 @@ describe('platform/vsts', () => {
       const pr = await vsts.findPr('branch-a', 'branch a pr');
       expect(pr).toBeNull();
     });
+    */
   });
 
   describe('getFileList', () => {

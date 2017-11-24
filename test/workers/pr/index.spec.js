@@ -249,7 +249,7 @@ describe('workers/pr', () => {
       config.automerge = true;
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       platform.getBranchStatus.mockReturnValueOnce('failure');
-      config.semanticPrefix = '';
+      config.semanticCommitScope = null;
       const pr = await prWorker.ensurePr(config);
       expect(platform.updatePr.mock.calls).toMatchSnapshot();
       expect(platform.updatePr.mock.calls.length).toBe(0);
@@ -259,7 +259,7 @@ describe('workers/pr', () => {
     });
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockReturnValueOnce(existingPr);
-      config.semanticPrefix = '';
+      config.semanticCommitScope = null;
       const pr = await prWorker.ensurePr(config);
       expect(platform.updatePr.mock.calls).toMatchSnapshot();
       expect(platform.updatePr.mock.calls).toHaveLength(0);
