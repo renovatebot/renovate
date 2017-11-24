@@ -766,6 +766,20 @@ describe('platform/github', () => {
       const res = await github.findPr('branch-a', null);
       expect(res).toBeDefined();
     });
+    it('returns true if not open', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            head: { ref: 'branch-a' },
+            title: 'branch a pr',
+            state: 'closed',
+          },
+        ],
+      });
+      const res = await github.findPr('branch-a', null, '!open');
+      expect(res).toBeDefined();
+    });
     it('caches pr list', async () => {
       get.mockReturnValueOnce({
         body: [

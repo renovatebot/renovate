@@ -39,19 +39,8 @@ Object {
   "head": Object {
     "ref": "branch-a",
   },
-  "isClosed": true,
   "number": 1,
-  "title": "branch a pr",
-}
-`;
-
-exports[`platform/vsts findPr(branchName, prTitle, state) returns pr if found it but add an error 1`] = `
-Object {
-  "head": Object {
-    "ref": "branch-a",
-  },
-  "isClosed": true,
-  "number": 1,
+  "state": "closed",
   "title": "branch a pr",
 }
 `;
@@ -61,8 +50,8 @@ Object {
   "head": Object {
     "ref": "branch-a",
   },
-  "isClosed": true,
   "number": 1,
+  "state": "closed",
   "title": "branch a pr",
 }
 `;
@@ -72,8 +61,19 @@ Object {
   "head": Object {
     "ref": "branch-a",
   },
-  "isClosed": false,
   "number": 1,
+  "state": "open",
+  "title": "branch a pr",
+}
+`;
+
+exports[`platform/vsts findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "number": 1,
+  "state": "closed",
   "title": "branch a pr",
 }
 `;
@@ -87,17 +87,7 @@ Array [
 
 exports[`platform/vsts getBranchLastCommitTime should return a Date 1`] = `"1986-11-07T00:00:00Z"`;
 
-exports[`platform/vsts getBranchPr(branchName) should return the pr 1`] = `
-Object {
-  "head": Object {
-    "ref": "branch-a",
-  },
-  "isClosed": false,
-  "number": 1,
-  "pullRequestId": 1,
-  "title": "branch a pr",
-}
-`;
+exports[`platform/vsts getBranchPr(branchName) should return the pr 1`] = `null`;
 
 exports[`platform/vsts getCommitMessages() returns commits messages 1`] = `
 Array [
