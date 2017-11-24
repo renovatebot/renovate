@@ -21,7 +21,7 @@ describe('config/validation', () => {
         enabled: 1,
         schedule: ['every 15 mins every weekday'],
         labels: 5,
-        semanticPrefix: 7,
+        semanticCommitType: 7,
         lockFileMaintenance: false,
         packageRules: [
           {

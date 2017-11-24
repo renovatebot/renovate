@@ -7,8 +7,6 @@ exports[`workers/repository/onboarding/pr/config-description getConfigDesc() ass
 Based on the currently configured presets, Renovate will:
 
   - Start dependency updates once this Configure Renovate PR is merged or closed
-  - Assign PRs to @someone and @someone-else
-  - Apply labels \`renovate\` and \`deps\` to PRs
   - Run Renovate on following schedule: before 5am
 
 Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch and this Pull Request description will be updated the next time Renovate runs. 

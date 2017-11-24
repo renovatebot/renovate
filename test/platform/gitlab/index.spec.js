@@ -494,6 +494,20 @@ describe('platform/gitlab', () => {
       const res = await gitlab.findPr('branch-a', null);
       expect(res).toBeDefined();
     });
+    it('returns true if not open', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'merged',
+          },
+        ],
+      });
+      const res = await gitlab.findPr('branch-a', null, '!open');
+      expect(res).toBeDefined();
+    });
     it('caches pr list', async () => {
       get.mockReturnValueOnce({
         body: [

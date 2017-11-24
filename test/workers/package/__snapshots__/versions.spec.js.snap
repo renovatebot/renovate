@@ -308,7 +308,7 @@ Object {
   "isRollback": true,
   "newVersion": "1.16.0",
   "newVersionMajor": 1,
-  "semanticPrefix": "fix(deps):",
+  "semanticCommitType": "fix",
   "type": "rollback",
   "unpublishable": false,
 }
