@@ -51,7 +51,7 @@
     "deepcopy": "0.6.3",
     "fs-extra": "4.0.2",
     "get-installed-path": "4.0.8",
-    "gh-got": "6.0.0",
+    "gh-got": "7.0.0",
     "github-url-from-git": "1.5.0",
     "gl-got": "8.0.0",
     "got": "8.0.0",
