@@ -95,7 +95,7 @@
     "mockdate": "2.0.2",
     "prettier": "1.8.2",
     "rimraf": "2.6.2",
-    "semantic-release": "9.1.1"
+    "semantic-release": "10.0.1"
   },
   "files": [
     "lib"
