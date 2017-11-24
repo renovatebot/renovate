@@ -104,6 +104,18 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.schedule).toEqual('on friday');
     });
+    it('migrates semantic prefix with no scope', () => {
+      const config = {
+        semanticPrefix: 'fix',
+      };
+      const parentConfig = { ...defaultConfig };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        parentConfig
+      );
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig.semanticCommitScope).toBe(null);
+    });
     it('does not migrate every weekday', () => {
       const config = {
         schedule: 'every weekday',
