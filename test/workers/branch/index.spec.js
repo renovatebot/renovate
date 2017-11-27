@@ -16,7 +16,6 @@ jest.mock('../../../lib/workers/branch/schedule');
 jest.mock('../../../lib/workers/branch/check-existing');
 jest.mock('../../../lib/workers/branch/parent');
 jest.mock('../../../lib/workers/branch/lock-files');
-jest.mock('../../../lib/workers/branch/commit');
 jest.mock('../../../lib/workers/branch/status-checks');
 jest.mock('../../../lib/workers/branch/automerge');
 jest.mock('../../../lib/workers/pr');
@@ -34,10 +33,12 @@ describe('workers/branch', () => {
         upgrades: [{ depName: 'some-dep-name' }],
       };
       schedule.isScheduledNow.mockReturnValue(true);
+      commit.commitFilesToBranch = jest.fn(() => true);
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
       platform.ensureCommentRemoval.mockClear();
+      commit.commitFilesToBranch.mockClear();
       jest.resetAllMocks();
     });
     it('skips branch if not scheduled and branch does not exist', async () => {
@@ -81,7 +82,7 @@ describe('workers/branch', () => {
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
     });
-    it('returns if no branch exists', async () => {
+    it('returns if no work', async () => {
       manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [],
       });
@@ -90,8 +91,7 @@ describe('workers/branch', () => {
         updatedLockFiles: [],
       });
       platform.branchExists.mockReturnValueOnce(false);
-      await branchWorker.processBranch(config);
-      expect(commit.commitFilesToBranch.mock.calls).toHaveLength(1);
+      expect(await branchWorker.processBranch(config)).toEqual('no-work');
     });
     it('returns if branch automerged', async () => {
       manager.getUpdatedPackageFiles.mockReturnValueOnce({
