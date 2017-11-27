@@ -208,7 +208,7 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toHaveLength(6);
       expect(fs.remove.mock.calls).toHaveLength(4);
     });
-    it('writes lock files', async () => {
+    it('writes package.json of local lib', async () => {
       config.packageFiles = [
         {
           packageFile: 'package.json',
@@ -223,8 +223,29 @@ describe('workers/branch/lock-files', () => {
           packageLock: 'some package lock',
         },
       ];
+      platform.getFile.mockReturnValue('some lock file contents');
       await writeExistingFiles(config);
       expect(fs.outputFile.mock.calls).toHaveLength(4);
+      expect(fs.remove.mock.calls).toHaveLength(0);
+    });
+    it('Try to write package.json of local lib, but file not found', async () => {
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          content: {
+            name: 'package 1',
+            dependencies: {
+              test: 'file:../test.tgz',
+              testFolder: 'file:../test',
+            },
+          },
+          yarnLock: 'some yarn lock',
+          packageLock: 'some package lock',
+        },
+      ];
+      platform.getFile.mockReturnValue(null);
+      await writeExistingFiles(config);
+      expect(fs.outputFile.mock.calls).toHaveLength(3);
       expect(fs.remove.mock.calls).toHaveLength(0);
     });
   });
