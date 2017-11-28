@@ -38,6 +38,9 @@ describe('workers/repository/updates/determine', () => {
         {
           packageFile: 'frontend/package.js',
         },
+        {
+          packageFile: '.travis.yml',
+        },
       ];
       packageFileWorker.renovateDockerfile.mockReturnValueOnce([
         { depName: 'a' },
@@ -49,8 +52,9 @@ describe('workers/repository/updates/determine', () => {
       packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce([
         { foo: 'd' },
       ]);
+      packageFileWorker.renovateNodeFile.mockReturnValueOnce([{ foo: 'e' }]);
       const res = await determineRepoUpgrades(config);
-      expect(res.upgrades).toHaveLength(4);
+      expect(res.upgrades).toHaveLength(5);
     });
   });
 });

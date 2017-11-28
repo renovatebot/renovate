@@ -57,6 +57,15 @@ describe('lib/workers/dep-type/index', () => {
       const res = await depTypeWorker.renovateDepType(content, config);
       expect(res).toHaveLength(6);
     });
+    it('returns upgrades for travis', async () => {
+      config.packageFile = '.travis.yml';
+      const content = fs.readFileSync(
+        path.resolve('test/_fixtures/node/travis.yml'),
+        'utf8'
+      );
+      const res = await depTypeWorker.renovateDepType(content, config);
+      expect(res).toHaveLength(1);
+    });
     it('handles malformed meteor', async () => {
       config.packageFile = 'package.js';
       const content = 'blah';

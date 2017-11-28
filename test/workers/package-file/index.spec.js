@@ -76,6 +76,27 @@ describe('packageFileWorker', () => {
       expect(res).toHaveLength(2);
     });
   });
+  describe('renovateNodeFile(config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        packageFile: '.travis.yml',
+        repoIsOnboarded: true,
+      };
+      depTypeWorker.renovateDepType.mockReturnValue([]);
+    });
+    it('returns empty if disabled', async () => {
+      config.enabled = false;
+      const res = await packageFileWorker.renovateNodeFile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns upgrades', async () => {
+      depTypeWorker.renovateDepType.mockReturnValueOnce([{}]);
+      const res = await packageFileWorker.renovateNodeFile(config);
+      expect(res).toHaveLength(1);
+    });
+  });
   describe('renovateDockerfile', () => {
     let config;
     beforeEach(() => {
