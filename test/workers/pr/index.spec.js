@@ -147,7 +147,7 @@ describe('workers/pr', () => {
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       expect(platform.createPr.mock.calls[0][2].indexOf('<details>')).toBe(-1);
     });
-    it('should delete branch and return null if creating PR fails', async () => {
+    it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       platform.createPr = jest.fn();
       platform.createPr.mockImplementationOnce(() => {
@@ -155,7 +155,6 @@ describe('workers/pr', () => {
       });
       config.prCreation = 'status-success';
       const pr = await prWorker.ensurePr(config);
-      expect(platform.deleteBranch.mock.calls).toHaveLength(1);
       expect(pr).toBe(null);
     });
     it('should return null if waiting for not pending', async () => {
