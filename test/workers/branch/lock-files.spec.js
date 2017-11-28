@@ -248,6 +248,26 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toHaveLength(3);
       expect(fs.remove.mock.calls).toHaveLength(0);
     });
+    it('detect malicious intent (error config in package.json) local lib is not in the repo', async () => {
+      config.packageFiles = [
+        {
+          packageFile: 'client/package.json',
+          content: {
+            name: 'package 1',
+            dependencies: {
+              test: 'file:../test.tgz',
+              testFolder: 'file:../../../../test',
+            },
+          },
+          yarnLock: 'some yarn lock',
+          packageLock: 'some package lock',
+        },
+      ];
+      platform.getFile.mockReturnValue(null);
+      await writeExistingFiles(config);
+      expect(fs.outputFile.mock.calls).toHaveLength(3);
+      expect(fs.remove.mock.calls).toHaveLength(0);
+    });
   });
   describe('writeUpdatedPackageFiles', () => {
     let config;
