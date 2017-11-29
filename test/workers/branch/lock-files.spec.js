@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const lockFiles = require('../../../lib/workers/branch/lock-files');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
+const upath = require('upath');
 
 const npm = require('../../../lib/workers/branch/npm');
 const yarn = require('../../../lib/workers/branch/yarn');
@@ -209,9 +210,11 @@ describe('workers/branch/lock-files', () => {
       expect(fs.remove.mock.calls).toHaveLength(4);
     });
     it('writes package.json of local lib', async () => {
+      const renoPath = upath.join(__dirname, '../../../');
+      config.tmpDir = { path: renoPath };
       config.packageFiles = [
         {
-          packageFile: 'package.json',
+          packageFile: 'client/package.json',
           content: {
             name: 'package 1',
             dependencies: {
@@ -229,9 +232,11 @@ describe('workers/branch/lock-files', () => {
       expect(fs.remove.mock.calls).toHaveLength(0);
     });
     it('Try to write package.json of local lib, but file not found', async () => {
+      const renoPath = upath.join(__dirname, '../../../');
+      config.tmpDir = { path: renoPath };
       config.packageFiles = [
         {
-          packageFile: 'package.json',
+          packageFile: 'client/package.json',
           content: {
             name: 'package 1',
             dependencies: {
@@ -249,6 +254,8 @@ describe('workers/branch/lock-files', () => {
       expect(fs.remove.mock.calls).toHaveLength(0);
     });
     it('detect malicious intent (error config in package.json) local lib is not in the repo', async () => {
+      const renoPath = upath.join(__dirname, '../../../');
+      config.tmpDir = { path: renoPath };
       config.packageFiles = [
         {
           packageFile: 'client/package.json',
