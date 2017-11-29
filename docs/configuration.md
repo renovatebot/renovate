@@ -251,6 +251,14 @@ Obviously, you can't set repository or package file location with this method.
   <td>`--yarnrc`<td>
 </tr>
 <tr>
+  <td>`copyLocalLibs`</td>
+  <td>enable copy local libraries found in package.json like `"lib1: file:../path/to/folder"`, warning: feature may be deprecated in future.</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_COPY_LOCAL_LIBS`</td>
+  <td>`--copy-local-libs`<td>
+</tr>
+<tr>
   <td>`ignoreNpmrcFile`</td>
   <td>Whether to ignore any .npmrc file found in repository</td>
   <td>boolean</td>
