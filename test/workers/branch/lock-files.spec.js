@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const lockFiles = require('../../../lib/workers/branch/lock-files');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
+const upath = require('upath');
 
 const npm = require('../../../lib/workers/branch/npm');
 const yarn = require('../../../lib/workers/branch/yarn');
@@ -208,15 +209,71 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls).toHaveLength(6);
       expect(fs.remove.mock.calls).toHaveLength(4);
     });
-    it('writes lock files', async () => {
+    it('writes package.json of local lib', async () => {
+      const renoPath = upath.join(__dirname, '../../../');
+      config.copyLocalLibs = true;
+      config.tmpDir = { path: renoPath };
       config.packageFiles = [
         {
-          packageFile: 'package.json',
-          content: { name: 'package 1' },
+          packageFile: 'client/package.json',
+          content: {
+            name: 'package 1',
+            dependencies: {
+              test: 'file:../test.tgz',
+              testFolder: 'file:../test',
+            },
+          },
           yarnLock: 'some yarn lock',
           packageLock: 'some package lock',
         },
       ];
+      platform.getFile.mockReturnValue('some lock file contents');
+      await writeExistingFiles(config);
+      expect(fs.outputFile.mock.calls).toHaveLength(4);
+      expect(fs.remove.mock.calls).toHaveLength(0);
+    });
+    it('Try to write package.json of local lib, but file not found', async () => {
+      const renoPath = upath.join(__dirname, '../../../');
+      config.copyLocalLibs = true;
+      config.tmpDir = { path: renoPath };
+      config.packageFiles = [
+        {
+          packageFile: 'client/package.json',
+          content: {
+            name: 'package 1',
+            dependencies: {
+              test: 'file:../test.tgz',
+              testFolder: 'file:../test',
+            },
+          },
+          yarnLock: 'some yarn lock',
+          packageLock: 'some package lock',
+        },
+      ];
+      platform.getFile.mockReturnValue(null);
+      await writeExistingFiles(config);
+      expect(fs.outputFile.mock.calls).toHaveLength(3);
+      expect(fs.remove.mock.calls).toHaveLength(0);
+    });
+    it('detect malicious intent (error config in package.json) local lib is not in the repo', async () => {
+      const renoPath = upath.join(__dirname, '../../../');
+      config.copyLocalLibs = true;
+      config.tmpDir = { path: renoPath };
+      config.packageFiles = [
+        {
+          packageFile: 'client/package.json',
+          content: {
+            name: 'package 1',
+            dependencies: {
+              test: 'file:../test.tgz',
+              testFolder: 'file:../../../../test',
+            },
+          },
+          yarnLock: 'some yarn lock',
+          packageLock: 'some package lock',
+        },
+      ];
+      platform.getFile.mockReturnValue(null);
       await writeExistingFiles(config);
       expect(fs.outputFile.mock.calls).toHaveLength(3);
       expect(fs.remove.mock.calls).toHaveLength(0);
