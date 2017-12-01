@@ -59,3 +59,38 @@ $ heroku addons:open scheduler
 At this point you should have the Heroku Scheduler Dashboard open. Click "Add new job" and enter the same command as you ran previously (e.g. `renovate [your/repo]`). Adjust the frequency to hourly if you prefer, then click Save.
 
 You can run `heroku logs` to check execution logs. Consider adjusting the scripts log level if you have problems (info -> verbose -> debug -> silly).
+
+## Docker
+
+Renovate can also be run as a Docker container.
+
+### Using docker-compose
+
+One way to run `renovate` with Docker is using a docker-compose file like the following:
+
+```
+version: '2'
+services:
+  renovate:
+    image: <DOCKER_HUB_IMAGE>
+    environment:
+      GITHUB_TOKEN: <MY_GITHUB_TOKEN>
+      # GITLAB_TOKEN: <MY_GITLAB_TOKEN>
+    command: [<PARAMS>] <MY_REPOS>
+    # command: singapore/lint-condo singapore/package-test
+    # command: --labels=renovate,dependency singapore/lint-condo
+```
+
+The `command` directive above may contain only a simple list of repos or additionally any of the available `renovate CLI parameters`.
+
+To run the compose file above, simply use `docker-compose up`. The container will run and exit once it has finished processing your repositories. To run it on a schedule, add a cronjob that executes it for you (e.g. daily or hourly).
+
+### Using docker
+
+To run `renovate` without depending on docker-compose like above, you may also just use native Docker commands:
+
+```
+$ docker run --rm -e "GITHUB_TOKEN=<MY_GITHUB_TOKEN>" <DOCKER_HUB_IMAGE> --labels=renovate,dependency singapore/lint-condo
+```
+
+The configuration options are the same as for running it with docker-compose. To run it on a schedule, add a cronjob that executes the above command for you (e.g. daily or hourly).

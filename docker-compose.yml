@@ -1,0 +1,11 @@
+version: '2'
+services:
+  renovate:
+    image: <DOCKER_HUB_IMAGE>
+    # build: . # during development
+    environment:
+      GITHUB_TOKEN: <MY_GITHUB_TOKEN>
+      # GITLAB_TOKEN: <MY_GITLAB_TOKEN>
+    command: [<PARAMS>] <MY_REPOS>
+    # command: singapore/lint-condo singapore/package-test
+    # command: --labels=renovate,dependency singapore/lint-condo
