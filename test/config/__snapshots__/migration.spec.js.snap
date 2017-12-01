@@ -21,6 +21,10 @@ Object {
     "schedule": Array [],
   },
   "enabled": true,
+  "extends": Array [
+    "config:js-app",
+    "config:js-lib",
+  ],
   "ignorePaths": Array [
     "node_modules/",
   ],
