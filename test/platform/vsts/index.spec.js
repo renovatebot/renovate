@@ -676,10 +676,12 @@ describe('platform/vsts', () => {
       }));
       vstsApi.getCoreApi.mockImplementation(() => ({
         getTeams: jest.fn(() => [{ id: 3 }, { id: 4 }]),
-        getTeamMembers: jest.fn(() => [{ displayName: 'jyc' }]),
+        getTeamMembers: jest.fn(() => [
+          { displayName: 'jyc', uniqueName: 'jyc', id: 123 },
+        ]),
       }));
       await vsts.addReviewers(123, ['test@bonjour.fr', 'jyc']);
-      expect(vstsApi.gitApi.mock.calls.length).toBe(5);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(4);
     });
 
     // to become async?
