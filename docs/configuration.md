@@ -3,24 +3,32 @@
 ## Configuration Methods
 
 Configuration is supported via any or all of the below:
-- Configuration file
-- Environment
-- CLI
-- `renovate.json` in target repository
-- `renovate` field of `package.json` in target repository
 
-The above are listed in reverse order of preference.
-i.e. `package.json` settings will override `renovate.json` settings, CLI, which overrides env, which overrides the config file, which overrides defaults.
+* Configuration file
+* Environment
+* CLI
+* `renovate.json` in target repository
+* `renovate` field of `package.json` in target repository
+
+The above are listed in reverse order of preference. i.e. `package.json`
+settings will override `renovate.json` settings, CLI, which overrides env, which
+overrides the config file, which overrides defaults.
 
 ### Default Configuration
 
-Default configuration values can be found in [lib/config/definitions.js](../lib/config/definitions.js)
+Default configuration values can be found in
+[lib/config/definitions.js](../lib/config/definitions.js)
 
 ### Configuration File
 
-You can override default configuration using a configuration file, with default name `config.js` in the working directory. If you need an alternate location or name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
+You can override default configuration using a configuration file, with default
+name `config.js` in the working directory. If you need an alternate location or
+name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
 
-Using a configuration file gives you very granular configuration options. For instance, you can override most settings at the global (file), repository, or package level. e.g. apply one set of labels for `backend/package.json` and a different set for `frontend/package.json` in the same repository.
+Using a configuration file gives you very granular configuration options. For
+instance, you can override most settings at the global (file), repository, or
+package level. e.g. apply one set of labels for `backend/package.json` and a
+different set for `frontend/package.json` in the same repository.
 
 ```javascript
 module.exports = {
@@ -33,7 +41,7 @@ module.exports = {
         'package.json',
         {
           packageFile: 'frontend/package.json',
-          labels: ['upgrade', 'frontend']
+          labels: ['upgrade', 'frontend'],
         },
       ],
     },
@@ -57,7 +65,7 @@ module.exports = {
       labels: ['jquery', 'uhoh'],
     },
   ],
-}
+};
 ```
 
 ### CLI
@@ -66,17 +74,21 @@ module.exports = {
 $ node renovate --help
 ```
 
-To configure any `<list>` items, separate with commas. E.g. `renovate --labels=renovate,dependency`.
+To configure any `<list>` items, separate with commas. E.g. `renovate
+--labels=renovate,dependency`.
 
 ### renovate.json
 
-If you add a `renovate.json` file to the root of your repository, you can use this to override default settings.
-If you leave the `packageFiles` field empty then `renovate` will still auto-discover all `package.json` files in the repository.
+If you add a `renovate.json` file to the root of your repository, you can use
+this to override default settings. If you leave the `packageFiles` field empty
+then `renovate` will still auto-discover all `package.json` files in the
+repository.
 
 ### package.json
 
-If you add configuration options to your `package.json` then these will override any other settings above.
-Obviously, you can't set repository or package file location with this method.
+If you add configuration options to your `package.json` then these will override
+any other settings above. Obviously, you can't set repository or package file
+location with this method.
 
 ```json
 "renovate": {
@@ -509,7 +521,6 @@ Obviously, you can't set repository or package file location with this method.
   "recreateClosed": true,
   "rebaseStalePrs": true,
   "groupName": "Pin Dependencies",
-  "semanticCommitType": "refactor",
   "group": {"commitMessage": "Pin Dependencies", "prTitle": "{{groupName}}"}
 }</pre></td>
   <td>`RENOVATE_PIN`</td>
@@ -519,7 +530,7 @@ Obviously, you can't set repository or package file location with this method.
   <td>`digest`</td>
   <td>Configuration to apply when updating a Docker digest (same tag)</td>
   <td>json</td>
-  <td><pre>{"semanticCommitType": "refactor"}</pre></td>
+  <td><pre>{}</pre></td>
   <td>`RENOVATE_DIGEST`</td>
   <td><td>
 </tr>

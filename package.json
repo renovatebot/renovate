@@ -10,7 +10,7 @@
     "jest": "npm run clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --fix lib test",
     "lint": "eslint lib test",
-    "prettier": "prettier \"**/*.{js,json}\" --write",
+    "prettier": "prettier \"**/*.{js,json,md}\" --write",
     "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
     "test": "npm run prettier -- --list-different && npm run lint && npm run jest",
