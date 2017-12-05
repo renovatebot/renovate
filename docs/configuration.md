@@ -41,9 +41,9 @@ module.exports = {
         'package.json',
         {
           packageFile: 'frontend/package.json',
-          labels: ['upgrade', 'frontend'],
-        },
-      ],
+          labels: ['upgrade', 'frontend']
+        }
+      ]
     },
     {
       repository: 'singapore/repo2',
@@ -52,19 +52,19 @@ module.exports = {
         'devDependencies',
         {
           depType: 'optionalDependencies',
-          labels: ['renovate', 'optional'],
-        },
+          labels: ['renovate', 'optional']
+        }
       ],
-      labels: ['renovate'],
+      labels: ['renovate']
     },
-    'singapore/repo3',
+    'singapore/repo3'
   ],
   packages: [
     {
       package: 'jquery',
-      labels: ['jquery', 'uhoh'],
-    },
-  ],
+      labels: ['jquery', 'uhoh']
+    }
+  ]
 };
 ```
 
@@ -74,8 +74,7 @@ module.exports = {
 $ node renovate --help
 ```
 
-To configure any `<list>` items, separate with commas. E.g. `renovate
---labels=renovate,dependency`.
+To configure any `<list>` items, separate with commas. E.g. `renovate --labels=renovate,dependency`.
 
 ### renovate.json
 
