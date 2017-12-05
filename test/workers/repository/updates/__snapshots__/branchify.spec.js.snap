@@ -7,6 +7,9 @@ Object {
   "automerge": false,
   "automergeType": "pr",
   "baseBranch": null,
+  "bazel": Object {
+    "enabled": false,
+  },
   "branchList": undefined,
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -572,6 +575,9 @@ Object {
   "automerge": false,
   "automergeType": "pr",
   "baseBranch": null,
+  "bazel": Object {
+    "enabled": false,
+  },
   "branchList": undefined,
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -1129,6 +1135,9 @@ Object {
   "automerge": false,
   "automergeType": "pr",
   "baseBranch": null,
+  "bazel": Object {
+    "enabled": false,
+  },
   "branchList": undefined,
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -1692,6 +1701,9 @@ Object {
   "automerge": false,
   "automergeType": "pr",
   "baseBranch": null,
+  "bazel": Object {
+    "enabled": false,
+  },
   "branchList": undefined,
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -2250,6 +2262,9 @@ Object {
   "automerge": false,
   "automergeType": "pr",
   "baseBranch": null,
+  "bazel": Object {
+    "enabled": false,
+  },
   "branchList": Array [
     "foo-1.1.0",
   ],
