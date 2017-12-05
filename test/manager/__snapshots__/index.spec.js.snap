@@ -7,6 +7,12 @@ Array [
 ]
 `;
 
+exports[`manager detectPackageFiles(config) finds .travis.yml files 1`] = `
+Array [
+  ".travis.yml",
+]
+`;
+
 exports[`manager detectPackageFiles(config) finds Dockerfiles 1`] = `
 Array [
   "Dockerfile",

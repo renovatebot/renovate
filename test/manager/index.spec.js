@@ -3,6 +3,7 @@ const manager = require('../../lib/manager');
 const npmUpdater = require('../../lib/manager/npm/update');
 const meteorUpdater = require('../../lib/manager/meteor/update');
 const dockerUpdater = require('../../lib/manager/docker/update');
+const nodeUpdater = require('../../lib/manager/node/update');
 
 const { getUpdatedPackageFiles } = manager;
 
@@ -59,6 +60,16 @@ describe('manager', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
+    it('finds .travis.yml files', async () => {
+      config.node.enabled = true;
+      platform.getFileList.mockReturnValueOnce([
+        '.travis.yml',
+        'other/.travis.yml',
+      ]);
+      const res = await manager.detectPackageFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
     it('skips Dockerfiles with no content', async () => {
       platform.getFileList.mockReturnValueOnce(['Dockerfile']);
       platform.getFile.mockReturnValueOnce(null);
@@ -87,6 +98,7 @@ describe('manager', () => {
       npmUpdater.setNewValue = jest.fn();
       dockerUpdater.setNewValue = jest.fn();
       meteorUpdater.setNewValue = jest.fn();
+      nodeUpdater.setNewValue = jest.fn();
     });
     it('returns empty if lock file maintenance', async () => {
       config.upgrades = [{ type: 'lockFileMaintenance' }];
@@ -119,15 +131,18 @@ describe('manager', () => {
         { packageFile: 'package.json' },
         { packageFile: 'Dockerfile' },
         { packageFile: 'packages/foo/package.js' },
+        { packageFile: '.travis.yml' },
       ];
       platform.getFile.mockReturnValueOnce('old content 1');
       platform.getFile.mockReturnValueOnce('old content 1');
       platform.getFile.mockReturnValueOnce('old content 2');
       platform.getFile.mockReturnValueOnce('old content 3');
+      platform.getFile.mockReturnValueOnce('old travis');
       npmUpdater.setNewValue.mockReturnValueOnce('new content 1');
       npmUpdater.setNewValue.mockReturnValueOnce('new content 1+');
       dockerUpdater.setNewValue.mockReturnValueOnce('new content 2');
       meteorUpdater.setNewValue.mockReturnValueOnce('old content 3');
+      nodeUpdater.setNewValue.mockReturnValueOnce('old travis');
       const res = await getUpdatedPackageFiles(config);
       expect(res.updatedPackageFiles).toHaveLength(2);
     });
