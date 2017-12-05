@@ -8,6 +8,7 @@ Object {
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "currentVersion": "1.0.0",
   "depName": "foo",
   "description": Array [],

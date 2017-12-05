@@ -6,6 +6,7 @@ describe('config/migration', () => {
     it('it migrates config', () => {
       const config = {
         enabled: true,
+        extends: [':js-app', 'config:library'],
         maintainYarnLock: true,
         onboarding: 'false',
         automerge: 'none',

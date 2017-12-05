@@ -1,6 +1,7 @@
 # Deployment
 
-Before deploying the script for scheduled runs, it's recommend you test your settings locally first.
+Before deploying the script for scheduled runs, it's recommend you test your
+settings locally first.
 
 ## Server cron
 
@@ -12,15 +13,16 @@ Install using `npm install -g`.
 
 ### Configuration
 
-At a minimum, you will need to configure the token and repository list.
-Simplest would be to specify both via CLI.
-Alternatively, configure the token via Environment Variable if you don't want it to show in any cron logs.
+At a minimum, you will need to configure the token and repository list. Simplest
+would be to specify both via CLI. Alternatively, configure the token via
+Environment Variable if you don't want it to show in any cron logs.
 
 Running daily should suit most people. At most, hourly.
 
 ## Heroku
 
-Heroku free dynos provide a good way to host this for free. Set it up with the following commands:
+Heroku free dynos provide a good way to host this for free. Set it up with the
+following commands:
 
 ### Installation
 
@@ -40,9 +42,11 @@ You now need to set the token.
 ```
 $ heroku config:set GITHUB_TOKEN=[YourGitHubToken]
 ```
+
 (or use `GITLAB_TOKEN` if appropriate)
 
-You should also set any other [Configuration Options](configuration.md) you need.
+You should also set any other [Configuration Options](configuration.md) you
+need.
 
 The app should now be ready for testing.
 
@@ -50,12 +54,17 @@ The app should now be ready for testing.
 $ heroku run renovate [your/repo]
 ```
 
-Once you've verified the script ran successfully, it's time to set it up for automatic scheduling.
+Once you've verified the script ran successfully, it's time to set it up for
+automatic scheduling.
+
 ```
 $ heroku addons:create scheduler:standard
 $ heroku addons:open scheduler
 ```
 
-At this point you should have the Heroku Scheduler Dashboard open. Click "Add new job" and enter the same command as you ran previously (e.g. `renovate [your/repo]`). Adjust the frequency to hourly if you prefer, then click Save.
+At this point you should have the Heroku Scheduler Dashboard open. Click "Add
+new job" and enter the same command as you ran previously (e.g. `renovate
+[your/repo]`). Adjust the frequency to hourly if you prefer, then click Save.
 
-You can run `heroku logs` to check execution logs. Consider adjusting the scripts log level if you have problems (info -> verbose -> debug -> silly).
+You can run `heroku logs` to check execution logs. Consider adjusting the
+scripts log level if you have problems (info -> verbose -> debug -> silly).

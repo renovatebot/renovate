@@ -10,6 +10,7 @@ Object {
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -534,6 +535,7 @@ Object {
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -1064,6 +1066,7 @@ Object {
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -1848,6 +1851,7 @@ Object {
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -2375,6 +2379,7 @@ Object {
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -2894,6 +2899,7 @@ Object {
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -3413,6 +3419,7 @@ Object {
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },

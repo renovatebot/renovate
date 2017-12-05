@@ -55,6 +55,7 @@ Object {
     },
   ],
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -611,6 +612,7 @@ Object {
     },
   ],
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -1173,6 +1175,7 @@ Object {
     },
   ],
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -1719,6 +1722,7 @@ Object {
     },
   ],
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
@@ -2268,6 +2272,7 @@ Object {
     },
   ],
   "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
   },
