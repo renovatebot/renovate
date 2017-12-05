@@ -9,17 +9,17 @@ describe('lib/workers/package/node', () => {
         ...defaultConfig,
       };
     });
-    it('returns empty if no policy array', async () => {
+    it('returns empty if no supportPolicy array', async () => {
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
       config.currentVersions = ['6', '8'];
-      config.policy = ['lts_active'];
+      config.supportPolicy = ['lts_active'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns result if needing updates', async () => {
       config.currentVersions = ['6', '8'];
-      config.policy = ['lts'];
+      config.supportPolicy = ['lts'];
       expect(await node.getPackageUpdates(config)).toMatchSnapshot();
     });
   });
