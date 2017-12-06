@@ -287,6 +287,15 @@ Array [
 ]
 `;
 
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns warning if range not found 1`] = `
+Array [
+  Object {
+    "message": "No satisfying version found for existing dependency range \\"^8.4.0\\"",
+    "type": "warning",
+  },
+]
+`;
+
 exports[`workers/package/versions .determineUpgrades(npmDep, config) should allow unstable versions if the current version is unstable 1`] = `
 Array [
   Object {

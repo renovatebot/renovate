@@ -32,6 +32,10 @@ describe('workers/package/versions', () => {
       expect(res).toHaveLength(1);
       expect(res[0]).toMatchSnapshot();
     });
+    it('returns warning if range not found', () => {
+      config.currentVersion = '^8.4.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
     it('supports minor and major upgrades for tilde ranges', () => {
       config.currentVersion = '^0.4.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
