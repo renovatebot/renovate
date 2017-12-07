@@ -63,8 +63,7 @@ $ heroku addons:open scheduler
 ```
 
 At this point you should have the Heroku Scheduler Dashboard open. Click "Add
-new job" and enter the same command as you ran previously (e.g. `renovate
-[your/repo]`). Adjust the frequency to hourly if you prefer, then click Save.
+new job" and enter the same command as you ran previously (e.g. `renovate [your/repo]`). Adjust the frequency to hourly if you prefer, then click Save.
 
 You can run `heroku logs` to check execution logs. Consider adjusting the
 scripts log level if you have problems (info -> verbose -> debug -> silly).

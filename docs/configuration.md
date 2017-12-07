@@ -74,8 +74,7 @@ module.exports = {
 $ node renovate --help
 ```
 
-To configure any `<list>` items, separate with commas. E.g. `renovate
---labels=renovate,dependency`.
+To configure any `<list>` items, separate with commas. E.g. `renovate --labels=renovate,dependency`.
 
 ### renovate.json
 

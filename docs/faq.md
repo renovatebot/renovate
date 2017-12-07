@@ -143,8 +143,7 @@ Set configuration option `pinVersions` to `false`.
 
 ### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` hasn't changed
 
-This is enabled by default, but its schedule is set to `['before 5am on
-monday']`. If you want it more frequently, then update the `schedule` field
+This is enabled by default, but its schedule is set to `['before 5am on monday']`. If you want it more frequently, then update the `schedule` field
 inside the `lockFileMaintenance` object.
 
 ### Wait until tests have passed before creating the PR
