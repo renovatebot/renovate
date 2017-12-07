@@ -19,6 +19,13 @@ Array [
 ]
 `;
 
+exports[`manager detectPackageFiles(config) finds WORKSPACE files 1`] = `
+Array [
+  "WORKSPACE",
+  "other/WORKSPACE",
+]
+`;
+
 exports[`manager detectPackageFiles(config) finds meteor package files 1`] = `
 Array [
   "modules/something/package.js",

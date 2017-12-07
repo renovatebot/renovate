@@ -5,10 +5,12 @@ const configParser = require('../../../lib/config');
 const docker = require('../../../lib/manager/docker/package');
 const npm = require('../../../lib/manager/npm/package');
 const node = require('../../../lib/manager/node/package');
+const bazel = require('../../../lib/manager/bazel/package');
 
 jest.mock('../../../lib/manager/docker/package');
 jest.mock('../../../lib/manager/npm/package');
 jest.mock('../../../lib/manager/node/package');
+jest.mock('../../../lib/manager/bazel/package');
 
 describe('lib/workers/package/index', () => {
   describe('renovatePackage(config)', () => {
@@ -38,6 +40,12 @@ describe('lib/workers/package/index', () => {
     it('calls node', async () => {
       node.getPackageUpdates.mockReturnValueOnce([]);
       config.packageFile = '.travis.yml';
+      const res = await pkgWorker.renovatePackage(config);
+      expect(res).toMatchObject([]);
+    });
+    it('calls bazel', async () => {
+      bazel.getPackageUpdates.mockReturnValueOnce([]);
+      config.packageFile = 'WORKSPACE';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });

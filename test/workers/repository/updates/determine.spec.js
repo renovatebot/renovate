@@ -41,6 +41,9 @@ describe('workers/repository/updates/determine', () => {
         {
           packageFile: '.travis.yml',
         },
+        {
+          packageFile: 'WORKSPACE',
+        },
       ];
       packageFileWorker.renovateDockerfile.mockReturnValueOnce([
         { depName: 'a' },
@@ -53,8 +56,9 @@ describe('workers/repository/updates/determine', () => {
         { foo: 'd' },
       ]);
       packageFileWorker.renovateNodeFile.mockReturnValueOnce([{ foo: 'e' }]);
+      packageFileWorker.renovateBazelFile.mockReturnValueOnce([{ bar: 'f' }]);
       const res = await determineRepoUpgrades(config);
-      expect(res.upgrades).toHaveLength(5);
+      expect(res.upgrades).toHaveLength(6);
     });
   });
 });

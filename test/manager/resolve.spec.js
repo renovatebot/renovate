@@ -64,15 +64,27 @@ describe('manager/resolve', () => {
       expect(res).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
-    it('detects meteor and docker and travis', async () => {
-      config.packageFiles = ['package.js', 'Dockerfile', '.travis.yml'];
-      platform.getFile.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile
+    it('detects meteor and docker and travis and bazel', async () => {
+      config.packageFiles = [
+        'package.js',
+        'Dockerfile',
+        '.travis.yml',
+        'WORKSPACE',
+      ];
+      platform.getFile.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile.js
       platform.getFile.mockReturnValueOnce('hello: world\n'); // Dockerfile
+      platform.getFile.mockReturnValueOnce('# travis'); // .travis.yml
+      platform.getFile.mockReturnValueOnce('# WORKSPACE'); // Dockerfile
       const res = await resolvePackageFiles(config);
       expect(res).toMatchSnapshot();
     });
     it('skips if no content or no match', async () => {
-      config.packageFiles = ['Dockerfile', 'other/Dockerfile', '.travis.yml'];
+      config.packageFiles = [
+        'Dockerfile',
+        'other/Dockerfile',
+        '.travis.yml',
+        'WORKSPACE',
+      ];
       platform.getFile.mockReturnValueOnce('# comment\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
       expect(res).toMatchSnapshot();

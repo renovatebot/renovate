@@ -76,6 +76,27 @@ describe('packageFileWorker', () => {
       expect(res).toHaveLength(2);
     });
   });
+  describe('renovateBazelFile(config)', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+        packageFile: 'WORKSPACE',
+        repoIsOnboarded: true,
+      };
+      depTypeWorker.renovateDepType.mockReturnValue([]);
+    });
+    it('returns empty if disabled', async () => {
+      config.enabled = false;
+      const res = await packageFileWorker.renovateBazelFile(config);
+      expect(res).toEqual([]);
+    });
+    it('returns upgrades', async () => {
+      depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
+      const res = await packageFileWorker.renovateBazelFile(config);
+      expect(res).toHaveLength(2);
+    });
+  });
   describe('renovateNodeFile(config)', () => {
     let config;
     beforeEach(() => {
