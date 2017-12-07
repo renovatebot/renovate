@@ -749,6 +749,14 @@ location with this method.
   <td>`--meteor`<td>
 </tr>
 <tr>
+  <td>`bazel`</td>
+  <td>Configuration object for bazel WORKSPACE renovation</td>
+  <td>json</td>
+  <td><pre>{"enabled": false}</pre></td>
+  <td>`RENOVATE_BAZEL`</td>
+  <td>`--bazel`<td>
+</tr>
+<tr>
   <td>`supportPolicy`</td>
   <td>Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)</td>
   <td>list</td>

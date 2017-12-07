@@ -57,6 +57,15 @@ describe('lib/workers/dep-type/index', () => {
       const res = await depTypeWorker.renovateDepType(content, config);
       expect(res).toHaveLength(6);
     });
+    it('returns upgrades for bazel', async () => {
+      config.packageFile = 'WORKSPACE';
+      const content = fs.readFileSync(
+        path.resolve('test/_fixtures/bazel/WORKSPACE1'),
+        'utf8'
+      );
+      const res = await depTypeWorker.renovateDepType(content, config);
+      expect(res).toHaveLength(2);
+    });
     it('returns upgrades for travis', async () => {
       config.packageFile = '.travis.yml';
       const content = fs.readFileSync(
