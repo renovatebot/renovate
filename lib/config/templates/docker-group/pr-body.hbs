@@ -5,7 +5,7 @@ This Pull Request updates Dockerfiles to use image digests.
 {{/if}}
 
 {{#each upgrades as |upgrade|}}
--   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}`{{depName}}`{{/if}}: `{{upgrade.newDigest}}`
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}{{depName}}{{/if}}: `{{upgrade.newDigest}}`
 {{/each}}
 
 {{#if hasErrors}}
