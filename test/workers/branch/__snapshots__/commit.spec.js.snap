@@ -13,6 +13,7 @@ Array [
     "a(b): some commit message",
     undefined,
     null,
+    null,
   ],
 ]
 `;
@@ -29,6 +30,7 @@ Array [
     ],
     "some commit message",
     undefined,
+    null,
     null,
   ],
 ]

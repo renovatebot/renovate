@@ -13,6 +13,7 @@ Object {
   "depName": "foo",
   "description": Array [],
   "gitAuthor": null,
+  "gitPrivateKey": null,
   "group": Object {
     "branchName": "{{branchPrefix}}{{groupSlug}}",
     "commitMessage": "Pin Dependencies",
