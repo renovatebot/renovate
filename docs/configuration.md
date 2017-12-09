@@ -318,6 +318,14 @@ location with this method.
   <td>`--git-author`<td>
 </tr>
 <tr>
+  <td>`gitPrivateKey`</td>
+  <td>PGP key to use for signing git commits</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_GIT_PRIVATE_KEY`</td>
+  <td><td>
+</tr>
+<tr>
   <td>`packageFiles`</td>
   <td>Package file paths</td>
   <td>list</td>
