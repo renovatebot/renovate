@@ -1308,6 +1308,59 @@ describe('platform/github', () => {
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.patch.mock.calls).toMatchSnapshot();
     });
+    it('should parse valid gitAuthor', async () => {
+      // branchExists
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            name: 'master',
+          },
+        ],
+      }));
+      const files = [
+        {
+          name: 'package.json',
+          contents: 'hello world',
+        },
+      ];
+      await github.commitFilesToBranch(
+        'the-branch',
+        files,
+        'my other commit message',
+        undefined,
+        'Renovate Bot <bot@renovateapp.com>'
+      );
+      expect(get.post.mock.calls[2][1].body.author.name).toEqual(
+        'Renovate Bot'
+      );
+      expect(get.post.mock.calls[2][1].body.author.email).toEqual(
+        'bot@renovateapp.com'
+      );
+    });
+    it('should skip invalid gitAuthor', async () => {
+      // branchExists
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            name: 'master',
+          },
+        ],
+      }));
+      const files = [
+        {
+          name: 'package.json',
+          contents: 'hello world',
+        },
+      ];
+      await github.commitFilesToBranch(
+        'the-branch',
+        files,
+        'my other commit message',
+        undefined,
+        'Renovate Bot bot@renovateapp.com'
+      );
+      expect(get.post.mock.calls[2][1].body.author).toBeUndefined();
+    });
   });
   describe('getCommitMessages()', () => {
     it('returns commits messages', async () => {

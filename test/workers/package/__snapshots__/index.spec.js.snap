@@ -12,6 +12,7 @@ Object {
   "currentVersion": "1.0.0",
   "depName": "foo",
   "description": Array [],
+  "gitAuthor": null,
   "group": Object {
     "branchName": "{{branchPrefix}}{{groupSlug}}",
     "commitMessage": "Pin Dependencies",
