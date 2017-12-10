@@ -224,7 +224,25 @@ describe('platform/github', () => {
     it('should detect repoForceRebase', async () => {
       get.mockImplementationOnce(() => ({
         body: {
-          strict: true,
+          required_pull_request_reviews: {
+            dismiss_stale_reviews: false,
+            require_code_owner_reviews: false,
+          },
+          required_status_checks: {
+            strict: true,
+            contexts: [],
+          },
+          restrictions: {
+            users: [
+              {
+                login: 'rarkins',
+                id: 6311784,
+                type: 'User',
+                site_admin: false,
+              },
+            ],
+            teams: [],
+          },
         },
       }));
       const res = await github.getRepoForceRebase();
