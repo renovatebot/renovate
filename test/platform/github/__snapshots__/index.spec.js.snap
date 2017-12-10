@@ -40,11 +40,6 @@ exports[`platform/github commitFilesToBranch(branchName, files, message, parentB
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -127,11 +122,6 @@ exports[`platform/github commitFilesToBranch(branchName, files, message, parentB
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -313,11 +303,6 @@ exports[`platform/github getBranchPr(branchName) should return the PR object 1`]
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -344,11 +329,6 @@ exports[`platform/github getFile() should return null if GitHub returns a 404 1`
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -369,11 +349,6 @@ exports[`platform/github getFile() should return null if getFile returns nothing
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -394,11 +369,6 @@ exports[`platform/github getFile() should return the encoded file content 1`] = 
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -555,11 +525,6 @@ exports[`platform/github initRepo should initialise the config for the repo - 0 
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -584,11 +549,6 @@ exports[`platform/github initRepo should initialise the config for the repo - 1 
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -613,11 +573,6 @@ exports[`platform/github initRepo should initialise the config for the repo - 2 
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -670,11 +625,6 @@ exports[`platform/github mergeBranch(branchName, mergeType) should perform a bra
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -718,11 +668,6 @@ exports[`platform/github mergeBranch(branchName, mergeType) should perform a bra
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -770,11 +715,6 @@ exports[`platform/github mergeBranch(branchName, mergeType) should throw if bran
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -814,11 +754,6 @@ exports[`platform/github mergeBranch(branchName, mergeType) should throw if bran
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -860,11 +795,6 @@ exports[`platform/github mergeBranch(branchName, mergeType) should throw if unkn
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
@@ -890,11 +820,6 @@ exports[`platform/github setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
     "repos/some/repo",
-    Object {
-      "headers": Object {
-        "accept": "application/vnd.github.loki-preview+json",
-      },
-    },
   ],
   Array [
     "repos/some/repo/pulls?per_page=100&state=all",
