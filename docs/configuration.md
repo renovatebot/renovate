@@ -174,6 +174,14 @@ location with this method.
   <td>`--renovate-fork`<td>
 </tr>
 <tr>
+  <td>`forkMode`</td>
+  <td>Set to true if Renovate should fork the source repository and create branches there instead</td>
+  <td>boolean</td>
+  <td><pre>false</pre></td>
+  <td>`RENOVATE_FORK_MODE`</td>
+  <td>`--fork-mode`<td>
+</tr>
+<tr>
   <td>`privateKey`</td>
   <td>Server-side private key</td>
   <td>string</td>
