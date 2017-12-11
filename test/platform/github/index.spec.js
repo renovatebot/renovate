@@ -8,6 +8,7 @@ describe('platform/github', () => {
 
     // reset module
     jest.resetModules();
+    jest.mock('delay');
     jest.mock('../../../lib/platform/github/gh-got-wrapper');
     get = require('../../../lib/platform/github/gh-got-wrapper');
     github = require('../../../lib/platform/github');
@@ -143,6 +144,106 @@ describe('platform/github', () => {
         return github.initRepo(...args);
       }
       const config = await squashInitRepo('some/repo', 'token');
+      expect(config).toMatchSnapshot();
+    });
+    it('should forks when forkMode', async () => {
+      function forkInitRepo(...args) {
+        // repo info
+        get.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+            allow_rebase_merge: true,
+            allow_squash_merge: true,
+            allow_merge_commit: true,
+          },
+        }));
+        // getPrList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getFileList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getBranchCommit
+        get.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getRepos
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getBranchCommit
+        get.post.mockImplementationOnce(() => ({
+          body: {},
+        }));
+        return github.initRepo(...args);
+      }
+      const config = await forkInitRepo(
+        'some/repo',
+        'token',
+        'some-endpoint',
+        true
+      );
+      expect(config).toMatchSnapshot();
+    });
+    it('should update fork when forkMode', async () => {
+      function forkInitRepo(...args) {
+        // repo info
+        get.mockImplementationOnce(() => ({
+          body: {
+            owner: {
+              login: 'theowner',
+            },
+            default_branch: 'master',
+            allow_rebase_merge: true,
+            allow_squash_merge: true,
+            allow_merge_commit: true,
+          },
+        }));
+        // getPrList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getFileList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getBranchCommit
+        get.mockImplementationOnce(() => ({
+          body: {
+            object: {
+              sha: '1234',
+            },
+          },
+        }));
+        // getRepos
+        get.mockImplementationOnce(() => ({
+          body: [
+            {
+              full_name: 'forked_repo',
+            },
+          ],
+        }));
+        // fork
+        get.post.mockImplementationOnce(() => ({
+          body: { full_name: 'forked_repo' },
+        }));
+        return github.initRepo(...args);
+      }
+      const config = await forkInitRepo(
+        'some/repo',
+        'token',
+        'some-endpoint',
+        true
+      );
       expect(config).toMatchSnapshot();
     });
     it('should squash', async () => {
