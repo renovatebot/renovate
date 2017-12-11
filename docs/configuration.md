@@ -760,7 +760,7 @@ location with this method.
   <td>`npm`</td>
   <td>Configuration object for npm package.json renovation</td>
   <td>json</td>
-  <td><pre>{"enabled": true, "pin": {"automerge": true}}</pre></td>
+  <td><pre>{"enabled": true}</pre></td>
   <td>`RENOVATE_NPM`</td>
   <td>`--npm`<td>
 </tr>
