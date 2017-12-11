@@ -325,6 +325,34 @@ Array [
 ]
 `;
 
+exports[`platform/github getFile() should return large file via git API 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
+  ],
+  Array [
+    "repos/some/repo/contents/backend/package-lock.json?ref=master",
+  ],
+  Array [
+    "repos/some/repo/git/trees/master.backend",
+  ],
+  Array [
+    "repos/some/repo/git/blobs/some-sha",
+  ],
+]
+`;
+
+exports[`platform/github getFile() should return large file via git API 2`] = `"{\\"hello\\":\\"workd\\"}"`;
+
 exports[`platform/github getFile() should return null if GitHub returns a 404 1`] = `
 Array [
   Array [

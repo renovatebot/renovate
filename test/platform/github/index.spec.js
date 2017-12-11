@@ -75,6 +75,10 @@ describe('platform/github', () => {
             type: 'blob',
             path: 'package.json',
           },
+          {
+            type: 'blob',
+            path: 'backend/package-lock.json',
+          },
         ],
       },
     }));
@@ -1208,6 +1212,54 @@ describe('platform/github', () => {
       const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
+    });
+    it('should return large file via git API', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 403,
+          message: 'This API returns blobs up to 1 MB in size, OK?',
+        })
+      );
+      get.mockImplementationOnce(() => ({
+        body: {
+          tree: [
+            {
+              path: 'package-lock.json',
+              sha: 'some-sha',
+            },
+          ],
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: {
+          content: Buffer.from('{"hello":"workd"}').toString('base64'),
+        },
+      }));
+      const content = await github.getFile('backend/package-lock.json');
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(content).toMatchSnapshot();
+    });
+    it('should throw if cannot find large file via git API', async () => {
+      await initRepo('some/repo', 'token');
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 403,
+          message: 'This API returns blobs up to 1 MB in size, OK?',
+        })
+      );
+      get.mockImplementationOnce(() => ({
+        body: {
+          tree: [],
+        },
+      }));
+      let e;
+      try {
+        await github.getFile('backend/package-lock.json');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
     it('should return null if getFile returns nothing', async () => {
       await initRepo('some/repo', 'token');
