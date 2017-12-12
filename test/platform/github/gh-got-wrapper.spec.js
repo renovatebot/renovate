@@ -7,6 +7,7 @@ describe('platform/gh-got-wrapper', () => {
   const body = ['a', 'b'];
   beforeEach(() => {
     jest.resetAllMocks();
+    get.reset();
     get.setAppMode(false);
   });
   it('supports app mode', async () => {
@@ -15,6 +16,11 @@ describe('platform/gh-got-wrapper', () => {
     expect(ghGot.mock.calls[0][1].headers.accept).toBe(
       'application/vnd.github.machine-man-preview+json, some-accept'
     );
+  });
+  it('uses writeToken', async () => {
+    get.reset('some-write-token');
+    await get.put('some-url', { body: {} });
+    expect(ghGot.mock.calls).toMatchSnapshot();
   });
   it('paginates', async () => {
     ghGot.mockReturnValueOnce({

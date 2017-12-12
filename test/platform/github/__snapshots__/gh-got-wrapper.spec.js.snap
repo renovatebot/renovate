@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/gh-got-wrapper uses writeToken 1`] = `
+Array [
+  Array [
+    "some-url",
+    Object {
+      "body": Object {},
+      "method": "PUT",
+      "token": "some-write-token",
+    },
+  ],
+]
+`;
