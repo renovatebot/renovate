@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/workers/package/bazel getPackageUpdates returns http archive result 1`] = `
+Array [
+  Object {
+    "newVersion": "0.8.1",
+    "newVersionMajor": 0,
+    "type": "minor",
+  },
+]
+`;
+
 exports[`lib/workers/package/bazel getPackageUpdates returns major result 1`] = `
 Array [
   Object {

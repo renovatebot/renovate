@@ -13,15 +13,18 @@ describe('lib/workers/package/bazel', () => {
       };
     });
     it('returns empty if remote is not github', async () => {
+      config.depType = 'git_repository';
       config.remote = 'https://gitlab.com/a/b.git';
       expect(await bazel.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if current version is not valid semver', async () => {
+      config.depType = 'git_repository';
       config.remote = 'https://github.com/a/b.git';
       config.currentVersion = 'latest';
       expect(await bazel.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if no newer version', async () => {
+      config.depType = 'git_repository';
       config.remote = 'https://github.com/a/b.git';
       config.currentVersion = '1.0.0';
       ghGot.mockReturnValueOnce({
@@ -37,6 +40,7 @@ describe('lib/workers/package/bazel', () => {
       expect(await bazel.getPackageUpdates(config)).toEqual([]);
     });
     it('returns result if newer version', async () => {
+      config.depType = 'git_repository';
       config.remote = 'https://github.com/a/b.git';
       config.currentVersion = '1.0.0';
       ghGot.mockReturnValueOnce({
@@ -58,6 +62,7 @@ describe('lib/workers/package/bazel', () => {
       expect(await bazel.getPackageUpdates(config)).toMatchSnapshot();
     });
     it('returns major result', async () => {
+      config.depType = 'git_repository';
       config.remote = 'https://github.com/a/b.git';
       config.currentVersion = '1.0.0';
       ghGot.mockReturnValueOnce({
@@ -71,6 +76,34 @@ describe('lib/workers/package/bazel', () => {
         ],
       });
       expect(await bazel.getPackageUpdates(config)).toMatchSnapshot();
+    });
+    it('returns http archive result', async () => {
+      config.depType = 'http_archive';
+      config.repo = 'a/b';
+      config.currentVersion = '0.7.1';
+      ghGot.mockReturnValueOnce({
+        body: [
+          {
+            tag_name: '0.7.0',
+          },
+          {
+            tag_name: '0.7.1',
+          },
+          {
+            tag_name: '0.8.0',
+          },
+          {
+            tag_name: '0.8.1',
+          },
+        ],
+      });
+      expect(await bazel.getPackageUpdates(config)).toMatchSnapshot();
+    });
+    it('warns for invalid semver', async () => {
+      config.depType = 'http_archive';
+      config.repo = 'a/b';
+      config.currentVersion = 'foo';
+      expect(await bazel.getPackageUpdates(config)).toEqual([]);
     });
   });
 });

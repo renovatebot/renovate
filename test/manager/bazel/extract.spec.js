@@ -1,4 +1,10 @@
+const fs = require('fs');
 const { extractDependencies } = require('../../../lib/manager/bazel/extract');
+
+const workspaceFile = fs.readFileSync(
+  'test/_fixtures/bazel/WORKSPACE1',
+  'utf8'
+);
 
 describe('lib/manager/bazel/extract', () => {
   describe('extractDependencies()', () => {
@@ -16,6 +22,10 @@ describe('lib/manager/bazel/extract', () => {
         config
       );
       expect(res).toEqual([]);
+    });
+    it('extracts multiple types of dependencies', () => {
+      const res = extractDependencies(workspaceFile, config);
+      expect(res).toMatchSnapshot();
     });
   });
 });

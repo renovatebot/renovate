@@ -64,7 +64,7 @@ describe('lib/workers/dep-type/index', () => {
         'utf8'
       );
       const res = await depTypeWorker.renovateDepType(content, config);
-      expect(res).toHaveLength(2);
+      expect(res).toHaveLength(4);
     });
     it('returns upgrades for travis', async () => {
       config.packageFile = '.travis.yml';

@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/bazel/extract extractDependencies() extracts multiple types of dependencies 1`] = `
+Array [
+  Object {
+    "currentVersion": "0.3.1",
+    "def": "git_repository(
+    name = \\"build_bazel_rules_nodejs\\",
+    remote = \\"https://github.com/bazelbuild/rules_nodejs.git\\",
+    tag = \\"0.3.1\\",
+)
+",
+    "depName": "build_bazel_rules_nodejs",
+    "depType": "git_repository",
+    "remote": "https://github.com/bazelbuild/rules_nodejs.git",
+  },
+  Object {
+    "currentVersion": "0.6.1",
+    "def": "git_repository(
+    name = \\"build_bazel_rules_typescript\\",
+    remote = \\"https://github.com/bazelbuild/rules_typescript.git\\",
+    tag = \\"0.6.1\\",
+)
+",
+    "depName": "build_bazel_rules_typescript",
+    "depType": "git_repository",
+    "remote": "https://github.com/bazelbuild/rules_typescript.git",
+  },
+  Object {
+    "currentVersion": "0.0.3",
+    "def": "git_repository(
+    name = \\"io_bazel_rules_sass\\",
+    remote = \\"https://github.com/bazelbuild/rules_sass.git\\",
+    tag = \\"0.0.3\\",
+)
+",
+    "depName": "io_bazel_rules_sass",
+    "depType": "git_repository",
+    "remote": "https://github.com/bazelbuild/rules_sass.git",
+  },
+  Object {
+    "currentVersion": "0.7.1",
+    "def": "http_archive(
+    name = \\"io_bazel_rules_go\\",
+    url = \\"https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz\\",
+    sha256 = \\"341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c\\",
+)
+",
+    "depName": "io_bazel_rules_go",
+    "depType": "http_archive",
+    "repo": "bazelbuild/rules_go",
+  },
+]
+`;
