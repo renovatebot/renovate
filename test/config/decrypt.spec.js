@@ -57,7 +57,7 @@ describe('config/decrypt', () => {
       );
       expect(res.packageFiles[0].devDependencies.npmToken).not.toBeDefined();
       expect(res.packageFiles[0].devDependencies.npmrc).toEqual(
-        '//registry.npmjs.org/:_authToken=abcdef-ghijklm-nopqf-stuvwxyz\n'
+        '_auth=abcdef-ghijklm-nopqf-stuvwxyz\n'
       );
     });
   });

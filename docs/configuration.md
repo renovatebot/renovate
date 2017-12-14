@@ -294,14 +294,6 @@ location with this method.
   <td>`--autodiscover`<td>
 </tr>
 <tr>
-  <td>`autodiscover`</td>
-  <td>Autodiscover all repositories</td>
-  <td>boolean</td>
-  <td><pre>false</pre></td>
-  <td>`RENOVATE_AUTODISCOVER`</td>
-  <td>`--autodiscover`<td>
-</tr>
-<tr>
   <td>`repositories`</td>
   <td>List of Repositories</td>
   <td>list</td>
@@ -345,7 +337,7 @@ location with this method.
   <td>`ignorePaths`</td>
   <td>Skip any package.json whose path matches one of these. Can be string or glob pattern</td>
   <td>list</td>
-  <td><pre>["**/node_modules/**"]</pre></td>
+  <td><pre>["**/node_modules/**", "**/bower_components/**"]</pre></td>
   <td>`RENOVATE_IGNORE_PATHS`</td>
   <td>`--ignore-paths`<td>
 </tr>
