@@ -100,6 +100,11 @@ describe('platform/gitlab', () => {
         expect(process.env.GITLAB_ENDPOINT).toBe(endpoint);
       });
     });
+    it(`should escape all forward slashes in project names`, async () => {
+      const config = await initRepo('some/repo/project', 'some-token');
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(config).toMatchSnapshot();
+    });
     it('should throw an error if no token is provided', async () => {
       let err;
       try {
