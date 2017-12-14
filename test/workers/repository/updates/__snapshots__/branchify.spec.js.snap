@@ -8,7 +8,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchList": undefined,
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
@@ -577,7 +577,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchList": undefined,
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
@@ -1138,7 +1138,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchList": undefined,
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
@@ -1705,7 +1705,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchList": undefined,
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
@@ -2267,7 +2267,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchList": Array [
     "foo-1.1.0",

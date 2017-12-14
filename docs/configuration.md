@@ -768,7 +768,7 @@ location with this method.
   <td>`bazel`</td>
   <td>Configuration object for bazel WORKSPACE renovation</td>
   <td>json</td>
-  <td><pre>{"enabled": false}</pre></td>
+  <td><pre>{"enabled": true}</pre></td>
   <td>`RENOVATE_BAZEL`</td>
   <td>`--bazel`<td>
 </tr>

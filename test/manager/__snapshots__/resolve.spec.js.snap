@@ -8,7 +8,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -537,7 +537,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -1073,7 +1073,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -1867,7 +1867,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -2400,7 +2400,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -2924,7 +2924,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
@@ -3448,7 +3448,7 @@ Object {
   "automergeType": "pr",
   "baseBranch": null,
   "bazel": Object {
-    "enabled": false,
+    "enabled": true,
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
