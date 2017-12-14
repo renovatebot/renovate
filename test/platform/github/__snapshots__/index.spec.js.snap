@@ -702,6 +702,7 @@ exports[`platform/github mergeBranch(branchName, mergeType) should perform a bra
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
@@ -747,6 +748,7 @@ exports[`platform/github mergeBranch(branchName, mergeType) should perform a bra
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
+    undefined,
   ],
 ]
 `;
