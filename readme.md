@@ -19,7 +19,7 @@ Keep dependencies up-to-date.
 * Configurable via file, environment, CLI, and `package.json`
 * Supports eslint-like preset configs for ease of use
 * Updates `yarn.lock` and `package-lock.json` files natively
-* Supports GitHub, GitLab and VSTS
+* Supports GitHub, GitLab (APIv4) and VSTS
 * Open source and can be self-hosted or used via GitHub App
 
 ## Configuration Help
@@ -53,7 +53,7 @@ You can find instructions for GitHub
 (select "repo" permissions)
 
 You can find instructions for GitLab
-[here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens).
+[here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens). Note: GitLab APIv3 is no longer supported - please upgrade to GitLab APIv4 before testing Renovate.
 
 You can find instructions for VSTS
 [vsts](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
