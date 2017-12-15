@@ -310,6 +310,14 @@ location with this method.
   <td><td>
 </tr>
 <tr>
+  <td>`baseBranches`</td>
+  <td>An array of base branches to be renovated separately</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
   <td>`gitAuthor`</td>
   <td>Author to use for git commits. RFC5322</td>
   <td>string</td>
