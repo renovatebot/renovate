@@ -98,7 +98,7 @@
     "mockdate": "2.0.2",
     "nock": "9.1.4",
     "prettier": "1.9.2",
-    "semantic-release": "9.1.1"
+    "semantic-release": "11.0.2"
   },
   "files": [
     "lib"
