@@ -235,15 +235,5 @@ describe('config/index', () => {
       const config = configParser.mergeChildConfig(parentConfig, undefined);
       expect(config).toMatchObject(parentConfig);
     });
-    it('handles mergeable strings', () => {
-      const parentConfig = { ...defaultConfig };
-      parentConfig.npmrc = '_auth=abcd-abcd-abcd-abcd\n';
-      const childConfig = {
-        npmrc: 'always-auth=true\nregistry=some-registry\n',
-      };
-      const configParser = require('../../lib/config/index.js');
-      const config = configParser.mergeChildConfig(parentConfig, childConfig);
-      expect(config.npmrc).toMatchSnapshot();
-    });
   });
 });

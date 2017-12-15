@@ -1,12 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`config/index mergeChildConfig(parentConfig, childConfig) handles mergeable strings 1`] = `
-"_auth=abcd-abcd-abcd-abcd
-always-auth=true
-registry=some-registry
-"
-`;
-
 exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
 Object {
   "branchName": "{{branchPrefix}}lock-file-maintenance",
