@@ -26,10 +26,6 @@ Array [
           "someuser",
           "someotheruser",
         ],
-        "team_reviewers": Array [],
-      },
-      "headers": Object {
-        "accept": "application/vnd.github.thor-preview+json",
       },
     },
   ],
