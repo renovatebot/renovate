@@ -11,3 +11,5 @@ exports[`workers/repository/init/config mergeRenovateConfig() throws error if du
 exports[`workers/repository/init/config mergeRenovateConfig() throws error if duplicate keys 2`] = `"Duplicate keys in JSON"`;
 
 exports[`workers/repository/init/config mergeRenovateConfig() throws error if duplicate keys 3`] = `"\\"Syntax error: duplicated keys \\\\\\"enabled\\\\\\" near \\\\\\": false }\\""`;
+
+exports[`workers/repository/init/config mergeRenovateConfig() throws error if misconfigured 1`] = `[Error: config-validation]`;

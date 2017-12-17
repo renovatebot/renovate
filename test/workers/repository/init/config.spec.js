@@ -9,9 +9,18 @@ beforeEach(() => {
 const {
   mergeRenovateConfig,
 } = require('../../../../lib/workers/repository/init/config');
+const migrateValidate = require('../../../../lib/config/migrate-validate');
+
+jest.mock('../../../../lib/config/migrate-validate');
 
 describe('workers/repository/init/config', () => {
   describe('mergeRenovateConfig()', () => {
+    beforeEach(() => {
+      migrateValidate.migrateAndValidate.mockReturnValue({
+        warnings: [],
+        errors: [],
+      });
+    });
     it('returns config if not found', async () => {
       platform.getFileList.mockReturnValue(['package.json']);
       const res = await mergeRenovateConfig(config);
@@ -52,6 +61,24 @@ describe('workers/repository/init/config', () => {
       ]);
       platform.getFile.mockReturnValue('{}');
       await mergeRenovateConfig(config);
+    });
+    it('throws error if misconfigured', async () => {
+      platform.getFileList.mockReturnValue([
+        'package.json',
+        '.renovaterc.json',
+      ]);
+      platform.getFile.mockReturnValue('{}');
+      migrateValidate.migrateAndValidate.mockReturnValueOnce({
+        errors: [{}],
+      });
+      let e;
+      try {
+        await mergeRenovateConfig(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e).toMatchSnapshot();
     });
   });
 });

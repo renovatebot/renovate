@@ -1,5 +1,7 @@
 const { handleError } = require('../../../lib/workers/repository/error');
 
+jest.mock('../../../lib/workers/repository/error-config');
+
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
@@ -14,6 +16,7 @@ describe('workers/repository/error', () => {
       'fork',
       'no-package-files',
       'loops>5',
+      'config-validation',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {
