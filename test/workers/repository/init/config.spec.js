@@ -20,16 +20,30 @@ describe('workers/repository/init/config', () => {
     it('returns error if cannot parse', async () => {
       platform.getFileList.mockReturnValue(['package.json', 'renovate.json']);
       platform.getFile.mockReturnValue('cannot parse');
-      const res = await mergeRenovateConfig(config);
-      expect(res.errors).toHaveLength(1);
-      expect(res.errors[0]).toMatchSnapshot();
+      let e;
+      try {
+        await mergeRenovateConfig(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
     });
-    it('returns error if duplicate keys', async () => {
+    it('throws error if duplicate keys', async () => {
       platform.getFileList.mockReturnValue(['package.json', '.renovaterc']);
       platform.getFile.mockReturnValue('{ "enabled": true, "enabled": false }');
-      const res = await mergeRenovateConfig(config);
-      expect(res.errors).toHaveLength(1);
-      expect(res.errors[0]).toMatchSnapshot();
+      let e;
+      try {
+        await mergeRenovateConfig(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
     });
     it('finds .renovaterc.json', async () => {
       platform.getFileList.mockReturnValue([

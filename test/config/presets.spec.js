@@ -74,11 +74,33 @@ describe('config/presets', () => {
       expect(config).toMatchObject(res);
       expect(res).toMatchSnapshot();
     });
-    it('returns same if invalid preset', async () => {
+    it('throws if invalid preset file', async () => {
+      config.foo = 1;
+      config.extends = ['notfoundaaaaaaaa'];
+      let e;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
+    });
+    it('throws if invalid preset', async () => {
       config.foo = 1;
       config.extends = [':invalid-preset'];
-      const res = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
+      let e;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
     });
     it('works with valid', async () => {
       config.foo = 1;
@@ -87,12 +109,19 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
       expect(res.pinVersions).toBe(true);
     });
-    it('works with valid and invalid', async () => {
+    it('throws if valid and invalid', async () => {
       config.foo = 1;
       config.extends = [':invalid-preset', ':pinVersions'];
-      const res = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
-      expect(res.pinVersions).toBe(true);
+      let e;
+      try {
+        await presets.resolveConfigPresets(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
     });
     it('resolves app preset', async () => {
       config.extends = [':app'];
@@ -281,20 +310,52 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles 404 packages', async () => {
-      const res = await presets.getPreset('notfound:foo');
-      expect(res).toMatchSnapshot();
+      let e;
+      try {
+        await presets.getPreset('notfound:foo');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
     });
     it('handles no config', async () => {
-      const res = await presets.getPreset('noconfig:foo');
-      expect(res).toMatchSnapshot();
+      let e;
+      try {
+        await presets.getPreset('noconfig:foo');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
     });
     it('handles throw errors', async () => {
-      const res = await presets.getPreset('throw:foo');
-      expect(res).toMatchSnapshot();
+      let e;
+      try {
+        await presets.getPreset('throw:foo');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
     });
     it('handles preset not found', async () => {
-      const res = await presets.getPreset('wrongpreset:foo');
-      expect(res).toMatchSnapshot();
+      let e;
+      try {
+        await presets.getPreset('wrongpreset:foo');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e.configFile).toMatchSnapshot();
+      expect(e.validationError).toMatchSnapshot();
+      expect(e.validationMessage).toMatchSnapshot();
     });
   });
 });

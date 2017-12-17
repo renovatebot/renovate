@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/resolve resolvePackageFiles() deetect package.json and warns if cannot parse 1`] = `
+exports[`manager/resolve resolvePackageFiles() detect package.json and warns if cannot parse 1`] = `
 Object {
   "assignees": Array [],
   "autodiscover": false,
