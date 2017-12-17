@@ -873,6 +873,23 @@ describe('platform/github', () => {
       expect(res).toBe(null);
     });
   });
+  describe('ensureIssueClosing()', () => {
+    it('closes issue', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      }));
+      await github.ensureIssueClosing('title-2');
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo('some/repo', 'token');
