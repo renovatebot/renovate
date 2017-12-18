@@ -25,7 +25,7 @@ describe('manager/resolve', () => {
       expect(res).toMatchSnapshot();
       expect(res.errors).toHaveLength(2);
     });
-    it('deetect package.json and warns if cannot parse', async () => {
+    it('detect package.json and warns if cannot parse', async () => {
       manager.detectPackageFiles = jest.fn(() => [
         { packageFile: 'package.json' },
       ]);
