@@ -7,7 +7,7 @@ Object {
   "automergeType": "pr",
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
-  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "commitMessage": "Update dependency {{depName}} to {{#unless isRange}}v{{/unless}}{{newVersion}}",
   "copyLocalLibs": false,
   "currentVersion": "1.0.0",
   "depName": "foo",

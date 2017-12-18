@@ -12,7 +12,7 @@ Object {
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
-  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "commitMessage": "Update dependency {{depName}} to {{#unless isRange}}v{{/unless}}{{newVersion}}",
   "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
@@ -541,7 +541,7 @@ Object {
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
-  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "commitMessage": "Update dependency {{depName}} to {{#unless isRange}}v{{/unless}}{{newVersion}}",
   "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
@@ -1077,7 +1077,7 @@ Object {
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
-  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "commitMessage": "Update dependency {{depName}} to {{#unless isRange}}v{{/unless}}{{newVersion}}",
   "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
@@ -1871,7 +1871,7 @@ Object {
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
-  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "commitMessage": "Update dependency {{depName}} to {{#unless isRange}}v{{/unless}}{{newVersion}}",
   "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
@@ -2404,7 +2404,7 @@ Object {
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
-  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "commitMessage": "Update dependency {{depName}} to {{#unless isRange}}v{{/unless}}{{newVersion}}",
   "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
@@ -2928,7 +2928,7 @@ Object {
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
-  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "commitMessage": "Update dependency {{depName}} to {{#unless isRange}}v{{/unless}}{{newVersion}}",
   "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",
@@ -3452,7 +3452,7 @@ Object {
   },
   "branchName": "{{branchPrefix}}{{depNameSanitized}}-{{newVersionMajor}}.x",
   "branchPrefix": "renovate/",
-  "commitMessage": "Update dependency {{depName}} to v{{newVersion}}",
+  "commitMessage": "Update dependency {{depName}} to {{#unless isRange}}v{{/unless}}{{newVersion}}",
   "copyLocalLibs": false,
   "dependencies": Object {
     "semanticCommitType": "fix",

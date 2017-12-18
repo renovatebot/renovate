@@ -649,7 +649,7 @@ location with this method.
   <td>`commitMessage`</td>
   <td>Commit message template</td>
   <td>string</td>
-  <td><pre>"Update dependency {{depName}} to v{{newVersion}}"</pre></td>
+  <td><pre>"Update dependency {{depName}} to {{#unless isRange}}v{{/unless}}{{newVersion}}"</pre></td>
   <td>`RENOVATE_COMMIT_MESSAGE`</td>
   <td><td>
 </tr>
