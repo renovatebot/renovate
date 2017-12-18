@@ -67,7 +67,7 @@
     "later": "1.2.0",
     "lodash": "4.17.4",
     "minimatch": "3.0.4",
-    "moment": "2.19.4",
+    "moment": "2.20.0",
     "moment-timezone": "0.5.14",
     "npm": "5.6.0",
     "openpgp": "2.6.0",
