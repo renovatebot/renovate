@@ -137,7 +137,7 @@
       ":automergeLinters",
       ":label(ready)",
       ":assignee(rarkins)"
-    ],
+    ]
   },
   "publishConfig": {
     "tag": "latest"
