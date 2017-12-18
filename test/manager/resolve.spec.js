@@ -25,14 +25,29 @@ describe('manager/resolve', () => {
       expect(res).toMatchSnapshot();
       expect(res.errors).toHaveLength(2);
     });
-    it('detect package.json and warns if cannot parse', async () => {
+    it('detect package.json and adds error if cannot parse (onboarding)', async () => {
       manager.detectPackageFiles = jest.fn(() => [
         { packageFile: 'package.json' },
       ]);
       platform.getFile.mockReturnValueOnce('not json');
       const res = await resolvePackageFiles(config);
       expect(res).toMatchSnapshot();
-      expect(res.warnings).toHaveLength(1);
+      expect(res.errors).toHaveLength(1);
+    });
+    it('detect package.json and throws error if cannot parse (onboarded)', async () => {
+      manager.detectPackageFiles = jest.fn(() => [
+        { packageFile: 'package.json' },
+      ]);
+      platform.getFile.mockReturnValueOnce('not json');
+      config.repoIsOnboarded = true;
+      let e;
+      try {
+        await resolvePackageFiles(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e).toMatchSnapshot();
     });
     it('detects package.json and parses json with renovate config', async () => {
       manager.detectPackageFiles = jest.fn(() => [
