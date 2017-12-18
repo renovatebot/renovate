@@ -131,21 +131,13 @@
   },
   "renovate": {
     "extends": [
-      ":app",
+      "config:js-app",
       ":automergePatch",
       ":automergeBranchPush",
-      "group:monorepos",
-      ":automergeLinters"
+      ":automergeLinters",
+      ":label(ready)",
+      ":assignee(rarkins)"
     ],
-    "labels": [
-      "ready"
-    ],
-    "reviewers": [
-      "rarkins"
-    ],
-    "assignees": [
-      "rarkins"
-    ]
   },
   "publishConfig": {
     "tag": "latest"
