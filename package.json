@@ -135,6 +135,7 @@
       ":automergePatch",
       ":automergeBranchPush",
       ":automergeLinters",
+      ":rebaseStalePrs",
       ":label(ready)",
       ":assignee(rarkins)"
     ]
