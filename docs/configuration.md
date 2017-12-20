@@ -609,7 +609,7 @@ location with this method.
   <td>`prNotPendingHours`</td>
   <td>Timeout in hours for when prCreation=not-pending</td>
   <td>integer</td>
-  <td><pre>12</pre></td>
+  <td><pre>24</pre></td>
   <td>`RENOVATE_PR_NOT_PENDING_HOURS`</td>
   <td>`--pr-not-pending-hours`<td>
 </tr>
