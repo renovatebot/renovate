@@ -117,6 +117,23 @@ describe('lib/workers/dep-type/index', () => {
         },
       ],
     };
+    it('supports inclusive or', () => {
+      const nConfig = {
+        packageRules: [
+          {
+            packageNames: ['neutrino'],
+            packagePatterns: ['^@neutrino\\/'],
+            x: 1,
+          },
+        ],
+      };
+      const res1 = depTypeWorker.getDepConfig(nConfig, { depName: 'neutrino' });
+      expect(res1.x).toBeDefined();
+      const res2 = depTypeWorker.getDepConfig(nConfig, {
+        depName: '@neutrino/something',
+      });
+      expect(res2.x).toBeDefined();
+    });
     it('applies both rules for a', () => {
       const dep = {
         depName: 'a',
