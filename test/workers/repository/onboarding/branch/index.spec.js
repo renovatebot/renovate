@@ -44,6 +44,12 @@ describe('workers/repository/onboarding/branch', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
+    it('detects repo is onboarded via package.json config', async () => {
+      platform.getFileList.mockReturnValueOnce(['package.json']);
+      platform.getFile.mockReturnValueOnce('{"renovate":{}}');
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(true);
+    });
     it('detects repo is onboarded via PR', async () => {
       platform.findPr.mockReturnValue(true);
       const res = await checkOnboardingBranch(config);
