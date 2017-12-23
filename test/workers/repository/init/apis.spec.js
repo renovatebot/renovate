@@ -20,7 +20,8 @@ describe('workers/repository/init/apis', () => {
       config.repository = 'some/name';
       glGot.mockReturnValueOnce({ body: {} });
       glGot.mockReturnValueOnce({ body: {} });
-      glGot.mockReturnValueOnce({ body: {} });
+      glGot.mockReturnValueOnce({ body: [] });
+      glGot.mockReturnValueOnce({ body: [] });
       await initApis(config, 'some-token');
     });
     it('runs vsts', async () => {
