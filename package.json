@@ -132,9 +132,6 @@
   "renovate": {
     "extends": [
       "config:js-app",
-      ":automergePatch",
-      ":automergeBranchPush",
-      ":automergeLinters",
       ":rebaseStalePrs",
       ":label(ready)",
       ":assignee(rarkins)"
