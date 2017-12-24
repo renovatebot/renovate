@@ -707,7 +707,6 @@ location with this method.
   <td>Config if groupName is enabled</td>
   <td>json</td>
   <td><pre>{
-  "recreateClosed": true,
   "branchName": "{{branchPrefix}}{{groupSlug}}",
   "commitMessage": "Update {{groupName}} packages",
   "prTitle": "Update {{groupName}} packages{{#if singleVersion}} to {{#unless isRange}}v{{/unless}}{{singleVersion}}{{/if}}",
