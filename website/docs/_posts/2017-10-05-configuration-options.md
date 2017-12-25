@@ -67,7 +67,7 @@ Type of automerge approach to use.
 
 Renovate will default to automerging after creating PRs, but you can override that to automerge _without_ PRs. There are two ways to merge branch upgrades: merge commits, and branch push.
 
-Merge commits will employ the standard GitHub "merge commit" API, just like when you merge a PR with merge commit setting. The downside of this aproach is that you will end up with merge commits and not a nice clean default branch!
+Merge commits will employ the standard GitHub "merge commit" API, just like when you merge a PR with merge commit setting. The downside of this approach is that you will end up with merge commits and not a nice clean default branch!
 
 Branch push employs GitHub's low-level `git` API to push the Renovate upgrade directly to the head of the base branch (e.g. `master`) to maintain a "clean" history. The downside of this approach is that it implicitly enables the `rebaseStalePrs` setting because otherwise we would risk pushing a bad commit to master. i.e. Renovate won't push the commit to base branch unless the branch is completely up-to-date with `master` and has passed tests, which means that if the default branch is getting updated regularly then it might take several rebases from Renovate until it has a branch commit that is safe to push to `master`.
 
@@ -82,7 +82,7 @@ A custom base branch to target for pull requests.
 
 If left default (empty) then the default branch of the repository is used.
 
-For most projects, this should be left as default. An example use case for using this setting is a project who uses the default `master` branch for releases and a separate branch `next` for preparing for the next release. In that case the project may prefer Pull Requests from Renovate are targetted to the `next` branch instead of `master`.
+For most projects, this should be left as default. An example use case for using this setting is a project who uses the default `master` branch for releases and a separate branch `next` for preparing for the next release. In that case, the project may prefer for Pull Requests from Renovate to be opened against the `next` branch instead of `master`.
 
 You also may add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR. If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch instead of default.
 
@@ -132,7 +132,7 @@ Configuration specific for `package.json > dependencies`.
 | type    | object                           |
 | default | {"semanticPrefix": "fix(deps):"} |
 
-Extend this if you wish to configure rules specificly for `dependencies` and not `devDependencies` or `optionalDependencies`.
+Extend this if you wish to configure rules specifically for `dependencies` and not `devDependencies` or `optionalDependencies`.
 
 ## devDependencies
 
@@ -143,7 +143,7 @@ Configuration specific for `package.json > devDependencies`.
 | type    | object |
 | default | {}     |
 
-Extend this if you wish to configure rules specificly for `devDependencies` and not `dependencies` or `optionalDependencies`.
+Extend this if you wish to configure rules specifically for `devDependencies` and not `dependencies` or `optionalDependencies`.
 
 ## docker
 
@@ -228,7 +228,7 @@ A configuration object containing strings encrypted with Renovate's public key.
 | type    | object |
 | default | {}     |
 
-See http://localhost:4000/docs/deep-dives/private-modules for details on how this is used to encrypte npm tokens.
+See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
 
 ## group
 
@@ -407,7 +407,7 @@ A string copy of npmrc file.
 | type    | string |
 | default | null   |
 
-See http://localhost:4000/docs/deep-dives/private-modules for details on how this is used.
+See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
 
 ## npmToken
 
@@ -418,7 +418,7 @@ Your npmjs token.
 | type    | string |
 | default | null   |
 
-See http://localhost:4000/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## optionalDependencies
 
@@ -429,7 +429,7 @@ Configuration specific for `package.json > optionalDependencies`.
 | type    | object |
 | default | {}     |
 
-Extend this if you wish to configure rules specificly for `optionalDependencies` and not `dependencies` or `devDependencies`.
+Extend this if you wish to configure rules specifically for `optionalDependencies` and not `dependencies` or `devDependencies`.
 
 ## packageFiles
 

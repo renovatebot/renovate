@@ -68,7 +68,7 @@ The increased volume of Pull Requests for upgrading dependencies may be consider
 
 There are some dependencies that either (a) don't have the potential to break something in production, or (b) are fully tested by your tests.
 
-For example, it's essentially impossible for `eslint` to break anything in production. If your build/tests pass, then you are fine. Therefore you should consider enabling automerge for all lint packages to save yourself the pointless click. In this case you maybe wake up to 5/10 of your overnight Pull Requests already merged by themself.
+For example, it's essentially impossible for `eslint` to break anything in production. If your build/tests pass, then you are fine. Therefore you should consider enabling automerge for all lint packages to save yourself the pointless click. In this case you might wake up to 5/10 of your overnight Pull Requests having already merged themselves.
 
 Another example of a good candidate for automerging might be a database driver like `node-postgres` (`pg` on npm), if you have 100% test coverage of your API. In that case if the `pg` package has a minor or patch update and passes all tests then you may as well merge it automatically if you were not going to do a manual inspection anyway.
 
