@@ -7,6 +7,7 @@ description: Configuration Options usable in renovate.json or package.json
 type: Document
 order: 0
 ---
+
 This document describes all the configuration options you may configure in a `renovate.json` file or within a `"renovate"` section of your `package.json`. Note that any config in a `package.json` will apply only to that package file, so this is also one way you can specify different behaviour for different `package.json files`. Similarly, if you have a monorepo and want your config to apply to all package files then you need to define it in a `renovate.json`;
 
 Also, be sure to check out Renovate's [shareabe config presets](/docs/configuration-reference/config-presets) to save yourself from reinventing any wheels.
@@ -17,10 +18,10 @@ If you have any questions about the below config options, or would like to get h
 
 Assignees for Pull Requests
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 Must be valid usernames.
 
@@ -28,14 +29,14 @@ Must be valid usernames.
 
 Configure if Renovate should merge passing PRs itself..
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | false |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
 
 By default, Renovate raises PRs but leaves them to someone/something else to merge them. By configuring this setting, you can enable Renovate to automerge branches or PRs itself, therefore reducing the amount of human intervention required.
 
-Usually you won't want to automerge *all* PRs, for example most people would want to leave major dependency updates to a human to review first. In that case you will want to embed this setting inside `major`, `minor`, or `patch` configuration options. For example, you could add this to your `renovate.json` to automerge only non-major updates:
+Usually you won't want to automerge _all_ PRs, for example most people would want to leave major dependency updates to a human to review first. In that case you will want to embed this setting inside `major`, `minor`, or `patch` configuration options. For example, you could add this to your `renovate.json` to automerge only non-major updates:
 
 ```json
   "automerge": true,
@@ -58,13 +59,13 @@ Warning: GitHub currently has a bug where automerge won't work if a GitHub Organ
 
 Type of automerge approach to use.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string |
+| name         | value                                        |
+| ------------ | -------------------------------------------- |
+| type         | string                                       |
 | valid values | "branch-merge-commit", "branch-push" or "pr" |
-| default  | "pr" |
+| default      | "pr"                                         |
 
-Renovate will default to automerging after creating PRs, but you can override that to automerge *without* PRs. There are two ways to merge branch upgrades: merge commits, and branch push.
+Renovate will default to automerging after creating PRs, but you can override that to automerge _without_ PRs. There are two ways to merge branch upgrades: merge commits, and branch push.
 
 Merge commits will employ the standard GitHub "merge commit" API, just like when you merge a PR with merge commit setting. The downside of this aproach is that you will end up with merge commits and not a nice clean default branch!
 
@@ -74,11 +75,10 @@ Branch push employs GitHub's low-level `git` API to push the Renovate upgrade di
 
 A custom base branch to target for pull requests.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string                      |
-| default  | `''` |
-
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | `''`   |
 
 If left default (empty) then the default branch of the repository is used.
 
@@ -90,10 +90,10 @@ You also may add this setting into the `renovate.json` file as part of the "Conf
 
 Prefix to be used for all branch names
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string |
-| default  | renovate/ |
+| name    | value     |
+| ------- | --------- |
+| type    | string    |
+| default | renovate/ |
 
 You can modify this field if you want to change the prefix used. For example if you want branches to be like `deps/eslint-4.x` instead of `renovate/eslint-4.x` then you set `branchPrefix` = `deps/`. Or if you wish to avoid forward slashes in branch names then you could use `renovate_` instead, for example.
 
@@ -101,10 +101,10 @@ You can modify this field if you want to change the prefix used. For example if 
 
 Branch name template
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | handlebars template |
-| default  | {% raw %}{{renovatePrefix}}{{depName}}-{{newVersionMajor}}.x{% endraw %} |
+| name    | value                                                                    |
+| ------- | ------------------------------------------------------------------------ |
+| type    | handlebars template                                                      |
+| default | {% raw %}{{renovatePrefix}}{{depName}}-{{newVersionMajor}}.x{% endraw %} |
 
 It's recommended to use our default templates, but you may override branch name if you really wish. It's recommended to still keep `depName` and `newVersionMajor` in the branch name to make sure all other Renovate features can still work.
 
@@ -114,10 +114,10 @@ Example branch name: `renovate/eslint-4.x`.
 
 Commit message template
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | handlebars template |
-| default  | {% raw %}{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}{% endraw %} |
+| name    | value                                                                                          |
+| ------- | ---------------------------------------------------------------------------------------------- |
+| type    | handlebars template                                                                            |
+| default | {% raw %}{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}{% endraw %} |
 
 The commit message is less important than branchName so you may override it if you wish.
 
@@ -127,10 +127,10 @@ Example commit message: "chore(deps): Update dependency eslint to version 4.0.1"
 
 Configuration specific for `package.json > dependencies`.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | {"semanticPrefix": "fix(deps):"} |
+| name    | value                            |
+| ------- | -------------------------------- |
+| type    | object                           |
+| default | {"semanticPrefix": "fix(deps):"} |
 
 Extend this if you wish to configure rules specificly for `dependencies` and not `devDependencies` or `optionalDependencies`.
 
@@ -138,10 +138,10 @@ Extend this if you wish to configure rules specificly for `dependencies` and not
 
 Configuration specific for `package.json > devDependencies`.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | {} |
+| name    | value  |
+| ------- | ------ |
+| type    | object |
+| default | {}     |
 
 Extend this if you wish to configure rules specificly for `devDependencies` and not `dependencies` or `optionalDependencies`.
 
@@ -149,10 +149,10 @@ Extend this if you wish to configure rules specificly for `devDependencies` and 
 
 Configuration specific for Dockerfile updates.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | { enabled: false } |
+| name    | value              |
+| ------- | ------------------ |
+| type    | object             |
+| default | { enabled: false } |
 
 Set enabled to `true` to enable Dockerfile FROM updating.
 
@@ -160,10 +160,10 @@ Set enabled to `true` to enable Dockerfile FROM updating.
 
 Enable or disable Renovate.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | true |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
 
 Renovate is enabled for all packages by default, but this setting allows you to disable Renovate for specific packages, dependency types, package files, or even for the whole repository.
 
@@ -190,10 +190,10 @@ To disable Renovate for `dependencies` but keep it for `devDependencies` you cou
 
 A list of package names inside a package rule which are to be excluded/ignored.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 Use this field if you want to have one or more exact name matches excluded in your package rule. See also `packageNames`.
 
@@ -201,10 +201,10 @@ Use this field if you want to have one or more exact name matches excluded in yo
 
 A list of regex package patterns inside a package rule which are to be excluded/ignored.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 Use this field if you want to have one or more package name patterns excluded in your package rule. See also `packagePatterns`.
 
@@ -212,10 +212,10 @@ Use this field if you want to have one or more package name patterns excluded in
 
 Preset configs to use/extend.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 See https://renovateapp.com/docs/configuration-reference/config-presets for details.
 
@@ -223,10 +223,10 @@ See https://renovateapp.com/docs/configuration-reference/config-presets for deta
 
 A configuration object containing strings encrypted with Renovate's public key.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | {} |
+| name    | value  |
+| ------- | ------ |
+| type    | object |
+| default | {}     |
 
 See http://localhost:4000/docs/deep-dives/private-modules for details on how this is used to encrypte npm tokens.
 
@@ -234,21 +234,21 @@ See http://localhost:4000/docs/deep-dives/private-modules for details on how thi
 
 Group configuration to apply if groupName is provided.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | {<br />&nbsp;&nbsp;"recreateClosed": true,<br />&nbsp;&nbsp;"branchName": "template",<br />&nbsp;&nbsp;"commitMessage": "template",<br />&nbsp;&nbsp;"prTitle": "template",<br />&nbsp;&nbsp;"prBody": "template"<br />} |
+| name    | value                                                                                                                                                                                                                    |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type    | object                                                                                                                                                                                                                   |
+| default | {<br />&nbsp;&nbsp;"recreateClosed": true,<br />&nbsp;&nbsp;"branchName": "template",<br />&nbsp;&nbsp;"commitMessage": "template",<br />&nbsp;&nbsp;"prTitle": "template",<br />&nbsp;&nbsp;"prBody": "template"<br />} |
 
-The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to *add* settings to any group by defining your own `group` configuration object.
+The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to _add_ settings to any group by defining your own `group` configuration object.
 
 ## groupName
 
 Human understandable name for a dependency group
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string |
-| default  | null |
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | null   |
 
 There are multiple cases where it can be useful to group multiple upgrades together. Internally Renovate uses this for branches such as "Pin Dependencies", "Lock File Maintenance", etc. Another example used previously is to group together all related `eslint` packages, or perhaps `angular` or `babel`. To enable grouping, you set the `groupName` field to something non-null.
 
@@ -256,10 +256,10 @@ There are multiple cases where it can be useful to group multiple upgrades toget
 
 Slug to use in the branch name for groups.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string |
-| default  | null |
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | null   |
 
 By default, Renovate will "slugify" the groupName to determine the branch name. For example if you named your group "All eslint packages" then the branchName would be `renovate/all-eslint-packages`. If you wished to override this then you could set like this:
 
@@ -274,10 +274,10 @@ And then the branchName would be `renovate/eslint` instead.
 
 Dependencies to ignore.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 The `ignoreDeps` configuration field allows you to define a list of dependency names to be ignored by Renovate. Currently it supports only "exact match" dependency names and not any patterns. e.g. to ignore both `eslint` and `eslint-config-base` you would add this to your config:
 
@@ -291,10 +291,10 @@ You could also configure this using `packageRules`, especially if you need patte
 
 Ignore npmrc files found in repository
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | false |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
 
 There may be times where an `.npmrc` file in your repository causes problems, such as during lock file generation. Set this to true and Renovate will ignore any `.npmrc` files it finds.
 
@@ -302,10 +302,10 @@ There may be times where an `.npmrc` file in your repository causes problems, su
 
 Ignore package files matching any of these paths
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | ['node_modules'] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | ['node_modules'] |
 
 Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want kept up to date.
 
@@ -313,21 +313,21 @@ Using this setting, you can selectively ignore package files that you don't want
 
 Ignore versions with unstable semver.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | true |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
 
-By default, Renovate won't update any packages to unstable versions (e.g. `4.0.0-rc3`) unless the package version was *already* unstable (e.g. it was already on `4.0.0-rc2`). If for some reason you wish to *force* unstable updates on Renovate, you can set `ignoreUnstable` to `false`, but this is not recommended for most situations.
+By default, Renovate won't update any packages to unstable versions (e.g. `4.0.0-rc3`) unless the package version was _already_ unstable (e.g. it was already on `4.0.0-rc2`). If for some reason you wish to _force_ unstable updates on Renovate, you can set `ignoreUnstable` to `false`, but this is not recommended for most situations.
 
 ## labels
 
 Labels to add to Pull Requests
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 Add an array of 1 or more strings to `labels` and Renovate will apply these labels to any PR its created. Usually these will be a per-repository setting like "renovate", or "ready", or "dependencies", however you can configure them right down to per-package level.
 
@@ -335,10 +335,10 @@ Add an array of 1 or more strings to `labels` and Renovate will apply these labe
 
 Use group names only when more than one upgrade is available.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | true |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
 
 The default behaviour for Renovate is to only use group names for branches and PRs when there's more than one dependency in a group. For example you may have defined a dependency group calls "All eslint packages" with a `packagePattern` of `^eslint`, but if the only upgrade available at the time is `eslint-config-airbnb` then it makes more sense for the PR to be named "Upgrade eslint-config-airbnb to version 2.1.4" than to name it "Upgrade All eslint packages". If ever this behaviour is undesirable then you can override it by setting this option to `false`.
 
@@ -346,10 +346,10 @@ The default behaviour for Renovate is to only use group names for branches and P
 
 Configuration for lock file maintenance.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | configuration object |
-| default  | {% raw %}{<br />&nbsp;&nbsp;"enabled": true,<br />&nbsp;&nbsp;"recreateClosed": true,<br />&nbsp;&nbsp;"branchName": "renovate/lock-files",<br />&nbsp;&nbsp;"commitMessage": "{{semanticPrefix}}Update lock file",<br />&nbsp;&nbsp;"prTitle": "{{semanticPrefix}}Lock file maintenance",<br />&nbsp;&nbsp;"prBody": "This PR regenerates lock files to keep them up-to-date.",<br />&nbsp;&nbsp;"schedule": ["before 5am on monday"]<br />}{% endraw %} |
+| name    | value                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type    | configuration object                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| default | {% raw %}{<br />&nbsp;&nbsp;"enabled": true,<br />&nbsp;&nbsp;"recreateClosed": true,<br />&nbsp;&nbsp;"branchName": "renovate/lock-files",<br />&nbsp;&nbsp;"commitMessage": "{{semanticPrefix}}Update lock file",<br />&nbsp;&nbsp;"prTitle": "{{semanticPrefix}}Lock file maintenance",<br />&nbsp;&nbsp;"prBody": "This PR regenerates lock files to keep them up-to-date.",<br />&nbsp;&nbsp;"schedule": ["before 5am on monday"]<br />}{% endraw %} |
 
 By setting enabled=true, this means that the default behaviour is to "maintain" lock files for each `package.json` if they exist already. "Maintaining" a lock file means recreating it to get an up-to-date version and committing that. Supported lock files include `package-lock.json` (npm >= 5) and `yarn.lock` (yarn).
 
@@ -369,10 +369,10 @@ The `recreateClosed` setting is necessary to tell Renovate to override its defau
 
 Configuration specific for major dependency updates.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | {} |
+| name    | value  |
+| ------- | ------ |
+| type    | object |
+| default | {}     |
 
 Add to this object if you wish to define rules that apply only to major updates.
 
@@ -380,10 +380,10 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 Configuration specific for meteor updates.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | { enabled: false } |
+| name    | value              |
+| ------- | ------------------ |
+| type    | object             |
+| default | { enabled: false } |
 
 Set enabled to `true` to enable meteor package updating.
 
@@ -391,10 +391,10 @@ Set enabled to `true` to enable meteor package updating.
 
 Configuration specific for minor dependency updates.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | {} |
+| name    | value  |
+| ------- | ------ |
+| type    | object |
+| default | {}     |
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
@@ -402,10 +402,10 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 A string copy of npmrc file.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string |
-| default  | null |
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | null   |
 
 See http://localhost:4000/docs/deep-dives/private-modules for details on how this is used.
 
@@ -413,10 +413,10 @@ See http://localhost:4000/docs/deep-dives/private-modules for details on how thi
 
 Your npmjs token.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string |
-| default  | null |
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | null   |
 
 See http://localhost:4000/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
@@ -424,10 +424,10 @@ See http://localhost:4000/docs/deep-dives/private-modules for details on how thi
 
 Configuration specific for `package.json > optionalDependencies`.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | {} |
+| name    | value  |
+| ------- | ------ |
+| type    | object |
+| default | {}     |
 
 Extend this if you wish to configure rules specificly for `optionalDependencies` and not `dependencies` or `devDependencies`.
 
@@ -435,10 +435,10 @@ Extend this if you wish to configure rules specificly for `optionalDependencies`
 
 A manually provisioned list of package.json paths to use.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings            |
-| default  | `[]` |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | `[]`             |
 
 If left default then package file autodiscovery will be used, so only change this setting if you wish to manually specify a limited set of `package.json` files to renovate, or if package file autodiscovery is not finding all your `package.json` files.
 
@@ -448,10 +448,10 @@ Note: `package.json` autodiscovery works for any GitHub repository that isn't it
 
 A list of package names inside a package rule.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 Use this field if you want to have one or more exact name matches in your package rule. See also `excludedPackageNames`.
 
@@ -459,10 +459,10 @@ Use this field if you want to have one or more exact name matches in your packag
 
 A list of package patterns inside a package rule.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 Use this field if you want to have one or more package names patterns in your package rule. See also `excludedPackagePatterns`.
 
@@ -470,10 +470,10 @@ Use this field if you want to have one or more package names patterns in your pa
 
 A list of package rules to apply.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | list of configuration objects |
-| default  | [] |
+| name    | value                         |
+| ------- | ----------------------------- |
+| type    | list of configuration objects |
+| default | []                            |
 
 `packageRules` is a powerful feature that lets you apply rules to individual packages or to groups of packages using regex pattern matching.
 
@@ -501,7 +501,7 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
   ]
 ```
 
-Note how the above uses `packageNames` instead of `packagePatterns` because it is an exact match package name. This is the equivalent of defining `"packagePatterns": ["^aws\-sdk$"]` and hence much simpler. However you can mix together both `packageNames` and `packagePatterns` in the same package rule and the rule will be applied if *either* match. Example:
+Note how the above uses `packageNames` instead of `packagePatterns` because it is an exact match package name. This is the equivalent of defining `"packagePatterns": ["^aws\-sdk$"]` and hence much simpler. However you can mix together both `packageNames` and `packagePatterns` in the same package rule and the rule will be applied if _either_ match. Example:
 
 ```json
   "packageRules": [
@@ -519,10 +519,10 @@ The above rule will group together the `neutrino` package and any package matchi
 
 Configuration specific for patch dependency updates.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | { "branchName": "{{branchPrefix}}{{depName}}-{{newVersionMajor}}.{{newVersionMinor}}.x" } |
+| name    | value                                                                                     |
+| ------- | ----------------------------------------------------------------------------------------- |
+| type    | object                                                                                    |
+| default | { "branchName": "{{branchPrefix}}{{depName}}-{{newVersionMajor}}.{{newVersionMinor}}.x" } |
 
 Add to this object if you wish to define rules that apply only to patch updates. See also `major` and `minor` configuration options.
 
@@ -530,10 +530,10 @@ Add to this object if you wish to define rules that apply only to patch updates.
 
 Configuration specific for `package.json > peerDependencies`.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | {"enabled": false} |
+| name    | value              |
+| ------- | ------------------ |
+| type    | object             |
+| default | {"enabled": false} |
 
 Extend this if you wish to configure rules specifically for `peerDependencies`. Disabled by default.
 
@@ -541,10 +541,10 @@ Extend this if you wish to configure rules specifically for `peerDependencies`. 
 
 Configuration specific for dependency pinning.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | object |
-| default  | {<br />"automerge": true,<br />"unpublishSafe": false,<br />"groupName": "Pin Dependencies",<br />"group": {"prTitle": "{{groupName}}", "semanticPrefix": "refactor(deps):"}<br />} |
+| name    | value                                                                                                                                                                               |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type    | object                                                                                                                                                                              |
+| default | {<br />"automerge": true,<br />"unpublishSafe": false,<br />"groupName": "Pin Dependencies",<br />"group": {"prTitle": "{{groupName}}", "semanticPrefix": "refactor(deps):"}<br />} |
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
 
@@ -552,10 +552,10 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 Whether to convert ranged versions in `package.json` to pinned versions.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | true |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
 
 This is a very important feature to consider, because not every repository's requirements are the same. Although Renovate's default value for pinVersions is `true` - i.e. pin versions of all dependencies, there are cases where you may want to keep ranges, for example if your project is a web library that is consumed by others. In that case, you may wish to keep ranges for `dependencies` but pin versions for `devDependencies`, for example.
 
@@ -565,10 +565,10 @@ When creating the onboarding PR, Renovate will try to detect the best setting fo
 
 Pull Request body template.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | handlebars template |
-| default  | [too long or inclusion] |
+| name    | value                   |
+| ------- | ----------------------- |
+| type    | handlebars template     |
+| default | [too long or inclusion] |
 
 Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovateapp/renovate/issues) and let us solve it for you and for everyone else too.
 
@@ -576,17 +576,17 @@ Although the PR body can be customised by you, it might be quite challenging. If
 
 When to create the PR for a branch.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string |
-| valid values   | "immediate", "not-pending", "status-success" |
-| default  | "immediate" |
+| name         | value                                        |
+| ------------ | -------------------------------------------- |
+| type         | string                                       |
+| valid values | "immediate", "not-pending", "status-success" |
+| default      | "immediate"                                  |
 
 This setting tells Renovate when you would like it to raise PRs:
 
-- `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
-- `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
-- `status-success`: Renovate won't raise PRs unless tests pass
+* `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
+* `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
+* `status-success`: Renovate won't raise PRs unless tests pass
 
 Renovate defaults to `immediate` but some like to change to `not-pending`. If you set to immediate, it means you will usually get GitHub notifications that a new PR is available but if you view it immediately then it will still have "pending" tests so you can't take any action. With `not-pending`, it means that when you receive the PR notification, you can see if it passed or failed and take action immediately. Therefore you can customise this setting if you wish to be notified a little later in order to reduce "noise".
 
@@ -594,10 +594,10 @@ Renovate defaults to `immediate` but some like to change to `not-pending`. If yo
 
 Pull Request title template
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | handlebars template |
-| default  | {% raw %}{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}{% endraw %} |
+| name    | value                                                                                                                                                                                                                        |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type    | handlebars template                                                                                                                                                                                                          |
+| default | {% raw %}{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}{% endraw %} |
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
@@ -605,10 +605,10 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 Whether to rebase branches that are no longer up-to-date with the base branch.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | false |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
 
 This field is defaulted to `false` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
 
@@ -616,16 +616,16 @@ This field is defaulted to `false` because it has a potential to create a lot of
 
 Recreate PRs even if same ones were closed previously.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | false |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
 
 By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again. For example the Webpack 3.x case described above. This field lets you customise this behaviour down to a per-package level. For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
 
-- Package groups
-- When pinning versions
-- Lock file maintenance
+* Package groups
+* When pinning versions
+* Lock file maintenance
 
 Typically you shouldn't need to modify this setting.
 
@@ -633,10 +633,10 @@ Typically you shouldn't need to modify this setting.
 
 List of status checks that must pass before automerging.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 This is a future feature that is partially implemented. Currently Renovate's default behaviour is to only automerge if every status check has succeeded. In future, this might be configurable to allow certain status checks to be ignored.
 
@@ -644,10 +644,10 @@ You can still override this to `null` today if your repository doesn't support s
 
 ## respectLatest
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | true |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
 
 Similar to `ignoreUnstable`, this option controls whether to update to versions that are greater than the version tagged as `latest` in the repository. By default, `renovate` will update to a version greater than `latest` only if the current version is itself past latest.
 
@@ -655,10 +655,10 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 
 Requested reviewers for Pull Requests
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 Must be valid usernames.
 
@@ -666,10 +666,10 @@ Must be valid usernames.
 
 Times of day/week to schedule Renovate updates.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | array of strings |
-| default  | [] |
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
 
 The `schedule` option allows you to define 1 or more times of week for Renovate updates. Running Renovate around the clock may seem too "noisy" for some projects and therefore `schedule` is a good way to reduce the noise by reducing the timeframe in which Renovate will operate on your repository.
 
@@ -710,23 +710,23 @@ To restrict `aws-sdk` to only weekly updates, you could add this package rule:
 
 Enable semantic commit prefixes for commits and PR titles.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | null |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | null    |
 
 If you are using a semantic prefix for your commits, then you will want to enable this setting. Although it's configurable to a package-level, it makes most sense to configure it at a repository level. If set to true, then the `semanticPrefix` field will be used for each commit message and PR title.
 
-However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to *override* Renovate's autodetected setting.
+However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 
 ## semanticPrefix
 
 Prefix to use if semantic commits are enabled.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string |
-| default  | "chore(deps): " |
+| name    | value           |
+| ------- | --------------- |
+| type    | string          |
+| default | "chore(deps): " |
 
 By default, Renovate uses `angular` semantic commit conventions and `chore(deps)` as the prefix. This is override for `dependencies`, which defaults to `fix(deps)`. You can change this setting by editing this `semanticPrefix` field at any configuration level.
 
@@ -734,34 +734,34 @@ By default, Renovate uses `angular` semantic commit conventions and `chore(deps)
 
 If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | true |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
 
 Renovate's default behaviour is to create a separate branch/PR if updates or multiple major versions exist. For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
 
-It is recommended that you leave this setting to true, because of the polite way that Renovate handles this. For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives. In that case, simply close the "Update Webpack to version 3.x" PR and it *won't* be recreated again even if subsequent Webpack 3.x versions are released. You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it. Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested. After that, Renovate will resume providing you updates to 3.x again! i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
+It is recommended that you leave this setting to true, because of the polite way that Renovate handles this. For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives. In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released. You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it. Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested. After that, Renovate will resume providing you updates to 3.x again! i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
 ## separatePatchReleases
 
 If set to true, it will separate minor and patch updates into separate branches.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | false |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
 
-By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases -  groups them together. e.g. if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0. If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can set this option to `true`.
+By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases - groups them together. e.g. if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0. If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can set this option to `true`.
 
 ## timezone
 
 [IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for the repository.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string            |
-| default  | `Etc/UTC` |
+| name    | value     |
+| ------- | --------- |
+| type    | string    |
+| default | `Etc/UTC` |
 
 It is only recommended to set this field if you wish to use the `schedules` feature and want to write them in your local timezone. Please see the above link for valid timezone names.
 
@@ -769,20 +769,20 @@ It is only recommended to set this field if you wish to use the `schedules` feat
 
 Set a status check for unpublish-safe upgrades.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | boolean |
-| default  | false |
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
 
-It is not known by many that npm package authors and collaborators can *delete* an npm version if it is less than 24 hours old. e.g. version 1.0.0 might exist, then version 1.1.0 is released, and then version 1.1.0 might get deleted hours later. This means that version 1.1.0 essentially "disappears" and 1.0.0 returns to being the "latest". If you have installed 1.1.0 during that time then your build is essentially broken.
+It is not known by many that npm package authors and collaborators can _delete_ an npm version if it is less than 24 hours old. e.g. version 1.0.0 might exist, then version 1.1.0 is released, and then version 1.1.0 might get deleted hours later. This means that version 1.1.0 essentially "disappears" and 1.0.0 returns to being the "latest". If you have installed 1.1.0 during that time then your build is essentially broken.
 
-This setting `unpublishSafe`  enabled will add a `renovate/unpublish-safe` status check with value pending to every branch to warn you about this possibility. It can be handy when used with the `prCreation` = `not-pending` configuration option - that way you won't get the PR raised until after a patch is 24 hours old or more.
+This setting `unpublishSafe` enabled will add a `renovate/unpublish-safe` status check with value pending to every branch to warn you about this possibility. It can be handy when used with the `prCreation` = `not-pending` configuration option - that way you won't get the PR raised until after a patch is 24 hours old or more.
 
 ## yarnrc
 
 A string copy of yarnrc file.
 
-| name     | value                       |
-|----------|-----------------------------|
-| type     | string |
-| default  | null |
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | null   |

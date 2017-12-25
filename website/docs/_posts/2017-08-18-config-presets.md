@@ -81,6 +81,7 @@ Then in each of your repositories you can add your renovate config like:
 Any repository including this config will then adopt the rules of the default `library` preset but schedule it on weeknights or weekends.
 
 Note: if you prefer to publish using the namespace `@fastcore/renovate-config` then you would use the `@` prefix instead:
+
 ```json
   "extends": ["@fastcore"]
 ```

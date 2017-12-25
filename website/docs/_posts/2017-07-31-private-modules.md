@@ -20,9 +20,9 @@ Assuming the lookup succeeds (solutions for that are described later in this doc
 
 #### 2. Lock file generation
 
-If you are using a lock file (yarn's `yarn.lock` or npm's `package-lock.json`) then Renovate needs to regenerate that lock file whenever *any* npm module listed in your `package.json` is updated to a new version.
+If you are using a lock file (yarn's `yarn.lock` or npm's `package-lock.json`) then Renovate needs to regenerate that lock file whenever _any_ npm module listed in your `package.json` is updated to a new version.
 
-To do this, Renovate will run `npm install` or `yarn install` and save the resulting lock file. The "problem" here is that for the install to succeed - and lock file to be generated - then all modules must be found, including private ones. Therefore if a private module can't be found, and you're using lock files, then the private module install failure will then block *any* module from being renovated.
+To do this, Renovate will run `npm install` or `yarn install` and save the resulting lock file. The "problem" here is that for the install to succeed - and lock file to be generated - then all modules must be found, including private ones. Therefore if a private module can't be found, and you're using lock files, then the private module install failure will then block _any_ module from being renovated.
 
 Because lock files are quickly becoming "the new standard", we think it's essential that Renovate can access/install any private modules necessary.
 
@@ -30,7 +30,7 @@ Because lock files are quickly becoming "the new standard", we think it's essent
 
 #### Authenticate the "renovate" npm user to your private npm module
 
-The Renovate app itself runs with credentials for the "renovate" user on npm. Therefore, a simple solution to enabling private  modules is to treat Renovate as another account on your team and add the npm user "renovate" to the necessary projects that Renovate needs to access. Renovate will then use its own npm authentication if it finds none in your repository.
+The Renovate app itself runs with credentials for the "renovate" user on npm. Therefore, a simple solution to enabling private modules is to treat Renovate as another account on your team and add the npm user "renovate" to the necessary projects that Renovate needs to access. Renovate will then use its own npm authentication if it finds none in your repository.
 
 #### Commit .npmrc file into repository
 
@@ -44,7 +44,8 @@ The above solution maybe have a downside that all users of the repository (e.g. 
 
 ```json
 {
-  "npmrc": "//some.registry.com/:_authToken=abcdefghi-1234-jklmno-aac6-12345567889"
+  "npmrc":
+    "//some.registry.com/:_authToken=abcdefghi-1234-jklmno-aac6-12345567889"
 }
 ```
 
@@ -66,7 +67,7 @@ It's recommended that you use the [npm token](https://docs.npmjs.com/cli/token) 
 
 #### Add encrypted .npmrc file into repository
 
-Even if your repository is private itself, you may still prefer not to put an unencrypted `.npmrc` file into your renovate config. An alternative is to put an *encrypted* version into the config, inside an `encrypted` configuration block.
+Even if your repository is private itself, you may still prefer not to put an unencrypted `.npmrc` file into your renovate config. An alternative is to put an _encrypted_ version into the config, inside an `encrypted` configuration block.
 
 If you are using the hosted Renovate app service on GitHub, you can do this using the [renovate-encrypt](https://npmjs.com/package/renovate-encrypt) module. To get an encrypted value, use it like this:
 
@@ -74,6 +75,7 @@ If you are using the hosted Renovate app service on GitHub, you can do this usin
 $ renovate-encrypt < .npmrc
 WOTWu+jliBtXYz3CU2eI7dDyMIvSJKS2N5PEHZmLB3XKT3vLaaYTGCU6m92Q9FgdaM/q2wLYun2JrTP4GPaW8eGZ3iiG1cm7lgOR5xPnkCzz0DUmSf6Cc/6geeVeSFdJ0zqlEAhdNMyJ4pUW6iQxC3WJKgM/ADvFtme077Acvc0fhCXv0XvbNSbtUwHF/gD6OJ0r2qlIzUMGJk/eI254xo5SwWVctc1iZS9LW+L0/CKjqhWh4SbyglP3lKE5shg3q7mzWDZepa/nJmAnNmXdoVO2aPPeQCG3BKqCtCfvLUUU/0LvnJ2SbQ1obyzL7vhh2OF/VsATS5cxbHvoX/hxWQ==
 ```
+
 (if installed globally)
 
 or just run it without installing using `npx`:
@@ -87,8 +89,9 @@ You will then get an encrypted string that you can substitute into your renovate
 
 ```json
 {
-  "encrypted" : {
-    "npmrc": "WOTWu+jliBtXYz3CU2eI7dDyMIvSJKS2N5PEHZmLB3XKT3vLaaYTGCU6m92Q9FgdaM/q2wLYun2JrTP4GPaW8eGZ3iiG1cm7lgOR5xPnkCzz0DUmSf6Cc/6geeVeSFdJ0zqlEAhdNMyJ4pUW6iQxC3WJKgM/ADvFtme077Acvc0fhCXv0XvbNSbtUwHF/gD6OJ0r2qlIzUMGJk/eI254xo5SwWVctc1iZS9LW+L0/CKjqhWh4SbyglP3lKE5shg3q7mzWDZepa/nJmAnNmXdoVO2aPPeQCG3BKqCtCfvLUUU/0LvnJ2SbQ1obyzL7vhh2OF/VsATS5cxbHvoX/hxWQ=="
+  "encrypted": {
+    "npmrc":
+      "WOTWu+jliBtXYz3CU2eI7dDyMIvSJKS2N5PEHZmLB3XKT3vLaaYTGCU6m92Q9FgdaM/q2wLYun2JrTP4GPaW8eGZ3iiG1cm7lgOR5xPnkCzz0DUmSf6Cc/6geeVeSFdJ0zqlEAhdNMyJ4pUW6iQxC3WJKgM/ADvFtme077Acvc0fhCXv0XvbNSbtUwHF/gD6OJ0r2qlIzUMGJk/eI254xo5SwWVctc1iZS9LW+L0/CKjqhWh4SbyglP3lKE5shg3q7mzWDZepa/nJmAnNmXdoVO2aPPeQCG3BKqCtCfvLUUU/0LvnJ2SbQ1obyzL7vhh2OF/VsATS5cxbHvoX/hxWQ=="
   }
 }
 ```
@@ -107,7 +110,8 @@ The configure it like:
 ```json
 {
   "encrypted": {
-    "npmToken": "xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA=="
+    "npmToken":
+      "xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA=="
   }
 }
 ```

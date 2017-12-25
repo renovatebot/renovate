@@ -9,4 +9,3 @@ order: 1
 ---
 
 Renovate supports upgrading JavaScript dependencies specified in `package.json` files.
-

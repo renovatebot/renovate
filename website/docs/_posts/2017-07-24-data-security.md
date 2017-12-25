@@ -18,12 +18,12 @@ If you have any suggestions or questions about our security, please contact us a
 
 The most important consideration for GitHub App security is the [Private Key](https://developer.github.com/apps/building-integrations/setting-up-and-registering-github-apps/registering-github-apps/#generating-a-private-key) used to access installations. This key is metaphorically the "key to the kingdom" and is essentially the only thing anybody needs to gain access to all repositories on which the Renovate App has been installed, so we have handled it with great caution:
 
--   The key is not saved to disk *anywhere*. We do not keep a backup of it on any device, thumbdrive, or password manager.
--   The key is saved in one location - as an [AWS EC2 Parameter Store](http://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-paramstore.html) "Secure String"
--   The EC2 instance we run Renovate on gains access to this Secure String using its IAM Role permissions
--   The private key is not exposed/saved to "env" at any time 
--   There exists no generated AWS "Access Key" that has permissions to either (a) read from EC2 Parameter Store, or (b) create IAM users or roles with permissions to access the secure string, or (c) create a new EC2 instance that could gain access
--   When the Renovate App runs and decrypts the Private Key, it is stored in memory only as long as necessary to retrieve temporary tokens for each installation, and it is never written to any log
+* The key is not saved to disk _anywhere_. We do not keep a backup of it on any device, thumbdrive, or password manager.
+* The key is saved in one location - as an [AWS EC2 Parameter Store](http://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-paramstore.html) "Secure String"
+* The EC2 instance we run Renovate on gains access to this Secure String using its IAM Role permissions
+* The private key is not exposed/saved to "env" at any time
+* There exists no generated AWS "Access Key" that has permissions to either (a) read from EC2 Parameter Store, or (b) create IAM users or roles with permissions to access the secure string, or (c) create a new EC2 instance that could gain access
+* When the Renovate App runs and decrypts the Private Key, it is stored in memory only as long as necessary to retrieve temporary tokens for each installation, and it is never written to any log
 
 ## App Ownership
 
@@ -33,10 +33,10 @@ We have chosen to assign ownership of the apps to the GitHub organization "`reno
 
 The Renovate App requires the following GitHub Permissions:
 
--   **Read** access to administration and metadata
--   **Write** access to commit statuses
--   **Write** access to issues and pull requests
--   **Write** access to repository content
+* **Read** access to administration and metadata
+* **Write** access to commit statuses
+* **Write** access to issues and pull requests
+* **Write** access to repository content
 
 The "Forking Renovate" App requires only read-only access to repository content because it submits PRs from its own fork of each repository.
 
@@ -46,8 +46,8 @@ We will explain the need for each of these here:
 
 This is necessary so that Renovate can learn enough about the repository to detect settings without manual configuration. As an example, this permission is used so Renovate can detect:
 
--   The merge types allowed in the repository (e.g. merge commit, merge squash, rebase)
--   Whether the repository status checks require Pull Requests to be up-to-date with base branch before merging
+* The merge types allowed in the repository (e.g. merge commit, merge squash, rebase)
+* Whether the repository status checks require Pull Requests to be up-to-date with base branch before merging
 
 ##### **Write** access to commit statuses
 
@@ -55,7 +55,7 @@ Renovate can utilise commit statuses for purposes such as to warn if a package i
 
 ##### **Write** access to issues
 
-Renovate makes use of repository issues if it needs to alert of configuration errors. For example, if someone updates the `renovate.json` configuration with invalid JSON that cannot be parsed, Renovate will stop processing the repository and instead raise an "Action Required" issue to alert users to fix it. 
+Renovate makes use of repository issues if it needs to alert of configuration errors. For example, if someone updates the `renovate.json` configuration with invalid JSON that cannot be parsed, Renovate will stop processing the repository and instead raise an "Action Required" issue to alert users to fix it.
 
 ##### **Write** access to Pull Requests
 
@@ -63,7 +63,7 @@ This permission is used heavily today, for instance every time Renovate finds an
 
 ##### Write access to repository contents (i.e. code)
 
-Renovate needs write access to code in order to create branches within the repository, or to automerge any updates itself. Although this necessary permission gives us access to *all files in a repository*, we will only write changes to package definitions files (like `package.json` or `Dockerfile`), or lock files like `package-lock.json` and `yarn.lock`. These files may be located in any subdirectory too (e.g. for monorepo configurations).
+Renovate needs write access to code in order to create branches within the repository, or to automerge any updates itself. Although this necessary permission gives us access to _all files in a repository_, we will only write changes to package definitions files (like `package.json` or `Dockerfile`), or lock files like `package-lock.json` and `yarn.lock`. These files may be located in any subdirectory too (e.g. for monorepo configurations).
 
 [Forking Renovate](https://github.com/apps/forking-renovate) does not require write access to repository contents, because it submits PRs from branches within its own forks of repositories.
 
@@ -85,8 +85,8 @@ Renovate will always be run from the "production" server and the app's credentia
 
 All logs are stored in the AWS Oregon region as described above. We currently log to:
 
--   CloudWatch Logs (30 day retention)
--   S3 (30 day retention)
+* CloudWatch Logs (30 day retention)
+* S3 (30 day retention)
 
 Select metadata (such as each run's result/status) is extracted from logs and saved to an RDS Postgres instance with no expiry.
 
