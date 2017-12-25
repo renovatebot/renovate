@@ -23,6 +23,16 @@ describe('workers/branch/package-json', () => {
       );
       testContent.should.equal(outputContent);
     });
+    it('updates resolutions too', () => {
+      const testContent = npmUpdater.setNewValue(
+        input01Content,
+        'dependencies',
+        'config',
+        '1.22.0'
+      );
+      expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
+      expect(JSON.parse(testContent).resolutions.config).toEqual('1.22.0');
+    });
     it('replaces only the first instance of a value', () => {
       const outputContent = readFixture('outputs/012.json');
       const testContent = npmUpdater.setNewValue(

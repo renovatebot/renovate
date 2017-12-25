@@ -23,6 +23,9 @@
     "angular-sanitize":  "1.6.1",
     "@angular/core": "4.0.0-beta.1"
   },
+  "resolutions": {
+    "config": "1.21.0"
+  },
   "homepage": "https://keylocation.sg",
   "keywords": [
     "Key Location",
