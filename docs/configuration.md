@@ -646,6 +646,14 @@ location with this method.
   <td><td>
 </tr>
 <tr>
+  <td>`commitBody`</td>
+  <td>Commit message body template. Will be appended to commit message, separated by two line returns.</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_COMMIT_BODY`</td>
+  <td><td>
+</tr>
+<tr>
   <td>`prTitle`</td>
   <td>Pull Request title template</td>
   <td>string</td>

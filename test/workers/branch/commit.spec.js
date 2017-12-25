@@ -53,5 +53,15 @@ describe('workers/branch/automerge', () => {
         'a(b): foo\n\nBar'
       );
     });
+    it('adds commit message body', async () => {
+      config.updatedPackageFiles.push({
+        name: 'package.json',
+        contents: 'some contents',
+      });
+      config.commitBody = '[skip-ci]';
+      await commitFilesToBranch(config);
+      expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(platform.commitFilesToBranch.mock.calls).toMatchSnapshot();
+    });
   });
 });
