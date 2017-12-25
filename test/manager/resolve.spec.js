@@ -14,7 +14,7 @@ describe('manager/resolve', () => {
     it('handles wrong filenames', async () => {
       config.packageFiles = ['wrong.txt'];
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
     });
     it('uses packageFiles if already configured and raises error if not found', async () => {
       config.packageFiles = [
@@ -22,7 +22,7 @@ describe('manager/resolve', () => {
         { packageFile: 'backend/package.json' },
       ];
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
       expect(res.errors).toHaveLength(2);
     });
     it('detect package.json and adds error if cannot parse (onboarding)', async () => {
@@ -31,7 +31,7 @@ describe('manager/resolve', () => {
       ]);
       platform.getFile.mockReturnValueOnce('not json');
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
       expect(res.errors).toHaveLength(1);
     });
     it('detect package.json and throws error if cannot parse (onboarded)', async () => {
@@ -61,7 +61,7 @@ describe('manager/resolve', () => {
       platform.getFile.mockReturnValueOnce(JSON.stringify(pJson));
       platform.getFileList.mockReturnValueOnce([]);
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
     it('detects accompanying files', async () => {
@@ -76,7 +76,7 @@ describe('manager/resolve', () => {
       platform.getFile.mockReturnValueOnce('npmrc');
       platform.getFile.mockReturnValueOnce('yarnrc');
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
     it('detects meteor and docker and travis and bazel', async () => {
@@ -91,7 +91,7 @@ describe('manager/resolve', () => {
       platform.getFile.mockReturnValueOnce('# travis'); // .travis.yml
       platform.getFile.mockReturnValueOnce('# WORKSPACE'); // Dockerfile
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
     });
     it('skips if no content or no match', async () => {
       config.packageFiles = [
@@ -102,7 +102,7 @@ describe('manager/resolve', () => {
       ];
       platform.getFile.mockReturnValueOnce('# comment\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
     });
   });
 });

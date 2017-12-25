@@ -59,7 +59,6 @@ describe('lib/workers/package/index', () => {
       ]);
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toHaveLength(1);
-      expect(res[0]).toMatchSnapshot();
       expect(res[0].groupName).toEqual('Pin Dependencies');
     });
     it('throws', async () => {
