@@ -25,12 +25,5 @@ describe('workers/repository/write', () => {
       expect(res).toEqual('automerged');
       expect(branchWorker.processBranch.mock.calls).toHaveLength(2);
     });
-    it('stops after platform error', async () => {
-      config.branches = [{}, {}];
-      branchWorker.processBranch.mockReturnValueOnce('platform-error');
-      const res = await writeUpdates(config);
-      expect(res).toEqual('platform-error');
-      expect(branchWorker.processBranch.mock.calls).toHaveLength(1);
-    });
   });
 });

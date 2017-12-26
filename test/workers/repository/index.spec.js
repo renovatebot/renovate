@@ -28,7 +28,6 @@ describe('workers/repository', () => {
     it('writes', async () => {
       determineUpdates.mockReturnValue({ repoIsOnboarded: true });
       writeUpdates.mockReturnValueOnce('automerged');
-      writeUpdates.mockReturnValueOnce('platform-error');
       writeUpdates.mockReturnValueOnce('onboarded');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();
