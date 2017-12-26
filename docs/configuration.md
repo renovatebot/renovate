@@ -111,7 +111,7 @@ location with this method.
 </tr>
 <tr>
   <td>`extends`</td>
-  <td>Configuration presets to use/extend</td>
+  <td>Configuration presets to use/extend. Note: does not work if configured in config.js</td>
   <td>list</td>
   <td><pre>[]</pre></td>
   <td>`RENOVATE_EXTENDS`</td>
