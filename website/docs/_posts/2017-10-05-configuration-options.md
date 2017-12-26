@@ -86,16 +86,14 @@ For most projects, this should be left as default. An example use case for using
 
 You also may add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR. If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch instead of default.
 
-## branchPrefix
+## bazel
 
-Prefix to be used for all branch names
+Configuration specific for bazel WORKSPACE updates.
 
-| name    | value     |
-| ------- | --------- |
-| type    | string    |
-| default | renovate/ |
-
-You can modify this field if you want to change the prefix used. For example if you want branches to be like `deps/eslint-4.x` instead of `renovate/eslint-4.x` then you set `branchPrefix` = `deps/`. Or if you wish to avoid forward slashes in branch names then you could use `renovate_` instead, for example.
+| name    | value             |
+| ------- | ----------------- |
+| type    | object            |
+| default | { enabled: true } |
 
 ## branchName
 
@@ -110,6 +108,28 @@ It's recommended to use our default templates, but you may override branch name 
 
 Example branch name: `renovate/eslint-4.x`.
 
+## branchPrefix
+
+Prefix to be used for all branch names
+
+| name    | value     |
+| ------- | --------- |
+| type    | string    |
+| default | renovate/ |
+
+You can modify this field if you want to change the prefix used. For example if you want branches to be like `deps/eslint-4.x` instead of `renovate/eslint-4.x` then you set `branchPrefix` = `deps/`. Or if you wish to avoid forward slashes in branch names then you could use `renovate_` instead, for example.
+
+## commitBody
+
+Commit body template
+
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | null   |
+
+This is used whenever a commit "body" is needed, e.g. for adding [skip ci] or DCO signoff.
+
 ## commitMessage
 
 Commit message template
@@ -123,6 +143,15 @@ The commit message is less important than branchName so you may override it if y
 
 Example commit message: "chore(deps): Update dependency eslint to version 4.0.1"
 
+## copyLocalLibs
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
+
+Set to true if repository package.json files contain any local (file) dependencies + lock files. The `package.json` files from each will be copied to disk before lock file generation, even if they are within ignored directories.
+
 ## dependencies
 
 Configuration specific for `package.json > dependencies`.
@@ -133,6 +162,15 @@ Configuration specific for `package.json > dependencies`.
 | default | {"semanticPrefix": "fix(deps):"} |
 
 Extend this if you wish to configure rules specifically for `dependencies` and not `devDependencies` or `optionalDependencies`.
+
+## description
+
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | null   |
+
+The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
 
 ## devDependencies
 
@@ -145,16 +183,25 @@ Configuration specific for `package.json > devDependencies`.
 
 Extend this if you wish to configure rules specifically for `devDependencies` and not `dependencies` or `optionalDependencies`.
 
+## digest
+
+Configuration specific for Docker digest pinning.
+
+| name    | value |
+| ------- | ----- |
+| type    | json  |
+| default | {}    |
+
+Add to this object if you wish to define rules that apply only to PRs that pin Docker digests.
+
 ## docker
 
 Configuration specific for Dockerfile updates.
 
-| name    | value              |
-| ------- | ------------------ |
-| type    | object             |
-| default | { enabled: false } |
-
-Set enabled to `true` to enable Dockerfile FROM updating.
+| name    | value                                         |
+| ------- | --------------------------------------------- |
+| type    | object                                        |
+| default | { enabled: true, major: { enabled: false }, } |
 
 ## enabled
 
@@ -186,7 +233,18 @@ To disable Renovate for `dependencies` but keep it for `devDependencies` you cou
 }
 ```
 
-## excludedPackageNames
+## encrypted
+
+A configuration object containing strings encrypted with Renovate's public key.
+
+| name    | value  |
+| ------- | ------ |
+| type    | object |
+| default | {}     |
+
+See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+
+## excludePackageNames
 
 A list of package names inside a package rule which are to be excluded/ignored.
 
@@ -197,7 +255,7 @@ A list of package names inside a package rule which are to be excluded/ignored.
 
 Use this field if you want to have one or more exact name matches excluded in your package rule. See also `packageNames`.
 
-## excludedPackagePatterns
+## excludePackagePatterns
 
 A list of regex package patterns inside a package rule which are to be excluded/ignored.
 
@@ -219,16 +277,14 @@ Preset configs to use/extend.
 
 See https://renovateapp.com/docs/configuration-reference/config-presets for details.
 
-## encrypted
-
-A configuration object containing strings encrypted with Renovate's public key.
+## gitAuthor
 
 | name    | value  |
 | ------- | ------ |
-| type    | object |
-| default | {}     |
+| type    | string |
+| default | null   |
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+RFC5322-compliant string if you wish to customise the git author for commits.
 
 ## group
 
@@ -305,7 +361,7 @@ Ignore package files matching any of these paths
 | name    | value            |
 | ------- | ---------------- |
 | type    | array of strings |
-| default | ['node_modules'] |
+| default | ['**/node_modules/**', '**/bower_components/**'] |
 
 Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want kept up to date.
 
@@ -398,16 +454,34 @@ Configuration specific for minor dependency updates.
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
-## npmrc
+## multipleMajorPrs
 
-A string copy of npmrc file.
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
 
-| name    | value  |
-| ------- | ------ |
-| type    | string |
-| default | null   |
+Set this to true if you wish to receive one PR for every separate major version upgrade of a dependency. e.g. if you are on webpack@v1 currently then default behaviour is a PR for upgrading to webpack@v3 and not for webpack@v2. If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
+## node
+
+Configuration specific for node.js version updates (e.g. `.travis.yml`).
+
+| name    | value                                      |
+| ------- | ------------------------------------------ |
+| type    | object                                     |
+| default | { enabled: false, supportPolicy: ['lts'] } |
+
+It's set to false by default as we cannot 100% besure what supportPolicy you would want.
+
+## npm
+
+Configuration specific for npm dependency updates (`package.json`).
+
+| name    | value             |
+| ------- | ----------------- |
+| type    | object            |
+| default | { enabled: true } |
 
 ## npmToken
 
@@ -419,6 +493,17 @@ Your npmjs token.
 | default | null   |
 
 See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+
+## npmrc
+
+A string copy of npmrc file.
+
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | null   |
+
+See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
 
 ## optionalDependencies
 
@@ -548,6 +633,15 @@ Configuration specific for dependency pinning.
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
 
+## pinDigests
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
+
+By default, Renovate will add sha256 digests to Docker source images so that they are then "immutable". Set this to false to continue using only tags to identify source images.
+
 ## pinVersions
 
 Whether to convert ranged versions in `package.json` to pinned versions.
@@ -590,6 +684,15 @@ This setting tells Renovate when you would like it to raise PRs:
 
 Renovate defaults to `immediate` but some like to change to `not-pending`. If you set to immediate, it means you will usually get GitHub notifications that a new PR is available but if you view it immediately then it will still have "pending" tests so you can't take any action. With `not-pending`, it means that when you receive the PR notification, you can see if it passed or failed and take action immediately. Therefore you can customise this setting if you wish to be notified a little later in order to reduce "noise".
 
+## prNotPendingHours
+
+| name    | value   |
+| ------- | ------- |
+| type    | integer |
+| default | 24      |
+
+If you set `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs. However there are cases where PRs may remainin pending state forever, e.g. absence of tests or status checks that are set to pending indefinitely. Therefore we set an upper limit - default 24 hours - for how long we wait until creating a PR. Note also this is the same length of time as for Renovate's own `unpublishSafe` status check for npm.
+
 ## prTitle
 
 Pull Request title template
@@ -628,6 +731,17 @@ By default, Renovate will detect if it has proposed an update to a project befor
 * Lock file maintenance
 
 Typically you shouldn't need to modify this setting.
+
+## renovateFork
+
+Whether to renovate a forked repository or not.
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
+
+By default, Renovate will skip over any repositories that are forked, even if they contain a `renovate.json`, because that config may have been from the source repository. To enable Renovate on forked repositories, you need to add `renovateFork: true` to your renovate config.
 
 ## requiredStatusChecks
 
@@ -706,6 +820,28 @@ To restrict `aws-sdk` to only weekly updates, you could add this package rule:
   ]
 ```
 
+## semanticCommitScope
+
+Commit scope to use if semantic commits are enabled
+
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | "deps" |
+
+By default you will see angular-style commit prefixes like "chore(deps):". If you wish to change it to something else like "package" then it will look like "chore(package):".
+
+## semanticCommitType
+
+Commit type to use if semantic commits is enabled
+
+| name    | value   |
+| ------- | ------- |
+| type    | string  |
+| default | "chore" |
+
+By default you will see angular-style commit prefixes like "chore(deps):". If you wish to change it to something else like "ci" then it will look like "ci(deps):".
+
 ## semanticCommits
 
 Enable semantic commit prefixes for commits and PR titles.
@@ -719,17 +855,6 @@ If you are using a semantic prefix for your commits, then you will want to enabl
 
 However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 
-## semanticPrefix
-
-Prefix to use if semantic commits are enabled.
-
-| name    | value           |
-| ------- | --------------- |
-| type    | string          |
-| default | "chore(deps): " |
-
-By default, Renovate uses `angular` semantic commit conventions and `chore(deps)` as the prefix. This is override for `dependencies`, which defaults to `fix(deps)`. You can change this setting by editing this `semanticPrefix` field at any configuration level.
-
 ## separateMajorReleases
 
 If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches.
@@ -739,7 +864,7 @@ If set to false, it will upgrade dependencies to latest release only, and not se
 | type    | boolean |
 | default | true    |
 
-Renovate's default behaviour is to create a separate branch/PR if updates or multiple major versions exist. For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
+Renovate's default behaviour is to create a separate branch/PR if both minor and major version updates exist. For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
 
 It is recommended that you leave this setting to true, because of the polite way that Renovate handles this. For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives. In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released. You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it. Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested. After that, Renovate will resume providing you updates to 3.x again! i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
@@ -753,6 +878,15 @@ If set to true, it will separate minor and patch updates into separate branches.
 | default | false   |
 
 By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases - groups them together. e.g. if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0. If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can set this option to `true`.
+
+## supportPolicy
+
+Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)
+
+| name    | value |
+| ------- | ----- |
+| type    | list  |
+| default | []    |
 
 ## timezone
 
@@ -777,6 +911,32 @@ Set a status check for unpublish-safe upgrades.
 It is not known by many that npm package authors and collaborators can _delete_ an npm version if it is less than 24 hours old. e.g. version 1.0.0 might exist, then version 1.1.0 is released, and then version 1.1.0 might get deleted hours later. This means that version 1.1.0 essentially "disappears" and 1.0.0 returns to being the "latest". If you have installed 1.1.0 during that time then your build is essentially broken.
 
 This setting `unpublishSafe` enabled will add a `renovate/unpublish-safe` status check with value pending to every branch to warn you about this possibility. It can be handy when used with the `prCreation` = `not-pending` configuration option - that way you won't get the PR raised until after a patch is 24 hours old or more.
+
+## unstablePattern
+
+Regex for identifying unstable versions (docker only)
+
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | null   |
+
+Because Docker uses tags instead of semver, there is no fixed convention for how to identify unstable releases. e.g. some images may use semver convention like `v2.0.0-beta1` but others may use their own convention, like Node.js or Ubuntu even/odd.
+
+This field is currently used by some config prefixes.
+
+## updateNotScheduled
+
+Whether to update (but not create) branches when not scheduled.
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
+
+When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
+
+This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
 
 ## yarnrc
 

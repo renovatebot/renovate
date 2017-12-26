@@ -254,6 +254,14 @@ location with this method.
   <td>`--npmrc`<td>
 </tr>
 <tr>
+  <td>`npmToken`</td>
+  <td>npm token used for autnenticating with the default registry</td>
+  <td>string</td>
+  <td><pre>null</pre></td>
+  <td>`RENOVATE_NPM_TOKEN`</td>
+  <td>`--npm-token`<td>
+</tr>
+<tr>
   <td>`yarnrc`</td>
   <td>String copy of yarnrc file. Use \n instead of line breaks</td>
   <td>string</td>
@@ -454,14 +462,6 @@ location with this method.
   <td>`--separate-patch-releases`<td>
 </tr>
 <tr>
-  <td>`ignoreFuture`</td>
-  <td>Ignore versions tagged as "future"</td>
-  <td>boolean</td>
-  <td><pre>true</pre></td>
-  <td>`RENOVATE_IGNORE_FUTURE`</td>
-  <td>`--ignore-future`<td>
-</tr>
-<tr>
   <td>`ignoreUnstable`</td>
   <td>Ignore versions with unstable semver</td>
   <td>boolean</td>
@@ -559,7 +559,7 @@ location with this method.
 </tr>
 <tr>
   <td>`semanticCommitScope`</td>
-  <td>Conmmit scope to use if semantic commits are enabled</td>
+  <td>Commit scope to use if semantic commits are enabled</td>
   <td>string</td>
   <td><pre>"deps"</pre></td>
   <td>`RENOVATE_SEMANTIC_COMMIT_SCOPE`</td>
