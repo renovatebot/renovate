@@ -358,9 +358,9 @@ There may be times where an `.npmrc` file in your repository causes problems, su
 
 Ignore package files matching any of these paths
 
-| name    | value            |
-| ------- | ---------------- |
-| type    | array of strings |
+| name    | value                                            |
+| ------- | ------------------------------------------------ |
+| type    | array of strings                                 |
 | default | ['**/node_modules/**', '**/bower_components/**'] |
 
 Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want kept up to date.

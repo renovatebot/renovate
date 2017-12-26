@@ -131,6 +131,6 @@ Alternatively, consider using a Configuration File.
 
 Renovate uses the following convention for log levels:
 
-- logger.error should only be used for problems that are likely to be a Renovate bug or require Renovate improvements. These are the types of errors that Renovate administrators should be alerted to immediately
-- logger.warn should be used for problems that might be a Renovate problem so should be checked periodically in batches
-- For *user* problems (e.g. configuration errors), these should not warn or error on the server side and instead use logger.info
+* logger.error should only be used for problems that are likely to be a Renovate bug or require Renovate improvements. These are the types of errors that Renovate administrators should be alerted to immediately
+* logger.warn should be used for problems that might be a Renovate problem so should be checked periodically in batches
+* For _user_ problems (e.g. configuration errors), these should not warn or error on the server side and instead use logger.info
