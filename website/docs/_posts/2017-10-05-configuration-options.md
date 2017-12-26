@@ -774,7 +774,7 @@ Requested reviewers for Pull Requests
 | type    | array of strings |
 | default | []               |
 
-Must be valid usernames.
+Must be valid usernames. Note: does not currently work with the GitHub App due to an outstanding GitHub API bug.
 
 ## schedule
 
