@@ -1,6 +1,6 @@
 ![Renovate banner](https://renovateapp.com/images/design/header_small.jpg)
 
-# renovate
+# Renovate
 
 Automated dependency updates, for humans.
 
@@ -10,14 +10,14 @@ Automated dependency updates, for humans.
 [![David](https://david-dm.org/renovateapp/renovate.svg)](https://david-dm.org/renovateapp/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 
-## Why
+## Why Use Renovate?
 
 * Receive automated Pull Requests whenever dependencies need updating. Or whenever you schedule it for.
-* Discovers and processes all dependency files in a repository (e.g. supports
-  monorepo architecture including yarn workspaces)
-* Fully customisable behaviour via configuration files or within `package.json`
-* Supports eslint-like config presets for ease of use
-* Updates `yarn.lock` and `package-lock.json` lock files natively, including immediately recreating if conflicts emerge
+* Renovate discovers and processes all dependency files in a repository (e.g. supports
+  monorepo architecture such as lerna or yarn workspaces)
+* Extremely customisable behaviour via configuration files or within your `package.json`
+* Use eslint-like shared config presets for ease of use and simplifying configuration
+* Update lock files natively in the same commit, including immediately resolving conflicts whenever PRs are merged
 * Supports GitHub, GitLab (APIv4) and VSTS (BitBucket is a WIP)
 * Open source (installable via npm/yarn) so can be self-hosted or used for free via GitHub App
 
