@@ -130,6 +130,11 @@ Commit body template
 
 This is used whenever a commit "body" is needed, e.g. for adding [skip ci] or DCO signoff.
 
+For example, To add `[skip ci]` to every commit you could configure:
+```
+  "commitBody": "[skip ci]"
+```
+
 ## commitMessage
 
 Commit message template
