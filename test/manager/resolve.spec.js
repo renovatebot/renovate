@@ -104,5 +104,23 @@ describe('manager/resolve', () => {
       const res = await resolvePackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
+    it('applies package rules', async () => {
+      config.pathRules = [
+        {
+          paths: ['examples/**'],
+          prTitle: 'abcdefg',
+        },
+      ];
+      config.packageFiles = ['package.json', 'examples/a/package.json'];
+      platform.getFileList.mockReturnValue([
+        'package.json',
+        'examples/a/package.json',
+      ]);
+      platform.getFile.mockReturnValue('{}');
+      const res = await resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(2);
+      expect(res.packageFiles[0].prTitle).not.toEqual('abcdefg');
+      expect(res.packageFiles[1].prTitle).toEqual('abcdefg');
+    });
   });
 });
