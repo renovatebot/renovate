@@ -342,6 +342,22 @@ location with this method.
   <td>`--ignore-paths`<td>
 </tr>
 <tr>
+  <td>`pathRules`</td>
+  <td>Apply config on a path-based basis. Consists of a paths array plus whatever other configuration objects to apply</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
+  <td>`paths`</td>
+  <td>List of strings or glob patterns to match against package files. Applicable inside pathRules only</td>
+  <td>list</td>
+  <td><pre>[]</pre></td>
+  <td></td>
+  <td><td>
+</tr>
+<tr>
   <td>`dependencies`</td>
   <td>Configuration specifically for `package.json`>`dependencies`</td>
   <td>json</td>
