@@ -324,6 +324,21 @@ describe('platform/github', () => {
       const config = await mergeInitRepo('some/repo', 'token');
       expect(config).toMatchSnapshot();
     });
+    it('should throw error if archived', async () => {
+      get.mockReturnValueOnce({
+        body: {
+          archived: true,
+          owner: {},
+        },
+      });
+      let e;
+      try {
+        await github.initRepo('some/repo', 'token');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
   });
   describe('getRepoForceRebase', () => {
     it('should detect repoForceRebase', async () => {

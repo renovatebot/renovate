@@ -547,6 +547,7 @@ Array [
 
 exports[`platform/github initRepo should forks when forkMode 1`] = `
 Object {
+  "isArchived": false,
   "isFork": false,
   "privateRepo": false,
 }
@@ -571,6 +572,7 @@ Array [
 
 exports[`platform/github initRepo should initialise the config for the repo - 0 2`] = `
 Object {
+  "isArchived": false,
   "isFork": false,
   "privateRepo": false,
 }
@@ -595,6 +597,7 @@ Array [
 
 exports[`platform/github initRepo should initialise the config for the repo - 1 2`] = `
 Object {
+  "isArchived": false,
   "isFork": false,
   "privateRepo": false,
 }
@@ -619,6 +622,7 @@ Array [
 
 exports[`platform/github initRepo should initialise the config for the repo - 2 2`] = `
 Object {
+  "isArchived": false,
   "isFork": false,
   "privateRepo": false,
 }
@@ -626,6 +630,7 @@ Object {
 
 exports[`platform/github initRepo should merge 1`] = `
 Object {
+  "isArchived": false,
   "isFork": false,
   "privateRepo": false,
 }
@@ -633,6 +638,7 @@ Object {
 
 exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
+  "isArchived": false,
   "isFork": false,
   "privateRepo": false,
 }
@@ -640,6 +646,7 @@ Object {
 
 exports[`platform/github initRepo should rebase 1`] = `
 Object {
+  "isArchived": false,
   "isFork": false,
   "privateRepo": false,
 }
@@ -647,6 +654,7 @@ Object {
 
 exports[`platform/github initRepo should squash 1`] = `
 Object {
+  "isArchived": false,
   "isFork": false,
   "privateRepo": false,
 }
@@ -654,6 +662,7 @@ Object {
 
 exports[`platform/github initRepo should update fork when forkMode 1`] = `
 Object {
+  "isArchived": false,
   "isFork": false,
   "privateRepo": false,
 }

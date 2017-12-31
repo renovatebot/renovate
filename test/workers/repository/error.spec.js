@@ -17,6 +17,7 @@ describe('workers/repository/error', () => {
       'no-package-files',
       'loops>5',
       'config-validation',
+      'archived',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {
