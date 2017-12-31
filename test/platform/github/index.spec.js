@@ -339,6 +339,20 @@ describe('platform/github', () => {
       }
       expect(e).toBeDefined();
     });
+    it('throws not-found', async () => {
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      let e;
+      try {
+        await github.initRepo('some/repo', 'token');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
   });
   describe('getRepoForceRebase', () => {
     it('should detect repoForceRebase', async () => {

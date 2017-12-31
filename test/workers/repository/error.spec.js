@@ -18,6 +18,7 @@ describe('workers/repository/error', () => {
       'loops>5',
       'config-validation',
       'archived',
+      'not-found',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {
