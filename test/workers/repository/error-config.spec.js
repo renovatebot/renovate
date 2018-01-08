@@ -14,7 +14,6 @@ describe('workers/repository/error-config', () => {
       const error = new Error('config-validation');
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
-      config.repoIsOnboarded = true;
       platform.ensureIssue.mockReturnValue('created');
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
@@ -23,8 +22,7 @@ describe('workers/repository/error-config', () => {
       const error = new Error('config-validation');
       error.configFile = 'package.json';
       error.validationMessage = 'some-message';
-      config.repoIsOnboarded = false;
-      platform.getBranchPr.mockReturnValueOnce({ number: 1 });
+      platform.getBranchPr.mockReturnValueOnce({ number: 1, state: 'open' });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
