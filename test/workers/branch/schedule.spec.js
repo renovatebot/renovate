@@ -1,11 +1,6 @@
 const mockDate = require('mockdate');
 const schedule = require('../../../lib/workers/branch/schedule');
 
-const toLocalTime = globalEpochTime => {
-  const minuteOffset = new Date().getTimezoneOffset();
-  return globalEpochTime + minuteOffset * 60 * 1000;
-};
-
 describe('workers/branch/schedule', () => {
   describe('hasValidSchedule(schedule)', () => {
     beforeEach(() => {
@@ -83,7 +78,7 @@ describe('workers/branch/schedule', () => {
   describe('isScheduledNow(config)', () => {
     let config;
     beforeEach(() => {
-      mockDate.set(toLocalTime(1498812608678)); // Locally 2017-06-30 10:50am
+      mockDate.set('2017-06-30T10:50:00.000'); // Locally 2017-06-30 10:50am
       jest.resetAllMocks();
       config = {};
     });
@@ -119,7 +114,7 @@ describe('workers/branch/schedule', () => {
     it('supports timezone', () => {
       config.schedule = ['after 4:00pm'];
       config.timezone = 'Asia/Singapore';
-      mockDate.set(1498812608678); // UTC 2017-06-30 10:50am
+      mockDate.set('2017-06-30T10:50:00.000Z'); // Globally 2017-06-30 10:50am
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
@@ -165,7 +160,7 @@ describe('workers/branch/schedule', () => {
     });
     it('approves first day of the month', () => {
       config.schedule = ['before 11am on the first day of the month'];
-      mockDate.set(toLocalTime(1506835566000)); // Locally Sunday, 1 October 2017 05:26:06
+      mockDate.set('2017-10-01T05:26:06.000'); // Locally Sunday, 1 October 2017 05:26:06
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
