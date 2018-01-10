@@ -158,5 +158,30 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toEqual('chore(package): some-title');
     });
+    it('handles @types specially', () => {
+      const branch = [
+        {
+          depName: '@types/some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          newVersion: '0.5.7',
+          group: {},
+        },
+        {
+          depName: 'some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          newVersion: '0.6.0',
+          group: {},
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBe(false);
+      expect(res.groupName).toBeUndefined();
+    });
   });
 });
