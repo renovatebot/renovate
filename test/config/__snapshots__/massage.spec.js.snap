@@ -2,7 +2,7 @@
 
 exports[`config/massage massageConfig massages npmToken 1`] = `
 Object {
-  "npmrc": "_auth=some-token
+  "npmrc": "//registry.npmjs.org/:_authToken=some-token
 ",
 }
 `;
