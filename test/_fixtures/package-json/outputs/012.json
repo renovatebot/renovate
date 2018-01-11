@@ -14,7 +14,7 @@
       "bower": "~1.6.0",
       "browserify": "13.1.0",
     "browserify-css": "0.9.2",
-    "cheerio": "0.22.0",
+    "cheerio": "=0.22.0",
     "config": "1.21.0"
   },
   "devDependencies": {
@@ -22,6 +22,9 @@
     "angular-touch": "1.6.1",
     "angular-sanitize":  "1.5.8",
     "@angular/core": "4.0.0-beta.1"
+  },
+  "resolutions": {
+    "config": "1.21.0"
   },
   "homepage": "https://keylocation.sg",
   "keywords": [

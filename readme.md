@@ -1,8 +1,8 @@
 ![Renovate banner](https://renovateapp.com/images/design/header_small.jpg)
 
-# renovate
+# Renovate
 
-Keep dependencies up-to-date.
+Automated dependency updates, for humans.
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/renovateapp/renovate/master/license)
 [![codecov](https://codecov.io/gh/renovateapp/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovateapp/renovate)
@@ -10,74 +10,28 @@ Keep dependencies up-to-date.
 [![David](https://david-dm.org/renovateapp/renovate.svg)](https://david-dm.org/renovateapp/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 
-## Why
+## Why Use Renovate?
 
-* Creates or updates Pull Requests for each dependency that needs updating
-* Discovers and processes all `package.json` files in repository (supports
-  monorepo architecture including yarn workspaces)
-* Supports multiple major versions per-dependency at once
-* Configurable via file, environment, CLI, and `package.json`
-* Supports eslint-like preset configs for ease of use
-* Updates `yarn.lock` and `package-lock.json` files natively
-* Supports GitHub, GitLab (APIv4) and VSTS
-* Open source and can be self-hosted or used via GitHub App
+* Receive automated Pull Requests whenever dependencies need updating. Or whenever you schedule it for.
+* Renovate discovers and processes all dependency files in a repository (e.g. supports
+  monorepo architecture such as lerna or yarn workspaces)
+* Extremely customisable behaviour via configuration files or within your `package.json`
+* Use eslint-like shared config presets for ease of use and simplifying configuration
+* Update lock files natively in the same commit, including immediately resolving conflicts whenever PRs are merged
+* Supports GitHub, GitLab (APIv4) and VSTS (BitBucket is a WIP)
+* Open source (installable via npm/yarn) so can be self-hosted or used for free via GitHub App
 
-## Configuration Help
+## The Renovate Approach
 
-If you would like help on your Renovate configuration, or simply get someone to
-review it, we have created a config-help repository
-https://github.com/renovateapp/config-help/issues where you can post an issue
-with your config.
+* Bots should serve humans, not the other way around. Using Renovate should not cause you to change your workflow against your wishes
+* All behaviour should be configurable, down to a ridiculous level if desired
+* Autodetect settings wherever possible (to minimise configuration) but always allow overrides
 
-## GitHub App
+## Using Renovate
 
-Renovate is now available as a free GitHub "App". Go to
+The easiest way to use Renovate if you are on GitHub is to enable the free Renovate app. Go to
 [https://github.com/apps/renovate](https://github.com/apps/renovate) to enable
 it now.
-
-## Install
-
-```
-$ npm install -g renovate
-```
-
-## Authentication
-
-You need to select a repository user for `renovate` to assume the identity of,
-and generate a Personal Access Token. It's strongly recommended that you use a
-dedicated "bot" account for this to avoid user confusion and to avoid the
-Renovate bot mistaking changes you have made or PRs you have raised for its own.
-
-You can find instructions for GitHub
-[here](https://help.github.com/articles/creating-an-access-token-for-command-line-use/)
-(select "repo" permissions)
-
-You can find instructions for GitLab
-[here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens). Note: GitLab APIv3 is no longer supported - please upgrade to GitLab APIv4 before testing Renovate.
-
-You can find instructions for VSTS
-[vsts](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
-
-This token needs to be configured via file, environment variable, or CLI. See
-[docs/configuration.md](docs/configuration.md) for details. The simplest way is
-to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN` or `VSTS_TOKEN`.
-
-## Usage
-
-Run `renovate --help` for usage details.
-
-Note: The first time you run `renovate` on a repository, it will not upgrade any
-dependencies. Instead, it will create a Pull Request (Merge Request if GitLab)
-called 'Configure Renovate' and commit a default `renovate.json` file to the
-repository. This PR can be close unmerged if the default settings are fine for
-you. Also, this behaviour can be disabled if you set the `onboarding`
-configuration option to `false` before running.
-
-## Deployment
-
-See
-[deployment docs](https://github.com/renovateapp/renovate/blob/master/docs/deployment.md)
-for details.
 
 ## Configuration
 
@@ -90,8 +44,6 @@ documents should be helpful.
 You can also raise an issue in https://github.com/renovateapp/config-help if
 you'd like to get your config reviewed or ask any questions.
 
-## Design Decisions
+## Self-Hosting
 
-See
-[design decisions doc](https://github.com/renovateapp/renovate/blob/master/docs/design-decisions.md)
-for details.
+If you are not on GitHub or you prefer to run your own copy of Renovate, then it takes only seconds to set up. Please see [docs/self-hosting.md](https://github.com/renovateapp/renovate/blob/master/docs/self-hosting.md) for instructions.

@@ -324,6 +324,35 @@ describe('platform/github', () => {
       const config = await mergeInitRepo('some/repo', 'token');
       expect(config).toMatchSnapshot();
     });
+    it('should throw error if archived', async () => {
+      get.mockReturnValueOnce({
+        body: {
+          archived: true,
+          owner: {},
+        },
+      });
+      let e;
+      try {
+        await github.initRepo('some/repo', 'token');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
+    it('throws not-found', async () => {
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      let e;
+      try {
+        await github.initRepo('some/repo', 'token');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
   });
   describe('getRepoForceRebase', () => {
     it('should detect repoForceRebase', async () => {
@@ -819,6 +848,75 @@ describe('platform/github', () => {
       });
       const res = await github.getBranchLastCommitTime('some-branch');
       expect(res).toBeDefined();
+    });
+  });
+  describe('ensureIssue()', () => {
+    it('creates issue', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      }));
+      const res = await github.ensureIssue('new-title', 'new-content');
+      expect(res).toEqual('created');
+    });
+    it('updates issue', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'new-content' } });
+      const res = await github.ensureIssue('title-2', 'newer-content');
+      expect(res).toEqual('updated');
+    });
+    it('skips update if unchanged', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'newer-content' } });
+      const res = await github.ensureIssue('title-2', 'newer-content');
+      expect(res).toBe(null);
+    });
+  });
+  describe('ensureIssueClosing()', () => {
+    it('closes issue', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      }));
+      await github.ensureIssueClosing('title-2');
     });
   });
   describe('addAssignees(issueNo, assignees)', () => {

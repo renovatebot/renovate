@@ -35,30 +35,11 @@ token configured via environment variable and labels configured via target
 
 ## Cascading Configuration
 
-Configuration options applied per-package override those applied per
+Configuration options applied per-package (e.g. with package rules) override those applied per
 package-type, which override those per-repository, which override those which
 are global (all repositories).
 
-The following options can be configured down to a per-package type level:
-
-* Dependency Types
-* Ignored Dependencies
-
-The following options apply per-repository:
-
-* Token
-* Platform
-* Endpoint
-
-The following options apply globally:
-
-* Log Level
-
-The remaining configuration options can be applied per-package.
-
 ## Automatic discovery of package.json locations
-
-Note: GitHub only.
 
 Default behaviour is to auto-discover all `package.json` locations in a
 repository and process them all. Doing so means that "monorepos" are supported
@@ -79,9 +60,9 @@ templates in such a way to produce a single branch for all dependencies. The
 `groupName` configuration option can be used at a repository level (e.g. give it
 the value `All`) and then all dependency updates will be in the same branch/PR.
 
-## One PR per Major release
+## Separate Minor and Major PRs
 
-`renovate` will create multiple branches/PRs if multiple major branch upgrades
+`renovate` will create multiple branches/PRs if both major and minor branch upgrades
 are available. For example if the current example is 1.6.0 and upgrades to 1.7.0
 and 2.0.0 exist, then `renovate` will raise PRs for both the 1.x upgrade(s) and
 2.x upgrade(s).
@@ -93,7 +74,7 @@ and 2.0.0 exist, then `renovate` will raise PRs for both the 1.x upgrade(s) and
 * Projects should get Minor and Patch updates for their current Major release
   even if a new Major release exists
 
-This can be overriden via the config option `separateMajorReleases`.
+This can be overridden via the config option `separateMajorReleases`.
 
 ## Branch naming
 
@@ -123,12 +104,9 @@ This is now configurable via the `pinVersions` configuration option.
 
 ## Rebasing Unmergeable Pull Requests
 
-Note: GitHub only. GitLab does not expose enough low level git API to allow
-this.
-
 With the default behaviour of one branch per dependency, it's often that case
 that a PR gets merge conflicts after an adjacent dependency update is merged.
-Although GitHub has added a web interface for simple merge conflicts, this is
+Although platforms often have a web interface for simple merge conflicts, this is
 still annoying to resolve manually.
 
 `renovate` will rebase any unmergeable branches and add the latest necessary
@@ -148,3 +126,11 @@ $ RENOVATE_BRANCH_NAME=foo renovate
 ```
 
 Alternatively, consider using a Configuration File.
+
+## Logging and error levels
+
+Renovate uses the following convention for log levels:
+
+* logger.error should only be used for problems that are likely to be a Renovate bug or require Renovate improvements. These are the types of errors that Renovate administrators should be alerted to immediately
+* logger.warn should be used for problems that might be a Renovate problem so should be checked periodically in batches
+* For _user_ problems (e.g. configuration errors), these should not warn or error on the server side and instead use logger.info

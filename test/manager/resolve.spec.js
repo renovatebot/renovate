@@ -14,7 +14,7 @@ describe('manager/resolve', () => {
     it('handles wrong filenames', async () => {
       config.packageFiles = ['wrong.txt'];
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
     });
     it('uses packageFiles if already configured and raises error if not found', async () => {
       config.packageFiles = [
@@ -22,17 +22,32 @@ describe('manager/resolve', () => {
         { packageFile: 'backend/package.json' },
       ];
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
       expect(res.errors).toHaveLength(2);
     });
-    it('deetect package.json and warns if cannot parse', async () => {
+    it('detect package.json and adds error if cannot parse (onboarding)', async () => {
       manager.detectPackageFiles = jest.fn(() => [
         { packageFile: 'package.json' },
       ]);
       platform.getFile.mockReturnValueOnce('not json');
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
-      expect(res.warnings).toHaveLength(1);
+      expect(res.packageFiles).toMatchSnapshot();
+      expect(res.errors).toHaveLength(1);
+    });
+    it('detect package.json and throws error if cannot parse (onboarded)', async () => {
+      manager.detectPackageFiles = jest.fn(() => [
+        { packageFile: 'package.json' },
+      ]);
+      platform.getFile.mockReturnValueOnce('not json');
+      config.repoIsOnboarded = true;
+      let e;
+      try {
+        await resolvePackageFiles(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+      expect(e).toMatchSnapshot();
     });
     it('detects package.json and parses json with renovate config', async () => {
       manager.detectPackageFiles = jest.fn(() => [
@@ -46,7 +61,7 @@ describe('manager/resolve', () => {
       platform.getFile.mockReturnValueOnce(JSON.stringify(pJson));
       platform.getFileList.mockReturnValueOnce([]);
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
     it('detects accompanying files', async () => {
@@ -61,7 +76,7 @@ describe('manager/resolve', () => {
       platform.getFile.mockReturnValueOnce('npmrc');
       platform.getFile.mockReturnValueOnce('yarnrc');
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
     it('detects meteor and docker and travis and bazel', async () => {
@@ -76,7 +91,7 @@ describe('manager/resolve', () => {
       platform.getFile.mockReturnValueOnce('# travis'); // .travis.yml
       platform.getFile.mockReturnValueOnce('# WORKSPACE'); // Dockerfile
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
     });
     it('skips if no content or no match', async () => {
       config.packageFiles = [
@@ -87,7 +102,25 @@ describe('manager/resolve', () => {
       ];
       platform.getFile.mockReturnValueOnce('# comment\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
-      expect(res).toMatchSnapshot();
+      expect(res.packageFiles).toMatchSnapshot();
+    });
+    it('applies package rules', async () => {
+      config.pathRules = [
+        {
+          paths: ['examples/**'],
+          prTitle: 'abcdefg',
+        },
+      ];
+      config.packageFiles = ['package.json', 'examples/a/package.json'];
+      platform.getFileList.mockReturnValue([
+        'package.json',
+        'examples/a/package.json',
+      ]);
+      platform.getFile.mockReturnValue('{}');
+      const res = await resolvePackageFiles(config);
+      expect(res.packageFiles).toHaveLength(2);
+      expect(res.packageFiles[0].prTitle).not.toEqual('abcdefg');
+      expect(res.packageFiles[1].prTitle).toEqual('abcdefg');
     });
   });
 });

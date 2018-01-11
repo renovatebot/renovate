@@ -31,7 +31,11 @@ Object {
 }
 `;
 
-exports[`config/presets getPreset handles 404 packages 1`] = `Object {}`;
+exports[`config/presets getPreset handles 404 packages 1`] = `undefined`;
+
+exports[`config/presets getPreset handles 404 packages 2`] = `undefined`;
+
+exports[`config/presets getPreset handles 404 packages 3`] = `undefined`;
 
 exports[`config/presets getPreset handles missing params 1`] = `
 Object {
@@ -49,11 +53,23 @@ Object {
 }
 `;
 
-exports[`config/presets getPreset handles no config 1`] = `Object {}`;
+exports[`config/presets getPreset handles no config 1`] = `undefined`;
 
-exports[`config/presets getPreset handles preset not found 1`] = `Object {}`;
+exports[`config/presets getPreset handles no config 2`] = `undefined`;
 
-exports[`config/presets getPreset handles throw errors 1`] = `Object {}`;
+exports[`config/presets getPreset handles no config 3`] = `undefined`;
+
+exports[`config/presets getPreset handles preset not found 1`] = `undefined`;
+
+exports[`config/presets getPreset handles preset not found 2`] = `undefined`;
+
+exports[`config/presets getPreset handles preset not found 3`] = `undefined`;
+
+exports[`config/presets getPreset handles throw errors 1`] = `undefined`;
+
+exports[`config/presets getPreset handles throw errors 2`] = `undefined`;
+
+exports[`config/presets getPreset handles throw errors 3`] = `undefined`;
 
 exports[`config/presets getPreset ignores irrelevant params 1`] = `
 Object {
@@ -688,29 +704,31 @@ Object {
 }
 `;
 
-exports[`config/presets resolvePreset returns same if invalid preset 1`] = `
-Object {
-  "foo": 1,
-}
-`;
-
 exports[`config/presets resolvePreset returns same if no presets 1`] = `
 Object {
   "foo": 1,
 }
 `;
 
-exports[`config/presets resolvePreset works with valid 1`] = `
-Object {
-  "description": Array [
-    "Use version pinning (maintain a single version only and not semver ranges)",
-  ],
-  "foo": 1,
-  "pinVersions": true,
-}
-`;
+exports[`config/presets resolvePreset throws if invalid preset 1`] = `undefined`;
 
-exports[`config/presets resolvePreset works with valid and invalid 1`] = `
+exports[`config/presets resolvePreset throws if invalid preset 2`] = `"Preset name not found within published preset config (:invalid-preset)"`;
+
+exports[`config/presets resolvePreset throws if invalid preset 3`] = `undefined`;
+
+exports[`config/presets resolvePreset throws if invalid preset file 1`] = `undefined`;
+
+exports[`config/presets resolvePreset throws if invalid preset file 2`] = `"Cannot find preset's package (notfoundaaaaaaaa)"`;
+
+exports[`config/presets resolvePreset throws if invalid preset file 3`] = `undefined`;
+
+exports[`config/presets resolvePreset throws if valid and invalid 1`] = `undefined`;
+
+exports[`config/presets resolvePreset throws if valid and invalid 2`] = `"Preset name not found within published preset config (:invalid-preset)"`;
+
+exports[`config/presets resolvePreset throws if valid and invalid 3`] = `undefined`;
+
+exports[`config/presets resolvePreset works with valid 1`] = `
 Object {
   "description": Array [
     "Use version pinning (maintain a single version only and not semver ranges)",

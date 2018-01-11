@@ -82,6 +82,36 @@ describe('workers/branch', () => {
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
     });
+    it('skips branch if edited PR found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.findPr.mockReturnValueOnce({});
+      platform.getPr.mockReturnValueOnce({ state: 'open', canRebase: false });
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('pr-edited');
+    });
+    it('warns if edited PR is actually closed', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.findPr.mockReturnValueOnce({});
+      platform.getPr.mockReturnValueOnce({ state: 'closed' });
+      const res = await branchWorker.processBranch(config);
+      expect(res).not.toEqual('pr-edited');
+    });
+    it('returns if pr creation limit exceeded', async () => {
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [],
+      });
+      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+        lockFileError: false,
+        updatedLockFiles: [],
+      });
+      platform.branchExists.mockReturnValueOnce(false);
+      config.prHourlyLimitReached = true;
+      expect(await branchWorker.processBranch(config)).toEqual(
+        'pr-hourly-limit-reached'
+      );
+    });
     it('returns if no work', async () => {
       manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [],

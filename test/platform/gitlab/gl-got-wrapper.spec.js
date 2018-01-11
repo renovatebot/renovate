@@ -52,4 +52,13 @@ describe('platform/gl-got-wrapper', () => {
     const res = await get.post('some-url');
     expect(res.body).toEqual(body);
   });
+  it('returns cached', async () => {
+    get.reset();
+    glGot.mockReturnValueOnce({
+      body: {},
+    });
+    const res1 = await get('projects/foo');
+    const res2 = await get('projects/foo');
+    expect(res1).toEqual(res2);
+  });
 });

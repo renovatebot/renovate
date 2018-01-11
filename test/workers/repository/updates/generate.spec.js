@@ -73,7 +73,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
     });
-    it('groups multiple upgrades', () => {
+    it('groups multiple upgrades same version', () => {
       const branch = [
         {
           depName: 'some-dep',
@@ -82,6 +82,7 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           lazyGrouping: true,
           foo: 1,
+          newVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -93,6 +94,7 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           lazyGrouping: true,
           foo: 1,
+          newVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -100,6 +102,40 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
+      expect(res.singleVersion).toBeDefined();
+      expect(res.groupName).toBeDefined();
+    });
+    it('groups multiple upgrades different version', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          newVersion: '5.1.2',
+          group: {
+            foo: 2,
+          },
+        },
+        {
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          foo: 1,
+          newVersion: '1.1.0',
+          group: {
+            foo: 2,
+          },
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.foo).toBe(2);
+      expect(res.singleVersion).toBeUndefined();
+      expect(res.recreateClosed).toBe(true);
       expect(res.groupName).toBeDefined();
     });
     it('uses semantic commits', () => {
@@ -121,6 +157,31 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toEqual('chore(package): some-title');
+    });
+    it('handles @types specially', () => {
+      const branch = [
+        {
+          depName: '@types/some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          newVersion: '0.5.7',
+          group: {},
+        },
+        {
+          depName: 'some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          newVersion: '0.6.0',
+          group: {},
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBe(false);
+      expect(res.groupName).toBeUndefined();
     });
   });
 });

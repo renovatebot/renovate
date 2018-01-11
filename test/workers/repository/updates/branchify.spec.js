@@ -29,7 +29,6 @@ describe('workers/repository/updates/branchify', () => {
       config.repoIsOnboarded = true;
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(1);
-      expect(res).toMatchSnapshot();
     });
     it('does not group if different compiled branch names', async () => {
       config.upgrades = [
@@ -54,7 +53,6 @@ describe('workers/repository/updates/branchify', () => {
       ];
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(3);
-      expect(res).toMatchSnapshot();
     });
     it('groups if same compiled branch names', async () => {
       config.upgrades = [
@@ -79,7 +77,6 @@ describe('workers/repository/updates/branchify', () => {
       ];
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(2);
-      expect(res).toMatchSnapshot();
     });
     it('groups if same compiled group name', async () => {
       config.upgrades = [
@@ -108,7 +105,6 @@ describe('workers/repository/updates/branchify', () => {
       ];
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(2);
-      expect(res).toMatchSnapshot();
     });
     it('mixes errors and warnings', async () => {
       config.upgrades = [
@@ -136,7 +132,6 @@ describe('workers/repository/updates/branchify', () => {
       expect(Object.keys(res.branches).length).toBe(2);
       expect(res.errors).toHaveLength(1);
       expect(res.warnings).toHaveLength(1);
-      expect(res).toMatchSnapshot();
     });
   });
 });

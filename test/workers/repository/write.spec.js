@@ -1,5 +1,6 @@
 const { writeUpdates } = require('../../../lib/workers/repository/write');
 const branchWorker = require('../../../lib/workers/branch');
+const moment = require('moment');
 
 branchWorker.processBranch = jest.fn();
 
@@ -11,6 +12,22 @@ beforeEach(() => {
 
 describe('workers/repository/write', () => {
   describe('writeUpdates()', () => {
+    it('calculates hourly limit remaining', async () => {
+      config.branches = [];
+      config.prHourlyLimit = 1;
+      platform.getPrList.mockReturnValueOnce([
+        { created_at: moment().format() },
+      ]);
+      const res = await writeUpdates(config);
+      expect(res).toEqual('done');
+    });
+    it('handles error in calculation', async () => {
+      config.branches = [];
+      config.prHourlyLimit = 1;
+      platform.getPrList.mockReturnValueOnce([{}, null]);
+      const res = await writeUpdates(config);
+      expect(res).toEqual('done');
+    });
     it('runs pins first', async () => {
       config.branches = [{ isPin: true }, {}, {}];
       const res = await writeUpdates(config);

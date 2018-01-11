@@ -3,7 +3,7 @@
 exports[`platform/gitlab addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
 Array [
   Array [
-    "projects/some%2Frepo/merge_requests/42?assignee_id=123",
+    "projects/undefined/merge_requests/42?assignee_id=123",
   ],
 ]
 `;
@@ -11,7 +11,7 @@ Array [
 exports[`platform/gitlab addAssignees(issueNo, assignees) should warn if more than one assignee 1`] = `
 Array [
   Array [
-    "projects/some%2Frepo/merge_requests/42?assignee_id=123",
+    "projects/undefined/merge_requests/42?assignee_id=123",
   ],
 ]
 `;
@@ -75,13 +75,7 @@ exports[`platform/gitlab getBranchLastCommitTime should return a Date 1`] = `201
 exports[`platform/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
 Array [
   Array [
-    "projects/some%2Frepo",
-  ],
-  Array [
-    "user",
-  ],
-  Array [
-    "projects/some%2Frepo/merge_requests?state=opened&per_page=100",
+    "projects/undefined/merge_requests?state=opened&per_page=100",
     Object {
       "paginate": true,
     },
@@ -92,22 +86,16 @@ Array [
 exports[`platform/gitlab getBranchPr(branchName) should return the PR object 1`] = `
 Array [
   Array [
-    "projects/some%2Frepo",
-  ],
-  Array [
-    "user",
-  ],
-  Array [
-    "projects/some%2Frepo/merge_requests?state=opened&per_page=100",
+    "projects/undefined/merge_requests?state=opened&per_page=100",
     Object {
       "paginate": true,
     },
   ],
   Array [
-    "projects/some%2Frepo/merge_requests/undefined",
+    "projects/undefined/merge_requests/undefined",
   ],
   Array [
-    "projects/some%2Frepo/repository/branches/some-branch",
+    "projects/undefined/repository/branches/some-branch",
   ],
 ]
 `;
@@ -212,10 +200,20 @@ Array [
   Array [
     "user",
   ],
+  Array [
+    "projects/some%2Frepo%2Fproject/merge_requests?per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo%2Fproject/repository/tree?ref=undefined&recursive=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
 ]
 `;
-
-exports[`platform/gitlab initRepo should escape all forward slashes in project names 2`] = `Object {}`;
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 0 1`] = `
 Array [
@@ -224,6 +222,18 @@ Array [
   ],
   Array [
     "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/repository/tree?ref=undefined&recursive=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
   ],
 ]
 `;
@@ -238,6 +248,18 @@ Array [
   Array [
     "user",
   ],
+  Array [
+    "projects/some%2Frepo/merge_requests?per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/repository/tree?ref=undefined&recursive=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
 ]
 `;
 
@@ -251,18 +273,21 @@ Array [
   Array [
     "user",
   ],
+  Array [
+    "projects/some%2Frepo/merge_requests?per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/repository/tree?ref=undefined&recursive=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
 ]
 `;
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 2 2`] = `Object {}`;
 
-exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
-Array [
-  Array [
-    "projects/some%2Frepo",
-  ],
-  Array [
-    "user",
-  ],
-]
-`;
+exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `Array []`;

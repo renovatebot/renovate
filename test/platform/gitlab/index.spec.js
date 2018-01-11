@@ -93,6 +93,7 @@ describe('platform/gitlab', () => {
         if (envToken !== undefined) {
           process.env.GITLAB_TOKEN = envToken;
         }
+        get.mockReturnValue({ body: [] });
         const config = await initRepo('some/repo', ...args);
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
@@ -101,9 +102,9 @@ describe('platform/gitlab', () => {
       });
     });
     it(`should escape all forward slashes in project names`, async () => {
-      const config = await initRepo('some/repo/project', 'some-token');
+      get.mockReturnValue({ body: [] });
+      await initRepo('some/repo/project', 'some-token');
       expect(get.mock.calls).toMatchSnapshot();
-      expect(config).toMatchSnapshot();
     });
     it('should throw an error if no token is provided', async () => {
       let err;
@@ -136,7 +137,6 @@ describe('platform/gitlab', () => {
   });
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch', async () => {
-      await initRepo('some/repo', 'token');
       // getBranchCommit
       get.mockImplementationOnce(() => ({
         body: {
@@ -151,7 +151,6 @@ describe('platform/gitlab', () => {
   });
   describe('getFileList', () => {
     it('returns empty array if error', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => {
         throw new Error('some error');
       });
@@ -159,7 +158,6 @@ describe('platform/gitlab', () => {
       expect(files).toEqual([]);
     });
     it('warns if truncated result', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
         body: [],
       }));
@@ -167,7 +165,6 @@ describe('platform/gitlab', () => {
       expect(files.length).toBe(0);
     });
     it('caches the result', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
         body: [],
       }));
@@ -177,7 +174,6 @@ describe('platform/gitlab', () => {
       expect(files.length).toBe(0);
     });
     it('should return the files matching the fileName', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
         body: [
           { type: 'blob', path: 'symlinks/package.json', mode: '120000' },
@@ -241,7 +237,6 @@ describe('platform/gitlab', () => {
   });
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce(() => ({
         body: [],
       }));
@@ -250,7 +245,6 @@ describe('platform/gitlab', () => {
       expect(pr).toBe(null);
     });
     it('should return the PR object', async () => {
-      await initRepo('some/repo', 'token');
       get.mockReturnValueOnce({
         body: [{ number: 91, source_branch: 'somebranch' }],
       });
@@ -283,12 +277,10 @@ describe('platform/gitlab', () => {
       });
     });
     it('returns success if requiredStatusChecks null', async () => {
-      await initRepo('some/repo', 'token');
       const res = await gitlab.getBranchStatus('somebranch', null);
       expect(res).toEqual('success');
     });
     it('return failed if unsupported requiredStatusChecks', async () => {
-      await initRepo('some/repo', 'token');
       const res = await gitlab.getBranchStatus('somebranch', ['foo']);
       expect(res).toEqual('failed');
     });
@@ -368,7 +360,6 @@ describe('platform/gitlab', () => {
   });
   describe('setBranchStatus', () => {
     it('sets branch status', async () => {
-      await initRepo('some/repo', 'token');
       // getBranchCommit
       get.mockReturnValueOnce({
         body: {
@@ -401,7 +392,6 @@ describe('platform/gitlab', () => {
   });
   describe('getBranchLastCommitTime', () => {
     it('should return a Date', async () => {
-      await initRepo('some/repo', 'token');
       get.mockReturnValueOnce({
         body: [
           {
@@ -436,7 +426,6 @@ describe('platform/gitlab', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles error', async () => {
-      await initRepo('some/repo', 'token');
       get.mockReturnValueOnce({
         body: [],
       });
@@ -446,7 +435,6 @@ describe('platform/gitlab', () => {
   });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
-      await initRepo('some/repo', 'token');
       get.mockReturnValueOnce({
         body: [{ id: 123 }],
       });
@@ -454,7 +442,6 @@ describe('platform/gitlab', () => {
       expect(get.put.mock.calls).toMatchSnapshot();
     });
     it('should warn if more than one assignee', async () => {
-      await initRepo('some/repo', 'token');
       get.mockReturnValueOnce({
         body: [{ id: 123 }],
       });
@@ -462,7 +449,6 @@ describe('platform/gitlab', () => {
       expect(get.put.mock.calls).toMatchSnapshot();
     });
     it('should swallow error', async () => {
-      await initRepo('some/repo', 'token');
       get.mockImplementationOnce({});
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
       expect(get.put.mock.calls).toHaveLength(0);
@@ -470,7 +456,6 @@ describe('platform/gitlab', () => {
   });
   describe('addReviewers(issueNo, reviewers)', () => {
     it('should add the given reviewers to the PR', async () => {
-      await initRepo('some/repo', 'token');
       await gitlab.addReviewers(42, ['someuser', 'someotheruser']);
     });
   });
@@ -611,6 +596,10 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getFile(filePath, branchName)', () => {
+    beforeEach(async () => {
+      get.mockReturnValueOnce({ body: [{ type: 'blob', path: 'some-path' }] });
+      await gitlab.getFileList();
+    });
     it('gets the file', async () => {
       get.mockReturnValueOnce({
         body: {
@@ -619,6 +608,10 @@ describe('platform/gitlab', () => {
       });
       const res = await gitlab.getFile('some-path');
       expect(res).toMatchSnapshot();
+    });
+    it('short cuts 404', async () => {
+      const res = await gitlab.getFile('some-missing-path');
+      expect(res).toBe(null);
     });
     it('returns null for 404', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));

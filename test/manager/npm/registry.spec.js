@@ -45,6 +45,13 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobarhome');
     expect(res).toMatchSnapshot();
   });
+  it('should return null if lookup fails 401', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(401);
+    const res = await npm.getDependency('foobar');
+    expect(res).toBeNull();
+  });
   it('should return null if lookup fails', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')

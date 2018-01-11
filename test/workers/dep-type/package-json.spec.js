@@ -35,6 +35,7 @@ describe('workers/dep-type/package-json', () => {
         JSON.parse(input01Content),
         'dependencies'
       );
+      expect(extractedDependencies).toMatchSnapshot();
       extractedDependencies
         .every(dep => dep.depType && dep.depName && dep.currentVersion)
         .should.eql(true);
