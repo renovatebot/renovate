@@ -286,7 +286,11 @@ describe('platform/vsts', () => {
     });
     */
   });
-
+  describe('getPrList()', () => {
+    it('returns empty array', () => {
+      expect(vsts.getPrList()).toEqual([]);
+    });
+  });
   describe('getFileList', () => {
     it('returns empty array if error', async () => {
       await initRepo('some/repo', 'token');

@@ -98,6 +98,20 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).not.toEqual('pr-edited');
     });
+    it('returns if pr creation limit exceeded', async () => {
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [],
+      });
+      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+        lockFileError: false,
+        updatedLockFiles: [],
+      });
+      platform.branchExists.mockReturnValueOnce(false);
+      config.prHourlyLimitReached = true;
+      expect(await branchWorker.processBranch(config)).toEqual(
+        'pr-hourly-limit-reached'
+      );
+    });
     it('returns if no work', async () => {
       manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [],
