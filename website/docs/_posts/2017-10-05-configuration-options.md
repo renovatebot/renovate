@@ -719,6 +719,25 @@ This setting tells Renovate when you would like it to raise PRs:
 
 Renovate defaults to `immediate` but some like to change to `not-pending`. If you set to immediate, it means you will usually get GitHub notifications that a new PR is available but if you view it immediately then it will still have "pending" tests so you can't take any action. With `not-pending`, it means that when you receive the PR notification, you can see if it passed or failed and take action immediately. Therefore you can customise this setting if you wish to be notified a little later in order to reduce "noise".
 
+## prHourlyLimit
+
+Rate limit PRs to maximum x created per hour. 0 (default) means no limit.
+
+| name    | value   |
+| ------- | ------- |
+| type    | integer |
+| default | 0       |
+
+This setting - if enabled - helps slow down Renovate, particularly during the onboarding phase. What may happen without this setting is:
+
+1. Onboarding PR is created
+2. User merges onboarding PR to activate Renovate
+3. Renovate creates a "Pin Dependencies" PR (if necessary)
+4. User merges Pin PR
+5. Renovate then creates every single upgrade PR necessary - potentially dozens
+
+The above can result in swamping CI systems, as well as a lot of retesting if branches need to be rebased every time one is merged. Instead, if `prHourlyLimit` is set to a value like 1 or 2, it will mean that Renovate creates at most that many new PRs within each hourly period (:00-:59). So the project should still result in all PRs created perhaps within the first 24 hours maximum, but at a rate that may allow users to merge them once they pass tests. It does not place a limit on the number of _concurrently open_ PRs - only on the rate they are created.
+
 ## prNotPendingHours
 
 | name    | value   |
