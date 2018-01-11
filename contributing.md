@@ -36,7 +36,7 @@ the code configurable, so most new functionality should be controllable via
 configuration options. Please see [Configuration docs](docs/configuration.md)
 for a list of current options.
 
-If you wish to add one, add it to `lib/config/definitions.js` and then run `yarn run update-docs`.
+If you wish to add one, add it to `lib/config/definitions.js` and then add documentation to `website/docs/_posts/2017-10-05-configuration-options.md`.
 
 ## Running tests
 
