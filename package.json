@@ -96,7 +96,7 @@
     "jest": "22.0.5",
     "mockdate": "2.0.2",
     "nock": "9.1.6",
-    "prettier": "1.10.1",
+    "prettier": "1.10.2",
     "semantic-release": "11.0.2"
   },
   "files": [
