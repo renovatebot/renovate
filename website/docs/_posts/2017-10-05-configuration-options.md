@@ -71,20 +71,22 @@ Merge commits will employ the standard GitHub "merge commit" API, just like when
 
 Branch push employs GitHub's low-level `git` API to push the Renovate upgrade directly to the head of the base branch (e.g. `master`) to maintain a "clean" history. The downside of this approach is that it implicitly enables the `rebaseStalePrs` setting because otherwise we would risk pushing a bad commit to master. i.e. Renovate won't push the commit to base branch unless the branch is completely up-to-date with `master` and has passed tests, which means that if the default branch is getting updated regularly then it might take several rebases from Renovate until it has a branch commit that is safe to push to `master`.
 
-## baseBranch
+## baseBranches
 
-A custom base branch to target for pull requests.
+An array of one or more custom base branches to be renovated. Default behaviour is to renovate the default repository branch.
 
-| name    | value  |
-| ------- | ------ |
-| type    | string |
-| default | `''`   |
+| name    | value |
+| ------- | ----- |
+| type    | list  |
+| default | []    |
 
 If left default (empty) then the default branch of the repository is used.
 
 For most projects, this should be left as default. An example use case for using this setting is a project who uses the default `master` branch for releases and a separate branch `next` for preparing for the next release. In that case, the project may prefer for Pull Requests from Renovate to be opened against the `next` branch instead of `master`.
 
-You also may add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR. If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch instead of default.
+If instead the project needs _both_ `master` and `next` to be renovated, then both should be put into the `baseBranches` array.
+
+It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR. If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch instead of default.
 
 ## bazel
 
