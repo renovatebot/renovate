@@ -10,6 +10,9 @@ exports[`config/migration migrateConfig(config, parentConfig) it migrates config
 Object {
   "autodiscover": true,
   "automerge": false,
+  "baseBranches": Array [
+    "next",
+  ],
   "commitMessage": "some commit message",
   "devDependencies": Object {
     "major": Object {

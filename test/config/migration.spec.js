@@ -13,6 +13,7 @@ describe('config/migration', () => {
         automergeMajor: false,
         automergeMinor: true,
         automergePatch: true,
+        baseBranch: 'next',
         ignoreNodeModules: true,
         meteor: true,
         autodiscover: 'true',

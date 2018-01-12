@@ -1,3 +1,4 @@
+const { initRepo } = require('../../../lib/workers/repository/init');
 const { determineUpdates } = require('../../../lib/workers/repository/updates');
 const { writeUpdates } = require('../../../lib/workers/repository/write');
 const {
@@ -26,15 +27,34 @@ describe('workers/repository', () => {
       expect(res).toMatchSnapshot();
     });
     it('writes', async () => {
-      determineUpdates.mockReturnValue({ repoIsOnboarded: true });
+      initRepo.mockReturnValue({});
+      determineUpdates.mockReturnValue({
+        repoIsOnboarded: true,
+        branches: [{ type: 'minor' }, { type: 'pin' }],
+      });
       writeUpdates.mockReturnValueOnce('automerged');
       writeUpdates.mockReturnValueOnce('onboarded');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();
     });
     it('ensures onboarding pr', async () => {
-      determineUpdates.mockReturnValue({ repoIsOnboarded: false });
+      initRepo.mockReturnValue({});
+      determineUpdates.mockReturnValue({
+        repoIsOnboarded: false,
+        branches: [],
+      });
       ensureOnboardingPr.mockReturnValue('onboarding');
+      const res = await renovateRepository(config, 'some-token');
+      expect(res).toMatchSnapshot();
+    });
+    it('handles baseBranches', async () => {
+      initRepo.mockReturnValue({ baseBranches: ['master', 'next'] });
+      determineUpdates.mockReturnValue({
+        repoIsOnboarded: true,
+        branches: [],
+      });
+      writeUpdates.mockReturnValueOnce('automerged');
+      writeUpdates.mockReturnValueOnce('onboarded');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();
     });
