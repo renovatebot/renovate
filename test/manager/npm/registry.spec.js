@@ -59,6 +59,18 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobar');
     expect(res).toBeNull();
   });
+  it('should throw error for 5xx', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(503);
+    let e;
+    try {
+      await npm.getDependency('foobar');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+  });
   it('should send an authorization header if provided', async () => {
     registryAuthToken.mockImplementation(() => ({
       type: 'Basic',
