@@ -17,6 +17,7 @@ describe('workers/repository/error', () => {
       'no-package-files',
       'loops>5',
       'config-validation',
+      'registry-failure',
       'archived',
       'not-found',
     ];
