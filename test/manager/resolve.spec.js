@@ -71,6 +71,7 @@ describe('manager/resolve', () => {
       platform.getFileList.mockReturnValueOnce([
         'yarn.lock',
         'package-lock.json',
+        'shrinkwrap.yaml',
       ]);
       platform.getFile.mockReturnValueOnce('{"name": "package.json"}');
       platform.getFile.mockReturnValueOnce('npmrc');
