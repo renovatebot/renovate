@@ -5,6 +5,9 @@ Object {
   "packageLockFileDirs": Array [
     "backend",
   ],
+  "shrinkwrapYamlDirs": Array [
+    "frontend",
+  ],
   "yarnLockFileDirs": Array [
     ".",
   ],
@@ -16,6 +19,9 @@ Object {
   "packageLockFileDirs": Array [
     "backend",
   ],
+  "shrinkwrapYamlDirs": Array [
+    "frontend",
+  ],
   "yarnLockFileDirs": Array [
     ".",
   ],
@@ -25,6 +31,7 @@ Object {
 exports[`workers/branch/lock-files determineLockFileDirs returns root directory if using yarn workspaces 1`] = `
 Object {
   "packageLockFileDirs": Array [],
+  "shrinkwrapYamlDirs": Array [],
   "yarnLockFileDirs": Array [
     ".",
   ],
