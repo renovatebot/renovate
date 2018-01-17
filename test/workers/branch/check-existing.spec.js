@@ -35,13 +35,5 @@ describe('workers/branch/check-existing', () => {
       expect(await prAlreadyExisted(config)).toEqual({ number: 13 });
       expect(platform.findPr.mock.calls.length).toBe(2);
     });
-    it('returns false if mistaken', async () => {
-      platform.findPr.mockReturnValueOnce({
-        title: 'some title',
-        closed_at: '2017-10-15T21:28:07.000Z',
-      });
-      expect(await prAlreadyExisted(config)).toBe(null);
-      expect(platform.updatePr.mock.calls).toHaveLength(1);
-    });
   });
 });
