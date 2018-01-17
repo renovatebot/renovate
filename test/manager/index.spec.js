@@ -55,7 +55,7 @@ describe('manager', () => {
         'other/Dockerfile',
       ]);
       platform.getFile.mockReturnValueOnce(
-        '### comment\nFROM something\nRUN something'
+        '### comment\n\n \nFROM something\nRUN something'
       );
       platform.getFile.mockReturnValueOnce(
         'ARG foo\nFROM something\nRUN something'
