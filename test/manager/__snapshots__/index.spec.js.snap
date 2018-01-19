@@ -16,6 +16,7 @@ Array [
 exports[`manager detectPackageFiles(config) finds Dockerfiles 1`] = `
 Array [
   "Dockerfile",
+  "other/Dockerfile",
 ]
 `;
 
