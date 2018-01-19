@@ -1142,15 +1142,15 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => ({
         body: [
           {
-            committer: {
-              login: 'web-flow',
-            },
-          },
-          {
             commit: {
               author: {
                 email: 'bar',
               },
+            },
+          },
+          {
+            committer: {
+              login: 'web-flow',
             },
           },
           {},
