@@ -112,16 +112,22 @@ describe('manager/resolve', () => {
           prTitle: 'abcdefg',
         },
       ];
-      config.packageFiles = ['package.json', 'examples/a/package.json'];
+      config.packageFiles = [
+        'package.json',
+        'examples/a/package.json',
+        'packages/examples/package.json',
+      ];
       platform.getFileList.mockReturnValue([
         'package.json',
         'examples/a/package.json',
+        'packages/examples/package.json',
       ]);
       platform.getFile.mockReturnValue('{}');
       const res = await resolvePackageFiles(config);
-      expect(res.packageFiles).toHaveLength(2);
+      expect(res.packageFiles).toHaveLength(3);
       expect(res.packageFiles[0].prTitle).not.toEqual('abcdefg');
       expect(res.packageFiles[1].prTitle).toEqual('abcdefg');
+      expect(res.packageFiles[2].prTitle).not.toEqual('abcdefg');
     });
   });
 });
