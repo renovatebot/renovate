@@ -29,6 +29,10 @@ This Pull Request renovates the package group "{{groupName}}".
 {{/unless}}
 <br />
 
+{{#if isPin}}
+**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please upate your config accordingly instead of leaving this PR open.
+{{/if}}
+
 {{#if hasErrors}}
 
 ---
