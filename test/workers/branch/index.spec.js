@@ -63,7 +63,10 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
       config.isMajor = true;
-      checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
+      checkExisting.prAlreadyExisted.mockReturnValueOnce({
+        number: 13,
+        state: 'closed',
+      });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
     });
@@ -71,14 +74,30 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
       config.isDigest = true;
-      checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
+      checkExisting.prAlreadyExisted.mockReturnValueOnce({
+        number: 13,
+        state: 'closed',
+      });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
     });
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
-      checkExisting.prAlreadyExisted.mockReturnValueOnce({ number: 13 });
+      checkExisting.prAlreadyExisted.mockReturnValueOnce({
+        number: 13,
+        state: 'closed',
+      });
+      await branchWorker.processBranch(config);
+      expect(parent.getParentBranch.mock.calls.length).toBe(0);
+    });
+    it('skips branch if merged PR found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
+      checkExisting.prAlreadyExisted.mockReturnValueOnce({
+        number: 13,
+        state: 'merged',
+      });
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
     });
