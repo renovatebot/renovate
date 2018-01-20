@@ -9,7 +9,9 @@ Array [
   Object {
     "content": Object {
       "name": "package.json",
+      "version": "0.0.1",
     },
+    "currentPackageJsonVersion": "0.0.1",
     "enabled": true,
     "npmrc": "npmrc",
     "packageFile": "package.json",
@@ -299,7 +301,11 @@ exports[`manager/resolve resolvePackageFiles() detects package.json and parses j
 Array [
   Object {
     "automerge": true,
-    "content": Object {},
+    "content": Object {
+      "name": "something",
+      "version": "1.0.0",
+    },
+    "currentPackageJsonVersion": "1.0.0",
     "enabled": true,
     "errors": Array [],
     "packageFile": "package.json",

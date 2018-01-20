@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/branch/package-json .bumpPackageVersion() increments 1`] = `"{\\"name\\":\\"some-package\\",\\"version\\":\\"0.0.3\\"}"`;
+
+exports[`workers/branch/package-json .bumpPackageVersion() updates 1`] = `"{\\"name\\":\\"some-package\\",\\"version\\":\\"0.1.0\\"}"`;

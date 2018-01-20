@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const npmUpdater = require('../../../lib/manager/npm/update');
+const semver = require('semver');
 
 function readFixture(fixture) {
   return fs.readFileSync(
@@ -70,6 +71,30 @@ describe('workers/branch/package-json', () => {
         '1.5.8'
       );
       expect(testContent).toBe(null);
+    });
+  });
+  describe('.bumpPackageVersion()', () => {
+    const content = JSON.stringify({ name: 'some-package', version: '0.0.2' });
+    it('increments', () => {
+      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', 'patch');
+      expect(res).toMatchSnapshot();
+      expect(res).not.toEqual(content);
+    });
+    it('no ops', () => {
+      const res = npmUpdater.bumpPackageVersion(content, '0.0.1', 'patch');
+      expect(res).toEqual(content);
+    });
+    it('updates', () => {
+      const res = npmUpdater.bumpPackageVersion(content, '0.0.1', 'minor');
+      expect(res).toMatchSnapshot();
+      expect(res).not.toEqual(content);
+    });
+    it('returns content if bumping errors', () => {
+      semver.inc = jest.fn(() => {
+        throw new Error('semver inc');
+      });
+      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', true);
+      expect(res).toEqual(content);
     });
   });
 });
