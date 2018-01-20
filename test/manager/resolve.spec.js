@@ -54,6 +54,8 @@ describe('manager/resolve', () => {
         { packageFile: 'package.json' },
       ]);
       const pJson = {
+        name: 'something',
+        version: '1.0.0',
         renovate: {
           automerge: true,
         },
@@ -73,7 +75,9 @@ describe('manager/resolve', () => {
         'package-lock.json',
         'shrinkwrap.yaml',
       ]);
-      platform.getFile.mockReturnValueOnce('{"name": "package.json"}');
+      platform.getFile.mockReturnValueOnce(
+        '{"name": "package.json", "version": "0.0.1"}'
+      );
       platform.getFile.mockReturnValueOnce('npmrc');
       platform.getFile.mockReturnValueOnce('yarnrc');
       const res = await resolvePackageFiles(config);

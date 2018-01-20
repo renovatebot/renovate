@@ -125,9 +125,9 @@ You can modify this field if you want to change the prefix used. For example if 
 
 Bump the version in the package.json being updated
 
-| name    | value     |
-| ------- | --------- |
-| type    | string    |
+| name | value  |
+| ---- | ------ |
+| type | string |
 
 Set this value to 'patch', 'minor' or 'major' to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, set this to `patch`.
 
