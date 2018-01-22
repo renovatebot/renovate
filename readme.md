@@ -2,7 +2,7 @@
 
 # Renovate
 
-Automated dependency updates, for humans.
+Automated dependency updates. Flexible, so you don't need to be.
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/renovateapp/renovate/master/license)
 [![codecov](https://codecov.io/gh/renovateapp/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovateapp/renovate)
@@ -18,12 +18,13 @@ Automated dependency updates, for humans.
 * Extremely customisable behaviour via configuration files or within your `package.json`
 * Use eslint-like shared config presets for ease of use and simplifying configuration
 * Update lock files natively in the same commit, including immediately resolving conflicts whenever PRs are merged
-* Supports GitHub, GitLab (APIv4) and VSTS (BitBucket is a WIP)
+* Supports GitHub, GitLab (APIv4) and VSTS. BitBucket is a WIP.
 * Open source (installable via npm/yarn) so can be self-hosted or used for free via GitHub App
 
 ## The Renovate Approach
 
-* Bots should serve humans, not the other way around. Using Renovate should not cause you to change your workflow against your wishes
+* Everyone can benefit from automation, whether it's a little or a lot
+* Renovate should not cause you to change your workflow against your wishes - don't enforce opinions on users
 * All behaviour should be configurable, down to a ridiculous level if desired
 * Autodetect settings wherever possible (to minimise configuration) but always allow overrides
 
