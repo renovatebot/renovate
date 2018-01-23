@@ -49,7 +49,7 @@ describe('manager/resolve', () => {
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
     });
-    it('detects package.json and parses json with renovate config', async () => {
+    it('clears npmrc and yarnrc fields', async () => {
       manager.detectPackageFiles = jest.fn(() => [
         { packageFile: 'package.json' },
       ]);
