@@ -10,6 +10,10 @@ describe('lib/manager/docker/extract', () => {
       const res = extractDependencies('FROM node\n', config);
       expect(res).toMatchSnapshot();
     });
+    it('is case insensitive', () => {
+      const res = extractDependencies('From node\n', config);
+      expect(res).toMatchSnapshot();
+    });
     it('handles tag', () => {
       const res = extractDependencies('FROM node:8.9.0-alpine\n', config);
       expect(res).toMatchSnapshot();
@@ -76,6 +80,13 @@ describe('lib/manager/docker/extract', () => {
     it('handles abnoral spacing', () => {
       const res = extractDependencies(
         'FROM    registry.allmine.info:5005/node:8.7.0\n\n'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('extracts multiple FROM tags', () => {
+      const res = extractDependencies(
+        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM python:3.6-slim\n',
+        config
       );
       expect(res).toMatchSnapshot();
     });

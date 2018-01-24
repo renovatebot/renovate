@@ -49,11 +49,13 @@ describe('manager/resolve', () => {
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
     });
-    it('detects package.json and parses json with renovate config', async () => {
+    it('clears npmrc and yarnrc fields', async () => {
       manager.detectPackageFiles = jest.fn(() => [
         { packageFile: 'package.json' },
       ]);
       const pJson = {
+        name: 'something',
+        version: '1.0.0',
         renovate: {
           automerge: true,
         },
@@ -73,7 +75,9 @@ describe('manager/resolve', () => {
         'package-lock.json',
         'shrinkwrap.yaml',
       ]);
-      platform.getFile.mockReturnValueOnce('{"name": "package.json"}');
+      platform.getFile.mockReturnValueOnce(
+        '{"name": "package.json", "version": "0.0.1"}'
+      );
       platform.getFile.mockReturnValueOnce('npmrc');
       platform.getFile.mockReturnValueOnce('yarnrc');
       const res = await resolvePackageFiles(config);
@@ -112,16 +116,22 @@ describe('manager/resolve', () => {
           prTitle: 'abcdefg',
         },
       ];
-      config.packageFiles = ['package.json', 'examples/a/package.json'];
+      config.packageFiles = [
+        'package.json',
+        'examples/a/package.json',
+        'packages/examples/package.json',
+      ];
       platform.getFileList.mockReturnValue([
         'package.json',
         'examples/a/package.json',
+        'packages/examples/package.json',
       ]);
       platform.getFile.mockReturnValue('{}');
       const res = await resolvePackageFiles(config);
-      expect(res.packageFiles).toHaveLength(2);
+      expect(res.packageFiles).toHaveLength(3);
       expect(res.packageFiles[0].prTitle).not.toEqual('abcdefg');
       expect(res.packageFiles[1].prTitle).toEqual('abcdefg');
+      expect(res.packageFiles[2].prTitle).not.toEqual('abcdefg');
     });
   });
 });

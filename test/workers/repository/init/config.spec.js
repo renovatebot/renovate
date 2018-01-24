@@ -23,8 +23,20 @@ describe('workers/repository/init/config', () => {
     });
     it('returns config if not found', async () => {
       platform.getFileList.mockReturnValue(['package.json']);
+      platform.getFile.mockReturnValue('{}');
       const res = await mergeRenovateConfig(config);
       expect(res).toMatchObject(config);
+    });
+    it('uses package.json config if found', async () => {
+      platform.getFileList.mockReturnValue(['package.json']);
+      const pJson = JSON.stringify({
+        name: 'something',
+        renovate: {
+          prHourlyLimit: 10,
+        },
+      });
+      platform.getFile.mockReturnValue(pJson);
+      await mergeRenovateConfig(config);
     });
     it('returns error if cannot parse', async () => {
       platform.getFileList.mockReturnValue(['package.json', 'renovate.json']);

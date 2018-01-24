@@ -107,9 +107,11 @@ describe('workers/pr', () => {
       jest.clearAllMocks();
     });
     it('should return null if check fails', async () => {
-      platform.getBranchPr.mockImplementationOnce(() => {
+      platform.updatePr.mockImplementationOnce(() => {
         throw new Error('oops');
       });
+      config.newVersion = '1.2.0';
+      platform.getBranchPr.mockReturnValueOnce(existingPr);
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
     });
