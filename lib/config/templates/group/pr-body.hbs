@@ -1,11 +1,11 @@
-This Pull Request renovates the package group "{{groupName}}".
+This Pull Request renovates the package group "{{{groupName}}}".
 
 {{#if schedule}}
-**Note**: This PR was created on a configured schedule ("{{schedule}}"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.
+**Note**: This PR was created on a configured schedule ("{{{schedule}}}"{{#if timezone}} in timezone `{{{timezone}}}`{{/if}}) and will not receive updates outside those times.
 {{/if}}
 
 {{#each upgrades as |upgrade|}}
--   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}{{depName}}{{/if}}: from `{{upgrade.currentVersion}}` to `{{upgrade.newVersion}}`
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}{{{depName}}}{{/if}}: from `{{upgrade.currentVersion}}` to `{{upgrade.newVersion}}`
 {{/each}}
 
 {{#unless isPin}}
