@@ -347,6 +347,22 @@ Array [
 ]
 `;
 
+exports[`workers/package/versions .determineUpgrades(npmDep, config) supports complex major hyphen ranges 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "2.7.0",
+    "changeLogToVersion": "3.8.1",
+    "isMajor": true,
+    "isRange": true,
+    "newVersion": "1.x - 3.x",
+    "newVersionMajor": 3,
+    "newVersionMinor": 8,
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`workers/package/versions .determineUpgrades(npmDep, config) supports complex major ranges 1`] = `
 Array [
   Object {
@@ -820,6 +836,38 @@ Array [
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) widens .x OR ranges 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "2.7.0",
+    "changeLogToVersion": "3.8.1",
+    "isMajor": true,
+    "isRange": true,
+    "newVersion": "1.x || 2.x || 3.x",
+    "newVersionMajor": 3,
+    "newVersionMinor": 8,
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) widens stanndalone major OR ranges 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "2.7.0",
+    "changeLogToVersion": "3.8.1",
+    "isMajor": true,
+    "isRange": true,
+    "newVersion": "1 || 2 || 3",
+    "newVersionMajor": 3,
+    "newVersionMinor": 8,
+    "type": "major",
     "unpublishable": false,
   },
 ]
