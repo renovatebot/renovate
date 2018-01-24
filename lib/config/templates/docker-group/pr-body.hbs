@@ -1,11 +1,11 @@
 This Pull Request updates Dockerfiles to use image digests.
 
 {{#if schedule}}
-**Note**: This PR was created on a configured schedule ("{{schedule}}"{{#if timezone}} in timezone `{{timezone}}`{{/if}}) and will not receive updates outside those times.
+**Note**: This PR was created on a configured schedule ("{{{schedule}}}"{{#if timezone}} in timezone `{{{timezone}}}`{{/if}}) and will not receive updates outside those times.
 {{/if}}
 
 {{#each upgrades as |upgrade|}}
--   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}{{depName}}{{/if}}: `{{upgrade.newDigest}}`
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}{{{depName}}}{{/if}}: `{{upgrade.newDigest}}`
 {{/each}}
 
 {{#if hasErrors}}

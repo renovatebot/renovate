@@ -2,14 +2,14 @@
 
 exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
 Object {
-  "branchName": "{{branchPrefix}}lock-file-maintenance",
+  "branchName": "{{{branchPrefix}}}lock-file-maintenance",
   "commitMessage": "Update lock file",
   "enabled": false,
   "groupName": null,
   "prBody": "This Pull Request updates \`package.json\` lock files to use the latest dependency versions.
 
 {{#if schedule}}
-**Note**: This PR was created on a configured schedule (\\"{{schedule}}\\"{{#if timezone}} in timezone \`{{timezone}}\`{{/if}}) and will not receive updates outside those times.
+**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.
 {{/if}}
 
 {{#if hasErrors}}
