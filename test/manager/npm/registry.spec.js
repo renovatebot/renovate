@@ -173,7 +173,7 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });
-  it('should throw error if necessary env var is not present', async () => {
+  it('should throw error if necessary env var is not present', () => {
     let e;
     try {
       /* eslint-disable */
