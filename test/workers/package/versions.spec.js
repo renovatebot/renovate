@@ -169,6 +169,24 @@ describe('workers/package/versions', () => {
       const res = versions.determineUpgrades(webpackJson, config);
       expect(res).toMatchSnapshot();
     });
+    it('supports complex major hyphen ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '1.x - 2.x';
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toMatchSnapshot();
+    });
+    it('widens .x OR ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '1.x || 2.x';
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toMatchSnapshot();
+    });
+    it('widens stanndalone major OR ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '1 || 2';
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toMatchSnapshot();
+    });
     it('supports complex tilde ranges', () => {
       config.pinVersions = false;
       config.currentVersion = '~1.2.0 || ~1.3.0';
