@@ -156,12 +156,24 @@ describe('workers/package/versions', () => {
       config.currentVersion = '^0.7.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
-    it('ignores complex ranges when not pinning', () => {
+    it('supports complex ranges', () => {
       config.pinVersions = false;
       config.currentVersion = '^0.7.0 || ^0.8.0';
       const res = versions.determineUpgrades(qJson, config);
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
       expect(res[0]).toMatchSnapshot();
+    });
+    it('supports complex major ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '^1.0.0 || ^2.0.0';
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toMatchSnapshot();
+    });
+    it('supports complex tilde ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '~1.2.0 || ~1.3.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
     });
     it('returns nothing for greater than ranges', () => {
       config.pinVersions = false;
