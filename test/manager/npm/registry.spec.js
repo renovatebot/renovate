@@ -167,7 +167,9 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
+    /* eslint-disable */
     npm.setNpmrc('registry=${REGISTRY}');
+    /* eslint-enable */
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });
