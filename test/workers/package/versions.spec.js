@@ -156,12 +156,42 @@ describe('workers/package/versions', () => {
       config.currentVersion = '^0.7.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
-    it('ignores complex ranges when not pinning', () => {
+    it('supports complex ranges', () => {
       config.pinVersions = false;
       config.currentVersion = '^0.7.0 || ^0.8.0';
       const res = versions.determineUpgrades(qJson, config);
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
       expect(res[0]).toMatchSnapshot();
+    });
+    it('supports complex major ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '^1.0.0 || ^2.0.0';
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toMatchSnapshot();
+    });
+    it('supports complex major hyphen ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '1.x - 2.x';
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toMatchSnapshot();
+    });
+    it('widens .x OR ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '1.x || 2.x';
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toMatchSnapshot();
+    });
+    it('widens stanndalone major OR ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '1 || 2';
+      const res = versions.determineUpgrades(webpackJson, config);
+      expect(res).toMatchSnapshot();
+    });
+    it('supports complex tilde ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '~1.2.0 || ~1.3.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
     });
     it('returns nothing for greater than ranges', () => {
       config.pinVersions = false;
@@ -173,10 +203,53 @@ describe('workers/package/versions', () => {
       config.currentVersion = '<= 0.7.2';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
-    it('rejects less than ranges without pinning', () => {
+    it('upgrades less than ranges without pinning', () => {
       config.pinVersions = false;
       config.currentVersion = '< 0.7.2';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('upgrades major less than equal ranges', () => {
+      config.pinVersions = false;
+      config.currentVersion = '<= 1.0.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
+      expect(res[0].newVersion).toEqual('<= 2.0.0');
+    });
+    it('upgrades major less than ranges without pinning', () => {
+      config.pinVersions = false;
+      config.currentVersion = '< 1.0.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
+      expect(res[0].newVersion).toEqual('< 2.0.0');
+    });
+    it('upgrades major greater than less than ranges without pinning', () => {
+      config.pinVersions = false;
+      config.currentVersion = '>= 0.5.0 < 1.0.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
+      expect(res[0].newVersion).toEqual('>= 0.5.0 < 2.0.0');
+    });
+    it('upgrades minor greater than less than ranges without pinning', () => {
+      config.pinVersions = false;
+      config.currentVersion = '>= 0.5.0 < 0.8.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
+      expect(res[0].newVersion).toEqual('>= 0.5.0 < 0.10.0');
+      expect(res[1].newVersion).toEqual('>= 0.5.0 < 1.5.0');
+    });
+    it('upgrades minor greater than less than equals ranges without pinning', () => {
+      config.pinVersions = false;
+      config.currentVersion = '>= 0.5.0 <= 0.8.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
+      expect(res[0].newVersion).toEqual('>= 0.5.0 <= 0.10.0');
+      expect(res[1].newVersion).toEqual('>= 0.5.0 <= 1.5.0');
+    });
+    it('rejects reverse ordered less than greater than', () => {
+      config.pinVersions = false;
+      config.currentVersion = '<= 0.8.0 >= 0.5.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
     });
     it('supports > latest versions if configured', () => {
       config.respectLatest = false;
