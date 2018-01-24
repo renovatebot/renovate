@@ -1,6 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`api/npm should fetch package info from custom registry 1`] = `null`;
+exports[`api/npm should fetch package info from custom registry 1`] = `
+Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
+  "homepage": undefined,
+  "name": undefined,
+  "renovate-config": undefined,
+  "repositoryUrl": undefined,
+  "versions": Object {
+    "0.0.1": Object {
+      "time": "",
+    },
+  },
+}
+`;
 
 exports[`api/npm should fetch package info from npm 1`] = `
 Object {
@@ -81,7 +96,7 @@ Object {
   "repositoryUrl": undefined,
   "versions": Object {
     "0.0.1": Object {
-      "time": "",
+      "time": "2017-01-01T12:00:00.000Z",
     },
   },
 }

@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/onboarding/branch checkOnboardingBranch creates onboarding branch with greenkeeper migration 1`] = `
+"{
+  \\"extends\\": [
+    \\"config:base\\"
+  ],
+  \\"labels\\": [
+    \\"renovate\\"
+  ],
+  \\"branchName\\": [
+    \\"renovate--\\"
+  ],
+  \\"ignoreDeps\\": [
+    \\"foo\\",
+    \\"bar\\"
+  ]
+}
+"
+`;

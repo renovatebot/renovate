@@ -59,10 +59,46 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobar');
     expect(res).toBeNull();
   });
+  it('should throw error for unparseable', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, 'oops');
+    let e;
+    try {
+      await npm.getDependency('foobar');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+  });
+  it('should throw error for 429', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(429);
+    let e;
+    try {
+      await npm.getDependency('foobar');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+  });
   it('should throw error for 5xx', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(503);
+    let e;
+    try {
+      await npm.getDependency('foobar');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+  });
+  it('should throw error for others', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(451);
     let e;
     try {
       await npm.getDependency('foobar');
@@ -92,14 +128,6 @@ describe('api/npm', () => {
     process.env.NPM_TOKEN = oldToken;
     expect(res).toMatchSnapshot();
   });
-  it('should fetch package info from custom registry', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, npmResponse);
-    npm.setNpmrc('registry=https://npm.mycustomregistry.com/');
-    const res = await npm.getDependency('foobar');
-    expect(res).toMatchSnapshot();
-  });
   it('should use default registry if missing from npmrc', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
@@ -125,5 +153,13 @@ describe('api/npm', () => {
     const res2 = await npm.getDependency('foobar');
     expect(res1).not.toBe(null);
     expect(res1).toEqual(res2);
+  });
+  it('should fetch package info from custom registry', async () => {
+    nock('https://npm.mycustomregistry.com')
+      .get('/foobar')
+      .reply(200, npmResponse);
+    npm.setNpmrc('registry=https://npm.mycustomregistry.com/');
+    const res = await npm.getDependency('foobar');
+    expect(res).toMatchSnapshot();
   });
 });

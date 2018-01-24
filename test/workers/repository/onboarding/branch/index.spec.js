@@ -62,6 +62,23 @@ describe('workers/repository/onboarding/branch', () => {
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(platform.setBaseBranch.mock.calls).toHaveLength(1);
     });
+    it('creates onboarding branch with greenkeeper migration', async () => {
+      platform.getFileList.mockReturnValue(['package.json']);
+      const pJsonContent = JSON.stringify({
+        name: 'some-name',
+        version: '0.0.1',
+        greenkeeper: {
+          label: 'greenkeeper',
+          branchName: 'greenkeeper--',
+          ignore: ['foo', 'bar'],
+        },
+      });
+      platform.getFile.mockReturnValue(pJsonContent);
+      await checkOnboardingBranch(config);
+      expect(
+        platform.commitFilesToBranch.mock.calls[0][1][0].contents
+      ).toMatchSnapshot();
+    });
     it('updates onboarding branch', async () => {
       platform.getFileList.mockReturnValue(['package.json']);
       platform.findPr.mockReturnValueOnce(null);

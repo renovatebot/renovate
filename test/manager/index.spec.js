@@ -53,16 +53,20 @@ describe('manager', () => {
       platform.getFileList.mockReturnValueOnce([
         'Dockerfile',
         'other/Dockerfile',
+        'another/Dockerfile',
       ]);
       platform.getFile.mockReturnValueOnce(
-        '### comment\n\n \nFROM something\nRUN something'
+        '### comment\n\n \nFROM something\nRUN something\nFROM something-else\nRUN bar'
       );
       platform.getFile.mockReturnValueOnce(
         'ARG foo\nFROM something\nRUN something'
       );
+      platform.getFile.mockReturnValueOnce(
+        'ARG foo\nno FROM at all\nRUN something'
+      );
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
     });
     it('finds .travis.yml files', async () => {
       config.node.enabled = true;
