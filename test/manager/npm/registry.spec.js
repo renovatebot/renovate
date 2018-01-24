@@ -173,4 +173,23 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });
+  it('should throw error if necessary env var is not present', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
+
+    /* eslint-disable */
+    npm.setNpmrc('registry=${REGISTRY_MISSING}');
+    /* eslint-enable */
+
+    let err;
+    try {
+      await npm.getDependency('foobar');
+    } catch (e) {
+      err = e;
+    }
+    /* eslint-disable */
+    expect(err.message).toBe('Failed to replace env in config: ${REGISTRY_MISSING}');
+    /* eslint-enable */
+  });
 });
