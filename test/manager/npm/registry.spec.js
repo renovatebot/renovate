@@ -162,4 +162,13 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });
+  it('should replace any environment variable in npmrc', async () => {
+    nock('https://registry.from-env.com')
+      .get('/foobar')
+      .reply(200, npmResponse);
+    process.env.REGISTRY = 'https://registry.from-env.com';
+    npm.setNpmrc('registry=${REGISTRY}');
+    const res = await npm.getDependency('foobar');
+    expect(res).toMatchSnapshot();
+  });
 });
