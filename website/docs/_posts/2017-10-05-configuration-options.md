@@ -1004,6 +1004,26 @@ When schedules are in use, it generally means "no updates". However there are ca
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
 
+## versionStrategy
+
+Strategy for how to modify/update existing versions/semver. Possible values: auto, replace, or widen
+
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | 'auto' |
+
+npm-only.
+
+Renovate's "auto" strategy for updating versions is like this:
+
+1. If the existing version already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
+2. Otherwise, replace it. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
+
+You can override logic either way, by setting it to `replace` or `widen`. e.g. if the currentVersion is `"^1.0.0 || ^2.0.0"` but you configure `versionStrategy=replace` then the result will be `"^3.0.0"`.
+
+Or for example if you configure all `peerDependencies` with `versionStrategy=widen` and have `"react": "^15.0.0"` as current version then it will be updated to `"react": "^15.0.0 || ^16.0.0"`.
+
 ## yarnrc
 
 A string copy of yarnrc file.
