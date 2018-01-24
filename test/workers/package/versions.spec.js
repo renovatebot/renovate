@@ -8,7 +8,7 @@ let config;
 
 describe('workers/package/versions', () => {
   beforeEach(() => {
-    config = require('../../../lib/config/defaults').getConfig();
+    config = { ...require('../../../lib/config/defaults').getConfig() };
     config.pinVersions = true;
   });
 
@@ -103,6 +103,30 @@ describe('workers/package/versions', () => {
     it('upgrades minor ranged versions', () => {
       config.currentVersion = '~1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('widens minor ranged versions if configured', () => {
+      config.pinVersions = false;
+      config.currentVersion = '~1.3.0';
+      config.versionStrategy = 'widen';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('replaces minor complex ranged versions if configured', () => {
+      config.pinVersions = false;
+      config.currentVersion = '~1.2.0 || ~1.3.0';
+      config.versionStrategy = 'replace';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('widens major ranged versions if configured', () => {
+      config.pinVersions = false;
+      config.currentVersion = '^2.0.0';
+      config.versionStrategy = 'widen';
+      expect(versions.determineUpgrades(webpackJson, config)).toMatchSnapshot();
+    });
+    it('replaces major complex ranged versions if configured', () => {
+      config.pinVersions = false;
+      config.currentVersion = '^1.0.0 || ^2.0.0';
+      config.versionStrategy = 'replace';
+      expect(versions.determineUpgrades(webpackJson, config)).toMatchSnapshot();
     });
     it('pins minor ranged versions', () => {
       config.currentVersion = '^1.0.0';
