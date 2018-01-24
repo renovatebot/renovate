@@ -183,7 +183,9 @@ describe('api/npm', () => {
       e = err;
     }
     /* eslint-disable */
-    expect(e.message).toBe('Failed to replace env in config: ${REGISTRY_MISSING}');
+    expect(e.message).toBe(
+      'Failed to replace env in config: ${REGISTRY_MISSING}'
+    );
     /* eslint-enable */
   });
 });
