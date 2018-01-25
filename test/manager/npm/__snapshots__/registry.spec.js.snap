@@ -34,6 +34,23 @@ Object {
 }
 `;
 
+exports[`api/npm should replace any environment variable in npmrc 1`] = `
+Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
+  "homepage": undefined,
+  "name": undefined,
+  "renovate-config": undefined,
+  "repositoryUrl": undefined,
+  "versions": Object {
+    "0.0.1": Object {
+      "time": "",
+    },
+  },
+}
+`;
+
 exports[`api/npm should send an authorization header if provided 1`] = `
 Object {
   "dist-tags": Object {
