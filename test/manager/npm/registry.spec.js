@@ -168,7 +168,7 @@ describe('api/npm', () => {
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
     /* eslint-disable */
-    npm.setNpmrc('registry=${REGISTRY}');
+    npm.setNpmrc('registry=${REGISTRY}', true);
     /* eslint-enable */
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
@@ -177,15 +177,13 @@ describe('api/npm', () => {
     let e;
     try {
       /* eslint-disable */
-      npm.setNpmrc('registry=${REGISTRY_MISSING}');
+      npm.setNpmrc('registry=${REGISTRY_MISSING}', true);
       /* eslint-enable */
     } catch (err) {
       e = err;
     }
     /* eslint-disable */
-    expect(e.message).toBe(
-      'Failed to replace env in config: ${REGISTRY_MISSING}'
-    );
+    expect(e.message).toBe('env-replace');
     /* eslint-enable */
   });
 });
