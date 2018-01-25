@@ -1116,11 +1116,19 @@ describe('platform/github', () => {
           number: 123,
         },
       }));
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: { sha: 'some-sha' },
+        },
+      }));
+      // res.body.object.sha
       const pr = await github.createPr(
         'some-branch',
         'The Title',
         'Hello world',
-        ['deps', 'renovate']
+        ['deps', 'renovate'],
+        false,
+        true
       );
       expect(pr).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();

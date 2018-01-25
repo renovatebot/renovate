@@ -228,6 +228,17 @@ Array [
       ],
     },
   ],
+  Array [
+    "repos/some/repo/statuses/some-sha",
+    Object {
+      "body": Object {
+        "context": "renovate/verify",
+        "description": "Renovate verified pull request",
+        "state": "success",
+        "target_url": "https://renovateapp.com",
+      },
+    },
+  ],
 ]
 `;
 
