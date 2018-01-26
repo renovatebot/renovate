@@ -147,7 +147,7 @@ Object {
   "privateRepo": true,
   "repoForceRebase": false,
   "repoId": "1",
-  "repoName": "some-repo",
+  "repository": "some-repo",
 }
 `;
 

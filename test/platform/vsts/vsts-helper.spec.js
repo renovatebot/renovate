@@ -157,7 +157,7 @@ describe('platform/vsts/helpers', () => {
           },
         ],
         '123',
-        'repoName',
+        'repository',
         'branchName'
       );
       expect(res).toMatchSnapshot();
@@ -175,7 +175,7 @@ describe('platform/vsts/helpers', () => {
           },
         ],
         '123',
-        'repoName',
+        'repository',
         'branchName'
       );
       expect(res).toMatchSnapshot();
@@ -204,7 +204,7 @@ describe('platform/vsts/helpers', () => {
 
       const res = await vstsHelper.getFile(
         '123',
-        'repoName',
+        'repository',
         './myFilePath/test',
         'branchName'
       );
@@ -232,7 +232,7 @@ describe('platform/vsts/helpers', () => {
 
       const res = await vstsHelper.getFile(
         '123',
-        'repoName',
+        'repository',
         './myFilePath/test',
         'branchName'
       );
@@ -260,7 +260,7 @@ describe('platform/vsts/helpers', () => {
 
       const res = await vstsHelper.getFile(
         '123',
-        'repoName',
+        'repository',
         './myFilePath/test',
         'branchName'
       );
@@ -276,7 +276,7 @@ describe('platform/vsts/helpers', () => {
 
       const res = await vstsHelper.getFile(
         '123',
-        'repoName',
+        'repository',
         './myFilePath/test',
         'branchName'
       );
@@ -350,7 +350,7 @@ describe('platform/vsts/helpers', () => {
         err = error;
       }
       expect(err.message).toBe(
-        `prjName/myRepoName/blalba can be only structured this way : 'repoName' or 'projectName/repoName'!`
+        `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
       );
     });
   });

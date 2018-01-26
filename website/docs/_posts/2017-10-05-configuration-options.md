@@ -945,6 +945,17 @@ If set to true, it will separate minor and patch updates into separate branches.
 
 By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases - groups them together. e.g. if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0. If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can set this option to `true`.
 
+## statusCheckVerify
+
+Set a "renovate/verify" status check for all PRs
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
+
+This feature is added for people migrating from alternative services who are used to seeing a "verify" status check on PRs. If you'd like to use this then go ahead, but otherwise we recommend it's more secure to look for Renovate's [GPG Verified Commits](https://github.com/blog/2144-gpg-signature-verification) instead, because those cannot be spoofed by any other person or service (unlike status checks).
+
 ## supportPolicy
 
 Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)
