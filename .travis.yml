@@ -8,6 +8,10 @@ node_js:
 
 sudo: false
 
+branches:
+  only:
+  - master
+
 if: tag IS blank
 
 before_install:
