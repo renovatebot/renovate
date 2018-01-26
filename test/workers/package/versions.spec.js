@@ -132,6 +132,11 @@ describe('workers/package/versions', () => {
       config.currentVersion = '^1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
+    it('uses the locked version for pinning', () => {
+      config.currentVersion = '^1.0.0';
+      config.lockedVersion = '1.0.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
     it('ignores minor ranged versions when not pinning', () => {
       config.pinVersions = false;
       config.currentVersion = '^1.0.0';

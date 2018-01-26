@@ -1,6 +1,9 @@
 const packageFileWorker = require('../../../lib/workers/package-file');
 const depTypeWorker = require('../../../lib/workers/dep-type');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
+const yarnLock = require('@yarnpkg/lockfile');
+
+jest.mock('@yarnpkg/lockfile');
 
 jest.mock('../../../lib/workers/dep-type');
 jest.mock('../../../lib/workers/branch/schedule');
@@ -53,6 +56,29 @@ describe('packageFileWorker', () => {
       config.yarnLock = '# some yarn lock';
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(1);
+    });
+    it('skips unparseable yarn.lock', async () => {
+      config.yarnLock = 'yarn.lock';
+      await packageFileWorker.renovatePackageFile(config);
+    });
+    it('skips unparseable yarn.lock', async () => {
+      config.yarnLock = 'yarn.lock';
+      yarnLock.parse.mockReturnValueOnce({ type: 'failure' });
+      await packageFileWorker.renovatePackageFile(config);
+    });
+    it('uses workspace yarn.lock', async () => {
+      config.workspaceDir = '.';
+      yarnLock.parse.mockReturnValueOnce({ type: 'success' });
+      await packageFileWorker.renovatePackageFile(config);
+    });
+    it('skips unparseable package-lock.json', async () => {
+      config.packageLock = 'package-lock.lock';
+      await packageFileWorker.renovatePackageFile(config);
+    });
+    it('parses package-lock.json', async () => {
+      config.packageLock = 'package-lock.lock';
+      platform.getFile.mockReturnValueOnce('{}');
+      await packageFileWorker.renovatePackageFile(config);
     });
   });
   describe('renovateMeteorPackageFile(config)', () => {

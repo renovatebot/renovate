@@ -873,6 +873,28 @@ Array [
 ]
 `;
 
+exports[`workers/package/versions .determineUpgrades(npmDep, config) uses the locked version for pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.0.0",
+    "changeLogToVersion": "1.4.1",
+    "isMinor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "minor",
+    "unpublishable": false,
+  },
+  Object {
+    "isPin": true,
+    "newVersion": "1.0.0",
+    "newVersionMajor": 1,
+    "type": "pin",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`workers/package/versions .determineUpgrades(npmDep, config) widens .x OR ranges 1`] = `
 Array [
   Object {
