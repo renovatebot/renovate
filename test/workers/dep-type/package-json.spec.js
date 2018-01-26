@@ -56,5 +56,45 @@ describe('workers/dep-type/package-json', () => {
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(0);
     });
+    it('finds a locked version in package-lock.json', () => {
+      const packageLockParsed = {
+        dependencies: { chalk: { version: '2.0.1' } },
+      };
+      const extractedDependencies = packageJson.extractDependencies(
+        { dependencies: { chalk: '^2.0.0', foo: '^1.0.0' } },
+        'dependencies',
+        packageLockParsed
+      );
+      extractedDependencies.should.be.instanceof(Array);
+      extractedDependencies.should.have.length(2);
+      expect(extractedDependencies[0].lockedVersion).toBeDefined();
+      expect(extractedDependencies[1].lockedVersion).toBeUndefined();
+    });
+    it('finds a locked version in yarn.lock', () => {
+      const yarnLockParsed = {
+        object: { 'chalk@^2.0.0': { version: '2.0.1' } },
+      };
+      const extractedDependencies = packageJson.extractDependencies(
+        { dependencies: { chalk: '^2.0.0', foo: '^1.0.0' } },
+        'dependencies',
+        undefined,
+        yarnLockParsed
+      );
+      extractedDependencies.should.be.instanceof(Array);
+      extractedDependencies.should.have.length(2);
+      expect(extractedDependencies[0].lockedVersion).toBeDefined();
+      expect(extractedDependencies[1].lockedVersion).toBeUndefined();
+    });
+    it('handles lock error', () => {
+      const extractedDependencies = packageJson.extractDependencies(
+        { dependencies: { chalk: '^2.0.0', foo: '^1.0.0' } },
+        'dependencies',
+        true
+      );
+      extractedDependencies.should.be.instanceof(Array);
+      extractedDependencies.should.have.length(2);
+      expect(extractedDependencies[0].lockedVersion).toBeUndefined();
+      expect(extractedDependencies[1].lockedVersion).toBeUndefined();
+    });
   });
 });
