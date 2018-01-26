@@ -63,7 +63,7 @@ describe('platform/gitlab', () => {
   });
 
   function initRepo(...args) {
-    // projects/${config.repoName
+    // projects/${config.repository
     get.mockImplementationOnce(() => ({
       body: {
         default_branch: 'master',
@@ -80,21 +80,20 @@ describe('platform/gitlab', () => {
 
   describe('initRepo', () => {
     [
-      [undefined, ['mytoken'], 'mytoken', undefined],
-      [
-        undefined,
-        ['mytoken', 'https://my.custom.endpoint/'],
-        'mytoken',
-        'https://my.custom.endpoint/',
-      ],
-      ['myenvtoken', [], 'myenvtoken', undefined],
-    ].forEach(([envToken, args, token, endpoint], i) => {
+      [undefined, 'mytoken', undefined],
+      [undefined, 'mytoken', 'https://my.custom.endpoint/'],
+      ['myenvtoken', 'myenvtoken', undefined],
+    ].forEach(([envToken, token, endpoint], i) => {
       it(`should initialise the config for the repo - ${i}`, async () => {
         if (envToken !== undefined) {
           process.env.GITLAB_TOKEN = envToken;
         }
         get.mockReturnValue({ body: [] });
-        const config = await initRepo('some/repo', ...args);
+        const config = await initRepo({
+          repository: 'some/repo',
+          token,
+          endpoint,
+        });
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
         expect(process.env.GITLAB_TOKEN).toBe(token);
@@ -103,13 +102,13 @@ describe('platform/gitlab', () => {
     });
     it(`should escape all forward slashes in project names`, async () => {
       get.mockReturnValue({ body: [] });
-      await initRepo('some/repo/project', 'some-token');
+      await initRepo({ repository: 'some/repo/project', token: 'some-token' });
       expect(get.mock.calls).toMatchSnapshot();
     });
     it('should throw an error if no token is provided', async () => {
       let err;
       try {
-        await gitlab.initRepo('some/repo');
+        await gitlab.initRepo({ repository: 'some/repo' });
       } catch (e) {
         err = e;
       }
@@ -123,7 +122,7 @@ describe('platform/gitlab', () => {
       });
       let err;
       try {
-        await gitlab.initRepo('some/repo', 'sometoken');
+        await gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' });
       } catch (e) {
         err = e;
       }

@@ -5,6 +5,7 @@ exports[`workers/repository/onboarding/branch checkOnboardingBranch creates onbo
   \\"extends\\": [
     \\"config:base\\"
   ],
+  \\"statusCheckVerify\\": true,
   \\"labels\\": [
     \\"renovate\\"
   ],
