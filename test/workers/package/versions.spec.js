@@ -3,6 +3,7 @@ const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
 const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
 const webpackJson = require('../../_fixtures/npm/webpack.json');
+const nextJson = require('../../_fixtures/npm/next.json');
 
 let config;
 
@@ -345,6 +346,12 @@ describe('workers/package/versions', () => {
       config.multipleMajorPrs = true;
       const res = versions.determineUpgrades(webpackJson, config);
       expect(res).toHaveLength(3);
+    });
+    it('does not jump  major unstable', () => {
+      config.currentVersion = '^4.4.0-canary.3';
+      config.pinVersions = false;
+      const res = versions.determineUpgrades(nextJson, config);
+      expect(res).toHaveLength(0);
     });
   });
   describe('.isRange(input)', () => {
