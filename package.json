@@ -131,7 +131,7 @@
   },
   "renovate": {
     "extends": [
-      "config:js-app",
+      "config:base",
       ":rebaseStalePrs",
       ":label(ready)",
       ":assignee(rarkins)"
