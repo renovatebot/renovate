@@ -272,6 +272,15 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchSnapshot();
     });
+    it('should return modified existing PR title', async () => {
+      config.newVersion = '1.2.0';
+      platform.getBranchPr.mockReturnValueOnce({
+        ...existingPr,
+        title: 'wrong',
+      });
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchSnapshot();
+    });
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch-push';
