@@ -41,11 +41,25 @@ describe('workers/repository', () => {
       initRepo.mockReturnValue({});
       determineUpdates.mockReturnValue({
         repoIsOnboarded: false,
-        branches: [],
+        branches: [
+          {
+            type: 'pin',
+            prTitle: 'bbb',
+          },
+          {
+            type: 'pin',
+            prTitle: 'aaa',
+          },
+          {
+            type: 'minor',
+            prTitle: 'aaa',
+          },
+        ],
       });
       ensureOnboardingPr.mockReturnValue('onboarding');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();
+      expect(ensureOnboardingPr.mock.calls[0][0].branches).toMatchSnapshot();
     });
     it('handles baseBranches', async () => {
       initRepo.mockReturnValue({ baseBranches: ['master', 'next'] });
