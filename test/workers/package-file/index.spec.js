@@ -57,6 +57,11 @@ describe('packageFileWorker', () => {
       const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(1);
     });
+    it('uses workspaces yarn.lock', async () => {
+      config.workspaceDir = '.';
+      platform.getFile.mockReturnValueOnce('# yarn lock');
+      await packageFileWorker.renovatePackageFile(config);
+    });
     it('skips unparseable yarn.lock', async () => {
       config.yarnLock = 'yarn.lock';
       await packageFileWorker.renovatePackageFile(config);
