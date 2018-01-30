@@ -117,6 +117,24 @@ describe('lib/workers/dep-type/index', () => {
         },
       ],
     };
+    it('matches anything if missing inclusive rules', () => {
+      const allConfig = {
+        packageRules: [
+          {
+            excludePackageNames: ['foo'],
+            x: 1,
+          },
+        ],
+      };
+      const res1 = depTypeWorker.getDepConfig(allConfig, {
+        depName: 'foo',
+      });
+      expect(res1.x).toBeUndefined();
+      const res2 = depTypeWorker.getDepConfig(allConfig, {
+        depName: 'bar',
+      });
+      expect(res2.x).toBeDefined();
+    });
     it('supports inclusive or', () => {
       const nConfig = {
         packageRules: [
