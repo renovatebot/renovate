@@ -713,6 +713,17 @@ Pull Request body template.
 
 Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovateapp/renovate/issues) and let us solve it for you and for everyone else too.
 
+## prConcurrentLimit
+
+Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.
+
+| name    | value   |
+| ------- | ------- |
+| type    | integer |
+| default | 0       |
+
+This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
+
 ## prCreation
 
 When to create the PR for a branch.
