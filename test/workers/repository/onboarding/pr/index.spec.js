@@ -16,6 +16,7 @@ describe('workers/repository/onboarding/pr', () => {
         warnings: [],
         description: [],
         branches: [],
+        packageFiles: [{ packageFile: 'package.json' }],
       };
       platform.createPr.mockReturnValue({});
     });
