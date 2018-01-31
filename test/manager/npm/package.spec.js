@@ -70,5 +70,14 @@ describe('lib/workers/package/npm', () => {
       expect(Object.keys(res[0])).toMatchSnapshot();
       expect(res[0].repositoryUrl).toBeDefined();
     });
+    it('sets repositoryUrl for @types', async () => {
+      config.depName = '@types/some-dep';
+      npmApi.getDependency.mockReturnValueOnce({});
+      versions.determineUpgrades = jest.fn(() => [{}]);
+      const res = await npm.getPackageUpdates(config);
+      expect(res[0].repositoryUrl).toEqual(
+        'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/some-dep'
+      );
+    });
   });
 });
