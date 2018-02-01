@@ -261,11 +261,11 @@ describe('workers/package/versions', () => {
     });
     it('upgrades minor greater than less than ranges without pinning', () => {
       config.pinVersions = false;
-      config.currentVersion = '>= 0.5.0 < 0.8.0';
+      config.currentVersion = '>= 0.5.0 <0.8';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toMatchSnapshot();
-      expect(res[0].newVersion).toEqual('>= 0.5.0 < 0.10.0');
-      expect(res[1].newVersion).toEqual('>= 0.5.0 < 1.5.0');
+      expect(res[0].newVersion).toEqual('>= 0.5.0 <0.10');
+      expect(res[1].newVersion).toEqual('>= 0.5.0 <1.5');
     });
     it('upgrades minor greater than less than equals ranges without pinning', () => {
       config.pinVersions = false;
