@@ -13,19 +13,34 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 **Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.
 {{/if}}
 
-### Commits
-
-<details>
-<summary>{{githubName}}</summary>
+### Release Notes
 
 {{#each releases as |release|}}
-#### {{release.version}}
+{{#if release.releaseNotes}}
+<details>
+<summary>{{{release.version}}}</summary>
+
+{{{release.releaseNotes.body}}}
+
+</details>
+
+{{/if}}
+{{/each}}
+
+### Commits
+
+{{#each releases as |release|}}
+<details>
+<summary>{{{release.version}}}</summary>
+
 {{#each release.commits as |commit|}}
 -   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}
 {{/each}}
-{{/each}}
 
 </details>
+
+{{/each}}
+
 {{/if}}
 
 {{#if hasErrors}}
