@@ -308,5 +308,14 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
+    it('should create privateRepo PR if success', async () => {
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      config.prCreation = 'status-success';
+      config.privateRepo = false;
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      existingPr.body = platform.createPr.mock.calls[0][2];
+    });
   });
 });
