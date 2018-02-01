@@ -220,7 +220,7 @@ options:
 
 ### Automatically merge passing Pull Requests
 
-Set configuration option `autoMerge` to `minor` if you want this to apply only
+Set configuration option `automerge` to `minor` if you want this to apply only
 to minor upgrades, or set to value `all` if you want it applied to both minor
 and major upgrades.
 
