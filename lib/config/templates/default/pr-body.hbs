@@ -17,29 +17,26 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 
 {{#each releases as |release|}}
 {{#if release.releaseNotes}}
-<details>
-<summary>{{{release.version}}}</summary>
+**`{{{release.version}}}`**
 
 {{{release.releaseNotes.body}}}
-
-</details>
 
 {{/if}}
 {{/each}}
 
 ### Commits
 
-{{#each releases as |release|}}
 <details>
-<summary>{{{release.version}}}</summary>
+<summary>{{githubName}}</summary>
 
+{{#each releases as |release|}}
+#### {{release.version}}
 {{#each release.commits as |commit|}}
 -   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}
 {{/each}}
+{{/each}}
 
 </details>
-
-{{/each}}
 
 {{/if}}
 
