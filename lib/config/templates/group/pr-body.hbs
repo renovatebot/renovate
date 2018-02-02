@@ -9,9 +9,8 @@ This Pull Request renovates the package group "{{{groupName}}}".
 {{/each}}
 
 {{#unless isPin}}
-
+{{#if hasReleaseNotes}}
 # Release Notes
-
 {{#each upgrades as |upgrade|}}
 {{#if upgrade.hasReleaseNotes}}
 <details>
@@ -31,6 +30,7 @@ This Pull Request renovates the package group "{{{groupName}}}".
 </details>
 {{/if}}
 {{/each}}
+{{/if}}
 
 # Commits
 
