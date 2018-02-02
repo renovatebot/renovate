@@ -9,6 +9,29 @@ This Pull Request renovates the package group "{{{groupName}}}".
 {{/each}}
 
 {{#unless isPin}}
+
+# Release Notes
+
+{{#each upgrades as |upgrade|}}
+{{#if upgrade.hasReleaseNotes}}
+<details>
+<summary>{{upgrade.githubName}}</summary>
+
+{{#each upgrade.releases as |release|}}
+{{#if release.releaseNotes}}
+### [`v{{{release.version}}}`]({{{release.releaseNotes.url}}})
+
+{{{release.releaseNotes.body}}}
+
+---
+
+{{/if}}
+{{/each}}
+
+</details>
+{{/if}}
+{{/each}}
+
 # Commits
 
 {{#each upgrades as |upgrade|}}
