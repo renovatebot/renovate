@@ -18,7 +18,7 @@ This Pull Request renovates the package group "{{{groupName}}}".
 {{#each upgrade.releases as |release|}}
 {{#if release.hasCommits}}
 
-#### {{release.version}}
+#### v{{{release.version}}}
 {{#each release.commits as |commit|}}
 -   [`{{commit.shortSha}}`]({{commit.url}}){{commit.message}}
 {{/each}}
