@@ -21,7 +21,7 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 
 {{#each releases as |release|}}
 {{#if release.hasCommits}}
-#### {{release.version}}
+#### v{{{release.version}}}
 {{#each release.commits as |commit|}}
 -   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}
 {{/each}}

@@ -34,7 +34,7 @@ Array [
 <h1 id=\\"commits\\">Commits</h1>
 <p><details><br />
 <summary>renovateapp/dummy</summary></p>
-**1.1.0**
+**v1.1.0**
 <ul>
 <li><a href=\\"https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz\\"><code>abcdefg</code></a> foo <a href=\\"https://github.com/renovateapp/dummy/issues/3\\">#3</a></li>
 </ul>
@@ -60,7 +60,7 @@ Array [
 <details>
 <summary>renovateapp/dummy</summary>
 
-#### 1.1.0
+#### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
 
 </details>
@@ -89,7 +89,7 @@ Array [
 <details>
 <summary>renovateapp/dummy</summary>
 
-#### 1.1.0
+#### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo #&#8203;3
 
 </details>
@@ -116,7 +116,7 @@ Object {
 <details>
 <summary>renovateapp/dummy</summary>
 
-#### 1.1.0
+#### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
 
 </details>
@@ -142,7 +142,7 @@ Object {
 <details>
 <summary>renovateapp/dummy</summary>
 
-#### 1.1.0
+#### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
 
 </details>
@@ -172,7 +172,7 @@ Array [
 
 **renovateapp/dummy**
 
-#### 1.1.0
+#### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
 
 
