@@ -13,19 +13,21 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 **Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.
 {{/if}}
 {{#if hasReleaseNotes}}
-### Release Notes
+# Release Notes
 
 {{#each releases as |release|}}
 {{#if release.releaseNotes}}
-[**`v{{{release.version}}}`**]({{{release.url}}})
+### [`v{{{release.version}}}`]({{{release.releaseNotes.url}}})
 
 {{{release.releaseNotes.body}}}
+
+---
 
 {{/if}}
 {{/each}}
 {{/if}}
 
-### Commits
+# Commits
 
 <details>
 <summary>{{githubName}}</summary>
@@ -44,7 +46,7 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 
 ---
 
-### Errors
+# Errors
 
 Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
 
@@ -57,7 +59,7 @@ Renovate encountered some errors when processing your repository, so you are bei
 
 ---
 
-### Warnings
+# Warnings
 
 Please make sure the following warnings are safe to ignore:
 
