@@ -28,6 +28,20 @@ describe('api/npm', () => {
     jest.resetAllMocks();
     npm.resetCache();
   });
+  it('should throw error for no versions', async () => {
+    const missingVersions = { ...npmResponse };
+    missingVersions.versions = {};
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, missingVersions);
+    let e;
+    try {
+      await npm.getDependency('foobar');
+    } catch (err) {
+      e = err;
+    }
+    expect(e.message).toBe('registry-failure');
+  });
   it('should fetch package info from npm', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
