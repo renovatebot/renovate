@@ -19,6 +19,7 @@ describe('workers/repository/error', () => {
       'config-validation',
       'registry-failure',
       'archived',
+      'blocked',
       'not-found',
     ];
     errors.forEach(err => {
