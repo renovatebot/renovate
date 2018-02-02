@@ -2,6 +2,7 @@
 
 exports[`workers/pr/changelog getChangeLogJSON sorts JSON 1`] = `
 Object {
+  "hasReleaseNotes": false,
   "project": Object {
     "github": "chalk/chalk",
     "repository": "https://github.com/chalk/chalk",
@@ -41,6 +42,7 @@ Object {
         },
       ],
       "date": "2017-10-24T03:20:46.238Z",
+      "releaseNotes": undefined,
       "version": "2.2.2",
     },
     Object {
@@ -57,6 +59,7 @@ Object {
         },
       ],
       "date": "2017-10-24T04:12:55.953Z",
+      "releaseNotes": undefined,
       "version": "2.3.0",
     },
   ],
