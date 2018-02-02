@@ -27,6 +27,20 @@ describe('workers/pr/changelog', () => {
         await changelogHelper.getChangeLogJSON('renovate', '1.0.0', '2.0.0')
       ).toMatchObject({ a: 1 });
     });
+    it('returns cached JSON', async () => {
+      changelog.generate = jest.fn(() => ({ a: 2 }));
+      expect(
+        await changelogHelper.getChangeLogJSON('renovate', '1.0.0', '2.0.0')
+      ).toMatchObject({ a: 1 });
+    });
+    it('filters unnecessary warns', async () => {
+      changelog.generate = jest.fn(() => {
+        throw new Error('Unknown Github Repo');
+      });
+      expect(
+        await changelogHelper.getChangeLogJSON('renovate', '1.0.0', '3.0.0')
+      ).toBe(null);
+    });
     it('sorts JSON', async () => {
       changelog.generate = jest.fn(() => ({
         project: {
@@ -93,20 +107,6 @@ describe('workers/pr/changelog', () => {
       expect(
         await changelogHelper.getChangeLogJSON('chalk', '2.2.2', '2.3.0')
       ).toMatchSnapshot();
-    });
-    it('returns cached JSON', async () => {
-      changelog.generate = jest.fn(() => ({ a: 2 }));
-      expect(
-        await changelogHelper.getChangeLogJSON('renovate', '1.0.0', '2.0.0')
-      ).toMatchObject({ a: 1 });
-    });
-    it('filters unnecessary warns', async () => {
-      changelog.generate = jest.fn(() => {
-        throw new Error('Unknown Github Repo');
-      });
-      expect(
-        await changelogHelper.getChangeLogJSON('renovate', '1.0.0', '3.0.0')
-      ).toBe(null);
     });
   });
 });

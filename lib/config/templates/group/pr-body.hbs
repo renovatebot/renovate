@@ -8,7 +8,30 @@ This Pull Request renovates the package group "{{{groupName}}}".
 -   {{#if repositoryUrl}}[{{{upgrade.depName}}}]({{upgrade.repositoryUrl}}){{else}}`{{{depName}}}`{{/if}}: from `{{{upgrade.currentVersion}}}` to `{{{upgrade.newVersion}}}`
 {{/each}}
 
-{{#unless isPin}}
+{{#if hasReleaseNotes}}
+# Release Notes
+{{#each upgrades as |upgrade|}}
+{{#if upgrade.hasReleaseNotes}}
+<details>
+<summary>{{upgrade.githubName}}</summary>
+
+{{#each upgrade.releases as |release|}}
+{{#if release.releaseNotes}}
+### [`v{{{release.version}}}`]({{{release.releaseNotes.url}}})
+
+{{{release.releaseNotes.body}}}
+
+---
+
+{{/if}}
+{{/each}}
+
+</details>
+{{/if}}
+{{/each}}
+{{/if}}
+
+{{#if hasCommits}}
 # Commits
 
 {{#each upgrades as |upgrade|}}
@@ -26,10 +49,10 @@ This Pull Request renovates the package group "{{{groupName}}}".
 {{/each}}
 
 </details>
+
 {{/if}}
 {{/each}}
-{{/unless}}
-<br />
+{{/if}}
 
 {{#if isPin}}
 **Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.
