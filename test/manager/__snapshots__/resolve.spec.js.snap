@@ -322,4 +322,18 @@ exports[`manager/resolve resolvePackageFiles() handles wrong filenames 1`] = `Ar
 
 exports[`manager/resolve resolvePackageFiles() skips if no content or no match 1`] = `Array []`;
 
+exports[`manager/resolve resolvePackageFiles() strips npmrc with NPM_TOKEN 1`] = `
+Array [
+  Object {
+    "content": Object {
+      "name": "package.json",
+      "version": "0.0.1",
+    },
+    "currentPackageJsonVersion": "0.0.1",
+    "enabled": true,
+    "packageFile": "package.json",
+  },
+]
+`;
+
 exports[`manager/resolve resolvePackageFiles() uses packageFiles if already configured and raises error if not found 1`] = `Array []`;

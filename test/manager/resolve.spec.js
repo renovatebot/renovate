@@ -5,6 +5,7 @@ let config;
 beforeEach(() => {
   jest.resetAllMocks();
   config = { ...require('../_fixtures/config') };
+  config.global = {};
   config.errors = [];
   config.warnings = [];
 });
@@ -132,6 +133,21 @@ describe('manager/resolve', () => {
       expect(res.packageFiles[0].prTitle).not.toEqual('abcdefg');
       expect(res.packageFiles[1].prTitle).toEqual('abcdefg');
       expect(res.packageFiles[2].prTitle).not.toEqual('abcdefg');
+    });
+    it('strips npmrc with NPM_TOKEN', async () => {
+      manager.detectPackageFiles = jest.fn(() => [
+        { packageFile: 'package.json' },
+      ]);
+      platform.getFileList.mockReturnValueOnce(['package.json', '.npmrc']);
+      platform.getFile.mockReturnValueOnce(
+        '{"name": "package.json", "version": "0.0.1"}'
+      );
+      platform.getFile.mockReturnValueOnce(
+        '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' // eslint-disable-line
+      );
+      const res = await resolvePackageFiles(config);
+      expect(res.packageFiles).toMatchSnapshot();
+      expect(res.warnings).toHaveLength(0);
     });
   });
 });
