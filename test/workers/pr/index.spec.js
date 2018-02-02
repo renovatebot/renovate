@@ -228,10 +228,10 @@ describe('workers/pr', () => {
       config.warnings = [{}];
       const pr = await prWorker.ensurePr(config);
       expect(
-        platform.createPr.mock.calls[0][2].indexOf('### Errors')
+        platform.createPr.mock.calls[0][2].indexOf('# Errors')
       ).not.toEqual(-1);
       expect(
-        platform.createPr.mock.calls[0][2].indexOf('### Warnings')
+        platform.createPr.mock.calls[0][2].indexOf('# Warnings')
       ).not.toEqual(-1);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
