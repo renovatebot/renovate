@@ -27,19 +27,23 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 {{/each}}
 {{/if}}
 
+{{#if hasCommits}}
 # Commits
 
 <details>
 <summary>{{githubName}}</summary>
 
 {{#each releases as |release|}}
+{{#if release.hasCommits}}
 #### v{{{release.version}}}
 {{#each release.commits as |commit|}}
 -   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}
 {{/each}}
+{{/if}}
 {{/each}}
 
 </details>
+{{/if}}
 {{/if}}
 
 {{#if hasErrors}}
