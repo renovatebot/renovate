@@ -136,14 +136,6 @@ describe('platform/gitlab', () => {
   });
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch', async () => {
-      // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1238',
-          },
-        },
-      }));
       await gitlab.setBaseBranch('some-branch');
       expect(get.mock.calls).toMatchSnapshot();
     });
