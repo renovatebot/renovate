@@ -70,6 +70,13 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab getAllRenovateBranches() should return all renovate branches 1`] = `
+Array [
+  "renovate/a",
+  "renovate/b",
+]
+`;
+
 exports[`platform/gitlab getBranchLastCommitTime should return a Date 1`] = `2012-09-20T08:50:22.000Z`;
 
 exports[`platform/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `

@@ -219,8 +219,22 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getAllRenovateBranches()', () => {
-    it('exists', () => {
-      gitlab.getAllRenovateBranches();
+    it('should return all renovate branches', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            name: 'renovate/a',
+          },
+          {
+            name: 'master',
+          },
+          {
+            name: 'renovate/b',
+          },
+        ],
+      }));
+      const res = await gitlab.getAllRenovateBranches('renovate/');
+      expect(res).toMatchSnapshot();
     });
   });
   describe('isBranchStale()', () => {
@@ -375,6 +389,12 @@ describe('platform/gitlab', () => {
     it('should send delete', async () => {
       get.delete = jest.fn();
       await gitlab.deleteBranch('some-branch');
+      expect(get.delete.mock.calls.length).toBe(1);
+    });
+    it('should close PR', async () => {
+      get.delete = jest.fn();
+      get.mockReturnValueOnce({ body: [] }); // getBranchPr
+      await gitlab.deleteBranch('some-branch', true);
       expect(get.delete.mock.calls.length).toBe(1);
     });
   });
