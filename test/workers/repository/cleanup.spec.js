@@ -16,11 +16,10 @@ describe('workers/repository/cleanup', () => {
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(0);
     });
-    it('returns if config is not github', async () => {
+    it('returns if no renovate branches', async () => {
       config.branchList = [];
-      config.platform = 'gitlab';
+      platform.getAllRenovateBranches.mockReturnValueOnce([]);
       await cleanup.pruneStaleBranches(config, config.branchList);
-      expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(0);
     });
     it('returns if no remaining branches', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
