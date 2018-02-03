@@ -1,6 +1,7 @@
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
+  let helpers;
   beforeEach(() => {
     // clean up env
     delete process.env.GITLAB_TOKEN;
@@ -12,6 +13,7 @@ describe('platform/gitlab', () => {
     jest.mock('../../../lib/platform/gitlab/helpers');
     gitlab = require('../../../lib/platform/gitlab');
     get = require('../../../lib/platform/gitlab/gl-got-wrapper');
+    helpers = require('../../../lib/platform/gitlab/helpers');
   });
 
   describe('getRepos', () => {
@@ -621,40 +623,32 @@ describe('platform/gitlab', () => {
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
-    it('creates branch', async () => {
-      get.mockReturnValueOnce({ statusCode: 404 });
-      await gitlab.commitFilesToBranch('some-branch', [], 'some-message');
-    });
-    it('does not create branch and updates file', async () => {
-      get.mockReturnValueOnce({ statusCode: 200 });
-      get.mockReturnValueOnce({
-        body: {
-          content: 'hello',
-        },
-      });
+    it('creates branch and updates file', async () => {
       const file = {
-        name: 'foo',
-        contents: 'bar',
+        name: 'some-file',
+        contents: 'some contents',
       };
       await gitlab.commitFilesToBranch(
-        'some-branch',
+        'renovate/something',
         [file],
-        'some-message',
-        'parent-branch'
+        'Update something'
       );
     });
-    it('does not create branch and creates file', async () => {
-      get.mockReturnValueOnce({ statusCode: 200 });
-      get.mockReturnValueOnce(Promise.reject({ statusCode: 404 }));
+    it('updates branch and creates file', async () => {
       const file = {
-        name: 'foo',
-        contents: 'bar',
+        name: 'renovate.json',
+        contents: '{}',
       };
+      get.post.mockImplementationOnce(() => {
+        throw new Error('branch exists');
+      }); // create branch
+      helpers.updateFile.mockImplementationOnce(() => {
+        throw new Error('file does not exist');
+      }); // update file
       await gitlab.commitFilesToBranch(
-        'some-branch',
+        'renovate/configure',
         [file],
-        'some-message',
-        'parent-branch'
+        'Add renovate.json'
       );
     });
   });
