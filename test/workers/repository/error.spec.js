@@ -13,6 +13,7 @@ describe('workers/repository/error', () => {
     const errors = [
       'uninitiated',
       'disabled',
+      'repository-changed',
       'fork',
       'no-package-files',
       'loops>5',
