@@ -9,8 +9,6 @@ Automated dependency updates. Flexible, so you don't need to be.
 [![Join the chat at https://gitter.im/renovate-app/Lobby](https://badges.gitter.im/renovate-app/Lobby.svg)](https://gitter.im/renovate-app/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 
-<br />
-
 ## Why Use Renovate?
 
 * Receive automated Pull Requests whenever dependencies need updating. Or whenever you schedule it for.
@@ -31,6 +29,8 @@ Renovate was released in 2017 and is now widely used in the developer community.
 [<img align="left" src="https://avatars2.githubusercontent.com/u/131524?s=80&v=4" alt="mozilla" title="mozilla" hspace="10"/>](https://github.com/mozilla)
 [<img align="left" src="https://avatars2.githubusercontent.com/u/33676472?s=80&v=4" alt="uber-workflow" title="uber-workflow" hspace="10"/>](https://github.com/uber-workflow)
 [<img align="left" src="https://avatars1.githubusercontent.com/u/22247014?s=80&v=4" alt="yarnpkg" title="yarnpkg" hspace="10"/>](https://github.com/yarnpkg)
+
+<br /><br />
 
 ## The Renovate Approach
 
