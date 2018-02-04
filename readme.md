@@ -9,6 +9,8 @@ Automated dependency updates. Flexible, so you don't need to be.
 [![Join the chat at https://gitter.im/renovate-app/Lobby](https://badges.gitter.im/renovate-app/Lobby.svg)](https://gitter.im/renovate-app/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 
+<br />
+
 ## Why Use Renovate?
 
 * Receive automated Pull Requests whenever dependencies need updating. Or whenever you schedule it for.
