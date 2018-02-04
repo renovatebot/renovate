@@ -7,7 +7,6 @@ Automated dependency updates. Flexible, so you don't need to be.
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/renovateapp/renovate/master/license)
 [![codecov](https://codecov.io/gh/renovateapp/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovateapp/renovate)
 [![Join the chat at https://gitter.im/renovate-app/Lobby](https://badges.gitter.im/renovate-app/Lobby.svg)](https://gitter.im/renovate-app/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![David](https://david-dm.org/renovateapp/renovate.svg)](https://david-dm.org/renovateapp/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 
 ## Why Use Renovate?
