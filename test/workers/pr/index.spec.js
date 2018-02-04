@@ -228,10 +228,10 @@ describe('workers/pr', () => {
       config.warnings = [{}];
       const pr = await prWorker.ensurePr(config);
       expect(
-        platform.createPr.mock.calls[0][2].indexOf('### Errors')
+        platform.createPr.mock.calls[0][2].indexOf('# Errors')
       ).not.toEqual(-1);
       expect(
-        platform.createPr.mock.calls[0][2].indexOf('### Warnings')
+        platform.createPr.mock.calls[0][2].indexOf('# Warnings')
       ).not.toEqual(-1);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
@@ -272,6 +272,15 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchSnapshot();
     });
+    it('should return modified existing PR title', async () => {
+      config.newVersion = '1.2.0';
+      platform.getBranchPr.mockReturnValueOnce({
+        ...existingPr,
+        title: 'wrong',
+      });
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchSnapshot();
+    });
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch-push';
@@ -298,6 +307,15 @@ describe('workers/pr', () => {
       config.upgrades.push(config.upgrades[0]);
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+    });
+    it('should create privateRepo PR if success', async () => {
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      config.prCreation = 'status-success';
+      config.privateRepo = false;
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      existingPr.body = platform.createPr.mock.calls[0][2];
     });
   });
 });

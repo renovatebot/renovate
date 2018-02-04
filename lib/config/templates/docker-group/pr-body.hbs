@@ -5,14 +5,14 @@ This Pull Request updates Dockerfiles to use image digests.
 {{/if}}
 
 {{#each upgrades as |upgrade|}}
--   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}{{{depName}}}{{/if}}: `{{upgrade.newDigest}}`
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}`{{{depName}}}`{{/if}}: `{{upgrade.newDigest}}`
 {{/each}}
 
 {{#if hasErrors}}
 
 ---
 
-### Errors
+# Errors
 
 Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
 
@@ -25,7 +25,7 @@ Renovate encountered some errors when processing your repository, so you are bei
 
 ---
 
-### Warnings
+# Warnings
 
 Please make sure the following warnings are safe to ignore:
 

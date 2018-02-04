@@ -707,7 +707,7 @@ Array [
     "changeLogToVersion": "0.9.7",
     "isMinor": true,
     "isRange": true,
-    "newVersion": ">= 0.5.0 < 0.10.0",
+    "newVersion": ">= 0.5.0 <0.10",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
     "type": "minor",
@@ -718,7 +718,7 @@ Array [
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
     "isRange": true,
-    "newVersion": ">= 0.5.0 < 1.5.0",
+    "newVersion": ">= 0.5.0 <1.5",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "major",
@@ -868,6 +868,28 @@ Array [
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) uses the locked version for pinning 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.0.0",
+    "changeLogToVersion": "1.4.1",
+    "isMinor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "minor",
+    "unpublishable": false,
+  },
+  Object {
+    "isPin": true,
+    "newVersion": "1.0.0",
+    "newVersionMajor": 1,
+    "type": "pin",
     "unpublishable": false,
   },
 ]

@@ -3,6 +3,7 @@ const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
 const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
 const webpackJson = require('../../_fixtures/npm/webpack.json');
+const nextJson = require('../../_fixtures/npm/next.json');
 
 let config;
 
@@ -132,6 +133,11 @@ describe('workers/package/versions', () => {
       config.currentVersion = '^1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
+    it('uses the locked version for pinning', () => {
+      config.currentVersion = '^1.0.0';
+      config.lockedVersion = '1.0.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
     it('ignores minor ranged versions when not pinning', () => {
       config.pinVersions = false;
       config.currentVersion = '^1.0.0';
@@ -255,11 +261,11 @@ describe('workers/package/versions', () => {
     });
     it('upgrades minor greater than less than ranges without pinning', () => {
       config.pinVersions = false;
-      config.currentVersion = '>= 0.5.0 < 0.8.0';
+      config.currentVersion = '>= 0.5.0 <0.8';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toMatchSnapshot();
-      expect(res[0].newVersion).toEqual('>= 0.5.0 < 0.10.0');
-      expect(res[1].newVersion).toEqual('>= 0.5.0 < 1.5.0');
+      expect(res[0].newVersion).toEqual('>= 0.5.0 <0.10');
+      expect(res[1].newVersion).toEqual('>= 0.5.0 <1.5');
     });
     it('upgrades minor greater than less than equals ranges without pinning', () => {
       config.pinVersions = false;
@@ -340,6 +346,12 @@ describe('workers/package/versions', () => {
       config.multipleMajorPrs = true;
       const res = versions.determineUpgrades(webpackJson, config);
       expect(res).toHaveLength(3);
+    });
+    it('does not jump  major unstable', () => {
+      config.currentVersion = '^4.4.0-canary.3';
+      config.pinVersions = false;
+      const res = versions.determineUpgrades(nextJson, config);
+      expect(res).toHaveLength(0);
     });
   });
   describe('.isRange(input)', () => {

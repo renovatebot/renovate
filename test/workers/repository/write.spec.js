@@ -21,6 +21,16 @@ describe('workers/repository/write', () => {
       const res = await writeUpdates(config);
       expect(res).toEqual('done');
     });
+    it('calculates concurrent limit remaining', async () => {
+      config.branches = ['renovate/chalk-2.x'];
+      config.prConcurrentLimit = 1;
+      platform.getPrList.mockReturnValueOnce([
+        { created_at: moment().format() },
+      ]);
+      platform.branchExists.mockReturnValueOnce(true);
+      const res = await writeUpdates(config);
+      expect(res).toEqual('done');
+    });
     it('handles error in calculation', async () => {
       config.branches = [];
       config.prHourlyLimit = 1;

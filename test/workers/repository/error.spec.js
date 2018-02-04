@@ -13,12 +13,14 @@ describe('workers/repository/error', () => {
     const errors = [
       'uninitiated',
       'disabled',
+      'repository-changed',
       'fork',
       'no-package-files',
       'loops>5',
       'config-validation',
       'registry-failure',
       'archived',
+      'blocked',
       'not-found',
     ];
     errors.forEach(err => {

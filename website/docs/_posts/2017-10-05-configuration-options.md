@@ -10,7 +10,7 @@ order: 0
 
 This document describes all the configuration options you may configure in a `renovate.json` file or within a `"renovate"` section of your `package.json`. Note that any config in a `package.json` will apply only to that package file, so this is also one way you can specify different behaviour for different `package.json files`. Similarly, if you have a monorepo and want your config to apply to all package files then you need to define it in a `renovate.json`;
 
-Also, be sure to check out Renovate's [shareabe config presets](/docs/configuration-reference/config-presets) to save yourself from reinventing any wheels.
+Also, be sure to check out Renovate's [shareable config presets](/docs/configuration-reference/config-presets) to save yourself from reinventing any wheels.
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovateapp/config-help](https://github.com/renovateapp/config-help) where it will be promptly answered.
 
@@ -712,6 +712,17 @@ Pull Request body template.
 | default | [too long or inclusion] |
 
 Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovateapp/renovate/issues) and let us solve it for you and for everyone else too.
+
+## prConcurrentLimit
+
+Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.
+
+| name    | value   |
+| ------- | ------- |
+| type    | integer |
+| default | 0       |
+
+This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
 
 ## prCreation
 

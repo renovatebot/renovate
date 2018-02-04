@@ -70,6 +70,13 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab getAllRenovateBranches() should return all renovate branches 1`] = `
+Array [
+  "renovate/a",
+  "renovate/b",
+]
+`;
+
 exports[`platform/gitlab getBranchLastCommitTime should return a Date 1`] = `2012-09-20T08:50:22.000Z`;
 
 exports[`platform/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
@@ -290,4 +297,13 @@ Array [
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 2 2`] = `Object {}`;
 
-exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `Array []`;
+exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
+Array [
+  Array [
+    "projects/undefined/repository/tree?ref=some-branch&recursive=true&per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+]
+`;

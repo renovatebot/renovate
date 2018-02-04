@@ -2,7 +2,7 @@
 
 exports[`workers/repository/onboarding/pr/errors-warnings getErrors() returns error text 1`] = `
 "
-### Errors (1)
+# Errors (1)
 
 Renovate has found errors that you should fix (in this branch) before finishing this PR.
 
@@ -14,7 +14,7 @@ Renovate has found errors that you should fix (in this branch) before finishing 
 
 exports[`workers/repository/onboarding/pr/errors-warnings getWarnings() returns warning text 1`] = `
 "
-### Warnings (1)
+# Warnings (1)
 
 Please correct - or verify that you can safely ignore - these warnings before you merge this PR.
 
