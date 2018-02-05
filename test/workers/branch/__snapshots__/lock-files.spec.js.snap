@@ -54,6 +54,25 @@ Object {
 }
 `;
 
+exports[`workers/branch/lock-files getUpdatedLockFiles tries lerna npm 1`] = `
+Object {
+  "lockFileErrors": Array [],
+  "updatedLockFiles": Array [],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles tries lerna yarn 1`] = `
+Object {
+  "lockFileErrors": Array [
+    Object {
+      "lockFile": "yarn.lock",
+      "stderr": undefined,
+    },
+  ],
+  "updatedLockFiles": Array [],
+}
+`;
+
 exports[`workers/branch/lock-files getUpdatedLockFiles tries multiple lock files 1`] = `
 Object {
   "lockFileErrors": Array [],

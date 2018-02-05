@@ -6,6 +6,7 @@ const upath = require('upath');
 const npm = require('../../../lib/workers/branch/npm');
 const yarn = require('../../../lib/workers/branch/yarn');
 const pnpm = require('../../../lib/workers/branch/pnpm');
+const lerna = require('../../../lib/workers/branch/lerna');
 
 const {
   hasPackageLock,
@@ -286,7 +287,7 @@ describe('workers/branch/lock-files', () => {
       ];
       platform.getFile.mockReturnValue('some lock file contents');
       await writeExistingFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(4);
+      expect(fs.outputFile.mock.calls).toHaveLength(5);
       expect(fs.remove.mock.calls).toHaveLength(1);
     });
     it('Try to write package.json of local lib, but file not found', async () => {
@@ -397,6 +398,7 @@ describe('workers/branch/lock-files', () => {
       pnpm.generateLockFile.mockReturnValue({
         lockFile: 'some lock file contents',
       });
+      lerna.generateLockFiles = jest.fn();
       lockFiles.determineLockFileDirs = jest.fn();
     });
     afterEach(() => {
@@ -435,7 +437,31 @@ describe('workers/branch/lock-files', () => {
       expect(res.updatedLockFiles).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(platform.getFile.mock.calls).toHaveLength(5);
+      expect(platform.getFile.mock.calls).toHaveLength(6);
+    });
+    it('tries lerna npm', async () => {
+      lockFiles.determineLockFileDirs.mockReturnValueOnce({
+        packageLockFileDirs: ['a', 'b'],
+        yarnLockFileDirs: [],
+        shrinkwrapYamlDirs: [],
+        lernaDirs: ['.'],
+      });
+      config.lernaLockFile = 'npm';
+      lerna.generateLockFiles.mockReturnValueOnce({ error: false });
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('tries lerna yarn', async () => {
+      lockFiles.determineLockFileDirs.mockReturnValueOnce({
+        packageLockFileDirs: [],
+        yarnLockFileDirs: ['c', 'd'],
+        shrinkwrapYamlDirs: [],
+        lernaDirs: ['.'],
+      });
+      config.lernaLockFile = 'yarn';
+      lerna.generateLockFiles.mockReturnValueOnce({ error: true });
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
     });
     it('sets error if receiving null', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
@@ -452,7 +478,7 @@ describe('workers/branch/lock-files', () => {
       expect(res.updatedLockFiles).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(platform.getFile.mock.calls).toHaveLength(2);
+      expect(platform.getFile.mock.calls).toHaveLength(3);
     });
     it('adds multiple lock files', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
@@ -469,7 +495,7 @@ describe('workers/branch/lock-files', () => {
       expect(res.updatedLockFiles).toHaveLength(3);
       expect(npm.generateLockFile.mock.calls).toHaveLength(2);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(platform.getFile.mock.calls).toHaveLength(5);
+      expect(platform.getFile.mock.calls).toHaveLength(6);
     });
   });
 });
