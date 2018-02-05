@@ -415,6 +415,7 @@ describe('workers/branch/lock-files', () => {
         packageLockFileDirs: [],
         yarnLockFileDirs: [],
         shrinkwrapYamlDirs: [],
+        lernaDirs: [],
       });
       const res = await getUpdatedLockFiles(config);
       expect(res).toMatchSnapshot();
@@ -426,6 +427,7 @@ describe('workers/branch/lock-files', () => {
         packageLockFileDirs: ['a', 'b'],
         yarnLockFileDirs: ['c', 'd'],
         shrinkwrapYamlDirs: ['e'],
+        lernaDirs: [],
       });
       const res = await getUpdatedLockFiles(config);
       expect(res).toMatchSnapshot();
@@ -440,6 +442,7 @@ describe('workers/branch/lock-files', () => {
         packageLockFileDirs: ['a', 'b'],
         yarnLockFileDirs: ['c', 'd'],
         shrinkwrapYamlDirs: ['e'],
+        lernaDirs: [],
       });
       npm.generateLockFile.mockReturnValueOnce({ error: true });
       yarn.generateLockFile.mockReturnValueOnce({ error: true });
@@ -456,6 +459,7 @@ describe('workers/branch/lock-files', () => {
         packageLockFileDirs: ['a', 'b'],
         yarnLockFileDirs: ['c', 'd'],
         shrinkwrapYamlDirs: ['e'],
+        lernaDirs: [],
       });
       npm.generateLockFile.mockReturnValueOnce('some new lock file contents');
       yarn.generateLockFile.mockReturnValueOnce('some new lock file contents');
