@@ -29,6 +29,17 @@ Object {
 }
 `;
 
+exports[`workers/branch/lock-files determineLockFileDirs returns root directory if using lerna package lock 1`] = `
+Object {
+  "lernaDirs": Array [
+    ".",
+  ],
+  "packageLockFileDirs": Array [],
+  "shrinkwrapYamlDirs": Array [],
+  "yarnLockFileDirs": Array [],
+}
+`;
+
 exports[`workers/branch/lock-files determineLockFileDirs returns root directory if using yarn workspaces 1`] = `
 Object {
   "lernaDirs": Array [],

@@ -230,6 +230,32 @@ describe('workers/branch/lock-files', () => {
       expect(res.yarnLockFileDirs).toHaveLength(1);
       expect(res.yarnLockFileDirs[0]).toEqual('.');
     });
+    it('returns root directory if using lerna package lock', () => {
+      config.lernaLockFile = 'yarn';
+      config.upgrades = [{}];
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          yarnLock: '# some yarn lock',
+        },
+        {
+          packageFile: 'backend/package.json',
+          workspaceDir: '.',
+        },
+      ];
+      config.updatedPackageFiles = [
+        {
+          name: 'backend/package.json',
+          contents: 'some contents',
+        },
+      ];
+      const res = determineLockFileDirs(config);
+      expect(res).toMatchSnapshot();
+      expect(res.packageLockFileDirs).toHaveLength(0);
+      expect(res.yarnLockFileDirs).toHaveLength(0);
+      expect(res.lernaDirs).toHaveLength(1);
+      expect(res.lernaDirs[0]).toEqual('.');
+    });
   });
   describe('writeExistingFiles', () => {
     let config;
