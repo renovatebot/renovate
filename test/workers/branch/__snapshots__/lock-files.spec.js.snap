@@ -16,6 +16,7 @@ Object {
 
 exports[`workers/branch/lock-files determineLockFileDirs returns directories from updated package files 1`] = `
 Object {
+  "lernaDirs": Array [],
   "packageLockFileDirs": Array [
     "backend",
   ],
@@ -28,8 +29,20 @@ Object {
 }
 `;
 
+exports[`workers/branch/lock-files determineLockFileDirs returns root directory if using lerna package lock 1`] = `
+Object {
+  "lernaDirs": Array [
+    ".",
+  ],
+  "packageLockFileDirs": Array [],
+  "shrinkwrapYamlDirs": Array [],
+  "yarnLockFileDirs": Array [],
+}
+`;
+
 exports[`workers/branch/lock-files determineLockFileDirs returns root directory if using yarn workspaces 1`] = `
 Object {
+  "lernaDirs": Array [],
   "packageLockFileDirs": Array [],
   "shrinkwrapYamlDirs": Array [],
   "yarnLockFileDirs": Array [
@@ -48,6 +61,25 @@ Object {
 exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if none updated 1`] = `
 Object {
   "lockFileErrors": Array [],
+  "updatedLockFiles": Array [],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles tries lerna npm 1`] = `
+Object {
+  "lockFileErrors": Array [],
+  "updatedLockFiles": Array [],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles tries lerna yarn 1`] = `
+Object {
+  "lockFileErrors": Array [
+    Object {
+      "lockFile": "yarn.lock",
+      "stderr": undefined,
+    },
+  ],
   "updatedLockFiles": Array [],
 }
 `;
