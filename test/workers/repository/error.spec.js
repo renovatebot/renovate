@@ -22,6 +22,7 @@ describe('workers/repository/error', () => {
       'archived',
       'blocked',
       'not-found',
+      'forbidden',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {
