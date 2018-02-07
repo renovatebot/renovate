@@ -13,7 +13,9 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 **Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.
 {{/if}}
 {{#if hasReleaseNotes}}
-# Release Notes
+
+<details>
+<summary>Release Notes</summary>
 
 {{#each releases as |release|}}
 {{#if release.releaseNotes}}
@@ -25,13 +27,13 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 
 {{/if}}
 {{/each}}
+</details>
 {{/if}}
 
 {{#if hasCommits}}
-# Commits
 
 <details>
-<summary>{{githubName}}</summary>
+<summary>Commits</summary>
 
 {{#each releases as |release|}}
 {{#if release.hasCommits}}
