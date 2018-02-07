@@ -3746,9 +3746,9 @@ jest-changed-files@^22.2.0:
   dependencies:
     throat "^4.0.0"
 
-jest-cli@^22.2.0:
-  version "22.2.0"
-  resolved "https://registry.yarnpkg.com/jest-cli/-/jest-cli-22.2.0.tgz#061acb5f995180b7f7bbc6cc8b8302f0804cfb74"
+jest-cli@^22.2.1:
+  version "22.2.1"
+  resolved "https://registry.yarnpkg.com/jest-cli/-/jest-cli-22.2.1.tgz#f1df6675cd719e0773be77d6314c5f4b1d8af47f"
   dependencies:
     ansi-escapes "^3.0.0"
     chalk "^2.0.1"
@@ -3762,15 +3762,15 @@ jest-cli@^22.2.0:
     istanbul-lib-instrument "^1.8.0"
     istanbul-lib-source-maps "^1.2.1"
     jest-changed-files "^22.2.0"
-    jest-config "^22.2.0"
+    jest-config "^22.2.1"
     jest-environment-jsdom "^22.2.0"
     jest-get-type "^22.1.0"
     jest-haste-map "^22.2.0"
     jest-message-util "^22.2.0"
     jest-regex-util "^22.1.0"
     jest-resolve-dependencies "^22.1.0"
-    jest-runner "^22.2.0"
-    jest-runtime "^22.2.0"
+    jest-runner "^22.2.1"
+    jest-runtime "^22.2.1"
     jest-snapshot "^22.2.0"
     jest-util "^22.2.0"
     jest-worker "^22.2.0"
@@ -3784,16 +3784,16 @@ jest-cli@^22.2.0:
     which "^1.2.12"
     yargs "^10.0.3"
 
-jest-config@^22.2.0:
-  version "22.2.0"
-  resolved "https://registry.yarnpkg.com/jest-config/-/jest-config-22.2.0.tgz#762725cdd2552b7e2353df89e18876c320cd7d74"
+jest-config@^22.2.1:
+  version "22.2.1"
+  resolved "https://registry.yarnpkg.com/jest-config/-/jest-config-22.2.1.tgz#8617e99cff0544f0a5f254a5dde37f43b5383934"
   dependencies:
     chalk "^2.0.1"
     glob "^7.1.1"
     jest-environment-jsdom "^22.2.0"
     jest-environment-node "^22.2.0"
     jest-get-type "^22.1.0"
-    jest-jasmine2 "^22.2.0"
+    jest-jasmine2 "^22.2.1"
     jest-regex-util "^22.1.0"
     jest-resolve "^22.2.0"
     jest-util "^22.2.0"
@@ -3845,9 +3845,9 @@ jest-haste-map@^22.2.0:
     micromatch "^2.3.11"
     sane "^2.0.0"
 
-jest-jasmine2@^22.2.0:
-  version "22.2.0"
-  resolved "https://registry.yarnpkg.com/jest-jasmine2/-/jest-jasmine2-22.2.0.tgz#c5f6a9a44f3a48b31bfa50f9fb2710c19cab21da"
+jest-jasmine2@^22.2.1:
+  version "22.2.1"
+  resolved "https://registry.yarnpkg.com/jest-jasmine2/-/jest-jasmine2-22.2.1.tgz#58d115f3f4a0a186b5e90c5db8ac68aecfc41051"
   dependencies:
     callsites "^2.0.0"
     chalk "^2.0.1"
@@ -3906,25 +3906,25 @@ jest-resolve@^22.2.0:
     browser-resolve "^1.11.2"
     chalk "^2.0.1"
 
-jest-runner@^22.2.0:
-  version "22.2.0"
-  resolved "https://registry.yarnpkg.com/jest-runner/-/jest-runner-22.2.0.tgz#173249cff9f58d65c2bb3a47a03ee4806996c927"
+jest-runner@^22.2.1:
+  version "22.2.1"
+  resolved "https://registry.yarnpkg.com/jest-runner/-/jest-runner-22.2.1.tgz#539b2b7eb0ceb34e63a1ca78a1eda46ace70b940"
   dependencies:
     exit "^0.1.2"
-    jest-config "^22.2.0"
+    jest-config "^22.2.1"
     jest-docblock "^22.2.0"
     jest-haste-map "^22.2.0"
-    jest-jasmine2 "^22.2.0"
+    jest-jasmine2 "^22.2.1"
     jest-leak-detector "^22.1.0"
     jest-message-util "^22.2.0"
-    jest-runtime "^22.2.0"
+    jest-runtime "^22.2.1"
     jest-util "^22.2.0"
     jest-worker "^22.2.0"
     throat "^4.0.0"
 
-jest-runtime@^22.2.0:
-  version "22.2.0"
-  resolved "https://registry.yarnpkg.com/jest-runtime/-/jest-runtime-22.2.0.tgz#f2ff307eae5ed10fbca8501534aba0922c7da693"
+jest-runtime@^22.2.1:
+  version "22.2.1"
+  resolved "https://registry.yarnpkg.com/jest-runtime/-/jest-runtime-22.2.1.tgz#c5b0173a7f5274b28da30019cf7bb7b8cda68040"
   dependencies:
     babel-core "^6.0.0"
     babel-jest "^22.2.0"
@@ -3933,7 +3933,7 @@ jest-runtime@^22.2.0:
     convert-source-map "^1.4.0"
     exit "^0.1.2"
     graceful-fs "^4.1.11"
-    jest-config "^22.2.0"
+    jest-config "^22.2.1"
     jest-haste-map "^22.2.0"
     jest-regex-util "^22.1.0"
     jest-resolve "^22.2.0"
@@ -3984,12 +3984,12 @@ jest-worker@^22.2.0:
   dependencies:
     merge-stream "^1.0.1"
 
-jest@22.2.0:
-  version "22.2.0"
-  resolved "https://registry.yarnpkg.com/jest/-/jest-22.2.0.tgz#024040afa1e83faf212f35dfb8941e7ece2d8b25"
+jest@22.2.1:
+  version "22.2.1"
+  resolved "https://registry.yarnpkg.com/jest/-/jest-22.2.1.tgz#fb6524d35bd02968afe3b17f330d6f7207846147"
   dependencies:
     import-local "^1.0.0"
-    jest-cli "^22.2.0"
+    jest-cli "^22.2.1"
 
 js-tokens@^3.0.0, js-tokens@^3.0.2:
   version "3.0.2"
