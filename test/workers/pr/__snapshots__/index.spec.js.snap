@@ -31,9 +31,8 @@ Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
   "<p>This Merge Request updates dependency <a href=\\"https://github.com/renovateapp/dummy\\">dummy</a> from <code>v1.0.0</code> to <code>v1.1.0</code></p>
-<h1 id=\\"commits\\">Commits</h1>
 <p><details><br />
-<summary>renovateapp/dummy</summary></p>
+<summary>Commits</summary></p>
 **v1.1.0**
 <ul>
 <li><a href=\\"https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz\\"><code>abcdefg</code></a> foo <a href=\\"https://github.com/renovateapp/dummy/issues/3\\">#3</a></li>
@@ -55,10 +54,9 @@ Array [
 
 
 
-# Commits
 
 <details>
-<summary>renovateapp/dummy</summary>
+<summary>Commits</summary>
 
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
@@ -84,10 +82,9 @@ Array [
 
 
 
-# Commits
 
 <details>
-<summary>renovateapp/dummy</summary>
+<summary>Commits</summary>
 
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo #&#8203;3
@@ -111,10 +108,9 @@ Object {
 
 
 
-# Commits
 
 <details>
-<summary>renovateapp/dummy</summary>
+<summary>Commits</summary>
 
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
@@ -137,10 +133,9 @@ Object {
 
 
 
-# Commits
 
 <details>
-<summary>renovateapp/dummy</summary>
+<summary>Commits</summary>
 
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
@@ -167,10 +162,9 @@ Array [
 
 
 
-# Commits
 
 
-**renovateapp/dummy**
+**Commits**
 
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
