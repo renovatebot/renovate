@@ -4,7 +4,7 @@ exports[`workers/pr/release-notes getReleaseNotes() gets release notes 1`] = `un
 
 exports[`workers/pr/release-notes getReleaseNotesMd() parses angular.js 1`] = `
 Object {
-  "body": "## Bug Fixes
+  "body": "#### Bug Fixes
 - **input:** add \`drop\` event support for IE
   ([5dc076](https://github.com/angular/angular.js/commit/5dc07667de00c5e85fd69c5b7b7fe4fb5fd65a77))
 - **ngMessages:** prevent memory leak from messages that are never attached
@@ -18,20 +18,19 @@ Object {
   [#16412](https://github.com/angular/angular.js/issues/16412))
 - **$sanitize:** sanitize \`xml:base\` attributes
   ([b9ef65](https://github.com/angular/angular.js/commit/b9ef6585e10477fbbf912a971fe0b390bca692a6))
-
-
-## New Features
+#### New Features
 - **currencyFilter:** trim whitespace around an empty currency symbol
   ([367390](https://github.com/angular/angular.js/commit/3673909896efb6ff47546caf7fc61549f193e043),
   [#15018](https://github.com/angular/angular.js/issues/15018),
   [#15085](https://github.com/angular/angular.js/issues/15085),
   [#15105](https://github.com/angular/angular.js/issues/15105))",
+  "url": "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#169-fiery-basilisk-2018-02-02",
 }
 `;
 
 exports[`workers/pr/release-notes getReleaseNotesMd() parses jest 1`] = `
 Object {
-  "body": "### Fixes
+  "body": "##### Fixes
 
 * \`[jest-resolve]\` Use \`module.builtinModules\` as \`BUILTIN_MODULES\` when it
   exists
@@ -99,8 +98,7 @@ Object {
   ([#5000](https://github.com/facebook/jest/pull/5000))
 * \`[expect]\` [**BREAKING**] Replace identity equality with Object.is in toBe
   matcher ([#4917](https://github.com/facebook/jest/pull/4917))
-
-### Features
+##### Features
 
 * \`[jest-message-util]\` Add codeframe to test assertion failures
   ([#5087](https://github.com/facebook/jest/pull/5087))
@@ -178,8 +176,7 @@ Object {
   ([#4946](https://github.com/facebook/jest/pull/4946))
 * \`[jest-cli]\` Explain which snapshots are obsolete
   ([#5005](https://github.com/facebook/jest/pull/5005))
-
-### Chore & Maintenance
+##### Chore & Maintenance
 
 * \`[docs]\` Add guide of using with puppeteer
   ([#5093](https://github.com/facebook/jest/pull/5093))
@@ -216,5 +213,6 @@ Object {
 * \`[docs]\` Add clarification for hook execution order
 * \`[docs]\` Update \`expect.anything()\` sample code
   ([#5007](https://github.com/facebook/jest/pull/5007))",
+  "url": "https://github.com/facebook/jest/blob/master/CHANGELOG.md#jest-2200",
 }
 `;
