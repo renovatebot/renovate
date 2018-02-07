@@ -153,7 +153,7 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       platform.createPr = jest.fn();
       platform.createPr.mockImplementationOnce(() => {
-        throw new Error('failed to create PR');
+        throw new Error('Validation Failed (422)');
       });
       config.prCreation = 'status-success';
       const pr = await prWorker.ensurePr(config);
