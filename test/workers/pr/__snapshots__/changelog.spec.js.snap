@@ -1,5 +1,66 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/pr/changelog getChangeLogJSON finds dep manually 1`] = `
+Object {
+  "hasReleaseNotes": false,
+  "project": Object {
+    "github": "renovateapp/renovate",
+  },
+  "versions": Array [
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "2.1.0",
+    },
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "2.2.0",
+    },
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "2.3.0",
+    },
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "2.4.0",
+    },
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "2.4.1",
+    },
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "2.4.2",
+    },
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "2.4.3",
+    },
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "2.4.4",
+    },
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "2.4.5",
+    },
+    Object {
+      "changes": Array [],
+      "releaseNotes": undefined,
+      "version": "3.0.0",
+    },
+  ],
+}
+`;
+
 exports[`workers/pr/changelog getChangeLogJSON sorts JSON 1`] = `
 Object {
   "hasReleaseNotes": false,

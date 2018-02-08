@@ -33,12 +33,20 @@ describe('workers/pr/changelog', () => {
         await changelogHelper.getChangeLogJSON('renovate', '1.0.0', '2.0.0')
       ).toMatchObject({ a: 1 });
     });
+    it('finds dep manually', async () => {
+      changelog.generate = jest.fn(() => {
+        throw new Error('Unknown Github Repo');
+      });
+      expect(
+        await changelogHelper.getChangeLogJSON('renovate', '2.0.0', '3.0.0')
+      ).toMatchSnapshot();
+    });
     it('filters unnecessary warns', async () => {
       changelog.generate = jest.fn(() => {
         throw new Error('Unknown Github Repo');
       });
       expect(
-        await changelogHelper.getChangeLogJSON('renovate', '1.0.0', '3.0.0')
+        await changelogHelper.getChangeLogJSON('@renovate/no', '1.0.0', '3.0.0')
       ).toBe(null);
     });
     it('sorts JSON', async () => {
