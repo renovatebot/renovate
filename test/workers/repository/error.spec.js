@@ -20,6 +20,7 @@ describe('workers/repository/error', () => {
       'config-validation',
       'registry-failure',
       'archived',
+      'renamed',
       'blocked',
       'not-found',
       'forbidden',
