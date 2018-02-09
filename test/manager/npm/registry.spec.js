@@ -176,23 +176,19 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
-    /* eslint-disable */
+    // eslint-disable-next-line no-template-curly-in-string
     npm.setNpmrc('registry=${REGISTRY}', true);
-    /* eslint-enable */
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });
   it('should throw error if necessary env var is not present', () => {
     let e;
     try {
-      /* eslint-disable */
+      // eslint-disable-next-line no-template-curly-in-string
       npm.setNpmrc('registry=${REGISTRY_MISSING}', true);
-      /* eslint-enable */
     } catch (err) {
       e = err;
     }
-    /* eslint-disable */
     expect(e.message).toBe('env-replace');
-    /* eslint-enable */
   });
 });
