@@ -3,6 +3,7 @@ const registryAuthToken = require('registry-auth-token');
 const nock = require('nock');
 
 jest.mock('registry-auth-token');
+jest.mock('delay');
 
 const npmResponse = {
   versions: {
@@ -98,11 +99,21 @@ describe('api/npm', () => {
       .reply(503);
     let e;
     try {
-      await npm.getDependency('foobar');
+      await npm.getDependency('foobar', 0);
     } catch (err) {
       e = err;
     }
-    expect(e).toBeDefined();
+    expect(e.message).toBe('registry-failure');
+  });
+  it('should retry when 5xx', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(503);
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200);
+    const res = await npm.getDependency('foobar');
+    expect(res).toBe(null);
   });
   it('should throw error for others', async () => {
     nock('https://registry.npmjs.org')
