@@ -300,8 +300,19 @@ describe('workers/pr', () => {
       config.automerge = true;
       config.automergeType = 'branch-push';
       platform.getBranchStatus.mockReturnValueOnce('pending');
+      platform.getBranchLastCommitTime.mockReturnValueOnce(new Date());
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
+    });
+    it('should not return null if branch automerging taking too long', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch-push';
+      platform.getBranchStatus.mockReturnValueOnce('pending');
+      platform.getBranchLastCommitTime.mockReturnValueOnce(
+        new Date('2018-01-01')
+      );
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).not.toBe(null);
     });
     it('handles duplicate upgrades', async () => {
       config.upgrades.push(config.upgrades[0]);
