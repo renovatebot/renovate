@@ -641,7 +641,12 @@ describe('platform/gitlab', () => {
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
     it('creates file', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
+      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       const file = {
         name: 'some-new-file',
         contents: 'some new-contents',
@@ -655,6 +660,7 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
     it('updates multiple files', async () => {
+      // Two files exist
       get.mockReturnValueOnce({
         body: {
           content: 'foo',
@@ -665,6 +671,8 @@ describe('platform/gitlab', () => {
           content: 'foo',
         },
       });
+      // branch exists
+      get.mockImplementationOnce(() => ({ statusCode: 200 }));
       const files = [
         {
           name: 'some-existing-file',
