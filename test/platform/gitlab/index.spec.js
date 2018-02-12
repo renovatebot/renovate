@@ -1,7 +1,6 @@
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
-  let helpers;
   beforeEach(() => {
     // clean up env
     delete process.env.GITLAB_TOKEN;
@@ -10,10 +9,8 @@ describe('platform/gitlab', () => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
-    jest.mock('../../../lib/platform/gitlab/helpers');
     gitlab = require('../../../lib/platform/gitlab');
     get = require('../../../lib/platform/gitlab/gl-got-wrapper');
-    helpers = require('../../../lib/platform/gitlab/helpers');
   });
 
   describe('getRepos', () => {
@@ -643,33 +640,48 @@ describe('platform/gitlab', () => {
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
-    it('creates branch and updates file', async () => {
+    it('creates file', async () => {
+      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
       const file = {
-        name: 'some-file',
-        contents: 'some contents',
+        name: 'some-new-file',
+        contents: 'some new-contents',
       };
       await gitlab.commitFilesToBranch(
         'renovate/something',
         [file],
+        'Create something'
+      );
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toHaveLength(1);
+    });
+    it('updates multiple files', async () => {
+      get.mockReturnValueOnce({
+        body: {
+          content: 'foo',
+        },
+      });
+      get.mockReturnValueOnce({
+        body: {
+          content: 'foo',
+        },
+      });
+      const files = [
+        {
+          name: 'some-existing-file',
+          contents: 'updated content',
+        },
+        {
+          name: 'some-other-existing-file',
+          contents: 'other updated content',
+        },
+      ];
+      await gitlab.commitFilesToBranch(
+        'renovate/something',
+        files,
         'Update something'
       );
-    });
-    it('updates branch and creates file', async () => {
-      const file = {
-        name: 'renovate.json',
-        contents: '{}',
-      };
-      get.post.mockImplementationOnce(() => {
-        throw new Error('branch exists');
-      }); // create branch
-      helpers.updateFile.mockImplementationOnce(() => {
-        throw new Error('file does not exist');
-      }); // update file
-      await gitlab.commitFilesToBranch(
-        'renovate/configure',
-        [file],
-        'Add renovate.json'
-      );
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toHaveLength(1);
     });
   });
   describe('getCommitMessages()', () => {

@@ -16,6 +16,58 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab commitFilesToBranch(branchName, files, message, parentBranch) creates file 1`] = `
+Array [
+  Array [
+    "projects/undefined/repository/commits",
+    Object {
+      "body": Object {
+        "actions": Array [
+          Object {
+            "action": "create",
+            "content": "c29tZSBuZXctY29udGVudHM=",
+            "encoding": "base64",
+            "file_path": "some-new-file",
+          },
+        ],
+        "branch": "renovate/something",
+        "commit_message": "Create something",
+        "start_branch": undefined,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab commitFilesToBranch(branchName, files, message, parentBranch) updates multiple files 1`] = `
+Array [
+  Array [
+    "projects/undefined/repository/commits",
+    Object {
+      "body": Object {
+        "actions": Array [
+          Object {
+            "action": "update",
+            "content": "dXBkYXRlZCBjb250ZW50",
+            "encoding": "base64",
+            "file_path": "some-existing-file",
+          },
+          Object {
+            "action": "update",
+            "content": "b3RoZXIgdXBkYXRlZCBjb250ZW50",
+            "encoding": "base64",
+            "file_path": "some-other-existing-file",
+          },
+        ],
+        "branch": "renovate/something",
+        "commit_message": "Update something",
+        "start_branch": undefined,
+      },
+    },
+  ],
+]
+`;
+
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 1`] = `
 Object {
   "displayNumber": "Merge Request #12345",
