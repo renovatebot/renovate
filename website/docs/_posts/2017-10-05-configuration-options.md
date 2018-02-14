@@ -262,6 +262,17 @@ A configuration object containing strings encrypted with Renovate's public key.
 
 See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
 
+## engines
+
+Configuration specific for `package.json > engines`.
+
+| name    | value  |
+| ------- | ------ |
+| type    | object |
+| default | {}     |
+
+Extend this if you wish to configure rules specifically for `engines` definitions. Currently only `node` is supported.
+
 ## excludePackageNames
 
 A list of package names inside a package rule which are to be excluded/ignored.
