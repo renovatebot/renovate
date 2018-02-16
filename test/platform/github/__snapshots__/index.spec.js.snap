@@ -435,6 +435,7 @@ Object {
     "sha": "1234",
   },
   "displayNumber": "Pull Request #1",
+  "mergeable": true,
   "number": 1,
   "state": "closed",
 }
@@ -464,6 +465,7 @@ Object {
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isStale": true,
+  "mergeable": true,
   "number": 1,
   "state": "open",
 }
