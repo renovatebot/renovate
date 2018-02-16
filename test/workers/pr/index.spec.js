@@ -48,7 +48,6 @@ describe('workers/pr', () => {
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
       pr.canRebase = true;
-      pr.mergeable = true;
       platform.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(1);
@@ -56,28 +55,25 @@ describe('workers/pr', () => {
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
       pr.canRebase = false;
-      pr.mergeable = true;
       platform.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automerge = true;
-      pr.mergeable = true;
       platform.getBranchStatus.mockReturnValueOnce('pending');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
-      pr.mergeable = true;
       pr.mergeable_state = 'unstable';
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
-      pr.mergeable = false;
+      pr.isUnmergeable = true;
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
