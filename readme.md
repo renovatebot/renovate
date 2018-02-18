@@ -7,7 +7,6 @@ Automated dependency updates. Flexible, so you don't need to be.
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/renovateapp/renovate/master/license)
 [![codecov](https://codecov.io/gh/renovateapp/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovateapp/renovate)
 [![Join the chat at https://gitter.im/renovate-app/Lobby](https://badges.gitter.im/renovate-app/Lobby.svg)](https://gitter.im/renovate-app/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![David](https://david-dm.org/renovateapp/renovate.svg)](https://david-dm.org/renovateapp/renovate)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
 
 ## Why Use Renovate?
@@ -20,6 +19,18 @@ Automated dependency updates. Flexible, so you don't need to be.
 * Update lock files natively in the same commit, including immediately resolving conflicts whenever PRs are merged
 * Supports GitHub, GitLab (APIv4) and VSTS. BitBucket is a WIP.
 * Open source (installable via npm/yarn) so can be self-hosted or used for free via GitHub App
+
+## Who Uses Renovate?
+
+Renovate was released in 2017 and is now widely used in the developer community. Example users include the following GitHub organisations:
+
+[<img align="left" src="https://avatars1.githubusercontent.com/u/2034458?s=80&v=4" alt="algolia" title="algolia" hspace="10"/>](https://github.com/algolia)
+[<img align="left" src="https://avatars0.githubusercontent.com/u/139426?s=80&v=4" alt="angular" title="angular" hspace="10"/>](https://github.com/angular)
+[<img align="left" src="https://avatars2.githubusercontent.com/u/131524?s=80&v=4" alt="mozilla" title="mozilla" hspace="10"/>](https://github.com/mozilla)
+[<img align="left" src="https://avatars2.githubusercontent.com/u/33676472?s=80&v=4" alt="uber-workflow" title="uber-workflow" hspace="10"/>](https://github.com/uber-workflow)
+[<img align="left" src="https://avatars1.githubusercontent.com/u/22247014?s=80&v=4" alt="yarnpkg" title="yarnpkg" hspace="10"/>](https://github.com/yarnpkg)
+
+<br /><br /><br /><br /><br />
 
 ## The Renovate Approach
 

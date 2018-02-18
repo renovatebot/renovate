@@ -86,8 +86,7 @@ repository.
 ### package.json
 
 If you add configuration options to your `package.json` then these will override
-any other settings above. Obviously, you can't set repository or package file
-location with this method.
+any other settings above.
 
 ```json
 "renovate": {

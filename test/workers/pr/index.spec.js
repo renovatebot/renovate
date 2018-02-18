@@ -48,7 +48,6 @@ describe('workers/pr', () => {
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
       pr.canRebase = true;
-      pr.mergeable = true;
       platform.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(1);
@@ -56,28 +55,25 @@ describe('workers/pr', () => {
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
       pr.canRebase = false;
-      pr.mergeable = true;
       platform.getBranchStatus.mockReturnValueOnce('success');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is mergeable but branch status is not success', async () => {
       config.automerge = true;
-      pr.mergeable = true;
       platform.getBranchStatus.mockReturnValueOnce('pending');
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
-      pr.mergeable = true;
       pr.mergeable_state = 'unstable';
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
-      pr.mergeable = false;
+      pr.isUnmergeable = true;
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
@@ -153,7 +149,7 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       platform.createPr = jest.fn();
       platform.createPr.mockImplementationOnce(() => {
-        throw new Error('failed to create PR');
+        throw new Error('Validation Failed (422)');
       });
       config.prCreation = 'status-success';
       const pr = await prWorker.ensurePr(config);
@@ -228,10 +224,10 @@ describe('workers/pr', () => {
       config.warnings = [{}];
       const pr = await prWorker.ensurePr(config);
       expect(
-        platform.createPr.mock.calls[0][2].indexOf('### Errors')
+        platform.createPr.mock.calls[0][2].indexOf('# Errors')
       ).not.toEqual(-1);
       expect(
-        platform.createPr.mock.calls[0][2].indexOf('### Warnings')
+        platform.createPr.mock.calls[0][2].indexOf('# Warnings')
       ).not.toEqual(-1);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
@@ -300,13 +296,33 @@ describe('workers/pr', () => {
       config.automerge = true;
       config.automergeType = 'branch-push';
       platform.getBranchStatus.mockReturnValueOnce('pending');
+      platform.getBranchLastCommitTime.mockReturnValueOnce(new Date());
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
+    });
+    it('should not return null if branch automerging taking too long', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch-push';
+      platform.getBranchStatus.mockReturnValueOnce('pending');
+      platform.getBranchLastCommitTime.mockReturnValueOnce(
+        new Date('2018-01-01')
+      );
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).not.toBe(null);
     });
     it('handles duplicate upgrades', async () => {
       config.upgrades.push(config.upgrades[0]);
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+    });
+    it('should create privateRepo PR if success', async () => {
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      config.prCreation = 'status-success';
+      config.privateRepo = false;
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      existingPr.body = platform.createPr.mock.calls[0][2];
     });
   });
 });

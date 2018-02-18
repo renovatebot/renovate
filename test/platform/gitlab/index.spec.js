@@ -9,7 +9,6 @@ describe('platform/gitlab', () => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
-    jest.mock('../../../lib/platform/gitlab/helpers');
     gitlab = require('../../../lib/platform/gitlab');
     get = require('../../../lib/platform/gitlab/gl-got-wrapper');
   });
@@ -136,14 +135,6 @@ describe('platform/gitlab', () => {
   });
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch', async () => {
-      // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1238',
-          },
-        },
-      }));
       await gitlab.setBaseBranch('some-branch');
       expect(get.mock.calls).toMatchSnapshot();
     });
@@ -225,8 +216,22 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getAllRenovateBranches()', () => {
-    it('exists', () => {
-      gitlab.getAllRenovateBranches();
+    it('should return all renovate branches', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            name: 'renovate/a',
+          },
+          {
+            name: 'master',
+          },
+          {
+            name: 'renovate/b',
+          },
+        ],
+      }));
+      const res = await gitlab.getAllRenovateBranches('renovate/');
+      expect(res).toMatchSnapshot();
     });
   });
   describe('isBranchStale()', () => {
@@ -381,6 +386,12 @@ describe('platform/gitlab', () => {
     it('should send delete', async () => {
       get.delete = jest.fn();
       await gitlab.deleteBranch('some-branch');
+      expect(get.delete.mock.calls.length).toBe(1);
+    });
+    it('should close PR', async () => {
+      get.delete = jest.fn();
+      get.mockReturnValueOnce({ body: [] }); // getBranchPr
+      await gitlab.deleteBranch('some-branch', true);
       expect(get.delete.mock.calls.length).toBe(1);
     });
   });
@@ -629,41 +640,108 @@ describe('platform/gitlab', () => {
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
-    it('creates branch', async () => {
-      get.mockReturnValueOnce({ statusCode: 404 });
-      await gitlab.commitFilesToBranch('some-branch', [], 'some-message');
+    it('creates file', async () => {
+      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
+      const file = {
+        name: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      await gitlab.commitFilesToBranch(
+        'renovate/something',
+        [file],
+        'Create something'
+      );
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toHaveLength(1);
     });
-    it('does not create branch and updates file', async () => {
-      get.mockReturnValueOnce({ statusCode: 200 });
+    it('updates multiple files', async () => {
+      // Two files exist
       get.mockReturnValueOnce({
         body: {
-          content: 'hello',
+          content: 'foo',
         },
       });
-      const file = {
-        name: 'foo',
-        contents: 'bar',
-      };
+      get.mockReturnValueOnce({
+        body: {
+          content: 'foo',
+        },
+      });
+      // branch exists
+      get.mockImplementationOnce(() => ({ statusCode: 200 }));
+      const files = [
+        {
+          name: 'some-existing-file',
+          contents: 'updated content',
+        },
+        {
+          name: 'some-other-existing-file',
+          contents: 'other updated content',
+        },
+      ];
       await gitlab.commitFilesToBranch(
-        'some-branch',
+        'renovate/something',
+        files,
+        'Update something'
+      );
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toHaveLength(1);
+    });
+
+    it('should parse valid gitAuthor', async () => {
+      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
+      const file = {
+        name: 'some-new-file',
+        contents: 'some new-contents',
+      };
+
+      await gitlab.commitFilesToBranch(
+        'renovate/something',
         [file],
-        'some-message',
-        'parent-branch'
+        'Update something',
+        undefined,
+        'Renovate Bot <bot@renovateapp.com>'
+      );
+
+      expect(get.post.mock.calls[0][1].body.author_name).toEqual(
+        'Renovate Bot'
+      );
+      expect(get.post.mock.calls[0][1].body.author_email).toEqual(
+        'bot@renovateapp.com'
       );
     });
-    it('does not create branch and creates file', async () => {
-      get.mockReturnValueOnce({ statusCode: 200 });
-      get.mockReturnValueOnce(Promise.reject({ statusCode: 404 }));
+
+    it('should skip invalid gitAuthor', async () => {
+      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       const file = {
-        name: 'foo',
-        contents: 'bar',
+        name: 'some-new-file',
+        contents: 'some new-contents',
       };
+
       await gitlab.commitFilesToBranch(
-        'some-branch',
+        'renovate/something',
         [file],
-        'some-message',
-        'parent-branch'
+        'Update something',
+        undefined,
+        'Renovate Bot bot@renovateapp.com'
       );
+
+      expect(get.post.mock.calls[0][1].body.author_name).toBeUndefined();
+      expect(get.post.mock.calls[0][1].body.author_email).toBeUndefined();
     });
   });
   describe('getCommitMessages()', () => {

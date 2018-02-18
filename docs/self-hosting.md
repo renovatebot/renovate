@@ -26,7 +26,7 @@ You can find instructions for VSTS
 [vsts](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
 
 This token needs to be configured via file, environment variable, or CLI. See
-[docs/configuration.md](docs/configuration.md) for details. The simplest way is
+[docs/configuration.md](configuration.md) for details. The simplest way is
 to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN` or `VSTS_TOKEN`.
 
 ## Usage

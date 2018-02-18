@@ -3,6 +3,7 @@ const registryAuthToken = require('registry-auth-token');
 const nock = require('nock');
 
 jest.mock('registry-auth-token');
+jest.mock('delay');
 
 const npmResponse = {
   versions: {
@@ -27,6 +28,15 @@ describe('api/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     npm.resetCache();
+  });
+  it('should return null for no versions', async () => {
+    const missingVersions = { ...npmResponse };
+    missingVersions.versions = {};
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, missingVersions);
+    const res = await npm.getDependency('foobar');
+    expect(res).toBe(null);
   });
   it('should fetch package info from npm', async () => {
     nock('https://registry.npmjs.org')
@@ -89,11 +99,21 @@ describe('api/npm', () => {
       .reply(503);
     let e;
     try {
-      await npm.getDependency('foobar');
+      await npm.getDependency('foobar', 0);
     } catch (err) {
       e = err;
     }
-    expect(e).toBeDefined();
+    expect(e.message).toBe('registry-failure');
+  });
+  it('should retry when 5xx', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(503);
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200);
+    const res = await npm.getDependency('foobar');
+    expect(res).toBe(null);
   });
   it('should throw error for others', async () => {
     nock('https://registry.npmjs.org')
@@ -167,23 +187,19 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
-    /* eslint-disable */
+    // eslint-disable-next-line no-template-curly-in-string
     npm.setNpmrc('registry=${REGISTRY}', true);
-    /* eslint-enable */
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });
   it('should throw error if necessary env var is not present', () => {
     let e;
     try {
-      /* eslint-disable */
+      // eslint-disable-next-line no-template-curly-in-string
       npm.setNpmrc('registry=${REGISTRY_MISSING}', true);
-      /* eslint-enable */
     } catch (err) {
       e = err;
     }
-    /* eslint-disable */
     expect(e.message).toBe('env-replace');
-    /* eslint-enable */
   });
 });

@@ -1164,7 +1164,7 @@ describe('platform/github', () => {
       expect(pr).toBe(null);
     });
     [
-      { number: 1, state: 'closed', base: { sha: '1234' } },
+      { number: 1, state: 'closed', base: { sha: '1234' }, mergeable: true },
       {
         number: 1,
         state: 'open',
@@ -1172,7 +1172,13 @@ describe('platform/github', () => {
         base: { sha: '1234' },
         commits: 1,
       },
-      { number: 1, state: 'open', base: { sha: '5678' }, commits: 1 },
+      {
+        number: 1,
+        state: 'open',
+        base: { sha: '5678' },
+        commits: 1,
+        mergeable: true,
+      },
     ].forEach((body, i) => {
       it(`should return a PR object - ${i}`, async () => {
         await initRepo({ repository: 'some/repo', token: 'token' });
