@@ -291,7 +291,7 @@ describe('workers/branch/lock-files', () => {
       ];
       await writeExistingFiles(config);
       expect(fs.outputFile.mock.calls).toHaveLength(6);
-      expect(fs.remove.mock.calls).toHaveLength(6);
+      expect(fs.remove.mock.calls).toHaveLength(4);
     });
     it('writes package.json of local lib', async () => {
       const renoPath = upath.join(__dirname, '../../../');
@@ -313,7 +313,7 @@ describe('workers/branch/lock-files', () => {
       ];
       platform.getFile.mockReturnValue('some lock file contents');
       await writeExistingFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(5);
+      expect(fs.outputFile.mock.calls).toHaveLength(4);
       expect(fs.remove.mock.calls).toHaveLength(1);
     });
     it('Try to write package.json of local lib, but file not found', async () => {
@@ -336,7 +336,7 @@ describe('workers/branch/lock-files', () => {
       ];
       platform.getFile.mockReturnValue(null);
       await writeExistingFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(3);
+      expect(fs.outputFile.mock.calls).toHaveLength(2);
       expect(fs.remove.mock.calls).toHaveLength(1);
     });
     it('detect malicious intent (error config in package.json) local lib is not in the repo', async () => {
@@ -359,7 +359,7 @@ describe('workers/branch/lock-files', () => {
       ];
       platform.getFile.mockReturnValue(null);
       await writeExistingFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(3);
+      expect(fs.outputFile.mock.calls).toHaveLength(2);
       expect(fs.remove.mock.calls).toHaveLength(1);
     });
   });
