@@ -40,7 +40,7 @@
   "dependencies": {
     "@yarnpkg/lockfile": "1.0.0",
     "bunyan": "1.8.12",
-    "cacache": "10.0.2",
+    "cacache": "10.0.4",
     "chalk": "2.3.1",
     "changelog": "1.4.2",
     "child-process-promise": "2.2.1",
