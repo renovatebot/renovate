@@ -24,7 +24,7 @@ describe('platform/vsts/vsts-got-wrapper', () => {
       let err;
       try {
         process.env.VSTS_TOKEN = 'myToken';
-        await vsts.gitApi();
+        await vsts.getCoreApi();
       } catch (e) {
         err = e;
       }
