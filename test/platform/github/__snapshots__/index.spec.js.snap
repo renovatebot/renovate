@@ -446,6 +446,7 @@ Object {
   "base": Object {
     "sha": "1234",
   },
+  "branchName": undefined,
   "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
@@ -461,6 +462,7 @@ Object {
   "base": Object {
     "sha": "5678",
   },
+  "branchName": undefined,
   "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
@@ -476,6 +478,7 @@ Object {
   "base": Object {
     "sha": "1234",
   },
+  "branchName": undefined,
   "canRebase": true,
   "commits": 2,
   "displayNumber": "Pull Request #1",
@@ -491,6 +494,7 @@ Object {
   "base": Object {
     "sha": "1234",
   },
+  "branchName": undefined,
   "canRebase": true,
   "commits": 2,
   "displayNumber": "Pull Request #1",
@@ -506,6 +510,7 @@ Object {
   "base": Object {
     "sha": "1234",
   },
+  "branchName": undefined,
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isUnmergeable": true,
