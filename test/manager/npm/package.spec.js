@@ -17,6 +17,11 @@ describe('lib/workers/package/npm', () => {
         currentVersion: '1.0.0',
       };
     });
+    it('calls engines function', async () => {
+      config.depType = 'engines';
+      const res = await npm.getPackageUpdates(config);
+      expect(res).toHaveLength(0);
+    });
     it('returns if using a file reference', async () => {
       config.currentVersion = 'file:../sibling/package.json';
       const res = await npm.getPackageUpdates(config);
