@@ -598,7 +598,7 @@ describe('platform/vsts', () => {
         updateThread: jest.fn(),
       }));
       await vsts.ensureCommentRemoval(42, 'some-subject');
-      expect(vstsApi.gitApi.mock.calls.length).toBe(4);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(3);
     });
     it('nothing should happen, no number', async () => {
       await vsts.ensureCommentRemoval();
@@ -647,6 +647,35 @@ describe('platform/vsts', () => {
     });
   });
 
+  describe('Assignees', () => {
+    it('addAssignees', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      vstsApi.gitApi.mockImplementation(() => ({
+        createThread: jest.fn(() => [{ id: 123 }]),
+      }));
+      await vsts.addAssignees(123, ['test@bonjour.fr']);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(3);
+    });
+  });
+
+  describe('Reviewers', () => {
+    it('addReviewers', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      vstsApi.gitApi.mockImplementation(() => ({
+        getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
+        createPullRequestReviewer: jest.fn(),
+      }));
+      vstsApi.getCoreApi.mockImplementation(() => ({
+        getTeams: jest.fn(() => [{ id: 3 }, { id: 4 }]),
+        getTeamMembers: jest.fn(() => [
+          { displayName: 'jyc', uniqueName: 'jyc', id: 123 },
+        ]),
+      }));
+      await vsts.addReviewers(123, ['test@bonjour.fr', 'jyc']);
+      expect(vstsApi.gitApi.mock.calls.length).toBe(3);
+    });
+  });
+
   describe('Not supported by VSTS (yet!)', () => {
     it('setBranchStatus', () => {
       const res = vsts.setBranchStatus();
@@ -661,31 +690,6 @@ describe('platform/vsts', () => {
     it('mergePr', async () => {
       const res = await vsts.mergePr();
       expect(res).toBeUndefined();
-    });
-
-    it('addAssignees', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      vstsApi.gitApi.mockImplementation(() => ({
-        createThread: jest.fn(() => [{ id: 123 }]),
-      }));
-      await vsts.addAssignees(123, ['test@bonjour.fr']);
-      expect(vstsApi.gitApi.mock.calls.length).toBe(3);
-    });
-
-    it('addReviewers', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      vstsApi.gitApi.mockImplementation(() => ({
-        getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
-        createPullRequestReviewer: jest.fn(),
-      }));
-      vstsApi.getCoreApi.mockImplementation(() => ({
-        getTeams: jest.fn(() => [{ id: 3 }, { id: 4 }]),
-        getTeamMembers: jest.fn(() => [
-          { displayName: 'jyc', uniqueName: 'jyc', id: 123 },
-        ]),
-      }));
-      await vsts.addReviewers(123, ['test@bonjour.fr', 'jyc']);
-      expect(vstsApi.gitApi.mock.calls.length).toBe(4);
     });
 
     // to become async?

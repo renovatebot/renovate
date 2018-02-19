@@ -24,7 +24,7 @@ describe('platform/vsts/vsts-got-wrapper', () => {
       let err;
       try {
         process.env.VSTS_TOKEN = 'myToken';
-        await vsts.gitApi();
+        await vsts.getCoreApi();
       } catch (e) {
         err = e;
       }
@@ -35,20 +35,7 @@ describe('platform/vsts/vsts-got-wrapper', () => {
     it('should set token and endpoint', async () => {
       process.env.VSTS_TOKEN = 'myToken';
       process.env.VSTS_ENDPOINT = 'myEndpoint';
-      const res = await vsts.gitApi();
-
-      // We will track if the lib vso-node-api change
-      expect(res).toMatchSnapshot();
-      expect(process.env.VSTS_TOKEN).toBe(`myToken`);
-      expect(process.env.VSTS_ENDPOINT).toBe(`myEndpoint`);
-    });
-  });
-
-  describe('gitApi', () => {
-    it('should set token and endpoint', async () => {
-      process.env.VSTS_TOKEN = 'myToken';
-      process.env.VSTS_ENDPOINT = 'myEndpoint';
-      const res = await vsts.getCoreApi();
+      const res = await vsts.vstsObj();
 
       // We will track if the lib vso-node-api change
       expect(res).toMatchSnapshot();
