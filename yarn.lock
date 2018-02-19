@@ -7296,9 +7296,9 @@ version-selector-type@^2.0.0:
   dependencies:
     semver "^5.4.1"
 
-vso-node-api@6.2.8-preview:
-  version "6.2.8-preview"
-  resolved "https://registry.yarnpkg.com/vso-node-api/-/vso-node-api-6.2.8-preview.tgz#99902e626c408716ab90b042705452c88ec1c2f0"
+vso-node-api@6.3.2:
+  version "6.3.2"
+  resolved "https://registry.yarnpkg.com/vso-node-api/-/vso-node-api-6.3.2.tgz#bc6d4c8a6e0351eee1c0e622dda95f0e929fdd32"
   dependencies:
     tunnel "0.0.4"
     typed-rest-client "^0.12.0"
