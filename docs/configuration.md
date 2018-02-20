@@ -7,7 +7,7 @@ Configuration is supported via any or all of the below:
 * Configuration file
 * Environment
 * CLI
-* `renovate.json` in target repository
+* `renovate.json`, `.renovaterc.json`, or `.renovaterc` in target repository
 * `renovate` field of `package.json` in target repository
 
 The above are listed in reverse order of preference. i.e. `package.json`
@@ -33,7 +33,6 @@ different set for `frontend/package.json` in the same repository.
 ```javascript
 module.exports = {
   labels: ['upgrade'],
-  depTypes: ['dependencies', 'devDependencies'],
   repositories: [
     {
       repository: 'singapore/repo1',
@@ -47,21 +46,16 @@ module.exports = {
     },
     {
       repository: 'singapore/repo2',
-      depTypes: [
-        'dependencies',
-        'devDependencies',
-        {
-          depType: 'optionalDependencies',
-          labels: ['renovate', 'optional'],
-        },
-      ],
+      optionalDependencies: {
+        labels: ['renovate', 'optional'],
+      },
       labels: ['renovate'],
     },
     'singapore/repo3',
   ],
   packages: [
     {
-      package: 'jquery',
+      packageNames: ['jquery'],
       labels: ['jquery', 'uhoh'],
     },
   ],
