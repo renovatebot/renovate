@@ -2,6 +2,7 @@ const changelog = require('changelog');
 const changelogHelper = require('../../../lib/workers/pr/changelog');
 
 jest.mock('changelog');
+jest.mock('../../../lib/manager/npm/registry');
 
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
