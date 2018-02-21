@@ -13,6 +13,10 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       };
     });
     it('does nothing if branch is up to date', async () => {
+      platform.getFile.mockReturnValueOnce('{}'); // package.json
+      platform.getFile.mockReturnValueOnce(
+        JSON.stringify(defaultConfig.onboardingConfig, null, 2) + '\n'
+      ); // renovate.json
       platform.getBranchPr.mockReturnValueOnce({ number: 1 });
       platform.getPr.mockReturnValueOnce({ isStale: false });
       await rebaseOnboardingBranch(config);
