@@ -431,9 +431,9 @@ The default behaviour for Renovate is to only use group names for branches and P
 
 Configuration for lock file maintenance.
 
-| name    | value                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type    | configuration object                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| name    | value                                                                                                                                                           |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type    | configuration object                                                                                                                                            |
 | default | {% raw %}{<br />&nbsp;&nbsp;"enabled": false,<br />&nbsp;&nbsp;"recreateClosed": true,<br />&nbsp;&nbsp;"schedule": ["before 5am on monday"]<br />}{% endraw %} |
 
 By setting enabled=true, this means that the default behaviour is to "maintain" lock files for each `package.json` if they exist already. "Maintaining" a lock file means recreating it to get an up-to-date version and committing that. Supported lock files include `package-lock.json` (npm >= 5) and `yarn.lock` (yarn).
