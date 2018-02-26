@@ -4433,9 +4433,9 @@ pn@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.0.0.tgz#1cf5a30b0d806cd18f88fc41a6b5d4ad615b3ba9"
 
-pnpm@1.35.0:
-  version "1.35.0"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.35.0.tgz#2f898ec508bb6f2e4d9d429f66823cf017da2638"
+pnpm@1.35.1:
+  version "1.35.1"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.35.1.tgz#7eb1265daa9da18dab7a7b1645747cd046c42f33"
 
 prelude-ls@~1.1.2:
   version "1.1.2"
