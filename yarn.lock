@@ -3739,9 +3739,9 @@ nerf-dart@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/nerf-dart/-/nerf-dart-1.0.0.tgz#e6dab7febf5ad816ea81cf5c629c5a0ebde72c1a"
 
-nock@9.2.1:
-  version "9.2.1"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-9.2.1.tgz#7e73561277c3e8f2287e385d3d04c7223a54faea"
+nock@9.2.2:
+  version "9.2.2"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-9.2.2.tgz#3f302e577965c67bcbdb913cf42402c19ec1b2db"
   dependencies:
     chai "^4.1.2"
     debug "^3.1.0"
