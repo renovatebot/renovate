@@ -158,6 +158,31 @@ Array [
 ]
 `;
 
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns minor update if automerging both patch and minor 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "0.9.7",
+    "isMinor": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "type": "minor",
+    "unpublishable": false,
+  },
+  Object {
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "1.4.1",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`workers/package/versions .determineUpgrades(npmDep, config) returns minor update if separate patches not configured 1`] = `
 Array [
   Object {
