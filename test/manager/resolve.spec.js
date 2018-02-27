@@ -14,8 +14,13 @@ describe('manager/resolve', () => {
   describe('resolvePackageFiles()', () => {
     it('handles wrong filenames', async () => {
       config.packageFiles = ['wrong.txt'];
-      const res = await resolvePackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
+      let e;
+      try {
+        await resolvePackageFiles(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
     it('uses packageFiles if already configured and raises error if not found', async () => {
       config.packageFiles = [
