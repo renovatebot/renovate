@@ -465,6 +465,7 @@ Object {
     "sha": "5678",
   },
   "branchName": undefined,
+  "canMerge": true,
   "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",

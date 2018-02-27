@@ -169,6 +169,7 @@ Object {
   },
   "body": undefined,
   "branchName": "some-branch",
+  "canMerge": true,
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Merge Request #91",
@@ -206,6 +207,7 @@ exports[`platform/gitlab getPr(prNo) returns the PR 1`] = `
 Object {
   "body": "a merge request",
   "branchName": "some-branch",
+  "canMerge": false,
   "canRebase": true,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",

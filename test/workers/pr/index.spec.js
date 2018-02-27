@@ -36,6 +36,7 @@ describe('workers/pr', () => {
         head: {
           ref: 'somebranch',
         },
+        canMerge: true,
       };
     });
     afterEach(() => {
@@ -67,7 +68,7 @@ describe('workers/pr', () => {
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
-      pr.mergeable_state = 'unstable';
+      pr.canMerge = undefined;
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
