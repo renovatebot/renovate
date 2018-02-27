@@ -43,9 +43,9 @@ Another example of adjusting schedules to fit with your workflow might be if you
 
 **Caution**: You need to make sure you leave yourself and Renovate enough time in a week to actually get all your updating and merging done. There are multiple reasons why Renovate may need to "recreate" PRs after you merge another:
 
-1. Conflict with `package.json` (sometimes)
-2. Conflict with lock files (often)
-3. If you have configure Renovate or GitHub that PRs must always be kept up-to-date with master
+1.  Conflict with `package.json` (sometimes)
+2.  Conflict with lock files (often)
+3.  If you have configure Renovate or GitHub that PRs must always be kept up-to-date with master
 
 Any of the above reasons can lead to a Renovate branch being considered "stale" and then Renovate needs to rebase it off `master` before you can test and merge again, and Renovate won't do this until it's back in schedule.
 
@@ -138,7 +138,7 @@ As mentioned earlier. using lock files greatly increase the chance that merging 
 
 First of all, if you every have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovateapp/renovate). Our philosophy is:
 
-1. Nearly everyone should probably use Renovate-like dependency update automation
-2. Over time, you should "see" Renovate less and less
+1.  Nearly everyone should probably use Renovate-like dependency update automation
+2.  Over time, you should "see" Renovate less and less
 
 One of our hopes with preset configs is that a set of "sensible" configs can be maintained by the community that combine grouping, scheduling and automerging to reduce the amount of noise in repositories with little downside or increased risk. Such lists could be maintained and used somewhat like Adblock lists - kept up to date by maintainers but for the majority of users they are simply trusted/automatic/invisible.

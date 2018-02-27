@@ -764,11 +764,11 @@ Rate limit PRs to maximum x created per hour. 0 (default) means no limit.
 
 This setting - if enabled - helps slow down Renovate, particularly during the onboarding phase. What may happen without this setting is:
 
-1. Onboarding PR is created
-2. User merges onboarding PR to activate Renovate
-3. Renovate creates a "Pin Dependencies" PR (if necessary)
-4. User merges Pin PR
-5. Renovate then creates every single upgrade PR necessary - potentially dozens
+1.  Onboarding PR is created
+2.  User merges onboarding PR to activate Renovate
+3.  Renovate creates a "Pin Dependencies" PR (if necessary)
+4.  User merges Pin PR
+5.  Renovate then creates every single upgrade PR necessary - potentially dozens
 
 The above can result in swamping CI systems, as well as a lot of retesting if branches need to be rebased every time one is merged. Instead, if `prHourlyLimit` is set to a value like 1 or 2, it will mean that Renovate creates at most that many new PRs within each hourly period (:00-:59). So the project should still result in all PRs created perhaps within the first 24 hours maximum, but at a rate that may allow users to merge them once they pass tests. It does not place a limit on the number of _concurrently open_ PRs - only on the rate they are created.
 
@@ -1050,8 +1050,8 @@ npm-only.
 
 Renovate's "auto" strategy for updating versions is like this:
 
-1. If the existing version already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
-2. Otherwise, replace it. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
+1.  If the existing version already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
+2.  Otherwise, replace it. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 You can override logic either way, by setting it to `replace` or `widen`. e.g. if the currentVersion is `"^1.0.0 || ^2.0.0"` but you configure `versionStrategy=replace` then the result will be `"^3.0.0"`.
 
