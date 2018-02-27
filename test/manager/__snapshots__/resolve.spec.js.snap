@@ -45,6 +45,7 @@ Array [
 exports[`manager/resolve resolvePackageFiles() detects meteor and docker and travis and bazel 1`] = `
 Array [
   Object {
+    "content": "{}",
     "enabled": true,
     "manager": "meteor",
     "packageFile": "package.js",

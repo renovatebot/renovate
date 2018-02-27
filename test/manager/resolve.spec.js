@@ -97,7 +97,8 @@ describe('manager/resolve', () => {
         '.travis.yml',
         'WORKSPACE',
       ];
-      platform.getFile.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile.js
+      platform.getFile.mockReturnValueOnce('{}'); // package.js
+      platform.getFile.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile
       platform.getFile.mockReturnValueOnce('hello: world\n'); // Dockerfile
       platform.getFile.mockReturnValueOnce('# travis'); // .travis.yml
       platform.getFile.mockReturnValueOnce('# WORKSPACE'); // Dockerfile
@@ -110,6 +111,7 @@ describe('manager/resolve', () => {
         'other/Dockerfile',
         '.travis.yml',
         'WORKSPACE',
+        'package.js',
       ];
       platform.getFile.mockReturnValueOnce('# comment\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
