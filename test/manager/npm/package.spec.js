@@ -1,9 +1,9 @@
-const npmApi = require('../../../lib/manager/npm/registry');
+const npmApi = require('../../../lib/datasource/npm');
 const versions = require('../../../lib/workers/package/versions');
 const npm = require('../../../lib/manager/npm/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
-jest.mock('../../../lib/manager/npm/registry');
+jest.mock('../../../lib/datasource/npm');
 npmApi.getDependency = jest.fn();
 
 describe('lib/workers/package/npm', () => {

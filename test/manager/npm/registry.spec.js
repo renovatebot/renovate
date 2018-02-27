@@ -1,4 +1,4 @@
-const npm = require('../../../lib/manager/npm/registry');
+const npm = require('../../../lib/datasource/npm');
 const registryAuthToken = require('registry-auth-token');
 const nock = require('nock');
 
