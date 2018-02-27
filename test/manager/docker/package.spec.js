@@ -1,4 +1,4 @@
-const dockerApi = require('../../../lib/manager/docker/registry');
+const dockerApi = require('../../../lib/datasource/docker');
 const docker = require('../../../lib/manager/docker/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 

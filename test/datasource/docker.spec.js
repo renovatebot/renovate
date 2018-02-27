@@ -1,4 +1,4 @@
-const docker = require('../../../lib/manager/docker/registry');
+const docker = require('../../lib/datasource/docker');
 const got = require('got');
 
 jest.mock('got');
