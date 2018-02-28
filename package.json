@@ -97,7 +97,7 @@
     "eslint-plugin-promise": "3.6.0",
     "jest": "22.4.2",
     "mockdate": "2.0.2",
-    "nock": "9.2.2",
+    "nock": "9.2.3",
     "prettier": "1.11.0",
     "semantic-release": "12.4.1"
   },
