@@ -240,15 +240,22 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getBranchPr(branchName)', () => {
-    it('should return null if no PR exists', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [],
-      }));
+    it('should return null if branch does not exist', async () => {
+      get.mockReturnValueOnce({ statusCode: 500 }); // branchExists
       const pr = await gitlab.getBranchPr('somebranch');
-      expect(get.mock.calls).toMatchSnapshot();
+      expect(pr).toBe(null);
+    });
+    it('should return null if no PR exists', async () => {
+      get.mockReturnValueOnce({ statusCode: 200 }); // branchExists
+      get.mockReturnValueOnce({
+        // branchExists
+        body: [],
+      });
+      const pr = await gitlab.getBranchPr('somebranch');
       expect(pr).toBe(null);
     });
     it('should return the PR object', async () => {
+      get.mockReturnValueOnce({ statusCode: 200 }); // branchExists
       get.mockReturnValueOnce({
         body: [{ number: 91, source_branch: 'somebranch' }],
       });
@@ -266,7 +273,6 @@ describe('platform/gitlab', () => {
       });
       get.mockReturnValueOnce({ body: 'foo' });
       const pr = await gitlab.getBranchPr('somebranch');
-      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
     });
   });
@@ -581,6 +587,25 @@ describe('platform/gitlab', () => {
           commit: {},
         },
       });
+      const pr = await gitlab.getPr(12345);
+      expect(pr).toMatchSnapshot();
+    });
+    it('returns the PR with nonexisting branch', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          id: 1,
+          iid: 12345,
+          description: 'a merge request',
+          state: 'open',
+          merge_status: 'cannot_be_merged',
+          source_branch: 'some-branch',
+        },
+      }));
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
     });
