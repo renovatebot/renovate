@@ -15,6 +15,7 @@ describe('lib/workers/dep-type/index', () => {
     beforeEach(() => {
       config = {
         packageFile: 'package.json',
+        manager: 'npm',
         ignoreDeps: ['a', 'b'],
         monorepoPackages: ['e'],
         workspaceDir: '.',
@@ -49,7 +50,7 @@ describe('lib/workers/dep-type/index', () => {
       expect(res).toHaveLength(2);
     });
     it('returns upgrades for meteor', async () => {
-      config.packageFile = 'package.js';
+      config.manager = 'meteor';
       const content = fs.readFileSync(
         path.resolve('test/_fixtures/meteor/package-1.js'),
         'utf8'
@@ -58,7 +59,7 @@ describe('lib/workers/dep-type/index', () => {
       expect(res).toHaveLength(6);
     });
     it('returns upgrades for bazel', async () => {
-      config.packageFile = 'WORKSPACE';
+      config.manager = 'bazel';
       const content = fs.readFileSync(
         path.resolve('test/_fixtures/bazel/WORKSPACE1'),
         'utf8'
@@ -67,7 +68,7 @@ describe('lib/workers/dep-type/index', () => {
       expect(res).toHaveLength(4);
     });
     it('returns upgrades for travis', async () => {
-      config.packageFile = '.travis.yml';
+      config.manager = 'node';
       const content = fs.readFileSync(
         path.resolve('test/_fixtures/node/travis.yml'),
         'utf8'
@@ -76,13 +77,13 @@ describe('lib/workers/dep-type/index', () => {
       expect(res).toHaveLength(1);
     });
     it('handles malformed meteor', async () => {
-      config.packageFile = 'package.js';
+      config.manager = 'meteor';
       const content = 'blah';
       const res = await depTypeWorker.renovateDepType(content, config);
       expect(res).toHaveLength(0);
     });
     it('returns upgrades for docker', async () => {
-      config.packageFile = 'Dockerfile';
+      config.manager = 'docker';
       config.currentFrom = 'node';
       const res = await depTypeWorker.renovateDepType(
         '# a comment\nFROM something\n',
@@ -91,7 +92,7 @@ describe('lib/workers/dep-type/index', () => {
       expect(res).toHaveLength(1);
     });
     it('ignores Dockerfiles with no FROM', async () => {
-      config.packageFile = 'Dockerfile';
+      config.manager = 'docker';
       config.currentFrom = 'node';
       const res = await depTypeWorker.renovateDepType(
         '# a comment\nRUN something\n',

@@ -31,18 +31,23 @@ describe('workers/repository/updates/determine', () => {
       config.packageFiles = [
         {
           packageFile: 'Dockerfile',
+          manager: 'docker',
         },
         {
           packageFile: 'backend/package.json',
+          manager: 'npm',
         },
         {
           packageFile: 'frontend/package.js',
+          manager: 'meteor',
         },
         {
           packageFile: '.travis.yml',
+          manager: 'node',
         },
         {
           packageFile: 'WORKSPACE',
+          manager: 'bazel',
         },
       ];
       packageFileWorker.renovateDockerfile.mockReturnValueOnce([

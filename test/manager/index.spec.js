@@ -134,7 +134,7 @@ describe('manager', () => {
     it('recurses if setNewValue error', async () => {
       config.parentBranch = 'some-branch';
       config.canRebase = true;
-      config.upgrades = [{ packageFile: 'package.json' }];
+      config.upgrades = [{ packageFile: 'package.json', manager: 'npm' }];
       npmUpdater.setNewValue.mockReturnValueOnce(null);
       npmUpdater.setNewValue.mockReturnValueOnce('some content');
       const res = await getUpdatedPackageFiles(config);
@@ -154,11 +154,11 @@ describe('manager', () => {
       config.parentBranch = 'some-branch';
       config.canRebase = true;
       config.upgrades = [
-        { packageFile: 'package.json' },
-        { packageFile: 'Dockerfile' },
-        { packageFile: 'packages/foo/package.js' },
-        { packageFile: '.travis.yml' },
-        { packageFile: 'WORKSPACE' },
+        { packageFile: 'package.json', manager: 'npm' },
+        { packageFile: 'Dockerfile', manager: 'docker' },
+        { packageFile: 'packages/foo/package.js', manager: 'meteor' },
+        { packageFile: '.travis.yml', manager: 'node' },
+        { packageFile: 'WORKSPACE', manager: 'bazel' },
       ];
       platform.getFile.mockReturnValueOnce('old content 1');
       platform.getFile.mockReturnValueOnce('old content 1');
