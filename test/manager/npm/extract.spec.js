@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const packageJson = require('../../../lib/workers/dep-type/package-json');
+const npmExtract = require('../../../lib/manager/npm/extract');
 
 function readFixture(fixture) {
   return fs.readFileSync(
@@ -13,9 +13,9 @@ const input01Content = readFixture('inputs/01.json');
 const input02Content = readFixture('inputs/02.json');
 
 describe('workers/dep-type/package-json', () => {
-  describe('.extractDependencies(packageJson, depType)', () => {
+  describe('.extractDependencies(npmExtract, depType)', () => {
     it('returns an array of correct length (dependencies)', () => {
-      const extractedDependencies = packageJson.extractDependencies(
+      const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input01Content),
         'dependencies'
       );
@@ -23,7 +23,7 @@ describe('workers/dep-type/package-json', () => {
       extractedDependencies.should.have.length(6);
     });
     it('returns an array of correct length (devDependencies)', () => {
-      const extractedDependencies = packageJson.extractDependencies(
+      const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input01Content),
         'devDependencies'
       );
@@ -31,7 +31,7 @@ describe('workers/dep-type/package-json', () => {
       extractedDependencies.should.have.length(4);
     });
     it('each element contains non-null depType, depName, currentVersion', () => {
-      const extractedDependencies = packageJson.extractDependencies(
+      const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input01Content),
         'dependencies'
       );
@@ -41,7 +41,7 @@ describe('workers/dep-type/package-json', () => {
         .should.eql(true);
     });
     it('supports null devDependencies indirect', () => {
-      const extractedDependencies = packageJson.extractDependencies(
+      const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input02Content),
         'dependencies'
       );
@@ -49,7 +49,7 @@ describe('workers/dep-type/package-json', () => {
       extractedDependencies.should.have.length(6);
     });
     it('supports null', () => {
-      const extractedDependencies = packageJson.extractDependencies(
+      const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input02Content),
         'fooDependencies'
       );
@@ -60,7 +60,7 @@ describe('workers/dep-type/package-json', () => {
       const packageLockParsed = {
         dependencies: { chalk: { version: '2.0.1' } },
       };
-      const extractedDependencies = packageJson.extractDependencies(
+      const extractedDependencies = npmExtract.extractDependencies(
         { dependencies: { chalk: '^2.0.0', foo: '^1.0.0' } },
         'dependencies',
         packageLockParsed
@@ -74,7 +74,7 @@ describe('workers/dep-type/package-json', () => {
       const yarnLockParsed = {
         object: { 'chalk@^2.0.0': { version: '2.0.1' } },
       };
-      const extractedDependencies = packageJson.extractDependencies(
+      const extractedDependencies = npmExtract.extractDependencies(
         { dependencies: { chalk: '^2.0.0', foo: '^1.0.0' } },
         'dependencies',
         undefined,
@@ -86,7 +86,7 @@ describe('workers/dep-type/package-json', () => {
       expect(extractedDependencies[1].lockedVersion).toBeUndefined();
     });
     it('handles lock error', () => {
-      const extractedDependencies = packageJson.extractDependencies(
+      const extractedDependencies = npmExtract.extractDependencies(
         { dependencies: { chalk: '^2.0.0', foo: '^1.0.0' } },
         'dependencies',
         true

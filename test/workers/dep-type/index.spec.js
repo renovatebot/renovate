@@ -1,10 +1,10 @@
 const path = require('path');
 const fs = require('fs');
-const packageJson = require('../../../lib/workers/dep-type/package-json');
+const npmExtract = require('../../../lib/manager/npm/extract');
 const pkgWorker = require('../../../lib/workers/package/index');
 const depTypeWorker = require('../../../lib/workers/dep-type/index');
 
-jest.mock('../../../lib/workers/dep-type/package-json');
+jest.mock('../../../lib/manager/npm/extract');
 jest.mock('../../../lib/workers/package/index');
 
 pkgWorker.renovatePackage = jest.fn(() => ['a']);
@@ -27,12 +27,12 @@ describe('lib/workers/dep-type/index', () => {
       expect(res).toMatchObject([]);
     });
     it('returns empty if no deps found', async () => {
-      packageJson.extractDependencies.mockReturnValueOnce([]);
+      npmExtract.extractDependencies.mockReturnValueOnce([]);
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toMatchObject([]);
     });
     it('returns empty if all deps are filtered', async () => {
-      packageJson.extractDependencies.mockReturnValueOnce([
+      npmExtract.extractDependencies.mockReturnValueOnce([
         { depName: 'a' },
         { depName: 'b' },
         { depName: 'e' },
@@ -41,7 +41,7 @@ describe('lib/workers/dep-type/index', () => {
       expect(res).toMatchObject([]);
     });
     it('returns combined upgrades if all deps are filtered', async () => {
-      packageJson.extractDependencies.mockReturnValueOnce([
+      npmExtract.extractDependencies.mockReturnValueOnce([
         { depName: 'a' },
         { depName: 'c' },
         { depName: 'd' },
