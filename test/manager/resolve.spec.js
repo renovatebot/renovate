@@ -1,5 +1,6 @@
-const { resolvePackageFiles } = require('../../lib/manager/resolve');
 const manager = require('../../lib/manager');
+
+const { resolvePackageFiles } = manager;
 
 let config;
 beforeEach(() => {
@@ -33,8 +34,9 @@ describe('manager/resolve', () => {
     });
     it('detect package.json and adds error if cannot parse (onboarding)', async () => {
       manager.detectPackageFiles = jest.fn(() => [
-        { packageFile: 'package.json' },
+        { packageFile: 'package.json', manager: 'npm' },
       ]);
+      platform.getFileList.mockReturnValue(['package.json']);
       platform.getFile.mockReturnValueOnce('not json');
       const res = await resolvePackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
@@ -42,8 +44,9 @@ describe('manager/resolve', () => {
     });
     it('detect package.json and throws error if cannot parse (onboarded)', async () => {
       manager.detectPackageFiles = jest.fn(() => [
-        { packageFile: 'package.json' },
+        { packageFile: 'package.json', manager: 'npm' },
       ]);
+      platform.getFileList.mockReturnValue(['package.json']);
       platform.getFile.mockReturnValueOnce('not json');
       config.repoIsOnboarded = true;
       let e;
@@ -57,7 +60,7 @@ describe('manager/resolve', () => {
     });
     it('clears npmrc and yarnrc fields', async () => {
       manager.detectPackageFiles = jest.fn(() => [
-        { packageFile: 'package.json' },
+        { packageFile: 'package.json', manager: 'npm' },
       ]);
       const pJson = {
         name: 'something',
@@ -67,16 +70,17 @@ describe('manager/resolve', () => {
         },
       };
       platform.getFile.mockReturnValueOnce(JSON.stringify(pJson));
-      platform.getFileList.mockReturnValueOnce([]);
+      platform.getFileList.mockReturnValue(['package.json']);
       const res = await resolvePackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
     it('detects accompanying files', async () => {
       manager.detectPackageFiles = jest.fn(() => [
-        { packageFile: 'package.json' },
+        { packageFile: 'package.json', manager: 'npm' },
       ]);
-      platform.getFileList.mockReturnValueOnce([
+      platform.getFileList.mockReturnValue([
+        'package.json',
         'yarn.lock',
         'package-lock.json',
         'shrinkwrap.yaml',
@@ -143,9 +147,9 @@ describe('manager/resolve', () => {
     });
     it('strips npmrc with NPM_TOKEN', async () => {
       manager.detectPackageFiles = jest.fn(() => [
-        { packageFile: 'package.json' },
+        { packageFile: 'package.json', manager: 'npm' },
       ]);
-      platform.getFileList.mockReturnValueOnce(['package.json', '.npmrc']);
+      platform.getFileList.mockReturnValue(['package.json', '.npmrc']);
       platform.getFile.mockReturnValueOnce(
         '{"name": "package.json", "version": "0.0.1"}'
       );
