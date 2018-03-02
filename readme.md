@@ -41,8 +41,8 @@ Renovate was released in 2017 and is now widely used in the developer community.
 
 ## Using Renovate
 
-The easiest way to use Renovate if you are on GitHub is to enable the free Renovate app. Go to
-[https://github.com/apps/renovate](https://github.com/apps/renovate) to enable
+The easiest way to use Renovate if you are on GitHub is to use the Renovate app. Go to
+[https://github.com/apps/renovate](https://github.com/apps/renovate) to install
 it now.
 
 ## Configuration
