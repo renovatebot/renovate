@@ -14,6 +14,23 @@ Also, be sure to check out Renovate's [shareable config presets](/docs/configura
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovateapp/config-help](https://github.com/renovateapp/config-help) where it will be promptly answered.
 
+## allowedVersions
+
+A semver range defining allowed versions for dependencies
+
+| name | value  |
+| ---- | ------ |
+| type | string |
+
+Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could defined this to be `<= 1.5` or `< 1.6.0`:
+
+```
+  "packageRules": [{
+    "packageNames": ["angular"],
+    "allowedVersions": "<=1.5"
+  }]
+```
+
 ## assignees
 
 Assignees for Pull Requests

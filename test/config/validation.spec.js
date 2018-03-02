@@ -18,6 +18,7 @@ describe('config/validation', () => {
     });
     it('errors for all types', () => {
       const config = {
+        allowedVersions: 'foo',
         enabled: 1,
         schedule: ['every 15 mins every weekday'],
         labels: 5,
@@ -31,7 +32,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(6);
+      expect(errors).toHaveLength(7);
       expect(errors).toMatchSnapshot();
     });
   });
