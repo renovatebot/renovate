@@ -23,7 +23,7 @@ describe('workers/repository/updates/determine', () => {
           packageFile: 'backend/package.json',
         },
       ];
-      packageFileWorker.renovatePackageFile.mockReturnValue([]);
+      packageFileWorker.renovatePackageJson.mockReturnValue([]);
       const res = await determineRepoUpgrades(config);
       expect(res.upgrades).toHaveLength(0);
     });
@@ -53,7 +53,7 @@ describe('workers/repository/updates/determine', () => {
       packageFileWorker.renovateDockerfile.mockReturnValueOnce([
         { depName: 'a' },
       ]);
-      packageFileWorker.renovatePackageFile.mockReturnValueOnce([
+      packageFileWorker.renovatePackageJson.mockReturnValueOnce([
         { depName: 'b' },
         { depName: 'c' },
       ]);
