@@ -4,6 +4,10 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
 Array [
   Object {
     "depName": "Configuration Error",
+    "message": "Invalid semver range for allowedVersions: \`foo\`",
+  },
+  Object {
+    "depName": "Configuration Error",
     "message": "Configuration option \`enabled\` should be boolean. Found: 1 (number)",
   },
   Object {
