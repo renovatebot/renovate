@@ -13,12 +13,12 @@ describe('lib/workers/package/node', () => {
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
-      config.currentVersions = ['6', '8'];
+      config.currentVersion = ['6', '8'];
       config.supportPolicy = ['lts_active'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns result if needing updates', async () => {
-      config.currentVersions = ['6', '8'];
+      config.currentVersion = ['6', '8'];
       config.supportPolicy = ['lts'];
       expect(await node.getPackageUpdates(config)).toMatchSnapshot();
     });

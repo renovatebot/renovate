@@ -11,21 +11,21 @@ describe('manager/travis/update', () => {
   describe('setNewValue', () => {
     it('updates values', () => {
       const upgrade = {
-        newVersions: ['6', '8'],
+        newVersion: ['6', '8'],
       };
       const res = nodefile.setNewValue(content, upgrade);
       expect(res).toMatchSnapshot();
     });
     it('falls back to 2 spaces', () => {
       const upgrade = {
-        newVersions: ['6', '8'],
+        newVersion: ['6', '8'],
       };
       const res = nodefile.setNewValue('hello: world', upgrade);
       expect(res).toMatchSnapshot();
     });
     it('returns null if error', () => {
       const upgrade = {
-        newVersions: '6',
+        newVersion: '6',
       };
       const res = nodefile.setNewValue(content, upgrade);
       expect(res).toBe(null);
