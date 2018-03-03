@@ -15,6 +15,7 @@ describe('packageFileWorker', () => {
       config = {
         ...defaultConfig,
         packageFile: 'package.json',
+        manager: 'npm',
         content: {},
         repoIsOnboarded: true,
         npmrc: '# nothing',
@@ -92,18 +93,19 @@ describe('packageFileWorker', () => {
       config = {
         ...defaultConfig,
         packageFile: 'package.js',
+        manager: 'meteor',
         repoIsOnboarded: true,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);
     });
     it('returns empty if disabled', async () => {
       config.enabled = false;
-      const res = await packageFileWorker.renovateMeteorPackageFile(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toEqual([]);
     });
     it('returns upgrades', async () => {
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
-      const res = await packageFileWorker.renovateMeteorPackageFile(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(2);
     });
   });
@@ -113,18 +115,19 @@ describe('packageFileWorker', () => {
       config = {
         ...defaultConfig,
         packageFile: 'WORKSPACE',
+        manager: 'bazel',
         repoIsOnboarded: true,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);
     });
     it('returns empty if disabled', async () => {
       config.enabled = false;
-      const res = await packageFileWorker.renovateBazelFile(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toEqual([]);
     });
     it('returns upgrades', async () => {
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
-      const res = await packageFileWorker.renovateBazelFile(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(2);
     });
   });
@@ -134,18 +137,19 @@ describe('packageFileWorker', () => {
       config = {
         ...defaultConfig,
         packageFile: '.travis.yml',
+        manager: 'node',
         repoIsOnboarded: true,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);
     });
     it('returns empty if disabled', async () => {
       config.enabled = false;
-      const res = await packageFileWorker.renovateNodeFile(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toEqual([]);
     });
     it('returns upgrades', async () => {
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}]);
-      const res = await packageFileWorker.renovateNodeFile(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(1);
     });
   });
@@ -155,18 +159,19 @@ describe('packageFileWorker', () => {
       config = {
         ...defaultConfig,
         packageFile: 'Dockerfile',
+        manager: 'docker',
         repoIsOnboarded: true,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);
     });
     it('returns empty if disabled', async () => {
       config.enabled = false;
-      const res = await packageFileWorker.renovateDockerfile(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toEqual([]);
     });
     it('returns upgrades', async () => {
       depTypeWorker.renovateDepType.mockReturnValueOnce([{}, {}]);
-      const res = await packageFileWorker.renovateDockerfile(config);
+      const res = await packageFileWorker.renovatePackageFile(config);
       expect(res).toHaveLength(2);
     });
   });

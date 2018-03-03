@@ -1,10 +1,10 @@
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 const manager = require('../../lib/manager');
-const npmUpdater = require('../../lib/manager/npm/update');
-const meteorUpdater = require('../../lib/manager/meteor/update');
-const dockerUpdater = require('../../lib/manager/docker/update');
-const nodeUpdater = require('../../lib/manager/node/update');
-const bazelUpdater = require('../../lib/manager/bazel/update');
+const npm = require('../../lib/manager/npm');
+const meteor = require('../../lib/manager/meteor');
+const docker = require('../../lib/manager/docker');
+const node = require('../../lib/manager/node');
+const bazel = require('../../lib/manager/bazel');
 
 const path = require('path');
 const fs = require('fs-extra');
@@ -120,11 +120,11 @@ describe('manager', () => {
         ...defaultConfig,
         parentBranch: 'some-branch',
       };
-      npmUpdater.setNewValue = jest.fn();
-      dockerUpdater.setNewValue = jest.fn();
-      meteorUpdater.setNewValue = jest.fn();
-      nodeUpdater.setNewValue = jest.fn();
-      bazelUpdater.setNewValue = jest.fn();
+      npm.setNewValue = jest.fn();
+      docker.setNewValue = jest.fn();
+      meteor.setNewValue = jest.fn();
+      node.setNewValue = jest.fn();
+      bazel.setNewValue = jest.fn();
     });
     it('returns empty if lock file maintenance', async () => {
       config.upgrades = [{ type: 'lockFileMaintenance' }];
@@ -135,13 +135,13 @@ describe('manager', () => {
       config.parentBranch = 'some-branch';
       config.canRebase = true;
       config.upgrades = [{ packageFile: 'package.json', manager: 'npm' }];
-      npmUpdater.setNewValue.mockReturnValueOnce(null);
-      npmUpdater.setNewValue.mockReturnValueOnce('some content');
+      npm.setNewValue.mockReturnValueOnce(null);
+      npm.setNewValue.mockReturnValueOnce('some content');
       const res = await getUpdatedPackageFiles(config);
       expect(res.updatedPackageFiles).toHaveLength(1);
     });
     it('errors if cannot rebase', async () => {
-      config.upgrades = [{ packageFile: 'package.json' }];
+      config.upgrades = [{ packageFile: 'package.json', manager: 'npm' }];
       let e;
       try {
         await getUpdatedPackageFiles(config);
@@ -166,12 +166,12 @@ describe('manager', () => {
       platform.getFile.mockReturnValueOnce('old content 3');
       platform.getFile.mockReturnValueOnce('old travis');
       platform.getFile.mockReturnValueOnce('old WORKSPACE');
-      npmUpdater.setNewValue.mockReturnValueOnce('new content 1');
-      npmUpdater.setNewValue.mockReturnValueOnce('new content 1+');
-      dockerUpdater.setNewValue.mockReturnValueOnce('new content 2');
-      meteorUpdater.setNewValue.mockReturnValueOnce('old content 3');
-      nodeUpdater.setNewValue.mockReturnValueOnce('old travis');
-      bazelUpdater.setNewValue.mockReturnValueOnce('old WORKSPACE');
+      npm.setNewValue.mockReturnValueOnce('new content 1');
+      npm.setNewValue.mockReturnValueOnce('new content 1+');
+      docker.setNewValue.mockReturnValueOnce('new content 2');
+      meteor.setNewValue.mockReturnValueOnce('old content 3');
+      node.setNewValue.mockReturnValueOnce('old travis');
+      bazel.setNewValue.mockReturnValueOnce('old WORKSPACE');
       const res = await getUpdatedPackageFiles(config);
       expect(res.updatedPackageFiles).toHaveLength(2);
     });
