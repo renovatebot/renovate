@@ -41,7 +41,7 @@
     "@yarnpkg/lockfile": "1.0.0",
     "bunyan": "1.8.12",
     "cacache": "10.0.4",
-    "chalk": "2.3.1",
+    "chalk": "2.3.2",
     "changelog": "1.4.2",
     "child-process-promise": "2.2.1",
     "commander": "2.14.1",
