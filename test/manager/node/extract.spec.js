@@ -1,6 +1,6 @@
-const { extractDependencies } = require('../../../lib/manager/node/extract');
+const { extractDependencies } = require('../../../lib/manager/travis/extract');
 
-describe('lib/manager/node/extract', () => {
+describe('lib/manager/travis/extract', () => {
   describe('extractDependencies()', () => {
     let config;
     beforeEach(() => {

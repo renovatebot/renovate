@@ -68,7 +68,7 @@ describe('lib/workers/dep-type/index', () => {
       expect(res).toHaveLength(4);
     });
     it('returns upgrades for travis', async () => {
-      config.manager = 'node';
+      config.manager = 'travis';
       const content = fs.readFileSync(
         path.resolve('test/_fixtures/node/travis.yml'),
         'utf8'

@@ -137,7 +137,7 @@ describe('packageFileWorker', () => {
       config = {
         ...defaultConfig,
         packageFile: '.travis.yml',
-        manager: 'node',
+        manager: 'travis',
         repoIsOnboarded: true,
       };
       depTypeWorker.renovateDepType.mockReturnValue([]);

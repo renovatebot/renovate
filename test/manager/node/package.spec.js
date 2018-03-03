@@ -1,4 +1,4 @@
-const node = require('../../../lib/manager/node/package');
+const node = require('../../../lib/manager/travis/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 describe('lib/workers/package/node', () => {
