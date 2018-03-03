@@ -509,17 +509,6 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Set this to true if you wish to receive one PR for every separate major version upgrade of a dependency. e.g. if you are on webpack@v1 currently then default behaviour is a PR for upgrading to webpack@v3 and not for webpack@v2. If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
-## node
-
-Configuration specific for node.js version updates (e.g. `.travis.yml`).
-
-| name    | value                                      |
-| ------- | ------------------------------------------ |
-| type    | object                                     |
-| default | { enabled: false, supportPolicy: ['lts'] } |
-
-It's set to false by default as we cannot 100% besure what supportPolicy you would want.
-
 ## npm
 
 Configuration specific for npm dependency updates (`package.json`).
@@ -1014,6 +1003,17 @@ Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)
 | default | `Etc/UTC` |
 
 It is only recommended to set this field if you wish to use the `schedules` feature and want to write them in your local timezone. Please see the above link for valid timezone names.
+
+## travis
+
+Configuration specific for .travis.yml node.js version updates.
+
+| name    | value                                      |
+| ------- | ------------------------------------------ |
+| type    | object                                     |
+| default | { enabled: false, supportPolicy: ['lts'] } |
+
+It's set to false by default as we cannot 100% be sure what supportPolicy you would want.
 
 ## unpublishSafe
 
