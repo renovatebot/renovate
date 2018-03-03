@@ -4,6 +4,7 @@ const npm = require('../../../lib/manager/npm/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 jest.mock('../../../lib/datasource/npm');
+jest.mock('../../../lib/manager/_helpers/node/package');
 npmApi.getDependency = jest.fn();
 
 describe('lib/workers/package/npm', () => {
@@ -17,10 +18,17 @@ describe('lib/workers/package/npm', () => {
         currentVersion: '1.0.0',
       };
     });
-    it('calls engines function', async () => {
+    it('skips non-node engines', async () => {
       config.depType = 'engines';
       const res = await npm.getPackageUpdates(config);
       expect(res).toHaveLength(0);
+    });
+    it('calls node for node engines', async () => {
+      config.depType = 'engines';
+      config.depName = 'node';
+      config.currentVersion = '8.9.0';
+      const res = await npm.getPackageUpdates(config);
+      expect(res).toBeUndefined();
     });
     it('returns if using a file reference', async () => {
       config.currentVersion = 'file:../sibling/package.json';
