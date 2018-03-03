@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
-const nodefile = require('../../../lib/manager/node/update');
+const nodefile = require('../../../lib/manager/travis/update');
 
 const content = fs.readFileSync(
   path.resolve('test/_fixtures/node/travis.yml'),
   'utf8'
 );
 
-describe('manager/node/update', () => {
+describe('manager/travis/update', () => {
   describe('setNewValue', () => {
     it('updates values', () => {
       const upgrade = {

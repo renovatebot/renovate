@@ -3,7 +3,7 @@ const manager = require('../../lib/manager');
 const npm = require('../../lib/manager/npm');
 const meteor = require('../../lib/manager/meteor');
 const docker = require('../../lib/manager/docker');
-const node = require('../../lib/manager/node');
+const node = require('../../lib/manager/travis');
 const bazel = require('../../lib/manager/bazel');
 
 const path = require('path');
@@ -157,7 +157,7 @@ describe('manager', () => {
         { packageFile: 'package.json', manager: 'npm' },
         { packageFile: 'Dockerfile', manager: 'docker' },
         { packageFile: 'packages/foo/package.js', manager: 'meteor' },
-        { packageFile: '.travis.yml', manager: 'node' },
+        { packageFile: '.travis.yml', manager: 'travis' },
         { packageFile: 'WORKSPACE', manager: 'bazel' },
       ];
       platform.getFile.mockReturnValueOnce('old content 1');

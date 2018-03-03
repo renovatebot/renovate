@@ -43,7 +43,7 @@ describe('workers/repository/updates/determine', () => {
         },
         {
           packageFile: '.travis.yml',
-          manager: 'node',
+          manager: 'travis',
         },
         {
           packageFile: 'WORKSPACE',

@@ -4,12 +4,12 @@ const configParser = require('../../../lib/config');
 
 const docker = require('../../../lib/manager/docker/package');
 const npm = require('../../../lib/manager/npm/package');
-const node = require('../../../lib/manager/node/package');
+const node = require('../../../lib/manager/travis/package');
 const bazel = require('../../../lib/manager/bazel/package');
 
 jest.mock('../../../lib/manager/docker/package');
 jest.mock('../../../lib/manager/npm/package');
-jest.mock('../../../lib/manager/node/package');
+jest.mock('../../../lib/manager/travis/package');
 jest.mock('../../../lib/manager/bazel/package');
 
 describe('lib/workers/package/index', () => {
@@ -39,7 +39,7 @@ describe('lib/workers/package/index', () => {
     });
     it('calls node', async () => {
       node.getPackageUpdates.mockReturnValueOnce([]);
-      config.manager = 'node';
+      config.manager = 'travis';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
