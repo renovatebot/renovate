@@ -9,9 +9,6 @@ describe('lib/workers/package/node', () => {
         ...defaultConfig,
       };
     });
-    it('returns empty if no supportPolicy array', async () => {
-      expect(await node.getPackageUpdates(config)).toEqual([]);
-    });
     it('returns empty if matching', async () => {
       config.currentVersion = ['6', '8'];
       config.supportPolicy = ['lts_active'];
@@ -19,7 +16,6 @@ describe('lib/workers/package/node', () => {
     });
     it('returns result if needing updates', async () => {
       config.currentVersion = ['6', '8'];
-      config.supportPolicy = ['lts'];
       expect(await node.getPackageUpdates(config)).toMatchSnapshot();
     });
   });
