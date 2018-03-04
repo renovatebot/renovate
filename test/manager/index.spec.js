@@ -120,6 +120,27 @@ describe('manager', () => {
       expect(res.warnings).toMatchSnapshot();
     });
   });
+  describe('getManager', () => {
+    it('rejects unknown files', () => {
+      expect(manager.getManager('WORKSPACER')).toBe(null);
+    });
+    it('detects files in root', () => {
+      expect(manager.getManager('WORKSPACE')).toBe('bazel');
+      expect(manager.getManager('Dockerfile')).toBe('docker');
+      expect(manager.getManager('package.js')).toBe('meteor');
+      expect(manager.getManager('package.json')).toBe('npm');
+      expect(manager.getManager('.nvmrc')).toBe('nvm');
+      expect(manager.getManager('.travis.yml')).toBe('travis');
+    });
+    it('detects nested files', () => {
+      expect(manager.getManager('foo/bar/WORKSPACE')).toBe('bazel');
+      expect(manager.getManager('backend/Dockerfile')).toBe('docker');
+      expect(manager.getManager('package/a/package.js')).toBe('meteor');
+      expect(manager.getManager('frontend/package.json')).toBe('npm');
+      expect(manager.getManager('subfolder-1/.nvmrc')).toBe(null);
+      expect(manager.getManager('subfolder-2/.travis.yml')).toBe(null);
+    });
+  });
   describe('getUpdatedPackageFiles', () => {
     let config;
     beforeEach(() => {
