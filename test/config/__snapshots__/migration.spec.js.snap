@@ -9,29 +9,30 @@ Object {
 exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
 Object {
   "autodiscover": true,
+  "automerge": false,
   "baseBranches": Array [
     "next",
   ],
   "commitMessage": "some commit message",
   "devDependencies": Object {
-    "extends": Array [
-      ":automergeMinor",
-    ],
+    "major": Object {
+      "automerge": false,
+    },
+    "minor": Object {
+      "automerge": true,
+    },
     "schedule": Array [],
   },
   "enabled": true,
   "extends": Array [
     "config:js-app",
     "config:js-lib",
-    ":automergeDisabled",
   ],
   "ignorePaths": Array [
     "node_modules/",
   ],
   "lockFileMaintenance": Object {
-    "extends": Array [
-      ":automergeAll",
-    ],
+    "automerge": true,
     "schedule": "before 5am",
   },
   "major": Object {
@@ -45,9 +46,12 @@ Object {
   },
   "onboarding": false,
   "optionalDependencies": Object {
-    "extends": Array [
-      ":automergeMinor",
-    ],
+    "major": Object {
+      "automerge": false,
+    },
+    "minor": Object {
+      "automerge": true,
+    },
     "respectLatest": false,
     "schedule": "before 5am on Monday",
   },
@@ -89,9 +93,7 @@ Object {
 exports[`config/migration migrateConfig(config, parentConfig) it migrates node to travis 1`] = `
 Object {
   "node": Object {
-    "extends": Array [
-      ":automergeDisabled",
-    ],
+    "automerge": false,
     "supportPolicy": Array [
       "lts",
     ],
@@ -125,15 +127,24 @@ Object {
 
 exports[`config/migration migrateConfig(config, parentConfig) it overrides existing automerge setting 1`] = `
 Object {
-  "extends": Array [
-    ":automergeMinor",
-  ],
+  "major": Object {
+    "automerge": false,
+  },
+  "minor": Object {
+    "automerge": true,
+  },
   "packageRules": Array [
     Object {
-      "extends": Array [
-        ":automergePatch",
-      ],
+      "major": Object {
+        "automerge": false,
+      },
+      "minor": Object {
+        "automerge": false,
+      },
       "packagePatterns": "^(@angular|typescript)",
+      "patch": Object {
+        "automerge": true,
+      },
     },
   ],
 }
