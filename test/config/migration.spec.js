@@ -66,7 +66,6 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.optionalDependencies.respectLatest).toBe(false);
-      expect(migratedConfig.automerge).toEqual(false);
       expect(migratedConfig).toMatchSnapshot();
     });
     it('migrates before and after schedules', () => {
@@ -192,7 +191,6 @@ describe('config/migration', () => {
       );
       expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
-      expect(migratedConfig.packageRules[0].minor.automerge).toBe(false);
     });
     it('it does not migrate config', () => {
       const config = {
