@@ -551,6 +551,17 @@ A string copy of npmrc file.
 
 See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
 
+## nvm
+
+Configuration specific for `.nvmrc` files.
+
+| name    | value             |
+| ------- | ----------------- |
+| type    | object            |
+| default | { enabled: true } |
+
+For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
+
 ## optionalDependencies
 
 Configuration specific for `package.json > optionalDependencies`.
@@ -1024,7 +1035,9 @@ Configuration specific for `.travis.yml` files.
 | type    | object             |
 | default | { enabled: false } |
 
-Disabled by default as we cannot be sure of which combination of releases you want until you configure supportPolicy.
+For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
+
+Note: Travis renovation is disabled by default as we cannot be sure of which combination of releases you want until you configure supportPolicy.
 
 ## unpublishSafe
 
