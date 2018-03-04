@@ -22,8 +22,10 @@ Object {
 
 exports[`config/migrate-validate migrateAndValidate() handles migration 1`] = `
 Object {
-  "automerge": false,
   "errors": Array [],
+  "extends": Array [
+    ":automergeDisabled",
+  ],
   "warnings": Array [],
 }
 `;

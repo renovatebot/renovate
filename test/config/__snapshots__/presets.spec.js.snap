@@ -259,6 +259,7 @@ Object {
     "Use <code>renovate/</code> as prefix for all branch names",
     "If semantic commits detected, use <code>fix(deps):</code> for dependencies and <code>chore(deps):</code> for all others",
     "Require all status checks to pass before any automerging",
+    "Automerge patch or minor upgrades if they pass tests",
     "Pin dependency versions for <code>devDependencies</code> and retain semver ranges for others",
   ],
   "devDependencies": Object {
@@ -279,9 +280,6 @@ Object {
     "schedule": Array [
       "before 8am on Monday",
     ],
-  },
-  "major": Object {
-    "automerge": false,
   },
   "minor": Object {
     "automerge": true,
