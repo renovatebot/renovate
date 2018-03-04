@@ -84,6 +84,23 @@ Object {
   "schedule": "on the first day of the month",
   "semanticCommitScope": "deps",
   "semanticCommitType": "fix",
+  "travis": Object {
+    "enabled": true,
+  },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it migrates node to travis 1`] = `
+Object {
+  "node": Object {
+    "automerge": false,
+    "supportPolicy": Array [
+      "lts",
+    ],
+  },
+  "travis": Object {
+    "enabled": true,
+  },
 }
 `;
 
