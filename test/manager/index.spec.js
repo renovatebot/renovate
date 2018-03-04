@@ -78,6 +78,13 @@ describe('manager', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
+    it('finds .nvmrc files', async () => {
+      config.travis.enabled = true;
+      platform.getFileList.mockReturnValueOnce(['.nvmrc', 'other/.nvmrc']);
+      const res = await manager.detectPackageFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
     it('finds WORKSPACE files', async () => {
       config.bazel.enabled = true;
       platform.getFileList.mockReturnValueOnce([

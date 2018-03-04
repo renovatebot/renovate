@@ -94,18 +94,19 @@ describe('manager/resolve', () => {
       expect(res.packageFiles).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
-    it('detects meteor and docker and travis and bazel', async () => {
+    it('detects meteor and docker and travis and bazel and nvm', async () => {
       config.packageFiles = [
         'package.js',
         'Dockerfile',
         '.travis.yml',
         'WORKSPACE',
+        '.nvmrc',
       ];
       platform.getFile.mockReturnValueOnce('{}'); // package.js
       platform.getFile.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile
-      platform.getFile.mockReturnValueOnce('hello: world\n'); // Dockerfile
       platform.getFile.mockReturnValueOnce('# travis'); // .travis.yml
       platform.getFile.mockReturnValueOnce('# WORKSPACE'); // Dockerfile
+      platform.getFile.mockReturnValueOnce('8.9\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
     });
@@ -116,6 +117,7 @@ describe('manager/resolve', () => {
         '.travis.yml',
         'WORKSPACE',
         'package.js',
+        '.nvmrc',
       ];
       platform.getFile.mockReturnValueOnce('# comment\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
