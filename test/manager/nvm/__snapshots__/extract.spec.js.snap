@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/nvm/extract extractDependencies() returns a result 1`] = `
+Array [
+  Object {
+    "currentVersion": "8.4.0",
+    "depName": "node",
+    "depType": ".nvmrc",
+  },
+]
+`;

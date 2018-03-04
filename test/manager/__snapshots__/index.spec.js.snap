@@ -7,6 +7,12 @@ Array [
 ]
 `;
 
+exports[`manager detectPackageFiles(config) finds .nvmrc files 1`] = `
+Array [
+  ".nvmrc",
+]
+`;
+
 exports[`manager detectPackageFiles(config) finds .travis.yml files 1`] = `
 Array [
   ".travis.yml",
