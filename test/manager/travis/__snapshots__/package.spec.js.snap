@@ -9,6 +9,7 @@ Array [
       "6",
       "4",
     ],
+    "repositoryUrl": "https://github.com/nodejs/node",
   },
 ]
 `;
