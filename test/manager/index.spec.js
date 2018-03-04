@@ -69,7 +69,7 @@ describe('manager', () => {
       expect(res).toHaveLength(2);
     });
     it('finds .travis.yml files', async () => {
-      config.node.enabled = true;
+      config.travis.enabled = true;
       platform.getFileList.mockReturnValueOnce([
         '.travis.yml',
         'other/.travis.yml',

@@ -511,14 +511,14 @@ Set this to true if you wish to receive one PR for every separate major version 
 
 ## node
 
-Configuration specific for node.js version updates (e.g. `.travis.yml`).
+Configuration specific for all node.js version updates (e.g. `.travis.yml`).
 
-| name    | value                                      |
-| ------- | ------------------------------------------ |
-| type    | object                                     |
-| default | { enabled: false, supportPolicy: ['lts'] } |
+| name    | value                                         |
+| ------- | --------------------------------------------- |
+| type    | object                                        |
+| default | { groupName: 'node.js', lazyGrouping: false } |
 
-It's set to false by default as we cannot 100% besure what supportPolicy you would want.
+Using this configuration option allows you to apply common config and policies across all node.js version updates even if done by different package managers.
 
 ## npm
 
@@ -1014,6 +1014,17 @@ Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)
 | default | `Etc/UTC` |
 
 It is only recommended to set this field if you wish to use the `schedules` feature and want to write them in your local timezone. Please see the above link for valid timezone names.
+
+## travis
+
+Configuration specific for `.travis.yml` files.
+
+| name    | value              |
+| ------- | ------------------ |
+| type    | object             |
+| default | { enabled: false } |
+
+Disabled by default as we cannot be sure of which combination of releases you want until you configure supportPolicy.
 
 ## unpublishSafe
 
