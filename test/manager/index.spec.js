@@ -90,6 +90,7 @@ describe('manager', () => {
       platform.getFileList.mockReturnValueOnce([
         'WORKSPACE',
         'other/WORKSPACE',
+        'empty/WORKSPACE',
       ]);
       platform.getFile.mockReturnValueOnce('\n\ngit_repository(\n\n)\n');
       platform.getFile.mockReturnValueOnce(
@@ -98,6 +99,7 @@ describe('manager', () => {
           'utf8'
         )
       );
+      platform.getFile.mockReturnValueOnce('foo');
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
