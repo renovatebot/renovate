@@ -523,13 +523,6 @@ Object {
 }
 `;
 
-exports[`platform/github getPrFiles() returns files 1`] = `
-Array [
-  "renovate.json",
-  "not renovate.json",
-]
-`;
-
 exports[`platform/github getRepos should return an array of repos 1`] = `
 Array [
   Array [
