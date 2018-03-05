@@ -575,16 +575,14 @@ Extend this if you wish to configure rules specifically for `optionalDependencie
 
 ## packageFiles
 
-A manually provisioned list of package.json paths to use.
+A manually provisioned list of package files to use.
 
 | name    | value            |
 | ------- | ---------------- |
 | type    | array of strings |
 | default | `[]`             |
 
-If left default then package file autodiscovery will be used, so only change this setting if you wish to manually specify a limited set of `package.json` files to renovate, or if package file autodiscovery is not finding all your `package.json` files.
-
-Note: `package.json` autodiscovery works for any GitHub repository that isn't itself a fork of another (otherwise GitHub does not index forks for searching). Otherwise `renovate` will default to looking for `package.json` in the root directory of the repository and you will need to manually provision your list of package files.
+If left default then package file autodiscovery will be used, so only change this setting if you wish to manually specify a limited set of `package.json` or other package files to renovate.
 
 ## packageNames
 
