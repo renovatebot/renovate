@@ -74,6 +74,7 @@ describe('manager', () => {
         '.travis.yml',
         'other/.travis.yml',
       ]);
+      platform.getFile.mockReturnValueOnce('sudo: true\nnode_js:\n  -8\n');
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
