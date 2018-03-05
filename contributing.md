@@ -7,7 +7,7 @@ Contributions are welcome and desirable, in the form of:
 * Code (create a Pull Request)
 * Comments (comment on any of the above)
 
-Before you start any Pull Request, it's recommended that you create an issue to dsicuss
+Before you start any Pull Request, it's recommended that you create an issue to discuss
 first if you have any doubts about requirement or implementation. That way you can be sure that the maintainer(s)
 agree on what to change and how, and you can hopefully get a quick merge
 afterwards.
