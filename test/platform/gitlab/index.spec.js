@@ -308,9 +308,23 @@ describe('platform/gitlab', () => {
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('success');
     });
-    it('returns failure if any are failed', async () => {
+    it('returns success if optional jobs fail', async () => {
       get.mockReturnValueOnce({
-        body: [{ status: 'success' }, { status: 'failed' }],
+        body: [
+          { status: 'success' },
+          { status: 'failed', allow_failure: true },
+        ],
+      });
+      const res = await gitlab.getBranchStatus('somebranch', []);
+      expect(res).toEqual('success');
+    });
+    it('returns failure if any mandatory jobs fails', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          { status: 'success' },
+          { status: 'failed', allow_failure: true },
+          { status: 'failed' },
+        ],
       });
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('failure');
