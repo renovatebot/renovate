@@ -60,6 +60,10 @@ you'd like to get your config reviewed or ask any questions.
 
 If you are not on GitHub or you prefer to run your own copy of Renovate, then it takes only seconds to set up. Please see [docs/self-hosting.md](https://github.com/renovateapp/renovate/blob/master/docs/self-hosting.md) for instructions.
 
+## Contributing
+
+If you would like to contribute to Renovate or get a local copy running for some other reason, please see the instructions in [contributing.md](contributing.md).
+
 ## Security / Disclosure
 
 If you discover any important bug with Renovate that may pose a security problem, please disclose it confidentially to security@renovateapp.com first, so that it can be assessed and hopefully fixed prior to being exploited. Please do not raise GitHub issues for security-related doubts or problems.
