@@ -1309,6 +1309,23 @@ describe('platform/github', () => {
       expect(pr).toMatchSnapshot();
     });
   });
+  describe('getPrFiles()', () => {
+    it('should return empty if no prNo is passed', async () => {
+      const prFiles = await github.getPrFiles(null);
+      expect(prFiles).toEqual([]);
+    });
+    it('returns files', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          { filename: 'renovate.json' },
+          { filename: 'not renovate.json' },
+        ],
+      });
+      const prFiles = await github.getPrFiles(123);
+      expect(prFiles).toMatchSnapshot();
+      expect(prFiles).toHaveLength(2);
+    });
+  });
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });

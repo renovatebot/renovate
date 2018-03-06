@@ -624,6 +624,12 @@ describe('platform/gitlab', () => {
       expect(pr).toMatchSnapshot();
     });
   });
+  describe('getPrFiles()', () => {
+    it('should return empty', async () => {
+      const prFiles = await gitlab.getPrFiles();
+      expect(prFiles).toEqual([]);
+    });
+  });
   describe('updatePr(prNo, title, body)', () => {
     jest.resetAllMocks();
     it('updates the PR', async () => {
