@@ -12,6 +12,7 @@ jest.mock('../../../lib/workers/repository/updates');
 jest.mock('../../../lib/workers/repository/onboarding/pr');
 jest.mock('../../../lib/workers/repository/write');
 jest.mock('../../../lib/workers/repository/cleanup');
+jest.mock('../../../lib/workers/repository/validate');
 jest.mock('../../../lib/manager');
 
 let config;
