@@ -516,7 +516,7 @@ Configuration specific for all Node.js version updates (e.g. `engines` field in 
 | name    | value                                         |
 | ------- | --------------------------------------------- |
 | type    | object                                        |
-| default | { groupName: 'node.js', lazyGrouping: false } |
+| default | { groupName: 'Node.js', lazyGrouping: false } |
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
