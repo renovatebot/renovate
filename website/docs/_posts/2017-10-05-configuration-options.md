@@ -511,14 +511,16 @@ Set this to true if you wish to receive one PR for every separate major version 
 
 ## node
 
-Configuration specific for all node.js version updates (e.g. `.travis.yml`).
+Configuration specific for all Node.js version updates (e.g. `engines` field in `package.json`).
 
 | name    | value                                         |
 | ------- | --------------------------------------------- |
 | type    | object                                        |
-| default | { groupName: 'node.js', lazyGrouping: false } |
+| default | { groupName: 'Node.js', lazyGrouping: false } |
 
-Using this configuration option allows you to apply common config and policies across all node.js version updates even if done by different package managers.
+Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
+
+Check out our [Node.js documentation](https://renovateapp.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
@@ -1006,12 +1008,16 @@ This feature is added for people migrating from alternative services who are use
 
 ## supportPolicy
 
-Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)
+Dependency support policy, e.g. used for deciding whether to use a [Long-term Support](https://en.wikipedia.org/wiki/Long-term_support) version vs non-LTS version, a combination, etc.
 
 | name    | value |
 | ------- | ----- |
 | type    | list  |
 | default | []    |
+
+Language support is limited to those listed below:
+
+* **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 
