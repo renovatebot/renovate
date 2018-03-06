@@ -2,7 +2,9 @@
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "0.0.0-semantic-release",
-  "bin": "lib/renovate.js",
+  "bin": {
+    "renovate" : "lib/renovate.js"
+  },
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
     "heroku-push": "git push heroku master",
