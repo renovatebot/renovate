@@ -1017,7 +1017,7 @@ Dependency support policy, e.g. used for deciding whether to use a [Long-term Su
 
 Language support is limited to those listed below:
 
-* **Node.js** -  [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
+* **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 
