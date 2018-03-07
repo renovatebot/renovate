@@ -106,6 +106,7 @@
     "semantic-release": "12.4.1"
   },
   "files": [
+    "bin/config-validator.js",
     "lib"
   ],
   "babel": {
