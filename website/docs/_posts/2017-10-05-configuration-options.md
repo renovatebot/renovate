@@ -1082,6 +1082,21 @@ When schedules are in use, it generally means "no updates". However there are ca
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
 
+## upgradeInRange
+
+Upgrade ranges to latest version even if latest version satisfies existing range.
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
+
+By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open. As such, Renovate won't deliberately "narrow" the range by increasing the semver value inside.
+
+For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `upgradeInRange` to `true` in your Renovate config.
+
+This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`. It is not compatible with `pinVersions=true`.
+
 ## versionStrategy
 
 Strategy for how to modify/update existing versions/semver. Possible values: auto, replace, or widen
