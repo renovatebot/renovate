@@ -3,7 +3,8 @@
   "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "0.0.0-semantic-release",
   "bin": {
-    "renovate" : "lib/renovate.js"
+    "renovate" : "lib/renovate.js",
+    "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
