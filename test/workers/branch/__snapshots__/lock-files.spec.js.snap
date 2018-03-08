@@ -17,6 +17,9 @@ Object {
 exports[`workers/branch/lock-files determineLockFileDirs returns directories from updated package files 1`] = `
 Object {
   "lernaDirs": Array [],
+  "npmShrinkwrapDirs": Array [
+    "leftend",
+  ],
   "packageLockFileDirs": Array [
     "backend",
   ],
@@ -34,6 +37,7 @@ Object {
   "lernaDirs": Array [
     ".",
   ],
+  "npmShrinkwrapDirs": Array [],
   "packageLockFileDirs": Array [],
   "shrinkwrapYamlDirs": Array [],
   "yarnLockFileDirs": Array [],
@@ -43,6 +47,7 @@ Object {
 exports[`workers/branch/lock-files determineLockFileDirs returns root directory if using yarn workspaces 1`] = `
 Object {
   "lernaDirs": Array [],
+  "npmShrinkwrapDirs": Array [],
   "packageLockFileDirs": Array [],
   "shrinkwrapYamlDirs": Array [],
   "yarnLockFileDirs": Array [

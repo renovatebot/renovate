@@ -82,7 +82,16 @@ describe('packageFileWorker', () => {
       await packageFileWorker.renovatePackageFile(config);
     });
     it('parses package-lock.json', async () => {
-      config.packageLock = 'package-lock.lock';
+      config.packageLock = 'package-lock.json';
+      platform.getFile.mockReturnValueOnce('{}');
+      await packageFileWorker.renovatePackageFile(config);
+    });
+    it('skips unparseable npm-shrinkwrap.json', async () => {
+      config.npmShrinkwrap = 'npm-shrinkwrap.json';
+      await packageFileWorker.renovatePackageFile(config);
+    });
+    it('parses npm-shrinkwrap.json', async () => {
+      config.npmShrinkwrap = 'npm-shrinkwrap.json';
       platform.getFile.mockReturnValueOnce('{}');
       await packageFileWorker.renovatePackageFile(config);
     });
