@@ -2,6 +2,9 @@
 
 exports[`workers/branch/lock-files determineLockFileDirs returns all directories if lock file maintenance 1`] = `
 Object {
+  "npmShrinkwrapDirs": Array [
+    "leftend",
+  ],
   "packageLockFileDirs": Array [
     "backend",
   ],
