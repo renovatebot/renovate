@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+SEMVER_REGEX="^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"
+
+if ! [[ "$CACHE_TAG" =~ $SEMVER_REGEX ]]; then
+  echo Not valid semver
+  exit
+fi
+
+major=${BASH_REMATCH[1]}
+minor=${BASH_REMATCH[2]}
+
+# Tag and push image for each additional tag
+for tag in {"$major","${major}.${minor}"}; do
+  docker tag $IMAGE_NAME ${DOCKER_REPO}:${tag}
+  docker push ${DOCKER_REPO}:${tag}
+done
