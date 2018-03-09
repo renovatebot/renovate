@@ -827,9 +827,11 @@ Whether to rebase branches that are no longer up-to-date with the base branch.
 | name    | value   |
 | ------- | ------- |
 | type    | boolean |
-| default | false   |
+| default | null    |
 
-This field is defaulted to `false` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+
+If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch-push` automerge then Renovate will still rebase as necessary for that.
 
 ## recreateClosed
 
