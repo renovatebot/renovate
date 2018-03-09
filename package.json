@@ -143,6 +143,7 @@
       ":label(ready)",
       ":assignee(rarkins)"
     ],
+    "renovateFork": 5,
     "semanticCommitScope": null
   },
   "publishConfig": {
