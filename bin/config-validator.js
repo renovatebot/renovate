@@ -51,7 +51,9 @@ try {
   }
   if (pkgJson['renovate-config']) {
     console.log(`Validating package.json > renovate-config`);
-    validate('package.json > renovate-config', pkgJson['renovate-config']);
+    Object.values(pkgJson['renovate-config']).forEach(presetConfig => {
+      validate('package.json > renovate-config', presetConfig);
+    });
   }
 } catch (err) {
   // ignore
