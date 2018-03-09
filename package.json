@@ -150,6 +150,7 @@
   },
   "release": {
     "branch": "master",
+    "tagFormat": "${version}",
     "analyzeCommits": {
       "preset": "angular",
       "releaseRules": [
