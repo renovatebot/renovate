@@ -4,9 +4,24 @@ Although Renovate is now best known as a "service" via the GitHub App, that serv
 
 ## Install
 
+#### npmjs
+
 ```
 $ npm install -g renovate
 ```
+
+#### Docker
+
+Renovate is available for Docker via an automated build [renovate/renovate](https://https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
+
+```
+$ docker run renovate/renovate
+$ docker run renovate/renovate:11.32.3
+$ docker run renovate/renovate:11.32
+$ docker run renovate/renovate 11
+```
+
+If you wish to configure Renovate using a `config.js` file then map it to `/src/config.js` using Docker volumes.
 
 ## Authentication
 
