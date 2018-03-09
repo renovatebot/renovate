@@ -2,7 +2,10 @@
   "name": "renovate",
   "description": "Keep npm dependencies up-to-date via Pull Requests",
   "version": "0.0.0-semantic-release",
-  "bin": "lib/renovate.js",
+  "bin": {
+    "renovate" : "lib/renovate.js",
+    "renovate-config-validator": "bin/config-validator.js"
+  },
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
     "heroku-push": "git push heroku master",
@@ -26,6 +29,7 @@
   ],
   "author": "Rhys Arkins <rhys@arkins.net>",
   "contributors": [
+    "Hutson Betts <hutson@hyper-expanse.net>",
     "Jean-Yves Couët <jycouet@gmail.com>"
   ],
   "license": "MIT",
@@ -44,7 +48,7 @@
     "chalk": "2.3.2",
     "changelog": "1.4.2",
     "child-process-promise": "2.2.1",
-    "commander": "2.14.1",
+    "commander": "2.15.0",
     "compare-versions": "3.1.0",
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
@@ -72,7 +76,7 @@
     "npm": "5.7.1",
     "openpgp": "2.6.2",
     "parse-link-header": "1.0.1",
-    "pnpm": "1.35.3",
+    "pnpm": "1.35.7",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "semver": "5.5.0",
@@ -94,7 +98,7 @@
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-config-prettier": "2.9.0",
     "eslint-plugin-import": "2.9.0",
-    "eslint-plugin-promise": "3.6.0",
+    "eslint-plugin-promise": "3.7.0",
     "jest": "22.4.2",
     "mockdate": "2.0.2",
     "nock": "9.2.3",
@@ -102,6 +106,7 @@
     "semantic-release": "12.4.1"
   },
   "files": [
+    "bin/config-validator.js",
     "lib"
   ],
   "babel": {
@@ -145,6 +150,7 @@
   },
   "release": {
     "branch": "master",
+    "tagFormat": "${version}",
     "analyzeCommits": {
       "preset": "angular",
       "releaseRules": [

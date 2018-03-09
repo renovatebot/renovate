@@ -970,9 +970,9 @@ combined-stream@^1.0.5, combined-stream@~1.0.5:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@2.14.1:
-  version "2.14.1"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-2.14.1.tgz#2235123e37af8ca3c65df45b026dbd357b01b9aa"
+commander@2.15.0:
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.0.tgz#ad2a23a1c3b036e392469b8012cec6b33b4c1322"
 
 commander@^2.11.0:
   version "2.12.1"
@@ -1524,9 +1524,9 @@ eslint-plugin-import@2.9.0:
     minimatch "^3.0.3"
     read-pkg-up "^2.0.0"
 
-eslint-plugin-promise@3.6.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-promise/-/eslint-plugin-promise-3.6.0.tgz#54b7658c8f454813dc2a870aff8152ec4969ba75"
+eslint-plugin-promise@3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-promise/-/eslint-plugin-promise-3.7.0.tgz#f4bde5c2c77cdd69557a8f69a24d1ad3cfc9e67e"
 
 eslint-restricted-globals@^0.1.1:
   version "0.1.1"
@@ -4450,9 +4450,9 @@ pn@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.0.0.tgz#1cf5a30b0d806cd18f88fc41a6b5d4ad615b3ba9"
 
-pnpm@1.35.3:
-  version "1.35.3"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.35.3.tgz#c8cdc2ec85cf0aa08b66aae0b298a70bed2bc6e1"
+pnpm@1.35.7:
+  version "1.35.7"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.35.7.tgz#2b723e244bd611d8bbcf0845cdbaf5d37d3969d9"
 
 prelude-ls@~1.1.2:
   version "1.1.2"

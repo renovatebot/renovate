@@ -83,6 +83,7 @@ describe('manager/resolve', () => {
         'package.json',
         'yarn.lock',
         'package-lock.json',
+        'npm-shrinkwrap.json',
         'shrinkwrap.yaml',
       ]);
       platform.getFile.mockReturnValueOnce(

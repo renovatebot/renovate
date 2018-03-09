@@ -691,5 +691,11 @@ describe('platform/vsts', () => {
       const res = await vsts.mergePr();
       expect(res).toBeUndefined();
     });
+
+    // to become async?
+    it('getPrFiles', () => {
+      const res = vsts.getPrFiles(46);
+      expect(res.length).toBe(0);
+    });
   });
 });
