@@ -12,6 +12,11 @@ describe('lib/workers/package/node', () => {
         ...defaultConfig,
       };
     });
+    it('returns empty if invalid supportPolicy', async () => {
+      config.currentVersion = ['6', '8'];
+      config.supportPolicy = ['foo'];
+      expect(await node.getPackageUpdates(config)).toEqual([]);
+    });
     it('returns empty if matching', async () => {
       config.currentVersion = ['6', '8'];
       config.supportPolicy = ['lts_active'];
