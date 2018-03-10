@@ -16,6 +16,10 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
+    "message": "Invalid timezone: Asia",
+  },
+  Object {
+    "depName": "Configuration Error",
     "message": "Configuration option \`labels\` should be a list (Array)",
   },
   Object {
