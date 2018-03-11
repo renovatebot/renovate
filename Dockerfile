@@ -5,6 +5,7 @@ LABEL name="renovate"
 
 WORKDIR /src
 
+RUN apk add --quiet --no-cache --virtual git
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
