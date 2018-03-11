@@ -12,7 +12,7 @@ $ npm install -g renovate
 
 #### Docker
 
-Renovate is available for Docker via an automated build [renovate/renovate](https://https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
+Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
 
 ```
 $ docker run renovate/renovate
