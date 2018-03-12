@@ -511,14 +511,16 @@ Set this to true if you wish to receive one PR for every separate major version 
 
 ## node
 
-Configuration specific for all node.js version updates (e.g. `.travis.yml`).
+Configuration specific for all Node.js version updates (e.g. `engines` field in `package.json`).
 
 | name    | value                                         |
 | ------- | --------------------------------------------- |
 | type    | object                                        |
-| default | { groupName: 'node.js', lazyGrouping: false } |
+| default | { groupName: 'Node.js', lazyGrouping: false } |
 
-Using this configuration option allows you to apply common config and policies across all node.js version updates even if done by different package managers.
+Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
+
+Check out our [Node.js documentation](https://renovateapp.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
@@ -825,9 +827,11 @@ Whether to rebase branches that are no longer up-to-date with the base branch.
 | name    | value   |
 | ------- | ------- |
 | type    | boolean |
-| default | false   |
+| default | null    |
 
-This field is defaulted to `false` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+
+If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch-push` automerge then Renovate will still rebase as necessary for that.
 
 ## recreateClosed
 
@@ -1006,12 +1010,16 @@ This feature is added for people migrating from alternative services who are use
 
 ## supportPolicy
 
-Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)
+Dependency support policy, e.g. used for deciding whether to use a [Long-term Support](https://en.wikipedia.org/wiki/Long-term_support) version vs non-LTS version, a combination, etc.
 
 | name    | value |
 | ------- | ----- |
 | type    | list  |
 | default | []    |
+
+Language support is limited to those listed below:
+
+* **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 
@@ -1075,6 +1083,21 @@ Whether to update (but not create) branches when not scheduled.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
+
+## upgradeInRange
+
+Upgrade ranges to latest version even if latest version satisfies existing range.
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
+
+By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open. As such, Renovate won't deliberately "narrow" the range by increasing the semver value inside.
+
+For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `upgradeInRange` to `true` in your Renovate config.
+
+This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`. It is not compatible with `pinVersions=true`.
 
 ## versionStrategy
 
