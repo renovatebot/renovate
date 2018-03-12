@@ -133,9 +133,9 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      expect(platform.createPr.mock.calls[0][2].indexOf('<p>This MR')).not.toBe(
-        -1
-      );
+      expect(
+        platform.createPr.mock.calls[0][2].indexOf('<p>This Merge Request')
+      ).not.toBe(-1);
     });
     it('should strip HTML PR for vsts', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
