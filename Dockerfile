@@ -5,9 +5,7 @@ LABEL name="renovate"
 
 WORKDIR /src
 
-RUN apk --update add git openssh-client && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm /var/cache/apk/*
+RUN apk --no-cache add git openssh-client
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
