@@ -6,6 +6,7 @@ describe('config/validation', () => {
       const config = {
         foo: 1,
         schedule: ['after 5pm'],
+        timezone: 'Asia/Singapore',
         prBody: 'some-body',
         lockFileMaintenance: {
           bar: 2,
@@ -21,6 +22,7 @@ describe('config/validation', () => {
         allowedVersions: 'foo',
         enabled: 1,
         schedule: ['every 15 mins every weekday'],
+        timezone: 'Asia',
         labels: 5,
         semanticCommitType: 7,
         lockFileMaintenance: false,
@@ -32,7 +34,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(7);
+      expect(errors).toHaveLength(8);
       expect(errors).toMatchSnapshot();
     });
   });

@@ -2,6 +2,14 @@ const mockDate = require('mockdate');
 const schedule = require('../../../lib/workers/branch/schedule');
 
 describe('workers/branch/schedule', () => {
+  describe('hasValidTimezone(schedule)', () => {
+    it('returns false for invalid timezone', () => {
+      expect(schedule.hasValidTimezone('Asia')[0]).toBe(false);
+    });
+    it('returns true for valid timezone', () => {
+      expect(schedule.hasValidTimezone('Asia/Singapore')[0]).toBe(true);
+    });
+  });
   describe('hasValidSchedule(schedule)', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -88,6 +96,12 @@ describe('workers/branch/schedule', () => {
     });
     it('returns true if invalid schedule', () => {
       config.schedule = ['every 15 minutes'];
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('returns true if invalid timezone', () => {
+      config.schedule = ['after 4:00pm'];
+      config.timezone = 'Asia';
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
