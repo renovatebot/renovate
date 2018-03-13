@@ -686,6 +686,11 @@ describe('platform/gitlab', () => {
           statusCode: 404,
         })
       ); // branch exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       const file = {
         name: 'some-new-file',
         contents: 'some new-contents',
@@ -712,6 +717,11 @@ describe('platform/gitlab', () => {
       });
       // branch exists
       get.mockImplementationOnce(() => ({ statusCode: 200 }));
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       const files = [
         {
           name: 'some-existing-file',
@@ -730,9 +740,13 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.post.mock.calls).toHaveLength(1);
     });
-
     it('should parse valid gitAuthor', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
@@ -758,9 +772,13 @@ describe('platform/gitlab', () => {
         'bot@renovateapp.com'
       );
     });
-
     it('should skip invalid gitAuthor', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
