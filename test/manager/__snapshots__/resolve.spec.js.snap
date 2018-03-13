@@ -130,7 +130,8 @@ Please make sure the following warnings are safe to ignore:
 {{#each warnings as |warning|}}
 -   \`{{warning.depName}}\`: {{warning.message}}
 {{/each}}
-{{/if}}",
+{{/if}}
+",
       "prTitle": "Update Docker {{{groupName}}} digests",
     },
     "major": Object {
