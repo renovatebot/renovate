@@ -26,6 +26,7 @@ describe('config/validation', () => {
         labels: 5,
         semanticCommitType: 7,
         lockFileMaintenance: false,
+        extends: [':timezone(Europe/Brussel)'],
         packageRules: [
           {
             foo: 1,
@@ -34,7 +35,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(8);
+      expect(errors).toHaveLength(9);
       expect(errors).toMatchSnapshot();
     });
   });

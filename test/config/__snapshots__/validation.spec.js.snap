@@ -32,6 +32,10 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
+    "message": "Invalid timezone: Europe/Brussel",
+  },
+  Object {
+    "depName": "Configuration Error",
     "message": "Invalid configuration option: \`foo\`",
   },
 ]
