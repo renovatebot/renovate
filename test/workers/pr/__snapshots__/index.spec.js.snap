@@ -36,7 +36,8 @@ Array [
 <ul>
 <li><a href=\\"https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz\\"><code>abcdefg</code></a> foo <a href=\\"https://github.com/renovateapp/dummy/issues/3\\">#3</a></li>
 </ul>
-<p></details></p>",
+<h1 id=\\"note\\">Note</h1>
+<p>Renovate will automatically rebase this MR whenever it becomes conflicted, unless you have made edits to it yourself.</p>",
   Array [],
   false,
   false,
@@ -58,7 +59,12 @@ Array [
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
 
-</details>",
+</details>
+
+
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
   Array [],
   false,
   false,
@@ -80,7 +86,12 @@ Array [
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo #&#8203;3
 
-</details>",
+</details>
+
+
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
   Array [],
   false,
   false,
@@ -100,7 +111,12 @@ Object {
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
 
-</details>",
+</details>
+
+
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
   "displayNumber": "Existing PR",
   "title": "Update dependency dummy to v1.1.0",
 }
@@ -119,7 +135,12 @@ Object {
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
 
-</details>",
+</details>
+
+
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
   "displayNumber": "Existing PR",
   "title": "wrong",
 }
@@ -142,7 +163,12 @@ Array [
 #### v1.1.0
 -   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
 
-",
+
+
+
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
   Array [],
   false,
   false,

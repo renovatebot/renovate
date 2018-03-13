@@ -36,7 +36,10 @@ Please make sure the following warnings are safe to ignore:
 {{#each warnings as |warning|}}
 -   \`{{warning.depName}}\`: {{warning.message}}
 {{/each}}
-{{/if}}",
+{{/if}}
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
   "prTitle": "Lock file maintenance",
   "recreateClosed": true,
   "schedule": Array [

@@ -91,7 +91,10 @@ Please make sure the following warnings are safe to ignore:
 {{#each warnings as |warning|}}
 -   \`{{warning.depName}}\`: {{warning.message}}
 {{/each}}
-{{/if}}",
+{{/if}}
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
       "prTitle": "Update Dockerfile {{{depName}}} image {{{currentTag}}} digest ({{{newDigestShort}}})",
     },
     "enabled": true,
@@ -130,7 +133,10 @@ Please make sure the following warnings are safe to ignore:
 {{#each warnings as |warning|}}
 -   \`{{warning.depName}}\`: {{warning.message}}
 {{/each}}
-{{/if}}",
+{{/if}}
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
       "prTitle": "Update Docker {{{groupName}}} digests",
     },
     "major": Object {
@@ -177,7 +183,10 @@ Please make sure the following warnings are safe to ignore:
 {{#each warnings as |warning|}}
 -   \`{{warning.depName}}\`: {{warning.message}}
 {{/each}}
-{{/if}}",
+{{/if}}
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
         "prTitle": "Pin Docker digests",
       },
       "groupName": "Pin Docker Digests",
@@ -214,7 +223,10 @@ Please make sure the following warnings are safe to ignore:
 {{#each warnings as |warning|}}
 -   \`{{warning.depName}}\`: {{warning.message}}
 {{/each}}
-{{/if}}",
+{{/if}}
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
       "prTitle": "Pin Dockerfile {{{depName}}}:{{{currentTag}}} image digest",
     },
     "prBody": "This Pull Request updates Docker base image \`{{{depName}}}\` from tag \`{{{currentTag}}}\` to new tag \`{{{newTag}}}\`. For details on Renovate's Docker support, please visit https://renovateapp.com/docs/language-support/docker
@@ -247,7 +259,10 @@ Please make sure the following warnings are safe to ignore:
 {{#each warnings as |warning|}}
 -   \`{{warning.depName}}\`: {{warning.message}}
 {{/each}}
-{{/if}}",
+{{/if}}
+
+# Note
+Renovate will automatically rebase this PR whenever it becomes conflicted, unless you have made edits to it yourself.",
     "prTitle": "Update {{{depName}}} Dockerfile tag to {{#if isMajor}}v{{{newVersionMajor}}}{{else}}v{{{newTag}}}{{/if}}",
   },
   Object {
