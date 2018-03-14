@@ -53,5 +53,27 @@ describe('workers/branch/dockerfile', () => {
       const res = dockerfile.setNewValue(currentFileContent, upgrade);
       expect(res).toBe(null);
     });
+    it('handles similar FROM', () => {
+      const currentFileContent =
+        'FROM debian:wheezy as stage-1\nRUN something\nFROM debian:wheezy\nRUN something else';
+      const upgrade1 = {
+        depName: 'debian',
+        currentVersion: 'debian:wheezy',
+        fromPrefix: 'FROM',
+        fromSuffix: 'as stage-1',
+        newFrom: 'debian:wheezy@sha256:abcdefghijklmnop',
+      };
+      const upgrade2 = {
+        depName: 'debian',
+        currentVersion: 'debian:wheezy',
+        fromPrefix: 'FROM',
+        fromSuffix: '',
+        newFrom: 'debian:wheezy@sha256:abcdefghijklmnop',
+      };
+      let res = dockerfile.setNewValue(currentFileContent, upgrade1);
+      res = dockerfile.setNewValue(res, upgrade2);
+      expect(res).toMatchSnapshot();
+      expect(res.includes('as stage-1')).toBe(true);
+    });
   });
 });
