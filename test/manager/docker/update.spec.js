@@ -71,7 +71,7 @@ describe('workers/branch/dockerfile', () => {
         newFrom: 'debian:wheezy@sha256:abcdefghijklmnop',
       };
       let res = dockerfile.setNewValue(currentFileContent, upgrade1);
-      res = dockerfile.setNewValue(currentFileContent, upgrade2);
+      res = dockerfile.setNewValue(res, upgrade2);
       expect(res).toMatchSnapshot();
       expect(res.includes('as stage-1')).toBe(true);
     });
