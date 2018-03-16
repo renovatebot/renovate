@@ -48,12 +48,16 @@ It's also find to export both so that you can switch between platforms.
 
 ## Tests
 
-You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on TravisCI.
+You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on TravisCI. `yarn test` runs an `eslint` check, a `prettier check`, and then all the unit tests using `jest`.
+
+## Jest
+
+You can run just the Jest unit tests by running `yarn jest`. You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest lock-files` or `yarn jest workers/branch`. If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end. e.g. `yarn jest lock-files -u` would update the saved Snapshots for _all_ tests in `test/workers/branch/lock-files.spec.js`.
 
 #### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
-Using `// instanbul-ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
+Using `// instanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/lcov-report/index.html` in your browser.
 
@@ -63,7 +67,7 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 #### Linting and formatting
 
 We use [Prettier](https://github.com/prettier/prettier) for code formatting. If
-your code fails `yarn test` due to a `prettier` rule then you should find that the offending file will be updated automatically and pass the second time you run `yarn test` because each time you run it, it includes the `--fix` command automatically.
+your code fails `yarn test` due to a `prettier` rule then you should find that the offending file will be updated automatically and pass the second time you run `yarn test` because each time you run it, it includes the `--fix` command automatically. You usually shouldn't need to fix any prettier errors manually.
 
 ## Tips and tricks
 
