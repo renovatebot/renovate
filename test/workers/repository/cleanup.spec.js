@@ -51,6 +51,18 @@ describe('workers/repository/cleanup', () => {
       expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(1);
       expect(platform.deleteBranch.mock.calls).toHaveLength(1);
     });
+    it('deletes lock file maintenance if should be deleted', async () => {
+      config.branchList = ['renovate/lock-file-maintenance'];
+      config.deletedBranches = ['renovate/lock-file-maintenance'];
+      platform.getAllRenovateBranches.mockReturnValueOnce([
+        'renovate/lock-file-maintenance',
+      ]);
+      await cleanup.pruneStaleBranches(config, [
+        'renovate/lock-file-maintenance',
+      ]);
+      expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(1);
+      expect(platform.deleteBranch.mock.calls).toHaveLength(1);
+    });
     it('calls delete only once', async () => {
       config.branchList = ['renovate/lock-file-maintenance'];
       platform.getAllRenovateBranches.mockReturnValueOnce([
