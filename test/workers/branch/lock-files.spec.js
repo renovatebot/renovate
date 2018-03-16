@@ -493,6 +493,7 @@ describe('workers/branch/lock-files', () => {
     });
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.type = 'lockFileMaintenance';
+      config.parentBranch = 'renovate/lock-file-maintenance';
       platform.branchExists.mockReturnValueOnce(true);
       const res = await getUpdatedLockFiles(config);
       expect(res).toMatchSnapshot();
