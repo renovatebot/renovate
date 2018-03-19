@@ -62,7 +62,7 @@ If you are not on GitHub or you prefer to run your own copy of Renovate, then it
 
 ## Contributing
 
-If you would like to contribute to Renovate or get a local copy running for some other reason, please see the instructions in [.github/contributing.md](contributing.md).
+If you would like to contribute to Renovate or get a local copy running for some other reason, please see the instructions in [contributing.md](.github/contributing.md).
 
 ## Security / Disclosure
 
