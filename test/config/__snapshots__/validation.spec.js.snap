@@ -20,6 +20,12 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
+    "message": Array [
+      "Invalid npmrc config property: \`foo:bar\`",
+    ],
+  },
+  Object {
+    "depName": "Configuration Error",
     "message": "Configuration option \`labels\` should be a list (Array)",
   },
   Object {
