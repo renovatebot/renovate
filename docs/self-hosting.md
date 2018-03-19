@@ -51,7 +51,7 @@ Run `renovate --help` for usage details.
 Note: The first time you run `renovate` on a repository, it will not upgrade any
 dependencies. Instead, it will create a Pull Request (Merge Request if GitLab)
 called 'Configure Renovate' and commit a default `renovate.json` file to the
-repository. This PR can be close unmerged if the default settings are fine for
+repository. This PR can be closed as unmerged if the default settings are fine for
 you. Also, this behaviour can be disabled if you set the `onboarding`
 configuration option to `false` before running.
 
