@@ -143,6 +143,9 @@
       ":label(ready)",
       ":assignee(rarkins)"
     ],
+    "docker": {
+      "semanticCommitType": "fix"
+    },
     "semanticCommitScope": null
   },
   "publishConfig": {
