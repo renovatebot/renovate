@@ -38,6 +38,7 @@ Please make sure the following warnings are safe to ignore:
 {{/each}}
 {{/if}}",
   "prTitle": "Lock file maintenance",
+  "rebaseStalePrs": true,
   "recreateClosed": true,
   "schedule": Array [
     "on monday",
