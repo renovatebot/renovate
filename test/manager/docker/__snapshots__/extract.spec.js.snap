@@ -246,3 +246,21 @@ Array [
   },
 ]
 `;
+
+exports[`lib/manager/docker/extract extractDependencies() skips named multistage FROM tags 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node:6.12.3",
+    "currentDepTagDigest": "node:6.12.3",
+    "currentDigest": undefined,
+    "currentFrom": "node:6.12.3",
+    "currentTag": "6.12.3",
+    "depName": "node",
+    "depType": "Dockerfile",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node:6.12.3 as frontend",
+    "fromPrefix": "FROM",
+    "fromSuffix": "as frontend",
+  },
+]
+`;
