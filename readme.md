@@ -1,4 +1,5 @@
 ![Renovate banner](https://renovateapp.com/images/design/header_small.jpg)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Frenovateapp%2Frenovate.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Frenovateapp%2Frenovate?ref=badge_shield)
 
 # Renovate
 
@@ -67,3 +68,7 @@ If you would like to contribute to Renovate or get a local copy running for some
 ## Security / Disclosure
 
 If you discover any important bug with Renovate that may pose a security problem, please disclose it confidentially to security@renovateapp.com first, so that it can be assessed and hopefully fixed prior to being exploited. Please do not raise GitHub issues for security-related doubts or problems.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Frenovateapp%2Frenovate.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Frenovateapp%2Frenovate?ref=badge_large)
