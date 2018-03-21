@@ -159,7 +159,7 @@ describe('workers/branch', () => {
         updatedLockFiles: [],
       });
       config.type = 'lockFileMaintenance';
-      platform.branchExists.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
       expect(await branchWorker.processBranch(config)).toEqual('delete');
     });
     it('returns if branch automerged', async () => {
