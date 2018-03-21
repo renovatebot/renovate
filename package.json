@@ -98,7 +98,7 @@
     "eslint-config-prettier": "2.9.0",
     "eslint-plugin-import": "2.9.0",
     "eslint-plugin-promise": "3.7.0",
-    "jest": "22.4.2",
+    "jest": "22.4.3",
     "mockdate": "2.0.2",
     "nock": "9.2.3",
     "prettier": "1.11.1",
