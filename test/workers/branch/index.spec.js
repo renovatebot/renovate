@@ -53,6 +53,14 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('not-scheduled');
     });
+    it('skips branch if not unpublishSafe + pending', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(true);
+      config.unpublishSafe = true;
+      config.prCreation = 'not-pending';
+      platform.branchExists.mockReturnValueOnce(true);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('pending');
+    });
     it('processes branch if not scheduled but updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
