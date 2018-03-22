@@ -23,8 +23,8 @@ beforeEach(() => {
 
 describe('workers/repository', () => {
   describe('renovateRepository()', () => {
-    it('exits after 6 loops', async () => {
-      const res = await renovateRepository(config, 'some-token', 6);
+    it('exits after 11 loops', async () => {
+      const res = await renovateRepository(config, 'some-token', 11);
       expect(res).toMatchSnapshot();
     });
     it('writes', async () => {
