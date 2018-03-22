@@ -73,6 +73,13 @@ Object {
 }
 `;
 
+exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if updateLockFiles false 1`] = `
+Object {
+  "lockFileErrors": Array [],
+  "updatedLockFiles": Array [],
+}
+`;
+
 exports[`workers/branch/lock-files getUpdatedLockFiles tries lerna npm 1`] = `
 Object {
   "lockFileErrors": Array [],

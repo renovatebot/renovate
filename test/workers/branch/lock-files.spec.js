@@ -491,6 +491,13 @@ describe('workers/branch/lock-files', () => {
     afterEach(() => {
       jest.resetAllMocks();
     });
+    it('returns no error and empty lockfiles if updateLockFiles false', async () => {
+      config.updateLockFiles = false;
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res.lockFileErrors).toHaveLength(0);
+      expect(res.updatedLockFiles).toHaveLength(0);
+    });
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.type = 'lockFileMaintenance';
       config.parentBranch = 'renovate/lock-file-maintenance';

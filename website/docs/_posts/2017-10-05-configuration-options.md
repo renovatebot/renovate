@@ -1069,6 +1069,15 @@ Because Docker uses tags instead of semver, there is no fixed convention for how
 
 This field is currently used by some config prefixes.
 
+## updateLockFiles
+
+Set to false to disable lock file updating.
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
+
 ## updateNotScheduled
 
 Whether to update (but not create) branches when not scheduled.
