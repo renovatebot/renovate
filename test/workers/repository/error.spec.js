@@ -24,6 +24,7 @@ describe('workers/repository/error', () => {
       'blocked',
       'not-found',
       'forbidden',
+      'rate-limit-exceeded',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {

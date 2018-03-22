@@ -55,6 +55,22 @@ describe('platform/gh-got-wrapper', () => {
     expect(res.body).toHaveLength(1);
     expect(ghGot.mock.calls).toHaveLength(1);
   });
+  it('should throw rate limit exceeded', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        statusCode: 403,
+        message:
+          'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
+      })
+    );
+    let e;
+    try {
+      await get('some-url');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+  });
   it('should retry 502s', async () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
@@ -94,7 +110,7 @@ describe('platform/gh-got-wrapper', () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
         statusCode: 403,
-        message: 'API rate limit exceeded for x.',
+        message: 'Bad bot.',
       })
     );
     ghGot.mockImplementationOnce(() =>
@@ -152,7 +168,7 @@ describe('platform/gh-got-wrapper', () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
         statusCode: 403,
-        message: 'API rate limit exceeded for x.',
+        message: 'Bad bot.',
       })
     );
     let err;
