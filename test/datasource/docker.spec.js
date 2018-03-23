@@ -43,10 +43,10 @@ describe('api/docker', () => {
     });
     it('returns tags', async () => {
       const tags = ['a', 'b'];
-      got.mockReturnValueOnce({ body: { token: 'some-token ' } });
-      got.mockReturnValueOnce({ body: { tags } });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: { tags } });
       const res = await docker.getTags(undefined, 'my/node');
-      expect(res).toBe(tags);
+      expect(res).toEqual(tags);
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
