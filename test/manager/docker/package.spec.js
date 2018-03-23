@@ -47,6 +47,15 @@ describe('lib/workers/package/docker', () => {
       expect(res).toHaveLength(1);
       expect(res[0].type).toEqual('digest');
     });
+    it('returns a digest when registry is present', async () => {
+      config.dockerRegistry = 'docker.io';
+      config.currentFrom = 'docker.io/some-dep:1.0.0@sha256:abcdefghijklmnop';
+      dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].type).toEqual('digest');
+    });
     it('adds latest tag', async () => {
       delete config.currentTag;
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
@@ -67,6 +76,7 @@ describe('lib/workers/package/docker', () => {
       expect(await docker.getPackageUpdates(config)).toEqual([]);
     });
     it('returns only one upgrade if automerging major', async () => {
+      config.dockerRegistry = 'docker.io';
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
       dockerApi.getTags.mockReturnValueOnce([

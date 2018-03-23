@@ -37,6 +37,19 @@ Array [
 ]
 `;
 
+exports[`lib/workers/package/docker getPackageUpdates returns a digest when registry is present 1`] = `
+Array [
+  Object {
+    "isDigest": true,
+    "newDigest": "sha256:1234567890",
+    "newDigestShort": "123456",
+    "newFrom": "docker.io/some-dep:1.0.0@sha256:1234567890",
+    "newTag": "1.0.0",
+    "type": "digest",
+  },
+]
+`;
+
 exports[`lib/workers/package/docker getPackageUpdates returns major and minor upgrades 1`] = `
 Array [
   Object {
@@ -118,7 +131,7 @@ Array [
     "isMajor": true,
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:one",
-    "newFrom": "some-dep:3.0.0@sha256:one",
+    "newFrom": "docker.io/some-dep:3.0.0@sha256:one",
     "newTag": "3.0.0",
     "newVersion": "3.0.0",
     "newVersionMajor": "3",
