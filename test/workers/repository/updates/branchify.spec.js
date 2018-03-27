@@ -140,65 +140,66 @@ describe('workers/repository/updates/branchify', () => {
             groupName: '/My Group/',
             group: { branchName: 'renovate/{{groupSlug}}' },
           },
-          expectedBranchName: 'renovate/my-group'
+          expectedBranchName: 'renovate/my-group',
         },
         {
           upgrade: {
             groupName: 'invalid branch name.lock',
             group: { branchName: 'renovate/{{groupSlug}}' },
           },
-          expectedBranchName: 'renovate/invalid-branch-name'
+          expectedBranchName: 'renovate/invalid-branch-name',
         },
         {
           upgrade: {
             groupName: '.a-bad-  name:@.lock',
             group: { branchName: 'renovate/{{groupSlug}}' },
           },
-          expectedBranchName: 'renovate/a-bad-name-@'
+          expectedBranchName: 'renovate/a-bad-name-@',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name1..' },
-          expectedBranchName: 'renovate/bad-branch-name1'
+          expectedBranchName: 'renovate/bad-branch-name1',
         },
         {
           upgrade: { branchName: 'renovate/~bad-branch-name2' },
-          expectedBranchName: 'renovate/-bad-branch-name2'
+          expectedBranchName: 'renovate/-bad-branch-name2',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-^-name3' },
-          expectedBranchName: 'renovate/bad-branch---name3'
+          expectedBranchName: 'renovate/bad-branch---name3',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name : 4' },
-          expectedBranchName: 'renovate/bad-branch-name--4'
+          expectedBranchName: 'renovate/bad-branch-name--4',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name5/' },
-          expectedBranchName: 'renovate/bad-branch-name5'
+          expectedBranchName: 'renovate/bad-branch-name5',
         },
         {
           upgrade: { branchName: '.bad-branch-name6' },
-          expectedBranchName: 'bad-branch-name6'
+          expectedBranchName: 'bad-branch-name6',
         },
         {
           upgrade: { branchName: 'renovate/.bad-branch-name7' },
-          expectedBranchName: 'renovate/bad-branch-name7'
+          expectedBranchName: 'renovate/bad-branch-name7',
         },
         {
           upgrade: { branchName: 'renovate/.bad-branch-name8' },
-          expectedBranchName: 'renovate/bad-branch-name8'
+          expectedBranchName: 'renovate/bad-branch-name8',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name9.' },
-          expectedBranchName: 'renovate/bad-branch-name9'
+          expectedBranchName: 'renovate/bad-branch-name9',
         },
       ];
       config.upgrades = fixtures.map(({ upgrade }) => upgrade);
 
-      (await branchifyUpgrades(config)).branches
-        .forEach(({ branchName }, index) => {
-          expect(branchName).toBe(fixtures[index].expectedBranchName)
-        });
+      (await branchifyUpgrades(config)).branches.forEach(
+        ({ branchName }, index) => {
+          expect(branchName).toBe(fixtures[index].expectedBranchName);
+        }
+      );
     });
   });
 });
