@@ -170,7 +170,7 @@ describe('workers/repository/updates/branchify', () => {
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name : 4' },
-          expectedBranchName: 'renovate/bad-branch-name---4'
+          expectedBranchName: 'renovate/bad-branch-name--4'
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name5/' },
