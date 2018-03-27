@@ -48,8 +48,8 @@ describe('lib/workers/package/npm', () => {
       expect(res[0].type).toEqual('warning');
       expect(npmApi.getDependency.mock.calls.length).toBe(1);
     });
-    it('throws error if no npm dep found and lock file', async () => {
-      config.packageLock = 'some package lock';
+    it('throws error if no npm dep found and yarn.lock', async () => {
+      config.yarnLock = 'some package lock';
       let e;
       try {
         await npm.getPackageUpdates(config);
