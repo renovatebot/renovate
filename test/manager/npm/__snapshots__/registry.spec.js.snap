@@ -51,6 +51,8 @@ Object {
 }
 `;
 
+exports[`api/npm should retry when 408 or 5xx 1`] = `null`;
+
 exports[`api/npm should send an authorization header if provided 1`] = `
 Object {
   "dist-tags": Object {
