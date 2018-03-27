@@ -150,6 +150,13 @@ describe('workers/repository/updates/branchify', () => {
           expectedBranchName: 'renovate/invalid-branch-name'
         },
         {
+          upgrade: {
+            groupName: '.a-bad-  name:@.lock',
+            group: { branchName: 'renovate/{{groupSlug}}' },
+          },
+          expectedBranchName: 'renovate/a-bad-name-@'
+        },
+        {
           upgrade: { branchName: 'renovate/bad-branch-name1..' },
           expectedBranchName: 'renovate/bad-branch-name1'
         },
@@ -163,7 +170,7 @@ describe('workers/repository/updates/branchify', () => {
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name : 4' },
-          expectedBranchName: 'renovate/bad-branch-name--4'
+          expectedBranchName: 'renovate/bad-branch-name---4'
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name5/' },
@@ -178,8 +185,12 @@ describe('workers/repository/updates/branchify', () => {
           expectedBranchName: 'renovate/bad-branch-name7'
         },
         {
-          upgrade: { branchName: 'renovate/bad-branch-name8.' },
+          upgrade: { branchName: 'renovate/.bad-branch-name8' },
           expectedBranchName: 'renovate/bad-branch-name8'
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-name9.' },
+          expectedBranchName: 'renovate/bad-branch-name9'
         },
       ];
       config.upgrades = fixtures.map(({ upgrade }) => upgrade);
