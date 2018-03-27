@@ -19,7 +19,7 @@ Array [
 ]
 `;
 
-exports[`workers/repository renovateRepository() exits after 6 loops 1`] = `"loops>5"`;
+exports[`workers/repository renovateRepository() exits after 11 loops 1`] = `"loops>10"`;
 
 exports[`workers/repository renovateRepository() handles baseBranches 1`] = `"onboarded"`;
 

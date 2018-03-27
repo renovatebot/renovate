@@ -530,6 +530,9 @@ describe('platform/github', () => {
             ref: 'refs/heads/master',
           },
           {
+            ref: 'refs/heads/renovate',
+          },
+          {
             ref: 'refs/heads/renovate/b',
           },
         ],

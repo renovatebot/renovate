@@ -302,6 +302,7 @@ content",
 exports[`platform/github getAllRenovateBranches() should return all renovate branches 1`] = `
 Array [
   "renovate/a",
+  "renovate",
   "renovate/b",
 ]
 `;
