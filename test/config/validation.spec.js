@@ -43,10 +43,9 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toMatchSnapshot();
-      expect(warnings).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(10);
+      expect(errors).toHaveLength(11);
     });
   });
 });
