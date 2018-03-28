@@ -238,6 +238,15 @@ Configuration specific for Dockerfile updates.
 | type    | object                                        |
 | default | { enabled: true, major: { enabled: false }, } |
 
+## docker-compose
+
+Configuration object for Docker Compose yaml file renovation. Also inherits settings from `docker` object.
+
+| name    | value              |
+| ------- | ------------------ |
+| type    | object             |
+| default | { enabled: false } |
+
 ## enabled
 
 Enable or disable Renovate.
