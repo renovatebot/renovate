@@ -81,7 +81,7 @@
     "root-require": "0.3.1",
     "semver": "5.5.0",
     "semver-stable": "2.0.4",
-    "semver-utils": "1.1.1",
+    "semver-utils": "1.1.2",
     "showdown": "1.8.6",
     "slugify": "1.2.9",
     "tmp-promise": "1.0.4",
