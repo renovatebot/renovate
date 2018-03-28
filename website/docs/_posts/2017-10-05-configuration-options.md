@@ -148,6 +148,15 @@ Bump the version in the package.json being updated
 
 Set this value to 'patch', 'minor' or 'major' to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, set this to `patch`.
 
+## circleci
+
+Configuration object for CircleCI yaml file renovation. Also inherits settings from `docker` object.
+
+| name    | value             |
+| ------- | ----------------- |
+| type    | object            |
+| default | { enabled: true } |
+
 ## commitBody
 
 Commit body template
