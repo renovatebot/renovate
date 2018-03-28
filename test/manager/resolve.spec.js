@@ -99,22 +99,25 @@ describe('manager/resolve', () => {
       config.packageFiles = [
         'package.js',
         'Dockerfile',
+        'docker-compose.yml',
         '.travis.yml',
         'WORKSPACE',
         '.nvmrc',
       ];
       platform.getFile.mockReturnValueOnce('{}'); // package.js
       platform.getFile.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile
+      platform.getFile.mockReturnValueOnce('image: node:8\n'); // Docker Compose
       platform.getFile.mockReturnValueOnce('# travis'); // .travis.yml
       platform.getFile.mockReturnValueOnce('# WORKSPACE'); // Dockerfile
       platform.getFile.mockReturnValueOnce('8.9\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
+      expect(res.packageFiles).toHaveLength(6);
     });
     it('skips if no content or no match', async () => {
       config.packageFiles = [
         'Dockerfile',
         'other/Dockerfile',
+        'docker-compose.yml',
         '.travis.yml',
         'WORKSPACE',
         'package.js',
