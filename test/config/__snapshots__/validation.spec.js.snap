@@ -3,6 +3,15 @@
 exports[`config/validation validateConfig(config) errors for all types 1`] = `
 Array [
   Object {
+    "depName": "Configuration Warning",
+    "message": "Each packageRule must contain at least one of [\\"packageNames\\",\\"packagePatterns\\",\\"excludePackageNames\\",\\"excludePackagePatterns\\"]",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors for all types 2`] = `
+Array [
+  Object {
     "depName": "Configuration Error",
     "message": "Invalid semver range for allowedVersions: \`foo\`",
   },
@@ -37,6 +46,10 @@ Array [
   Object {
     "depName": "Configuration Error",
     "message": "Invalid configuration option: \`foo\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules must contain JSON objects",
   },
 ]
 `;

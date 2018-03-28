@@ -8,18 +8,18 @@ beforeEach(() => {
 
 describe('config/migrate-validate', () => {
   describe('migrateAndValidate()', () => {
-    it('handles empty', () => {
-      const res = migrateAndValidate(config, {});
+    it('handles empty', async () => {
+      const res = await migrateAndValidate(config, {});
       expect(res).toMatchSnapshot();
     });
-    it('handles migration', () => {
+    it('handles migration', async () => {
       const input = { automerge: 'none' };
-      const res = migrateAndValidate(config, input);
+      const res = await migrateAndValidate(config, input);
       expect(res).toMatchSnapshot();
     });
-    it('handles invalid', () => {
+    it('handles invalid', async () => {
       const input = { foo: 'none' };
-      const res = migrateAndValidate(config, input);
+      const res = await migrateAndValidate(config, input);
       expect(res).toMatchSnapshot();
       expect(res.errors).toHaveLength(1);
     });
