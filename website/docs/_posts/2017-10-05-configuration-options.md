@@ -242,10 +242,10 @@ Configuration specific for Dockerfile updates.
 
 Configuration object for Docker Compose yaml file renovation. Also inherits settings from `docker` object.
 
-| name    | value             |
-| ------- | ----------------- |
-| type    | object            |
-| default | { enabled: true } |
+| name    | value              |
+| ------- | ------------------ |
+| type    | object             |
+| default | { enabled: false } |
 
 ## enabled
 
