@@ -2,46 +2,76 @@
 
 exports[`manager detectPackageFiles(config) adds package files to object 1`] = `
 Array [
-  "package.json",
-  "backend/package.json",
+  Object {
+    "manager": "npm",
+    "packageFile": "package.json",
+  },
+  Object {
+    "manager": "npm",
+    "packageFile": "backend/package.json",
+  },
 ]
 `;
 
 exports[`manager detectPackageFiles(config) finds .nvmrc files 1`] = `
 Array [
-  ".nvmrc",
+  Object {
+    "manager": "nvm",
+    "packageFile": ".nvmrc",
+  },
 ]
 `;
 
 exports[`manager detectPackageFiles(config) finds .travis.yml files 1`] = `
 Array [
-  ".travis.yml",
+  Object {
+    "manager": "travis",
+    "packageFile": ".travis.yml",
+  },
 ]
 `;
 
 exports[`manager detectPackageFiles(config) finds Dockerfiles 1`] = `
 Array [
-  "Dockerfile",
-  "other/Dockerfile",
+  Object {
+    "manager": "docker",
+    "packageFile": "Dockerfile",
+  },
+  Object {
+    "manager": "docker",
+    "packageFile": "other/Dockerfile",
+  },
 ]
 `;
 
 exports[`manager detectPackageFiles(config) finds WORKSPACE files 1`] = `
 Array [
-  "WORKSPACE",
-  "other/WORKSPACE",
+  Object {
+    "manager": "bazel",
+    "packageFile": "WORKSPACE",
+  },
+  Object {
+    "manager": "bazel",
+    "packageFile": "other/WORKSPACE",
+  },
 ]
 `;
 
 exports[`manager detectPackageFiles(config) finds meteor package files 1`] = `
 Array [
-  "modules/something/package.js",
+  Object {
+    "manager": "meteor",
+    "packageFile": "modules/something/package.js",
+  },
 ]
 `;
 
 exports[`manager detectPackageFiles(config) ignores node modules 1`] = `
 Array [
-  "package.json",
+  Object {
+    "manager": "npm",
+    "packageFile": "package.json",
+  },
 ]
 `;
 
