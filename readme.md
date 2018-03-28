@@ -27,8 +27,8 @@ Renovate was released in 2017 and is now widely used in the developer community.
 [<img align="left" src="https://avatars1.githubusercontent.com/u/2034458?s=80&v=4" alt="algolia" title="algolia" hspace="10"/>](https://github.com/algolia)
 [<img align="left" src="https://avatars0.githubusercontent.com/u/139426?s=80&v=4" alt="angular" title="angular" hspace="10"/>](https://github.com/angular)
 [<img align="left" src="https://avatars2.githubusercontent.com/u/131524?s=80&v=4" alt="mozilla" title="mozilla" hspace="10"/>](https://github.com/mozilla)
-[<img align="left" src="https://avatars2.githubusercontent.com/u/33676472?s=80&v=4" alt="uber-workflow" title="uber-workflow" hspace="10"/>](https://github.com/uber-workflow)
 [<img align="left" src="https://avatars1.githubusercontent.com/u/22247014?s=80&v=4" alt="yarnpkg" title="yarnpkg" hspace="10"/>](https://github.com/yarnpkg)
+[<img align="left" src="https://avatars2.githubusercontent.com/u/33676472?s=80&v=4" alt="uber-workflow" title="uber-workflow" hspace="10"/>](https://github.com/uber-workflow)
 
 <br /><br /><br /><br /><br />
 
