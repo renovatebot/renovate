@@ -16,7 +16,7 @@ services:
         condition: on-failure
 
   db:
-    image: postgres:9.4.0
+    image: "postgres:9.4.0"
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
@@ -41,7 +41,7 @@ services:
         condition: on-failure
 
   result:
-    image: dockersamples/examplevotingapp_result:before
+    image: 'dockersamples/examplevotingapp_result:before'
     ports:
       - 5001:80
     networks:
