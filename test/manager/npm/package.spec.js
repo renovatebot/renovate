@@ -48,25 +48,6 @@ describe('lib/workers/package/npm', () => {
       expect(res[0].type).toEqual('warning');
       expect(npmApi.getDependency.mock.calls.length).toBe(1);
     });
-    it('throws error if onboarded and no npm dep found and yarn.lock', async () => {
-      config.repoIsOnboarded = true;
-      config.yarnLock = 'some package lock';
-      let e;
-      try {
-        await npm.getPackageUpdates(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-    });
-    it('returns error if no npm scoped dep found', async () => {
-      config.repoIsOnboarded = false;
-      config.depName = '@foo/something';
-      config.yarnLock = '# some yarn lock';
-      const res = await npm.getPackageUpdates(config);
-      expect(res).toHaveLength(1);
-      expect(res).toMatchSnapshot();
-    });
     it('returns warning if warning found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
       versions.determineUpgrades = jest.fn(() => [
