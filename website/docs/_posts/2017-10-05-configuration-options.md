@@ -350,6 +350,15 @@ See https://renovateapp.com/docs/configuration-reference/config-presets for deta
 
 RFC5322-compliant string if you wish to customise the git author for commits.
 
+## gitlabci
+
+Configuration object for GitLab CI yaml file renovation. Also inherits settings from `docker` object.
+
+| name    | value             |
+| ------- | ----------------- |
+| type    | object            |
+| default | { enabled: true } |
+
 ## group
 
 Group configuration to apply if groupName is provided.
