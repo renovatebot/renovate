@@ -8,7 +8,7 @@ type: Document
 order: 0
 ---
 
-This document describes all the configuration options you may configure in a `renovate.json` file or within a `"renovate"` section of your `package.json`. Note that any config in a `package.json` will apply only to that package file, so this is also one way you can specify different behaviour for different `package.json files`. Similarly, if you have a monorepo and want your config to apply to all package files then you need to define it in a `renovate.json`;
+This document describes all the configuration options you may configure in a `renovate.json` file or within a `"renovate"` section of your `package.json`. Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
 Also, be sure to check out Renovate's [shareable config presets](/docs/configuration-reference/config-presets) to save yourself from reinventing any wheels.
 
