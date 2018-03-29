@@ -55,7 +55,7 @@ jobs:
   node-v4:
     <<: *node-base
     docker:
-      - image: node:4
+      - image: 'node:4'
   node-v6:
     <<: *node-base
     docker:
@@ -63,4 +63,4 @@ jobs:
   node-v8:
     <<: *node-base
     docker:
-      - image: node:8.9.0
+      - image: "node:8.9.0"
