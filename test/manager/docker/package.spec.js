@@ -204,6 +204,7 @@ describe('lib/workers/package/docker', () => {
       delete config.currentDigest;
       config.currentTag = '1.0.0-something';
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
+      dockerApi.getDigest.mockReturnValueOnce('sha256:two');
       dockerApi.getTags.mockReturnValueOnce([
         '1.1.0-something',
         '1.2.0-otherthing',

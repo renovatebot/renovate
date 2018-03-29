@@ -13,8 +13,8 @@ Array [
   Object {
     "isMinor": true,
     "newDepTag": "some-dep:1.1.0-something",
-    "newDigest": undefined,
-    "newFrom": "some-dep:1.1.0-something",
+    "newDigest": "sha256:two",
+    "newFrom": "some-dep:1.1.0-something@sha256:two",
     "newTag": "1.1.0-something",
     "newVersion": "1.1.0-something",
     "newVersionMajor": "1",
