@@ -20,7 +20,7 @@ major=${BASH_REMATCH[1]}
 minor=${BASH_REMATCH[2]}
 
 # Tag and push image for each additional tag
-for tag in {"$major","${major}.${minor}"}; do
+for tag in {"$major","${major}.${minor}","latest"}; do
   echo "Tagging ${DOCKER_REPO}:${tag}"
   docker tag $IMAGE_NAME ${DOCKER_REPO}:${tag}
   docker push ${DOCKER_REPO}:${tag}
