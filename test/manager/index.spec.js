@@ -151,23 +151,23 @@ describe('manager', () => {
         ...defaultConfig,
         parentBranch: 'some-branch',
       };
-      npm.setNewValue = jest.fn();
-      docker.setNewValue = jest.fn();
-      meteor.setNewValue = jest.fn();
-      node.setNewValue = jest.fn();
-      bazel.setNewValue = jest.fn();
+      npm.updateDependency = jest.fn();
+      docker.updateDependency = jest.fn();
+      meteor.updateDependency = jest.fn();
+      node.updateDependency = jest.fn();
+      bazel.updateDependency = jest.fn();
     });
     it('returns empty if lock file maintenance', async () => {
       config.upgrades = [{ type: 'lockFileMaintenance' }];
       const res = await getUpdatedPackageFiles(config);
       expect(res.updatedPackageFiles).toHaveLength(0);
     });
-    it('recurses if setNewValue error', async () => {
+    it('recurses if updateDependency error', async () => {
       config.parentBranch = 'some-branch';
       config.canRebase = true;
       config.upgrades = [{ packageFile: 'package.json', manager: 'npm' }];
-      npm.setNewValue.mockReturnValueOnce(null);
-      npm.setNewValue.mockReturnValueOnce('some content');
+      npm.updateDependency.mockReturnValueOnce(null);
+      npm.updateDependency.mockReturnValueOnce('some content');
       const res = await getUpdatedPackageFiles(config);
       expect(res.updatedPackageFiles).toHaveLength(1);
     });
@@ -197,12 +197,12 @@ describe('manager', () => {
       platform.getFile.mockReturnValueOnce('old content 3');
       platform.getFile.mockReturnValueOnce('old travis');
       platform.getFile.mockReturnValueOnce('old WORKSPACE');
-      npm.setNewValue.mockReturnValueOnce('new content 1');
-      npm.setNewValue.mockReturnValueOnce('new content 1+');
-      docker.setNewValue.mockReturnValueOnce('new content 2');
-      meteor.setNewValue.mockReturnValueOnce('old content 3');
-      node.setNewValue.mockReturnValueOnce('old travis');
-      bazel.setNewValue.mockReturnValueOnce('old WORKSPACE');
+      npm.updateDependency.mockReturnValueOnce('new content 1');
+      npm.updateDependency.mockReturnValueOnce('new content 1+');
+      docker.updateDependency.mockReturnValueOnce('new content 2');
+      meteor.updateDependency.mockReturnValueOnce('old content 3');
+      node.updateDependency.mockReturnValueOnce('old travis');
+      bazel.updateDependency.mockReturnValueOnce('old WORKSPACE');
       const res = await getUpdatedPackageFiles(config);
       expect(res.updatedPackageFiles).toHaveLength(2);
     });

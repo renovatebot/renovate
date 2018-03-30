@@ -13,14 +13,17 @@ const input01Content = readFixture('package-1.js');
 const input02Content = readFixture('package-2.js');
 
 describe('workers/branch/package-js', () => {
-  describe('.setNewValue(currentFileContent, depName, currentVersion, newVersion)', () => {
+  describe('.updateDependency(fileContent, depName, currentVersion, newVersion)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {
         depName: 'xmldom',
         currentVersion: '0.1.19',
         newVersion: '0.22.1',
       };
-      const testContent = meteorUpdater.setNewValue(input01Content, upgrade);
+      const testContent = meteorUpdater.updateDependency(
+        input01Content,
+        upgrade
+      );
       expect(testContent).toMatchSnapshot();
     });
     it('handles alternative quotes and white space', () => {
@@ -29,7 +32,10 @@ describe('workers/branch/package-js', () => {
         currentVersion: '0.1.19',
         newVersion: '0.22.1',
       };
-      const testContent = meteorUpdater.setNewValue(input02Content, upgrade);
+      const testContent = meteorUpdater.updateDependency(
+        input02Content,
+        upgrade
+      );
       expect(testContent).toMatchSnapshot();
     });
     it('handles the case where the desired version is already supported', () => {
@@ -38,7 +44,10 @@ describe('workers/branch/package-js', () => {
         currentVersion: '0.2.0',
         newVersion: '0.2.0',
       };
-      const testContent = meteorUpdater.setNewValue(input01Content, upgrade);
+      const testContent = meteorUpdater.updateDependency(
+        input01Content,
+        upgrade
+      );
       testContent.should.equal(input01Content);
     });
   });
