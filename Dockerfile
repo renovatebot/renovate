@@ -1,4 +1,4 @@
-FROM node:8.11.0-alpine@sha256:8af2ad09cdf0cc443ce076971e0c5b593c0fc7250d1fca3afe67fc7a8ff08a21
+FROM node:8.11.0-alpine@sha256:fa3766ad0159e71ccb8970b00c1f2bfc354e22e2c26aa7a144605c600e4fda71
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
