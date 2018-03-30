@@ -1,6 +1,6 @@
 {
   "name": "renovate",
-  "description": "Keep npm dependencies up-to-date via Pull Requests",
+  "description": "Automated dependency updates. Flexible so you don't need to be.",
   "version": "0.0.0-semantic-release",
   "bin": {
     "renovate": "lib/renovate.js",
@@ -23,9 +23,16 @@
     "url": "https://github.com/renovateapp/renovate.git"
   },
   "keywords": [
+    "automated",
+    "dependency",
+    "docker",
+    "management",
+    "meteor",
+    "node",
     "npm",
     "outdated",
-    "update"
+    "update",
+    "yarn"
   ],
   "author": "Rhys Arkins <rhys@arkins.net>",
   "contributors": [
