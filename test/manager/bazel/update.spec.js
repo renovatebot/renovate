@@ -19,7 +19,7 @@ git_repository(
 */
 
 describe('manager/bazel/update', () => {
-  describe('setNewValue', () => {
+  describe('updateDependency', () => {
     it('updates tag', async () => {
       const upgrade = {
         depName: 'build_bazel_rules_nodejs',
@@ -27,7 +27,7 @@ describe('manager/bazel/update', () => {
         def: `git_repository(\n    name = "build_bazel_rules_nodejs",\n    remote = "https://github.com/bazelbuild/rules_nodejs.git",\n    tag = "0.1.8",\n)`,
         newVersion: '0.2.0',
       };
-      const res = await bazelfile.setNewValue(content, upgrade);
+      const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
     });
     it('updates http archive', async () => {
@@ -39,7 +39,7 @@ describe('manager/bazel/update', () => {
         newVersion: '0.8.1',
       };
       got.mockReturnValueOnce({ body: '' });
-      const res = await bazelfile.setNewValue(content, upgrade);
+      const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
       expect(res.indexOf('0.8.1')).not.toBe(-1);
     });
@@ -54,7 +54,7 @@ describe('manager/bazel/update', () => {
       got.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      const res = await bazelfile.setNewValue(content, upgrade);
+      const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).toBe(null);
     });
   });

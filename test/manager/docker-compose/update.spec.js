@@ -7,13 +7,13 @@ const yamlFile = fs.readFileSync(
 );
 
 describe('manager/docker-compose/update', () => {
-  describe('setNewValue', () => {
+  describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
         lineNumber: 18,
         newFrom: 'postgres:9.6.8@sha256:abcdefghijklmnop',
       };
-      const res = dcUpdate.setNewValue(yamlFile, upgrade);
+      const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
       expect(res.includes(upgrade.newFrom)).toBe(true);
     });
@@ -22,7 +22,7 @@ describe('manager/docker-compose/update', () => {
         lineNumber: 4,
         newFrom: 'quay.io/something/redis:alpine',
       };
-      const res = dcUpdate.setNewValue(yamlFile, upgrade);
+      const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).toEqual(yamlFile);
     });
     it('returns null if mismatch', () => {
@@ -30,11 +30,11 @@ describe('manager/docker-compose/update', () => {
         lineNumber: 17,
         newFrom: 'postgres:9.6.8@sha256:abcdefghijklmnop',
       };
-      const res = dcUpdate.setNewValue(yamlFile, upgrade);
+      const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).toBe(null);
     });
     it('returns null if error', () => {
-      const res = dcUpdate.setNewValue(null, null);
+      const res = dcUpdate.updateDependency(null, null);
       expect(res).toBe(null);
     });
   });

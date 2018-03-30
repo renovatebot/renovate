@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/travis/update setNewValue falls back to 2 spaces 1`] = `"hello: world"`;
+exports[`manager/travis/update updateDependency falls back to 2 spaces 1`] = `"hello: world"`;
 
-exports[`manager/travis/update setNewValue updates values 1`] = `
+exports[`manager/travis/update updateDependency updates values 1`] = `
 "dist: trusty
 language: node_js
 node_js:
