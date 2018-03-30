@@ -45,8 +45,7 @@
   },
   "homepage": "https://github.com/renovateapp/renovate#readme",
   "engines": {
-    "node": ">=8.8.0",
-    "npm": "5"
+    "node": ">= 8.11.0"
   },
   "dependencies": {
     "@yarnpkg/lockfile": "1.0.0",
