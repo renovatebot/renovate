@@ -286,6 +286,28 @@ To disable Renovate for `dependencies` but keep it for `devDependencies` you cou
 }
 ```
 
+## enabledManagers
+
+A list of package managers to enable. If defined, then all managers not on the list are disabled.
+
+| name    | value |
+| ------- | ----- |
+| type    | list  |
+| default | []    |
+
+This is a way to "whitelist" certain package managers and disable all others.
+
+By default, as Renovate supports more package managers we enable them once they are stable, but for some people only interested in perhaps npm dependencies, it can feel like "whack-a-mole" to keep disabling new ones you don't want.
+
+This works for both managers (e.g. npm, circleci, nvm, etc) as well as "parent" managers (docker or node).
+
+Example:
+
+````json
+{
+  "enabledManagers": ["npm"]
+}
+
 ## encrypted
 
 A configuration object containing strings encrypted with Renovate's public key.
@@ -386,7 +408,7 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```json
   "groupName": "eslint packages",
   "groupSlug": "eslint"
-```
+````
 
 And then the branchName would be `renovate/eslint` instead.
 

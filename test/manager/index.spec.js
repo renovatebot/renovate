@@ -20,6 +20,15 @@ describe('manager', () => {
         warnings: [],
       };
     });
+    it('skips if not in enabledManagers list', async () => {
+      platform.getFileList.mockReturnValueOnce([
+        'package.json',
+        'backend/package.json',
+      ]);
+      config.enabledManagers = ['docker'];
+      const res = await manager.detectPackageFiles(config);
+      expect(res).toHaveLength(0);
+    });
     it('adds package files to object', async () => {
       platform.getFileList.mockReturnValueOnce([
         'package.json',
