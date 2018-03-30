@@ -4,7 +4,7 @@ notifications:
 language: node_js
 
 node_js:
-  - "8"
+  - "8.11.1"
 
 sudo: false
 
@@ -26,16 +26,16 @@ cache:
     - "node_modules"
 
 script:
-  - yarn run prettier -- --list-different
-  - yarn run lint
-  - yarn run jest --maxWorkers=4
+  - yarn prettier --list-different
+  - yarn lint
+  - yarn jest --maxWorkers=4
 
 after_success:
-  - yarn run codecov
+  - yarn codecov
 
 deploy:
   provider: script
-  script: curl -X POST -d '{}' $NETLIFY_DEPLOY_WEBHOOK && yarn run semantic-release
+  script: curl -X POST -d '{}' $NETLIFY_DEPLOY_WEBHOOK && yarn semantic-release
   skip_cleanup: true
   on:
     branch: master
