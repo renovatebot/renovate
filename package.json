@@ -53,6 +53,7 @@
     "cacache": "10.0.4",
     "chalk": "2.3.2",
     "changelog": "1.4.2",
+    "changelog-filename-regex": "1.1.1",
     "child-process-promise": "2.2.1",
     "clean-git-ref": "1.0.3",
     "commander": "2.15.1",
