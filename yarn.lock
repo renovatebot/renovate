@@ -4995,9 +4995,9 @@ pn@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.0.0.tgz#1cf5a30b0d806cd18f88fc41a6b5d4ad615b3ba9"
 
-pnpm@1.37.3:
-  version "1.37.3"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.37.3.tgz#592f62fb50633506494bd683a0533a95520ef968"
+pnpm@1.37.5:
+  version "1.37.5"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.37.5.tgz#2d488f777cd655491c41cb6bbb1b3b5ba7b93247"
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
