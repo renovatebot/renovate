@@ -216,3 +216,11 @@ Object {
   "url": "https://github.com/facebook/jest/blob/master/CHANGELOG.md#jest-2200",
 }
 `;
+
+exports[`workers/pr/release-notes getReleaseNotesMd() parses js-yaml 1`] = `
+Object {
+  "body": "- Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), #371, #370.
+- Dump astrals as codepoints instead of surrogate pair, #368.",
+  "url": "https://github.com/nodeca/js-yaml/blob/master/CHANGELOG.md#3100--2017-09-10",
+}
+`;

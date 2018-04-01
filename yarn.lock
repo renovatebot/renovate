@@ -1566,6 +1566,10 @@ end-of-stream@^1.0.0, end-of-stream@^1.1.0:
   dependencies:
     once "^1.4.0"
 
+entities@~1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/entities/-/entities-1.1.1.tgz#6e5c2d0a5621b5dadaecef80b90edfb5cd7772f0"
+
 env-ci@^1.0.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/env-ci/-/env-ci-1.4.0.tgz#d5a81534fb25c9dd8627c61e8db0d45bcbb7ef2c"
@@ -3666,6 +3670,12 @@ libnpx@^10.0.1:
     y18n "^4.0.0"
     yargs "^11.0.0"
 
+linkify-it@^2.0.0:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/linkify-it/-/linkify-it-2.0.3.tgz#d94a4648f9b1c179d64fa97291268bdb6ce9434f"
+  dependencies:
+    uc.micro "^1.0.1"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -3924,6 +3934,16 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
+markdown-it@8.4.1:
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-8.4.1.tgz#206fe59b0e4e1b78a7c73250af9b34a4ad0aaf44"
+  dependencies:
+    argparse "^1.0.7"
+    entities "~1.1.1"
+    linkify-it "^2.0.0"
+    mdurl "^1.0.1"
+    uc.micro "^1.0.5"
+
 marked-terminal@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/marked-terminal/-/marked-terminal-2.0.0.tgz#5eaf568be66f686541afa52a558280310a31de2d"
@@ -3937,6 +3957,10 @@ marked-terminal@^2.0.0:
 marked@^0.3.9:
   version "0.3.12"
   resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.12.tgz#7cf25ff2252632f3fe2406bde258e94eee927519"
+
+mdurl@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/mdurl/-/mdurl-1.0.1.tgz#fe85b2ec75a59037f2adfec100fd6c601761152e"
 
 meant@~1.0.1:
   version "1.0.1"
@@ -6287,6 +6311,10 @@ typed-rest-client@^0.12.0:
 typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
+
+uc.micro@^1.0.1, uc.micro@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/uc.micro/-/uc.micro-1.0.5.tgz#0c65f15f815aa08b560a61ce8b4db7ffc3f45376"
 
 uglify-js@^2.6:
   version "2.8.29"
