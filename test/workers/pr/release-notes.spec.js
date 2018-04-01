@@ -14,6 +14,11 @@ const jestChangelogMd = fs.readFileSync(
   'utf8'
 );
 
+const jsYamlChangelogMd = fs.readFileSync(
+  'test/_fixtures/changelog-md/js-yaml.md',
+  'utf8'
+);
+
 jest.mock('gh-got');
 
 describe('workers/pr/release-notes', () => {
@@ -66,6 +71,16 @@ describe('workers/pr/release-notes', () => {
         },
       });
       const res = await getReleaseNotesMd('facebook/jest', '22.0.0');
+      expect(res).not.toBe(null);
+      expect(res).toMatchSnapshot();
+    });
+    it('parses js-yaml', async () => {
+      ghGot.mockReturnValueOnce({
+        body: {
+          content: Buffer.from(jsYamlChangelogMd).toString('base64'),
+        },
+      });
+      const res = await getReleaseNotesMd('nodeca/js-yaml', '3.10.0');
       expect(res).not.toBe(null);
       expect(res).toMatchSnapshot();
     });
