@@ -456,6 +456,7 @@ Object {
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -473,6 +474,7 @@ Object {
   "isStale": true,
   "mergeable": true,
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -489,6 +491,7 @@ Object {
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -505,6 +508,7 @@ Object {
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -520,6 +524,7 @@ Object {
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
