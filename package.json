@@ -95,7 +95,7 @@
     "tmp-promise": "1.0.4",
     "traverse": "0.6.6",
     "upath": "1.0.4",
-    "vso-node-api": "6.3.2",
+    "vso-node-api": "6.5.0",
     "yarn": "1.5.1"
   },
   "devDependencies": {

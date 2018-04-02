@@ -6341,7 +6341,7 @@ umask@^1.1.0, umask@~1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/umask/-/umask-1.1.0.tgz#f29cebf01df517912bb58ff9c4e50fde8e33320d"
 
-underscore@1.8.3, underscore@^1.8.3:
+underscore@1.8.3:
   version "1.8.3"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.8.3.tgz#4f3fb53b106e6097fcf9cb4109f2a5e9bdfa5022"
 
@@ -6493,13 +6493,13 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-vso-node-api@6.3.2:
-  version "6.3.2"
-  resolved "https://registry.yarnpkg.com/vso-node-api/-/vso-node-api-6.3.2.tgz#bc6d4c8a6e0351eee1c0e622dda95f0e929fdd32"
+vso-node-api@6.5.0:
+  version "6.5.0"
+  resolved "https://registry.yarnpkg.com/vso-node-api/-/vso-node-api-6.5.0.tgz#5f3453f27d211b0fd54423c4c73116c1e8fea0c6"
   dependencies:
     tunnel "0.0.4"
     typed-rest-client "^0.12.0"
-    underscore "^1.8.3"
+    underscore "1.8.3"
 
 walker@~1.0.5:
   version "1.0.7"
