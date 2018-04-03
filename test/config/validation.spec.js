@@ -7,7 +7,7 @@ describe('config/validation', () => {
         foo: 1,
         schedule: ['after 5pm'],
         timezone: 'Asia/Singapore',
-        packagePatterns: '*',
+        packagePatterns: ['*'],
         excludePackagePatterns: '[a-z]',
         prBody: 'some-body',
         lockFileMaintenance: {
