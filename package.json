@@ -82,7 +82,7 @@
     "moment": "2.22.0",
     "moment-timezone": "0.5.14",
     "npm": "5.8.0",
-    "openpgp": "2.6.2",
+    "openpgp": "3.0.3",
     "parse-link-header": "1.0.1",
     "pnpm": "1.37.5",
     "registry-auth-token": "3.3.2",
