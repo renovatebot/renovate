@@ -138,7 +138,8 @@
     "setupFiles": [
       "./test/globals.js"
     ],
-    "setupTestFrameworkScriptFile": "./test/chai.js"
+    "setupTestFrameworkScriptFile": "./test/chai.js",
+    "snapshotSerializers": ["./test/newline-snapshot-serializer.js"]
   },
   "prettier": {
     "singleQuote": true,
