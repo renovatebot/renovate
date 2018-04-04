@@ -60,7 +60,11 @@ describe('platform/gitlab', () => {
       expect(repos).toMatchSnapshot();
     });
   });
-
+  describe('cleanRepo()', () => {
+    it('exists', () => {
+      gitlab.cleanRepo();
+    });
+  });
   function initRepo(...args) {
     // projects/${config.repository
     get.mockImplementationOnce(() => ({
