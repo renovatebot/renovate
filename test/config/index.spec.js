@@ -164,6 +164,36 @@ describe('config/index', () => {
       expect(ghGot.mock.calls.length).toBe(1);
       expect(get.mock.calls.length).toBe(0);
     });
+    it('resolves all presets', async () => {
+      defaultArgv.push('--pr-hourly-limit=10', '--upgrade-in-range=false');
+      const env = {
+        GITHUB_TOKEN: 'abc',
+        RENOVATE_CONFIG_FILE: require.resolve(
+          '../_fixtures/config/file-with-repo-presets.js'
+        ),
+      };
+      ghGot.mockImplementationOnce(() =>
+        Promise.resolve({
+          headers: {},
+          body: [],
+        })
+      );
+      const actual = await configParser.parseConfigs(env, defaultArgv);
+      expect(actual.peerDependencies.enabled).toBe(false);
+      expect(actual.separatePatchReleases).toBe(true);
+      expect(actual.patch.automerge).toBe(true);
+      expect(actual.minor.automerge).toBeUndefined();
+      expect(actual.major.automerge).toBeUndefined();
+      expect(actual.prHourlyLimit).toBe(10);
+      expect(actual.upgradeInRange).toBe(false);
+      actual.repositories.forEach(repo => {
+        if (typeof repo === 'object') {
+          expect(repo).toMatchSnapshot(repo.repository);
+        }
+      });
+      delete actual.repositories;
+      expect(actual).toMatchSnapshot('globalConfig');
+    });
   });
   describe('mergeChildConfig(parentConfig, childConfig)', () => {
     it('merges', () => {
