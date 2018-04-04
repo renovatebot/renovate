@@ -24,17 +24,12 @@ beforeEach(() => {
 
 describe('workers/repository', () => {
   describe('renovateRepository()', () => {
-    it('exits after 11 loops', async () => {
-      const res = await renovateRepository(config, 'some-token', 11);
-      expect(res).toMatchSnapshot();
-    });
     it('writes', async () => {
       initRepo.mockReturnValue({});
       determineUpdates.mockReturnValue({
         repoIsOnboarded: true,
         branches: [{ type: 'minor' }, { type: 'pin' }],
       });
-      writeUpdates.mockReturnValueOnce('automerged');
       writeUpdates.mockReturnValueOnce('onboarded');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();
@@ -69,7 +64,6 @@ describe('workers/repository', () => {
         repoIsOnboarded: true,
         branches: [],
       });
-      writeUpdates.mockReturnValueOnce('automerged');
       writeUpdates.mockReturnValueOnce('onboarded');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();

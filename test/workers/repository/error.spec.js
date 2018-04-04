@@ -16,7 +16,6 @@ describe('workers/repository/error', () => {
       'repository-changed',
       'fork',
       'no-package-files',
-      'loops>10',
       'config-validation',
       'registry-failure',
       'archived',
