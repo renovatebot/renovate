@@ -46,7 +46,11 @@ describe('platform/vsts', () => {
       expect(repos).toMatchSnapshot();
     });
   });
-
+  describe('cleanRepo()', () => {
+    it('exists', () => {
+      vsts.cleanRepo();
+    });
+  });
   function initRepo(...args) {
     vstsApi.gitApi.mockImplementationOnce(() => ({
       getRepositories: jest.fn(() => [
