@@ -20,7 +20,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid regExp for packagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
+    "message": "Configuration option \`packagePatterns\` should be a list (Array)",
   },
   Object {
     "depName": "Configuration Error",
