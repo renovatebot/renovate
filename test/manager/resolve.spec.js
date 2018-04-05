@@ -169,5 +169,21 @@ describe('manager/resolve', () => {
       expect(res.packageFiles).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
+    it('checks if renovate config in nested package.json throws an error', async () => {
+      manager.detectPackageFiles = jest.fn(() => [
+        { packageFile: 'package.json', manager: 'npm' },
+      ]);
+      platform.getFileList.mockReturnValue(['test/package.json']);
+      platform.getFile.mockReturnValueOnce(
+        '{"name": "test/package.json", "version": "0.0.1", "renovate":{"enabled": true}}'
+      );
+      let e;
+      try {
+        await resolvePackageFiles(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toEqual(new Error('config-validation'));
+    });
   });
 });
