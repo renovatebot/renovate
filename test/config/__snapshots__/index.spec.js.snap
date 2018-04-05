@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/index .parseConfigs(env, defaultArgv) removes configured repositories when autodiscovery is to replacde it & logs warn 1`] = `
+Array [
+  "foo/bar",
+  "rennovateapp/github-app-cli",
+  "bar/BAZ",
+  "renovateapp/renovate",
+  "not/configured",
+]
+`;
+
 exports[`config/index .parseConfigs(env, defaultArgv) resolves all presets: foo/bar 1`] = `
 Object {
   "repository": "foo/bar",
