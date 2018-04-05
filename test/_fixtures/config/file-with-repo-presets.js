@@ -15,7 +15,7 @@ module.exports = {
     },
     {
       repository: 'rennovateapp/github-app-cli',
-      extends: [':base', ':prHourlyLimit2']
+      extends: [':prHourlyLimit2']
     }
   ],
 };
