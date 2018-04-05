@@ -501,6 +501,15 @@ Object {
       },
       Object {
         "description": Array [
+          "Group packages from fimbullinter monorepo together",
+        ],
+        "groupName": "fimbullinter monorepo",
+        "packagePatterns": Array [
+          "^@fimbul/",
+        ],
+      },
+      Object {
+        "description": Array [
           "Group packages from gatsby monorepo together",
         ],
         "groupName": "gatsby monorepo",
@@ -1249,6 +1258,15 @@ Object {
       ],
       "packagePatterns": Array [
         "^@commitlint/",
+      ],
+    },
+    Object {
+      "description": Array [
+        "Group packages from fimbullinter monorepo together",
+      ],
+      "groupName": "fimbullinter monorepo",
+      "packagePatterns": Array [
+        "^@fimbul/",
       ],
     },
     Object {
