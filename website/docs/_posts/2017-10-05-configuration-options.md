@@ -303,10 +303,11 @@ This works for both managers (e.g. npm, circleci, nvm, etc) as well as "parent" 
 
 Example:
 
-````json
+```json
 {
   "enabledManagers": ["npm"]
 }
+```
 
 ## encrypted
 
