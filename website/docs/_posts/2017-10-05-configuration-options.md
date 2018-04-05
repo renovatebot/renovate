@@ -409,7 +409,7 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```json
   "groupName": "eslint packages",
   "groupSlug": "eslint"
-````
+```
 
 And then the branchName would be `renovate/eslint` instead.
 
