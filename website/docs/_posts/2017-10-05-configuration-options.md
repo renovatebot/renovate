@@ -303,10 +303,11 @@ This works for both managers (e.g. npm, circleci, nvm, etc) as well as "parent" 
 
 Example:
 
-````json
+```json
 {
   "enabledManagers": ["npm"]
 }
+```
 
 ## encrypted
 
@@ -408,7 +409,7 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```json
   "groupName": "eslint packages",
   "groupSlug": "eslint"
-````
+```
 
 And then the branchName would be `renovate/eslint` instead.
 
