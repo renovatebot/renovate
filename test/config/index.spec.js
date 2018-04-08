@@ -22,6 +22,8 @@ describe('config/index', () => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
+      jest.mock('delay');
+      require('delay').mockImplementation(() => Promise.resolve());
       jest.mock('gh-got');
       ghGot = require('gh-got');
       jest.mock('gl-got');
