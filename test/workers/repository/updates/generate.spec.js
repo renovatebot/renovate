@@ -1,3 +1,5 @@
+const defaultConfig = require('../../../../lib/config/defaults').getConfig();
+
 beforeEach(() => {
   jest.resetAllMocks();
 });
@@ -102,7 +104,6 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
-      expect(res.singleVersion).toBeDefined();
       expect(res.groupName).toBeDefined();
     });
     it('groups multiple upgrades different version', () => {
@@ -141,14 +142,13 @@ describe('workers/repository/updates/generate', () => {
     it('uses semantic commits', () => {
       const branch = [
         {
+          ...defaultConfig,
           depName: 'some-dep',
-          groupName: 'some-group',
-          branchName: 'some-branch',
-          prTitle: 'some-title',
           semanticCommits: true,
           semanticCommitType: 'chore',
           semanticCommitScope: 'package',
           lazyGrouping: true,
+          newVersion: '1.2.0',
           foo: 1,
           group: {
             foo: 2,
@@ -156,7 +156,34 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toEqual('chore(package): some-title');
+      expect(res.prTitle).toEqual(
+        'chore(package): update dependency some-dep to v1.2.0'
+      );
+    });
+    it('adds commit message body', () => {
+      const branch = [
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          commitBody: '[skip-ci]',
+          newVersion: '1.2.0',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.commitMessage).toMatchSnapshot();
+      expect(res.commitMessage.includes('\n')).toBe(true);
+    });
+    it('supports manual prTitle', () => {
+      const branch = [
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          prTitle: 'Upgrade {{depName}}',
+          toLowerCase: true,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toMatchSnapshot();
     });
     it('handles @types specially', () => {
       const branch = [
