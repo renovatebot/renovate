@@ -207,5 +207,58 @@ describe('lib/workers/dep-type/index', () => {
       expect(res.y).toBeUndefined();
       expect(res.packageRules).toBeUndefined();
     });
+    it('filters depType', () => {
+      const config = {
+        packageRules: [
+          {
+            depTypeList: ['dependencies', 'peerDependencies'],
+            packageNames: ['a'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+      };
+      const res = depTypeWorker.getDepConfig(config, dep);
+      expect(res.x).toBe(1);
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('filters naked depType', () => {
+      const config = {
+        packageRules: [
+          {
+            depTypeList: ['dependencies', 'peerDependencies'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+      };
+      const res = depTypeWorker.getDepConfig(config, dep);
+      expect(res.x).toBe(1);
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('filters depType', () => {
+      const config = {
+        packageRules: [
+          {
+            depTypeList: ['dependencies', 'peerDependencies'],
+            packageNames: ['a'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'devDependencies',
+        depName: 'a',
+      };
+      const res = depTypeWorker.getDepConfig(config, dep);
+      expect(res.x).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
+    });
   });
 });

@@ -23,6 +23,7 @@ Object {
   "commitBody": null,
   "commitMessage": "Update dependency {{{depName}}} to {{#unless isRange}}v{{/unless}}{{{newVersion}}}",
   "copyLocalLibs": false,
+  "depTypeList": Array [],
   "dependencies": Object {},
   "description": Array [
     "Do not renovate <code>peerDependencies</code> versions/ranges",

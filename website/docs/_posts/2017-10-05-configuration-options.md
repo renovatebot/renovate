@@ -196,6 +196,17 @@ Example commit message: "chore(deps): Update dependency eslint to version 4.0.1"
 
 Set to true if repository package.json files contain any local (file) dependencies + lock files. The `package.json` files from each will be copied to disk before lock file generation, even if they are within ignored directories.
 
+## depTypeList
+
+A list of depType names inside a package rule to filter on. Matches all depTypes if empty.
+
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
+
+Use this field if you want to limit a `packageRule` to certain `depType` values. Invalid if used outside of a `packageRule`.
+
 ## dependencies
 
 Configuration specific for `package.json > dependencies`.
