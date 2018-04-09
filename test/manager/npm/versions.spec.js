@@ -397,17 +397,6 @@ describe('manager/npm/versions', () => {
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
   });
-  describe('.isRange(input)', () => {
-    it('rejects simple semver', () => {
-      versions.isRange('1.2.3').should.eql(false);
-    });
-    it('accepts tilde', () => {
-      versions.isRange('~1.2.3').should.eql(true);
-    });
-    it('accepts caret', () => {
-      versions.isRange('^1.2.3').should.eql(true);
-    });
-  });
   describe('.isPastLatest(dep, version)', () => {
     it('should return false for less than', () => {
       versions.isPastLatest(qJson, '1.0.0').should.eql(false);
