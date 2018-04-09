@@ -12,6 +12,10 @@ describe('lib/workers/package/node', () => {
         ...defaultConfig,
       };
     });
+    it('returns empty if missing supportPolicy', async () => {
+      config.currentVersion = ['6', '8'];
+      expect(await node.getPackageUpdates(config)).toEqual([]);
+    });
     it('returns empty if invalid supportPolicy', async () => {
       config.currentVersion = ['6', '8'];
       config.supportPolicy = ['foo'];
@@ -24,10 +28,12 @@ describe('lib/workers/package/node', () => {
     });
     it('returns result if needing updates', async () => {
       config.currentVersion = ['6', '8'];
+      config.supportPolicy = ['lts'];
       expect(await node.getPackageUpdates(config)).toMatchSnapshot();
     });
     it('detects pinning', async () => {
       config.currentVersion = ['6.1.0', '8.4.0'];
+      config.supportPolicy = ['lts'];
       githubDatasource.getRepoReleases.mockReturnValueOnce([
         'v4.4.4',
         'v5.5.5',
