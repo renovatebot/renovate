@@ -776,9 +776,9 @@ Whether to convert ranged versions in `package.json` to pinned versions.
 | name    | value   |
 | ------- | ------- |
 | type    | boolean |
-| default | null    |
+| default | false   |
 
-This is a very important feature to consider, because not every repository's requirements are the same. The default value for this field is `null`, which means Renovate attempts to autodetect what's best for the project. `devDependencies` in `package.json` will alway be pinned, but `dependencies` will only be pinned if the package is `private` or has no `main` entry defined - both indicators that it is not intended to be published and consumed by other packages. If you wish to override this autodetection you can configure `pinVersions` either at the top level or within configuration objects such as `dependencies` or `devDependencies`.
+This is a very important feature to consider, because not every repository's requirements are the same. The default value within the tool itself is false, which means no existing ranges are pinned. However if you are using the suggested preset `"config:base"`, then it changes the default of pinVersions to `null`, which means Renovate attempts to autodetect what's best for the project. In such cases `devDependencies` in `package.json` will alway be pinned, but `dependencies` will only be pinned if the package is `private` or has no `main` entry defined - both indicators that it is not intended to be published and consumed by other packages. To override the `"config:base"` setting, add the preset `":preserveSemverRanges"` to your `extends` array.
 
 ## prBody
 
