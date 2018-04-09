@@ -213,6 +213,14 @@ Object {
 }
 `;
 
+exports[`config/index .parseConfigs(env, defaultArgv) uses configured repositories when autodiscovery is to replacde it & logs warn 1`] = `
+Array [
+  "bar/baz",
+  "renovateapp/renovate",
+  "not/configured",
+]
+`;
+
 exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
 Object {
   "branchName": "{{{branchPrefix}}}lock-file-maintenance",

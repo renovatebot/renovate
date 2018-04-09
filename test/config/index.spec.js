@@ -164,6 +164,29 @@ describe('config/index', () => {
       expect(ghGot.mock.calls.length).toBe(1);
       expect(get.mock.calls.length).toBe(0);
     });
+    it('uses configured repositories when autodiscovery is to replacde it & logs warn', async () => {
+      const env = {
+        RENOVATE_CONFIG_FILE: require.resolve(
+          '../_fixtures/config/file-with-repo-presets.js'
+        ),
+      };
+      defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);
+      ghGot.mockImplementationOnce(() => ({
+        headers: {},
+        body: [
+          { full_name: 'bar/BAZ' },
+          { full_name: 'renovateapp/renovate' },
+          { full_name: 'not/configured' },
+        ],
+      }));
+      const config = await configParser.parseConfigs(env, defaultArgv);
+      expect(config.repositories.length).toBe(3);
+      expect(
+        config.repositories.map(
+          repo => (typeof repo === 'string' ? repo : repo.repository)
+        )
+      ).toMatchSnapshot();
+    });
     it('adds a log file', async () => {
       const env = { GITHUB_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
