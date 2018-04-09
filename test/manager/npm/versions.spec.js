@@ -408,29 +408,6 @@ describe('manager/npm/versions', () => {
       versions.isRange('^1.2.3').should.eql(true);
     });
   });
-  describe('.isValidVersion(input)', () => {
-    it('should support simple semver', () => {
-      versions.isValidVersion('1.2.3').should.eql(true);
-    });
-    it('should support versions with dash', () => {
-      versions.isValidVersion('1.2.3-foo').should.eql(true);
-    });
-    it('should reject versions without dash', () => {
-      versions.isValidVersion('1.2.3foo').should.eql(false);
-    });
-    it('should support ranges', () => {
-      versions.isValidVersion('~1.2.3').should.eql(true);
-      versions.isValidVersion('^1.2.3').should.eql(true);
-      versions.isValidVersion('>1.2.3').should.eql(true);
-    });
-    it('should reject github repositories', () => {
-      versions.isValidVersion('renovateapp/renovate').should.eql(false);
-      versions.isValidVersion('renovateapp/renovate#master').should.eql(false);
-      versions
-        .isValidVersion('https://github.com/renovateapp/renovate.git')
-        .should.eql(false);
-    });
-  });
   describe('.isPastLatest(dep, version)', () => {
     it('should return false for less than', () => {
       versions.isPastLatest(qJson, '1.0.0').should.eql(false);
