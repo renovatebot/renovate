@@ -50,7 +50,7 @@
   "dependencies": {
     "@yarnpkg/lockfile": "1.0.0",
     "bunyan": "1.8.12",
-    "cacache": "10.0.4",
+    "cacache": "11.0.0",
     "chalk": "2.3.2",
     "changelog": "1.4.2",
     "changelog-filename-regex": "1.1.1",
