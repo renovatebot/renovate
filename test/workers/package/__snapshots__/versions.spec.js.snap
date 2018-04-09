@@ -71,6 +71,27 @@ Array [
 ]
 `;
 
+exports[`workers/package/versions .determineUpgrades(npmDep, config) rejects complex range in-range updates 1`] = `Array []`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) rejects in-range unsupported operator 1`] = `Array []`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) rejects non-fully specified in-range updates 1`] = `Array []`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) rejects non-range in-range updates 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.0.0",
+    "changeLogToVersion": "1.4.1",
+    "isMinor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`workers/package/versions .determineUpgrades(npmDep, config) rejects reverse ordered less than greater than 1`] = `
 Array [
   Object {
@@ -147,6 +168,31 @@ Array [
   },
   Object {
     "changeLogFromVersion": "0.4.4",
+    "changeLogToVersion": "1.4.1",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) returns minor update if automerging both patch and minor 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "0.9.0",
+    "changeLogToVersion": "0.9.7",
+    "isMinor": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "type": "minor",
+    "unpublishable": false,
+  },
+  Object {
+    "changeLogFromVersion": "0.9.0",
     "changeLogToVersion": "1.4.1",
     "isMajor": true,
     "newVersion": "1.4.1",
@@ -448,6 +494,22 @@ Array [
     "newVersion": "2.0.3",
     "newVersionMajor": 2,
     "type": "pin",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`workers/package/versions .determineUpgrades(npmDep, config) supports in-range updates 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "1.0.0",
+    "changeLogToVersion": "1.4.1",
+    "isMinor": true,
+    "isRange": true,
+    "newVersion": "~1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "type": "minor",
     "unpublishable": false,
   },
 ]

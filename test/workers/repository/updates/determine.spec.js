@@ -31,32 +31,35 @@ describe('workers/repository/updates/determine', () => {
       config.packageFiles = [
         {
           packageFile: 'Dockerfile',
+          manager: 'docker',
         },
         {
           packageFile: 'backend/package.json',
+          manager: 'npm',
         },
         {
           packageFile: 'frontend/package.js',
+          manager: 'meteor',
         },
         {
           packageFile: '.travis.yml',
+          manager: 'travis',
         },
         {
           packageFile: 'WORKSPACE',
+          manager: 'bazel',
         },
       ];
-      packageFileWorker.renovateDockerfile.mockReturnValueOnce([
+      packageFileWorker.renovatePackageFile.mockReturnValueOnce([
         { depName: 'a' },
       ]);
       packageFileWorker.renovatePackageFile.mockReturnValueOnce([
         { depName: 'b' },
         { depName: 'c' },
       ]);
-      packageFileWorker.renovateMeteorPackageFile.mockReturnValueOnce([
-        { foo: 'd' },
-      ]);
-      packageFileWorker.renovateNodeFile.mockReturnValueOnce([{ foo: 'e' }]);
-      packageFileWorker.renovateBazelFile.mockReturnValueOnce([{ bar: 'f' }]);
+      packageFileWorker.renovatePackageFile.mockReturnValueOnce([{ foo: 'd' }]);
+      packageFileWorker.renovatePackageFile.mockReturnValueOnce([{ foo: 'e' }]);
+      packageFileWorker.renovatePackageFile.mockReturnValueOnce([{ bar: 'f' }]);
       const res = await determineRepoUpgrades(config);
       expect(res.upgrades).toHaveLength(6);
     });

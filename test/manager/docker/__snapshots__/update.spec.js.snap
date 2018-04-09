@@ -1,20 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/branch/dockerfile setNewValue handles strange whitespace 1`] = `
+exports[`workers/branch/dockerfile updateDependency handles similar FROM 1`] = `
+"FROM debian:wheezy@sha256:abcdefghijklmnop as stage-1
+RUN something
+FROM debian:wheezy@sha256:abcdefghijklmnop
+RUN something else"
+`;
+
+exports[`workers/branch/dockerfile updateDependency handles strange whitespace 1`] = `
 "# comment FROM node:8
 FROM   node:8@sha256:abcdefghijklmnop as base
 RUN something
 "
 `;
 
-exports[`workers/branch/dockerfile setNewValue replaces existing value 1`] = `
+exports[`workers/branch/dockerfile updateDependency replaces existing value 1`] = `
 "# comment FROM node:8
 FROM node:8@sha256:abcdefghijklmnop
 RUN something
 "
 `;
 
-exports[`workers/branch/dockerfile setNewValue replaces existing value with suffix 1`] = `
+exports[`workers/branch/dockerfile updateDependency replaces existing value with suffix 1`] = `
 "# comment FROM node:8
 FROM node:8@sha256:abcdefghijklmnop as base
 RUN something

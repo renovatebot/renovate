@@ -4,12 +4,12 @@ const configParser = require('../../../lib/config');
 
 const docker = require('../../../lib/manager/docker/package');
 const npm = require('../../../lib/manager/npm/package');
-const node = require('../../../lib/manager/node/package');
+const node = require('../../../lib/manager/travis/package');
 const bazel = require('../../../lib/manager/bazel/package');
 
 jest.mock('../../../lib/manager/docker/package');
 jest.mock('../../../lib/manager/npm/package');
-jest.mock('../../../lib/manager/node/package');
+jest.mock('../../../lib/manager/travis/package');
 jest.mock('../../../lib/manager/bazel/package');
 
 describe('lib/workers/package/index', () => {
@@ -27,30 +27,30 @@ describe('lib/workers/package/index', () => {
     });
     it('calls docker', async () => {
       docker.getPackageUpdates.mockReturnValueOnce([]);
-      config.packageFile = 'Dockerfile';
+      config.manager = 'docker';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
     it('calls meteor', async () => {
       npm.getPackageUpdates.mockReturnValueOnce([]);
-      config.packageFile = 'package.js';
+      config.manager = 'meteor';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
     it('calls node', async () => {
       node.getPackageUpdates.mockReturnValueOnce([]);
-      config.packageFile = '.travis.yml';
+      config.manager = 'travis';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
     it('calls bazel', async () => {
       bazel.getPackageUpdates.mockReturnValueOnce([]);
-      config.packageFile = 'WORKSPACE';
+      config.manager = 'bazel';
       const res = await pkgWorker.renovatePackage(config);
       expect(res).toMatchObject([]);
     });
     it('maps and filters type', async () => {
-      config.packageFile = 'package.json';
+      config.manager = 'npm';
       config.major.enabled = false;
       npm.getPackageUpdates.mockReturnValueOnce([
         { type: 'pin' },

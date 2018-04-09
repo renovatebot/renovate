@@ -1,31 +1,42 @@
 {
   "name": "renovate",
-  "description": "Keep npm dependencies up-to-date via Pull Requests",
+  "description": "Automated dependency updates. Flexible so you don't need to be.",
   "version": "0.0.0-semantic-release",
-  "bin": "lib/renovate.js",
+  "bin": {
+    "renovate": "lib/renovate.js",
+    "renovate-config-validator": "bin/config-validator.js"
+  },
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "jest": "npm run clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
+    "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --fix lib test",
     "lint": "eslint lib test",
     "prettier": "prettier \"**/*.{js,json,md}\" --write",
     "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
-    "test": "npm run prettier -- --list-different && npm run lint && npm run jest"
+    "test": "yarn prettier --list-different && yarn lint && yarn jest"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/renovateapp/renovate.git"
   },
   "keywords": [
+    "automated",
+    "dependency",
+    "docker",
+    "management",
+    "meteor",
+    "node",
     "npm",
     "outdated",
-    "update"
+    "update",
+    "yarn"
   ],
   "author": "Rhys Arkins <rhys@arkins.net>",
   "contributors": [
+    "Hutson Betts <hutson@hyper-expanse.net>",
     "Jean-Yves Couët <jycouet@gmail.com>"
   ],
   "license": "MIT",
@@ -34,17 +45,18 @@
   },
   "homepage": "https://github.com/renovateapp/renovate#readme",
   "engines": {
-    "node": ">=8.8.0",
-    "npm": "5"
+    "node": ">= 8.11.0"
   },
   "dependencies": {
     "@yarnpkg/lockfile": "1.0.0",
     "bunyan": "1.8.12",
-    "cacache": "10.0.4",
-    "chalk": "2.3.1",
+    "cacache": "11.0.0",
+    "chalk": "2.3.2",
     "changelog": "1.4.2",
+    "changelog-filename-regex": "1.1.1",
     "child-process-promise": "2.2.1",
-    "commander": "2.14.1",
+    "clean-git-ref": "1.0.3",
+    "commander": "2.15.1",
     "compare-versions": "3.1.0",
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
@@ -57,51 +69,53 @@
     "gh-got": "7.0.0",
     "github-url-from-git": "1.5.0",
     "gl-got": "8.0.0",
-    "got": "8.2.0",
+    "got": "8.3.0",
     "handlebars": "4.0.11",
     "ini": "1.3.5",
-    "js-yaml": "3.10.0",
+    "js-yaml": "3.11.0",
     "json-dup-key-validator": "1.0.2",
     "json-stringify-pretty-compact": "1.1.0",
-    "json-stringify-safe": "5.0.1",
     "later": "1.2.0",
     "lodash": "4.17.5",
+    "markdown-it": "8.4.1",
     "minimatch": "3.0.4",
-    "moment": "2.20.1",
+    "moment": "2.22.0",
     "moment-timezone": "0.5.14",
-    "npm": "5.7.1",
+    "npm": "5.8.0",
     "openpgp": "2.6.2",
     "parse-link-header": "1.0.1",
-    "pnpm": "1.35.0",
+    "pnpm": "1.38.3",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "semver": "5.5.0",
     "semver-stable": "2.0.4",
-    "semver-utils": "1.1.1",
+    "semver-utils": "1.1.2",
     "showdown": "1.8.6",
+    "slugify": "1.2.9",
     "tmp-promise": "1.0.4",
     "traverse": "0.6.6",
     "upath": "1.0.4",
-    "vso-node-api": "6.3.2",
-    "yarn": "1.3.2"
+    "vso-node-api": "6.5.0",
+    "yarn": "1.5.1"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "codecov": "3.0.0",
-    "cross-env": "5.1.3",
-    "eslint": "4.18.1",
+    "cross-env": "5.1.4",
+    "eslint": "4.19.1",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-config-prettier": "2.9.0",
-    "eslint-plugin-import": "2.9.0",
-    "eslint-plugin-promise": "3.6.0",
-    "jest": "22.4.2",
+    "eslint-plugin-import": "2.10.0",
+    "eslint-plugin-promise": "3.7.0",
+    "jest": "22.4.3",
     "mockdate": "2.0.2",
-    "nock": "9.2.1",
-    "prettier": "1.10.2",
-    "semantic-release": "12.4.1"
+    "nock": "9.2.3",
+    "prettier": "1.11.1",
+    "semantic-release": "15.1.5"
   },
   "files": [
+    "bin/config-validator.js",
     "lib"
   ],
   "babel": {
@@ -124,7 +138,8 @@
     "setupFiles": [
       "./test/globals.js"
     ],
-    "setupTestFrameworkScriptFile": "./test/chai.js"
+    "setupTestFrameworkScriptFile": "./test/chai.js",
+    "snapshotSerializers": ["./test/newline-snapshot-serializer.js"]
   },
   "prettier": {
     "singleQuote": true,
@@ -134,9 +149,13 @@
     "extends": [
       "config:base",
       ":rebaseStalePrs",
+      ":automergeMinor",
       ":label(ready)",
       ":assignee(rarkins)"
     ],
+    "docker": {
+      "semanticCommitType": "fix"
+    },
     "semanticCommitScope": null
   },
   "publishConfig": {
@@ -144,6 +163,7 @@
   },
   "release": {
     "branch": "master",
+    "tagFormat": "${version}",
     "analyzeCommits": {
       "preset": "angular",
       "releaseRules": [

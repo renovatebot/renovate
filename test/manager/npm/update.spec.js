@@ -13,63 +13,63 @@ function readFixture(fixture) {
 const input01Content = readFixture('inputs/01.json');
 
 describe('workers/branch/package-json', () => {
-  describe('.setNewValue(currentFileContent, depType, depName, newVersion)', () => {
+  describe('.updateDependency(fileContent, depType, depName, newVersion)', () => {
     it('replaces a dependency value', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'cheerio',
+        newVersion: '0.22.1',
+      };
       const outputContent = readFixture('outputs/011.json');
-      const testContent = npmUpdater.setNewValue(
-        input01Content,
-        'dependencies',
-        'cheerio',
-        '0.22.1'
-      );
+      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       testContent.should.equal(outputContent);
     });
     it('updates resolutions too', () => {
-      const testContent = npmUpdater.setNewValue(
-        input01Content,
-        'dependencies',
-        'config',
-        '1.22.0'
-      );
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newVersion: '1.22.0',
+      };
+      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
       expect(JSON.parse(testContent).resolutions.config).toEqual('1.22.0');
     });
     it('replaces only the first instance of a value', () => {
+      const upgrade = {
+        depType: 'devDependencies',
+        depName: 'angular-touch',
+        newVersion: '1.6.1',
+      };
       const outputContent = readFixture('outputs/012.json');
-      const testContent = npmUpdater.setNewValue(
-        input01Content,
-        'devDependencies',
-        'angular-touch',
-        '1.6.1'
-      );
+      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       testContent.should.equal(outputContent);
     });
     it('replaces only the second instance of a value', () => {
+      const upgrade = {
+        depType: 'devDependencies',
+        depName: 'angular-sanitize',
+        newVersion: '1.6.1',
+      };
       const outputContent = readFixture('outputs/013.json');
-      const testContent = npmUpdater.setNewValue(
-        input01Content,
-        'devDependencies',
-        'angular-sanitize',
-        '1.6.1'
-      );
+      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       testContent.should.equal(outputContent);
     });
     it('handles the case where the desired version is already supported', () => {
-      const testContent = npmUpdater.setNewValue(
-        input01Content,
-        'devDependencies',
-        'angular-touch',
-        '1.5.8'
-      );
+      const upgrade = {
+        depType: 'devDependencies',
+        depName: 'angular-touch',
+        newVersion: '1.5.8',
+      };
+      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       testContent.should.equal(input01Content);
     });
     it('returns null if throws error', () => {
-      const testContent = npmUpdater.setNewValue(
-        input01Content,
-        'blah',
-        'angular-touch-not',
-        '1.5.8'
-      );
+      const upgrade = {
+        depType: 'blah',
+        depName: 'angular-touch-not',
+        newVersion: '1.5.8',
+      };
+      const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       expect(testContent).toBe(null);
     });
   });

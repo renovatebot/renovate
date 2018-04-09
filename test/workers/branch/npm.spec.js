@@ -19,7 +19,11 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const res = await npmHelper.generateLockFile('some-dir');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json'
+    );
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.error).not.toBeDefined();
     expect(res.lockFile).toEqual('package-lock-contents');
@@ -33,7 +37,11 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => {
       throw new Error('not found');
     });
-    const res = await npmHelper.generateLockFile('some-dir');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json'
+    );
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
@@ -51,7 +59,11 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const res = await npmHelper.generateLockFile('some-dir');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json'
+    );
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
@@ -69,7 +81,11 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const res = await npmHelper.generateLockFile('some-dir');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json'
+    );
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
@@ -89,7 +105,11 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const res = await npmHelper.generateLockFile('some-dir');
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json'
+    );
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });

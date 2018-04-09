@@ -1,10 +1,10 @@
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 const manager = require('../../lib/manager');
-const npmUpdater = require('../../lib/manager/npm/update');
-const meteorUpdater = require('../../lib/manager/meteor/update');
-const dockerUpdater = require('../../lib/manager/docker/update');
-const nodeUpdater = require('../../lib/manager/node/update');
-const bazelUpdater = require('../../lib/manager/bazel/update');
+const npm = require('../../lib/manager/npm');
+const meteor = require('../../lib/manager/meteor');
+const docker = require('../../lib/manager/docker');
+const node = require('../../lib/manager/travis');
+const bazel = require('../../lib/manager/bazel');
 
 const path = require('path');
 const fs = require('fs-extra');
@@ -16,9 +16,27 @@ describe('manager', () => {
     let config;
     beforeEach(() => {
       config = {
-        ...defaultConfig,
+        ...JSON.parse(JSON.stringify(defaultConfig)),
         warnings: [],
       };
+    });
+    it('skips if not in enabledManagers list', async () => {
+      platform.getFileList.mockReturnValueOnce([
+        'package.json',
+        'backend/package.json',
+      ]);
+      config.enabledManagers = ['docker'];
+      const res = await manager.detectPackageFiles(config);
+      expect(res).toHaveLength(0);
+    });
+    it('skips if parentManager is disabled', async () => {
+      platform.getFileList.mockReturnValueOnce([
+        'package.json',
+        '.circleci/config.yml',
+      ]);
+      config.docker.enabled = false;
+      const res = await manager.detectPackageFiles(config);
+      expect(res).toHaveLength(1);
     });
     it('adds package files to object', async () => {
       platform.getFileList.mockReturnValueOnce([
@@ -69,11 +87,19 @@ describe('manager', () => {
       expect(res).toHaveLength(2);
     });
     it('finds .travis.yml files', async () => {
-      config.node.enabled = true;
+      config.travis.enabled = true;
       platform.getFileList.mockReturnValueOnce([
         '.travis.yml',
         'other/.travis.yml',
       ]);
+      platform.getFile.mockReturnValueOnce('sudo: true\nnode_js:\n  -8\n');
+      const res = await manager.detectPackageFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
+    it('finds .nvmrc files', async () => {
+      config.travis.enabled = true;
+      platform.getFileList.mockReturnValueOnce(['.nvmrc', 'other/.nvmrc']);
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
@@ -83,6 +109,7 @@ describe('manager', () => {
       platform.getFileList.mockReturnValueOnce([
         'WORKSPACE',
         'other/WORKSPACE',
+        'empty/WORKSPACE',
       ]);
       platform.getFile.mockReturnValueOnce('\n\ngit_repository(\n\n)\n');
       platform.getFile.mockReturnValueOnce(
@@ -91,6 +118,7 @@ describe('manager', () => {
           'utf8'
         )
       );
+      platform.getFile.mockReturnValueOnce('foo');
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
@@ -113,6 +141,27 @@ describe('manager', () => {
       expect(res.warnings).toMatchSnapshot();
     });
   });
+  describe('getManager', () => {
+    it('rejects unknown files', () => {
+      expect(manager.getManager('WORKSPACER')).toBe(null);
+    });
+    it('detects files in root', () => {
+      expect(manager.getManager('WORKSPACE')).toBe('bazel');
+      expect(manager.getManager('Dockerfile')).toBe('docker');
+      expect(manager.getManager('package.js')).toBe('meteor');
+      expect(manager.getManager('package.json')).toBe('npm');
+      expect(manager.getManager('.nvmrc')).toBe('nvm');
+      expect(manager.getManager('.travis.yml')).toBe('travis');
+    });
+    it('detects nested files', () => {
+      expect(manager.getManager('foo/bar/WORKSPACE')).toBe('bazel');
+      expect(manager.getManager('backend/Dockerfile')).toBe('docker');
+      expect(manager.getManager('package/a/package.js')).toBe('meteor');
+      expect(manager.getManager('frontend/package.json')).toBe('npm');
+      expect(manager.getManager('subfolder-1/.nvmrc')).toBe(null);
+      expect(manager.getManager('subfolder-2/.travis.yml')).toBe(null);
+    });
+  });
   describe('getUpdatedPackageFiles', () => {
     let config;
     beforeEach(() => {
@@ -120,28 +169,28 @@ describe('manager', () => {
         ...defaultConfig,
         parentBranch: 'some-branch',
       };
-      npmUpdater.setNewValue = jest.fn();
-      dockerUpdater.setNewValue = jest.fn();
-      meteorUpdater.setNewValue = jest.fn();
-      nodeUpdater.setNewValue = jest.fn();
-      bazelUpdater.setNewValue = jest.fn();
+      npm.updateDependency = jest.fn();
+      docker.updateDependency = jest.fn();
+      meteor.updateDependency = jest.fn();
+      node.updateDependency = jest.fn();
+      bazel.updateDependency = jest.fn();
     });
     it('returns empty if lock file maintenance', async () => {
       config.upgrades = [{ type: 'lockFileMaintenance' }];
       const res = await getUpdatedPackageFiles(config);
       expect(res.updatedPackageFiles).toHaveLength(0);
     });
-    it('recurses if setNewValue error', async () => {
+    it('recurses if updateDependency error', async () => {
       config.parentBranch = 'some-branch';
       config.canRebase = true;
-      config.upgrades = [{ packageFile: 'package.json' }];
-      npmUpdater.setNewValue.mockReturnValueOnce(null);
-      npmUpdater.setNewValue.mockReturnValueOnce('some content');
+      config.upgrades = [{ packageFile: 'package.json', manager: 'npm' }];
+      npm.updateDependency.mockReturnValueOnce(null);
+      npm.updateDependency.mockReturnValueOnce('some content');
       const res = await getUpdatedPackageFiles(config);
       expect(res.updatedPackageFiles).toHaveLength(1);
     });
     it('errors if cannot rebase', async () => {
-      config.upgrades = [{ packageFile: 'package.json' }];
+      config.upgrades = [{ packageFile: 'package.json', manager: 'npm' }];
       let e;
       try {
         await getUpdatedPackageFiles(config);
@@ -154,11 +203,11 @@ describe('manager', () => {
       config.parentBranch = 'some-branch';
       config.canRebase = true;
       config.upgrades = [
-        { packageFile: 'package.json' },
-        { packageFile: 'Dockerfile' },
-        { packageFile: 'packages/foo/package.js' },
-        { packageFile: '.travis.yml' },
-        { packageFile: 'WORKSPACE' },
+        { packageFile: 'package.json', manager: 'npm' },
+        { packageFile: 'Dockerfile', manager: 'docker' },
+        { packageFile: 'packages/foo/package.js', manager: 'meteor' },
+        { packageFile: '.travis.yml', manager: 'travis' },
+        { packageFile: 'WORKSPACE', manager: 'bazel' },
       ];
       platform.getFile.mockReturnValueOnce('old content 1');
       platform.getFile.mockReturnValueOnce('old content 1');
@@ -166,12 +215,12 @@ describe('manager', () => {
       platform.getFile.mockReturnValueOnce('old content 3');
       platform.getFile.mockReturnValueOnce('old travis');
       platform.getFile.mockReturnValueOnce('old WORKSPACE');
-      npmUpdater.setNewValue.mockReturnValueOnce('new content 1');
-      npmUpdater.setNewValue.mockReturnValueOnce('new content 1+');
-      dockerUpdater.setNewValue.mockReturnValueOnce('new content 2');
-      meteorUpdater.setNewValue.mockReturnValueOnce('old content 3');
-      nodeUpdater.setNewValue.mockReturnValueOnce('old travis');
-      bazelUpdater.setNewValue.mockReturnValueOnce('old WORKSPACE');
+      npm.updateDependency.mockReturnValueOnce('new content 1');
+      npm.updateDependency.mockReturnValueOnce('new content 1+');
+      docker.updateDependency.mockReturnValueOnce('new content 2');
+      meteor.updateDependency.mockReturnValueOnce('old content 3');
+      node.updateDependency.mockReturnValueOnce('old travis');
+      bazel.updateDependency.mockReturnValueOnce('old WORKSPACE');
       const res = await getUpdatedPackageFiles(config);
       expect(res.updatedPackageFiles).toHaveLength(2);
     });

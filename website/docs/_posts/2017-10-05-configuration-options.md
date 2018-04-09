@@ -8,11 +8,28 @@ type: Document
 order: 0
 ---
 
-This document describes all the configuration options you may configure in a `renovate.json` file or within a `"renovate"` section of your `package.json`. Note that any config in a `package.json` will apply only to that package file, so this is also one way you can specify different behaviour for different `package.json files`. Similarly, if you have a monorepo and want your config to apply to all package files then you need to define it in a `renovate.json`;
+This document describes all the configuration options you may configure in a `renovate.json` file or within a `"renovate"` section of your `package.json`. Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
 Also, be sure to check out Renovate's [shareable config presets](/docs/configuration-reference/config-presets) to save yourself from reinventing any wheels.
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovateapp/config-help](https://github.com/renovateapp/config-help) where it will be promptly answered.
+
+## allowedVersions
+
+A semver range defining allowed versions for dependencies
+
+| name | value  |
+| ---- | ------ |
+| type | string |
+
+Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could defined this to be `<= 1.5` or `< 1.6.0`:
+
+```
+  "packageRules": [{
+    "packageNames": ["angular"],
+    "allowedVersions": "<=1.5"
+  }]
+```
 
 ## assignees
 
@@ -131,6 +148,15 @@ Bump the version in the package.json being updated
 
 Set this value to 'patch', 'minor' or 'major' to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, set this to `patch`.
 
+## circleci
+
+Configuration object for CircleCI yaml file renovation. Also inherits settings from `docker` object.
+
+| name    | value             |
+| ------- | ----------------- |
+| type    | object            |
+| default | { enabled: true } |
+
 ## commitBody
 
 Commit body template
@@ -221,6 +247,15 @@ Configuration specific for Dockerfile updates.
 | type    | object                                        |
 | default | { enabled: true, major: { enabled: false }, } |
 
+## docker-compose
+
+Configuration object for Docker Compose yaml file renovation. Also inherits settings from `docker` object.
+
+| name    | value             |
+| ------- | ----------------- |
+| type    | object            |
+| default | { enabled: true } |
+
 ## enabled
 
 Enable or disable Renovate.
@@ -248,6 +283,29 @@ To disable Renovate for `dependencies` but keep it for `devDependencies` you cou
 ```json
 "dependencies": {
   "enabled": false
+}
+```
+
+## enabledManagers
+
+A list of package managers to enable. If defined, then all managers not on the list are disabled.
+
+| name    | value |
+| ------- | ----- |
+| type    | list  |
+| default | []    |
+
+This is a way to "whitelist" certain package managers and disable all others.
+
+By default, as Renovate supports more package managers we enable them once they are stable, but for some people only interested in perhaps npm dependencies, it can feel like "whack-a-mole" to keep disabling new ones you don't want.
+
+This works for both managers (e.g. npm, circleci, nvm, etc) as well as "parent" managers (docker or node).
+
+Example:
+
+```json
+{
+  "enabledManagers": ["npm"]
 }
 ```
 
@@ -494,14 +552,16 @@ Set this to true if you wish to receive one PR for every separate major version 
 
 ## node
 
-Configuration specific for node.js version updates (e.g. `.travis.yml`).
+Configuration specific for all Node.js version updates (e.g. `engines` field in `package.json`).
 
-| name    | value                                      |
-| ------- | ------------------------------------------ |
-| type    | object                                     |
-| default | { enabled: false, supportPolicy: ['lts'] } |
+| name    | value                                         |
+| ------- | --------------------------------------------- |
+| type    | object                                        |
+| default | { groupName: 'Node.js', lazyGrouping: false } |
 
-It's set to false by default as we cannot 100% besure what supportPolicy you would want.
+Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
+
+Check out our [Node.js documentation](https://renovateapp.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
@@ -534,6 +594,17 @@ A string copy of npmrc file.
 
 See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
 
+## nvm
+
+Configuration specific for `.nvmrc` files.
+
+| name    | value             |
+| ------- | ----------------- |
+| type    | object            |
+| default | { enabled: true } |
+
+For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
+
 ## optionalDependencies
 
 Configuration specific for `package.json > optionalDependencies`.
@@ -547,16 +618,14 @@ Extend this if you wish to configure rules specifically for `optionalDependencie
 
 ## packageFiles
 
-A manually provisioned list of package.json paths to use.
+A manually provisioned list of package files to use.
 
 | name    | value            |
 | ------- | ---------------- |
 | type    | array of strings |
 | default | `[]`             |
 
-If left default then package file autodiscovery will be used, so only change this setting if you wish to manually specify a limited set of `package.json` files to renovate, or if package file autodiscovery is not finding all your `package.json` files.
-
-Note: `package.json` autodiscovery works for any GitHub repository that isn't itself a fork of another (otherwise GitHub does not index forks for searching). Otherwise `renovate` will default to looking for `package.json` in the root directory of the repository and you will need to manually provision your list of package files.
+If left default then package file autodiscovery will be used, so only change this setting if you wish to manually specify a limited set of `package.json` or other package files to renovate.
 
 ## packageNames
 
@@ -707,11 +776,9 @@ Whether to convert ranged versions in `package.json` to pinned versions.
 | name    | value   |
 | ------- | ------- |
 | type    | boolean |
-| default | true    |
+| default | null    |
 
-This is a very important feature to consider, because not every repository's requirements are the same. Although Renovate's default value for pinVersions is `true` - i.e. pin versions of all dependencies, there are cases where you may want to keep ranges, for example if your project is a web library that is consumed by others. In that case, you may wish to keep ranges for `dependencies` but pin versions for `devDependencies`, for example.
-
-When creating the onboarding PR, Renovate will try to detect the best setting for `pinVersions` and apply that in the `renovate.json` file. In most cases it will suggest pinning `devDependencies` and ranges for everything else, however if a repository's `package.json` files are flagged as `private` then Renovate will recommend pinning all dependencies.
+This is a very important feature to consider, because not every repository's requirements are the same. The default value for this field is `null`, which means Renovate attempts to autodetect what's best for the project. `devDependencies` in `package.json` will alway be pinned, but `dependencies` will only be pinned if the package is `private` or has no `main` entry defined - both indicators that it is not intended to be published and consumed by other packages. If you wish to override this autodetection you can configure `pinVersions` either at the top level or within configuration objects such as `dependencies` or `devDependencies`.
 
 ## prBody
 
@@ -764,11 +831,11 @@ Rate limit PRs to maximum x created per hour. 0 (default) means no limit.
 
 This setting - if enabled - helps slow down Renovate, particularly during the onboarding phase. What may happen without this setting is:
 
-1. Onboarding PR is created
-2. User merges onboarding PR to activate Renovate
-3. Renovate creates a "Pin Dependencies" PR (if necessary)
-4. User merges Pin PR
-5. Renovate then creates every single upgrade PR necessary - potentially dozens
+1.  Onboarding PR is created
+2.  User merges onboarding PR to activate Renovate
+3.  Renovate creates a "Pin Dependencies" PR (if necessary)
+4.  User merges Pin PR
+5.  Renovate then creates every single upgrade PR necessary - potentially dozens
 
 The above can result in swamping CI systems, as well as a lot of retesting if branches need to be rebased every time one is merged. Instead, if `prHourlyLimit` is set to a value like 1 or 2, it will mean that Renovate creates at most that many new PRs within each hourly period (:00-:59). So the project should still result in all PRs created perhaps within the first 24 hours maximum, but at a rate that may allow users to merge them once they pass tests. It does not place a limit on the number of _concurrently open_ PRs - only on the rate they are created.
 
@@ -799,9 +866,11 @@ Whether to rebase branches that are no longer up-to-date with the base branch.
 | name    | value   |
 | ------- | ------- |
 | type    | boolean |
-| default | false   |
+| default | null    |
 
-This field is defaulted to `false` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+
+If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch-push` automerge then Renovate will still rebase as necessary for that.
 
 ## recreateClosed
 
@@ -980,12 +1049,16 @@ This feature is added for people migrating from alternative services who are use
 
 ## supportPolicy
 
-Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)
+Dependency support policy, e.g. used for deciding whether to use a [Long-term Support](https://en.wikipedia.org/wiki/Long-term_support) version vs non-LTS version, a combination, etc.
 
 | name    | value |
 | ------- | ----- |
 | type    | list  |
 | default | []    |
+
+Language support is limited to those listed below:
+
+* **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 
@@ -997,6 +1070,19 @@ Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)
 | default | `Etc/UTC` |
 
 It is only recommended to set this field if you wish to use the `schedules` feature and want to write them in your local timezone. Please see the above link for valid timezone names.
+
+## travis
+
+Configuration specific for `.travis.yml` files.
+
+| name    | value              |
+| ------- | ------------------ |
+| type    | object             |
+| default | { enabled: false } |
+
+For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
+
+Note: Travis renovation is disabled by default as we cannot be sure of which combination of releases you want until you configure supportPolicy.
 
 ## unpublishSafe
 
@@ -1024,6 +1110,15 @@ Because Docker uses tags instead of semver, there is no fixed convention for how
 
 This field is currently used by some config prefixes.
 
+## updateLockFiles
+
+Set to false to disable lock file updating.
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | true    |
+
 ## updateNotScheduled
 
 Whether to update (but not create) branches when not scheduled.
@@ -1036,6 +1131,21 @@ Whether to update (but not create) branches when not scheduled.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
+
+## upgradeInRange
+
+Upgrade ranges to latest version even if latest version satisfies existing range.
+
+| name    | value   |
+| ------- | ------- |
+| type    | boolean |
+| default | false   |
+
+By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open. As such, Renovate won't deliberately "narrow" the range by increasing the semver value inside.
+
+For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `upgradeInRange` to `true` in your Renovate config.
+
+This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`. It is not compatible with `pinVersions=true`.
 
 ## versionStrategy
 
@@ -1050,8 +1160,8 @@ npm-only.
 
 Renovate's "auto" strategy for updating versions is like this:
 
-1. If the existing version already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
-2. Otherwise, replace it. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
+1.  If the existing version already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
+2.  Otherwise, replace it. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 You can override logic either way, by setting it to `replace` or `widen`. e.g. if the currentVersion is `"^1.0.0 || ^2.0.0"` but you configure `versionStrategy=replace` then the result will be `"^3.0.0"`.
 

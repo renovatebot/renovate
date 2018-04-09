@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/circleci/extract extractDependencies() extracts multiple image lines 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "node",
+    "currentDepTag": "node",
+    "currentDepTagDigest": "node",
+    "currentDigest": undefined,
+    "currentFrom": "node",
+    "currentTag": undefined,
+    "depName": "node",
+    "depType": "CircleCI",
+    "dockerRegistry": undefined,
+    "lineNumber": 12,
+  },
+  Object {
+    "changeLogFromVersion": "node:4",
+    "currentDepTag": "node:4",
+    "currentDepTagDigest": "node:4",
+    "currentDigest": undefined,
+    "currentFrom": "node:4",
+    "currentTag": "4",
+    "depName": "node",
+    "depType": "CircleCI",
+    "dockerRegistry": undefined,
+    "lineNumber": 57,
+  },
+  Object {
+    "changeLogFromVersion": "node:6",
+    "currentDepTag": "node:6",
+    "currentDepTagDigest": "node:6",
+    "currentDigest": undefined,
+    "currentFrom": "node:6",
+    "currentTag": "6",
+    "depName": "node",
+    "depType": "CircleCI",
+    "dockerRegistry": undefined,
+    "lineNumber": 61,
+  },
+  Object {
+    "changeLogFromVersion": "node:8.9.0",
+    "currentDepTag": "node:8.9.0",
+    "currentDepTagDigest": "node:8.9.0",
+    "currentDigest": undefined,
+    "currentFrom": "node:8.9.0",
+    "currentTag": "8.9.0",
+    "depName": "node",
+    "depType": "CircleCI",
+    "dockerRegistry": undefined,
+    "lineNumber": 65,
+  },
+]
+`;

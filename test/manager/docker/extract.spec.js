@@ -89,6 +89,19 @@ describe('lib/manager/docker/extract', () => {
         config
       );
       expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
+    });
+    it('skips scratchs', () => {
+      const res = extractDependencies('FROM scratch\nADD foo\n', config);
+      expect(res).toHaveLength(0);
+    });
+    it('skips named multistage FROM tags', () => {
+      const res = extractDependencies(
+        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM frontend\n',
+        config
+      );
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
     });
   });
 });

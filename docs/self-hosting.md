@@ -4,9 +4,24 @@ Although Renovate is now best known as a "service" via the GitHub App, that serv
 
 ## Install
 
+#### npmjs
+
 ```
 $ npm install -g renovate
 ```
+
+#### Docker
+
+Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
+
+```
+$ docker run renovate/renovate
+$ docker run renovate/renovate:11.32.3
+$ docker run renovate/renovate:11.32
+$ docker run renovate/renovate 11
+```
+
+If you wish to configure Renovate using a `config.js` file then map it to `/src/config.js` using Docker volumes.
 
 ## Authentication
 
@@ -36,7 +51,7 @@ Run `renovate --help` for usage details.
 Note: The first time you run `renovate` on a repository, it will not upgrade any
 dependencies. Instead, it will create a Pull Request (Merge Request if GitLab)
 called 'Configure Renovate' and commit a default `renovate.json` file to the
-repository. This PR can be close unmerged if the default settings are fine for
+repository. This PR can be closed as unmerged if the default settings are fine for
 you. Also, this behaviour can be disabled if you set the `onboarding`
 configuration option to `false` before running.
 

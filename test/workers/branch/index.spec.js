@@ -53,6 +53,14 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('not-scheduled');
     });
+    it('skips branch if not unpublishSafe + pending', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(true);
+      config.unpublishSafe = true;
+      config.prCreation = 'not-pending';
+      platform.branchExists.mockReturnValueOnce(true);
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('pending');
+    });
     it('processes branch if not scheduled but updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
@@ -141,6 +149,18 @@ describe('workers/branch', () => {
       });
       platform.branchExists.mockReturnValueOnce(false);
       expect(await branchWorker.processBranch(config)).toEqual('no-work');
+    });
+    it('returns delete if existing lock file maintenace is pointless', async () => {
+      manager.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [],
+      });
+      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+        lockFileError: false,
+        updatedLockFiles: [],
+      });
+      config.type = 'lockFileMaintenance';
+      platform.branchExists.mockReturnValueOnce(true);
+      expect(await branchWorker.processBranch(config)).toEqual('delete');
     });
     it('returns if branch automerged', async () => {
       manager.getUpdatedPackageFiles.mockReturnValueOnce({

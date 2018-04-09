@@ -302,6 +302,7 @@ content",
 exports[`platform/github getAllRenovateBranches() should return all renovate branches 1`] = `
 Array [
   "renovate/a",
+  "renovate",
   "renovate/b",
 ]
 `;
@@ -455,6 +456,7 @@ Object {
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -465,12 +467,14 @@ Object {
     "sha": "5678",
   },
   "branchName": undefined,
+  "canMerge": true,
   "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isStale": true,
   "mergeable": true,
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -487,6 +491,7 @@ Object {
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -503,6 +508,7 @@ Object {
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -518,6 +524,7 @@ Object {
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;

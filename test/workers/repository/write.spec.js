@@ -45,12 +45,13 @@ describe('workers/repository/write', () => {
       expect(branchWorker.processBranch.mock.calls).toHaveLength(1);
     });
     it('stops after automerge', async () => {
-      config.branches = [{}, {}, {}];
+      config.branches = [{}, {}, {}, {}];
       branchWorker.processBranch.mockReturnValueOnce('created');
+      branchWorker.processBranch.mockReturnValueOnce('delete');
       branchWorker.processBranch.mockReturnValueOnce('automerged');
       const res = await writeUpdates(config);
       expect(res).toEqual('automerged');
-      expect(branchWorker.processBranch.mock.calls).toHaveLength(2);
+      expect(branchWorker.processBranch.mock.calls).toHaveLength(3);
     });
   });
 });

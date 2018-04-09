@@ -2,6 +2,9 @@
 
 exports[`workers/branch/lock-files determineLockFileDirs returns all directories if lock file maintenance 1`] = `
 Object {
+  "npmShrinkwrapDirs": Array [
+    "leftend",
+  ],
   "packageLockFileDirs": Array [
     "backend",
   ],
@@ -17,6 +20,9 @@ Object {
 exports[`workers/branch/lock-files determineLockFileDirs returns directories from updated package files 1`] = `
 Object {
   "lernaDirs": Array [],
+  "npmShrinkwrapDirs": Array [
+    "leftend",
+  ],
   "packageLockFileDirs": Array [
     "backend",
   ],
@@ -34,6 +40,7 @@ Object {
   "lernaDirs": Array [
     ".",
   ],
+  "npmShrinkwrapDirs": Array [],
   "packageLockFileDirs": Array [],
   "shrinkwrapYamlDirs": Array [],
   "yarnLockFileDirs": Array [],
@@ -43,6 +50,7 @@ Object {
 exports[`workers/branch/lock-files determineLockFileDirs returns root directory if using yarn workspaces 1`] = `
 Object {
   "lernaDirs": Array [],
+  "npmShrinkwrapDirs": Array [],
   "packageLockFileDirs": Array [],
   "shrinkwrapYamlDirs": Array [],
   "yarnLockFileDirs": Array [
@@ -59,6 +67,13 @@ Object {
 `;
 
 exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if none updated 1`] = `
+Object {
+  "lockFileErrors": Array [],
+  "updatedLockFiles": Array [],
+}
+`;
+
+exports[`workers/branch/lock-files getUpdatedLockFiles returns no error and empty lockfiles if updateLockFiles false 1`] = `
 Object {
   "lockFileErrors": Array [],
   "updatedLockFiles": Array [],

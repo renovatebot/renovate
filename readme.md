@@ -41,8 +41,8 @@ Renovate was released in 2017 and is now widely used in the developer community.
 
 ## Using Renovate
 
-The easiest way to use Renovate if you are on GitHub is to enable the free Renovate app. Go to
-[https://github.com/apps/renovate](https://github.com/apps/renovate) to enable
+The easiest way to use Renovate if you are on GitHub is to use the Renovate app. Go to
+[https://github.com/apps/renovate](https://github.com/apps/renovate) to install
 it now.
 
 ## Configuration
@@ -59,6 +59,10 @@ you'd like to get your config reviewed or ask any questions.
 ## Self-Hosting
 
 If you are not on GitHub or you prefer to run your own copy of Renovate, then it takes only seconds to set up. Please see [docs/self-hosting.md](https://github.com/renovateapp/renovate/blob/master/docs/self-hosting.md) for instructions.
+
+## Contributing
+
+If you would like to contribute to Renovate or get a local copy running for some other reason, please see the instructions in [contributing.md](.github/contributing.md).
 
 ## Security / Disclosure
 

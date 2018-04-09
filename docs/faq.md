@@ -20,15 +20,15 @@ private modules is to make sure the appropriate credentials are in `.npmrc` or
 If you are using a hosted Renovate instance (such as the Renovate app), and your
 `package.json` includes private modules, then you can:
 
-1. Commit an `.npmrc` file to the repository, and Renovate will use this, or
-2. Add the contents of your `.npmrc` file to the config field `npmrc` in your
-   `renovate.json` or `package.json` renovate config
-3. Add a valid npm authToken to the config field `npmToken` in your
-   `renovate.json` or `package.json` renovate config
-4. If using the [GitHub App hosted service](https://github.com/apps/renovate),
-   authorize the npm user named "renovate" with read-only access to the relevant
-   modules. This "renovate" account is used solely for the purpose of the
-   renovate GitHub App.
+1.  Commit an `.npmrc` file to the repository, and Renovate will use this, or
+2.  Add the contents of your `.npmrc` file to the config field `npmrc` in your
+    `renovate.json` or `package.json` renovate config
+3.  Add a valid npm authToken to the config field `npmToken` in your
+    `renovate.json` or `package.json` renovate config
+4.  If using the [GitHub App hosted service](https://github.com/apps/renovate),
+    authorize the npm user named "renovate" with read-only access to the relevant
+    modules. This "renovate" account is used solely for the purpose of the
+    renovate GitHub App.
 
 ### Control renovate's schedule
 

@@ -10,6 +10,7 @@ const lerna = require('../../../lib/workers/branch/lerna');
 
 const {
   hasPackageLock,
+  hasNpmShrinkwrap,
   hasYarnLock,
   hasShrinkwrapYaml,
   determineLockFileDirs,
@@ -60,6 +61,53 @@ describe('workers/branch/lock-files', () => {
       let e;
       try {
         hasPackageLock(config, 'frontend/package.json');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
+  });
+  describe('hasNpmShrinkWrap', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        ...defaultConfig,
+      };
+    });
+    it('returns true if found and true', () => {
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          npmShrinkwrap: 'some package lock',
+        },
+      ];
+      expect(hasNpmShrinkwrap(config, 'package.json')).toBe(true);
+    });
+    it('returns false if found and false', () => {
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          npmShrinkwrap: 'some package lock',
+        },
+        {
+          packageFile: 'backend/package.json',
+        },
+      ];
+      expect(hasNpmShrinkwrap(config, 'backend/package.json')).toBe(false);
+    });
+    it('throws error if not found', () => {
+      config.packageFiles = [
+        {
+          packageFile: 'package.json',
+          npmShrinkwrap: 'some package lock',
+        },
+        {
+          packageFile: 'backend/package.json',
+        },
+      ];
+      let e;
+      try {
+        hasNpmShrinkwrap(config, 'frontend/package.json');
       } catch (err) {
         e = err;
       }
@@ -178,6 +226,10 @@ describe('workers/branch/lock-files', () => {
             packageFile: 'frontend/package.json',
             shrinkwrapYaml: 'some package lock',
           },
+          {
+            packageFile: 'leftend/package.json',
+            npmShrinkwrap: 'some package lock',
+          },
         ],
       };
     });
@@ -199,6 +251,10 @@ describe('workers/branch/lock-files', () => {
         },
         {
           name: 'frontend/package.json',
+          contents: 'some contents',
+        },
+        {
+          name: 'leftend/package.json',
           contents: 'some contents',
         },
       ];
@@ -288,10 +344,15 @@ describe('workers/branch/lock-files', () => {
           content: { name: 'package-2', engines: { yarn: '^0.27.5' } },
           yarnrc: 'some yarnrc',
         },
+        {
+          packageFile: 'leftend/package.json',
+          hasNpmShrinkwrap: true,
+          content: { name: 'package-3' },
+        },
       ];
       await writeExistingFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(6);
-      expect(fs.remove.mock.calls).toHaveLength(6);
+      expect(fs.outputFile.mock.calls).toHaveLength(7);
+      expect(fs.remove.mock.calls).toHaveLength(9);
     });
     it('writes package.json of local lib', async () => {
       const renoPath = upath.join(__dirname, '../../../');
@@ -430,8 +491,16 @@ describe('workers/branch/lock-files', () => {
     afterEach(() => {
       jest.resetAllMocks();
     });
+    it('returns no error and empty lockfiles if updateLockFiles false', async () => {
+      config.updateLockFiles = false;
+      const res = await getUpdatedLockFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res.lockFileErrors).toHaveLength(0);
+      expect(res.updatedLockFiles).toHaveLength(0);
+    });
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.type = 'lockFileMaintenance';
+      config.parentBranch = 'renovate/lock-file-maintenance';
       platform.branchExists.mockReturnValueOnce(true);
       const res = await getUpdatedLockFiles(config);
       expect(res).toMatchSnapshot();
@@ -441,6 +510,7 @@ describe('workers/branch/lock-files', () => {
     it('returns no error and empty lockfiles if none updated', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: [],
+        npmShrinkwrapDirs: [],
         yarnLockFileDirs: [],
         shrinkwrapYamlDirs: [],
         lernaDirs: [],
@@ -453,6 +523,7 @@ describe('workers/branch/lock-files', () => {
     it('tries multiple lock files', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: ['a', 'b'],
+        npmShrinkwrapDirs: ['f'],
         yarnLockFileDirs: ['c', 'd'],
         shrinkwrapYamlDirs: ['e'],
         lernaDirs: [],
@@ -461,13 +532,14 @@ describe('workers/branch/lock-files', () => {
       expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(0);
-      expect(npm.generateLockFile.mock.calls).toHaveLength(2);
+      expect(npm.generateLockFile.mock.calls).toHaveLength(3);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(platform.getFile.mock.calls).toHaveLength(6);
+      expect(platform.getFile.mock.calls).toHaveLength(7);
     });
     it('tries lerna npm', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: ['a', 'b'],
+        npmShrinkwrapDirs: [],
         yarnLockFileDirs: [],
         shrinkwrapYamlDirs: [],
         lernaDirs: ['.'],
@@ -480,6 +552,7 @@ describe('workers/branch/lock-files', () => {
     it('tries lerna yarn', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: [],
+        npmShrinkwrapDirs: [],
         yarnLockFileDirs: ['c', 'd'],
         shrinkwrapYamlDirs: [],
         lernaDirs: ['.'],
@@ -492,6 +565,7 @@ describe('workers/branch/lock-files', () => {
     it('sets error if receiving null', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: ['a', 'b'],
+        npmShrinkwrapDirs: ['f'],
         yarnLockFileDirs: ['c', 'd'],
         shrinkwrapYamlDirs: ['e'],
         lernaDirs: [],
@@ -502,13 +576,14 @@ describe('workers/branch/lock-files', () => {
       const res = await getUpdatedLockFiles(config);
       expect(res.lockFileErrors).toHaveLength(3);
       expect(res.updatedLockFiles).toHaveLength(0);
-      expect(npm.generateLockFile.mock.calls).toHaveLength(2);
+      expect(npm.generateLockFile.mock.calls).toHaveLength(3);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(platform.getFile.mock.calls).toHaveLength(3);
+      expect(platform.getFile.mock.calls).toHaveLength(4);
     });
     it('adds multiple lock files', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
         packageLockFileDirs: ['a', 'b'],
+        npmShrinkwrapDirs: ['f'],
         yarnLockFileDirs: ['c', 'd'],
         shrinkwrapYamlDirs: ['e'],
         lernaDirs: [],
@@ -519,9 +594,9 @@ describe('workers/branch/lock-files', () => {
       const res = await getUpdatedLockFiles(config);
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(3);
-      expect(npm.generateLockFile.mock.calls).toHaveLength(2);
+      expect(npm.generateLockFile.mock.calls).toHaveLength(3);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
-      expect(platform.getFile.mock.calls).toHaveLength(6);
+      expect(platform.getFile.mock.calls).toHaveLength(7);
     });
   });
 });

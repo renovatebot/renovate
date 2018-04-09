@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/workers/package/node getPackageUpdates detects pinning 1`] = `
+Array [
+  Object {
+    "isRange": true,
+    "newVersion": Array [
+      "8.9.4",
+      "6.11.0",
+      "4.4.4",
+    ],
+    "repositoryUrl": "https://github.com/nodejs/node",
+  },
+]
+`;
+
+exports[`lib/workers/package/node getPackageUpdates returns result if needing updates 1`] = `
+Array [
+  Object {
+    "isRange": true,
+    "newVersion": Array [
+      "8",
+      "6",
+      "4",
+    ],
+    "repositoryUrl": "https://github.com/nodejs/node",
+  },
+]
+`;

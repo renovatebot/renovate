@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+# We need to parse $IMAGE_NAME because $CACHE_TAG is broken on Docker Hub post_push
+
+IFS=: read DOCKER_REPO CACHE_TAG <<< $IMAGE_NAME
+
+echo "repo=${DOCKER_REPO}"
+echo "tag=${CACHE_TAG}"
+
+SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"
+
+if ! [[ "$CACHE_TAG" =~ $SEMVER_REGEX ]]; then
+  echo Not a semver tag - skipping
+  exit
+fi
+
+# Write the tag to package.json>version so that "renovate --version" is correct
+
+sed -i.bak "s/0.0.0-semantic-release/${CACHE_TAG}/" package.json
+rm -f package.json.bak

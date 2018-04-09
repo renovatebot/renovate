@@ -15,6 +15,9 @@ describe('config/migration', () => {
         automergePatch: true,
         baseBranch: 'next',
         ignoreNodeModules: true,
+        node: {
+          enabled: true,
+        },
         meteor: true,
         autodiscover: 'true',
         schedule: 'on the last day of the month',
@@ -225,6 +228,24 @@ describe('config/migration', () => {
       expect(
         migratedConfig.lockFileMaintenance.optionalDependencies.respectLatest
       ).toBe(false);
+    });
+    it('it migrates node to travis', () => {
+      const config = {
+        node: {
+          enabled: true,
+          supportPolicy: ['lts'],
+          automerge: 'none',
+        },
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig.node.enabled).toBeUndefined();
+      expect(migratedConfig.travis.enabled).toBe(true);
+      expect(migratedConfig.node.supportPolicy).toBeDefined();
     });
   });
 });

@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/dep-type/package-json .extractDependencies(npmExtract, depType) each element contains non-null depType, depName, currentVersion 1`] = `
+Array [
+  Object {
+    "currentVersion": "6.5.0",
+    "depName": "autoprefixer",
+    "depType": "dependencies",
+    "lockedVersion": undefined,
+  },
+  Object {
+    "currentVersion": "~1.6.0",
+    "depName": "bower",
+    "depType": "dependencies",
+    "lockedVersion": undefined,
+  },
+  Object {
+    "currentVersion": "13.1.0",
+    "depName": "browserify",
+    "depType": "dependencies",
+    "lockedVersion": undefined,
+  },
+  Object {
+    "currentVersion": "0.9.2",
+    "depName": "browserify-css",
+    "depType": "dependencies",
+    "lockedVersion": undefined,
+  },
+  Object {
+    "currentVersion": "0.22.0",
+    "depName": "cheerio",
+    "depType": "dependencies",
+    "lockedVersion": undefined,
+  },
+  Object {
+    "currentVersion": "1.21.0",
+    "depName": "config",
+    "depType": "dependencies",
+    "lockedVersion": undefined,
+  },
+]
+`;

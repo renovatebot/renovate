@@ -24,8 +24,8 @@ If new commits to the base branch - such as merging another Renovate PR - result
 
 There are two cases where Renovate will rebase its branches off the base branch every time they are out of date:
 
-1. If you manually configure `"rebaseStalePrs"` to be true.
-2. If you have enabled "Require branches to be up to date before merging" on GitHub protected branches settings
+1.  If you manually configure `"rebaseStalePrs"` to be true.
+2.  If you have enabled "Require branches to be up to date before merging" on GitHub protected branches settings
 
 In that case Renovate PRs will be continuously rebased off the repository's base branch whenever necessary, even if the PRs are not conflicted.
 

@@ -36,6 +36,7 @@ describe('workers/pr', () => {
         head: {
           ref: 'somebranch',
         },
+        canMerge: true,
       };
     });
     afterEach(() => {
@@ -67,7 +68,7 @@ describe('workers/pr', () => {
     });
     it('should not automerge if enabled and pr is mergeable but unstable', async () => {
       config.automerge = true;
-      pr.mergeable_state = 'unstable';
+      pr.canMerge = undefined;
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
@@ -132,9 +133,9 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      expect(platform.createPr.mock.calls[0][2].indexOf('<p>This MR')).not.toBe(
-        -1
-      );
+      expect(
+        platform.createPr.mock.calls[0][2].indexOf('<p>This Merge Request')
+      ).not.toBe(-1);
     });
     it('should strip HTML PR for vsts', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
@@ -323,6 +324,14 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][2];
+    });
+    it('should create PR if waiting for not pending but lockFileErrors', async () => {
+      platform.getBranchStatus.mockReturnValueOnce('pending');
+      platform.getBranchLastCommitTime.mockImplementationOnce(() => new Date());
+      config.prCreation = 'not-pending';
+      config.lockFileErrors = [{}];
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
   });
 });

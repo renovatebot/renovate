@@ -13,8 +13,8 @@ Array [
   Object {
     "isMinor": true,
     "newDepTag": "some-dep:1.1.0-something",
-    "newDigest": undefined,
-    "newFrom": "some-dep:1.1.0-something@undefined",
+    "newDigest": "sha256:two",
+    "newFrom": "some-dep:1.1.0-something@sha256:two",
     "newTag": "1.1.0-something",
     "newVersion": "1.1.0-something",
     "newVersionMajor": "1",
@@ -33,6 +33,19 @@ Array [
     "newVersion": "8",
     "newVersionMajor": "8",
     "type": "major",
+  },
+]
+`;
+
+exports[`lib/workers/package/docker getPackageUpdates returns a digest when registry is present 1`] = `
+Array [
+  Object {
+    "isDigest": true,
+    "newDigest": "sha256:1234567890",
+    "newDigestShort": "123456",
+    "newFrom": "docker.io/some-dep:1.0.0@sha256:1234567890",
+    "newTag": "1.0.0",
+    "type": "digest",
   },
 ]
 `;
@@ -118,7 +131,7 @@ Array [
     "isMajor": true,
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:one",
-    "newFrom": "some-dep:3.0.0@sha256:one",
+    "newFrom": "docker.io/some-dep:3.0.0@sha256:one",
     "newTag": "3.0.0",
     "newVersion": "3.0.0",
     "newVersionMajor": "3",

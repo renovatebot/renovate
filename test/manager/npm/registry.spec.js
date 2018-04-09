@@ -1,4 +1,4 @@
-const npm = require('../../../lib/manager/npm/registry');
+const npm = require('../../../lib/datasource/npm');
 const registryAuthToken = require('registry-auth-token');
 const nock = require('nock');
 
@@ -35,7 +35,10 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, missingVersions);
-    const res = await npm.getDependency('foobar');
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, missingVersions);
+    const res = await npm.getDependency('foobar', 1);
     expect(res).toBe(null);
   });
   it('should fetch package info from npm', async () => {
@@ -73,9 +76,12 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, 'oops');
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, 'oops');
     let e;
     try {
-      await npm.getDependency('foobar');
+      await npm.getDependency('foobar', 1);
     } catch (err) {
       e = err;
     }
@@ -105,15 +111,30 @@ describe('api/npm', () => {
     }
     expect(e.message).toBe('registry-failure');
   });
-  it('should retry when 5xx', async () => {
+  it('should throw error for 408', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(408);
+    let e;
+    try {
+      await npm.getDependency('foobar', 0);
+    } catch (err) {
+      e = err;
+    }
+    expect(e.message).toBe('registry-failure');
+  });
+  it('should retry when 408 or 5xx', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(503);
     nock('https://registry.npmjs.org')
       .get('/foobar')
+      .reply(408);
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
       .reply(200);
-    const res = await npm.getDependency('foobar');
-    expect(res).toBe(null);
+    const res = await npm.getDependency('foobar', 2);
+    expect(res).toMatchSnapshot();
   });
   it('should throw error for others', async () => {
     nock('https://registry.npmjs.org')

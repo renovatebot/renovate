@@ -69,7 +69,21 @@ describe('workers/package/versions', () => {
         automerge: true,
       };
       config.currentVersion = '0.9.0';
-      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
+      expect(res[0].type).toEqual('patch');
+    });
+    it('returns minor update if automerging both patch and minor', () => {
+      config.patch = {
+        automerge: true,
+      };
+      config.minor = {
+        automerge: true,
+      };
+      config.currentVersion = '0.9.0';
+      const res = versions.determineUpgrades(qJson, config);
+      expect(res).toMatchSnapshot();
+      expect(res[0].type).toEqual('minor');
     });
     it('returns patch update if separatePatchReleases', () => {
       config.separatePatchReleases = true;
@@ -352,6 +366,35 @@ describe('workers/package/versions', () => {
       config.pinVersions = false;
       const res = versions.determineUpgrades(nextJson, config);
       expect(res).toHaveLength(0);
+    });
+    it('supports in-range updates', () => {
+      config.upgradeInRange = true;
+      config.currentVersion = '~1.0.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('rejects in-range unsupported operator', () => {
+      config.upgradeInRange = true;
+      config.pinVersions = false;
+      config.currentVersion = '>=1.0.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('rejects non-fully specified in-range updates', () => {
+      config.upgradeInRange = true;
+      config.pinVersions = false;
+      config.currentVersion = '1.x';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('rejects complex range in-range updates', () => {
+      config.upgradeInRange = true;
+      config.pinVersions = false;
+      config.currentVersion = '^0.9.0 || ^1.0.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
+    });
+    it('rejects non-range in-range updates', () => {
+      config.upgradeInRange = true;
+      config.pinVersions = false;
+      config.currentVersion = '1.0.0';
+      expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
   });
   describe('.isRange(input)', () => {
