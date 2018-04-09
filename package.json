@@ -39,7 +39,7 @@
     "Hutson Betts <hutson@hyper-expanse.net>",
     "Jean-Yves Couët <jycouet@gmail.com>"
   ],
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/renovateapp/renovate/issues"
   },
