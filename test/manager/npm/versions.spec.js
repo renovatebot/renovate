@@ -1,4 +1,4 @@
-const versions = require('../../../lib/workers/package/versions');
+const versions = require('../../../lib/manager/npm/versions');
 const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
 const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
@@ -7,7 +7,7 @@ const nextJson = require('../../_fixtures/npm/next.json');
 
 let config;
 
-describe('workers/package/versions', () => {
+describe('manager/npm/versions', () => {
   beforeEach(() => {
     config = { ...require('../../../lib/config/defaults').getConfig() };
     config.pinVersions = true;
