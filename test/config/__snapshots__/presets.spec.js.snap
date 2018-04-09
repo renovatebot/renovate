@@ -249,6 +249,7 @@ Object {
   "branchprefix": "renovate/",
   "dependencies": Object {
     "description": Array [
+      "Use <code>fix(deps):</code> as semantic prefix for commit messages and PR titles",
       "Preserve (but continue to upgrade) any existing semver ranges",
     ],
     "pinVersions": false,
@@ -263,6 +264,7 @@ Object {
   ],
   "devDependencies": Object {
     "description": Array [
+      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
       "Use version pinning (maintain a single version only and not semver ranges)",
     ],
     "pinVersions": true,
@@ -288,6 +290,7 @@ Object {
   },
   "optionalDependencies": Object {
     "description": Array [
+      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
       "Preserve (but continue to upgrade) any existing semver ranges",
     ],
     "pinVersions": false,
@@ -296,6 +299,7 @@ Object {
   },
   "peerDependencies": Object {
     "description": Array [
+      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
       "Preserve (but continue to upgrade) any existing semver ranges",
     ],
     "pinVersions": false,
