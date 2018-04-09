@@ -27,9 +27,7 @@ Object {
   "commitBody": null,
   "commitMessage": "Update dependency {{{depName}}} to {{#unless isRange}}v{{/unless}}{{{newVersion}}}",
   "copyLocalLibs": false,
-  "dependencies": Object {
-    "semanticCommitType": "fix",
-  },
+  "dependencies": Object {},
   "description": Array [
     "Do not renovate <code>peerDependencies</code> versions/ranges",
     "Rate limit PR creation to a maximum of one per hour",
