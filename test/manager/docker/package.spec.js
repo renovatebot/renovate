@@ -65,6 +65,7 @@ describe('lib/workers/package/docker', () => {
     });
     it('returns a pin', async () => {
       delete config.currentDigest;
+      config.currentTag = 'some-text-tag';
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
       const res = await docker.getPackageUpdates(config);
       expect(res).toHaveLength(1);
