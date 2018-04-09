@@ -1,6 +1,6 @@
 const semver = require('../../lib/util/semver');
 
-describe('.isVersionOrRange(input)', () => {
+describe('.isValidSemver(input)', () => {
   it('should support simple semver', () => {
     expect(!!semver.isValidSemver('1.2.3')).toBe(true);
   });
