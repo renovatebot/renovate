@@ -1,4 +1,4 @@
-const pkgWorker = require('../../../lib/workers/package/index');
+const pkgWorker = require('../../../lib/workers/dep-type/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const configParser = require('../../../lib/config');
 
@@ -12,7 +12,7 @@ jest.mock('../../../lib/manager/npm/package');
 jest.mock('../../../lib/manager/travis/package');
 jest.mock('../../../lib/manager/bazel/package');
 
-describe('lib/workers/package/index', () => {
+describe('lib/workers/dep-type/package', () => {
   describe('renovatePackage(config)', () => {
     let config;
     beforeEach(() => {
