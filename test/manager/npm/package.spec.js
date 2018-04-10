@@ -7,7 +7,7 @@ jest.mock('../../../lib/datasource/npm');
 jest.mock('../../../lib/manager/_helpers/node/package');
 npmApi.getDependency = jest.fn();
 
-describe('lib/workers/package/npm', () => {
+describe('lib/manager/npm/package', () => {
   describe('getPackageUpdates', () => {
     let config;
     beforeEach(() => {

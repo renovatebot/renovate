@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/workers/package/npm getPackageUpdates returns array if upgrades found 1`] = `
+exports[`lib/manager/npm/package getPackageUpdates returns array if upgrades found 1`] = `
 Array [
   "repositoryUrl",
 ]
 `;
 
-exports[`lib/workers/package/npm getPackageUpdates returns warning if no npm dep found 1`] = `
+exports[`lib/manager/npm/package getPackageUpdates returns warning if no npm dep found 1`] = `
 Array [
   Object {
     "message": "Failed to look up dependency some-dep",
@@ -16,7 +16,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/npm getPackageUpdates returns warning if using invalid version 1`] = `
+exports[`lib/manager/npm/package getPackageUpdates returns warning if using invalid version 1`] = `
 Array [
   Object {
     "depName": "some-dep",
