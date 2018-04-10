@@ -1,15 +1,15 @@
 const path = require('path');
 const fs = require('fs');
 const npmExtract = require('../../../lib/manager/npm/extract');
-const pkgWorker = require('../../../lib/workers/dep-type/package');
-const depTypeWorker = require('../../../lib/workers/dep-type/index');
+const pkgWorker = require('../../../lib/workers/package-file/package');
+const depTypeWorker = require('../../../lib/workers/package-file/dep-type');
 
 jest.mock('../../../lib/manager/npm/extract');
-jest.mock('../../../lib/workers/dep-type/package');
+jest.mock('../../../lib/workers/package-file/package');
 
 pkgWorker.renovatePackage = jest.fn(() => ['a']);
 
-describe('lib/workers/dep-type/index', () => {
+describe('lib/workers/package-file/dep-type', () => {
   describe('renovateDepType(packageContent, config)', () => {
     let config;
     beforeEach(() => {
