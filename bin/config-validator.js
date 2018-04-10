@@ -2,13 +2,14 @@
 
 const fs = require('fs-extra');
 const { validateConfig } = require('../lib/config/validation');
+const { massageConfig } = require('../lib/config/massage');
 
 /* eslint-disable no-console */
 
 let returnVal = 0;
 
 async function validate(desc, config) {
-  const res = await validateConfig(config);
+  const res = await validateConfig(massageConfig(config));
   if (res.errors.length) {
     console.log(
       `${desc} contains errors:\n\n${JSON.stringify(res.errors, null, 2)}`
