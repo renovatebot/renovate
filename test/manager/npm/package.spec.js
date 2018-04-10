@@ -1,5 +1,5 @@
 const npmApi = require('../../../lib/datasource/npm');
-const versions = require('../../../lib/workers/package/versions');
+const versions = require('../../../lib/manager/npm/versions');
 const npm = require('../../../lib/manager/npm/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
