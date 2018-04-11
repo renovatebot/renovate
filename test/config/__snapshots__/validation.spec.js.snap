@@ -32,19 +32,19 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid timezone: Europe/Brussel",
-  },
-  Object {
-    "depName": "Configuration Error",
-    "message": "Configuration option \`packagePatterns\` should be a list (Array)",
-  },
-  Object {
-    "depName": "Configuration Error",
     "message": "extends: Invalid timezone: Europe/Brussel",
   },
   Object {
     "depName": "Configuration Error",
     "message": "Invalid configuration option: \`packageRules[1].foo\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`packageRules[3].packagePatterns\` should be a list (Array)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[3].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
   },
   Object {
     "depName": "Configuration Error",

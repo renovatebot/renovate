@@ -50,6 +50,11 @@ describe('config/validation', () => {
             foo: 1,
           },
           'what?',
+          {
+            packagePatterns: 'abc ([a-z]+) ([a-z]+))',
+            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            enabled: false,
+          },
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
