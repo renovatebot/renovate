@@ -27,8 +27,6 @@ describe('config/validation', () => {
         enabled: 1,
         schedule: ['every 15 mins every weekday'],
         timezone: 'Asia',
-        packagePatterns: 'abc ([a-z]+) ([a-z]+))',
-        excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
         labels: 5,
         semanticCommitType: 7,
         lockFileMaintenance: false,
@@ -42,6 +40,11 @@ describe('config/validation', () => {
             foo: 1,
           },
           'what?',
+          {
+            packagePatterns: 'abc ([a-z]+) ([a-z]+))',
+            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            enabled: false,
+          },
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(

@@ -20,14 +20,6 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`packagePatterns\` should be a list (Array)",
-  },
-  Object {
-    "depName": "Configuration Error",
-    "message": "Invalid regExp for excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
-  },
-  Object {
-    "depName": "Configuration Error",
     "message": "Configuration option \`labels\` should be a list (Array)",
   },
   Object {
@@ -45,6 +37,14 @@ Array [
   Object {
     "depName": "Configuration Error",
     "message": "Invalid configuration option: \`packageRules[1].foo\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`packageRules[3].packagePatterns\` should be a list (Array)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[3].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
   },
   Object {
     "depName": "Configuration Error",
