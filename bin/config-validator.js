@@ -8,8 +8,8 @@ const { massageConfig } = require('../lib/config/massage');
 
 let returnVal = 0;
 
-async function validate(desc, config) {
-  const res = await validateConfig(massageConfig(config));
+async function validate(desc, config, isPreset = false) {
+  const res = await validateConfig(massageConfig(config), isPreset);
   if (res.errors.length) {
     console.log(
       `${desc} contains errors:\n\n${JSON.stringify(res.errors, null, 2)}`
@@ -54,7 +54,7 @@ async function validate(desc, config) {
     if (pkgJson['renovate-config']) {
       console.log(`Validating package.json > renovate-config`);
       for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
-        await validate('package.json > renovate-config', presetConfig);
+        await validate('package.json > renovate-config', presetConfig, true);
       }
     }
   } catch (err) {

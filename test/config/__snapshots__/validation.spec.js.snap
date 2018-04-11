@@ -20,14 +20,6 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`packagePatterns\` should be a list (Array)",
-  },
-  Object {
-    "depName": "Configuration Error",
-    "message": "Invalid regExp for excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
-  },
-  Object {
-    "depName": "Configuration Error",
     "message": "Configuration option \`labels\` should be a list (Array)",
   },
   Object {
@@ -44,11 +36,19 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
+    "message": "Configuration option \`packagePatterns\` should be a list (Array)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
+  },
+  Object {
+    "depName": "Configuration Error",
     "message": "Invalid configuration option: \`foo\`",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Each packageRule must contain at least one selector (depTypeList, packageNames, packagePatterns, excludePackageNames, excludePackagePatterns). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "Each packageRule must contain at least one selector (packageNames, packagePatterns, excludePackageNames, excludePackagePatterns). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
   },
   Object {
     "depName": "Configuration Error",
@@ -56,6 +56,8 @@ Array [
   },
 ]
 `;
+
+exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `Array []`;
 
 exports[`config/validation validateConfig(config) returns nested errors 1`] = `
 Array [
@@ -66,6 +68,19 @@ Array [
   Object {
     "depName": "Configuration Error",
     "message": "Invalid configuration option: \`bar\`",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) selectors outside packageRules array trigger errors 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRule selectors should only be in a packageRules array or on a top level of a preset (current location: /)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRule selectors should only be in a packageRules array or on a top level of a preset (current location: /docker.minor)",
   },
 ]
 `;
