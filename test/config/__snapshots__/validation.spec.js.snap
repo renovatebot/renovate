@@ -57,6 +57,63 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) errors for all types 2`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid semver range for allowedVersions: \`foo\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`enabled\` should be boolean. Found: 1 (number)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid schedule: \`Schedule \\"every 15 mins every weekday\\" should not specify minutes\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "timezone: Invalid timezone: Asia",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`labels\` should be a list (Array)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`semanticCommitType\` should be a string",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`lockFileMaintenance\` should be a json object",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "extends: Invalid timezone: Europe/Brussel",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid configuration option: \`packageRules[1].foo\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`packageRules[3].packagePatterns\` should be a list (Array)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[3].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules: Each packageRule must contain at least one selector (depTypeList, packageNames, packagePatterns, excludePackageNames, excludePackagePatterns). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules must contain JSON objects",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) returns nested errors 1`] = `
 Array [
   Object {

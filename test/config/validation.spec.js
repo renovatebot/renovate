@@ -7,8 +7,12 @@ describe('config/validation', () => {
         foo: 1,
         schedule: ['after 5pm'],
         timezone: 'Asia/Singapore',
-        packagePatterns: ['*'],
-        excludePackagePatterns: ['[a-z]'],
+        packageRules: [
+          {
+            packagePatterns: ['*'],
+            excludePackagePatterns: ['[a-z]'],
+          },
+        ],
         prBody: 'some-body',
         lockFileMaintenance: {
           bar: 2,
@@ -53,6 +57,7 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(13);
+      expect(errors).toMatchSnapshot();
     });
   });
 });
