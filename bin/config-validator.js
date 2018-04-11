@@ -1,215 +1,67 @@
-const options = require('./definitions').getOptions();
-const { isValidSemver } = require('../util/semver');
-const { resolveConfigPresets } = require('./presets');
-const {
-  hasValidSchedule,
-  hasValidTimezone,
-} = require('../workers/branch/schedule');
+#!/usr/bin/env node
 
-let optionTypes;
+const fs = require('fs-extra');
+const { validateConfig } = require('../lib/config/validation');
+const { massageConfig } = require('../lib/config/massage');
 
-module.exports = {
-  validateConfig,
-};
+/* eslint-disable no-console */
 
-async function validateConfig(config, isPreset, parentPath) {
-  if (!optionTypes) {
-    optionTypes = {};
-    options.forEach(option => {
-      optionTypes[option.name] = option.type;
-    });
+let returnVal = 0;
+
+async function validate(desc, config, isPreset = false) {
+  const res = await validateConfig(massageConfig(config), isPreset);
+  if (res.errors.length) {
+    console.log(
+      `${desc} contains errors:\n\n${JSON.stringify(res.errors, null, 2)}`
+    );
+    returnVal = 1;
   }
-  let errors = [];
-  let warnings = [];
-
-  function isIgnored(key) {
-    const ignoredNodes = [
-      'prBanner',
-      'depType',
-      'npmToken',
-      'packageFile',
-      'forkToken',
-      'repository',
-    ];
-    return ignoredNodes.indexOf(key) !== -1;
+  if (res.warnings.length) {
+    console.log(
+      `${desc} contains warnings:\n\n${JSON.stringify(res.warnings, null, 2)}`
+    );
+    returnVal = 1;
   }
+}
 
-  function isAFunction(value) {
-    const getType = {};
-    return value && getType.toString.call(value) === '[object Function]';
-  }
-
-  function isObject(obj) {
-    return Object.prototype.toString.call(obj) === '[object Object]';
-  }
-
-  function isString(val) {
-    return typeof val === 'string' || val instanceof String;
-  }
-
-  for (const [key, val] of Object.entries(config)) {
-    const currentPath = parentPath ? `${parentPath}.${key}` : key;
-    if (
-      !isIgnored(key) && // We need to ignore some reserved keys
-      !isAFunction(val) // Ignore all functions
-    ) {
-      if (!optionTypes[key]) {
-        errors.push({
-          depName: 'Configuration Error',
-          message: `Invalid configuration option: \`${currentPath}\``,
-        });
-      } else if (key === 'schedule') {
-        const [validSchedule, errorMessage] = hasValidSchedule(val);
-        if (!validSchedule) {
-          errors.push({
-            depName: 'Configuration Error',
-            message: `Invalid ${currentPath}: \`${errorMessage}\``,
-          });
-        }
-      } else if (key === 'timezone' && val !== null) {
-        const [validTimezone, errorMessage] = hasValidTimezone(val);
-        if (!validTimezone) {
-          errors.push({
-            depName: 'Configuration Error',
-            message: `${currentPath}: ${errorMessage}`,
-          });
-        }
-      } else if (key === 'allowedVersions' && val !== null) {
-        if (!isValidSemver(val)) {
-          errors.push({
-            depName: 'Configuration Error',
-            message: `Invalid semver range for ${currentPath}: \`${val}\``,
-          });
-        }
-      } else if (val != null) {
-        const type = optionTypes[key];
-        if (type === 'boolean') {
-          if (val !== true && val !== false) {
-            errors.push({
-              depName: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
-                val
-              )} (${typeof val})`,
-            });
-          }
-        } else if (type === 'list' && val) {
-          if (!Array.isArray(val)) {
-            errors.push({
-              depName: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be a list (Array)`,
-            });
-          } else {
-            for (const [subIndex, subval] of val.entries()) {
-              if (isObject(subval)) {
-                const subValidation = await module.exports.validateConfig(
-                  subval,
-                  isPreset,
-                  `${currentPath}[${subIndex}]`
-                );
-                warnings = warnings.concat(subValidation.warnings);
-                errors = errors.concat(subValidation.errors);
-              }
-            }
-            if (key === 'extends') {
-              for (const subval of val) {
-                if (isString(subval) && subval.match(/^:timezone(.+)$/)) {
-                  const [, timezone] = subval.match(/^:timezone\((.+)\)$/);
-                  const [validTimezone, errorMessage] = hasValidTimezone(
-                    timezone
-                  );
-                  if (!validTimezone) {
-                    errors.push({
-                      depName: 'Configuration Error',
-                      message: `${currentPath}: ${errorMessage}`,
-                    });
-                  }
-                }
-              }
-            }
-
-            const selectors = [
-              'depTypeList',
-              'packageNames',
-              'packagePatterns',
-              'excludePackageNames',
-              'excludePackagePatterns',
-            ];
-            if (key === 'packageRules') {
-              for (const packageRule of val) {
-                let hasSelector = false;
-                if (isObject(packageRule)) {
-                  const resolvedRule = await resolveConfigPresets(packageRule);
-                  for (const pKey of Object.keys(resolvedRule)) {
-                    if (selectors.includes(pKey)) {
-                      hasSelector = true;
-                    }
-                  }
-                  if (!hasSelector) {
-                    const message = `${currentPath}: Each packageRule must contain at least one selector (${selectors.join(
-                      ', '
-                    )}). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.`;
-                    errors.push({
-                      depName: 'Configuration Error',
-                      message,
-                    });
-                  }
-                } else {
-                  errors.push({
-                    depName: 'Configuration Error',
-                    message: `${currentPath} must contain JSON objects`,
-                  });
-                }
-              }
-            }
-            if (
-              (key === 'packagePatterns' || key === 'excludePackagePatterns') &&
-              !(val && val.length === 1 && val[0] === '*')
-            ) {
-              try {
-                RegExp(val);
-              } catch (e) {
-                errors.push({
-                  depName: 'Configuration Error',
-                  message: `Invalid regExp for ${currentPath}: \`${val}\``,
-                });
-              }
-            }
-            if (
-              selectors.includes(key) &&
-              !parentPath.match(/packageRules\[\d+\]$/) && // Inside a packageRule
-              (parentPath || !isPreset) // top level in a preset
-            ) {
-              errors.push({
-                depName: 'Configuration Error',
-                message: `${currentPath}: ${key} should be inside a \`packageRule\` only`,
-              });
-            }
-          }
-        } else if (type === 'string') {
-          if (!isString(val)) {
-            errors.push({
-              depName: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be a string`,
-            });
-          }
-        } else if (type === 'json') {
-          if (isObject(val)) {
-            const subValidation = await module.exports.validateConfig(
-              val,
-              isPreset,
-              currentPath
-            );
-            warnings = warnings.concat(subValidation.warnings);
-            errors = errors.concat(subValidation.errors);
-          } else {
-            errors.push({
-              depName: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be a json object`,
-            });
-          }
-        }
+(async () => {
+  const renovateConfigFiles = [
+    'renovate.json',
+    '.renovaterc',
+    '.renovaterc.json',
+  ];
+  for (const file of renovateConfigFiles) {
+    try {
+      const rawContent = fs.readFileSync(file, 'utf8');
+      console.log(`Validating ${file}`);
+      try {
+        const jsonContent = JSON.parse(rawContent);
+        await validate(file, jsonContent);
+      } catch (err) {
+        console.log(`${file} is not valid JSON`);
+        returnVal = 1;
       }
+    } catch (err) {
+      // file does not exist
     }
   }
-  return { errors, warnings };
-}
+  try {
+    const pkgJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    if (pkgJson.renovate) {
+      console.log(`Validating package.json > renovate`);
+      await validate('package.json > renovate', pkgJson.renovate);
+    }
+    if (pkgJson['renovate-config']) {
+      console.log(`Validating package.json > renovate-config`);
+      for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
+        await validate('package.json > renovate-config', presetConfig, true);
+      }
+    }
+  } catch (err) {
+    // ignore
+  }
+  if (returnVal !== 0) {
+    process.exit(returnVal);
+  }
+  console.log('OK');
+})();
