@@ -41,10 +41,6 @@ describe('config/validation', () => {
             enabled: true,
           },
           {
-            packagePatterns: 'abc ([a-z]+) ([a-z]+))',
-            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
-          },
-          {
             foo: 1,
           },
           'what?',
