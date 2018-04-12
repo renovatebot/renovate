@@ -57,7 +57,47 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(13);
+    });
+    it('selectors outside packageRules array trigger errors', async () => {
+      const config = {
+        packageNames: ['angular'],
+        meteor: {
+          packageRules: [
+            {
+              packageNames: ['meteor'],
+            },
+          ],
+        },
+        docker: {
+          minor: {
+            packageNames: ['testPackage'],
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
+      expect(errors).toHaveLength(2);
+    });
+    it('ignore packageRule nesting validation for presets', async () => {
+      const config = {
+        description: ['All angular.js packages'],
+        packageNames: [
+          'angular',
+          'angular-animate',
+          'angular-scroll',
+          'angular-sanitize',
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+      expect(errors).toHaveLength(0);
     });
   });
 });
