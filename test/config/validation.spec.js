@@ -57,7 +57,6 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(13);
-      expect(errors).toMatchSnapshot();
     });
     it('selectors outside packageRules array trigger errors', async () => {
       const config = {
