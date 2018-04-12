@@ -30,7 +30,7 @@ describe('workers/repository', () => {
         repoIsOnboarded: true,
         branches: [{ type: 'minor' }, { type: 'pin' }],
       });
-      writeUpdates.mockReturnValueOnce('onboarded');
+      writeUpdates.mockReturnValueOnce('done');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();
     });
@@ -64,7 +64,7 @@ describe('workers/repository', () => {
         repoIsOnboarded: true,
         branches: [],
       });
-      writeUpdates.mockReturnValueOnce('onboarded');
+      writeUpdates.mockReturnValueOnce('done');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();
     });

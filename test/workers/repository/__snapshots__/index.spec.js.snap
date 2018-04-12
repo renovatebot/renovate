@@ -1,6 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository renovateRepository() ensures onboarding pr 1`] = `"onboarding"`;
+exports[`workers/repository renovateRepository() ensures onboarding pr 1`] = `
+Object {
+  "res": "done",
+  "status": "onboarding",
+}
+`;
 
 exports[`workers/repository renovateRepository() ensures onboarding pr 2`] = `
 Array [
@@ -19,6 +24,16 @@ Array [
 ]
 `;
 
-exports[`workers/repository renovateRepository() handles baseBranches 1`] = `"onboarded"`;
+exports[`workers/repository renovateRepository() handles baseBranches 1`] = `
+Object {
+  "res": "done",
+  "status": "enabled",
+}
+`;
 
-exports[`workers/repository renovateRepository() writes 1`] = `"onboarded"`;
+exports[`workers/repository renovateRepository() writes 1`] = `
+Object {
+  "res": "done",
+  "status": "enabled",
+}
+`;
