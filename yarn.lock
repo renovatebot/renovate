@@ -5034,9 +5034,9 @@ pn@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.0.0.tgz#1cf5a30b0d806cd18f88fc41a6b5d4ad615b3ba9"
 
-pnpm@1.38.3:
-  version "1.38.3"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.38.3.tgz#84b7ce1eee5d893c51995752e8afc2ee726539e3"
+pnpm@1.39.1:
+  version "1.39.1"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.39.1.tgz#3a6cb79d56f6de9eb7ac9654eeee05ca494447f2"
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
@@ -5058,9 +5058,9 @@ preserve@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
 
-prettier@1.11.1:
-  version "1.11.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.11.1.tgz#61e43fc4cd44e68f2b0dfc2c38cd4bb0fccdcc75"
+prettier@1.12.0:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.12.0.tgz#d26fc5894b9230de97629b39cae225b503724ce8"
 
 pretty-format@^22.4.3:
   version "22.4.3"
@@ -5667,9 +5667,9 @@ sax@^1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.1.5:
-  version "15.1.5"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.1.5.tgz#e97c2fa1defe6f65cd22d10f3ec2c242dc0e5632"
+semantic-release@15.1.6:
+  version "15.1.6"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.1.6.tgz#865a1677407b2b45f8eb55380a73b27335950d70"
   dependencies:
     "@semantic-release/commit-analyzer" "^5.0.0"
     "@semantic-release/error" "^2.2.0"

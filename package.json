@@ -84,7 +84,7 @@
     "npm": "5.8.0",
     "openpgp": "2.6.2",
     "parse-link-header": "1.0.1",
-    "pnpm": "1.38.3",
+    "pnpm": "1.39.1",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "semver": "5.5.0",
@@ -111,8 +111,8 @@
     "jest": "22.4.3",
     "mockdate": "2.0.2",
     "nock": "9.2.5",
-    "prettier": "1.11.1",
-    "semantic-release": "15.1.5"
+    "prettier": "1.12.0",
+    "semantic-release": "15.1.6"
   },
   "files": [
     "bin/config-validator.js",
