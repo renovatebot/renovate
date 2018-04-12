@@ -41,7 +41,7 @@ Most of the settings in the `renovate.json` onboarding configuration are default
 
 Please check the docs on this website for an exhaustive Configuration Reference, however here are some of the most commonly changed (overridden) configuration settings:
 
-* **pinVersions**: By default it's `true` (all ranges will be converted to pinned versions) but many people prefer to keep ranges
+* **pinVersions**: By default (with zero config) it's `false` however the `"config:base"` preset overrides it to autodetect.
 * **labels**: Labels to assign to Pull Requests
 * **assignees**: GitHub users to assign the Pull Requests to
 
