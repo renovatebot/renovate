@@ -131,11 +131,11 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "packageRule selectors should only be in a packageRules array or on a top level of a preset (current location: /)",
+    "message": "packageNames: packageNames should be inside a `packageRule` only",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "packageRule selectors should only be in a packageRules array or on a top level of a preset (current location: /docker.minor)",
+    "message": "docker.minor.packageNames: packageNames should be inside a `packageRule` only",
   },
 ]
 `;
