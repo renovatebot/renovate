@@ -10,7 +10,7 @@ describe('config/validation', () => {
         packageRules: [
           {
             packagePatterns: ['*'],
-            excludePackagePatterns: ['[a-z]'],
+            excludePackagePatterns: ['(x+x+)+y'],
           },
         ],
         prBody: 'some-body',
@@ -22,7 +22,7 @@ describe('config/validation', () => {
         config
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(3);
       expect(errors).toMatchSnapshot();
     });
     it('errors for all types', async () => {

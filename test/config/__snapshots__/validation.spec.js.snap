@@ -67,6 +67,10 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
+    "message": "Unsafe regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
+  },
+  Object {
+    "depName": "Configuration Error",
     "message": "Invalid configuration option: \`lockFileMaintenance.bar\`",
   },
 ]
