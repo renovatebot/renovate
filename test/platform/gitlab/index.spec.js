@@ -239,8 +239,43 @@ describe('platform/gitlab', () => {
     });
   });
   describe('isBranchStale()', () => {
-    it('exists', () => {
-      gitlab.isBranchStale();
+    it('should return false if same SHA as master', async () => {
+      // getBranchDetails - same as master
+      get.mockImplementationOnce(() => ({
+        body: {
+          commit: {
+            parent_ids: ['1234'],
+          },
+        },
+      }));
+      // getBranchDetails - master
+      get.mockImplementationOnce(() => ({
+        body: {
+          commit: {
+            id: '1234',
+          },
+        },
+      }));
+      expect(await gitlab.isBranchStale('thebranchname')).toBe(false);
+    });
+    it('should return true if SHA different from master', async () => {
+      // getBranchDetails - different from master
+      get.mockImplementationOnce(() => ({
+        body: {
+          commit: {
+            parent_ids: ['12345678'],
+          },
+        },
+      }));
+      // getBranchDetails - master
+      get.mockImplementationOnce(() => ({
+        body: {
+          commit: {
+            id: '1234',
+          },
+        },
+      }));
+      expect(await gitlab.isBranchStale('thebranchname')).toBe(true);
     });
   });
   describe('getBranchPr(branchName)', () => {
