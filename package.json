@@ -97,7 +97,7 @@
     "traverse": "0.6.6",
     "upath": "1.0.4",
     "vso-node-api": "6.5.0",
-    "yarn": "1.5.1"
+    "yarn": "1.6.0"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
