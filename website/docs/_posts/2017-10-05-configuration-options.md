@@ -351,7 +351,18 @@ A list of package names inside a package rule which are to be excluded/ignored.
 | type    | array of strings |
 | default | []               |
 
-Use this field if you want to have one or more exact name matches excluded in your package rule. See also `packageNames`.
+**Important**: Do not mix this up with the option `ignoreDeps`. Use `ignoreDeps` instead if all you want to do is have a list of package names for Renovate to ignore.
+
+Use `excludePackageNames` if you want to have one or more exact name matches excluded in your package rule. See also `packageNames`.
+
+```
+  "packageRules": [{
+    "packagePatterns": ["^eslint"],
+    "excludePackageNames": ["eslint-foo"]
+  }]
+```
+
+The above will match all package names starting with `eslint` but exclude the specific package `eslint-foo`.
 
 ## excludePackagePatterns
 
@@ -363,6 +374,15 @@ A list of regex package patterns inside a package rule which are to be excluded/
 | default | []               |
 
 Use this field if you want to have one or more package name patterns excluded in your package rule. See also `packagePatterns`.
+
+```
+  "packageRules": [{
+    "packagePatterns": ["^eslint"],
+    "excludePackageNames": ["^eslint-foo"]
+  }]
+```
+
+The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
 ## extends
 
@@ -649,6 +669,15 @@ A list of package names inside a package rule.
 
 Use this field if you want to have one or more exact name matches in your package rule. See also `excludedPackageNames`.
 
+```
+  "packageRules": [{
+    "packageNames": ["angular"],
+    "pinVersions": true
+  }]
+```
+
+The above will enable `pinVersions` for the package `angular`.
+
 ## packagePatterns
 
 A list of package patterns inside a package rule.
@@ -659,6 +688,15 @@ A list of package patterns inside a package rule.
 | default | []               |
 
 Use this field if you want to have one or more package names patterns in your package rule. See also `excludedPackagePatterns`.
+
+```
+  "packageRules": [{
+    "packageNames": ["^angular"],
+    "pinVersions": false
+  }]
+```
+
+The above will enable `pinVersions` for any package starting with `angular`.
 
 ## packageRules
 
