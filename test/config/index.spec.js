@@ -1,5 +1,14 @@
 const argv = require('../_fixtures/config/argv');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
+const npm = require('../../lib/datasource/npm');
+const presetDefaults = require('../_fixtures/npm/renovate-config-default');
+
+npm.getDependency = jest.fn(() => ({
+  'renovate-config':
+    presetDefaults.versions[presetDefaults['dist-tags'].latest][
+      'renovate-config'
+    ],
+}));
 
 describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
@@ -13,6 +22,8 @@ describe('config/index', () => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
+      jest.mock('delay');
+      require('delay').mockImplementation(() => Promise.resolve());
       jest.mock('gh-got');
       ghGot = require('gh-got');
       jest.mock('gl-got');
@@ -153,6 +164,29 @@ describe('config/index', () => {
       expect(ghGot.mock.calls.length).toBe(1);
       expect(get.mock.calls.length).toBe(0);
     });
+    it('uses configured repositories when autodiscovery is to replacde it & logs warn', async () => {
+      const env = {
+        RENOVATE_CONFIG_FILE: require.resolve(
+          '../_fixtures/config/file-with-repo-presets.js'
+        ),
+      };
+      defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);
+      ghGot.mockImplementationOnce(() => ({
+        headers: {},
+        body: [
+          { full_name: 'bar/BAZ' },
+          { full_name: 'renovateapp/renovate' },
+          { full_name: 'not/configured' },
+        ],
+      }));
+      const config = await configParser.parseConfigs(env, defaultArgv);
+      expect(config.repositories.length).toBe(3);
+      expect(
+        config.repositories.map(
+          repo => (typeof repo === 'string' ? repo : repo.repository)
+        )
+      ).toMatchSnapshot();
+    });
     it('adds a log file', async () => {
       const env = { GITHUB_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
@@ -163,6 +197,36 @@ describe('config/index', () => {
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(1);
       expect(get.mock.calls.length).toBe(0);
+    });
+    it('resolves all presets', async () => {
+      defaultArgv.push('--pr-hourly-limit=10', '--upgrade-in-range=false');
+      const env = {
+        GITHUB_TOKEN: 'abc',
+        RENOVATE_CONFIG_FILE: require.resolve(
+          '../_fixtures/config/file-with-repo-presets.js'
+        ),
+      };
+      ghGot.mockImplementationOnce(() =>
+        Promise.resolve({
+          headers: {},
+          body: [],
+        })
+      );
+      const actual = await configParser.parseConfigs(env, defaultArgv);
+      expect(actual.peerDependencies.enabled).toBe(false);
+      expect(actual.separatePatchReleases).toBe(true);
+      expect(actual.patch.automerge).toBe(true);
+      expect(actual.minor.automerge).toBeUndefined();
+      expect(actual.major.automerge).toBeUndefined();
+      expect(actual.prHourlyLimit).toBe(10);
+      expect(actual.upgradeInRange).toBe(false);
+      actual.repositories.forEach(repo => {
+        if (typeof repo === 'object') {
+          expect(repo).toMatchSnapshot(repo.repository);
+        }
+      });
+      delete actual.repositories;
+      expect(actual).toMatchSnapshot('globalConfig');
     });
   });
   describe('mergeChildConfig(parentConfig, childConfig)', () => {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/workers/package/docker getPackageUpdates adds digest 1`] = `
+exports[`lib/manager/docker/package getPackageUpdates adds digest 1`] = `
 Array [
   Object {
     "isPin": true,
@@ -23,7 +23,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/docker getPackageUpdates ignores unstable upgrades 1`] = `
+exports[`lib/manager/docker/package getPackageUpdates ignores unstable upgrades 1`] = `
 Array [
   Object {
     "isMajor": true,
@@ -37,7 +37,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/docker getPackageUpdates returns a digest when registry is present 1`] = `
+exports[`lib/manager/docker/package getPackageUpdates returns a digest when registry is present 1`] = `
 Array [
   Object {
     "isDigest": true,
@@ -50,7 +50,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/docker getPackageUpdates returns major and minor upgrades 1`] = `
+exports[`lib/manager/docker/package getPackageUpdates returns major and minor upgrades 1`] = `
 Array [
   Object {
     "isMinor": true,
@@ -85,7 +85,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/docker getPackageUpdates returns only one major 1`] = `
+exports[`lib/manager/docker/package getPackageUpdates returns only one major 1`] = `
 Array [
   Object {
     "isMinor": true,
@@ -110,7 +110,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/docker getPackageUpdates returns only one upgrade 1`] = `
+exports[`lib/manager/docker/package getPackageUpdates returns only one upgrade 1`] = `
 Array [
   Object {
     "isMajor": true,
@@ -125,7 +125,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/docker getPackageUpdates returns only one upgrade if automerging major 1`] = `
+exports[`lib/manager/docker/package getPackageUpdates returns only one upgrade if automerging major 1`] = `
 Array [
   Object {
     "isMajor": true,
@@ -140,7 +140,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/docker getPackageUpdates upgrades from unstable to stable 1`] = `
+exports[`lib/manager/docker/package getPackageUpdates upgrades from unstable to stable 1`] = `
 Array [
   Object {
     "isMajor": true,
@@ -154,7 +154,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/docker getPackageUpdates upgrades from unstable to unstable if not ignoring 1`] = `
+exports[`lib/manager/docker/package getPackageUpdates upgrades from unstable to unstable if not ignoring 1`] = `
 Array [
   Object {
     "isMajor": true,

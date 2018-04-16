@@ -1,6 +1,6 @@
 {
   "name": "renovate",
-  "description": "Keep npm dependencies up-to-date via Pull Requests",
+  "description": "Automated dependency updates. Flexible so you don't need to be.",
   "version": "0.0.0-semantic-release",
   "bin": {
     "renovate": "lib/renovate.js",
@@ -10,43 +10,50 @@
     "clean-cache": "node bin/clean-cache.js",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
-    "jest": "npm run clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
+    "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "lint-fix": "eslint --fix lib test",
     "lint": "eslint lib test",
     "prettier": "prettier \"**/*.{js,json,md}\" --write",
     "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
-    "test": "npm run prettier -- --list-different && npm run lint && npm run jest"
+    "test": "yarn prettier --list-different && yarn lint && yarn jest"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/renovateapp/renovate.git"
   },
   "keywords": [
+    "automated",
+    "dependency",
+    "docker",
+    "management",
+    "meteor",
+    "node",
     "npm",
     "outdated",
-    "update"
+    "update",
+    "yarn"
   ],
   "author": "Rhys Arkins <rhys@arkins.net>",
   "contributors": [
     "Hutson Betts <hutson@hyper-expanse.net>",
     "Jean-Yves Couët <jycouet@gmail.com>"
   ],
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/renovateapp/renovate/issues"
   },
   "homepage": "https://github.com/renovateapp/renovate#readme",
   "engines": {
-    "node": ">=8.8.0",
-    "npm": "5"
+    "node": ">= 8.11.0"
   },
   "dependencies": {
     "@yarnpkg/lockfile": "1.0.0",
     "bunyan": "1.8.12",
-    "cacache": "10.0.4",
+    "cacache": "11.0.1",
     "chalk": "2.3.2",
     "changelog": "1.4.2",
+    "changelog-filename-regex": "1.1.1",
     "child-process-promise": "2.2.1",
     "clean-git-ref": "1.0.3",
     "commander": "2.15.1",
@@ -70,15 +77,17 @@
     "json-stringify-pretty-compact": "1.1.0",
     "later": "1.2.0",
     "lodash": "4.17.5",
+    "markdown-it": "8.4.1",
     "minimatch": "3.0.4",
-    "moment": "2.21.0",
+    "moment": "2.22.1",
     "moment-timezone": "0.5.14",
     "npm": "5.8.0",
     "openpgp": "2.6.2",
     "parse-link-header": "1.0.1",
-    "pnpm": "1.37.3",
+    "pnpm": "1.40.2",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
+    "safe-regex": "1.1.0",
     "semver": "5.5.0",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.2",
@@ -87,8 +96,8 @@
     "tmp-promise": "1.0.4",
     "traverse": "0.6.6",
     "upath": "1.0.4",
-    "vso-node-api": "6.3.2",
-    "yarn": "1.5.1"
+    "vso-node-api": "6.5.0",
+    "yarn": "1.6.0"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
@@ -98,13 +107,13 @@
     "eslint": "4.19.1",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-config-prettier": "2.9.0",
-    "eslint-plugin-import": "2.9.0",
+    "eslint-plugin-import": "2.11.0",
     "eslint-plugin-promise": "3.7.0",
     "jest": "22.4.3",
     "mockdate": "2.0.2",
-    "nock": "9.2.3",
-    "prettier": "1.11.1",
-    "semantic-release": "15.1.4"
+    "nock": "9.2.5",
+    "prettier": "1.12.0",
+    "semantic-release": "15.1.7"
   },
   "files": [
     "bin/config-validator.js",
@@ -130,7 +139,10 @@
     "setupFiles": [
       "./test/globals.js"
     ],
-    "setupTestFrameworkScriptFile": "./test/chai.js"
+    "setupTestFrameworkScriptFile": "./test/chai.js",
+    "snapshotSerializers": [
+      "./test/newline-snapshot-serializer.js"
+    ]
   },
   "prettier": {
     "singleQuote": true,

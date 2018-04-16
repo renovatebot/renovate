@@ -14,6 +14,7 @@ jest.mock('../../../lib/workers/repository/write');
 jest.mock('../../../lib/workers/repository/cleanup');
 jest.mock('../../../lib/workers/repository/validate');
 jest.mock('../../../lib/manager');
+jest.mock('delay');
 
 let config;
 beforeEach(() => {
@@ -23,18 +24,13 @@ beforeEach(() => {
 
 describe('workers/repository', () => {
   describe('renovateRepository()', () => {
-    it('exits after 11 loops', async () => {
-      const res = await renovateRepository(config, 'some-token', 11);
-      expect(res).toMatchSnapshot();
-    });
     it('writes', async () => {
       initRepo.mockReturnValue({});
       determineUpdates.mockReturnValue({
         repoIsOnboarded: true,
         branches: [{ type: 'minor' }, { type: 'pin' }],
       });
-      writeUpdates.mockReturnValueOnce('automerged');
-      writeUpdates.mockReturnValueOnce('onboarded');
+      writeUpdates.mockReturnValueOnce('done');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();
     });
@@ -68,8 +64,7 @@ describe('workers/repository', () => {
         repoIsOnboarded: true,
         branches: [],
       });
-      writeUpdates.mockReturnValueOnce('automerged');
-      writeUpdates.mockReturnValueOnce('onboarded');
+      writeUpdates.mockReturnValueOnce('done');
       const res = await renovateRepository(config, 'some-token');
       expect(res).toMatchSnapshot();
     });

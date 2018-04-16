@@ -1,5 +1,5 @@
 const npmApi = require('../../../lib/datasource/npm');
-const versions = require('../../../lib/workers/package/versions');
+const versions = require('../../../lib/manager/npm/versions');
 const npm = require('../../../lib/manager/npm/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
@@ -7,7 +7,7 @@ jest.mock('../../../lib/datasource/npm');
 jest.mock('../../../lib/manager/_helpers/node/package');
 npmApi.getDependency = jest.fn();
 
-describe('lib/workers/package/npm', () => {
+describe('lib/manager/npm/package', () => {
   describe('getPackageUpdates', () => {
     let config;
     beforeEach(() => {

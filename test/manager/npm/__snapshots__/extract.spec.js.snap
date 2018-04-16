@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/dep-type/package-json .extractDependencies(npmExtract, depType) each element contains non-null depType, depName, currentVersion 1`] = `
+exports[`manager/npm/extract .extractDependencies(npmExtract, depType) each element contains non-null depType, depName, currentVersion 1`] = `
 Array [
   Object {
     "currentVersion": "6.5.0",

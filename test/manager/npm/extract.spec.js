@@ -12,7 +12,7 @@ function readFixture(fixture) {
 const input01Content = readFixture('inputs/01.json');
 const input02Content = readFixture('inputs/02.json');
 
-describe('workers/dep-type/package-json', () => {
+describe('manager/npm/extract', () => {
   describe('.extractDependencies(npmExtract, depType)', () => {
     it('returns an array of correct length (dependencies)', () => {
       const config = {

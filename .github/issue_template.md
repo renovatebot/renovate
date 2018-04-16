@@ -6,6 +6,8 @@
     If so, please open an issue in https://github.com/renovateapp/config-help instead
 -->
 
+<!-- Mark an 'x' in the applicable boxes below, e.g. like [x] -->
+
 #### This is a:
 
 * [ ] Bug report (non-security related)

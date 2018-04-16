@@ -16,7 +16,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid timezone: Asia",
+    "message": "timezone: Invalid timezone: Asia",
   },
   Object {
     "depName": "Configuration Error",
@@ -32,15 +32,23 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid timezone: Europe/Brussel",
+    "message": "extends: Invalid timezone: Europe/Brussel",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid configuration option: \`foo\`",
+    "message": "Invalid configuration option: \`packageRules[1].foo\`",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Each packageRule must contain at least one selector (packageNames, packagePatterns, excludePackageNames, excludePackagePatterns). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "Configuration option \`packageRules[3].packagePatterns\` should be a list (Array)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[3].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules: Each packageRule must contain at least one selector (depTypeList, packageNames, packagePatterns, excludePackageNames, excludePackagePatterns). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
   },
   Object {
     "depName": "Configuration Error",
@@ -48,6 +56,8 @@ Array [
   },
 ]
 `;
+
+exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `Array []`;
 
 exports[`config/validation validateConfig(config) returns nested errors 1`] = `
 Array [
@@ -57,7 +67,24 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid configuration option: \`bar\`",
+    "message": "Unsafe regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid configuration option: \`lockFileMaintenance.bar\`",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) selectors outside packageRules array trigger errors 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageNames: packageNames should be inside a \`packageRule\` only",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "docker.minor.packageNames: packageNames should be inside a \`packageRule\` only",
   },
 ]
 `;

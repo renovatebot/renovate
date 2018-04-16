@@ -1,11 +1,11 @@
 const packageFileWorker = require('../../../lib/workers/package-file');
-const depTypeWorker = require('../../../lib/workers/dep-type');
+const depTypeWorker = require('../../../lib/workers/package-file/dep-type');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const yarnLock = require('@yarnpkg/lockfile');
 
 jest.mock('@yarnpkg/lockfile');
 
-jest.mock('../../../lib/workers/dep-type');
+jest.mock('../../../lib/workers/package-file/dep-type');
 jest.mock('../../../lib/workers/branch/schedule');
 
 describe('packageFileWorker', () => {

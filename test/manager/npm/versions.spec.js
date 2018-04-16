@@ -1,4 +1,4 @@
-const versions = require('../../../lib/workers/package/versions');
+const versions = require('../../../lib/manager/npm/versions');
 const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
 const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
@@ -7,7 +7,7 @@ const nextJson = require('../../_fixtures/npm/next.json');
 
 let config;
 
-describe('workers/package/versions', () => {
+describe('manager/npm/versions', () => {
   beforeEach(() => {
     config = { ...require('../../../lib/config/defaults').getConfig() };
     config.pinVersions = true;
@@ -395,40 +395,6 @@ describe('workers/package/versions', () => {
       config.pinVersions = false;
       config.currentVersion = '1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
-    });
-  });
-  describe('.isRange(input)', () => {
-    it('rejects simple semver', () => {
-      versions.isRange('1.2.3').should.eql(false);
-    });
-    it('accepts tilde', () => {
-      versions.isRange('~1.2.3').should.eql(true);
-    });
-    it('accepts caret', () => {
-      versions.isRange('^1.2.3').should.eql(true);
-    });
-  });
-  describe('.isValidVersion(input)', () => {
-    it('should support simple semver', () => {
-      versions.isValidVersion('1.2.3').should.eql(true);
-    });
-    it('should support versions with dash', () => {
-      versions.isValidVersion('1.2.3-foo').should.eql(true);
-    });
-    it('should reject versions without dash', () => {
-      versions.isValidVersion('1.2.3foo').should.eql(false);
-    });
-    it('should support ranges', () => {
-      versions.isValidVersion('~1.2.3').should.eql(true);
-      versions.isValidVersion('^1.2.3').should.eql(true);
-      versions.isValidVersion('>1.2.3').should.eql(true);
-    });
-    it('should reject github repositories', () => {
-      versions.isValidVersion('renovateapp/renovate').should.eql(false);
-      versions.isValidVersion('renovateapp/renovate#master').should.eql(false);
-      versions
-        .isValidVersion('https://github.com/renovateapp/renovate.git')
-        .should.eql(false);
     });
   });
   describe('.isPastLatest(dep, version)', () => {

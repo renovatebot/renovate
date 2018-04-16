@@ -3,6 +3,7 @@
 exports[`platform has a list of supported methods for github 1`] = `
 Array [
   "getRepos",
+  "cleanRepo",
   "initRepo",
   "getRepoForceRebase",
   "setBaseBranch",
@@ -39,6 +40,7 @@ Array [
 exports[`platform has a list of supported methods for gitlab 1`] = `
 Array [
   "getRepos",
+  "cleanRepo",
   "initRepo",
   "getRepoForceRebase",
   "setBaseBranch",
@@ -75,6 +77,7 @@ Array [
 exports[`platform has a list of supported methods for vsts 1`] = `
 Array [
   "getRepos",
+  "cleanRepo",
   "initRepo",
   "getRepoForceRebase",
   "setBaseBranch",

@@ -2,9 +2,6 @@
 
 exports[`workers/repository/onboarding/branch checkOnboardingBranch creates onboarding branch with greenkeeper migration 1`] = `
 "{
-  \\"extends\\": [
-    \\"config:base\\"
-  ],
   \\"statusCheckVerify\\": true,
   \\"labels\\": [
     \\"renovate\\"

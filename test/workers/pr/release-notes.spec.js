@@ -14,6 +14,17 @@ const jestChangelogMd = fs.readFileSync(
   'utf8'
 );
 
+const jsYamlChangelogMd = fs.readFileSync(
+  'test/_fixtures/changelog-md/js-yaml.md',
+  'utf8'
+);
+
+const contentsResponse = [
+  { name: 'lib' },
+  { name: 'CHANGELOG.md' },
+  { name: 'README.md' },
+];
+
 jest.mock('gh-got');
 
 describe('workers/pr/release-notes', () => {
@@ -31,41 +42,68 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotesMd('chalk', '2.0.0');
       expect(res).toBe(null);
     });
-    it('handles wrong format', async () => {
+    it('handles files mismatch', async () => {
       ghGot.mockReturnValueOnce({
-        body: {
-          content: Buffer.from('not really markdown').toString('base64'),
-        },
+        body: [{ name: 'lib' }, { name: 'README.md' }],
       });
+      const res = await getReleaseNotesMd('chalk', '2.0.0');
+      expect(res).toBe(null);
+    });
+    it('handles wrong format', async () => {
+      ghGot
+        .mockReturnValueOnce({ body: contentsResponse })
+        .mockReturnValueOnce({
+          body: {
+            content: Buffer.from('not really markdown').toString('base64'),
+          },
+        });
       const res = await getReleaseNotesMd('some/repository1', '1.0.0');
       expect(res).toBe(null);
     });
     it('handles bad markdown', async () => {
-      ghGot.mockReturnValueOnce({
-        body: {
-          content: Buffer.from(`#\nha\nha\n#\nha\nha`).toString('base64'),
-        },
-      });
+      ghGot
+        .mockReturnValueOnce({ body: contentsResponse })
+        .mockReturnValueOnce({
+          body: {
+            content: Buffer.from(`#\nha\nha\n#\nha\nha`).toString('base64'),
+          },
+        });
       const res = await getReleaseNotesMd('some/repository2', '1.0.0');
       expect(res).toBe(null);
     });
     it('parses angular.js', async () => {
-      ghGot.mockReturnValueOnce({
-        body: {
-          content: Buffer.from(angularJsChangelogMd).toString('base64'),
-        },
-      });
+      ghGot
+        .mockReturnValueOnce({ body: contentsResponse })
+        .mockReturnValueOnce({
+          body: {
+            content: Buffer.from(angularJsChangelogMd).toString('base64'),
+          },
+        });
       const res = await getReleaseNotesMd('angular/angular.js', '1.6.9');
       expect(res).not.toBe(null);
       expect(res).toMatchSnapshot();
     });
     it('parses jest', async () => {
-      ghGot.mockReturnValueOnce({
-        body: {
-          content: Buffer.from(jestChangelogMd).toString('base64'),
-        },
-      });
+      ghGot
+        .mockReturnValueOnce({ body: contentsResponse })
+        .mockReturnValueOnce({
+          body: {
+            content: Buffer.from(jestChangelogMd).toString('base64'),
+          },
+        });
       const res = await getReleaseNotesMd('facebook/jest', '22.0.0');
+      expect(res).not.toBe(null);
+      expect(res).toMatchSnapshot();
+    });
+    it('parses js-yaml', async () => {
+      ghGot
+        .mockReturnValueOnce({ body: contentsResponse })
+        .mockReturnValueOnce({
+          body: {
+            content: Buffer.from(jsYamlChangelogMd).toString('base64'),
+          },
+        });
+      const res = await getReleaseNotesMd('nodeca/js-yaml', '3.10.0');
       expect(res).not.toBe(null);
       expect(res).toMatchSnapshot();
     });
