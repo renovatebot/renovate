@@ -82,6 +82,8 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newVersionMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newVersion}}{{/if}}',
           lazyGrouping: true,
           foo: 1,
           newVersion: '5.1.2',
@@ -94,6 +96,8 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newVersionMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newVersion}}{{/if}}',
           lazyGrouping: true,
           foo: 1,
           newVersion: '5.1.2',
@@ -113,6 +117,8 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newVersionMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newVersion}}{{/if}}',
           lazyGrouping: true,
           foo: 1,
           newVersion: '5.1.2',
@@ -125,6 +131,8 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newVersionMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newVersion}}{{/if}}',
           lazyGrouping: true,
           foo: 1,
           newVersion: '1.1.0',
