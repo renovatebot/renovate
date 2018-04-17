@@ -8,9 +8,7 @@ type: Document
 order: 30
 ---
 
-Renovate has always been intended to be as configurable as possible and therefore supported handlebars templates for branch name, commit message, PR title and PR body from almost the very start. However, with great power also comes great potential to shoot yourself in the foot.
-
-Read on for some recommendations of what to do if you want to change an of the existing templates.
+Tnis document describes how you can edit the branch names, commit messages, or PR titles and content.
 
 ## Branch Name
 
@@ -41,6 +39,8 @@ Renovate is designed to have just a single commit per branch, for merging conven
 `commitMessageExtra` usually refers to the version being updated to. e.g. `to v16` for a major upgrade, or `to v16.0.3` for a patch update. It may also be empty in some cases, e.g. if the action/topic is `Pin Docker digests`.
 
 `commitMessageSuffix` defaults to empty and is there for flexibility and future use. Maybe for `major` updates you always want the PR to end with `(MAJOR)`, for instance.
+
+`commitBody` is used if you wish to add multi-line commit messages, such as for the `Signed-off-by` fields, or adding `[skip-ci]`, etc. It is appended to the generated `commitMessage`, separated by a newline.
 
 ## PR Title
 
