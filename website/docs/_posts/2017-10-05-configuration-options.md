@@ -189,9 +189,9 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 Commit message template
 
-| name    | value                 |
-| ------- | --------------------- |
-| type    | handlebars template   |
+| name    | value                                                                                                                                      |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| type    | handlebars template                                                                                                                        |
 | default | {% raw %}{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}} {{commitMessageSuffix}}{% endraw %} |
 
 The commit message is less important than branchName so you may override it if you wish.
@@ -213,9 +213,9 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 Extra description used after the commit message topic - typically the version.
 
-| name    | value  |
-| ------- | ------ |
-| type    | string |
+| name    | value                                                                                                                  |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| type    | string                                                                                                                 |
 | default | {% raw %}to {{#unless isRange}}v{{/unless}}{{#if isMajor}}{{newVersionMajor}}{{else}}{{newVersion}}{{/if}}{% endraw %} |
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
