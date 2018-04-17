@@ -74,17 +74,7 @@ Object {
   "enabledManagers": Array [],
   "encrypted": null,
   "endpoint": null,
-  "engines": Object {
-    "packageRules": Array [
-      Object {
-        "groupName": "Node.js",
-        "lazyGrouping": false,
-        "packageNames": Array [
-          "node",
-        ],
-      },
-    ],
-  },
+  "engines": Object {},
   "excludePackageNames": Array [],
   "excludePackagePatterns": Array [],
   "exposeEnv": false,
