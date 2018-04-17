@@ -140,12 +140,14 @@ You can modify this field if you want to change the prefix used. For example if 
 
 ## branchTopic
 
-Combined with `branchPrefix` and `managerBranchPrefix` to form the `branchName`.
+The main name/text that Renovate should use when creating a branch on your repository.
 
 | name    | value                                                                |
 | ------- | -------------------------------------------------------------------- |
 | type    | string                                                               |
 | default | {{{depNameSanitized}}}-{{{newVersionMajor}}}.{{{newVersionMinor}}}.x |
+
+This field is combined with `branchPrefix` and `managerBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
 
 ## bumpVersion
 
@@ -190,7 +192,7 @@ Commit message template
 | name    | value                 |
 | ------- | --------------------- |
 | type    | handlebars template   |
-| default | {% raw %}{% endraw %} |
+| default | {% raw %}{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}} {{commitMessageSuffix}}{% endraw %} |
 
 The commit message is less important than branchName so you may override it if you wish.
 
@@ -214,7 +216,7 @@ Extra description used after the commit message topic - typically the version.
 | name    | value  |
 | ------- | ------ |
 | type    | string |
-| default | Update |
+| default | {% raw %}to {{#unless isRange}}v{{/unless}}{{#if isMajor}}{{newVersionMajor}}{{else}}{{newVersion}}{{/if}}{% endraw %} |
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
 
