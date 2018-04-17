@@ -24,7 +24,7 @@ Object {
   "commitBody": null,
   "commitMessage": "{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}} {{commitMessageSuffix}}",
   "commitMessageAction": "Update",
-  "commitMessageExtra": "to {{#unless isRange}}v{{/unless}}{{#if isMajor}}{{newVersionMajor}}{{else}}{{newVersion}}{{/if}}",
+  "commitMessageExtra": "to {{#if isMajor}}v{{newVersionMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newVersion}}{{/if}}",
   "commitMessagePrefix": null,
   "commitMessageTopic": "dependency {{depName}}",
   "copyLocalLibs": false,
