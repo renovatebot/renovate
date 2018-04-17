@@ -50,7 +50,7 @@
   "dependencies": {
     "@yarnpkg/lockfile": "1.0.0",
     "bunyan": "1.8.12",
-    "cacache": "11.0.0",
+    "cacache": "11.0.1",
     "chalk": "2.3.2",
     "changelog": "1.4.2",
     "changelog-filename-regex": "1.1.1",
@@ -79,14 +79,15 @@
     "lodash": "4.17.5",
     "markdown-it": "8.4.1",
     "minimatch": "3.0.4",
-    "moment": "2.22.0",
+    "moment": "2.22.1",
     "moment-timezone": "0.5.14",
     "npm": "5.8.0",
     "openpgp": "2.6.2",
     "parse-link-header": "1.0.1",
-    "pnpm": "1.38.3",
+    "pnpm": "1.40.2",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
+    "safe-regex": "1.1.0",
     "semver": "5.5.0",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.2",
@@ -96,7 +97,7 @@
     "traverse": "0.6.6",
     "upath": "1.0.4",
     "vso-node-api": "6.5.0",
-    "yarn": "1.5.1"
+    "yarn": "1.6.0"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
@@ -106,13 +107,13 @@
     "eslint": "4.19.1",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-config-prettier": "2.9.0",
-    "eslint-plugin-import": "2.10.0",
+    "eslint-plugin-import": "2.11.0",
     "eslint-plugin-promise": "3.7.0",
     "jest": "22.4.3",
     "mockdate": "2.0.2",
-    "nock": "9.2.3",
-    "prettier": "1.11.1",
-    "semantic-release": "15.1.5"
+    "nock": "9.2.5",
+    "prettier": "1.12.0",
+    "semantic-release": "15.1.7"
   },
   "files": [
     "bin/config-validator.js",
@@ -139,7 +140,9 @@
       "./test/globals.js"
     ],
     "setupTestFrameworkScriptFile": "./test/chai.js",
-    "snapshotSerializers": ["./test/newline-snapshot-serializer.js"]
+    "snapshotSerializers": [
+      "./test/newline-snapshot-serializer.js"
+    ]
   },
   "prettier": {
     "singleQuote": true,

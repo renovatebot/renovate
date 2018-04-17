@@ -28,6 +28,7 @@ Object {
   "commitMessagePrefix": null,
   "commitMessageTopic": "dependency {{depName}}",
   "copyLocalLibs": false,
+  "depTypeList": Array [],
   "dependencies": Object {},
   "description": Array [
     "Do not renovate <code>peerDependencies</code> versions/ranges",

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/workers/package/node getPackageUpdates detects pinning 1`] = `
+exports[`lib/manager/node/package getPackageUpdates detects pinning 1`] = `
 Array [
   Object {
     "isRange": true,
@@ -14,7 +14,7 @@ Array [
 ]
 `;
 
-exports[`lib/workers/package/node getPackageUpdates returns result if needing updates 1`] = `
+exports[`lib/manager/node/package getPackageUpdates returns result if needing updates 1`] = `
 Array [
   Object {
     "isRange": true,

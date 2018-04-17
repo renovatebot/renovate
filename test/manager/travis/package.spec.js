@@ -4,7 +4,7 @@ const githubDatasource = require('../../../lib/datasource/github');
 
 jest.mock('../../../lib/datasource/github');
 
-describe('lib/workers/package/node', () => {
+describe('lib/manager/node/package', () => {
   describe('getPackageUpdates', () => {
     let config;
     beforeEach(() => {

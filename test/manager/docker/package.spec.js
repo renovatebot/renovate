@@ -6,7 +6,7 @@ const defaultConfig = require('../../../lib/config/defaults').getConfig();
 dockerApi.getDigest = jest.fn();
 dockerApi.getTags = jest.fn();
 
-describe('lib/workers/package/docker', () => {
+describe('lib/manager/docker/package', () => {
   describe('isStable', () => {
     it('returns true if no pattern', () => {
       expect(docker.isStable('8', null)).toBe(true);

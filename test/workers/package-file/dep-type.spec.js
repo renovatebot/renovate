@@ -1,15 +1,15 @@
 const path = require('path');
 const fs = require('fs');
 const npmExtract = require('../../../lib/manager/npm/extract');
-const pkgWorker = require('../../../lib/workers/package/index');
-const depTypeWorker = require('../../../lib/workers/dep-type/index');
+const pkgWorker = require('../../../lib/workers/package-file/package');
+const depTypeWorker = require('../../../lib/workers/package-file/dep-type');
 
 jest.mock('../../../lib/manager/npm/extract');
-jest.mock('../../../lib/workers/package/index');
+jest.mock('../../../lib/workers/package-file/package');
 
 pkgWorker.renovatePackage = jest.fn(() => ['a']);
 
-describe('lib/workers/dep-type/index', () => {
+describe('lib/workers/package-file/dep-type', () => {
   describe('renovateDepType(packageContent, config)', () => {
     let config;
     beforeEach(() => {
@@ -205,6 +205,59 @@ describe('lib/workers/dep-type/index', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBeUndefined();
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('filters depType', () => {
+      const config = {
+        packageRules: [
+          {
+            depTypeList: ['dependencies', 'peerDependencies'],
+            packageNames: ['a'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+      };
+      const res = depTypeWorker.getDepConfig(config, dep);
+      expect(res.x).toBe(1);
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('filters naked depType', () => {
+      const config = {
+        packageRules: [
+          {
+            depTypeList: ['dependencies', 'peerDependencies'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'dependencies',
+        depName: 'a',
+      };
+      const res = depTypeWorker.getDepConfig(config, dep);
+      expect(res.x).toBe(1);
+      expect(res.packageRules).toBeUndefined();
+    });
+    it('filters depType', () => {
+      const config = {
+        packageRules: [
+          {
+            depTypeList: ['dependencies', 'peerDependencies'],
+            packageNames: ['a'],
+            x: 1,
+          },
+        ],
+      };
+      const dep = {
+        depType: 'devDependencies',
+        depName: 'a',
+      };
+      const res = depTypeWorker.getDepConfig(config, dep);
+      expect(res.x).toBeUndefined();
       expect(res.packageRules).toBeUndefined();
     });
   });

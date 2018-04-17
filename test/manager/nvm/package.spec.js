@@ -1,7 +1,7 @@
 const node = require('../../../lib/manager/nvm/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
-describe('lib/workers/package/node', () => {
+describe('lib/manager/node/package', () => {
   describe('getPackageUpdates', () => {
     let config;
     beforeEach(() => {

@@ -4,7 +4,7 @@ const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
 
 jest.mock('../../../lib/platform/github/gh-got-wrapper');
 
-describe('lib/workers/package/bazel', () => {
+describe('lib/manager/bazel/package', () => {
   describe('getPackageUpdates', () => {
     let config;
     beforeEach(() => {
