@@ -13,7 +13,7 @@ Object {
   "baseBranches": Array [
     "next",
   ],
-  "commitMessage": "{{semanticPrefix}}some commit message",
+  "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}:{{/if}}some commit message",
   "devDependencies": Object {
     "major": Object {
       "automerge": false,
@@ -80,7 +80,7 @@ Object {
   "patch": Object {
     "automerge": true,
   },
-  "prTitle": "{{semanticPrefix}}some pr title",
+  "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}:{{/if}}some pr title",
   "schedule": "on the first day of the month",
   "semanticCommitScope": "deps",
   "semanticCommitType": "fix",
