@@ -51,7 +51,7 @@
     "@yarnpkg/lockfile": "1.0.0",
     "bunyan": "1.8.12",
     "cacache": "11.0.1",
-    "chalk": "2.3.2",
+    "chalk": "2.4.0",
     "changelog": "1.4.2",
     "changelog-filename-regex": "1.1.1",
     "child-process-promise": "2.2.1",
