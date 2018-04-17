@@ -2,6 +2,14 @@ const configValidation = require('../../lib/config/validation.js');
 
 describe('config/validation', () => {
   describe('validateConfig(config)', () => {
+    it('returns deprecation warnings', async () => {
+      const config = {
+        prTitle: 'something',
+      };
+      const { warnings } = await configValidation.validateConfig(config);
+      expect(warnings).toHaveLength(1);
+      expect(warnings).toMatchSnapshot();
+    });
     it('returns nested errors', async () => {
       const config = {
         foo: 1,

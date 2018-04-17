@@ -385,6 +385,7 @@ Array [
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) should downgrade from missing versions 1`] = `
 Object {
   "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+  "commitMessageAction": "Roll back",
   "isRollback": true,
   "newVersion": "1.16.0",
   "newVersionMajor": 1,

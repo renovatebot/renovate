@@ -30,38 +30,5 @@ describe('workers/branch/automerge', () => {
       expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(platform.commitFilesToBranch.mock.calls).toMatchSnapshot();
     });
-    it('applies semantic prefix', async () => {
-      config.updatedPackageFiles.push({
-        name: 'package.json',
-        contents: 'some contents',
-      });
-      config.semanticCommits = true;
-      await commitFilesToBranch(config);
-      expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(platform.commitFilesToBranch.mock.calls).toMatchSnapshot();
-    });
-    it('lowercases only the first line when applying semantic prefix', async () => {
-      config.updatedPackageFiles.push({
-        name: 'package.json',
-        contents: 'some contents',
-      });
-      config.commitMessage = 'Foo\n\nBar';
-      config.semanticCommits = true;
-      await commitFilesToBranch(config);
-      expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(platform.commitFilesToBranch.mock.calls[0][2]).toEqual(
-        'a(b): foo\n\nBar'
-      );
-    });
-    it('adds commit message body', async () => {
-      config.updatedPackageFiles.push({
-        name: 'package.json',
-        contents: 'some contents',
-      });
-      config.commitBody = '[skip-ci]';
-      await commitFilesToBranch(config);
-      expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
-      expect(platform.commitFilesToBranch.mock.calls).toMatchSnapshot();
-    });
   });
 });
