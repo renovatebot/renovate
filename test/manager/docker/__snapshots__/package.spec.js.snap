@@ -8,6 +8,7 @@ Array [
     "newDigestShort": "one",
     "newFrom": "some-dep:1.0.0-something@sha256:one",
     "newTag": "1.0.0-something",
+    "newVersion": "one",
     "type": "pin",
   },
   Object {
@@ -45,6 +46,7 @@ Array [
     "newDigestShort": "123456",
     "newFrom": "docker.io/some-dep:1.0.0@sha256:1234567890",
     "newTag": "1.0.0",
+    "newVersion": "123456",
     "type": "digest",
   },
 ]
