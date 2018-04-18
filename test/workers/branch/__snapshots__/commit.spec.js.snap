@@ -1,43 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/branch/automerge commitFilesToBranch adds commit message body 1`] = `
-Array [
-  Array [
-    "renovate/some-branch",
-    Array [
-      Object {
-        "contents": "some contents",
-        "name": "package.json",
-      },
-    ],
-    "some commit message
-
-[skip-ci]",
-    undefined,
-    null,
-    null,
-  ],
-]
-`;
-
-exports[`workers/branch/automerge commitFilesToBranch applies semantic prefix 1`] = `
-Array [
-  Array [
-    "renovate/some-branch",
-    Array [
-      Object {
-        "contents": "some contents",
-        "name": "package.json",
-      },
-    ],
-    "a(b): some commit message",
-    undefined,
-    null,
-    null,
-  ],
-]
-`;
-
 exports[`workers/branch/automerge commitFilesToBranch commits files 1`] = `
 Array [
   Array [

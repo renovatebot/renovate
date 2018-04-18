@@ -138,6 +138,17 @@ Prefix to be used for all branch names
 
 You can modify this field if you want to change the prefix used. For example if you want branches to be like `deps/eslint-4.x` instead of `renovate/eslint-4.x` then you set `branchPrefix` = `deps/`. Or if you wish to avoid forward slashes in branch names then you could use `renovate_` instead, for example.
 
+## branchTopic
+
+The main name/text that Renovate should use when creating a branch on your repository.
+
+| name    | value                                                                |
+| ------- | -------------------------------------------------------------------- |
+| type    | string                                                               |
+| default | {{{depNameSanitized}}}-{{{newVersionMajor}}}.{{{newVersionMinor}}}.x |
+
+This field is combined with `branchPrefix` and `managerBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
+
 ## bumpVersion
 
 Bump the version in the package.json being updated
@@ -178,14 +189,58 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 Commit message template
 
-| name    | value                                                                                          |
-| ------- | ---------------------------------------------------------------------------------------------- |
-| type    | handlebars template                                                                            |
-| default | {% raw %}{{semanticPrefix}}Update dependency {{depName}} to version {{newVersion}}{% endraw %} |
+| name    | value                                                                                                                                      |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| type    | handlebars template                                                                                                                        |
+| default | {% raw %}{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}} {{commitMessageSuffix}}{% endraw %} |
 
 The commit message is less important than branchName so you may override it if you wish.
 
 Example commit message: "chore(deps): Update dependency eslint to version 4.0.1"
+
+## commitMessageAction
+
+Action verb to use in commit messages and PR titles.
+
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | Update |
+
+This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. Actions may be like 'Update', 'Pin', 'Roll back', 'Refresh', etc.
+
+## commitMessageExtra
+
+Extra description used after the commit message topic - typically the version.
+
+| name    | value                                                                                                                  |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| type    | string                                                                                                                 |
+| default | {% raw %}to {{#unless isRange}}v{{/unless}}{{#if isMajor}}{{newVersionMajor}}{{else}}{{newVersion}}{{/if}}{% endraw %} |
+
+This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
+
+## commitMessagePrefix
+
+Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if semanticCommits enabled.
+
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | ''     |
+
+This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "prefix" is usually an automatically applied semantic commit prefix, however it can also be statically configured.
+
+## commitMessageTopic
+
+The upgrade topic/noun used in commit messages and PR titles.
+
+| name    | value                  |
+| ------- | ---------------------- |
+| type    | string                 |
+| default | dependency {{depName}} |
+
+This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. "dependency react".
 
 ## copyLocalLibs
 
@@ -558,6 +613,17 @@ Configuration specific for major dependency updates.
 | default | {}     |
 
 Add to this object if you wish to define rules that apply only to major updates.
+
+## managerBranchPrefix
+
+Prefix to be added after `branchPrefix` for distinguishing between branches for different branches.
+
+| name    | value  |
+| ------- | ------ |
+| type    | string |
+| default | ''     |
+
+This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
 
 ## meteor
 

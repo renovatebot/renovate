@@ -59,6 +59,15 @@ Array [
 
 exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `Array []`;
 
+exports[`config/validation validateConfig(config) returns deprecation warnings 1`] = `
+Array [
+  Object {
+    "depName": "Deprecation Warning",
+    "message": "Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) returns nested errors 1`] = `
 Array [
   Object {
