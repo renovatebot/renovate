@@ -353,7 +353,7 @@ Array [
     "repos/some/repo/contents/backend/package-lock.json?ref=master",
   ],
   Array [
-    "repos/some/repo/git/trees/master.backend",
+    "repos/some/repo/git/trees/master/backend",
   ],
   Array [
     "repos/some/repo/git/blobs/some-sha",
