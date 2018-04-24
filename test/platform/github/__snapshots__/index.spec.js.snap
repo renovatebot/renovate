@@ -236,7 +236,7 @@ Array [
         "context": "renovate/verify",
         "description": "Renovate verified pull request",
         "state": "success",
-        "target_url": "https://renovateapp.com",
+        "target_url": "https://renovatebot.com",
       },
     },
   ],
