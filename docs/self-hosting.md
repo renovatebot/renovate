@@ -21,7 +21,7 @@ $ docker run renovate/renovate:11.32
 $ docker run renovate/renovate 11
 ```
 
-If you wish to configure Renovate using a `config.js` file then map it to `/src/config.js` using Docker volumes.
+If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 
 ## Authentication
 
