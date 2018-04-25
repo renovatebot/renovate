@@ -3561,9 +3561,9 @@ json-stable-stringify@^1.0.1:
   dependencies:
     jsonify "~0.0.0"
 
-json-stringify-pretty-compact@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/json-stringify-pretty-compact/-/json-stringify-pretty-compact-1.1.0.tgz#4fa5b898f61a287d64828691baa822a41f3ad5ab"
+json-stringify-pretty-compact@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/json-stringify-pretty-compact/-/json-stringify-pretty-compact-1.2.0.tgz#0bc316b5e6831c07041fc35612487fb4e9ab98b8"
 
 json-stringify-safe@^5.0.1, json-stringify-safe@~5.0.1:
   version "5.0.1"
@@ -3863,6 +3863,10 @@ lodash.uniq@~4.5.0:
 lodash.without@~4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.without/-/lodash.without-4.4.0.tgz#3cd4574a00b67bae373a94b748772640507b7aac"
+
+lodash@4.17.10:
+  version "4.17.10"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
 
 lodash@4.17.5, lodash@^4.17.5:
   version "4.17.5"
@@ -4197,9 +4201,9 @@ modify-values@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/modify-values/-/modify-values-1.0.0.tgz#e2b6cdeb9ce19f99317a53722f3dbf5df5eaaab2"
 
-moment-timezone@0.5.15:
-  version "0.5.15"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.15.tgz#0e2acec4a424850b4e0e3e08984532726563ad4c"
+moment-timezone@0.5.16:
+  version "0.5.16"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.16.tgz#661717d5f55b4d2c2e002262d726c83785192a5a"
   dependencies:
     moment ">= 2.9.0"
 
@@ -5034,9 +5038,9 @@ pn@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.0.0.tgz#1cf5a30b0d806cd18f88fc41a6b5d4ad615b3ba9"
 
-pnpm@1.40.2:
-  version "1.40.2"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.40.2.tgz#f7f651da3ab9572c4d8773b9447ee862792870dc"
+pnpm@1.41.2:
+  version "1.41.2"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.41.2.tgz#7e00734f120556e948301eaa34b6ea46adb512c3"
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
