@@ -1,8 +1,13 @@
 # Self-Hosting Renovate
 
-Although Renovate is now best known as a "service" via the GitHub App, that service is actually running this same open source project, so you can get the same functionality if running it yourself. The version you see here in this repository can be cloned or `npm` installed in seconds and give you the exact same functionality as in the app.
+## Open Source vs Comercial versions
 
-## Install
+Although Renovate is now best known as a "service" via the GitHub App, that service is actually running this same open source project, so you can get the same functionality if running it yourself. The version you see here in this repository can be cloned or `npm` installed in seconds and give you the exact core functionality as in the app.
+
+There is also a commercially-licensed "Professional Edition" of Renovate available for GitHub Enterprise, that includes a stateful priority job queue, background scheduler and webhook listener.
+For details and documentation on Renovate Pro, please visit [renovatebot.com/pro](https://renovatebot.com/pro).
+
+## Installing Renovate OSS
 
 #### npmjs
 
