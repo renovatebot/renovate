@@ -4,7 +4,7 @@ This document describes the steps to take if you are interest in adding new lang
 
 ### Background
 
-Renovate began life as a JavaScript-only, specifically for the npmjs ecosystem. 
+Renovate began life as a JavaScript-only, specifically for the npmjs ecosystem.
 Over time, additional "package managers" (e.g. Meteor.js, Dockerfile, nvm) have been added and the codebase incrementally refactored and improved with many of those to make it easier to add newer ones in future.
 
 ### Code structure
@@ -36,7 +36,7 @@ This is used when more than one package manager share common characteristics. e.
 
 ##### filePattern
 
-`filePattern` is a javascript `RegExp` used to detect the manager's files within the repository. 
+`filePattern` is a javascript `RegExp` used to detect the manager's files within the repository.
 
 An example `filePattern` from Docker Compose is `(^|/)docker-compose[^/]*\\.ya?ml$`. You can see that it's designed to match files both in the root as well as in subdirectories, and to be flexible with matching yaml files that start with `docker-compose` but may have additional characters in the filename.
 
@@ -56,9 +56,9 @@ For most managers, it is not necessary.
 
 This function is essential. It takes a file content and returns an array of detected/extracted dependencies, including:
 
-- dependency name
-- dependency type (e.g. dependencies, devDependencies, etc)
-- currentVersion
+* dependency name
+* dependency type (e.g. dependencies, devDependencies, etc)
+* currentVersion
 
 The fields returned here can be customised to suit the package manager, e.g. Docker uses `currentFrom`
 
