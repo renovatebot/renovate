@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/buildkite/extract extractDependencies() extracts multiple plugins in same file 1`] = `
+Array [
+  Object {
+    "currentVersion": "v1.3.2",
+    "depType": "plugin",
+    "lineNumber": 4,
+    "pluginName": "docker-compose",
+  },
+  Object {
+    "currentVersion": "v1.3.2",
+    "depType": "plugin",
+    "lineNumber": 15,
+    "pluginName": "docker-compose",
+  },
+]
+`;
+
+exports[`lib/manager/buildkite/extract extractDependencies() extracts simple single plugin 1`] = `
+Array [
+  Object {
+    "currentVersion": "v2.0.0",
+    "depType": "plugin",
+    "lineNumber": 2,
+    "pluginName": "detect-clowns",
+  },
+]
+`;

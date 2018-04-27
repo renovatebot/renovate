@@ -1,0 +1,3 @@
+steps:
+  - plugins:
+      detect-clowns#v2.0.0: ~
