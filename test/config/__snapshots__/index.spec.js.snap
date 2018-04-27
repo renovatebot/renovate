@@ -19,6 +19,13 @@ Object {
   "branchName": "{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}",
   "branchPrefix": "renovate/",
   "branchTopic": "{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+  "buildkite": Object {
+    "commitMessageExtra": "to {{newVersion}}",
+    "commitMessageTopic": "buildkite plugin {{depName}}",
+    "enabled": false,
+    "managerBranchPrefix": "buildkite-",
+    "prBody": "This Pull Request updates buildkite plugin {{#if repositoryUrl}}[{{{depName}}}]({{{repositoryUrl}}}){{else}}\`{{{depName}}}\`{{/if}} from \`{{{currentVersion}}}\` to \`{{{newVersion}}}\`.\\n\\n{{#if releases.length}}\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if isPin}}\\n**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.\\n{{/if}}\\n{{#if hasReleaseNotes}}\\n\\n<details>\\n<summary>Release Notes</summary>\\n\\n{{#each releases as |release|}}\\n{{#if release.releaseNotes}}\\n### [\`v{{{release.version}}}\`]({{{release.releaseNotes.url}}})\\n\\n{{{release.releaseNotes.body}}}\\n\\n---\\n\\n{{/if}}\\n{{/each}}\\n</details>\\n{{/if}}\\n\\n{{#if hasCommits}}\\n\\n<details>\\n<summary>Commits</summary>\\n\\n{{#each releases as |release|}}\\n{{#if release.hasCommits}}\\n#### v{{{release.version}}}\\n{{#each release.commits as |commit|}}\\n-   [\`{{commit.shortSha}}\`]({{commit.url}}) {{commit.message}}\\n{{/each}}\\n{{/if}}\\n{{/each}}\\n\\n</details>\\n{{/if}}\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+  },
   "bumpVersion": null,
   "circleci": Object {},
   "commitBody": null,

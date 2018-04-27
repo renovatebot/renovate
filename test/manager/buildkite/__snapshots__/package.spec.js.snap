@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/buildkite/package getPackageUpdates() returns one upgrade 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "v1.0.0",
+    "changeLogToVersion": "v1.2.0",
+    "newVersion": "v1.2.0",
+    "newVersionMajor": 1,
+    "newVersionMinor": 2,
+    "repositoryUrl": "https://github.com/some/plugin-buildkite-plugin",
+    "type": "minor",
+  },
+]
+`;

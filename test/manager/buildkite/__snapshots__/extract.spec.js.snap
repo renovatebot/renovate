@@ -5,13 +5,13 @@ Array [
   Object {
     "currentVersion": "v1.3.2",
     "depName": "docker-compose",
-    "depType": "plugin",
+    "depType": "plugins",
     "lineNumber": 4,
   },
   Object {
     "currentVersion": "v1.3.2",
     "depName": "docker-compose",
-    "depType": "plugin",
+    "depType": "plugins",
     "lineNumber": 15,
   },
 ]
@@ -22,7 +22,7 @@ Array [
   Object {
     "currentVersion": "v2.0.0",
     "depName": "detect-clowns",
-    "depType": "plugin",
+    "depType": "plugins",
     "lineNumber": 2,
   },
 ]

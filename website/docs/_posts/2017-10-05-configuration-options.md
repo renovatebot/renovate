@@ -149,6 +149,15 @@ The main name/text that Renovate should use when creating a branch on your repos
 
 This field is combined with `branchPrefix` and `managerBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
 
+## buildkite
+
+Configuration specific for buildkite plugins updates.
+
+| name    | value                                                 |
+| ------- | ----------------------------------------------------- |
+| type    | object                                                |
+| default | { enabled: false, managerBranchPrefix: 'buildkite-' } |
+
 ## bumpVersion
 
 Bump the version in the package.json being updated
