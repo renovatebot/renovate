@@ -618,6 +618,16 @@ Prefix to be added after `branchPrefix` for distinguishing between branches for 
 
 This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
 
+## matchCurrentVersion
+
+If set in a packageRule, the rule will be applied only if the current version of the package matches against this version or range.
+
+| name | value  |
+| ---- | ------ |
+| type | string |
+
+`matchCurrentVersion` can be an exact semver version or a semver range.
+
 ## meteor
 
 Configuration specific for meteor updates.

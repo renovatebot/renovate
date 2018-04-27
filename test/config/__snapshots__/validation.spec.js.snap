@@ -68,6 +68,15 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) invalid matchCurrentVersion triggers an error 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules: >= 2.-1.4 isn't a valid semver",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) returns nested errors 1`] = `
 Array [
   Object {
