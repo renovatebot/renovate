@@ -4,15 +4,15 @@ exports[`lib/manager/buildkite/extract extractDependencies() extracts multiple p
 Array [
   Object {
     "currentVersion": "v1.3.2",
+    "depName": "docker-compose",
     "depType": "plugin",
     "lineNumber": 4,
-    "pluginName": "docker-compose",
   },
   Object {
     "currentVersion": "v1.3.2",
+    "depName": "docker-compose",
     "depType": "plugin",
     "lineNumber": 15,
-    "pluginName": "docker-compose",
   },
 ]
 `;
@@ -21,9 +21,9 @@ exports[`lib/manager/buildkite/extract extractDependencies() extracts simple sin
 Array [
   Object {
     "currentVersion": "v2.0.0",
+    "depName": "detect-clowns",
     "depType": "plugin",
     "lineNumber": 2,
-    "pluginName": "detect-clowns",
   },
 ]
 `;
