@@ -121,6 +121,7 @@ Object {
   "logLevel": "error",
   "major": Object {},
   "managerBranchPrefix": "",
+  "matchCurrentVersion": null,
   "meteor": Object {},
   "minor": Object {},
   "mirrorMode": false,

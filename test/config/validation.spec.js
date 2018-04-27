@@ -107,5 +107,21 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(0);
     });
+    it('invalid matchCurrentVersion triggers an error', async () => {
+      const config = {
+        packageRules: [
+          {
+            packageNames: ['angular'],
+            matchCurrentVersion: '>= 2.-1.4',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+      expect(errors).toHaveLength(1);
+    });
   });
 });
