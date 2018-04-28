@@ -43,6 +43,12 @@ describe('config/validation', () => {
         semanticCommitType: 7,
         lockFileMaintenance: false,
         extends: [':timezone(Europe/Brussel)'],
+        pathRules: [
+          {
+            paths: ['examples/**'],
+            labels: ['examples'],
+          },
+        ],
         packageRules: [
           {
             excludePackageNames: ['foo'],

@@ -868,7 +868,7 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
 
 ## paths
 
-List of strings or glob patterns to match against package files. Applicable inside pathRules only.
+List of strings or glob patterns to match against package files. Applicable inside pathRules or packageRules only.
 
 | name    | value |
 | ------- | ----- |

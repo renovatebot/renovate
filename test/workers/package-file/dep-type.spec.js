@@ -308,5 +308,30 @@ describe('lib/workers/package-file/dep-type', () => {
       });
       expect(res1.x).toBeDefined();
     });
+    it('matches paths', () => {
+      const config = {
+        packageRules: [
+          {
+            paths: ['examples/**', 'lib/'],
+            x: 1,
+          },
+        ],
+      };
+      const res1 = depTypeWorker.getDepConfig(config, {
+        depName: 'test',
+        packageFile: 'examples/foo/package.json',
+      });
+      expect(res1.x).toBeDefined();
+      const res2 = depTypeWorker.getDepConfig(config, {
+        depName: 'test',
+        packageFile: 'package.json',
+      });
+      expect(res2.x).toBeUndefined();
+      const res3 = depTypeWorker.getDepConfig(config, {
+        depName: 'test',
+        packageFile: 'lib/a/package.json',
+      });
+      expect(res3.x).toBeDefined();
+    });
   });
 });
