@@ -24,6 +24,12 @@ describe('config/migration', () => {
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
+        pathRules: [
+          {
+            paths: ['examples/**'],
+            extends: ['foo'],
+          },
+        ],
         packageRules: [
           {
             packagePatterns: '^(@angular|typescript)',
@@ -47,6 +53,14 @@ describe('config/migration', () => {
         devDependencies: {
           automerge: 'minor',
           schedule: null,
+        },
+        nvmrc: {
+          pathRules: [
+            {
+              paths: ['node/**'],
+              extends: ['node'],
+            },
+          ],
         },
         depTypes: [
           'dependencies',
