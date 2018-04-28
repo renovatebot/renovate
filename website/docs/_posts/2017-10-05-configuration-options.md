@@ -158,6 +158,15 @@ Configuration specific for buildkite plugins updates.
 | type    | object                                                |
 | default | { enabled: false, managerBranchPrefix: 'buildkite-' } |
 
+## pip_requirements
+
+Configuration specific for requirements.txt updates.
+
+| name    | value              |
+| ------- | ------------------ |
+| type    | object             |
+| default | { enabled: false } |
+
 ## bumpVersion
 
 Bump the version in the package.json being updated
