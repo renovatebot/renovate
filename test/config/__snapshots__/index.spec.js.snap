@@ -148,7 +148,6 @@ Object {
     "automerge": true,
     "branchTopic": "{{{depNameSanitized}}}-{{{newVersionMajor}}}.{{{newVersionMinor}}}.x",
   },
-  "pathRules": Array [],
   "paths": Array [],
   "peerDependencies": Object {
     "enabled": false,
