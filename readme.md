@@ -58,7 +58,7 @@ you'd like to get your config reviewed or ask any questions.
 
 ## Self-Hosting
 
-If you are not on GitHub or you prefer to run your own copy of Renovate, then it takes only seconds to set up. Please see [docs/self-hosting.md](https://github.com/renovateapp/renovate/blob/master/docs/self-hosting.md) for instructions.
+If you are not on GitHub or you prefer to run your own copy of Renovate, then you can easily run your own copy. Please see [docs/self-hosting.md](https://github.com/renovateapp/renovate/blob/master/docs/self-hosting.md) for instructions. There is also a commercially licensed [Renovate Pro Edition](https://renovatebot.com/pro) available for GitHub Enterprise.
 
 ## Contributing
 

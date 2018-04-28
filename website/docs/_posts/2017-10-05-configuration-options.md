@@ -149,6 +149,15 @@ The main name/text that Renovate should use when creating a branch on your repos
 
 This field is combined with `branchPrefix` and `managerBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
 
+## buildkite
+
+Configuration specific for buildkite plugins updates.
+
+| name    | value                                                 |
+| ------- | ----------------------------------------------------- |
+| type    | object                                                |
+| default | { enabled: false, managerBranchPrefix: 'buildkite-' } |
+
 ## bumpVersion
 
 Bump the version in the package.json being updated
@@ -618,6 +627,16 @@ Prefix to be added after `branchPrefix` for distinguishing between branches for 
 
 This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
 
+## matchCurrentVersion
+
+If set in a packageRule, the rule will be applied only if the current version of the package matches against this version or range.
+
+| name | value  |
+| ---- | ------ |
+| type | string |
+
+`matchCurrentVersion` can be an exact semver version or a semver range.
+
 ## meteor
 
 Configuration specific for meteor updates.
@@ -849,7 +868,7 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
 
 ## paths
 
-List of strings or glob patterns to match against package files. Applicable inside pathRules only.
+List of strings or glob patterns to match against package files. Applicable inside pathRules or packageRules only.
 
 | name    | value |
 | ------- | ----- |
