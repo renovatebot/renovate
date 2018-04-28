@@ -310,6 +310,7 @@ describe('lib/workers/package-file/dep-type', () => {
     });
     it('matches paths', () => {
       const config = {
+        packageFile: 'examples/foo/package.json',
         packageRules: [
           {
             paths: ['examples/**', 'lib/'],
@@ -319,17 +320,16 @@ describe('lib/workers/package-file/dep-type', () => {
       };
       const res1 = depTypeWorker.getDepConfig(config, {
         depName: 'test',
-        packageFile: 'examples/foo/package.json',
       });
       expect(res1.x).toBeDefined();
+      config.packageFile = 'package.json';
       const res2 = depTypeWorker.getDepConfig(config, {
         depName: 'test',
-        packageFile: 'package.json',
       });
       expect(res2.x).toBeUndefined();
+      config.packageFile = 'lib/a/package.json';
       const res3 = depTypeWorker.getDepConfig(config, {
         depName: 'test',
-        packageFile: 'lib/a/package.json',
       });
       expect(res3.x).toBeDefined();
     });

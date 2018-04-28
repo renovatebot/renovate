@@ -844,6 +844,17 @@ Note how the above uses `packageNames` instead of `packagePatterns` because it i
 
 The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
 
+Path rules are convenient to use if you wish to apply configuration rules to certain package files without needing to configure them all in the `packageFiles` array. For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
+
+```json
+  "packageRules": [
+    {
+      "paths": ["examples/**"],
+      "extends": [":semanticCommitTypeAll(chore)"]
+    }
+  ]
+```
+
 ## patch
 
 Configuration specific for patch dependency updates.
@@ -855,29 +866,9 @@ Configuration specific for patch dependency updates.
 
 Add to this object if you wish to define rules that apply only to patch updates. See also `major` and `minor` configuration options.
 
-## pathRules
-
-Apply config on a path-based basis. Consists of a `paths` array plus whatever other configuration objects to apply.
-
-| name    | value |
-| ------- | ----- |
-| type    | list  |
-| default | []    |
-
-Path rules are convenient to use if you wish to apply configuration rules to certain package files without needing to configure them all in the `packageFiles` array. For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
-
-```json
-  "pathRules": [
-    {
-      "paths": ["examples/**"],
-      "extends": [":semanticCommitTypeAll(chore)"]
-    }
-  ]
-```
-
 ## paths
 
-List of strings or glob patterns to match against package files. Applicable inside pathRules or packageRules only.
+List of strings or glob patterns to match against package files. Applicable inside packageRules only.
 
 | name    | value |
 | ------- | ----- |
