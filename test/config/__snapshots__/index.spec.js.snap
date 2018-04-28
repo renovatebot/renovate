@@ -176,9 +176,7 @@ Object {
   "prNotPendingHours": 25,
   "prTitle": null,
   "privateKey": null,
-  "python": Object {
-    "enabled": true,
-  },
+  "python": Object {},
   "rebaseStalePrs": null,
   "recreateClosed": false,
   "renovateFork": false,
