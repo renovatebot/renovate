@@ -8,6 +8,8 @@ type: Document
 order: 30
 ---
 
+# Semantic Commit Messages
+
 Renovate attempts to autodetect if your repository uses "semantic" commit message prefixes, and adds them if so. To do so, it looks at the 10 most recent commit messages in the base branch and uses [conventional-commits-detector](https://github.com/conventional-changelog/conventional-commits-detector) to determine convention commit type.
 
 Currently, Renovate ignores commit conventions apart from "angular".

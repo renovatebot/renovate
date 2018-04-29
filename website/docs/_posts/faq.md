@@ -1,12 +1,12 @@
 ---
 date: 2017-07-25
 title: Frequently Asked Questions (FAQ)
-categories:
-  - all-other
 description: Frequently Asked Questions for Renovate Configuration
 type: Document
 order: 2
 ---
+
+# Frequently Asked Questions (FAQ)
 
 ## What Is The Default Behaviour?
 
@@ -41,7 +41,7 @@ You may configure more than one in the above.
 
 ### Support private npm modules
 
-See the dedicated [Private npm module support](https://renovateapp.com/docs/deep-dives/private-modules) page.
+See the dedicated [Private npm module support](https://renovatebot.com/docs/private-modules/) page.
 
 ### Control renovate's schedule
 

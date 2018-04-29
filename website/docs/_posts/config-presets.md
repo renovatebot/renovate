@@ -1,12 +1,12 @@
 ---
 date: 2017-08-18
 title: Shareable Config Presets
-categories:
-  - configuration-reference
 description: Renovate's support for eslint-like shareable configs
 type: Document
 order: 10
 ---
+
+# Shareable Config Presets
 
 Renovate supports an `eslint`-like approach to shareable configs, which we usually refer to as "presets". These are added/configured via the `"extends"` field in any configuration object.
 

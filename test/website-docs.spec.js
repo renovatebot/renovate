@@ -3,7 +3,7 @@ const options = require('../lib/config/definitions').getOptions();
 
 describe('docs', () => {
   const doc = fs.readFileSync(
-    'website/docs/_posts/2017-10-05-configuration-options.md',
+    'website/docs/_posts/configuration-options.md',
     'utf8'
   );
   const headers = doc
