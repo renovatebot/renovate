@@ -81,14 +81,14 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.automerge).toEqual(false);
-      expect(migratedConfig.packageRules).toHaveLength(5);
+      expect(migratedConfig.packageRules).toHaveLength(6);
     });
     it('migrates before and after schedules', () => {
       const config = {
-        dependencies: {
+        major: {
           schedule: 'after 10pm and before 7am',
         },
-        devDependencies: {
+        minor: {
           schedule: 'after 10pm and before 7am on every weekday',
         },
       };
@@ -99,15 +99,15 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
-      expect(migratedConfig.dependencies.schedule.length).toBe(2);
-      expect(migratedConfig.dependencies.schedule[0]).toEqual('after 10pm');
-      expect(migratedConfig.dependencies.schedule[1]).toEqual('before 7am');
-      expect(migratedConfig.devDependencies.schedule).toMatchSnapshot();
-      expect(migratedConfig.devDependencies.schedule.length).toBe(2);
-      expect(migratedConfig.devDependencies.schedule[0]).toEqual(
+      expect(migratedConfig.major.schedule.length).toBe(2);
+      expect(migratedConfig.major.schedule[0]).toEqual('after 10pm');
+      expect(migratedConfig.major.schedule[1]).toEqual('before 7am');
+      expect(migratedConfig.minor.schedule).toMatchSnapshot();
+      expect(migratedConfig.minor.schedule.length).toBe(2);
+      expect(migratedConfig.minor.schedule[0]).toEqual(
         'after 10pm every weekday'
       );
-      expect(migratedConfig.devDependencies.schedule[1]).toEqual(
+      expect(migratedConfig.minor.schedule[1]).toEqual(
         'before 7am every weekday'
       );
     });
