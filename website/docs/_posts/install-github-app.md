@@ -1,12 +1,12 @@
 ---
 date: 2017-07-12
 title: GitHub App Installation
-categories:
-  - getting-started
 description: How to install the Renovate GitHub App
 type: Document
 order: 1
 ---
+
+# GitHub App Installation
 
 Installing/Enabling the Renovate GitHub App is fairly simple, and no different to any other GitHub App.
 

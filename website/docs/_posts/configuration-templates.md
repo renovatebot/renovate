@@ -1,12 +1,12 @@
 ---
 date: 2018-04-09
 title: Config Template Editing
-categories:
-  - deep-dives
 description: How to edit Renovate's config templates
 type: Document
 order: 30
 ---
+
+# Config Template Editing
 
 Tnis document describes how you can edit the branch names, commit messages, or PR titles and content.
 

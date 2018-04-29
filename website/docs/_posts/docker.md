@@ -1,12 +1,12 @@
 ---
 date: 2017-11-10
 title: Docker
-categories:
-  - language-support
 description: Docker Package Manager Support in Renovate
 type: Document
 order: 2
 ---
+
+# Docker
 
 Renovate supports upgrading dependencies in Docker's `Dockerfile` files.
 

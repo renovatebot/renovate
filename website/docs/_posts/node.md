@@ -1,12 +1,12 @@
 ---
 date: 2017-11-10
 title: Node.js Versions
-categories:
-  - language-support
 description: Node versions support in Renovate
 type: Document
 order: 3
 ---
+
+# Node.js Versions
 
 Renovate can upgrade the [Node.js](https://nodejs.org/en/) runtime used by your project so that you're using the latest bug fixes, performance improvements, security mitigations, etc. that meet your project's unique needs.
 
@@ -31,7 +31,7 @@ When Renovate processes your project's repository it will look for the files lis
 
 ## Configuring Support Policy
 
-Renovate supports a [`supportPolicy`](https://renovateapp.com/docs/configuration-reference/configuration-options#supportpolicy) option that can be passed the following values and associated versions (current as of December 2017):
+Renovate supports a [`supportPolicy`](https://renovatebot.com/docs/configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of December 2017):
 
 **Default:** `lts`
 
@@ -53,4 +53,4 @@ For example, to instruct Renovate to upgrade your project to the latest [Long-te
 
 It's best to define this support policy inside the `node` configuration object so that it is applied to all Node.js-related files.
 
-For additional language support see the [`supportPolicy` documentation](https://renovateapp.com/docs/configuration-reference/configuration-options#supportpolicy).
+For additional language support see the [`supportPolicy` documentation](https://renovatebot.com/docs/configuration-options/#supportpolicy).

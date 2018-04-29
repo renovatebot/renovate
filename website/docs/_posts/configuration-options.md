@@ -1,16 +1,16 @@
 ---
 date: 2017-10-05
 title: Configuration Options
-categories:
-  - configuration-reference
 description: Configuration Options usable in renovate.json or package.json
 type: Document
 order: 0
 ---
 
+# Configuration Options
+
 This document describes all the configuration options you may configure in a `renovate.json` file or within a `"renovate"` section of your `package.json`. Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
-Also, be sure to check out Renovate's [shareable config presets](/docs/configuration-reference/config-presets) to save yourself from reinventing any wheels.
+Also, be sure to check out Renovate's [shareable config presets](https://renovatebot.com/docs/config-presets/) to save yourself from reinventing any wheels.
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovateapp/config-help](https://github.com/renovateapp/config-help) where it will be promptly answered.
 
@@ -679,7 +679,7 @@ Configuration specific for all Node.js version updates (e.g. `engines` field in 
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovateapp.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/node/) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
@@ -1171,7 +1171,7 @@ Dependency support policy, e.g. used for deciding whether to use a [Long-term Su
 
 Language support is limited to those listed below:
 
-* **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
+* **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/node/)
 
 ## timezone
 

@@ -1,12 +1,12 @@
 ---
 date: 2017-12-28
 title: Updating and Rebasing Branches
-categories:
-  - deep-dives
 description: How Renovate Updates and Rebases Branches
 type: Document
 order: 30
 ---
+
+# Updating and Rebasing Branches
 
 There are many cases where Renovate will need to update a branch/PR after its initial creation, and this document will attempt to describe them.
 

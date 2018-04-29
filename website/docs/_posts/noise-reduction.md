@@ -1,12 +1,12 @@
 ---
 date: 2017-10-06
 title: Noise Reduction
-categories:
-  - deep-dives
 description: How to reduce the "noise" associated with module updates
 type: Document
 order: 30
 ---
+
+# Noise Reduction
 
 Generally, the first reaction people have to automated dependency updates like Renovate is "oh great/feel the power of automation". The next reaction a few days or weeks later is often "this is getting overwhelming". Indeed, if you leave Renovate on its default settings of raising a PR every single time any dependency receives any update.. you will get a lot of PRs and related notifications. This document will give you some ideas of how to reduce the amount of "noise" in your repository and the Pros/Cons of each.
 
@@ -16,7 +16,7 @@ Of course, please keep in mind that people's definitions of "noise" may differ. 
 
 To reduce noise, you can reduce the number of updates in total, and a good way to do that is via intelligent grouping of related packages.
 
-As an example, our default `":app"` and `":library"` [presets](/docs/configuration-reference/config-presets) include the rule `"group:monorepos"`, which means that "sibling" packages from known monorepos will always be grouped into the same branch/PR by renovate. For example, all `@angular/*` packages that are updated at the same time will be raised in a "Renovate angular monorepo packages" PR. And every package in the React monorepo will be grouped together in a React monorepo PR too.
+As an example, our default `":app"` and `":library"` [presets](https://renovatebot.com/docs/config-presets/) include the rule `"group:monorepos"`, which means that "sibling" packages from known monorepos will always be grouped into the same branch/PR by renovate. For example, all `@angular/*` packages that are updated at the same time will be raised in a "Renovate angular monorepo packages" PR. And every package in the React monorepo will be grouped together in a React monorepo PR too.
 
 You may wish to take this further, for example you might want to group together all packages related to `eslint`, even if they come from separate repositories/authors. In that case you might add config like this:
 
