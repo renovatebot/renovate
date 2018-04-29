@@ -123,11 +123,6 @@ describe('config/presets', () => {
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
-    it('resolves app preset', async () => {
-      config.extends = [':app'];
-      const res = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
-    });
     it('resolves group monorepos', async () => {
       config.extends = ['group:monorepos'];
       const res = await presets.resolveConfigPresets(config);

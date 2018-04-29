@@ -38,7 +38,6 @@ Object {
   "depTypeList": Array [],
   "dependencies": Object {},
   "description": Array [
-    "Do not renovate <code>peerDependencies</code> versions/ranges",
     "Rate limit PR creation to a maximum of one per hour",
     "Automerge patch upgrades if they pass tests",
   ],
@@ -149,9 +148,7 @@ Object {
     "branchTopic": "{{{depNameSanitized}}}-{{{newVersionMajor}}}.{{{newVersionMinor}}}.x",
   },
   "paths": Array [],
-  "peerDependencies": Object {
-    "enabled": false,
-  },
+  "peerDependencies": Object {},
   "pin": Object {
     "commitMessageAction": "Pin",
     "group": Object {
