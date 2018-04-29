@@ -272,17 +272,6 @@ A list of depType names inside a package rule to filter on. Matches all depTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values. Invalid if used outside of a `packageRule`.
 
-## dependencies
-
-Configuration specific for `package.json > dependencies`.
-
-| name    | value                            |
-| ------- | -------------------------------- |
-| type    | object                           |
-| default | {"semanticPrefix": "fix(deps):"} |
-
-Extend this if you wish to configure rules specifically for `dependencies` and not `devDependencies` or `optionalDependencies`.
-
 ## description
 
 | name    | value  |
@@ -291,17 +280,6 @@ Extend this if you wish to configure rules specifically for `dependencies` and n
 | default | null   |
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
-
-## devDependencies
-
-Configuration specific for `package.json > devDependencies`.
-
-| name    | value  |
-| ------- | ------ |
-| type    | object |
-| default | {}     |
-
-Extend this if you wish to configure rules specifically for `devDependencies` and not `dependencies` or `optionalDependencies`.
 
 ## digest
 
@@ -724,17 +702,6 @@ Configuration specific for `.nvmrc` files.
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 
-## optionalDependencies
-
-Configuration specific for `package.json > optionalDependencies`.
-
-| name    | value  |
-| ------- | ------ |
-| type    | object |
-| default | {}     |
-
-Extend this if you wish to configure rules specifically for `optionalDependencies` and not `dependencies` or `devDependencies`.
-
 ## packageFiles
 
 A manually provisioned list of package files to use.
@@ -865,17 +832,6 @@ List of strings or glob patterns to match against package files. Applicable insi
 | ------- | ----- |
 | type    | list  |
 | default | []    |
-
-## peerDependencies
-
-Configuration specific for `package.json > peerDependencies`.
-
-| name    | value              |
-| ------- | ------------------ |
-| type    | object             |
-| default | {"enabled": false} |
-
-Extend this if you wish to configure rules specifically for `peerDependencies`. Disabled by default.
 
 ## pin
 
