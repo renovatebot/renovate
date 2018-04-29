@@ -45,7 +45,7 @@ Object {
     "automerge": true,
   },
   "nvmrc": Object {
-    "pathRules": Array [
+    "packageRules": Array [
       Object {
         "extends": Array [
           "node",
