@@ -77,11 +77,11 @@ describe('config/migration', () => {
         config,
         parentConfig
       );
+      expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
-      expect(migratedConfig.optionalDependencies.respectLatest).toBe(false);
       expect(migratedConfig.automerge).toEqual(false);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig.packageRules).toHaveLength(5);
     });
     it('migrates before and after schedules', () => {
       const config = {
@@ -238,9 +238,9 @@ describe('config/migration', () => {
       );
       expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
-      expect(migratedConfig.lockFileMaintenance.depTypes).not.toBeDefined();
+      expect(migratedConfig.lockFileMaintenance.packageRules).toHaveLength(1);
       expect(
-        migratedConfig.lockFileMaintenance.optionalDependencies.respectLatest
+        migratedConfig.lockFileMaintenance.packageRules[0].respectLatest
       ).toBe(false);
     });
     it('it migrates node to travis', () => {
