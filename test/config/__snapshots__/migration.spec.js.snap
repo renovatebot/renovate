@@ -45,7 +45,7 @@ Object {
     "automerge": true,
   },
   "nvmrc": Object {
-    "pathRules": Array [
+    "packageRules": Array [
       Object {
         "extends": Array [
           "node",
@@ -92,16 +92,6 @@ Object {
   "patch": Object {
     "automerge": true,
   },
-  "pathRules": Array [
-    Object {
-      "extends": Array [
-        "foo",
-      ],
-      "paths": Array [
-        "examples/**",
-      ],
-    },
-  ],
   "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title",
   "schedule": "on the first day of the month",
   "semanticCommitScope": "deps",
