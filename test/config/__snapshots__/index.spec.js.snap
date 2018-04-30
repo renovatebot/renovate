@@ -118,6 +118,7 @@ Object {
     "**/bower_components/**",
   ],
   "ignoreUnstable": true,
+  "includePaths": Array [],
   "labels": Array [],
   "lazyGrouping": true,
   "lockFileMaintenance": Object {

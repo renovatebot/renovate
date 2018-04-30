@@ -140,6 +140,16 @@ describe('manager', () => {
       expect(res.foundIgnoredPaths).toMatchSnapshot();
       expect(res.warnings).toMatchSnapshot();
     });
+    it('uses includePaths', async () => {
+      platform.getFileList.mockReturnValueOnce([
+        'package.json',
+        'backend/package.json',
+      ]);
+      config.includePaths = ['package.json'];
+      const res = await manager.detectPackageFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
   });
   describe('getManager', () => {
     it('rejects unknown files', () => {
