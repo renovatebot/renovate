@@ -56,9 +56,7 @@ describe('workers/pr/changelog', () => {
       res.repositoryUrl = 'https://github.com/about';
       npmRegistry.getDependency.mockReturnValueOnce(Promise.resolve(res));
 
-      expect(
-        await getChangeLogJSON('renovate', '1.0.0', '3.0.0')
-      ).toBe(null);
+      expect(await getChangeLogJSON('renovate', '1.0.0', '3.0.0')).toBe(null);
     });
     it('works without Github', async () => {
       expect(
@@ -86,9 +84,11 @@ describe('workers/pr/changelog', () => {
       // mock tags response
       ghGot.mockReturnValueOnce(Promise.resolve());
       // mock commit time response
-      ghGot.mockReturnValue(Promise.resolve({
-        body: { sha: 'sha_from_time' }
-      }));
+      ghGot.mockReturnValue(
+        Promise.resolve({
+          body: { sha: 'sha_from_time' },
+        })
+      );
       expect(
         await getChangeLogJSON('@renovate/no', '1.0.0', '3.0.0')
       ).toMatchSnapshot();
