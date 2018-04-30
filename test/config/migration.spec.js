@@ -266,6 +266,7 @@ describe('config/migration', () => {
         packageFiles: [
           'package.json',
           { packageFile: 'backend/package.json', pinVersions: false },
+          { packageFile: 'frontend/package.json', pinVersions: true },
         ],
       };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -274,8 +275,11 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
-      expect(migratedConfig.includePaths).toHaveLength(2);
+      expect(migratedConfig.includePaths).toHaveLength(3);
       expect(migratedConfig.packageFiles).toBeUndefined();
+      expect(migratedConfig.packageRules).toHaveLength(2);
+      expect(migratedConfig.packageRules[0].pinVersions).toBe(false);
+      expect(migratedConfig.packageRules[1].pinVersions).toBe(true);
     });
   });
 });

@@ -135,6 +135,21 @@ Object {
   "includePaths": Array [
     "package.json",
     "backend/package.json",
+    "frontend/package.json",
+  ],
+  "packageRules": Array [
+    Object {
+      "paths": Array [
+        "backend/package.json",
+      ],
+      "pinVersions": false,
+    },
+    Object {
+      "paths": Array [
+        "frontend/package.json",
+      ],
+      "pinVersions": true,
+    },
   ],
 }
 `;
