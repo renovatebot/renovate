@@ -29,7 +29,7 @@ describe('manager', () => {
       const res = await manager.detectPackageFiles(config);
       expect(res).toHaveLength(0);
     });
-    it('skips if parentManager is disabled', async () => {
+    it('skips if language is disabled', async () => {
       platform.getFileList.mockReturnValueOnce([
         'package.json',
         '.circleci/config.yml',
