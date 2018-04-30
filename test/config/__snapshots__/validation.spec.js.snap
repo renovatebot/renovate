@@ -57,6 +57,19 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) errors for unsafe fileMatches 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for npm.fileMatch: \`abc ([a-z]+) ([a-z]+))\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Unsafe regExp for docker.fileMatch: \`(x+x+)+y\`",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `Array []`;
 
 exports[`config/validation validateConfig(config) invalid matchCurrentVersion triggers an error 1`] = `

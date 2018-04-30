@@ -443,10 +443,10 @@ See https://renovateapp.com/docs/configuration-reference/config-presets for deta
 
 JS RegExp pattern for matching manager files.
 
-| name    | value  |
-| ------- | ------ |
-| type    | list   |
-| default | []     |
+| name    | value |
+| ------- | ----- |
+| type    | list  |
+| default | []    |
 
 ## gitAuthor
 

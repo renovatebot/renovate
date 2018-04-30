@@ -123,5 +123,21 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(1);
     });
+    it('errors for unsafe fileMatches', async () => {
+      const config = {
+        npm: {
+          fileMatch: ['abc ([a-z]+) ([a-z]+))'],
+        },
+        docker: {
+          fileMatch: ['(x+x+)+y'],
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+      expect(errors).toMatchSnapshot();
+    });
   });
 });
