@@ -244,5 +244,3 @@ Object {
   ],
 }
 `;
-
-exports[`config/index mergeChildConfig(parentConfig, childConfig) merges depTypes 1`] = `undefined`;
