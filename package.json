@@ -161,7 +161,9 @@
     },
     "packageRules": [
       {
-        "packageNames": ["semantic-release"],
+        "packageNames": [
+          "semantic-release"
+        ],
         "semanticCommitType": "fix"
       }
     ],
