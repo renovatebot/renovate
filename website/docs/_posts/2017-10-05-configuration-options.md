@@ -445,8 +445,8 @@ JS RegExp pattern for matching manager files.
 
 | name    | value  |
 | ------- | ------ |
-| type    | string |
-| default | null   |
+| type    | list   |
+| default | []     |
 
 ## gitAuthor
 

@@ -11,7 +11,9 @@ Array [
       "version": "1.0.0",
     },
     "currentPackageJsonVersion": "1.0.0",
-    "fileMatch": "(^|/)package.json$",
+    "fileMatch": Array [
+      "(^|/)package.json$",
+    ],
     "manager": "npm",
     "packageFile": "package.json",
   },
@@ -30,7 +32,9 @@ Array [
       "version": "0.0.1",
     },
     "currentPackageJsonVersion": "0.0.1",
-    "fileMatch": "(^|/)package.json$",
+    "fileMatch": Array [
+      "(^|/)package.json$",
+    ],
     "manager": "npm",
     "npmShrinkwrap": "npm-shrinkwrap.json",
     "npmrc": "npmrc",
@@ -53,7 +57,9 @@ Array [
       "version": "0.0.1",
     },
     "currentPackageJsonVersion": "0.0.1",
-    "fileMatch": "(^|/)package.json$",
+    "fileMatch": Array [
+      "(^|/)package.json$",
+    ],
     "manager": "npm",
     "packageFile": "package.json",
   },
