@@ -130,6 +130,15 @@ Object {
 }
 `;
 
+exports[`config/migration migrateConfig(config, parentConfig) it migrates packageFiles 1`] = `
+Object {
+  "includedPaths": Array [
+    "package.json",
+    "backend/package.json",
+  ],
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) it migrates packages 1`] = `
 Object {
   "packageRules": Array [

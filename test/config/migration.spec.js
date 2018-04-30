@@ -261,5 +261,21 @@ describe('config/migration', () => {
       expect(migratedConfig.travis.enabled).toBe(true);
       expect(migratedConfig.node.supportPolicy).toBeDefined();
     });
+    it('it migrates packageFiles', () => {
+      const config = {
+        packageFiles: [
+          'package.json',
+          { packageFile: 'backend/package.json', pinVersions: false },
+        ],
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig.includedPaths).toHaveLength(2);
+      expect(migratedConfig.packageFiles).toBeUndefined();
+    });
   });
 });
