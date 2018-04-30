@@ -22,7 +22,6 @@ The manager's `index.js` file then needs to export up to 7 functions or values:
 module.exports = {
   contentPattern,
   extractDependencies,
-  filePattern,
   getPackageUpdates,
   language,
   resolvePackageFile,
@@ -34,15 +33,9 @@ module.exports = {
 
 This is used when more than one package manager share settings from a common language. e.g. docker-compose, circleci and gitlabci all specify "docker" as their language and inherit all config settings from there.
 
-##### filePattern
-
-`filePattern` is a javascript `RegExp` used to detect the manager's files within the repository.
-
-An example `filePattern` from Docker Compose is `(^|/)docker-compose[^/]*\\.ya?ml$`. You can see that it's designed to match files both in the root as well as in subdirectories, and to be flexible with matching yaml files that start with `docker-compose` but may have additional characters in the filename.
-
 ##### contentPattern (optional)
 
-`contentPattern` is only necessary if there's the possibility that some of the files matched by `filePattern` may not belong to that package manager, or maybe don't have any dependencies.
+`contentPattern` is only necessary if there's the possibility that some of the files matched by `fileMatch` may not belong to that package manager, or maybe don't have any dependencies.
 
 An example `contentPattern` is from Meteor.js: `(^|\\n)\\s*Npm.depends\\(\\s*{`. Because Meteor's `package.js` is not particularly "unique", it's quite possible that repositories will have one or more `package.js` files that have nothing to do with Meteor.js, so we filter out only the ones that include `Npm.depends` in it.
 
@@ -74,3 +67,10 @@ Therefore, there is the possibility that for some future package managers we may
 ##### updateDependency
 
 This function is the final one called for a manager. It's purpose is to patch the package file with the new version and return an updated file.
+
+##### fileMatch
+
+`fileMatch` is a javascript `RegExp` string or an exact filename string used to detect the manager's files within the repository.
+It is located within `lib/config/definitions.js` so that it can be configured by the user.
+
+An example `fileMatch` from Docker Compose is `(^|/)docker-compose[^/]*\\.ya?ml$`. You can see that it's designed to match files both in the root as well as in subdirectories, and to be flexible with matching yaml files that start with `docker-compose` but may have additional characters in the filename.

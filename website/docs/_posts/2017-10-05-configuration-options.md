@@ -439,6 +439,15 @@ Preset configs to use/extend.
 
 See https://renovateapp.com/docs/configuration-reference/config-presets for details.
 
+## fileMatch
+
+JS RegExp pattern for matching manager files.
+
+| name    | value |
+| ------- | ----- |
+| type    | list  |
+| default | []    |
+
 ## gitAuthor
 
 | name    | value  |
