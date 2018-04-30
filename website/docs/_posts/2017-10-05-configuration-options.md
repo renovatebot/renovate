@@ -172,11 +172,11 @@ Set this value to 'patch', 'minor' or 'major' to have Renovate update the versio
 
 Configuration object for CircleCI yaml file renovation. Also inherits settings from `docker` object.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | {}     |
-| parentManager | docker |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | {}     |
+| language | docker |
 
 ## commitBody
 
@@ -327,11 +327,11 @@ Configuration specific for Dockerfile updates.
 
 Configuration object for Docker Compose yaml file renovation. Also inherits settings from `docker` object.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | {}     |
-| parentManager | docker |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | {}     |
+| language | docker |
 
 ## enabled
 
@@ -716,11 +716,11 @@ See https://renovateapp.com/docs/deep-dives/private-modules for details on how t
 
 Configuration specific for `.nvmrc` files.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | { }    |
-| parentManager | node   |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | { }    |
+| language | node   |
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 
@@ -1221,11 +1221,11 @@ It is only recommended to set this field if you wish to use the `schedules` feat
 
 Configuration specific for `.travis.yml` files.
 
-| name          | value              |
-| ------------- | ------------------ |
-| type          | object             |
-| default       | { enabled: false } |
-| parentManager | node               |
+| name     | value              |
+| -------- | ------------------ |
+| type     | object             |
+| default  | { enabled: false } |
+| language | node               |
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 

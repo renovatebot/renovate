@@ -24,15 +24,15 @@ module.exports = {
   extractDependencies,
   filePattern,
   getPackageUpdates,
-  parentManager,
+  language,
   resolvePackageFile,
   updateDependency,
 };
 ```
 
-##### parentManager (optional)
+##### language (optional)
 
-This is used when more than one package manager share common characteristics. e.g. docker-compose, circleci and gitlabci all specify "docker" as their parent manager and inherit all config settings from there.
+This is used when more than one package manager share settings from a common language. e.g. docker-compose, circleci and gitlabci all specify "docker" as their language and inherit all config settings from there.
 
 ##### filePattern
 
