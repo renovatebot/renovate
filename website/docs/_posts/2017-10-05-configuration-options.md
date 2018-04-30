@@ -711,17 +711,6 @@ Configuration specific for `.nvmrc` files.
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 
-## packageFiles
-
-A manually provisioned list of package files to use.
-
-| name    | value            |
-| ------- | ---------------- |
-| type    | array of strings |
-| default | `[]`             |
-
-If left default then package file autodiscovery will be used, so only change this setting if you wish to manually specify a limited set of `package.json` or other package files to renovate.
-
 ## packageNames
 
 A list of package names inside a package rule.
