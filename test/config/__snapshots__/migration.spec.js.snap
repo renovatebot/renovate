@@ -14,15 +14,6 @@ Object {
     "next",
   ],
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
-  "devDependencies": Object {
-    "major": Object {
-      "automerge": false,
-    },
-    "minor": Object {
-      "automerge": true,
-    },
-    "schedule": Array [],
-  },
   "enabled": true,
   "extends": Array [
     "config:js-app",
@@ -85,6 +76,18 @@ Object {
       "packagePatterns": Array [
         "ang",
       ],
+    },
+    Object {
+      "depTypeList": Array [
+        "devDependencies",
+      ],
+      "major": Object {
+        "automerge": false,
+      },
+      "minor": Object {
+        "automerge": true,
+      },
+      "schedule": Array [],
     },
     Object {
       "depTypeList": Array [
@@ -180,13 +183,13 @@ Object {
 
 exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
 Object {
-  "dependencies": Object {
+  "major": Object {
     "schedule": Array [
       "after 10pm",
       "before 7am",
     ],
   },
-  "devDependencies": Object {
+  "minor": Object {
     "schedule": Array [
       "after 10pm every weekday",
       "before 7am every weekday",

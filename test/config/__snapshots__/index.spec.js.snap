@@ -36,12 +36,10 @@ Object {
   "commitMessageTopic": "dependency {{depName}}",
   "copyLocalLibs": false,
   "depTypeList": Array [],
-  "dependencies": Object {},
   "description": Array [
     "Rate limit PR creation to a maximum of one per hour",
     "Automerge patch upgrades if they pass tests",
   ],
-  "devDependencies": Object {},
   "digest": Object {},
   "docker": Object {
     "commitMessageTopic": "{{{depName}}} Docker tag",
@@ -138,7 +136,6 @@ Object {
   "nvm": Object {},
   "onboarding": true,
   "onboardingConfig": Object {},
-  "optionalDependencies": Object {},
   "packageFiles": Array [],
   "packageNames": Array [],
   "packagePatterns": Array [],
@@ -148,7 +145,6 @@ Object {
     "branchTopic": "{{{depNameSanitized}}}-{{{newVersionMajor}}}.{{{newVersionMinor}}}.x",
   },
   "paths": Array [],
-  "peerDependencies": Object {},
   "pin": Object {
     "commitMessageAction": "Pin",
     "group": Object {
@@ -248,5 +244,3 @@ Object {
   ],
 }
 `;
-
-exports[`config/index mergeChildConfig(parentConfig, childConfig) merges depTypes 1`] = `undefined`;
