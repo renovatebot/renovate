@@ -14,15 +14,6 @@ Object {
     "next",
   ],
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
-  "devDependencies": Object {
-    "major": Object {
-      "automerge": false,
-    },
-    "minor": Object {
-      "automerge": true,
-    },
-    "schedule": Array [],
-  },
   "enabled": true,
   "extends": Array [
     "config:js-app",
@@ -57,17 +48,15 @@ Object {
     ],
   },
   "onboarding": false,
-  "optionalDependencies": Object {
-    "major": Object {
-      "automerge": false,
-    },
-    "minor": Object {
-      "automerge": true,
-    },
-    "respectLatest": false,
-    "schedule": "before 5am on Monday",
-  },
   "packageRules": Array [
+    Object {
+      "extends": Array [
+        "foo",
+      ],
+      "paths": Array [
+        "examples/**",
+      ],
+    },
     Object {
       "excludePackageNames": "foo",
       "groupName": "angular packages",
@@ -87,6 +76,31 @@ Object {
       "packagePatterns": Array [
         "ang",
       ],
+    },
+    Object {
+      "depTypeList": Array [
+        "devDependencies",
+      ],
+      "major": Object {
+        "automerge": false,
+      },
+      "minor": Object {
+        "automerge": true,
+      },
+      "schedule": Array [],
+    },
+    Object {
+      "depTypeList": Array [
+        "optionalDependencies",
+      ],
+      "major": Object {
+        "automerge": false,
+      },
+      "minor": Object {
+        "automerge": true,
+      },
+      "respectLatest": false,
+      "schedule": "before 5am on Monday",
     },
   ],
   "patch": Object {
@@ -130,9 +144,14 @@ Object {
 exports[`config/migration migrateConfig(config, parentConfig) it migrates subconfig 1`] = `
 Object {
   "lockFileMaintenance": Object {
-    "optionalDependencies": Object {
-      "respectLatest": false,
-    },
+    "packageRules": Array [
+      Object {
+        "depTypeList": Array [
+          "optionalDependencies",
+        ],
+        "respectLatest": false,
+      },
+    ],
   },
 }
 `;
@@ -164,13 +183,13 @@ Object {
 
 exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
 Object {
-  "dependencies": Object {
+  "major": Object {
     "schedule": Array [
       "after 10pm",
       "before 7am",
     ],
   },
-  "devDependencies": Object {
+  "minor": Object {
     "schedule": Array [
       "after 10pm every weekday",
       "before 7am every weekday",

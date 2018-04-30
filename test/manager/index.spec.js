@@ -29,7 +29,7 @@ describe('manager', () => {
       const res = await manager.detectPackageFiles(config);
       expect(res).toHaveLength(0);
     });
-    it('skips if parentManager is disabled', async () => {
+    it('skips if language is disabled', async () => {
       platform.getFileList.mockReturnValueOnce([
         'package.json',
         '.circleci/config.yml',
@@ -143,23 +143,35 @@ describe('manager', () => {
   });
   describe('getManager', () => {
     it('rejects unknown files', () => {
-      expect(manager.getManager('WORKSPACER')).toBe(null);
+      expect(manager.getManager(defaultConfig, 'WORKSPACER')).toBe(null);
     });
     it('detects files in root', () => {
-      expect(manager.getManager('WORKSPACE')).toBe('bazel');
-      expect(manager.getManager('Dockerfile')).toBe('docker');
-      expect(manager.getManager('package.js')).toBe('meteor');
-      expect(manager.getManager('package.json')).toBe('npm');
-      expect(manager.getManager('.nvmrc')).toBe('nvm');
-      expect(manager.getManager('.travis.yml')).toBe('travis');
+      expect(manager.getManager(defaultConfig, 'WORKSPACE')).toBe('bazel');
+      expect(manager.getManager(defaultConfig, 'Dockerfile')).toBe('docker');
+      expect(manager.getManager(defaultConfig, 'package.js')).toBe('meteor');
+      expect(manager.getManager(defaultConfig, 'package.json')).toBe('npm');
+      expect(manager.getManager(defaultConfig, '.nvmrc')).toBe('nvm');
+      expect(manager.getManager(defaultConfig, '.travis.yml')).toBe('travis');
     });
     it('detects nested files', () => {
-      expect(manager.getManager('foo/bar/WORKSPACE')).toBe('bazel');
-      expect(manager.getManager('backend/Dockerfile')).toBe('docker');
-      expect(manager.getManager('package/a/package.js')).toBe('meteor');
-      expect(manager.getManager('frontend/package.json')).toBe('npm');
-      expect(manager.getManager('subfolder-1/.nvmrc')).toBe(null);
-      expect(manager.getManager('subfolder-2/.travis.yml')).toBe(null);
+      expect(manager.getManager(defaultConfig, 'foo/bar/WORKSPACE')).toBe(
+        'bazel'
+      );
+      expect(manager.getManager(defaultConfig, 'backend/Dockerfile')).toBe(
+        'docker'
+      );
+      expect(manager.getManager(defaultConfig, 'package/a/package.js')).toBe(
+        'meteor'
+      );
+      expect(manager.getManager(defaultConfig, 'frontend/package.json')).toBe(
+        'npm'
+      );
+      expect(manager.getManager(defaultConfig, 'subfolder-1/.nvmrc')).toBe(
+        null
+      );
+      expect(manager.getManager(defaultConfig, 'subfolder-2/.travis.yml')).toBe(
+        null
+      );
     });
   });
   describe('getUpdatedPackageFiles', () => {

@@ -112,7 +112,7 @@
     "mockdate": "2.0.2",
     "nock": "9.2.5",
     "prettier": "1.12.1",
-    "semantic-release": "15.1.7"
+    "semantic-release": "15.1.8"
   },
   "files": [
     "bin/config-validator.js",
@@ -158,6 +158,12 @@
     "docker": {
       "semanticCommitType": "fix"
     },
+    "packageRules": [
+      {
+        "packageNames": ["semantic-release"],
+        "semanticCommitType": "fix"
+      }
+    ],
     "semanticCommitScope": null
   },
   "publishConfig": {

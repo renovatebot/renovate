@@ -213,7 +213,6 @@ describe('config/index', () => {
         })
       );
       const actual = await configParser.parseConfigs(env, defaultArgv);
-      expect(actual.peerDependencies.enabled).toBe(false);
       expect(actual.separatePatchReleases).toBe(true);
       expect(actual.patch.automerge).toBe(true);
       expect(actual.minor.automerge).toBeUndefined();
@@ -245,17 +244,6 @@ describe('config/index', () => {
       expect(config.pinVersions).toBe(false);
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
       expect(config.lockFileMaintenance).toMatchSnapshot();
-    });
-    it('merges depTypes', () => {
-      const parentConfig = { ...defaultConfig };
-      const childConfig = {
-        dependencies: {},
-        devDependencies: { foo: 1 },
-        peerDependencies: {},
-      };
-      const configParser = require('../../lib/config/index.js');
-      const config = configParser.mergeChildConfig(parentConfig, childConfig);
-      expect(config.depTypes).toMatchSnapshot();
     });
     it('merges packageRules', () => {
       const parentConfig = { ...defaultConfig };

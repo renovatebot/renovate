@@ -110,7 +110,7 @@ describe('manager/resolve', () => {
       platform.getFile.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile
       platform.getFile.mockReturnValueOnce('image: node:8\n'); // Docker Compose
       platform.getFile.mockReturnValueOnce('# travis'); // .travis.yml
-      platform.getFile.mockReturnValueOnce('# WORKSPACE'); // Dockerfile
+      platform.getFile.mockReturnValueOnce('# WORKSPACE'); // Dockerfileyarn j
       platform.getFile.mockReturnValueOnce('8.9\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
       expect(res.packageFiles).toHaveLength(7);

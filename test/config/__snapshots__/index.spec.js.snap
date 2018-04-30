@@ -15,7 +15,11 @@ Object {
   "automerge": false,
   "automergeType": "pr",
   "baseBranches": Array [],
-  "bazel": Object {},
+  "bazel": Object {
+    "fileMatch": Array [
+      "(^|/)WORKSPACE$",
+    ],
+  },
   "branchName": "{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}",
   "branchPrefix": "renovate/",
   "branchTopic": "{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
@@ -23,11 +27,18 @@ Object {
     "commitMessageExtra": "to {{newVersion}}",
     "commitMessageTopic": "buildkite plugin {{depName}}",
     "enabled": false,
+    "fileMatch": Array [
+      "\\\\.buildkite/.+\\\\.yml$",
+    ],
     "managerBranchPrefix": "buildkite-",
     "prBody": "This Pull Request updates buildkite plugin {{#if repositoryUrl}}[{{{depName}}}]({{{repositoryUrl}}}){{else}}\`{{{depName}}}\`{{/if}} from \`{{{currentVersion}}}\` to \`{{{newVersion}}}\`.\\n\\n{{#if releases.length}}\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if isPin}}\\n**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.\\n{{/if}}\\n{{#if hasReleaseNotes}}\\n\\n<details>\\n<summary>Release Notes</summary>\\n\\n{{#each releases as |release|}}\\n{{#if release.releaseNotes}}\\n### [\`v{{{release.version}}}\`]({{{release.releaseNotes.url}}})\\n\\n{{{release.releaseNotes.body}}}\\n\\n---\\n\\n{{/if}}\\n{{/each}}\\n</details>\\n{{/if}}\\n\\n{{#if hasCommits}}\\n\\n<details>\\n<summary>Commits</summary>\\n\\n{{#each releases as |release|}}\\n{{#if release.hasCommits}}\\n#### v{{{release.version}}}\\n{{#each release.commits as |commit|}}\\n-   [\`{{commit.shortSha}}\`]({{commit.url}}) {{commit.message}}\\n{{/each}}\\n{{/if}}\\n{{/each}}\\n\\n</details>\\n{{/if}}\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
   },
   "bumpVersion": null,
-  "circleci": Object {},
+  "circleci": Object {
+    "fileMatch": Array [
+      "^.circleci/config.yml$",
+    ],
+  },
   "commitBody": null,
   "commitMessage": "{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}",
   "commitMessageAction": "Update",
@@ -36,13 +47,10 @@ Object {
   "commitMessageTopic": "dependency {{depName}}",
   "copyLocalLibs": false,
   "depTypeList": Array [],
-  "dependencies": Object {},
   "description": Array [
-    "Do not renovate <code>peerDependencies</code> versions/ranges",
     "Rate limit PR creation to a maximum of one per hour",
     "Automerge patch upgrades if they pass tests",
   ],
-  "devDependencies": Object {},
   "digest": Object {},
   "docker": Object {
     "commitMessageTopic": "{{{depName}}} Docker tag",
@@ -56,6 +64,9 @@ Object {
       },
       "prBody": "This Pull Request updates Docker base image \`{{{depName}}}:{{{currentTag}}}\` to the latest digest (\`{{{newDigest}}}\`). For details on Renovate's Docker support, please visit https://renovatebot.com/docs/language-support/docker\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
     },
+    "fileMatch": Array [
+      "(^|/)Dockerfile$",
+    ],
     "group": Object {
       "commitMessageTopic": "{{{groupName}}} Docker tags",
       "prBody": "This Pull Request updates Dockerfiles to use image digests.\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#each upgrades as |upgrade|}}\\n-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{{depName}}}\`{{/if}}: \`{{upgrade.newDigest}}\`\\n{{/each}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
@@ -76,7 +87,11 @@ Object {
     },
     "prBody": "This Pull Request updates Docker base image \`{{{depName}}}\` from tag \`{{{currentTag}}}\` to new tag \`{{{newTag}}}\`. For details on Renovate's Docker support, please visit https://renovatebot.com/docs/language-support/docker\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
   },
-  "docker-compose": Object {},
+  "docker-compose": Object {
+    "fileMatch": Array [
+      "(^|/)docker-compose[^/]*\\\\.ya?ml$",
+    ],
+  },
   "enabled": true,
   "enabledManagers": Array [],
   "encrypted": null,
@@ -85,6 +100,7 @@ Object {
   "excludePackageNames": Array [],
   "excludePackagePatterns": Array [],
   "exposeEnv": false,
+  "fileMatch": Array [],
   "forkMode": false,
   "gitAuthor": null,
   "gitPrivateKey": null,
@@ -122,7 +138,11 @@ Object {
   "major": Object {},
   "managerBranchPrefix": "",
   "matchCurrentVersion": null,
-  "meteor": Object {},
+  "meteor": Object {
+    "fileMatch": Array [
+      "(^|/)package.js$",
+    ],
+  },
   "minor": Object {},
   "mirrorMode": false,
   "multipleMajorPrs": false,
@@ -133,13 +153,20 @@ Object {
     "groupName": "Node.js",
     "lazyGrouping": false,
   },
-  "npm": Object {},
+  "npm": Object {
+    "fileMatch": Array [
+      "(^|/)package.json$",
+    ],
+  },
   "npmToken": null,
   "npmrc": null,
-  "nvm": Object {},
+  "nvm": Object {
+    "fileMatch": Array [
+      "^.nvmrc$",
+    ],
+  },
   "onboarding": true,
   "onboardingConfig": Object {},
-  "optionalDependencies": Object {},
   "packageFiles": Array [],
   "packageNames": Array [],
   "packagePatterns": Array [],
@@ -149,9 +176,6 @@ Object {
     "branchTopic": "{{{depNameSanitized}}}-{{{newVersionMajor}}}.{{{newVersionMinor}}}.x",
   },
   "paths": Array [],
-  "peerDependencies": Object {
-    "enabled": false,
-  },
   "pin": Object {
     "commitMessageAction": "Pin",
     "group": Object {
@@ -166,6 +190,9 @@ Object {
   "pinVersions": false,
   "pip_requirements": Object {
     "enabled": false,
+    "fileMatch": Array [
+      "(^|\\\\/)([\\\\w-]*)requirements.(txt|pip)$",
+    ],
   },
   "platform": "github",
   "prBody": "This Pull Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{{depName}}}]({{{repositoryUrl}}}){{else}}\`{{{depName}}}\`{{/if}} from \`{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{{currentVersion}}}\` to \`{{#unless isRange}}v{{/unless}}{{{newVersion}}}\`{{#if isRollback}}. This is necessary and important because \`v{{{currentVersion}}}\` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}\\n{{#if hasTypes}}\\n\\nThis PR also includes an upgrade to the corresponding [@types/{{{depName}}}](https://npmjs.com/package/@types/{{{depName}}}) package.\\n{{/if}}\\n{{#if releases.length}}\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if isPin}}\\n**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.\\n{{/if}}\\n{{#if hasReleaseNotes}}\\n\\n<details>\\n<summary>Release Notes</summary>\\n\\n{{#each releases as |release|}}\\n{{#if release.releaseNotes}}\\n### [\`v{{{release.version}}}\`]({{{release.releaseNotes.url}}})\\n\\n{{{release.releaseNotes.body}}}\\n\\n---\\n\\n{{/if}}\\n{{/each}}\\n</details>\\n{{/if}}\\n\\n{{#if hasCommits}}\\n\\n<details>\\n<summary>Commits</summary>\\n\\n{{#each releases as |release|}}\\n{{#if release.hasCommits}}\\n#### v{{{release.version}}}\\n{{#each release.commits as |commit|}}\\n-   [\`{{commit.shortSha}}\`]({{commit.url}}) {{commit.message}}\\n{{/each}}\\n{{/if}}\\n{{/each}}\\n\\n</details>\\n{{/if}}\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
@@ -196,6 +223,9 @@ Object {
   "token": null,
   "travis": Object {
     "enabled": false,
+    "fileMatch": Array [
+      "^.travis.yml$",
+    ],
   },
   "unpublishSafe": false,
   "unstablePattern": null,
@@ -251,5 +281,3 @@ Object {
   ],
 }
 `;
-
-exports[`config/index mergeChildConfig(parentConfig, childConfig) merges depTypes 1`] = `undefined`;

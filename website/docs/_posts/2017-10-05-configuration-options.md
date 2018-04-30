@@ -172,11 +172,11 @@ Set this value to 'patch', 'minor' or 'major' to have Renovate update the versio
 
 Configuration object for CircleCI yaml file renovation. Also inherits settings from `docker` object.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | {}     |
-| parentManager | docker |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | {}     |
+| language | docker |
 
 ## commitBody
 
@@ -272,17 +272,6 @@ A list of depType names inside a package rule to filter on. Matches all depTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values. Invalid if used outside of a `packageRule`.
 
-## dependencies
-
-Configuration specific for `package.json > dependencies`.
-
-| name    | value                            |
-| ------- | -------------------------------- |
-| type    | object                           |
-| default | {"semanticPrefix": "fix(deps):"} |
-
-Extend this if you wish to configure rules specifically for `dependencies` and not `devDependencies` or `optionalDependencies`.
-
 ## description
 
 | name    | value  |
@@ -291,17 +280,6 @@ Extend this if you wish to configure rules specifically for `dependencies` and n
 | default | null   |
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
-
-## devDependencies
-
-Configuration specific for `package.json > devDependencies`.
-
-| name    | value  |
-| ------- | ------ |
-| type    | object |
-| default | {}     |
-
-Extend this if you wish to configure rules specifically for `devDependencies` and not `dependencies` or `optionalDependencies`.
 
 ## digest
 
@@ -327,11 +305,11 @@ Configuration specific for Dockerfile updates.
 
 Configuration object for Docker Compose yaml file renovation. Also inherits settings from `docker` object.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | {}     |
-| parentManager | docker |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | {}     |
+| language | docker |
 
 ## enabled
 
@@ -460,6 +438,15 @@ Preset configs to use/extend.
 | default | []               |
 
 See https://renovateapp.com/docs/configuration-reference/config-presets for details.
+
+## fileMatch
+
+JS RegExp pattern for matching manager files.
+
+| name    | value |
+| ------- | ----- |
+| type    | list  |
+| default | []    |
 
 ## gitAuthor
 
@@ -716,24 +703,13 @@ See https://renovateapp.com/docs/deep-dives/private-modules for details on how t
 
 Configuration specific for `.nvmrc` files.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | { }    |
-| parentManager | node   |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | { }    |
+| language | node   |
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
-
-## optionalDependencies
-
-Configuration specific for `package.json > optionalDependencies`.
-
-| name    | value  |
-| ------- | ------ |
-| type    | object |
-| default | {}     |
-
-Extend this if you wish to configure rules specifically for `optionalDependencies` and not `dependencies` or `devDependencies`.
 
 ## packageFiles
 
@@ -865,17 +841,6 @@ List of strings or glob patterns to match against package files. Applicable insi
 | ------- | ----- |
 | type    | list  |
 | default | []    |
-
-## peerDependencies
-
-Configuration specific for `package.json > peerDependencies`.
-
-| name    | value              |
-| ------- | ------------------ |
-| type    | object             |
-| default | {"enabled": false} |
-
-Extend this if you wish to configure rules specifically for `peerDependencies`. Disabled by default.
 
 ## pin
 
@@ -1221,11 +1186,11 @@ It is only recommended to set this field if you wish to use the `schedules` feat
 
 Configuration specific for `.travis.yml` files.
 
-| name          | value              |
-| ------------- | ------------------ |
-| type          | object             |
-| default       | { enabled: false } |
-| parentManager | node               |
+| name     | value              |
+| -------- | ------------------ |
+| type     | object             |
+| default  | { enabled: false } |
+| language | node               |
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 
