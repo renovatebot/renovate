@@ -1628,11 +1628,11 @@ entities@~1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/entities/-/entities-1.1.1.tgz#6e5c2d0a5621b5dadaecef80b90edfb5cd7772f0"
 
-env-ci@^1.0.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/env-ci/-/env-ci-1.4.0.tgz#d5a81534fb25c9dd8627c61e8db0d45bcbb7ef2c"
+env-ci@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/env-ci/-/env-ci-2.0.0.tgz#f62983d73740140e0a9ed78c9704473a6e163860"
   dependencies:
-    execa "^0.9.0"
+    execa "^0.10.0"
     java-properties "^0.2.9"
 
 err-code@^1.0.0:
@@ -5916,9 +5916,9 @@ sax@^1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.1.7:
-  version "15.1.7"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.1.7.tgz#b29eef1b9443f75addab7c2e353338b72b9b628d"
+semantic-release@15.1.8:
+  version "15.1.8"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.1.8.tgz#5b659650f9d9a6b35252fb05bb1e08d728713bc5"
   dependencies:
     "@semantic-release/commit-analyzer" "^5.0.0"
     "@semantic-release/error" "^2.2.0"
@@ -5929,7 +5929,7 @@ semantic-release@15.1.7:
     chalk "^2.3.0"
     cosmiconfig "^4.0.0"
     debug "^3.1.0"
-    env-ci "^1.0.0"
+    env-ci "^2.0.0"
     execa "^0.10.0"
     get-stream "^3.0.0"
     git-log-parser "^1.2.0"
