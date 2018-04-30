@@ -57,17 +57,15 @@ Object {
     ],
   },
   "onboarding": false,
-  "optionalDependencies": Object {
-    "major": Object {
-      "automerge": false,
-    },
-    "minor": Object {
-      "automerge": true,
-    },
-    "respectLatest": false,
-    "schedule": "before 5am on Monday",
-  },
   "packageRules": Array [
+    Object {
+      "extends": Array [
+        "foo",
+      ],
+      "paths": Array [
+        "examples/**",
+      ],
+    },
     Object {
       "excludePackageNames": "foo",
       "groupName": "angular packages",
@@ -87,6 +85,19 @@ Object {
       "packagePatterns": Array [
         "ang",
       ],
+    },
+    Object {
+      "depTypeList": Array [
+        "optionalDependencies",
+      ],
+      "major": Object {
+        "automerge": false,
+      },
+      "minor": Object {
+        "automerge": true,
+      },
+      "respectLatest": false,
+      "schedule": "before 5am on Monday",
     },
   ],
   "patch": Object {
@@ -130,9 +141,14 @@ Object {
 exports[`config/migration migrateConfig(config, parentConfig) it migrates subconfig 1`] = `
 Object {
   "lockFileMaintenance": Object {
-    "optionalDependencies": Object {
-      "respectLatest": false,
-    },
+    "packageRules": Array [
+      Object {
+        "depTypeList": Array [
+          "optionalDependencies",
+        ],
+        "respectLatest": false,
+      },
+    ],
   },
 }
 `;
