@@ -41,6 +41,10 @@ Array [
     "manager": "docker",
     "packageFile": "other/Dockerfile",
   },
+  Object {
+    "manager": "docker",
+    "packageFile": "another/Dockerfile",
+  },
 ]
 `;
 
