@@ -274,7 +274,7 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
-      expect(migratedConfig.includedPaths).toHaveLength(2);
+      expect(migratedConfig.includePaths).toHaveLength(2);
       expect(migratedConfig.packageFiles).toBeUndefined();
     });
   });

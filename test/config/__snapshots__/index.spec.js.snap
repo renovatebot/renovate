@@ -168,7 +168,6 @@ Object {
   },
   "onboarding": true,
   "onboardingConfig": Object {},
-  "packageFiles": Array [],
   "packageNames": Array [],
   "packagePatterns": Array [],
   "packageRules": Array [],

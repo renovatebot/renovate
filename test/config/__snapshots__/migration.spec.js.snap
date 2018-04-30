@@ -132,7 +132,7 @@ Object {
 
 exports[`config/migration migrateConfig(config, parentConfig) it migrates packageFiles 1`] = `
 Object {
-  "includedPaths": Array [
+  "includePaths": Array [
     "package.json",
     "backend/package.json",
   ],
