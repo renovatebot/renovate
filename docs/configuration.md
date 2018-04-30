@@ -46,9 +46,6 @@ module.exports = {
     },
     {
       repository: 'singapore/repo2',
-      optionalDependencies: {
-        labels: ['renovate', 'optional'],
-      },
       labels: ['renovate'],
     },
     'singapore/repo3',
