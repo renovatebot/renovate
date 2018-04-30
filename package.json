@@ -159,6 +159,12 @@
     "docker": {
       "semanticCommitType": "fix"
     },
+    "packageRules": [
+      {
+        "depNames": ["semantic-release"],
+        "semanticComitType": "fix"
+      }
+    ],
     "semanticCommitScope": null
   },
   "publishConfig": {
