@@ -73,18 +73,9 @@ describe('manager', () => {
         'other/Dockerfile',
         'another/Dockerfile',
       ]);
-      platform.getFile.mockReturnValueOnce(
-        '### comment\n\n \nFROM something\nRUN something\nFROM something-else\nRUN bar'
-      );
-      platform.getFile.mockReturnValueOnce(
-        'ARG foo\nFROM something\nRUN something'
-      );
-      platform.getFile.mockReturnValueOnce(
-        'ARG foo\nno FROM at all\nRUN something'
-      );
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toHaveLength(3);
     });
     it('finds .travis.yml files', async () => {
       config.travis.enabled = true;
@@ -122,12 +113,6 @@ describe('manager', () => {
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
-    });
-    it('skips Dockerfiles with no content', async () => {
-      platform.getFileList.mockReturnValueOnce(['Dockerfile']);
-      platform.getFile.mockReturnValueOnce(null);
-      const res = await manager.detectPackageFiles(config);
-      expect(res).toHaveLength(0);
     });
     it('ignores node modules', async () => {
       platform.getFileList.mockReturnValueOnce([
