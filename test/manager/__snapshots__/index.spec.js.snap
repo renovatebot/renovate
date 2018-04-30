@@ -80,3 +80,12 @@ exports[`manager detectPackageFiles(config) ignores node modules 2`] = `undefine
 exports[`manager detectPackageFiles(config) ignores node modules 3`] = `undefined`;
 
 exports[`manager detectPackageFiles(config) skips meteor package files with no json 1`] = `Array []`;
+
+exports[`manager detectPackageFiles(config) uses includePaths 1`] = `
+Array [
+  Object {
+    "manager": "npm",
+    "packageFile": "package.json",
+  },
+]
+`;
