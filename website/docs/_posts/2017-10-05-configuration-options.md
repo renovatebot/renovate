@@ -149,6 +149,15 @@ The main name/text that Renovate should use when creating a branch on your repos
 
 This field is combined with `branchPrefix` and `managerBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
 
+## buildkite
+
+Configuration specific for buildkite plugins updates.
+
+| name    | value                                                 |
+| ------- | ----------------------------------------------------- |
+| type    | object                                                |
+| default | { enabled: false, managerBranchPrefix: 'buildkite-' } |
+
 ## bumpVersion
 
 Bump the version in the package.json being updated
@@ -163,11 +172,11 @@ Set this value to 'patch', 'minor' or 'major' to have Renovate update the versio
 
 Configuration object for CircleCI yaml file renovation. Also inherits settings from `docker` object.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | {}     |
-| parentManager | docker |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | {}     |
+| language | docker |
 
 ## commitBody
 
@@ -263,17 +272,6 @@ A list of depType names inside a package rule to filter on. Matches all depTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values. Invalid if used outside of a `packageRule`.
 
-## dependencies
-
-Configuration specific for `package.json > dependencies`.
-
-| name    | value                            |
-| ------- | -------------------------------- |
-| type    | object                           |
-| default | {"semanticPrefix": "fix(deps):"} |
-
-Extend this if you wish to configure rules specifically for `dependencies` and not `devDependencies` or `optionalDependencies`.
-
 ## description
 
 | name    | value  |
@@ -282,17 +280,6 @@ Extend this if you wish to configure rules specifically for `dependencies` and n
 | default | null   |
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
-
-## devDependencies
-
-Configuration specific for `package.json > devDependencies`.
-
-| name    | value  |
-| ------- | ------ |
-| type    | object |
-| default | {}     |
-
-Extend this if you wish to configure rules specifically for `devDependencies` and not `dependencies` or `optionalDependencies`.
 
 ## digest
 
@@ -318,11 +305,11 @@ Configuration specific for Dockerfile updates.
 
 Configuration object for Docker Compose yaml file renovation. Also inherits settings from `docker` object.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | {}     |
-| parentManager | docker |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | {}     |
+| language | docker |
 
 ## enabled
 
@@ -452,6 +439,15 @@ Preset configs to use/extend.
 
 See https://renovateapp.com/docs/configuration-reference/config-presets for details.
 
+## fileMatch
+
+JS RegExp pattern for matching manager files.
+
+| name    | value |
+| ------- | ----- |
+| type    | list  |
+| default | []    |
+
 ## gitAuthor
 
 | name    | value  |
@@ -561,6 +557,19 @@ Ignore versions with unstable semver.
 
 By default, Renovate won't update any packages to unstable versions (e.g. `4.0.0-rc3`) unless the package version was _already_ unstable (e.g. it was already on `4.0.0-rc2`). If for some reason you wish to _force_ unstable updates on Renovate, you can set `ignoreUnstable` to `false`, but this is not recommended for most situations.
 
+## includePaths
+
+Include package files only within these defined paths.
+
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
+
+If you wish for Renovate to process only select paths in the repository, use `includePaths`.
+If instead you need to just exclude/ignore certain paths then consider `ignorePaths` instead.
+If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
+
 ## labels
 
 Labels to add to Pull Requests
@@ -627,6 +636,16 @@ Prefix to be added after `branchPrefix` for distinguishing between branches for 
 | default | ''     |
 
 This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
+
+## matchCurrentVersion
+
+If set in a packageRule, the rule will be applied only if the current version of the package matches against this version or range.
+
+| name | value  |
+| ---- | ------ |
+| type | string |
+
+`matchCurrentVersion` can be an exact semver version or a semver range.
 
 ## meteor
 
@@ -707,35 +726,13 @@ See https://renovateapp.com/docs/deep-dives/private-modules for details on how t
 
 Configuration specific for `.nvmrc` files.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | { }    |
-| parentManager | node   |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | { }    |
+| language | node   |
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
-
-## optionalDependencies
-
-Configuration specific for `package.json > optionalDependencies`.
-
-| name    | value  |
-| ------- | ------ |
-| type    | object |
-| default | {}     |
-
-Extend this if you wish to configure rules specifically for `optionalDependencies` and not `dependencies` or `devDependencies`.
-
-## packageFiles
-
-A manually provisioned list of package files to use.
-
-| name    | value            |
-| ------- | ---------------- |
-| type    | array of strings |
-| default | `[]`             |
-
-If left default then package file autodiscovery will be used, so only change this setting if you wish to manually specify a limited set of `package.json` or other package files to renovate.
 
 ## packageNames
 
@@ -826,6 +823,17 @@ Note how the above uses `packageNames` instead of `packagePatterns` because it i
 
 The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
 
+Path rules are convenient to use if you wish to apply configuration rules to certain package files without needing to configure them all in the `packageFiles` array. For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
+
+```json
+  "packageRules": [
+    {
+      "paths": ["examples/**"],
+      "extends": [":semanticCommitTypeAll(chore)"]
+    }
+  ]
+```
+
 ## patch
 
 Configuration specific for patch dependency updates.
@@ -837,45 +845,14 @@ Configuration specific for patch dependency updates.
 
 Add to this object if you wish to define rules that apply only to patch updates. See also `major` and `minor` configuration options.
 
-## pathRules
-
-Apply config on a path-based basis. Consists of a `paths` array plus whatever other configuration objects to apply.
-
-| name    | value |
-| ------- | ----- |
-| type    | list  |
-| default | []    |
-
-Path rules are convenient to use if you wish to apply configuration rules to certain package files without needing to configure them all in the `packageFiles` array. For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
-
-```json
-  "pathRules": [
-    {
-      "paths": ["examples/**"],
-      "extends": [":semanticCommitTypeAll(chore)"]
-    }
-  ]
-```
-
 ## paths
 
-List of strings or glob patterns to match against package files. Applicable inside pathRules only.
+List of strings or glob patterns to match against package files. Applicable inside packageRules only.
 
 | name    | value |
 | ------- | ----- |
 | type    | list  |
 | default | []    |
-
-## peerDependencies
-
-Configuration specific for `package.json > peerDependencies`.
-
-| name    | value              |
-| ------- | ------------------ |
-| type    | object             |
-| default | {"enabled": false} |
-
-Extend this if you wish to configure rules specifically for `peerDependencies`. Disabled by default.
 
 ## pin
 
@@ -907,6 +884,15 @@ Whether to convert ranged versions in `package.json` to pinned versions.
 | default | false   |
 
 This is a very important feature to consider, because not every repository's requirements are the same. The default value within the tool itself is false, which means no existing ranges are pinned. However if you are using the suggested preset `"config:base"`, then it changes the default of pinVersions to `null`, which means Renovate attempts to autodetect what's best for the project. In such cases `devDependencies` in `package.json` will alway be pinned, but `dependencies` will only be pinned if the package is `private` or has no `main` entry defined - both indicators that it is not intended to be published and consumed by other packages. To override the `"config:base"` setting, add the preset `":preserveSemverRanges"` to your `extends` array.
+
+## pip_requirements
+
+Configuration specific for requirements.txt updates.
+
+| name    | value              |
+| ------- | ------------------ |
+| type    | object             |
+| default | { enabled: false } |
 
 ## prBody
 
@@ -986,6 +972,15 @@ Pull Request title template
 | default | {% raw %}{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}{% endraw %} |
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## python
+
+Configuration specific for python updates.
+
+| name    | value             |
+| ------- | ----------------- |
+| type    | object            |
+| default | { enabled: true } |
 
 ## rebaseStalePrs
 
@@ -1203,11 +1198,11 @@ It is only recommended to set this field if you wish to use the `schedules` feat
 
 Configuration specific for `.travis.yml` files.
 
-| name          | value              |
-| ------------- | ------------------ |
-| type          | object             |
-| default       | { enabled: false } |
-| parentManager | node               |
+| name     | value              |
+| -------- | ------------------ |
+| type     | object             |
+| default  | { enabled: false } |
+| language | node               |
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 

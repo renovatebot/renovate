@@ -51,7 +51,7 @@
     "@yarnpkg/lockfile": "1.0.0",
     "bunyan": "1.8.12",
     "cacache": "11.0.1",
-    "chalk": "2.4.0",
+    "chalk": "2.4.1",
     "changelog": "1.4.2",
     "changelog-filename-regex": "1.1.1",
     "child-process-promise": "2.2.1",
@@ -81,8 +81,9 @@
     "minimatch": "3.0.4",
     "moment": "2.22.1",
     "moment-timezone": "0.5.16",
-    "npm": "5.8.0",
+    "npm": "6.0.0",
     "openpgp": "2.6.2",
+    "p-all": "1.0.0",
     "parse-link-header": "1.0.1",
     "pnpm": "1.41.2",
     "registry-auth-token": "3.3.2",
@@ -95,14 +96,14 @@
     "slugify": "1.2.9",
     "tmp-promise": "1.0.4",
     "traverse": "0.6.6",
-    "upath": "1.0.4",
+    "upath": "1.0.5",
     "vso-node-api": "6.5.0",
     "yarn": "1.6.0"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
-    "codecov": "3.0.0",
+    "codecov": "3.0.1",
     "cross-env": "5.1.4",
     "eslint": "4.19.1",
     "eslint-config-airbnb-base": "12.1.0",
@@ -113,7 +114,7 @@
     "mockdate": "2.0.2",
     "nock": "9.2.5",
     "prettier": "1.12.1",
-    "semantic-release": "15.1.7"
+    "semantic-release": "15.1.8"
   },
   "files": [
     "bin/config-validator.js",
@@ -159,6 +160,14 @@
     "docker": {
       "semanticCommitType": "fix"
     },
+    "packageRules": [
+      {
+        "packageNames": [
+          "semantic-release"
+        ],
+        "semanticCommitType": "fix"
+      }
+    ],
     "semanticCommitScope": null
   },
   "publishConfig": {

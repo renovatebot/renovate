@@ -260,5 +260,78 @@ describe('lib/workers/package-file/dep-type', () => {
       expect(res.x).toBeUndefined();
       expect(res.packageRules).toBeUndefined();
     });
+    it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', () => {
+      const config = {
+        packageRules: [
+          {
+            packageNames: ['test'],
+            matchCurrentVersion: '<= 2.0.0',
+            x: 1,
+          },
+        ],
+      };
+      const res1 = depTypeWorker.getDepConfig(config, {
+        depName: 'test',
+        currentVersion: '^1.0.0',
+      });
+      expect(res1.x).toBeDefined();
+    });
+    it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
+      const config = {
+        packageRules: [
+          {
+            packageNames: ['test'],
+            matchCurrentVersion: '>= 2.0.0',
+            x: 1,
+          },
+        ],
+      };
+      const res1 = depTypeWorker.getDepConfig(config, {
+        depName: 'test',
+        currentVersion: '2.4.6',
+      });
+      expect(res1.x).toBeDefined();
+    });
+    it('checks if matchCurrentVersion selector works with static values', () => {
+      const config = {
+        packageRules: [
+          {
+            packageNames: ['test'],
+            matchCurrentVersion: '4.6.0',
+            x: 1,
+          },
+        ],
+      };
+      const res1 = depTypeWorker.getDepConfig(config, {
+        depName: 'test',
+        currentVersion: '4.6.0',
+      });
+      expect(res1.x).toBeDefined();
+    });
+    it('matches paths', () => {
+      const config = {
+        packageFile: 'examples/foo/package.json',
+        packageRules: [
+          {
+            paths: ['examples/**', 'lib/'],
+            x: 1,
+          },
+        ],
+      };
+      const res1 = depTypeWorker.getDepConfig(config, {
+        depName: 'test',
+      });
+      expect(res1.x).toBeDefined();
+      config.packageFile = 'package.json';
+      const res2 = depTypeWorker.getDepConfig(config, {
+        depName: 'test',
+      });
+      expect(res2.x).toBeUndefined();
+      config.packageFile = 'lib/a/package.json';
+      const res3 = depTypeWorker.getDepConfig(config, {
+        depName: 'test',
+      });
+      expect(res3.x).toBeDefined();
+    });
   });
 });

@@ -4,11 +4,11 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid semver range for allowedVersions: \`foo\`",
+    "message": "Configuration option \`lockFileMaintenance\` should be a json object",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`enabled\` should be boolean. Found: 1 (number)",
+    "message": "Invalid semver range for allowedVersions: \`foo\`",
   },
   Object {
     "depName": "Configuration Error",
@@ -16,7 +16,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "timezone: Invalid timezone: Asia",
+    "message": "Invalid regExp for packageRules[3].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
   },
   Object {
     "depName": "Configuration Error",
@@ -28,15 +28,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`lockFileMaintenance\` should be a json object",
-  },
-  Object {
-    "depName": "Configuration Error",
-    "message": "extends: Invalid timezone: Europe/Brussel",
-  },
-  Object {
-    "depName": "Configuration Error",
-    "message": "Invalid configuration option: \`packageRules[1].foo\`",
+    "message": "Configuration option \`enabled\` should be boolean. Found: 1 (number)",
   },
   Object {
     "depName": "Configuration Error",
@@ -44,20 +36,50 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid regExp for packageRules[3].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
+    "message": "Invalid configuration option: \`packageRules[1].foo\`",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "packageRules: Each packageRule must contain at least one selector (depTypeList, packageNames, packagePatterns, excludePackageNames, excludePackagePatterns). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "extends: Invalid timezone: Europe/Brussel",
   },
   Object {
     "depName": "Configuration Error",
     "message": "packageRules must contain JSON objects",
   },
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules: Each packageRule must contain at least one selector (paths, depTypeList, packageNames, packagePatterns, excludePackageNames, excludePackagePatterns). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "timezone: Invalid timezone: Asia",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors for unsafe fileMatches 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for npm.fileMatch: \`abc ([a-z]+) ([a-z]+))\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Unsafe regExp for docker.fileMatch: \`(x+x+)+y\`",
+  },
 ]
 `;
 
 exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `Array []`;
+
+exports[`config/validation validateConfig(config) invalid matchCurrentVersion triggers an error 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules: >= 2.-1.4 isn't a valid semver",
+  },
+]
+`;
 
 exports[`config/validation validateConfig(config) returns deprecation warnings 1`] = `
 Array [
@@ -76,11 +98,11 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Unsafe regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
+    "message": "Invalid configuration option: \`lockFileMaintenance.bar\`",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid configuration option: \`lockFileMaintenance.bar\`",
+    "message": "Unsafe regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
   },
 ]
 `;
@@ -89,11 +111,11 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "packageNames: packageNames should be inside a \`packageRule\` only",
+    "message": "docker.minor.packageNames: packageNames should be inside a \`packageRule\` only",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "docker.minor.packageNames: packageNames should be inside a \`packageRule\` only",
+    "message": "packageNames: packageNames should be inside a \`packageRule\` only",
   },
 ]
 `;

@@ -1,6 +1,6 @@
 module.exports = {
   logLevel: 'error',
-  extends: [':disablePeerDependencies', ':prHourlyLimit1', ':automergePatch'],
+  extends: [':prHourlyLimit1', ':automergePatch'],
   upgradeInRange: true,
   separatePatchReleases: true,
   repositories: [

@@ -36,24 +36,20 @@ module.exports = {
   repositories: [
     {
       repository: 'singapore/repo1',
-      packageFiles: [
-        'package.json',
+      packageRules: [
         {
-          packageFile: 'frontend/package.json',
+          paths: ['frontend/package.json'],
           labels: ['upgrade', 'frontend'],
         },
       ],
     },
     {
       repository: 'singapore/repo2',
-      optionalDependencies: {
-        labels: ['renovate', 'optional'],
-      },
       labels: ['renovate'],
     },
     'singapore/repo3',
   ],
-  packages: [
+  packageRules: [
     {
       packageNames: ['jquery'],
       labels: ['jquery', 'uhoh'],
@@ -73,8 +69,7 @@ To configure any `<list>` items, separate with commas. E.g. `renovate --labels=r
 ### renovate.json
 
 If you add a `renovate.json` file to the root of your repository, you can use
-this to override default settings. If you leave the `packageFiles` field empty
-then `renovate` will still auto-discover all `package.json` files in the
+this to override default settings. `renovate` will still auto-discover all `package.json` files in the
 repository.
 
 ### package.json
