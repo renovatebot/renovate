@@ -106,9 +106,7 @@ You could:
 
 ### Disable renovate for certain dependency types
 
-If you want to disable `renovate` for `optionalDependencies`, for example, you
-could define your own `depTypes` array (in either a `renovate.json` or
-`package.json` file)
+Define a packageRules entry which has the dependency type(s) in `depTypeList` and `"enabled": false`.
 
 ### Use a single branch/PR for all dependency upgrades
 

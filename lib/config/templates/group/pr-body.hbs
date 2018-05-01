@@ -18,7 +18,9 @@ This Pull Request renovates the package group "{{{groupName}}}".
 {{#each upgrade.releases as |release|}}
 {{#if release.releaseNotes}}
 ### [`v{{{release.version}}}`]({{{release.releaseNotes.url}}})
-
+{{#if release.compare.url}}
+[Compare Source]({{release.compare.url}})
+{{/if}}
 {{{release.releaseNotes.body}}}
 
 ---
@@ -27,29 +29,6 @@ This Pull Request renovates the package group "{{{groupName}}}".
 {{/each}}
 
 </details>
-{{/if}}
-{{/each}}
-{{/if}}
-
-{{#if hasCommits}}
-# Commits
-
-{{#each upgrades as |upgrade|}}
-{{#if upgrade.releases.length}}
-<details>
-<summary>{{upgrade.githubName}}</summary>
-{{#each upgrade.releases as |release|}}
-{{#if release.hasCommits}}
-
-#### v{{{release.version}}}
-{{#each release.commits as |commit|}}
--   [`{{commit.shortSha}}`]({{commit.url}}){{commit.message}}
-{{/each}}
-{{/if}}
-{{/each}}
-
-</details>
-
 {{/if}}
 {{/each}}
 {{/if}}

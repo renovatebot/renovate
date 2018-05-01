@@ -29,7 +29,7 @@ describe('manager', () => {
       const res = await manager.detectPackageFiles(config);
       expect(res).toHaveLength(0);
     });
-    it('skips if parentManager is disabled', async () => {
+    it('skips if language is disabled', async () => {
       platform.getFileList.mockReturnValueOnce([
         'package.json',
         '.circleci/config.yml',
@@ -73,18 +73,9 @@ describe('manager', () => {
         'other/Dockerfile',
         'another/Dockerfile',
       ]);
-      platform.getFile.mockReturnValueOnce(
-        '### comment\n\n \nFROM something\nRUN something\nFROM something-else\nRUN bar'
-      );
-      platform.getFile.mockReturnValueOnce(
-        'ARG foo\nFROM something\nRUN something'
-      );
-      platform.getFile.mockReturnValueOnce(
-        'ARG foo\nno FROM at all\nRUN something'
-      );
       const res = await manager.detectPackageFiles(config);
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toHaveLength(3);
     });
     it('finds .travis.yml files', async () => {
       config.travis.enabled = true;
@@ -123,12 +114,6 @@ describe('manager', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
-    it('skips Dockerfiles with no content', async () => {
-      platform.getFileList.mockReturnValueOnce(['Dockerfile']);
-      platform.getFile.mockReturnValueOnce(null);
-      const res = await manager.detectPackageFiles(config);
-      expect(res).toHaveLength(0);
-    });
     it('ignores node modules', async () => {
       platform.getFileList.mockReturnValueOnce([
         'package.json',
@@ -140,26 +125,15 @@ describe('manager', () => {
       expect(res.foundIgnoredPaths).toMatchSnapshot();
       expect(res.warnings).toMatchSnapshot();
     });
-  });
-  describe('getManager', () => {
-    it('rejects unknown files', () => {
-      expect(manager.getManager('WORKSPACER')).toBe(null);
-    });
-    it('detects files in root', () => {
-      expect(manager.getManager('WORKSPACE')).toBe('bazel');
-      expect(manager.getManager('Dockerfile')).toBe('docker');
-      expect(manager.getManager('package.js')).toBe('meteor');
-      expect(manager.getManager('package.json')).toBe('npm');
-      expect(manager.getManager('.nvmrc')).toBe('nvm');
-      expect(manager.getManager('.travis.yml')).toBe('travis');
-    });
-    it('detects nested files', () => {
-      expect(manager.getManager('foo/bar/WORKSPACE')).toBe('bazel');
-      expect(manager.getManager('backend/Dockerfile')).toBe('docker');
-      expect(manager.getManager('package/a/package.js')).toBe('meteor');
-      expect(manager.getManager('frontend/package.json')).toBe('npm');
-      expect(manager.getManager('subfolder-1/.nvmrc')).toBe(null);
-      expect(manager.getManager('subfolder-2/.travis.yml')).toBe(null);
+    it('uses includePaths', async () => {
+      platform.getFileList.mockReturnValueOnce([
+        'package.json',
+        'backend/package.json',
+      ]);
+      config.includePaths = ['package.json'];
+      const res = await manager.detectPackageFiles(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
     });
   });
   describe('getUpdatedPackageFiles', () => {

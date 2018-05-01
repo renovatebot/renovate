@@ -544,6 +544,7 @@ describe('workers/branch/lock-files', () => {
         shrinkwrapYamlDirs: [],
         lernaDirs: ['.'],
       });
+      config.packageFiles = [];
       config.lernaLockFile = 'npm';
       lerna.generateLockFiles.mockReturnValueOnce({ error: false });
       const res = await getUpdatedLockFiles(config);

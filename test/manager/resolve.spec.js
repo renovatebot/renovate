@@ -13,40 +13,24 @@ beforeEach(() => {
 
 describe('manager/resolve', () => {
   describe('resolvePackageFiles()', () => {
-    it('handles wrong filenames', async () => {
-      config.packageFiles = ['wrong.txt'];
-      let e;
-      try {
-        await resolvePackageFiles(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-    });
-    it('uses packageFiles if already configured and raises error if not found', async () => {
-      config.packageFiles = [
-        'package.json',
-        { packageFile: 'backend/package.json' },
-      ];
-      const res = await resolvePackageFiles(config);
-      expect(res.packageFiles).toMatchSnapshot();
-      expect(res.errors).toHaveLength(2);
+    beforeEach(() => {
+      manager.detectPackageFiles = jest.fn();
     });
     it('detect package.json and adds error if cannot parse (onboarding)', async () => {
-      manager.detectPackageFiles = jest.fn(() => [
+      manager.detectPackageFiles.mockReturnValueOnce([
         { packageFile: 'package.json', manager: 'npm' },
       ]);
-      platform.getFileList.mockReturnValue(['package.json']);
+      platform.getFileList.mockReturnValueOnce(['package.json']);
       platform.getFile.mockReturnValueOnce('not json');
       const res = await resolvePackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
       expect(res.errors).toHaveLength(1);
     });
     it('detect package.json and throws error if cannot parse (onboarded)', async () => {
-      manager.detectPackageFiles = jest.fn(() => [
+      manager.detectPackageFiles.mockReturnValueOnce([
         { packageFile: 'package.json', manager: 'npm' },
       ]);
-      platform.getFileList.mockReturnValue(['package.json']);
+      platform.getFileList.mockReturnValueOnce(['package.json']);
       platform.getFile.mockReturnValueOnce('not json');
       config.repoIsOnboarded = true;
       let e;
@@ -59,7 +43,7 @@ describe('manager/resolve', () => {
       expect(e).toMatchSnapshot();
     });
     it('clears npmrc and yarnrc fields', async () => {
-      manager.detectPackageFiles = jest.fn(() => [
+      manager.detectPackageFiles.mockReturnValueOnce([
         { packageFile: 'package.json', manager: 'npm' },
       ]);
       const pJson = {
@@ -70,13 +54,14 @@ describe('manager/resolve', () => {
         },
       };
       platform.getFile.mockReturnValueOnce(JSON.stringify(pJson));
-      platform.getFileList.mockReturnValue(['package.json']);
+      platform.getFileList.mockReturnValueOnce(['package.json']);
+      platform.getFileList.mockReturnValueOnce(['package.json']);
       const res = await resolvePackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
     it('detects accompanying files', async () => {
-      manager.detectPackageFiles = jest.fn(() => [
+      manager.detectPackageFiles.mockReturnValueOnce([
         { packageFile: 'package.json', manager: 'npm' },
       ]);
       platform.getFileList.mockReturnValue([
@@ -95,43 +80,24 @@ describe('manager/resolve', () => {
       expect(res.packageFiles).toMatchSnapshot();
       expect(res.warnings).toHaveLength(0);
     });
-    it('detects meteor and docker and travis and bazel and nvm', async () => {
-      config.packageFiles = [
-        'package.js',
-        { packageFile: '.circleci/config.yml', manager: 'circleci' },
-        'Dockerfile',
-        'docker-compose.yml',
-        '.travis.yml',
-        'WORKSPACE',
-        '.nvmrc',
-      ];
-      platform.getFile.mockReturnValueOnce('{}'); // package.js
-      platform.getFile.mockReturnValueOnce('   - image: node:8\n'); // CircleCI
-      platform.getFile.mockReturnValueOnce('# comment\nFROM node:8\n'); // Dockerfile
-      platform.getFile.mockReturnValueOnce('image: node:8\n'); // Docker Compose
-      platform.getFile.mockReturnValueOnce('# travis'); // .travis.yml
-      platform.getFile.mockReturnValueOnce('# WORKSPACE'); // Dockerfile
-      platform.getFile.mockReturnValueOnce('8.9\n'); // Dockerfile
-      const res = await resolvePackageFiles(config);
-      expect(res.packageFiles).toHaveLength(7);
-    });
-    it('skips if no content or no match', async () => {
-      config.packageFiles = [
-        'Dockerfile',
-        'other/Dockerfile',
-        'docker-compose.yml',
-        '.travis.yml',
-        { packageFile: '.circleci/config.yml', manager: 'circleci' },
-        'WORKSPACE',
-        'package.js',
-        '.nvmrc',
-      ];
-      platform.getFile.mockReturnValueOnce('# comment\n'); // Dockerfile
+    it('resolves docker', async () => {
+      platform.getFileList.mockReturnValue(['Dockerfile']);
+      platform.getFile.mockReturnValue('# comment\nFROM node:8\n'); // Dockerfile
       const res = await resolvePackageFiles(config);
       expect(res.packageFiles).toMatchSnapshot();
+      expect(res.packageFiles).toHaveLength(1);
+      expect(res.warnings).toHaveLength(0);
+    });
+    it('resolves package files without own resolve', async () => {
+      platform.getFileList.mockReturnValue(['WORKSPACE']);
+      platform.getFile.mockReturnValue('git_repository(\n'); // WORKSPACE
+      const res = await resolvePackageFiles(config);
+      expect(res.packageFiles).toMatchSnapshot();
+      expect(res.packageFiles).toHaveLength(1);
+      expect(res.warnings).toHaveLength(0);
     });
     it('strips npmrc with NPM_TOKEN', async () => {
-      manager.detectPackageFiles = jest.fn(() => [
+      manager.detectPackageFiles.mockReturnValueOnce([
         { packageFile: 'package.json', manager: 'npm' },
       ]);
       platform.getFileList.mockReturnValue(['package.json', '.npmrc']);
@@ -146,7 +112,7 @@ describe('manager/resolve', () => {
       expect(res.warnings).toHaveLength(0);
     });
     it('checks if renovate config in nested package.json throws an error', async () => {
-      manager.detectPackageFiles = jest.fn(() => [
+      manager.detectPackageFiles.mockReturnValueOnce([
         { packageFile: 'package.json', manager: 'npm' },
       ]);
       platform.getFileList.mockReturnValue(['test/package.json']);
