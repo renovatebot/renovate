@@ -63,7 +63,7 @@
     "delay": "2.0.0",
     "detect-indent": "5.0.0",
     "email-addresses": "3.0.1",
-    "fs-extra": "5.0.0",
+    "fs-extra": "6.0.0",
     "get-installed-path": "4.0.8",
     "gh-got": "7.0.0",
     "github-url-from-git": "1.5.0",
