@@ -172,11 +172,11 @@ Set this value to 'patch', 'minor' or 'major' to have Renovate update the versio
 
 Configuration object for CircleCI yaml file renovation. Also inherits settings from `docker` object.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | {}     |
-| parentManager | docker |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | {}     |
+| language | docker |
 
 ## commitBody
 
@@ -272,17 +272,6 @@ A list of depType names inside a package rule to filter on. Matches all depTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values. Invalid if used outside of a `packageRule`.
 
-## dependencies
-
-Configuration specific for `package.json > dependencies`.
-
-| name    | value                            |
-| ------- | -------------------------------- |
-| type    | object                           |
-| default | {"semanticPrefix": "fix(deps):"} |
-
-Extend this if you wish to configure rules specifically for `dependencies` and not `devDependencies` or `optionalDependencies`.
-
 ## description
 
 | name    | value  |
@@ -291,17 +280,6 @@ Extend this if you wish to configure rules specifically for `dependencies` and n
 | default | null   |
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
-
-## devDependencies
-
-Configuration specific for `package.json > devDependencies`.
-
-| name    | value  |
-| ------- | ------ |
-| type    | object |
-| default | {}     |
-
-Extend this if you wish to configure rules specifically for `devDependencies` and not `dependencies` or `optionalDependencies`.
 
 ## digest
 
@@ -327,11 +305,11 @@ Configuration specific for Dockerfile updates.
 
 Configuration object for Docker Compose yaml file renovation. Also inherits settings from `docker` object.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | {}     |
-| parentManager | docker |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | {}     |
+| language | docker |
 
 ## enabled
 
@@ -461,6 +439,15 @@ Preset configs to use/extend.
 
 See https://renovateapp.com/docs/configuration-reference/config-presets for details.
 
+## fileMatch
+
+JS RegExp pattern for matching manager files.
+
+| name    | value |
+| ------- | ----- |
+| type    | list  |
+| default | []    |
+
 ## gitAuthor
 
 | name    | value  |
@@ -559,6 +546,19 @@ Ignore versions with unstable semver.
 | default | true    |
 
 By default, Renovate won't update any packages to unstable versions (e.g. `4.0.0-rc3`) unless the package version was _already_ unstable (e.g. it was already on `4.0.0-rc2`). If for some reason you wish to _force_ unstable updates on Renovate, you can set `ignoreUnstable` to `false`, but this is not recommended for most situations.
+
+## includePaths
+
+Include package files only within these defined paths.
+
+| name    | value            |
+| ------- | ---------------- |
+| type    | array of strings |
+| default | []               |
+
+If you wish for Renovate to process only select paths in the repository, use `includePaths`.
+If instead you need to just exclude/ignore certain paths then consider `ignorePaths` instead.
+If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
 
 ## labels
 
@@ -716,35 +716,13 @@ See https://renovateapp.com/docs/deep-dives/private-modules for details on how t
 
 Configuration specific for `.nvmrc` files.
 
-| name          | value  |
-| ------------- | ------ |
-| type          | object |
-| default       | { }    |
-| parentManager | node   |
+| name     | value  |
+| -------- | ------ |
+| type     | object |
+| default  | { }    |
+| language | node   |
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
-
-## optionalDependencies
-
-Configuration specific for `package.json > optionalDependencies`.
-
-| name    | value  |
-| ------- | ------ |
-| type    | object |
-| default | {}     |
-
-Extend this if you wish to configure rules specifically for `optionalDependencies` and not `dependencies` or `devDependencies`.
-
-## packageFiles
-
-A manually provisioned list of package files to use.
-
-| name    | value            |
-| ------- | ---------------- |
-| type    | array of strings |
-| default | `[]`             |
-
-If left default then package file autodiscovery will be used, so only change this setting if you wish to manually specify a limited set of `package.json` or other package files to renovate.
 
 ## packageNames
 
@@ -865,17 +843,6 @@ List of strings or glob patterns to match against package files. Applicable insi
 | ------- | ----- |
 | type    | list  |
 | default | []    |
-
-## peerDependencies
-
-Configuration specific for `package.json > peerDependencies`.
-
-| name    | value              |
-| ------- | ------------------ |
-| type    | object             |
-| default | {"enabled": false} |
-
-Extend this if you wish to configure rules specifically for `peerDependencies`. Disabled by default.
 
 ## pin
 
@@ -1221,11 +1188,11 @@ It is only recommended to set this field if you wish to use the `schedules` feat
 
 Configuration specific for `.travis.yml` files.
 
-| name          | value              |
-| ------------- | ------------------ |
-| type          | object             |
-| default       | { enabled: false } |
-| parentManager | node               |
+| name     | value              |
+| -------- | ------------------ |
+| type     | object             |
+| default  | { enabled: false } |
+| language | node               |
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
 
