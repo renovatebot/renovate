@@ -5,12 +5,11 @@ description: How to onboard Renovate via a Pull Request
 type: Document
 order: 2
 ---
-
 # Configure Renovate (Onboarding PR)
 
 Once you have enabled Renovate on a repository, you will receive a "Configure Renovate" Pull Request looking something like this:
 
-![Onboarding](/img/onboarding.png)
+![Onboarding](assets/images/onboarding.png)
 
 ## No Risk Onboarding
 

@@ -100,7 +100,7 @@ Although it's good to isolate each dependency update for ease of troubleshooting
 
 Since both `yarn` and `npm@5` both support lock files, it's a common question to ask "Why should I pin dependencies if I'm already using a lock file?". It's a good question!
 
-![broken-lockfile](/img/broken-lockfile.jpg)
+![broken-lockfile](assets/images/broken-lockfile.jpg)
 
 Lock files are a great companion to semver ranges _or_ pinning dependencies, because these files lock (pin) deeper into your dependency tree than you see in `package.json`.
 
@@ -114,7 +114,7 @@ To reuse an earlier example, this means that you could have `foobar@^1.1.0` in y
 
 The lock file has only delayed the inevitable problem, and provides much less visibility than `package.json`, because it's not designed to be human readable and is quite dense.
 
-![all-dead](/img/all-dead.jpg)
+![all-dead](assets/images/all-dead.jpg)
 
 If the `package.json` contains a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 
