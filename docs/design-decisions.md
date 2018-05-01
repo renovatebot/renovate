@@ -43,7 +43,7 @@ are global (all repositories).
 
 Default behaviour is to auto-discover all `package.json` locations in a
 repository and process them all. Doing so means that "monorepos" are supported
-by default. This can be overridden by the configuration option `packageFiles`,
+by default. This can be overridden by the configuration option `includePaths`,
 where you list the file paths manually (e.g. limit to just `package.json` in
 root of repository).
 
