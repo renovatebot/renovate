@@ -1,9 +1,6 @@
 ---
-date: 2017-12-28
 title: Updating and Rebasing Branches
 description: How Renovate Updates and Rebases Branches
-type: Document
-order: 30
 ---
 
 # Updating and Rebasing Branches

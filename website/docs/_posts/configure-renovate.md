@@ -1,10 +1,8 @@
 ---
-date: 2017-07-12
 title: Configure Renovate (Onboarding PR)
 description: How to onboard Renovate via a Pull Request
-type: Document
-order: 2
 ---
+
 # Configure Renovate (Onboarding PR)
 
 Once you have enabled Renovate on a repository, you will receive a "Configure Renovate" Pull Request looking something like this:

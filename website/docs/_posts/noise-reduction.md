@@ -1,9 +1,6 @@
 ---
-date: 2017-10-06
 title: Noise Reduction
 description: How to reduce the "noise" associated with module updates
-type: Document
-order: 30
 ---
 
 # Noise Reduction

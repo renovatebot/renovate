@@ -1,9 +1,6 @@
 ---
-date: 2017-07-25
 title: Frequently Asked Questions (FAQ)
 description: Frequently Asked Questions for Renovate Configuration
-type: Document
-order: 2
 ---
 
 # Frequently Asked Questions (FAQ)

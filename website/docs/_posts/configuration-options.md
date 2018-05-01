@@ -1,9 +1,6 @@
 ---
-date: 2017-10-05
 title: Configuration Options
 description: Configuration Options usable in renovate.json or package.json
-type: Document
-order: 0
 ---
 
 # Configuration Options

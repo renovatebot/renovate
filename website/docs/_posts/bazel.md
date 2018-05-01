@@ -1,10 +1,8 @@
 ---
-date: 2017-11-10
 title: Bazel
 description: Bazel dependencies support in Renovate
-type: Document
-order: 4
 ---
+
 # Bazel
 
 Renovate supports upgrading dependencies in bazel `WORKSPACE` files.

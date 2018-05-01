@@ -1,9 +1,6 @@
 ---
-date: 2017-08-18
 title: Shareable Config Presets
 description: Renovate's support for eslint-like shareable configs
-type: Document
-order: 10
 ---
 
 # Shareable Config Presets
