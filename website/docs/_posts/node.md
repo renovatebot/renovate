@@ -1,9 +1,6 @@
 ---
-date: 2017-11-10
 title: Node.js Versions
 description: Node versions support in Renovate
-type: Document
-order: 3
 ---
 
 # Node.js Versions

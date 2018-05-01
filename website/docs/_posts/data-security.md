@@ -1,10 +1,8 @@
 ---
-date: 2017-07-25
 title: Data Security and Handling
 description: Important information about how we handle and secure you data
-type: Document
-order: 1
 ---
+
 # Data Security and Handling
 
 We consider it a great responsibility that you have trusted us with your GitHub repository/data, and we take it very seriously. Although installing an App may take just a few clicks, we think it's important that you know what happens to your repository data once you install the Renovate or Forking Renovate apps.

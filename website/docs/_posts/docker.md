@@ -1,9 +1,6 @@
 ---
-date: 2017-11-10
 title: Docker
 description: Docker Package Manager Support in Renovate
-type: Document
-order: 2
 ---
 
 # Docker

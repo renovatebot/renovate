@@ -1,9 +1,6 @@
 ---
-date: 2017-07-26
 title: Should you Pin your Javascript Dependencies?
 description: The pros and cons of dependency pinning for Javascript/npm
-type: Document
-order: 20
 ---
 
 # Should you Pin your Javascript Dependencies?

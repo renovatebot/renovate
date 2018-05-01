@@ -1,9 +1,6 @@
 ---
-date: 2018-04-09
 title: Config Template Editing
 description: How to edit Renovate's config templates
-type: Document
-order: 30
 ---
 
 # Config Template Editing

@@ -1,11 +1,6 @@
 ---
-date: 2017-12-28
 title: Semantic Commit Messages
-categories:
-  - deep-dives
 description: Configuring Renovate to use Semantic Commits
-type: Document
-order: 30
 ---
 
 # Semantic Commit Messages
