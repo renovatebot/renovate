@@ -875,15 +875,6 @@ Whether to convert ranged versions in `package.json` to pinned versions.
 
 This is a very important feature to consider, because not every repository's requirements are the same. The default value within the tool itself is false, which means no existing ranges are pinned. However if you are using the suggested preset `"config:base"`, then it changes the default of pinVersions to `null`, which means Renovate attempts to autodetect what's best for the project. In such cases `devDependencies` in `package.json` will alway be pinned, but `dependencies` will only be pinned if the package is `private` or has no `main` entry defined - both indicators that it is not intended to be published and consumed by other packages. To override the `"config:base"` setting, add the preset `":preserveSemverRanges"` to your `extends` array.
 
-## pip_requirements
-
-Configuration specific for requirements.txt updates.
-
-| name    | value              |
-| ------- | ------------------ |
-| type    | object             |
-| default | { enabled: false } |
-
 ## prBody
 
 Pull Request body template.
@@ -962,15 +953,6 @@ Pull Request title template
 | default | {% raw %}{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}}{% endraw %} |
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
-
-## python
-
-Configuration specific for python updates.
-
-| name    | value             |
-| ------- | ----------------- |
-| type    | object            |
-| default | { enabled: true } |
 
 ## rebaseStalePrs
 
