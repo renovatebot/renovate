@@ -9,6 +9,7 @@ changelogHelper.getChangeLogJSON.mockReturnValue({
     github: 'renovateapp/dummy',
     repository: 'https://github.com/renovateapp/dummy',
   },
+  hasReleaseNotes: true,
   versions: [
     {
       date: new Date('2017-01-01'),
@@ -20,6 +21,12 @@ changelogHelper.getChangeLogJSON.mockReturnValue({
           message: 'foo #3\nbar',
         },
       ],
+      releaseNotes: {
+        url: 'https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0',
+      },
+      compare: {
+        url: 'https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0',
+      },
     },
   ],
 });
