@@ -46,6 +46,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       expect(res.indexOf('Docker-only')).toBe(-1);
     });
     it('assignees, labels and schedule', () => {
+      config.packageFiles = [];
       config.assignees = ['someone', '@someone-else'];
       config.labels = ['renovate', 'deps'];
       config.schedule = ['before 5am'];
