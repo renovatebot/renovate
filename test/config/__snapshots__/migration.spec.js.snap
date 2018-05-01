@@ -116,6 +116,34 @@ Object {
 }
 `;
 
+exports[`config/migration migrateConfig(config, parentConfig) it migrates more packageFiles 1`] = `
+Object {
+  "includePaths": Array [
+    "package.json",
+  ],
+  "packageRules": Array [
+    Object {
+      "depTypeList": Array [
+        "devDependencies",
+      ],
+      "paths": Array [
+        "package.json",
+      ],
+      "pinVersions": true,
+    },
+    Object {
+      "depTypeList": Array [
+        "dependencies",
+      ],
+      "paths": Array [
+        "package.json",
+      ],
+      "pinVersions": true,
+    },
+  ],
+}
+`;
+
 exports[`config/migration migrateConfig(config, parentConfig) it migrates node to travis 1`] = `
 Object {
   "node": Object {
@@ -127,6 +155,49 @@ Object {
   "travis": Object {
     "enabled": true,
   },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it migrates packageFiles 1`] = `
+Object {
+  "includePaths": Array [
+    "package.json",
+    "backend/package.json",
+    "frontend/package.json",
+    "other/package.json",
+  ],
+  "packageRules": Array [
+    Object {
+      "paths": Array [
+        "backend/package.json",
+      ],
+      "pinVersions": false,
+    },
+    Object {
+      "paths": Array [
+        "frontend/package.json",
+      ],
+      "pinVersions": true,
+    },
+    Object {
+      "depTypeList": Array [
+        "devDependencies",
+      ],
+      "paths": Array [
+        "other/package.json",
+      ],
+      "pinVersions": true,
+    },
+    Object {
+      "depTypeList": Array [
+        "dependencies",
+      ],
+      "paths": Array [
+        "other/package.json",
+      ],
+      "pinVersions": true,
+    },
+  ],
 }
 `;
 

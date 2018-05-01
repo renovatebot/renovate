@@ -47,11 +47,12 @@ Array [
 ]
 `;
 
-exports[`manager/resolve resolvePackageFiles() skips if no content or no match 1`] = `
+exports[`manager/resolve resolvePackageFiles() resolves docker 1`] = `
 Array [
   Object {
     "commitMessageTopic": "{{{depName}}} Docker tag",
     "content": "# comment
+FROM node:8
 ",
     "digest": Object {
       "branchTopic": "{{{depNameSanitized}}}-{{{currentTag}}}",
@@ -91,6 +92,19 @@ Array [
 ]
 `;
 
+exports[`manager/resolve resolvePackageFiles() resolves package files without own resolve 1`] = `
+Array [
+  Object {
+    "content": "git_repository(\\n",
+    "fileMatch": Array [
+      "(^|/)WORKSPACE$",
+    ],
+    "manager": "bazel",
+    "packageFile": "WORKSPACE",
+  },
+]
+`;
+
 exports[`manager/resolve resolvePackageFiles() strips npmrc with NPM_TOKEN 1`] = `
 Array [
   Object {
@@ -107,5 +121,3 @@ Array [
   },
 ]
 `;
-
-exports[`manager/resolve resolvePackageFiles() uses packageFiles if already configured and raises error if not found 1`] = `Array []`;
