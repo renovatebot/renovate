@@ -13,7 +13,7 @@ First, navigate to [https://github.com/apps/renovate](https://github.com/apps/re
 
 The only choice you need to make is whether to run Renovate on:
 
-![Github App repositories](assets/images/github-app-install-repositories.png)
+![Github App repositories](assets/images/github-app-choose-repos.png)
 
 Renovate will silently ignore any repositories that don't have a `package.json` file, however most people choose to select which repositories to include. Unfortunately GitHub doesn't yet offer the chance to "select all but exclude some" so instead you need to select all that you want. The form also requires you to start typing before it suggests to you repositories, which is a bit of a pain.
 
