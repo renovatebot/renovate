@@ -103,7 +103,7 @@ You could:
 
 ### Disable renovate for certain dependency types
 
-Define a packageRules entry which has the dependency type(s) in `depTypeList` and `"enabled": false`
+Define a packageRules entry which has the dependency type(s) in `depTypeList` and `"enabled": false`.
 
 ### Use a single branch/PR for all dependency upgrades
 
