@@ -1,12 +1,9 @@
 ---
-date: 2017-07-31
 title: Private npm module support
-categories:
-  - deep-dives
 description: How to support private npm  modules when using Renovate
-type: Document
-order: 30
 ---
+
+# Private npm module support
 
 ## When are npm private modules used?
 

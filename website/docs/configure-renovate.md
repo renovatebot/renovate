@@ -1,20 +1,17 @@
 ---
-date: 2017-07-12
 title: Configure Renovate (Onboarding PR)
-categories:
-  - getting-started
 description: How to onboard Renovate via a Pull Request
-type: Document
-order: 2
 ---
+
+# Configure Renovate (Onboarding PR)
 
 Once you have enabled Renovate on a repository, you will receive a "Configure Renovate" Pull Request looking something like this:
 
-![Onboarding](/images/screenshots/onboarding.png)
+![Onboarding](assets/images/onboarding.png)
 
 ## No Risk Onboarding
 
-Conveniently, Renovate will not make any changes to your repository or raise any further Pull Requests until after you _close or merge_ this initial Pull Request. So if there is anything about the Pull Request that you don't like or understand, take your time to read [documentation](/docs) or ask questions in one of our support forums and merge the PR only once you're satisfied with the result. You can edit your Renovate configuration **within this `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can keep doing that until you're satisfied with the results.
+Conveniently, Renovate will not make any changes to your repository or raise any further Pull Requests until after you _close or merge_ this initial Pull Request. So if there is anything about the Pull Request that you don't like or understand, take your time to read [documentation](/docs/) or ask questions in one of our support forums and merge the PR only once you're satisfied with the result. You can edit your Renovate configuration **within this `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can keep doing that until you're satisfied with the results.
 
 ## Check for Warnings
 

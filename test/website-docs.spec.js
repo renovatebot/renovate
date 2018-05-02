@@ -2,10 +2,7 @@ const fs = require('fs');
 const options = require('../lib/config/definitions').getOptions();
 
 describe('docs', () => {
-  const doc = fs.readFileSync(
-    'website/docs/_posts/2017-10-05-configuration-options.md',
-    'utf8'
-  );
+  const doc = fs.readFileSync('website/docs/configuration-options.md', 'utf8');
   const headers = doc
     .match(/\n## (.*?)\n/g)
     .map(match => match.substring(4, match.length - 1));
