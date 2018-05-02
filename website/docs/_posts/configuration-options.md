@@ -7,7 +7,7 @@ description: Configuration Options usable in renovate.json or package.json
 
 This document describes all the configuration options you may configure in a `renovate.json` file or within a `"renovate"` section of your `package.json`. Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
-Also, be sure to check out Renovate's [shareable config presets](/docs/config-presets) to save yourself from reinventing any wheels.
+Also, be sure to check out Renovate's [shareable config presets](docs/config-presets) to save yourself from reinventing any wheels.
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovateapp/config-help](https://github.com/renovateapp/config-help) where it will be promptly answered.
 
