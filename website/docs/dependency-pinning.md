@@ -1,12 +1,9 @@
 ---
-date: 2017-07-26
 title: Should you Pin your Javascript Dependencies?
-categories:
-  - deep-dives
 description: The pros and cons of dependency pinning for Javascript/npm
-type: Document
-order: 20
 ---
+
+# Should you Pin your Javascript Dependencies?
 
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using semver ranges. The answer is "It's your choice", however we can certainly make some generalisations/recommendations to help you. Jump to the bottom conclusions if you get impatient.
 
@@ -100,7 +97,7 @@ Although it's good to isolate each dependency update for ease of troubleshooting
 
 Since both `yarn` and `npm@5` both support lock files, it's a common question to ask "Why should I pin dependencies if I'm already using a lock file?". It's a good question!
 
-![broken-lockfile](/images/broken-lockfile.jpg)
+![broken-lockfile](assets/images/broken-lockfile.jpg)
 
 Lock files are a great companion to semver ranges _or_ pinning dependencies, because these files lock (pin) deeper into your dependency tree than you see in `package.json`.
 
@@ -114,7 +111,7 @@ To reuse an earlier example, this means that you could have `foobar@^1.1.0` in y
 
 The lock file has only delayed the inevitable problem, and provides much less visibility than `package.json`, because it's not designed to be human readable and is quite dense.
 
-![all-dead](/images/all-dead.jpg)
+![all-dead](assets/images/all-dead.jpg)
 
 If the `package.json` contains a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 
@@ -163,6 +160,6 @@ As noted earlier, when you pin dependencies then you will see an increase in the
 
 ## References
 
-This is a "living" document and we plan to update it whenever we think of something new or someone makes a valid point we've missed or misunderstood. [GitHub Location](https://github.com/renovateapp/renovate/blob/master/website/docs/_posts/2017-07-26-dependency-pinning.md)
+This is a "living" document and we plan to update it whenever we think of something new or someone makes a valid point we've missed or misunderstood. [GitHub Location](https://github.com/renovateapp/renovate/blob/master/website/docs/dependency-pinning.md)
 
 Updated 2018-01-19 after [excellent feedback on lockfiles](https://github.com/commitizen/cz-conventional-changelog-default-export/pull/4#issuecomment-358038966) by [@LinusU](https://github.com/LinusU)
