@@ -18,13 +18,16 @@ describe('lib/manager/buildkite/extract', () => {
     beforeEach(() => {
       config = {};
     });
+    it('returns null for empty', () => {
+      expect(extractDependencies('nothing here', config)).toBe(null);
+    });
     it('extracts simple single plugin', () => {
-      const res = extractDependencies(pipeline1, config);
+      const res = extractDependencies(pipeline1, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
     it('extracts multiple plugins in same file', () => {
-      const res = extractDependencies(pipeline2, config);
+      const res = extractDependencies(pipeline2, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
