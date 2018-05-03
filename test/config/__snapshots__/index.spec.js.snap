@@ -9,7 +9,6 @@ Object {
 
 exports[`config/index .parseConfigs(env, defaultArgv) resolves all presets: globalConfig 1`] = `
 Object {
-  "allowedVersions": null,
   "assignees": Array [],
   "autodiscover": false,
   "automerge": false,
@@ -45,7 +44,6 @@ Object {
   "commitMessagePrefix": null,
   "commitMessageTopic": "dependency {{depName}}",
   "copyLocalLibs": false,
-  "depTypeList": Array [],
   "description": Array [
     "Rate limit PR creation to a maximum of one per hour",
     "Automerge patch upgrades if they pass tests",
@@ -96,8 +94,6 @@ Object {
   "encrypted": null,
   "endpoint": null,
   "engines": Object {},
-  "excludePackageNames": Array [],
-  "excludePackagePatterns": Array [],
   "exposeEnv": false,
   "fileMatch": Array [],
   "forkMode": false,
@@ -137,7 +133,6 @@ Object {
   "logLevel": "error",
   "major": Object {},
   "managerBranchPrefix": "",
-  "matchCurrentVersion": null,
   "meteor": Object {
     "fileMatch": Array [
       "(^|/)package.js$",
@@ -167,8 +162,6 @@ Object {
   },
   "onboarding": true,
   "onboardingConfig": Object {},
-  "packageNames": Array [],
-  "packagePatterns": Array [],
   "packageRules": Array [],
   "patch": Object {
     "automerge": true,
