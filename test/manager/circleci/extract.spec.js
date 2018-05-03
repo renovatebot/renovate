@@ -11,10 +11,13 @@ describe('lib/manager/circleci/extract', () => {
     beforeEach(() => {
       config = {};
     });
+    it('returns null for empty', () => {
+      expect(extractDependencies('nothing here', config)).toBe(null);
+    });
     it('extracts multiple image lines', () => {
       const res = extractDependencies(yamlFile, config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(4);
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(4);
     });
   });
 });

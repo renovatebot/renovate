@@ -5,7 +5,6 @@ Array [
   Object {
     "currentVersion": "8.4.0",
     "depName": "node",
-    "depType": ".nvmrc",
   },
 ]
 `;
