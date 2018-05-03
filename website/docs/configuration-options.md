@@ -150,10 +150,10 @@ This field is combined with `branchPrefix` and `managerBranchPrefix` to form the
 
 Configuration specific for buildkite plugins updates.
 
-| name    | value                                                 |
-| ------- | ----------------------------------------------------- |
-| type    | object                                                |
-| default | { enabled: false, managerBranchPrefix: 'buildkite-' } |
+| name    | value                                 |
+| ------- | ------------------------------------- |
+| type    | object                                |
+| default | { managerBranchPrefix: 'buildkite-' } |
 
 ## bumpVersion
 

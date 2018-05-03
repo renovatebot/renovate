@@ -26,7 +26,6 @@ Object {
   "buildkite": Object {
     "commitMessageExtra": "to {{newVersion}}",
     "commitMessageTopic": "buildkite plugin {{depName}}",
-    "enabled": false,
     "fileMatch": Array [
       "\\\\.buildkite/.+\\\\.yml$",
     ],
