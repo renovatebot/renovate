@@ -45,7 +45,6 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             {
               isPin: true,
               depName: 'b',
-              depType: 'devDependencies',
               newVersion: '1.5.3',
             },
           ],
