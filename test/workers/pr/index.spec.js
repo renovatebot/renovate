@@ -60,6 +60,15 @@ describe('workers/pr', () => {
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(1);
     });
+    it('should automerge comment', async () => {
+      config.automerge = true;
+      config.automergeType = 'pr-comment';
+      config.automergeComment = '!merge';
+      pr.canRebase = true;
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      await prWorker.checkAutoMerge(pr, config);
+      expect(platform.ensureComment.mock.calls.length).toBe(1);
+    });
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
       pr.canRebase = false;
