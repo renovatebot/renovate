@@ -1111,7 +1111,7 @@ describe('platform/github', () => {
         repository: 'some/repo',
         token: 'token',
       });
-      get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge'}] });
+      get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
       await github.ensureComment(42, null, '!merge');
       expect(get.post.mock.calls).toHaveLength(0);
       expect(get.patch.mock.calls).toHaveLength(0);
