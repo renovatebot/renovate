@@ -27,25 +27,21 @@ describe('lib/workers/package-file/dep-type', () => {
       expect(res).toMatchObject([]);
     });
     it('returns empty if no deps found', async () => {
-      npmExtract.extractDependencies.mockReturnValueOnce([]);
+      npmExtract.extractDependencies.mockReturnValueOnce(null);
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toMatchObject([]);
     });
     it('returns empty if all deps are filtered', async () => {
-      npmExtract.extractDependencies.mockReturnValueOnce([
-        { depName: 'a' },
-        { depName: 'b' },
-        { depName: 'e' },
-      ]);
+      npmExtract.extractDependencies.mockReturnValueOnce({
+        deps: [{ depName: 'a' }, { depName: 'b' }, { depName: 'e' }],
+      });
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toMatchObject([]);
     });
     it('returns combined upgrades if all deps are filtered', async () => {
-      npmExtract.extractDependencies.mockReturnValueOnce([
-        { depName: 'a' },
-        { depName: 'c' },
-        { depName: 'd' },
-      ]);
+      npmExtract.extractDependencies.mockReturnValueOnce({
+        deps: [{ depName: 'a' }, { depName: 'c' }, { depName: 'd' }],
+      });
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toHaveLength(2);
     });

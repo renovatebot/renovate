@@ -10,7 +10,7 @@ With your current configuration, Renovate will create 2 Pull Requests:
 
   - Branch name: \`renovate/pin-dependencies\`
   - Pins [a](https://a) in \`devDependencies\` to \`1.1.0\`
-  - Pins b in \`devDependencies\` to \`1.5.3\`
+  - Pins b to \`1.5.3\`
 
 
 2. **Update a to v2**

@@ -22,7 +22,7 @@ describe('lib/manager/node/package', () => {
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
-      config.currentVersion = ['6', '8'];
+      config.currentVersion = ['8'];
       config.supportPolicy = ['lts_active'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
