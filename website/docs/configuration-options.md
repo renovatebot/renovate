@@ -69,15 +69,23 @@ Also note that this option can be combined with other nested settings, such as d
 
 Warning: GitHub currently has a bug where automerge won't work if a GitHub Organization has protected their master branch, and there is no way to configure around this. Hence, automerging will try and fail in such situations. This doc will be updated once that bug/limitation is fixed by GitHub.
 
+## automergeComment
+
+PR comment to add to trigger automerge. Used only if automergeType=pr-comment.
+
+| name | value  |
+| ---- | ------ |
+| type | string |
+
 ## automergeType
 
 Type of automerge approach to use.
 
-| name         | value                                        |
-| ------------ | -------------------------------------------- |
-| type         | string                                       |
-| valid values | "branch-merge-commit", "branch-push" or "pr" |
-| default      | "pr"                                         |
+| name         | value                                                      |
+| ------------ | ---------------------------------------------------------- |
+| type         | string                                                     |
+| valid values | "branch-merge-commit", "branch-push", "pr-comment" or "pr" |
+| default      | "pr"                                                       |
 
 Renovate will default to automerging after creating PRs, but you can override that to automerge _without_ PRs. There are two ways to merge branch upgrades: merge commits, and branch push.
 

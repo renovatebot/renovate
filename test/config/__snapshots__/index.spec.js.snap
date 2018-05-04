@@ -12,6 +12,7 @@ Object {
   "assignees": Array [],
   "autodiscover": false,
   "automerge": false,
+  "automergeComment": "automergeComment",
   "automergeType": "pr",
   "baseBranches": Array [],
   "bazel": Object {
