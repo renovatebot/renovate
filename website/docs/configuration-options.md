@@ -71,11 +71,21 @@ Warning: GitHub currently has a bug where automerge won't work if a GitHub Organ
 
 ## automergeComment
 
-PR comment to add to trigger automerge. Used only if automergeType=pr-comment.
+PR comment to add to trigger automerge. Used only if `automergeType="pr-comment"`.
 
 | name | value  |
 | ---- | ------ |
 | type | string |
+
+Example use:
+
+```json
+{
+  "automerge": enabled,
+  "automergeType": "pr-comment",
+  "automergeComment": "@bors: r+"
+}
+```
 
 ## automergeType
 
