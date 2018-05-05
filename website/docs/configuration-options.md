@@ -83,7 +83,6 @@ It's possible to add this setting into the `renovate.json` file as part of the "
 
 ## branchName
 
-
 It's recommended to use our default templates, but you may override branch name if you really wish. It's recommended to still keep `depName` and `newVersionMajor` in the branch name to make sure all other Renovate features can still work.
 
 Example branch name: `renovate/eslint-4.x`.
@@ -652,4 +651,3 @@ You can override logic either way, by setting it to `replace` or `widen`. e.g. i
 Or for example if you configure all `peerDependencies` with `versionStrategy=widen` and have `"react": "^15.0.0"` as current version then it will be updated to `"react": "^15.0.0 || ^16.0.0"`.
 
 ## yarnrc
-
