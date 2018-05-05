@@ -5,13 +5,13 @@ Object {
   "npmShrinkwrapDirs": Array [
     "leftend",
   ],
-  "packageLockFileDirs": Array [
+  "npmLockDirs": Array [
     "backend",
   ],
-  "shrinkwrapYamlDirs": Array [
+  "pnpmShrinkwrapDirs": Array [
     "frontend",
   ],
-  "yarnLockFileDirs": Array [
+  "yarnLockDirs": Array [
     ".",
   ],
 }
@@ -23,13 +23,13 @@ Object {
   "npmShrinkwrapDirs": Array [
     "leftend",
   ],
-  "packageLockFileDirs": Array [
+  "npmLockDirs": Array [
     "backend",
   ],
-  "shrinkwrapYamlDirs": Array [
+  "pnpmShrinkwrapDirs": Array [
     "frontend",
   ],
-  "yarnLockFileDirs": Array [
+  "yarnLockDirs": Array [
     ".",
   ],
 }
@@ -41,9 +41,9 @@ Object {
     ".",
   ],
   "npmShrinkwrapDirs": Array [],
-  "packageLockFileDirs": Array [],
-  "shrinkwrapYamlDirs": Array [],
-  "yarnLockFileDirs": Array [],
+  "npmLockDirs": Array [],
+  "pnpmShrinkwrapDirs": Array [],
+  "yarnLockDirs": Array [],
 }
 `;
 
@@ -51,9 +51,9 @@ exports[`workers/branch/lock-files determineLockFileDirs returns root directory 
 Object {
   "lernaDirs": Array [],
   "npmShrinkwrapDirs": Array [],
-  "packageLockFileDirs": Array [],
-  "shrinkwrapYamlDirs": Array [],
-  "yarnLockFileDirs": Array [
+  "npmLockDirs": Array [],
+  "pnpmShrinkwrapDirs": Array [],
+  "yarnLockDirs": Array [
     ".",
   ],
 }

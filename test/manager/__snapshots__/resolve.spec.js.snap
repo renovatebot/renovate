@@ -40,7 +40,7 @@ Array [
     "npmrc": "npmrc",
     "packageFile": "package.json",
     "packageLock": "package-lock.json",
-    "shrinkwrapYaml": "shrinkwrap.yaml",
+    "pnpmShrinkwrap": "shrinkwrap.yaml",
     "yarnLock": "yarn.lock",
     "yarnrc": "yarnrc",
   },
