@@ -9,6 +9,13 @@ const {
   rmAllCache,
 } = require('../../../lib/workers/pr/changelog/source-cache');
 
+const upgrade = {
+  manager: 'npm',
+  depName: 'renovate',
+  fromVersion: '1.0.0',
+  newVersion: '3.0.0',
+};
+
 function npmResponse() {
   return {
     repositoryUrl: 'https://github.com/chalk/chalk',
@@ -36,18 +43,29 @@ describe('workers/pr/changelog', () => {
       await rmAllCache();
     });
     it('returns null if no fromVersion', async () => {
-      expect(await getChangeLogJSON('renovate', null, '1.0.0')).toBe(null);
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          fromVersion: null,
+        })
+      ).toBe(null);
       expect(npmRegistry.getDependency.mock.calls).toHaveLength(0);
       expect(ghGot.mock.calls).toHaveLength(0);
     });
     it('returns null if fromVersion equals newVersion', async () => {
-      expect(await getChangeLogJSON('renovate', '1.0.0', '1.0.0')).toBe(null);
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          fromVersion: '1.0.0',
+          newVersion: '1.0.0',
+        })
+      ).toBe(null);
       expect(ghGot.mock.calls).toHaveLength(0);
     });
     it('logs when no JSON', async () => {
       // clear the mock
       npmRegistry.getDependency.mockReset();
-      expect(await getChangeLogJSON('renovate', '1.0.0', '3.0.0')).toBe(null);
+      expect(await getChangeLogJSON({ ...upgrade })).toBe(null);
     });
     it('skips invalid repos', async () => {
       // clear the mock
@@ -55,13 +73,10 @@ describe('workers/pr/changelog', () => {
       const res = npmResponse();
       res.repositoryUrl = 'https://github.com/about';
       npmRegistry.getDependency.mockReturnValueOnce(Promise.resolve(res));
-
-      expect(await getChangeLogJSON('renovate', '1.0.0', '3.0.0')).toBe(null);
+      expect(await getChangeLogJSON({ ...upgrade })).toBe(null);
     });
     it('works without Github', async () => {
-      expect(
-        await getChangeLogJSON('renovate', '1.0.0', '3.0.0')
-      ).toMatchSnapshot();
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
     });
     it('uses GitHub tags', async () => {
       ghGot.mockReturnValueOnce(
@@ -76,9 +91,7 @@ describe('workers/pr/changelog', () => {
           ],
         })
       );
-      expect(
-        await getChangeLogJSON('renovate', '1.0.0', '3.0.0')
-      ).toMatchSnapshot();
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
     });
     it('falls back to commit from release time', async () => {
       // mock tags response
@@ -90,13 +103,16 @@ describe('workers/pr/changelog', () => {
         })
       );
       expect(
-        await getChangeLogJSON('@renovate/no', '1.0.0', '3.0.0')
+        await getChangeLogJSON({
+          ...upgrade,
+          depName: '@renovate/no',
+        })
       ).toMatchSnapshot();
     });
     it('returns cached JSON', async () => {
-      const first = await getChangeLogJSON('renovate', '1.0.0', '3.0.0');
+      const first = await getChangeLogJSON({ ...upgrade });
       npmRegistry.getDependency.mockClear();
-      const second = await getChangeLogJSON('renovate', '1.0.0', '3.0.0');
+      const second = await getChangeLogJSON({ ...upgrade });
       expect(first).toEqual(second);
       expect(npmRegistry.getDependency.mock.calls).toHaveLength(0);
     });
@@ -105,8 +121,16 @@ describe('workers/pr/changelog', () => {
         throw new Error('Unknown Github Repo');
       });
       expect(
-        await getChangeLogJSON('@renovate/no', '1.0.0', '3.0.0')
+        await getChangeLogJSON({
+          ...upgrade,
+          depName: '@renovate/no',
+        })
       ).toMatchSnapshot();
+    });
+    it('skips node engines', async () => {
+      expect(await getChangeLogJSON({ ...upgrade, depType: 'engines' })).toBe(
+        null
+      );
     });
   });
 });
