@@ -3,7 +3,14 @@ const options = require('../lib/config/definitions').getOptions();
 
 describe('docs', () => {
   const doc = fs.readFileSync('website/docs/configuration-options.md', 'utf8');
+  const botDoc = fs.readFileSync(
+    'website/docs/self-hosted-configuration.md',
+    'utf8'
+  );
   const headers = doc
+    .match(/\n## (.*?)\n/g)
+    .map(match => match.substring(4, match.length - 1));
+  const botHeaders = botDoc
     .match(/\n## (.*?)\n/g)
     .map(match => match.substring(4, match.length - 1));
   const expectedOptions = options
@@ -12,11 +19,23 @@ describe('docs', () => {
     .filter(option => !option.parent)
     .map(option => option.name)
     .sort();
+
+  const botExpectedOptions = options
+    .filter(option => option.admin || option.stage === 'global')
+    .map(option => option.name)
+    .sort();
+
   it('has doc headers sorted alphabetically', () => {
     expect(headers).toEqual([...headers].sort());
   });
   it('has headers for every required option', () => {
     expect(headers).toEqual(expectedOptions);
+  });
+  it('has bot doc headers sorted alphabetically', () => {
+    expect(botHeaders).toEqual([...botHeaders].sort());
+  });
+  it('has headers (bot) for every required option', () => {
+    expect(botHeaders).toEqual(botExpectedOptions);
   });
   const headers3 = doc
     .match(/\n### (.*?)\n/g)
