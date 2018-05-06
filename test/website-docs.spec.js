@@ -3,14 +3,14 @@ const options = require('../lib/config/definitions').getOptions();
 
 describe('docs', () => {
   const doc = fs.readFileSync('website/docs/configuration-options.md', 'utf8');
-  const botDoc = fs.readFileSync(
+  const selfHostDoc = fs.readFileSync(
     'website/docs/self-hosted-configuration.md',
     'utf8'
   );
   const headers = doc
     .match(/\n## (.*?)\n/g)
     .map(match => match.substring(4, match.length - 1));
-  const botHeaders = botDoc
+  const selfHostHeaders = selfHostDoc
     .match(/\n## (.*?)\n/g)
     .map(match => match.substring(4, match.length - 1));
   const expectedOptions = options
@@ -20,7 +20,7 @@ describe('docs', () => {
     .map(option => option.name)
     .sort();
 
-  const botExpectedOptions = options
+  const selfHostExpectedOptions = options
     .filter(option => option.admin || option.stage === 'global')
     .map(option => option.name)
     .sort();
@@ -31,11 +31,11 @@ describe('docs', () => {
   it('has headers for every required option', () => {
     expect(headers).toEqual(expectedOptions);
   });
-  it('has bot doc headers sorted alphabetically', () => {
-    expect(botHeaders).toEqual([...botHeaders].sort());
+  it('has self hosted doc headers sorted alphabetically', () => {
+    expect(selfHostHeaders).toEqual([...selfHostHeaders].sort());
   });
-  it('has headers (bot) for every required option', () => {
-    expect(botHeaders).toEqual(botExpectedOptions);
+  it('has headers (self hosted) for every required option', () => {
+    expect(selfHostHeaders).toEqual(selfHostExpectedOptions);
   });
   const headers3 = doc
     .match(/\n### (.*?)\n/g)
