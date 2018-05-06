@@ -156,7 +156,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
       expect(res.y).toBe(2);
-      expect(res.packageRules).toBeUndefined();
     });
     it('applies both rules for b', () => {
       const dep = {
@@ -165,7 +164,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
       expect(res.y).toBe(2);
-      expect(res.packageRules).toBeUndefined();
     });
     it('applies the second rule', () => {
       const dep = {
@@ -174,7 +172,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBe(2);
-      expect(res.packageRules).toBeUndefined();
     });
     it('applies the second second rule', () => {
       const dep = {
@@ -183,7 +180,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBe(2);
-      expect(res.packageRules).toBeUndefined();
     });
     it('excludes package name', () => {
       const dep = {
@@ -192,7 +188,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBeUndefined();
-      expect(res.packageRules).toBeUndefined();
     });
     it('excludes package pattern', () => {
       const dep = {
@@ -201,7 +196,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBeUndefined();
-      expect(res.packageRules).toBeUndefined();
     });
     it('filters depType', () => {
       const config = {
@@ -219,7 +213,6 @@ describe('lib/workers/package-file/dep-type', () => {
       };
       const res = depTypeWorker.getDepConfig(config, dep);
       expect(res.x).toBe(1);
-      expect(res.packageRules).toBeUndefined();
     });
     it('filters naked depType', () => {
       const config = {
@@ -236,7 +229,6 @@ describe('lib/workers/package-file/dep-type', () => {
       };
       const res = depTypeWorker.getDepConfig(config, dep);
       expect(res.x).toBe(1);
-      expect(res.packageRules).toBeUndefined();
     });
     it('filters depType', () => {
       const config = {
@@ -254,7 +246,6 @@ describe('lib/workers/package-file/dep-type', () => {
       };
       const res = depTypeWorker.getDepConfig(config, dep);
       expect(res.x).toBeUndefined();
-      expect(res.packageRules).toBeUndefined();
     });
     it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', () => {
       const config = {
