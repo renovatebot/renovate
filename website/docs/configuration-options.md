@@ -11,17 +11,6 @@ Also, be sure to check out Renovate's [shareable config presets](./config-preset
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where it will be promptly answered.
 
-## allowedVersions
-
-Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could defined this to be `<= 1.5` or `< 1.6.0`:
-
-```
-  "packageRules": [{
-    "packageNames": ["angular"],
-    "allowedVersions": "<=1.5"
-  }]
-```
-
 ## assignees
 
 Must be valid usernames.
@@ -139,10 +128,6 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 Set to true if repository package.json files contain any local (file) dependencies + lock files. The `package.json` files from each will be copied to disk before lock file generation, even if they are within ignored directories.
 
-## depTypeList
-
-Use this field if you want to limit a `packageRule` to certain `depType` values. Invalid if used outside of a `packageRule`.
-
 ## description
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
@@ -201,34 +186,6 @@ See https://renovateapp.com/docs/deep-dives/private-modules for details on how t
 ## engines
 
 Extend this if you wish to configure rules specifically for `engines` definitions. Currently only `node` is supported.
-
-## excludePackageNames
-
-**Important**: Do not mix this up with the option `ignoreDeps`. Use `ignoreDeps` instead if all you want to do is have a list of package names for Renovate to ignore.
-
-Use `excludePackageNames` if you want to have one or more exact name matches excluded in your package rule. See also `packageNames`.
-
-```
-  "packageRules": [{
-    "packagePatterns": ["^eslint"],
-    "excludePackageNames": ["eslint-foo"]
-  }]
-```
-
-The above will match all package names starting with `eslint` but exclude the specific package `eslint-foo`.
-
-## excludePackagePatterns
-
-Use this field if you want to have one or more package name patterns excluded in your package rule. See also `packagePatterns`.
-
-```
-  "packageRules": [{
-    "packagePatterns": ["^eslint"],
-    "excludePackageNames": ["^eslint-foo"]
-  }]
-```
-
-The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
 ## extends
 
@@ -319,10 +276,6 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
 
-## matchCurrentVersion
-
-`matchCurrentVersion` can be an exact semver version or a semver range.
-
 ## meteor
 
 Set enabled to `true` to enable meteor package updating.
@@ -354,32 +307,6 @@ See https://renovateapp.com/docs/deep-dives/private-modules for details on how t
 ## nvm
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
-
-## packageNames
-
-Use this field if you want to have one or more exact name matches in your package rule. See also `excludedPackageNames`.
-
-```
-  "packageRules": [{
-    "packageNames": ["angular"],
-    "pinVersions": true
-  }]
-```
-
-The above will enable `pinVersions` for the package `angular`.
-
-## packagePatterns
-
-Use this field if you want to have one or more package names patterns in your package rule. See also `excludedPackagePatterns`.
-
-```
-  "packageRules": [{
-    "packageNames": ["^angular"],
-    "pinVersions": false
-  }]
-```
-
-The above will enable `pinVersions` for any package starting with `angular`.
 
 ## packageRules
 
@@ -433,6 +360,79 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
     }
   ]
 ```
+
+### allowedVersions
+
+Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could defined this to be `<= 1.5` or `< 1.6.0`:
+
+```
+  "packageRules": [{
+    "packageNames": ["angular"],
+    "allowedVersions": "<=1.5"
+  }]
+```
+
+### depTypeList
+
+Use this field if you want to limit a `packageRule` to certain `depType` values. Invalid if used outside of a `packageRule`.
+
+### excludePackageNames
+
+**Important**: Do not mix this up with the option `ignoreDeps`. Use `ignoreDeps` instead if all you want to do is have a list of package names for Renovate to ignore.
+
+Use `excludePackageNames` if you want to have one or more exact name matches excluded in your package rule. See also `packageNames`.
+
+```
+  "packageRules": [{
+    "packagePatterns": ["^eslint"],
+    "excludePackageNames": ["eslint-foo"]
+  }]
+```
+
+The above will match all package names starting with `eslint` but exclude the specific package `eslint-foo`.
+
+### excludePackagePatterns
+
+Use this field if you want to have one or more package name patterns excluded in your package rule. See also `packagePatterns`.
+
+```
+  "packageRules": [{
+    "packagePatterns": ["^eslint"],
+    "excludePackageNames": ["^eslint-foo"]
+  }]
+```
+
+The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
+
+### matchCurrentVersion
+
+`matchCurrentVersion` can be an exact semver version or a semver range.
+
+### packageNames
+
+Use this field if you want to have one or more exact name matches in your package rule. See also `excludedPackageNames`.
+
+```
+  "packageRules": [{
+    "packageNames": ["angular"],
+    "pinVersions": true
+  }]
+```
+
+The above will enable `pinVersions` for the package `angular`.
+
+### packagePatterns
+
+Use this field if you want to have one or more package names patterns in your package rule. See also `excludedPackagePatterns`.
+
+```
+  "packageRules": [{
+    "packageNames": ["^angular"],
+    "pinVersions": false
+  }]
+```
+
+The above will enable `pinVersions` for any package starting with `angular`.
 
 ## patch
 
