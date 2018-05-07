@@ -35,5 +35,48 @@ describe('manager/npm/extract/locked-versions', () => {
       await getLockedVersions(packageFiles);
       expect(packageFiles).toMatchSnapshot();
     });
+    it('uses package-lock.json', async () => {
+      npm.getNpmLock.mockReturnValue({
+        a: '1.0.0',
+        b: '2.0.0',
+        c: '3.0.0',
+      });
+      const packageFiles = [
+        {
+          npmLock: 'package-lock.json',
+          deps: [
+            {
+              depName: 'a',
+              currentVersion: '1.0.0',
+            },
+            {
+              depName: 'b',
+              currentVersion: '2.0.0',
+            },
+          ],
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toMatchSnapshot();
+    });
+    it('ignores pnpm', async () => {
+      const packageFiles = [
+        {
+          pnpmShrinkwrap: 'shrinkwrap.yaml',
+          deps: [
+            {
+              depName: 'a',
+              currentVersion: '1.0.0',
+            },
+            {
+              depName: 'b',
+              currentVersion: '2.0.0',
+            },
+          ],
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toMatchSnapshot();
+    });
   });
 });

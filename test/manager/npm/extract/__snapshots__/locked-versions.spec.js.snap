@@ -1,5 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/npm/extract/locked-versions .getLockedVersions() ignores pnpm 1`] = `
+Array [
+  Object {
+    "deps": Array [
+      Object {
+        "currentVersion": "1.0.0",
+        "depName": "a",
+      },
+      Object {
+        "currentVersion": "2.0.0",
+        "depName": "b",
+      },
+    ],
+    "pnpmShrinkwrap": "shrinkwrap.yaml",
+  },
+]
+`;
+
+exports[`manager/npm/extract/locked-versions .getLockedVersions() uses package-lock.json 1`] = `
+Array [
+  Object {
+    "deps": Array [
+      Object {
+        "currentVersion": "1.0.0",
+        "depName": "a",
+        "lockedVersion": "1.0.0",
+      },
+      Object {
+        "currentVersion": "2.0.0",
+        "depName": "b",
+        "lockedVersion": "2.0.0",
+      },
+    ],
+    "npmLock": "package-lock.json",
+  },
+]
+`;
+
 exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock 1`] = `
 Array [
   Object {
