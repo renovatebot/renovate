@@ -69,61 +69,8 @@ describe('manager/npm/extract', () => {
     });
   });
   describe('.postExtract()', () => {
-    beforeEach(() => {
-      platform.getFile.mockReturnValue(null);
-    });
-    it('handles no monorepo', async () => {
-      const packageFiles = [
-        {
-          packageFile: 'package.json',
-        },
-      ];
-      await npmExtract.postExtract(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
-    });
-    it('uses lerna package settings', async () => {
-      const packageFiles = [
-        {
-          packageFile: 'package.json',
-          lernaDir: '.',
-          lernaPackages: ['packages/*'],
-        },
-        {
-          packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
-        },
-        {
-          packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
-        },
-      ];
-      await npmExtract.postExtract(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].lernaDir).toEqual('.');
-      expect(packageFiles[1].monorepoPackages).toEqual(['@org/b']);
-    });
-    it('uses yarn workspaces package settings', async () => {
-      const packageFiles = [
-        {
-          packageFile: 'package.json',
-          lernaDir: '.',
-          lernaPackages: ['oldpackages/*'],
-          lernaClient: 'yarn',
-          yarnWorkspacesPackages: ['packages/*'],
-        },
-        {
-          packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
-        },
-        {
-          packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
-        },
-      ];
-      await npmExtract.postExtract(packageFiles);
-      expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].lernaDir).toEqual('.');
-      expect(packageFiles[1].monorepoPackages).toEqual(['@org/b']);
+    it('runs', async () => {
+      await npmExtract.postExtract([]);
     });
   });
 });

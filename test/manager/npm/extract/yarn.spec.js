@@ -3,7 +3,7 @@ const { getYarnLock } = require('../../../../lib/manager/npm/extract/yarn');
 
 describe('manager/npm/extract/yarn', () => {
   describe('.getYarnLock()', () => {
-    it('returns empty if failed to parse', async () => {
+    it('returns empty if exception parsing', async () => {
       platform.getFile.mockReturnValueOnce('abcd');
       const res = await getYarnLock('package.json');
       expect(Object.keys(res)).toHaveLength(0);
