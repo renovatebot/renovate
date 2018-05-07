@@ -13,8 +13,13 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         ...defaultConfig,
       };
     });
+    it('handles emptyu', () => {
+      const branches = [];
+      const res = getPrList(config, branches);
+      expect(res).toMatchSnapshot();
+    });
     it('has special lock file maintenance description', () => {
-      config.branches = [
+      const branches = [
         {
           prTitle: 'Lock file maintenance',
           schedule: ['before 5am'],
@@ -26,11 +31,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ],
         },
       ];
-      const res = getPrList(config);
+      const res = getPrList(config, branches);
       expect(res).toMatchSnapshot();
     });
     it('handles multiple', () => {
-      config.branches = [
+      const branches = [
         {
           prTitle: 'Pin dependencies',
           branchName: 'renovate/pin-dependencies',
@@ -63,7 +68,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ],
         },
       ];
-      const res = getPrList(config);
+      const res = getPrList(config, branches);
       expect(res).toMatchSnapshot();
     });
   });
