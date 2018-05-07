@@ -11,18 +11,20 @@ describe('workers/repository/onboarding/pr', () => {
       jest.resetAllMocks();
       config = {
         ...defaultConfig,
-
         errors: [],
         warnings: [],
         description: [],
-        branches: [],
         packageFiles: [{ packageFile: 'package.json' }],
       };
       platform.createPr.mockReturnValue({});
     });
     let createPrBody;
+    it('returns if onboarded', async () => {
+      config.repoIsOnboarded = true;
+      expect(await ensureOnboardingPr(config, [])).toBe(null);
+    });
     it('creates PR', async () => {
-      await ensureOnboardingPr(config);
+      await ensureOnboardingPr(config, []);
       expect(platform.createPr.mock.calls).toHaveLength(1);
       createPrBody = platform.createPr.mock.calls[0][2];
     });
@@ -31,7 +33,7 @@ describe('workers/repository/onboarding/pr', () => {
         title: 'Configure Renovate',
         body: createPrBody,
       });
-      await ensureOnboardingPr(config);
+      await ensureOnboardingPr(config, []);
       expect(platform.createPr.mock.calls).toHaveLength(0);
       expect(platform.updatePr.mock.calls).toHaveLength(0);
     });
@@ -41,7 +43,7 @@ describe('workers/repository/onboarding/pr', () => {
         title: 'Configure Renovate',
         body: createPrBody,
       });
-      await ensureOnboardingPr(config);
+      await ensureOnboardingPr(config, []);
       expect(platform.createPr.mock.calls).toHaveLength(0);
       expect(platform.updatePr.mock.calls).toHaveLength(1);
     });
