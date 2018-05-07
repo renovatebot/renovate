@@ -1,5 +1,7 @@
-const { writeUpdates } = require('../../../lib/workers/repository/write');
-const branchWorker = require('../../../lib/workers/branch');
+const {
+  writeUpdates,
+} = require('../../../../lib/workers/repository/process/write');
+const branchWorker = require('../../../../lib/workers/branch');
 const moment = require('moment');
 
 branchWorker.processBranch = jest.fn();
@@ -7,7 +9,7 @@ branchWorker.processBranch = jest.fn();
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('../../_fixtures/config') };
+  config = { ...require('../../../_fixtures/config') };
 });
 
 describe('workers/repository/write', () => {
