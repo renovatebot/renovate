@@ -41,7 +41,7 @@ Let's say that a "faulty" version `1.2.0` of `foobar` is released and it breaks 
 
 If you were using default caret semver ranges, then your `master` branch is now "broken" because its `package.json` says that any version 1.x above 1.1.0 is acceptable, and npm will choose the latest (`1.2.0`). You would need to manually check and work out which dependency caused the failure (`foobar` may not have been the only dependency to have "automatically" upgraded since the last time your tests passed) and then you would need to pin the dependency yourself to stop `npm` installing `1.2.0`.
 
-Consider the same situation if instead you were _pinning_ dependency versions. Your `master` would not be broken because it's pinned to `foobar@1.1.0` - instead you'd just have a Pull Request for upgrading to `foobar@1.2.0` which would fail. You'd know not to merge it and can wait for `foobar@1.2.1` or later when it's fixed. Therefore you know exactly what you're running and you know exactl9y what failed - you have great "visibility".
+Consider the same situation if instead you were _pinning_ dependency versions. Your `master` would not be broken because it's pinned to `foobar@1.1.0` - instead you'd just have a Pull Request for upgrading to `foobar@1.2.0` which would fail. You'd know not to merge it and can wait for `foobar@1.2.1` or later when it's fixed. Therefore you know exactly what you're running and you know exactly what failed - you have great "visibility".
 
 Now consider a similar theoretical scenario where `foobar@1.2.0` is faulty but it is _not_ caught by any of your automated tests. This is more common and more dangerous.
 
@@ -133,7 +133,7 @@ Don't forget though that our motto is "Flexible, so you don't need to be", so go
 
 ## What about indirect/sub-dependencies?
 
-A good argument made by [@LinuxU](https://github.com/LinusU) is:
+A good argument made by [@LinusU](https://github.com/LinusU) is:
 
 > pinning will only protect you against breakage in a, in many cases, small percentage of your packages. If you for example have installed express and pinned it, you will only protect yourself against a bad express release, it will not help with the 30 dependencies that express has.
 
