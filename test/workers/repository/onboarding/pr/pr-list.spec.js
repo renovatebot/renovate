@@ -13,6 +13,11 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
         ...defaultConfig,
       };
     });
+    it('handles emptyu', () => {
+      const branches = [];
+      const res = getPrList(config, branches);
+      expect(res).toMatchSnapshot();
+    });
     it('has special lock file maintenance description', () => {
       const branches = [
         {

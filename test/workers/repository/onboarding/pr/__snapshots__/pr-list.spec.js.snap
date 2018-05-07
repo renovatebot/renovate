@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/onboarding/pr/pr-list getPrList() handles emptyu 1`] = `
+"
+### What to Expect
+
+It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.
+"
+`;
+
 exports[`workers/repository/onboarding/pr/pr-list getPrList() handles multiple 1`] = `
 "
 ### What to Expect
