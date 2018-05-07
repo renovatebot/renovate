@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const npmExtract = require('../../../lib/manager/npm/extract');
+const npmExtract = require('../../../../lib/manager/npm/extract');
 
 function readFixture(fixture) {
   return fs.readFileSync(
-    path.resolve(__dirname, `../../_fixtures/package-json/${fixture}`),
+    path.resolve(__dirname, `../../../_fixtures/package-json/${fixture}`),
     'utf8'
   );
 }
@@ -79,6 +79,51 @@ describe('manager/npm/extract', () => {
         },
       ];
       await npmExtract.postExtract(packageFiles);
+      expect(packageFiles).toMatchSnapshot();
+    });
+    it('uses lerna package settings', async () => {
+      const packageFiles = [
+        {
+          packageFile: 'package.json',
+          lernaDir: '.',
+          lernaPackages: ['packages/*'],
+        },
+        {
+          packageFile: 'packages/a/package.json',
+          packageJsonName: '@org/a',
+        },
+        {
+          packageFile: 'packages/b/package.json',
+          packageJsonName: '@org/b',
+        },
+      ];
+      await npmExtract.postExtract(packageFiles);
+      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles[1].lernaDir).toEqual('.');
+      expect(packageFiles[1].monorepoPackages).toEqual(['@org/b']);
+    });
+    it('uses yarn workspaces package settings', async () => {
+      const packageFiles = [
+        {
+          packageFile: 'package.json',
+          lernaDir: '.',
+          lernaPackages: ['oldpackages/*'],
+          lernaClient: 'yarn',
+          yarnWorkspacesPackages: ['packages/*'],
+        },
+        {
+          packageFile: 'packages/a/package.json',
+          packageJsonName: '@org/a',
+        },
+        {
+          packageFile: 'packages/b/package.json',
+          packageJsonName: '@org/b',
+        },
+      ];
+      await npmExtract.postExtract(packageFiles);
+      expect(packageFiles).toMatchSnapshot();
+      expect(packageFiles[1].lernaDir).toEqual('.');
+      expect(packageFiles[1].monorepoPackages).toEqual(['@org/b']);
     });
   });
 });
