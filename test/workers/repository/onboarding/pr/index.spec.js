@@ -19,10 +19,6 @@ describe('workers/repository/onboarding/pr', () => {
       platform.createPr.mockReturnValue({});
     });
     let createPrBody;
-    it('returns if onboarded', async () => {
-      config.repoIsOnboarded = true;
-      expect(await ensureOnboardingPr(config, [])).toBe(null);
-    });
     it('creates PR', async () => {
       await ensureOnboardingPr(config, []);
       expect(platform.createPr.mock.calls).toHaveLength(1);
