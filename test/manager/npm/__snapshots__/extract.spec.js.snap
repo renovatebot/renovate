@@ -200,3 +200,5 @@ Object {
   "yarnWorkspacesPackages": undefined,
 }
 `;
+
+exports[`manager/npm/extract .postExtract() handles no monorepo 1`] = `undefined`;

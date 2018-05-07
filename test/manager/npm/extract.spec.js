@@ -10,7 +10,6 @@ function readFixture(fixture) {
 }
 
 const input01Content = readFixture('inputs/01.json');
-const input02Content = readFixture('inputs/02.json');
 
 describe('manager/npm/extract', () => {
   describe('.extractDependencies()', () => {
@@ -67,6 +66,19 @@ describe('manager/npm/extract', () => {
         'package.json'
       );
       expect(res).toMatchSnapshot();
+    });
+  });
+  describe('.postExtract()', () => {
+    beforeEach(() => {
+      platform.getFile.mockReturnValue(null);
+    });
+    it('handles no monorepo', async () => {
+      const packageFiles = [
+        {
+          packageFile: 'package.json',
+        },
+      ];
+      await npmExtract.postExtract(packageFiles);
     });
   });
 });
