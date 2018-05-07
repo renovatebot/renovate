@@ -1,4 +1,4 @@
-const validate = require('../../../lib/workers/repository/validate');
+const validate = require('../../../../lib/workers/repository/finalise/validate');
 
 beforeEach(() => {
   jest.resetAllMocks();
