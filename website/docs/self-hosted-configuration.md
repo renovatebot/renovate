@@ -9,7 +9,7 @@ The below configuration options are applicable only if you are running your own 
 
 ## autodiscover
 
-Be cautious when using this option - it will run Renovate over *every* repository that the bot account has access to.
+Be cautious when using this option - it will run Renovate over _every_ repository that the bot account has access to.
 
 ## endpoint
 
