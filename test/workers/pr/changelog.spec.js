@@ -1,8 +1,10 @@
 jest.mock('../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../lib/datasource/npm');
+jest.mock('got');
 
 const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
 const npmRegistry = require('../../../lib/datasource/npm');
+const got = require('got');
 
 const { getChangeLogJSON } = require('../../../lib/workers/pr/changelog');
 const {
@@ -26,6 +28,22 @@ function npmResponse() {
       '2.2.2': { gitHead: 'npm_2.2.2' },
       '2.4.2': { time: '2017-12-24T03:20:46.238Z' },
       '2.5.2': {},
+    },
+  };
+}
+
+function pipResponse() {
+  return {
+    info: {
+      home_page: 'https://github.com/chalk/chalk'
+    },
+    releases: {
+      '0.9.0': [],
+      '1.0.0': [],
+      '2.3.0': [{upload_time: '2017-10-24T03:20:46.238Z'}],
+      '2.2.2': [{}],
+      '2.4.2': [{upload_time: '2017-12-24T03:20:46.238Z'}],
+      '2.5.2': [],
     },
   };
 }
@@ -131,6 +149,29 @@ describe('workers/pr/changelog', () => {
       expect(await getChangeLogJSON({ ...upgrade, depType: 'engines' })).toBe(
         null
       );
+    });
+    it('supports pip', async () => {
+      got.mockReturnValueOnce(
+        Promise.resolve({
+          body: pipResponse()
+        })
+      );
+      expect(
+        await getChangeLogJSON({ ...upgrade, manager: 'pip_requirements' })
+      ).toMatchSnapshot();
+    });
+    it('works without pip', async () => {
+      expect(
+        await getChangeLogJSON({ ...upgrade, manager: 'pip_requirements' })
+      ).toBe(null);
+    });
+    it('handles pip errors', async () => {
+      got.mockImplementation(() => {
+        throw new Error('Unknown Pip Repo');
+      });
+      expect(
+        await getChangeLogJSON({ ...upgrade, manager: 'pip_requirements' })
+      ).toBe(null);
     });
   });
 });

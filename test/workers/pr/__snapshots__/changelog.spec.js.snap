@@ -100,6 +100,46 @@ Object {
 }
 `;
 
+exports[`workers/pr/changelog getChangeLogJSON supports pip 1`] = `
+Object {
+  "hasReleaseNotes": false,
+  "project": Object {
+    "github": "chalk/chalk",
+    "repository": "https://github.com/chalk/chalk",
+  },
+  "versions": Array [
+    Object {
+      "changes": Array [],
+      "compare": Object {},
+      "date": undefined,
+      "releaseNotes": undefined,
+      "version": "2.5.2",
+    },
+    Object {
+      "changes": Array [],
+      "compare": Object {},
+      "date": "2017-12-24T03:20:46.238Z",
+      "releaseNotes": undefined,
+      "version": "2.4.2",
+    },
+    Object {
+      "changes": Array [],
+      "compare": Object {},
+      "date": "2017-10-24T03:20:46.238Z",
+      "releaseNotes": undefined,
+      "version": "2.3.0",
+    },
+    Object {
+      "changes": Array [],
+      "compare": Object {},
+      "date": undefined,
+      "releaseNotes": undefined,
+      "version": "2.2.2",
+    },
+  ],
+}
+`;
+
 exports[`workers/pr/changelog getChangeLogJSON uses GitHub tags 1`] = `
 Object {
   "hasReleaseNotes": true,
