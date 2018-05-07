@@ -3,9 +3,6 @@ const { determineUpdates } = require('../../../lib/workers/repository/updates');
 const {
   writeUpdates,
 } = require('../../../lib/workers/repository/process/write');
-const {
-  ensureOnboardingPr,
-} = require('../../../lib/workers/repository/onboarding/pr');
 const { renovateRepository } = require('../../../lib/workers/repository/index');
 
 jest.mock('../../../lib/workers/repository/init');

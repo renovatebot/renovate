@@ -4,7 +4,7 @@ const {
 
 describe('workers/repository/process/sort', () => {
   describe('sortBranches()', () => {
-    it('sorts based on type and prTitle', async () => {
+    it('sorts based on type and prTitle', () => {
       const branches = [
         {
           type: 'major',
