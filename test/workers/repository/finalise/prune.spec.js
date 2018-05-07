@@ -1,15 +1,15 @@
-const cleanup = require('../../../lib/workers/repository/cleanup');
+const cleanup = require('../../../../lib/workers/repository/finalise/prune');
 
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../_fixtures/config');
+  config = require('../../../_fixtures/config');
   config.platform = 'github';
   config.errors = [];
   config.warnings = [];
 });
 
-describe('workers/repository/cleanup', () => {
+describe('workers/repository/finalise/prune', () => {
   describe('pruneStaleBranches()', () => {
     it('returns if no branchList', async () => {
       delete config.branchList;
