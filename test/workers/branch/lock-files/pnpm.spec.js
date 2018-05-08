@@ -1,4 +1,4 @@
-const pnpmHelper = require('../../../../lib/workers/branch/lock-files/pnpm');
+const pnpmHelper = require('../../../../lib/manager/npm/post-update/pnpm');
 
 const { getInstalledPath } = require('get-installed-path');
 

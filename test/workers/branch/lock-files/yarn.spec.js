@@ -1,4 +1,4 @@
-const yarnHelper = require('../../../../lib/workers/branch/lock-files/yarn');
+const yarnHelper = require('../../../../lib/manager/npm/post-update/yarn');
 
 const { getInstalledPath } = require('get-installed-path');
 

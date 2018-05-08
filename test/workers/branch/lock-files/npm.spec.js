@@ -1,4 +1,4 @@
-const npmHelper = require('../../../../lib/workers/branch/lock-files/npm');
+const npmHelper = require('../../../../lib/manager/npm/post-update/npm');
 
 const { getInstalledPath } = require('get-installed-path');
 

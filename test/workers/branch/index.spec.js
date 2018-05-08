@@ -4,7 +4,7 @@ const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const schedule = require('../../../lib/workers/branch/schedule');
 const checkExisting = require('../../../lib/workers/branch/check-existing');
 const parent = require('../../../lib/workers/branch/parent');
-const lockFiles = require('../../../lib/workers/branch/lock-files');
+const npmPostExtract = require('../../../lib/manager/npm/post-update');
 const commit = require('../../../lib/workers/branch/commit');
 const statusChecks = require('../../../lib/workers/branch/status-checks');
 const automerge = require('../../../lib/workers/branch/automerge');
@@ -15,7 +15,7 @@ jest.mock('../../../lib/workers/branch/get-updated');
 jest.mock('../../../lib/workers/branch/schedule');
 jest.mock('../../../lib/workers/branch/check-existing');
 jest.mock('../../../lib/workers/branch/parent');
-jest.mock('../../../lib/workers/branch/lock-files');
+jest.mock('../../../lib/manager/npm/post-update');
 jest.mock('../../../lib/workers/branch/status-checks');
 jest.mock('../../../lib/workers/branch/automerge');
 jest.mock('../../../lib/workers/pr');
@@ -129,7 +129,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [],
       });
-      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [],
       });
@@ -143,7 +143,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [],
       });
-      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [],
       });
@@ -154,7 +154,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
-      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
       });
@@ -169,7 +169,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
-      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
       });
@@ -186,7 +186,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
-      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
       });
@@ -205,7 +205,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
-      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
       });
@@ -231,7 +231,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
-      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
         lockFileError: true,
         updatedLockFiles: [{}],
       });
@@ -241,7 +241,7 @@ describe('workers/branch', () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
-      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
         lockFileError: false,
         updatedLockFiles: [{}],
       });

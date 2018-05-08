@@ -1,21 +1,21 @@
 const fs = require('fs-extra');
-const lockFiles = require('../../../../lib/workers/branch/lock-files');
+const lockFiles = require('../../../../lib/manager/npm/post-update');
 const defaultConfig = require('../../../../lib/config/defaults').getConfig();
 // const upath = require('upath');
 
-const npm = require('../../../../lib/workers/branch/lock-files/npm');
-const yarn = require('../../../../lib/workers/branch/lock-files/yarn');
-const pnpm = require('../../../../lib/workers/branch/lock-files/pnpm');
-const lerna = require('../../../../lib/workers/branch/lock-files/lerna');
+const npm = require('../../../../lib/manager/npm/post-update/npm');
+const yarn = require('../../../../lib/manager/npm/post-update/yarn');
+const pnpm = require('../../../../lib/manager/npm/post-update/pnpm');
+const lerna = require('../../../../lib/manager/npm/post-update/lerna');
 
 const {
   // determineLockFileDirs,
   // writeExistingFiles,
   writeUpdatedPackageFiles,
-  getUpdatedLockFiles,
+  getAdditionalFiles,
 } = lockFiles;
 
-describe('workers/branch/lock-files', () => {
+describe('manager/npm/post-update', () => {
   /*
   describe('determineLockFileDirs', () => {
     let config;
@@ -283,7 +283,7 @@ describe('workers/branch/lock-files', () => {
       expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
     });
   });
-  describe('getUpdatedLockFiles', () => {
+  describe('getAdditionalFiles', () => {
     let config;
     beforeEach(() => {
       config = {
@@ -311,7 +311,7 @@ describe('workers/branch/lock-files', () => {
     });
     it('returns no error and empty lockfiles if updateLockFiles false', async () => {
       config.updateLockFiles = false;
-      const res = await getUpdatedLockFiles(config);
+      const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(0);
@@ -320,7 +320,7 @@ describe('workers/branch/lock-files', () => {
       config.type = 'lockFileMaintenance';
       config.parentBranch = 'renovate/lock-file-maintenance';
       platform.branchExists.mockReturnValueOnce(true);
-      const res = await getUpdatedLockFiles(config);
+      const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(0);
@@ -334,7 +334,7 @@ describe('workers/branch/lock-files', () => {
         pnpmShrinkwrapDirs: [],
         lernaDirs: [],
       });
-      const res = await getUpdatedLockFiles(config);
+      const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(0);
@@ -347,7 +347,7 @@ describe('workers/branch/lock-files', () => {
         pnpmShrinkwrapDirs: ['e'],
         lernaDirs: [],
       });
-      const res = await getUpdatedLockFiles(config);
+      const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(0);
@@ -366,7 +366,7 @@ describe('workers/branch/lock-files', () => {
       config.packageFiles = [];
       config.lernaLockFile = 'npm';
       lerna.generateLockFiles.mockReturnValueOnce({ error: false });
-      const res = await getUpdatedLockFiles(config);
+      const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();
     });
     it('tries lerna yarn', async () => {
@@ -379,7 +379,7 @@ describe('workers/branch/lock-files', () => {
       });
       config.lernaLockFile = 'yarn';
       lerna.generateLockFiles.mockReturnValueOnce({ error: true });
-      const res = await getUpdatedLockFiles(config);
+      const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();
     });
     it('sets error if receiving null', async () => {
@@ -393,7 +393,7 @@ describe('workers/branch/lock-files', () => {
       npm.generateLockFile.mockReturnValueOnce({ error: true });
       yarn.generateLockFile.mockReturnValueOnce({ error: true });
       pnpm.generateLockFile.mockReturnValueOnce({ error: true });
-      const res = await getUpdatedLockFiles(config);
+      const res = await getAdditionalFiles(config);
       expect(res.lockFileErrors).toHaveLength(3);
       expect(res.updatedLockFiles).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(3);
@@ -411,7 +411,7 @@ describe('workers/branch/lock-files', () => {
       npm.generateLockFile.mockReturnValueOnce('some new lock file contents');
       yarn.generateLockFile.mockReturnValueOnce('some new lock file contents');
       pnpm.generateLockFile.mockReturnValueOnce('some new lock file contents');
-      const res = await getUpdatedLockFiles(config);
+      const res = await getAdditionalFiles(config);
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(3);
       expect(npm.generateLockFile.mock.calls).toHaveLength(3);
