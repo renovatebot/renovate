@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles content change 1`] = `
+Object {
+  "parentBranch": undefined,
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "some new content",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles empty 1`] = `
+Object {
+  "parentBranch": undefined,
+  "updatedPackageFiles": Array [],
+}
+`;
