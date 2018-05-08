@@ -1,4 +1,4 @@
-const lernaHelper = require('../../../lib/workers/branch/lerna');
+const lernaHelper = require('../../../../lib/workers/branch/lock-files/lerna');
 
 jest.mock('child-process-promise');
 
