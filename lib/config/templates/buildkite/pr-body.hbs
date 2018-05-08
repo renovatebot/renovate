@@ -1,4 +1,6 @@
-This Pull Request updates buildkite plugin {{#if repositoryUrl}}[{{{depName}}}]({{{repositoryUrl}}}){{else}}`{{{depName}}}`{{/if}} from `{{{currentVersion}}}` to `{{{newVersion}}}`.
+This Pull Request updates buildkite plugin {{#if repositoryUrl}}[{{{depName}}}]({{{repositoryUrl}}}){{else}}`{{{depName}}}`{{/if}} from `{{{currentVersion}}}` to `{{{newVersion}}}` ([release notes]({{{repositoryUrl}}}/releases/tag/{{{newVersion}}})).
+
+[Compare source commits]({{{repositoryUrl}}}/compare/{{{currentVersion}}}...{{{newVersion}}})
 
 {{#if releases.length}}
 
@@ -17,7 +19,9 @@ This Pull Request updates buildkite plugin {{#if repositoryUrl}}[{{{depName}}}](
 {{#each releases as |release|}}
 {{#if release.releaseNotes}}
 ### [`v{{{release.version}}}`]({{{release.releaseNotes.url}}})
-
+{{#if release.compare.url}}
+[Compare Source]({{release.compare.url}})
+{{/if}}
 {{{release.releaseNotes.body}}}
 
 ---
@@ -27,22 +31,6 @@ This Pull Request updates buildkite plugin {{#if repositoryUrl}}[{{{depName}}}](
 </details>
 {{/if}}
 
-{{#if hasCommits}}
-
-<details>
-<summary>Commits</summary>
-
-{{#each releases as |release|}}
-{{#if release.hasCommits}}
-#### v{{{release.version}}}
-{{#each release.commits as |commit|}}
--   [`{{commit.shortSha}}`]({{commit.url}}) {{commit.message}}
-{{/each}}
-{{/if}}
-{{/each}}
-
-</details>
-{{/if}}
 {{/if}}
 
 {{#if hasErrors}}

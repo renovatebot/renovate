@@ -5,7 +5,6 @@ Array [
   Object {
     "currentVersion": "0.3.1",
     "depName": "some-package",
-    "depType": "python",
     "lineNumber": 2,
   },
 ]

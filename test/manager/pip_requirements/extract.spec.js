@@ -14,8 +14,11 @@ describe('lib/manager/pip_requirements/extract', () => {
     beforeEach(() => {
       config = {};
     });
+    it('returns null for empty', () => {
+      expect(extractDependencies('nothing here', config)).toBe(null);
+    });
     it('extracts dependencies', () => {
-      const res = extractDependencies(requirements, config);
+      const res = extractDependencies(requirements, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });

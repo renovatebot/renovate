@@ -31,11 +31,10 @@ Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
   "<p>This Merge Request updates dependency <a href=\\"https://github.com/renovateapp/dummy\\">dummy</a> from <code>v1.0.0</code> to <code>v1.1.0</code></p>
-<h1>Commits</h1>
-**v1.1.0**
-<ul>
-<li><a href=\\"https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz\\"><code>abcdefg</code></a> foo <a href=\\"https://github.com/renovateapp/dummy/issues/3\\">#3</a></li>
-</ul>
+<h1>Release Notes</h1>
+<h3 id=\\"v110httpsgithubcomrenovateappdummycomparev100v110\\"><a href=\\"https://github.com/renovateapp/dummy/compare/v1.0.0…v1.1.0\\"><code>v1.1.0</code></a></h3>
+<p><a href=\\"https://github.com/renovateapp/dummy/compare/v1.0.0…v1.1.0\\">Compare Source</a></p>
+<hr />
 <p></details></p>",
   Array [],
   false,
@@ -51,12 +50,14 @@ Array [
 
 
 
-
 <details>
-<summary>Commits</summary>
+<summary>Release Notes</summary>
 
-#### v1.1.0
--   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
+### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
+[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
+
+
+---
 
 </details>",
   Array [],
@@ -73,12 +74,14 @@ Array [
 
 
 
-
 <details>
-<summary>Commits</summary>
+<summary>Release Notes</summary>
 
-#### v1.1.0
--   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo #&#8203;3
+### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
+[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
+
+
+---
 
 </details>",
   Array [],
@@ -93,12 +96,14 @@ Object {
 
 
 
-
 <details>
-<summary>Commits</summary>
+<summary>Release Notes</summary>
 
-#### v1.1.0
--   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
+### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
+[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
+
+
+---
 
 </details>",
   "displayNumber": "Existing PR",
@@ -112,12 +117,14 @@ Object {
 
 
 
-
 <details>
-<summary>Commits</summary>
+<summary>Release Notes</summary>
 
-#### v1.1.0
--   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
+### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
+[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
+
+
+---
 
 </details>",
   "displayNumber": "Existing PR",
@@ -136,11 +143,13 @@ Array [
 
 
 
+**Release Notes**
 
-**Commits**
+### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
+[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
-#### v1.1.0
--   [\`abcdefg\`](https://github.com/renovateapp/dummy/commit/abcdefghijklmnopqrstuvwxyz) foo [#3](https://github.com/renovateapp/dummy/issues/3)
+
+---
 
 ",
   Array [],

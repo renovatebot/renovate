@@ -150,18 +150,6 @@ describe('workers/branch', () => {
       platform.branchExists.mockReturnValueOnce(false);
       expect(await branchWorker.processBranch(config)).toEqual('no-work');
     });
-    it('returns delete if existing lock file maintenace is pointless', async () => {
-      manager.getUpdatedPackageFiles.mockReturnValueOnce({
-        updatedPackageFiles: [],
-      });
-      lockFiles.getUpdatedLockFiles.mockReturnValueOnce({
-        lockFileError: false,
-        updatedLockFiles: [],
-      });
-      config.type = 'lockFileMaintenance';
-      platform.branchExists.mockReturnValueOnce(true);
-      expect(await branchWorker.processBranch(config)).toEqual('delete');
-    });
     it('returns if branch automerged', async () => {
       manager.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],

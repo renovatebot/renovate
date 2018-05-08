@@ -27,25 +27,21 @@ describe('lib/workers/package-file/dep-type', () => {
       expect(res).toMatchObject([]);
     });
     it('returns empty if no deps found', async () => {
-      npmExtract.extractDependencies.mockReturnValueOnce([]);
+      npmExtract.extractDependencies.mockReturnValueOnce(null);
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toMatchObject([]);
     });
     it('returns empty if all deps are filtered', async () => {
-      npmExtract.extractDependencies.mockReturnValueOnce([
-        { depName: 'a' },
-        { depName: 'b' },
-        { depName: 'e' },
-      ]);
+      npmExtract.extractDependencies.mockReturnValueOnce({
+        deps: [{ depName: 'a' }, { depName: 'b' }, { depName: 'e' }],
+      });
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toMatchObject([]);
     });
     it('returns combined upgrades if all deps are filtered', async () => {
-      npmExtract.extractDependencies.mockReturnValueOnce([
-        { depName: 'a' },
-        { depName: 'c' },
-        { depName: 'd' },
-      ]);
+      npmExtract.extractDependencies.mockReturnValueOnce({
+        deps: [{ depName: 'a' }, { depName: 'c' }, { depName: 'd' }],
+      });
       const res = await depTypeWorker.renovateDepType({}, config);
       expect(res).toHaveLength(2);
     });
@@ -160,7 +156,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
       expect(res.y).toBe(2);
-      expect(res.packageRules).toBeUndefined();
     });
     it('applies both rules for b', () => {
       const dep = {
@@ -169,7 +164,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBe(2);
       expect(res.y).toBe(2);
-      expect(res.packageRules).toBeUndefined();
     });
     it('applies the second rule', () => {
       const dep = {
@@ -178,7 +172,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBe(2);
-      expect(res.packageRules).toBeUndefined();
     });
     it('applies the second second rule', () => {
       const dep = {
@@ -187,7 +180,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBe(2);
-      expect(res.packageRules).toBeUndefined();
     });
     it('excludes package name', () => {
       const dep = {
@@ -196,7 +188,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBeUndefined();
-      expect(res.packageRules).toBeUndefined();
     });
     it('excludes package pattern', () => {
       const dep = {
@@ -205,7 +196,6 @@ describe('lib/workers/package-file/dep-type', () => {
       const res = depTypeWorker.getDepConfig(depTypeConfig, dep);
       expect(res.x).toBeUndefined();
       expect(res.y).toBeUndefined();
-      expect(res.packageRules).toBeUndefined();
     });
     it('filters depType', () => {
       const config = {
@@ -223,7 +213,6 @@ describe('lib/workers/package-file/dep-type', () => {
       };
       const res = depTypeWorker.getDepConfig(config, dep);
       expect(res.x).toBe(1);
-      expect(res.packageRules).toBeUndefined();
     });
     it('filters naked depType', () => {
       const config = {
@@ -240,7 +229,6 @@ describe('lib/workers/package-file/dep-type', () => {
       };
       const res = depTypeWorker.getDepConfig(config, dep);
       expect(res.x).toBe(1);
-      expect(res.packageRules).toBeUndefined();
     });
     it('filters depType', () => {
       const config = {
@@ -258,7 +246,6 @@ describe('lib/workers/package-file/dep-type', () => {
       };
       const res = depTypeWorker.getDepConfig(config, dep);
       expect(res.x).toBeUndefined();
-      expect(res.packageRules).toBeUndefined();
     });
     it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', () => {
       const config = {

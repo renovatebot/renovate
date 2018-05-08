@@ -21,7 +21,7 @@ describe('manager/npm/extract', () => {
       const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input01Content),
         config
-      );
+      ).deps;
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(6);
     });
@@ -32,7 +32,7 @@ describe('manager/npm/extract', () => {
       const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input01Content),
         config
-      );
+      ).deps;
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(4);
     });
@@ -43,7 +43,7 @@ describe('manager/npm/extract', () => {
       const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input01Content),
         config
-      );
+      ).deps;
       expect(extractedDependencies).toMatchSnapshot();
       extractedDependencies
         .every(dep => dep.depType && dep.depName && dep.currentVersion)
@@ -56,7 +56,7 @@ describe('manager/npm/extract', () => {
       const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input02Content),
         config
-      );
+      ).deps;
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(6);
     });
@@ -67,7 +67,7 @@ describe('manager/npm/extract', () => {
       const extractedDependencies = npmExtract.extractDependencies(
         JSON.parse(input02Content),
         config
-      );
+      ).deps;
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(0);
     });
@@ -82,7 +82,7 @@ describe('manager/npm/extract', () => {
       const extractedDependencies = npmExtract.extractDependencies(
         { dependencies: { chalk: '^2.0.0', foo: '^1.0.0' } },
         config
-      );
+      ).deps;
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(2);
       expect(extractedDependencies[0].lockedVersion).toBeDefined();
@@ -99,7 +99,7 @@ describe('manager/npm/extract', () => {
       const extractedDependencies = npmExtract.extractDependencies(
         { dependencies: { chalk: '^2.0.0', foo: '^1.0.0' } },
         config
-      );
+      ).deps;
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(2);
       expect(extractedDependencies[0].lockedVersion).toBeDefined();
@@ -113,7 +113,7 @@ describe('manager/npm/extract', () => {
       const extractedDependencies = npmExtract.extractDependencies(
         { dependencies: { chalk: '^2.0.0', foo: '^1.0.0' } },
         config
-      );
+      ).deps;
       extractedDependencies.should.be.instanceof(Array);
       extractedDependencies.should.have.length(2);
       expect(extractedDependencies[0].lockedVersion).toBeUndefined();

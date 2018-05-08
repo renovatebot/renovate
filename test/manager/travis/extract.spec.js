@@ -6,9 +6,9 @@ describe('lib/manager/travis/extract', () => {
     beforeEach(() => {
       config = {};
     });
-    it('returns empty if fails to pass', () => {
+    it('returns empty if fails to parse', () => {
       const res = extractDependencies('blahhhhh:foo:@what\n', config);
-      expect(res).toEqual([]);
+      expect(res).toBe(null);
     });
   });
 });

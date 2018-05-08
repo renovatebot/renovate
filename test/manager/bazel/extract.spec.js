@@ -12,20 +12,20 @@ describe('lib/manager/bazel/extract', () => {
     beforeEach(() => {
       config = {};
     });
-    it('returns empty if fails to pass', () => {
+    it('returns empty if fails to parse', () => {
       const res = extractDependencies('blahhhhh:foo:@what\n', config);
-      expect(res).toEqual([]);
+      expect(res).toBe(null);
     });
     it('returns empty if cannot parse dependency', () => {
       const res = extractDependencies(
         'git_repository(\n  nothing\n)\n',
         config
       );
-      expect(res).toEqual([]);
+      expect(res).toBe(null);
     });
     it('extracts multiple types of dependencies', () => {
       const res = extractDependencies(workspaceFile, config);
-      expect(res).toMatchSnapshot();
+      expect(res.deps).toMatchSnapshot();
     });
   });
 });
