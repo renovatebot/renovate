@@ -7,6 +7,15 @@ Object {
       "deps": Array [
         Object {
           "depName": "aaa",
+          "depType": "devDependencies",
+          "updates": Array [
+            "a",
+            "b",
+          ],
+        },
+        Object {
+          "depName": "bbb",
+          "depType": "dependencies",
           "updates": Array [
             "a",
             "b",
@@ -14,6 +23,7 @@ Object {
         },
       ],
       "packageFile": "package.json",
+      "packageJsonType": "app",
     },
   ],
 }
