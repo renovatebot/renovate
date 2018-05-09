@@ -121,7 +121,7 @@ Object {
       "depType": "devDependencies",
     },
   ],
-  "lernaClient": undefined,
+  "lernaClient": "npm",
   "lernaDir": ".",
   "lernaPackages": undefined,
   "npmLock": undefined,
