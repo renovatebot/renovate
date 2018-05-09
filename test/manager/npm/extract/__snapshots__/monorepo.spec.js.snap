@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/npm/extract .extractDependencies() uses lerna package settings 1`] = `
+Array [
+  Object {
+    "lernaDir": ".",
+    "lernaPackages": Array [
+      "packages/*",
+    ],
+    "packageFile": "package.json",
+  },
+  Object {
+    "lernaDir": ".",
+    "monorepoPackages": Array [
+      "@org/b",
+    ],
+    "npmLock": undefined,
+    "packageFile": "packages/a/package.json",
+    "packageJsonName": "@org/a",
+    "yarnLock": undefined,
+  },
+  Object {
+    "lernaDir": ".",
+    "monorepoPackages": Array [
+      "@org/a",
+    ],
+    "npmLock": undefined,
+    "packageFile": "packages/b/package.json",
+    "packageJsonName": "@org/b",
+    "yarnLock": undefined,
+  },
+]
+`;
+
+exports[`manager/npm/extract .extractDependencies() uses yarn workspaces package settings 1`] = `
+Array [
+  Object {
+    "lernaClient": "yarn",
+    "lernaDir": ".",
+    "lernaPackages": Array [
+      "oldpackages/*",
+    ],
+    "packageFile": "package.json",
+    "yarnWorkspacesPackages": Array [
+      "packages/*",
+    ],
+  },
+  Object {
+    "lernaDir": ".",
+    "monorepoPackages": Array [
+      "@org/b",
+    ],
+    "npmLock": undefined,
+    "packageFile": "packages/a/package.json",
+    "packageJsonName": "@org/a",
+    "yarnLock": undefined,
+  },
+  Object {
+    "lernaDir": ".",
+    "monorepoPackages": Array [
+      "@org/a",
+    ],
+    "npmLock": undefined,
+    "packageFile": "packages/b/package.json",
+    "packageJsonName": "@org/b",
+    "yarnLock": undefined,
+  },
+]
+`;

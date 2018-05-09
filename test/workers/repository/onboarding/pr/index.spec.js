@@ -17,11 +17,15 @@ describe('workers/repository/onboarding/pr', () => {
         warnings: [],
         description: [],
       };
-      packageFiles = [{ packageFile: 'package.json' }];
+      packageFiles = { npm: [{ packageFile: 'package.json' }] };
       branches = [];
       platform.createPr.mockReturnValue({});
     });
     let createPrBody;
+    it('returns if onboarded', async () => {
+      config.repoIsOnboarded = true;
+      await ensureOnboardingPr(config, packageFiles, branches);
+    });
     it('creates PR', async () => {
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr.mock.calls).toHaveLength(1);
