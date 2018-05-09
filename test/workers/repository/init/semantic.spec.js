@@ -8,7 +8,7 @@ beforeEach(() => {
 
 const {
   detectSemanticCommits,
-} = require('../../../../lib/workers/repository/updates/semantic');
+} = require('../../../../lib/workers/repository/init/semantic');
 
 describe('workers/repository/init/semantic', () => {
   describe('detectSemanticCommits()', () => {
