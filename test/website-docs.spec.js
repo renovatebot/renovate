@@ -51,4 +51,18 @@ describe('docs', () => {
   it('has headers for every required sub-option', () => {
     expect(headers3).toEqual(expectedOptions3);
   });
+
+  // Checking relatedOptions field in definitions
+  let relatedOptions = options
+    .filter(option => option.relatedOptions)
+    .map(option => option.relatedOptions)
+    .sort();
+
+  relatedOptions = [].concat(...relatedOptions);
+
+  const allOptionNames = options.map(option => option.name).sort();
+
+  it('has valid relateOptions values', () => {
+    expect(allOptionNames).toEqual(expect.arrayContaining(relatedOptions));
+  });
 });
