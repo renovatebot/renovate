@@ -97,7 +97,7 @@ describe('manager/npm/post-update', () => {
       expect(res.yarnLockDirs[0]).toEqual('.');
     });
     it('returns root directory if using lerna package lock', () => {
-      config.lernaLockFile = 'yarn';
+      config.lernaClient = 'yarn';
       config.upgrades = [{}];
       config.packageFiles = [
         {
@@ -364,7 +364,7 @@ describe('manager/npm/post-update', () => {
         lernaDirs: ['.'],
       });
       config.packageFiles = [];
-      config.lernaLockFile = 'npm';
+      config.lernaClient = 'npm';
       lerna.generateLockFiles.mockReturnValueOnce({ error: false });
       const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();
@@ -377,7 +377,7 @@ describe('manager/npm/post-update', () => {
         pnpmShrinkwrapDirs: [],
         lernaDirs: ['.'],
       });
-      config.lernaLockFile = 'yarn';
+      config.lernaClient = 'yarn';
       lerna.generateLockFiles.mockReturnValueOnce({ error: true });
       const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();

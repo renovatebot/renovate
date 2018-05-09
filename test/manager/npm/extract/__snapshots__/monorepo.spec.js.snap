@@ -10,6 +10,7 @@ Array [
     "packageFile": "package.json",
   },
   Object {
+    "lernaClient": undefined,
     "lernaDir": ".",
     "monorepoPackages": Array [
       "@org/b",
@@ -20,6 +21,7 @@ Array [
     "yarnLock": undefined,
   },
   Object {
+    "lernaClient": undefined,
     "lernaDir": ".",
     "monorepoPackages": Array [
       "@org/a",
@@ -46,6 +48,7 @@ Array [
     ],
   },
   Object {
+    "lernaClient": "yarn",
     "lernaDir": ".",
     "monorepoPackages": Array [
       "@org/b",
@@ -56,6 +59,7 @@ Array [
     "yarnLock": undefined,
   },
   Object {
+    "lernaClient": "yarn",
     "lernaDir": ".",
     "monorepoPackages": Array [
       "@org/a",
