@@ -254,15 +254,15 @@ ansi-styles@^3.2.1:
   dependencies:
     color-convert "^1.9.0"
 
-ansicolors@^0.3.2, ansicolors@~0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/ansicolors/-/ansicolors-0.3.2.tgz#665597de86a9ffe3aa9bfbe6cae5c6ea426b4979"
-
 ansicolors@~0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/ansicolors/-/ansicolors-0.2.1.tgz#be089599097b74a5c9c4a84a0cdbcdb62bd87aef"
 
-ansistyles@^0.1.3, ansistyles@~0.1.3:
+ansicolors@~0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/ansicolors/-/ansicolors-0.3.2.tgz#665597de86a9ffe3aa9bfbe6cae5c6ea426b4979"
+
+ansistyles@~0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/ansistyles/-/ansistyles-0.1.3.tgz#5de60415bda071bb37127854c864f41b23254539"
 
@@ -1190,7 +1190,7 @@ configstore@^3.0.0:
     write-file-atomic "^2.0.0"
     xdg-basedir "^3.0.0"
 
-console-control-strings@^1.0.0, console-control-strings@~1.1.0:
+console-control-strings@^1.0.0, console-control-strings@^1.1.0, console-control-strings@~1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
 
@@ -1396,7 +1396,7 @@ debug@3.1.0, debug@^3.1.0:
   dependencies:
     ms "2.0.0"
 
-debuglog@^1.0.1:
+debuglog@*, debuglog@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/debuglog/-/debuglog-1.0.1.tgz#aa24ffb9ac3df9a2351837cfb2d279360cd78492"
 
@@ -2790,7 +2790,7 @@ import-local@^1.0.0:
     pkg-dir "^2.0.0"
     resolve-cwd "^2.0.0"
 
-imurmurhash@^0.1.4:
+imurmurhash@*, imurmurhash@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
 
@@ -3815,13 +3815,26 @@ lock-verify@^2.0.0:
     npm-package-arg "^5.1.2"
     semver "^5.4.1"
 
-lockfile@~1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/lockfile/-/lockfile-1.0.3.tgz#2638fc39a0331e9cac1a04b71799931c9c50df79"
+lock-verify@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/lock-verify/-/lock-verify-2.0.2.tgz#148e4f85974915c9e3c34d694b7de9ecb18ee7a8"
+  dependencies:
+    npm-package-arg "^5.1.2 || 6"
+    semver "^5.4.1"
+
+lockfile@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/lockfile/-/lockfile-1.0.4.tgz#07f819d25ae48f87e538e6578b6964a4981a5609"
+  dependencies:
+    signal-exit "^3.0.2"
 
 lodash._basecopy@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/lodash._basecopy/-/lodash._basecopy-3.0.1.tgz#8da0e6a876cf344c0ad8a54882111dd3c5c7ca36"
+
+lodash._baseindexof@*:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/lodash._baseindexof/-/lodash._baseindexof-3.1.0.tgz#fe52b53a1c6761e42618d654e4a25789ed61822c"
 
 lodash._basetostring@^3.0.0:
   version "3.0.1"
@@ -3838,11 +3851,25 @@ lodash._basevalues@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/lodash._basevalues/-/lodash._basevalues-3.0.0.tgz#5b775762802bde3d3297503e26300820fdf661b7"
 
+lodash._bindcallback@*:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/lodash._bindcallback/-/lodash._bindcallback-3.0.1.tgz#e531c27644cf8b57a99e17ed95b35c748789392e"
+
+lodash._cacheindexof@*:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/lodash._cacheindexof/-/lodash._cacheindexof-3.0.2.tgz#3dc69ac82498d2ee5e3ce56091bafd2adc7bde92"
+
+lodash._createcache@*:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/lodash._createcache/-/lodash._createcache-3.1.2.tgz#56d6a064017625e79ebca6b8018e17440bdcf093"
+  dependencies:
+    lodash._getnative "^3.0.0"
+
 lodash._createset@~4.0.0:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/lodash._createset/-/lodash._createset-4.0.3.tgz#0f4659fbb09d75194fa9e2b88a6644d363c9fe26"
 
-lodash._getnative@^3.0.0:
+lodash._getnative@*, lodash._getnative@^3.0.0:
   version "3.9.1"
   resolved "https://registry.yarnpkg.com/lodash._getnative/-/lodash._getnative-3.9.1.tgz#570bc7dede46d61cdcde687d65d3eecbaa3aaff5"
 
@@ -3888,7 +3915,7 @@ lodash.keys@^3.0.0:
     lodash.isarguments "^3.0.0"
     lodash.isarray "^3.0.0"
 
-lodash.restparam@^3.0.0:
+lodash.restparam@*, lodash.restparam@^3.0.0:
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/lodash.restparam/-/lodash.restparam-3.6.1.tgz#936a4e309ef330a7645ed4145986c85ae5b20805"
 
@@ -4521,13 +4548,12 @@ normalize-url@^2.0.1:
     query-string "^5.0.1"
     sort-keys "^2.0.0"
 
-npm-audit-report@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/npm-audit-report/-/npm-audit-report-1.0.5.tgz#f16fa7c61459dd660913509685193148ce2cd85f"
+npm-audit-report@^1.0.8:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/npm-audit-report/-/npm-audit-report-1.0.9.tgz#0fe93c36e0d10cf6cf2033572138014f2e64b4ec"
   dependencies:
-    ansicolors "^0.3.2"
-    ansistyles "^0.1.3"
     cli-table2 "^0.2.0"
+    console-control-strings "^1.1.0"
 
 npm-bundled@^1.0.1:
   version "1.0.3"
@@ -4591,7 +4617,7 @@ npm-package-arg@^5.1.2:
     semver "^5.1.0"
     validate-npm-package-name "^3.0.0"
 
-npm-package-arg@^6.1.0:
+"npm-package-arg@^5.1.2 || 6", npm-package-arg@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/npm-package-arg/-/npm-package-arg-6.1.0.tgz#15ae1e2758a5027efb4c250554b85a737db7fcc1"
   dependencies:
@@ -4670,9 +4696,9 @@ npm-user-validate@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.0.tgz#8ceca0f5cea04d4e93519ef72d0557a75122e951"
 
-npm@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-6.0.0.tgz#f5518c860ab91586db2a24aad4de1433cda108d9"
+npm@6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-6.0.1.tgz#13b8850d5521daf39924600ad87220fcb6636d81"
   dependencies:
     JSONStream "^1.3.2"
     abbrev "~1.1.1"
@@ -4692,6 +4718,7 @@ npm@6.0.0:
     cmd-shim "~2.0.2"
     columnify "~1.5.4"
     config-chain "~1.1.11"
+    debuglog "*"
     detect-indent "~5.0.0"
     detect-newline "^2.1.0"
     dezalgo "~1.0.3"
@@ -4706,6 +4733,7 @@ npm@6.0.0:
     has-unicode "~2.0.1"
     hosted-git-info "^2.6.0"
     iferr "^1.0.0"
+    imurmurhash "*"
     inflight "~1.0.6"
     inherits "~2.0.3"
     ini "^1.3.5"
@@ -4716,9 +4744,16 @@ npm@6.0.0:
     libcipm "^1.6.2"
     libnpmhook "^4.0.1"
     libnpx "^10.2.0"
-    lockfile "~1.0.3"
+    lock-verify "^2.0.2"
+    lockfile "^1.0.4"
+    lodash._baseindexof "*"
     lodash._baseuniq "~4.6.0"
+    lodash._bindcallback "*"
+    lodash._cacheindexof "*"
+    lodash._createcache "*"
+    lodash._getnative "*"
     lodash.clonedeep "~4.5.0"
+    lodash.restparam "*"
     lodash.union "~4.6.0"
     lodash.uniq "~4.5.0"
     lodash.without "~4.4.0"
@@ -4730,7 +4765,7 @@ npm@6.0.0:
     node-gyp "^3.6.2"
     nopt "~4.0.1"
     normalize-package-data "~2.4.0"
-    npm-audit-report "^1.0.5"
+    npm-audit-report "^1.0.8"
     npm-cache-filename "~1.0.2"
     npm-install-checks "~3.0.0"
     npm-lifecycle "^2.0.1"
@@ -4745,11 +4780,11 @@ npm@6.0.0:
     once "~1.4.0"
     opener "~1.4.3"
     osenv "^0.1.5"
-    pacote "^8.1.0"
+    pacote "^8.1.1"
     path-is-inside "~1.0.2"
     promise-inflight "~1.0.1"
     qrcode-terminal "^0.12.0"
-    query-string "^6.0.0"
+    query-string "^6.1.0"
     qw "~1.0.1"
     read "~1.0.7"
     read-cmd-shim "~1.0.1"
@@ -4757,10 +4792,11 @@ npm@6.0.0:
     read-package-json "^2.0.13"
     read-package-tree "^5.2.1"
     readable-stream "^2.3.6"
+    readdir-scoped-modules "*"
     request "^2.85.0"
     retry "^0.12.0"
     rimraf "~2.6.2"
-    safe-buffer "~5.1.1"
+    safe-buffer "^5.1.2"
     semver "^5.5.0"
     sha "~2.0.1"
     slide "~1.1.6"
@@ -4768,14 +4804,14 @@ npm@6.0.0:
     sorted-union-stream "~2.1.3"
     ssri "^6.0.0"
     strip-ansi "~4.0.0"
-    tar "^4.4.1"
+    tar "^4.4.2"
     text-table "~0.2.0"
     tiny-relative-date "^1.3.0"
     uid-number "0.0.6"
     umask "~1.1.0"
     unique-filename "~1.1.0"
     unpipe "~1.0.0"
-    update-notifier "^2.4.0"
+    update-notifier "^2.5.0"
     uuid "^3.2.1"
     validate-npm-package-license "^3.0.3"
     validate-npm-package-name "~3.0.0"
@@ -5028,7 +5064,7 @@ pacote@^7.5.1:
     unique-filename "^1.1.0"
     which "^1.3.0"
 
-pacote@^8.1.0:
+pacote@^8.1.1:
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/pacote/-/pacote-8.1.1.tgz#7ee85dad2bccf5524e5460508f833c60dddf5183"
   dependencies:
@@ -5388,9 +5424,9 @@ query-string@^5.0.1:
     object-assign "^4.1.0"
     strict-uri-encode "^1.0.0"
 
-query-string@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.0.0.tgz#8b8f39447b73e8290d6f5e3581779218e9171142"
+query-string@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.1.0.tgz#01e7d69f6a0940dac67a937d6c6325647aa4532a"
   dependencies:
     decode-uri-component "^0.2.0"
     strict-uri-encode "^2.0.0"
@@ -5550,7 +5586,7 @@ readable-stream@~1.1.10:
     isarray "0.0.1"
     string_decoder "~0.10.x"
 
-readdir-scoped-modules@^1.0.0:
+readdir-scoped-modules@*, readdir-scoped-modules@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/readdir-scoped-modules/-/readdir-scoped-modules-1.0.2.tgz#9fafa37d286be5d92cbaebdee030dc9b5f406747"
   dependencies:
@@ -5866,6 +5902,10 @@ rx-lite@*, rx-lite@^4.0.8:
 safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
+
+safe-buffer@^5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
 
 safe-json-stringify@~1:
   version "1.0.4"
@@ -6474,6 +6514,18 @@ tar@^4.4.0, tar@^4.4.1:
     safe-buffer "^5.1.1"
     yallist "^3.0.2"
 
+tar@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.2.tgz#60685211ba46b38847b1ae7ee1a24d744a2cd462"
+  dependencies:
+    chownr "^1.0.1"
+    fs-minipass "^1.2.5"
+    minipass "^2.2.4"
+    minizlib "^1.1.0"
+    mkdirp "^0.5.0"
+    safe-buffer "^5.1.2"
+    yallist "^3.0.2"
+
 term-size@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/term-size/-/term-size-1.2.0.tgz#458b83887f288fc56d6fffbfad262e26638efa69"
@@ -6730,7 +6782,7 @@ update-notifier@^2.3.0:
     semver-diff "^2.0.0"
     xdg-basedir "^3.0.0"
 
-update-notifier@^2.4.0:
+update-notifier@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/update-notifier/-/update-notifier-2.5.0.tgz#d0744593e13f161e406acb1d9408b72cad08aff6"
   dependencies:
