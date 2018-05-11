@@ -64,7 +64,7 @@
     "detect-indent": "5.0.0",
     "email-addresses": "3.0.1",
     "fast-clone": "1.5.3",
-    "fs-extra": "6.0.0",
+    "fs-extra": "6.0.1",
     "get-installed-path": "4.0.8",
     "gh-got": "7.0.0",
     "github-url-from-git": "1.5.0",
@@ -81,7 +81,7 @@
     "minimatch": "3.0.4",
     "moment": "2.22.1",
     "moment-timezone": "0.5.16",
-    "npm": "6.0.0",
+    "npm": "6.0.1",
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-link-header": "1.0.1",
@@ -104,7 +104,7 @@
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "codecov": "3.0.2",
-    "cross-env": "5.1.4",
+    "cross-env": "5.1.5",
     "eslint": "4.19.1",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-config-prettier": "2.9.0",
@@ -174,7 +174,7 @@
     "tag": "latest"
   },
   "release": {
-    "branch": "master",
+    "branch": "stable",
     "tagFormat": "${version}",
     "analyzeCommits": {
       "preset": "angular",

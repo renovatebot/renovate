@@ -49,11 +49,16 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[2].updates).toHaveLength(0);
     });
     it('fetches updates', async () => {
+      config.pinVersions = null;
       const packageFiles = {
         npm: [
           {
             packageFile: 'package.json',
-            deps: [{ depName: 'aaa' }],
+            packageJsonType: 'app',
+            deps: [
+              { depName: 'aaa', depType: 'devDependencies' },
+              { depName: 'bbb', depType: 'dependencies' },
+            ],
           },
         ],
       };

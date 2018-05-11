@@ -311,7 +311,7 @@ describe('manager/npm/post-update', () => {
     });
     it('returns no error and empty lockfiles if updateLockFiles false', async () => {
       config.updateLockFiles = false;
-      const res = await getAdditionalFiles(config);
+      const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(0);
@@ -320,7 +320,7 @@ describe('manager/npm/post-update', () => {
       config.type = 'lockFileMaintenance';
       config.parentBranch = 'renovate/lock-file-maintenance';
       platform.branchExists.mockReturnValueOnce(true);
-      const res = await getAdditionalFiles(config);
+      const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toMatchSnapshot();
       expect(res.lockFileErrors).toHaveLength(0);
       expect(res.updatedLockFiles).toHaveLength(0);
