@@ -58,11 +58,34 @@ describe('docs', () => {
     .map(option => option.relatedOptions)
     .sort();
 
-  relatedOptions = [].concat(...relatedOptions);
+  relatedOptions = [].concat(...relatedOptions); // Converts the matrix to an 1D array
+  relatedOptions = [...new Set(relatedOptions)]; // Makes all options unique
+
+  /*
+    Matcher which checks if the argument is within the received array (or string)
+    on an error, it throws a custom message.
+  */
+  expect.extend({
+    toContainOption(received, argument) {
+      if (received.includes(argument)) {
+        return {
+          message: () => `Option "${argument}" should be within definitions`,
+          pass: true,
+        };
+      }
+      return {
+        message: () => `Option "${argument}" doesn't exist within definitions`,
+        pass: false,
+      };
+    },
+  });
 
   const allOptionNames = options.map(option => option.name).sort();
 
+  // Lists through each option in the relatedOptions array to be able to locate the exact element which causes error, in case of one
   it('has valid relateOptions values', () => {
-    expect(allOptionNames).toEqual(expect.arrayContaining(relatedOptions));
+    relatedOptions.forEach(relOption => {
+      expect(allOptionNames).toContainOption(relOption);
+    });
   });
 });
