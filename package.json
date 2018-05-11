@@ -48,7 +48,7 @@
     "node": ">= 8.11.0"
   },
   "dependencies": {
-    "@yarnpkg/lockfile": "1.0.0",
+    "@yarnpkg/lockfile": "1.0.1",
     "bunyan": "1.8.12",
     "cacache": "11.0.2",
     "chalk": "2.4.1",
