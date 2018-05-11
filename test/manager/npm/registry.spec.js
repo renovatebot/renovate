@@ -187,6 +187,7 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
   });
   it('should cache package info from npm', async () => {
+    npm.setNpmrc('//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz');
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
