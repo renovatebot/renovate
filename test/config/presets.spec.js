@@ -107,7 +107,7 @@ describe('config/presets', () => {
       config.extends = [':pinVersions'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.pinVersions).toBe(true);
+      expect(res.rangeStrategy).toEqual('pin');
     });
     it('throws if valid and invalid', async () => {
       config.foo = 1;

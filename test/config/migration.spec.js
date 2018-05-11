@@ -283,8 +283,8 @@ describe('config/migration', () => {
       expect(migratedConfig.includePaths).toHaveLength(4);
       expect(migratedConfig.packageFiles).toBeUndefined();
       expect(migratedConfig.packageRules).toHaveLength(4);
-      expect(migratedConfig.packageRules[0].pinVersions).toBe(false);
-      expect(migratedConfig.packageRules[1].pinVersions).toBe(true);
+      expect(migratedConfig.packageRules[0].rangeStrategy).toBe('upgrade');
+      expect(migratedConfig.packageRules[1].rangeStrategy).toBe('pin');
     });
     it('it migrates more packageFiles', () => {
       const config = {
