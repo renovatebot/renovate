@@ -129,7 +129,7 @@ Object {
       "paths": Array [
         "package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
     Object {
       "depTypeList": Array [
@@ -138,7 +138,7 @@ Object {
       "paths": Array [
         "package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
   ],
 }
@@ -171,13 +171,13 @@ Object {
       "paths": Array [
         "backend/package.json",
       ],
-      "pinVersions": false,
+      "rangeStrategy": "upgrade",
     },
     Object {
       "paths": Array [
         "frontend/package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
     Object {
       "depTypeList": Array [
@@ -186,7 +186,7 @@ Object {
       "paths": Array [
         "other/package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
     Object {
       "depTypeList": Array [
@@ -195,7 +195,7 @@ Object {
       "paths": Array [
         "other/package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
   ],
 }

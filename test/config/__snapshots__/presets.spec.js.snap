@@ -76,7 +76,7 @@ Object {
   "description": Array [
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
-  "pinVersions": true,
+  "rangeStrategy": "pin",
 }
 `;
 
@@ -287,13 +287,13 @@ Object {
       "packagePatterns": Array [
         "*",
       ],
-      "pinVersions": false,
+      "rangeStrategy": "upgrade",
     },
     Object {
       "depTypeList": Array [
         "devDependencies",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
   ],
   "prCreation": "immediate",
@@ -670,6 +670,6 @@ Object {
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
   "foo": 1,
-  "pinVersions": true,
+  "rangeStrategy": "pin",
 }
 `;
