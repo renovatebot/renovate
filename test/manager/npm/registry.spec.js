@@ -200,7 +200,9 @@ describe('api/npm', () => {
     nock('https://npm.mycustomregistry.com')
       .get('/foobar')
       .reply(200, npmResponse);
-    npm.setNpmrc('registry=https://npm.mycustomregistry.com/');
+    npm.setNpmrc(
+      'registry=https://npm.mycustomregistry.com/\n//npm.mycustomregistry.com/:_auth = abcdef'
+    );
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });
