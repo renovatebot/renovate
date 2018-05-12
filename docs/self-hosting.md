@@ -1,6 +1,6 @@
 # Self-Hosting Renovate
 
-## Open Source vs Comercial versions
+## Open Source vs Commercial versions
 
 Although Renovate is now best known as a "service" via the GitHub App, that service is actually running this same open source project, so you can get the same functionality if running it yourself. The version you see here in this repository can be cloned or `npm` installed in seconds and give you the exact core functionality as in the app.
 

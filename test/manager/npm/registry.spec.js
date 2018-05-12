@@ -187,6 +187,7 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
   });
   it('should cache package info from npm', async () => {
+    npm.setNpmrc('//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz');
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
@@ -199,7 +200,9 @@ describe('api/npm', () => {
     nock('https://npm.mycustomregistry.com')
       .get('/foobar')
       .reply(200, npmResponse);
-    npm.setNpmrc('registry=https://npm.mycustomregistry.com/');
+    npm.setNpmrc(
+      'registry=https://npm.mycustomregistry.com/\n//npm.mycustomregistry.com/:_auth = abcdef'
+    );
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });

@@ -48,7 +48,7 @@
     "node": ">= 8.11.0"
   },
   "dependencies": {
-    "@yarnpkg/lockfile": "1.0.0",
+    "@yarnpkg/lockfile": "1.0.1",
     "bunyan": "1.8.12",
     "cacache": "11.0.2",
     "chalk": "2.4.1",
@@ -80,7 +80,7 @@
     "markdown-it": "8.4.1",
     "minimatch": "3.0.4",
     "moment": "2.22.1",
-    "moment-timezone": "0.5.16",
+    "moment-timezone": "0.5.17",
     "npm": "6.0.1",
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
@@ -97,6 +97,7 @@
     "tmp-promise": "1.0.4",
     "traverse": "0.6.6",
     "upath": "1.0.5",
+    "validator": "10.2.0",
     "vso-node-api": "6.5.0",
     "yarn": "1.6.0"
   },
@@ -114,7 +115,7 @@
     "mockdate": "2.0.2",
     "nock": "9.2.5",
     "prettier": "1.12.1",
-    "semantic-release": "15.4.0"
+    "semantic-release": "15.4.1"
   },
   "files": [
     "bin/config-validator.js",
@@ -171,10 +172,10 @@
     "semanticCommitScope": null
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "next"
   },
   "release": {
-    "branch": "stable",
+    "branch": "master",
     "tagFormat": "${version}",
     "analyzeCommits": {
       "preset": "angular",
