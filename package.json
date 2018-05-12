@@ -80,7 +80,7 @@
     "markdown-it": "8.4.1",
     "minimatch": "3.0.4",
     "moment": "2.22.1",
-    "moment-timezone": "0.5.16",
+    "moment-timezone": "0.5.17",
     "npm": "6.0.1",
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
