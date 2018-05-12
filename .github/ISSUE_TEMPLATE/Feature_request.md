@@ -1,7 +1,6 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-
 ---
 
 **What would you like Renovate to be able to do?**
