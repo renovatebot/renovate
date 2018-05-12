@@ -61,7 +61,7 @@ Object {
           "updates": Array [],
         },
       ],
-      "monorepoPackages": Array [
+      "internalPackages": Array [
         "zzzz",
       ],
       "packageFile": "package.json",

@@ -35,7 +35,7 @@ describe('workers/repository/process/fetch', () => {
               { depName: 'zzzz' },
               { depName: 'foo' },
             ],
-            monorepoPackages: ['zzzz'],
+            internalPackages: ['zzzz'],
           },
         ],
       };

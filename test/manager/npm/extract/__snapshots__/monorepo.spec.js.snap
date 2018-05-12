@@ -12,7 +12,7 @@ Array [
   Object {
     "lernaClient": undefined,
     "lernaDir": ".",
-    "monorepoPackages": Array [
+    "internalPackages": Array [
       "@org/b",
     ],
     "npmLock": undefined,
@@ -23,7 +23,7 @@ Array [
   Object {
     "lernaClient": undefined,
     "lernaDir": ".",
-    "monorepoPackages": Array [
+    "internalPackages": Array [
       "@org/a",
     ],
     "npmLock": undefined,
@@ -50,7 +50,7 @@ Array [
   Object {
     "lernaClient": "yarn",
     "lernaDir": ".",
-    "monorepoPackages": Array [
+    "internalPackages": Array [
       "@org/b",
     ],
     "npmLock": undefined,
@@ -61,7 +61,7 @@ Array [
   Object {
     "lernaClient": "yarn",
     "lernaDir": ".",
-    "monorepoPackages": Array [
+    "internalPackages": Array [
       "@org/a",
     ],
     "npmLock": undefined,
