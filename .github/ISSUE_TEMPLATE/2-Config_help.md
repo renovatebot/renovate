@@ -1,6 +1,6 @@
 ---
 name: Configuration help
-about: Please create an issue in renovatebot/config-help instead if you want config help or to ask a question.
+about: Please create an issue in renovatebot/config-help instead
 ---
 
 Stop!
