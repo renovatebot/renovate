@@ -448,10 +448,6 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 By default, Renovate will add sha256 digests to Docker source images so that they are then "immutable". Set this to false to continue using only tags to identify source images.
 
-## pinVersions
-
-This is a very important feature to consider, because not every repository's requirements are the same. The default value within the tool itself is false, which means no existing ranges are pinned. However if you are using the suggested preset `"config:base"`, then it changes the default of pinVersions to `null`, which means Renovate attempts to autodetect what's best for the project. In such cases `devDependencies` in `package.json` will alway be pinned, but `dependencies` will only be pinned if the package is `private` or has no `main` entry defined - both indicators that it is not intended to be published and consumed by other packages. To override the `"config:base"` setting, add the preset `":preserveSemverRanges"` to your `extends` array.
-
 ## pip_requirements
 
 ## prBody
@@ -493,6 +489,32 @@ If you set `prCreation=not-pending`, then Renovate will wait until tests are non
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
 ## python
+
+## rangeStrategy
+
+Behaviour:
+
+* `auto` = Renovate decides (this will be done on a manager-by-manager basis)
+* `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
+* `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
+* `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
+* `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
+
+Renovate's "auto" strategy works like this for npm:
+
+1.  Always pin `devDependencies`
+2.  Pin `dependencies` if we detect that it's an app and not a library
+3.  Widen `peerDependencies`
+4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
+5.  Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
+
+**bump**
+
+By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open. As such, Renovate won't deliberately "narrow" any range by increasing the semver value inside.
+
+For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything because `1.2.0` satisfies the range. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `rangeStrategy` to `bump` in your Renovate config.
+
+This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`. It is not compatible with `pinVersions=true`.
 
 ## rebaseStalePrs
 
@@ -628,26 +650,5 @@ This field is currently used by some config prefixes.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
-
-## upgradeInRange
-
-By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open. As such, Renovate won't deliberately "narrow" the range by increasing the semver value inside.
-
-For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `upgradeInRange` to `true` in your Renovate config.
-
-This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`. It is not compatible with `pinVersions=true`.
-
-## versionStrategy
-
-npm-only.
-
-Renovate's "auto" strategy for updating versions is like this:
-
-1.  If the existing version already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
-2.  Otherwise, replace it. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
-
-You can override logic either way, by setting it to `replace` or `widen`. e.g. if the currentVersion is `"^1.0.0 || ^2.0.0"` but you configure `versionStrategy=replace` then the result will be `"^3.0.0"`.
-
-Or for example if you configure all `peerDependencies` with `versionStrategy=widen` and have `"react": "^15.0.0"` as current version then it will be updated to `"react": "^15.0.0 || ^16.0.0"`.
 
 ## yarnrc
