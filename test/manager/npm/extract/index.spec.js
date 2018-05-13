@@ -19,25 +19,32 @@ describe('manager/npm/extract', () => {
     it('returns null if cannot parse', async () => {
       const res = await npmExtract.extractDependencies(
         'not json',
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toBe(null);
     });
     it('returns null if no deps', async () => {
-      const res = await npmExtract.extractDependencies('{}', 'package.json');
+      const res = await npmExtract.extractDependencies(
+        '{}',
+        'package.json',
+        {}
+      );
       expect(res).toBe(null);
     });
     it('handles invalid', async () => {
       const res = await npmExtract.extractDependencies(
         '{"dependencies": true, "devDependencies": []}',
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toBe(null);
     });
     it('returns an array of dependencies', async () => {
       const res = await npmExtract.extractDependencies(
         input01Content,
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toMatchSnapshot();
     });
@@ -50,7 +57,8 @@ describe('manager/npm/extract', () => {
       });
       const res = await npmExtract.extractDependencies(
         input01Content,
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toMatchSnapshot();
     });
@@ -63,7 +71,8 @@ describe('manager/npm/extract', () => {
       });
       const res = await npmExtract.extractDependencies(
         input01Content,
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toMatchSnapshot();
     });
