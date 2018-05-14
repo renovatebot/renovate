@@ -19,25 +19,45 @@ describe('manager/npm/extract', () => {
     it('returns null if cannot parse', async () => {
       const res = await npmExtract.extractDependencies(
         'not json',
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toBe(null);
     });
+    it('throws error if non-root renovate config', async () => {
+      let e;
+      try {
+        await npmExtract.extractDependencies(
+          '{ "renovate": {} }',
+          'backend/package.json',
+          {}
+        );
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
     it('returns null if no deps', async () => {
-      const res = await npmExtract.extractDependencies('{}', 'package.json');
+      const res = await npmExtract.extractDependencies(
+        '{ "renovate": {} }',
+        'package.json',
+        {}
+      );
       expect(res).toBe(null);
     });
     it('handles invalid', async () => {
       const res = await npmExtract.extractDependencies(
         '{"dependencies": true, "devDependencies": []}',
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toBe(null);
     });
     it('returns an array of dependencies', async () => {
       const res = await npmExtract.extractDependencies(
         input01Content,
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toMatchSnapshot();
     });
@@ -50,9 +70,25 @@ describe('manager/npm/extract', () => {
       });
       const res = await npmExtract.extractDependencies(
         input01Content,
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toMatchSnapshot();
+    });
+    it('finds and discards .npmrc', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === '.npmrc') {
+          // eslint-disable-next-line
+          return '//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractDependencies(
+        input01Content,
+        'package.json',
+        { global: {} }
+      );
+      expect(res.npmrc).toBeUndefined();
     });
     it('finds lerna', async () => {
       platform.getFile = jest.fn(fileName => {
@@ -63,7 +99,8 @@ describe('manager/npm/extract', () => {
       });
       const res = await npmExtract.extractDependencies(
         input01Content,
-        'package.json'
+        'package.json',
+        {}
       );
       expect(res).toMatchSnapshot();
     });
