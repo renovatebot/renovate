@@ -75,6 +75,21 @@ describe('manager/npm/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('finds and discards .npmrc', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === '.npmrc') {
+          // eslint-disable-next-line
+          return '//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractDependencies(
+        input01Content,
+        'package.json',
+        { global: {} }
+      );
+      expect(res.npmrc).toBeUndefined();
+    });
     it('finds lerna', async () => {
       platform.getFile = jest.fn(fileName => {
         if (fileName === 'lerna.json') {
