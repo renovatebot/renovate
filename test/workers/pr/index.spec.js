@@ -6,6 +6,7 @@ jest.mock('../../../lib/workers/pr/changelog');
 changelogHelper.getChangeLogJSON = jest.fn();
 changelogHelper.getChangeLogJSON.mockReturnValue({
   project: {
+    githubBaseURL: 'https://github.com/',
     github: 'renovateapp/dummy',
     repository: 'https://github.com/renovateapp/dummy',
   },
