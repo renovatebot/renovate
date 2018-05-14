@@ -33,7 +33,11 @@ describe('workers/pr/release-notes', () => {
       ghGot.mockReturnValueOnce({
         body: [{ tag_name: 'v1.0.0' }, { tag_name: 'v1.0.1' }],
       });
-      const res = await getReleaseNotes('some/repository', '1.0.0');
+      const res = await getReleaseNotes(
+        'some/repository',
+        '1.0.0',
+        'https://github.com/'
+      );
       expect(res).toMatchSnapshot();
     });
   });
