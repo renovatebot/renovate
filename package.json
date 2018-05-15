@@ -96,7 +96,7 @@
     "slugify": "1.3.0",
     "tmp-promise": "1.0.4",
     "traverse": "0.6.6",
-    "upath": "1.0.5",
+    "upath": "1.1.0",
     "validator": "10.2.0",
     "vso-node-api": "6.5.0",
     "yarn": "1.6.0"
