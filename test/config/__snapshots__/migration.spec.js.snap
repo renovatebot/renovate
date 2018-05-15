@@ -79,6 +79,12 @@ Object {
     },
     Object {
       "depTypeList": Array [
+        "peerDependencies",
+      ],
+      "rangeStrategy": "widen",
+    },
+    Object {
+      "depTypeList": Array [
         "devDependencies",
       ],
       "major": Object {
@@ -107,6 +113,7 @@ Object {
     "automerge": true,
   },
   "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title",
+  "rangeStrategy": "bump",
   "schedule": "on the first day of the month",
   "semanticCommitScope": "deps",
   "semanticCommitType": "fix",

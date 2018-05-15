@@ -13,6 +13,7 @@ describe('config/migration', () => {
         automergeMajor: false,
         automergeMinor: true,
         automergePatch: true,
+        upgradeInRange: true,
         baseBranch: 'next',
         ignoreNodeModules: true,
         node: {
@@ -30,6 +31,9 @@ describe('config/migration', () => {
             extends: ['foo'],
           },
         ],
+        peerDependencies: {
+          versionStrategy: 'widen',
+        },
         packageRules: [
           {
             packagePatterns: '^(@angular|typescript)',
@@ -81,7 +85,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.automerge).toEqual(false);
-      expect(migratedConfig.packageRules).toHaveLength(6);
+      expect(migratedConfig.packageRules).toHaveLength(7);
     });
     it('migrates before and after schedules', () => {
       const config = {
