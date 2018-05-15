@@ -2,8 +2,8 @@
 
 exports[`config/index .parseConfigs(env, defaultArgv) resolves all presets: foo/bar 1`] = `
 Object {
+  "automerge": false,
   "repository": "foo/bar",
-  "upgradeInRange": false,
 }
 `;
 
@@ -180,7 +180,6 @@ Object {
     "unpublishSafe": false,
   },
   "pinDigests": true,
-  "pinVersions": false,
   "pip_requirements": Object {
     "enabled": false,
     "fileMatch": Array [
@@ -197,6 +196,7 @@ Object {
   "prTitle": null,
   "privateKey": null,
   "python": Object {},
+  "rangeStrategy": "auto",
   "rebaseStalePrs": null,
   "recreateClosed": false,
   "renovateFork": false,
@@ -224,8 +224,6 @@ Object {
   "unstablePattern": null,
   "updateLockFiles": true,
   "updateNotScheduled": true,
-  "upgradeInRange": false,
-  "versionStrategy": "auto",
   "yarnrc": null,
 }
 `;
@@ -245,7 +243,7 @@ Object {
   "description": Array [
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
-  "pinVersions": true,
+  "rangeStrategy": "pin",
   "repository": "renovateapp/renovate",
 }
 `;

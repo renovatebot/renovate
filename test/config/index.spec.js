@@ -199,7 +199,7 @@ describe('config/index', () => {
       expect(get.mock.calls.length).toBe(0);
     });
     it('resolves all presets', async () => {
-      defaultArgv.push('--pr-hourly-limit=10', '--upgrade-in-range=false');
+      defaultArgv.push('--pr-hourly-limit=10', '--automerge=false');
       const env = {
         GITHUB_TOKEN: 'abc',
         RENOVATE_CONFIG_FILE: require.resolve(
@@ -218,7 +218,7 @@ describe('config/index', () => {
       expect(actual.minor.automerge).toBeUndefined();
       expect(actual.major.automerge).toBeUndefined();
       expect(actual.prHourlyLimit).toBe(10);
-      expect(actual.upgradeInRange).toBe(false);
+      expect(actual.automerge).toBe(false);
       actual.repositories.forEach(repo => {
         if (typeof repo === 'object') {
           expect(repo).toMatchSnapshot(repo.repository);

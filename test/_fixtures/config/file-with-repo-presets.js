@@ -1,13 +1,13 @@
 module.exports = {
   logLevel: 'error',
   extends: [':prHourlyLimit1', ':automergePatch'],
-  upgradeInRange: true,
+  automerge: true,
   separatePatchReleases: true,
   repositories: [
     'bar/baz',
     {
       repository: 'foo/bar',
-      upgradeInRange: false,
+      automerge: false,
     },
     {
       repository: 'renovateapp/renovate',
