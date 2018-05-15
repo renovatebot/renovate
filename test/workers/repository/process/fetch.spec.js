@@ -43,7 +43,9 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles.npm[0].deps[0].skipReason).toEqual('ignored');
       expect(packageFiles.npm[0].deps[0].updates).toHaveLength(0);
-      expect(packageFiles.npm[0].deps[1].skipReason).toEqual('monorepo');
+      expect(packageFiles.npm[0].deps[1].skipReason).toEqual(
+        'internal-package'
+      );
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
       expect(packageFiles.npm[0].deps[2].skipReason).toEqual('disabled');
       expect(packageFiles.npm[0].deps[2].updates).toHaveLength(0);
