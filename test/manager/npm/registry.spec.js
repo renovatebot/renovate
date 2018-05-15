@@ -169,6 +169,10 @@ describe('api/npm', () => {
     process.env.NPM_TOKEN = oldToken;
     expect(res).toMatchSnapshot();
   });
+  it('resets npmrc', () => {
+    npm.setNpmrc('something=something');
+    npm.setNpmrc();
+  });
   it('should use default registry if missing from npmrc', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')

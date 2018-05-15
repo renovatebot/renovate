@@ -56,7 +56,7 @@
     "child-process-promise": "2.2.1",
     "clean-git-ref": "1.0.3",
     "commander": "2.15.1",
-    "compare-versions": "3.2.0",
+    "compare-versions": "3.2.1",
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
     "deepcopy": "0.6.3",
@@ -113,7 +113,7 @@
     "eslint-plugin-promise": "3.7.0",
     "jest": "22.4.3",
     "mockdate": "2.0.2",
-    "nock": "9.2.5",
+    "nock": "9.2.6",
     "prettier": "1.12.1",
     "semantic-release": "15.4.1"
   },
