@@ -52,7 +52,7 @@ Object {
         },
         Object {
           "depName": "zzzz",
-          "skipReason": "monorepo",
+          "skipReason": "internal-package",
           "updates": Array [],
         },
         Object {
