@@ -10,22 +10,22 @@ Array [
     "packageFile": "package.json",
   },
   Object {
-    "lernaClient": undefined,
-    "lernaDir": ".",
     "internalPackages": Array [
       "@org/b",
     ],
+    "lernaClient": undefined,
+    "lernaDir": ".",
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
     "yarnLock": undefined,
   },
   Object {
-    "lernaClient": undefined,
-    "lernaDir": ".",
     "internalPackages": Array [
       "@org/a",
     ],
+    "lernaClient": undefined,
+    "lernaDir": ".",
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
@@ -48,22 +48,22 @@ Array [
     ],
   },
   Object {
-    "lernaClient": "yarn",
-    "lernaDir": ".",
     "internalPackages": Array [
       "@org/b",
     ],
+    "lernaClient": "yarn",
+    "lernaDir": ".",
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
     "yarnLock": undefined,
   },
   Object {
-    "lernaClient": "yarn",
-    "lernaDir": ".",
     "internalPackages": Array [
       "@org/a",
     ],
+    "lernaClient": "yarn",
+    "lernaDir": ".",
     "npmLock": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
