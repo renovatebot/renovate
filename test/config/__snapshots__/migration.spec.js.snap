@@ -171,7 +171,7 @@ Object {
       "paths": Array [
         "backend/package.json",
       ],
-      "rangeStrategy": "upgrade",
+      "rangeStrategy": "replace",
     },
     Object {
       "paths": Array [

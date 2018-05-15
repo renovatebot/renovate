@@ -233,7 +233,7 @@ describe('config/index', () => {
       const parentConfig = { ...defaultConfig };
       const childConfig = {
         foo: 'bar',
-        rangeStrategy: 'upgrade',
+        rangeStrategy: 'replace',
         lockFileMaintenance: {
           schedule: ['on monday'],
         },
@@ -241,7 +241,7 @@ describe('config/index', () => {
       const configParser = require('../../lib/config/index.js');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.foo).toEqual('bar');
-      expect(config.rangeStrategy).toEqual('upgrade');
+      expect(config.rangeStrategy).toEqual('replace');
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
       expect(config.lockFileMaintenance).toMatchSnapshot();
     });
