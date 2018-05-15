@@ -415,11 +415,11 @@ Use this field if you want to have one or more exact name matches in your packag
 ```
   "packageRules": [{
     "packageNames": ["angular"],
-    "pinVersions": true
+    "rangeStrategy": "pin"
   }]
 ```
 
-The above will enable `pinVersions` for the package `angular`.
+The above will enable set `rangeStrategy` to `pin` only for the package `angular`.
 
 ### packagePatterns
 
@@ -428,11 +428,11 @@ Use this field if you want to have one or more package names patterns in your pa
 ```
   "packageRules": [{
     "packageNames": ["^angular"],
-    "pinVersions": false
+    "rangeStrategy": "replace"
   }]
 ```
 
-The above will enable `pinVersions` for any package starting with `angular`.
+The above will set `rangeStrategy` to `replace` for any package starting with `angular`.
 
 ## patch
 
