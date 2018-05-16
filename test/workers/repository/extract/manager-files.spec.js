@@ -24,9 +24,16 @@ describe('workers/repository/extract/manager-files', () => {
       const res = await getManagerPackageFiles(config, managerConfig);
       expect(res).toHaveLength(0);
     });
+    it('skips files if null content returned', async () => {
+      const managerConfig = { manager: 'npm', enabled: true };
+      fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
+      const res = await getManagerPackageFiles(config, managerConfig);
+      expect(res).toHaveLength(0);
+    });
     it('returns files', async () => {
       const managerConfig = { manager: 'npm', enabled: true };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
+      platform.getFile.mockReturnValue('{}');
       npm.extractDependencies = jest.fn(() => ({ some: 'result' }));
       const res = await getManagerPackageFiles(config, managerConfig);
       expect(res).toMatchSnapshot();
