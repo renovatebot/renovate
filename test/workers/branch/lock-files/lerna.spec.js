@@ -5,6 +5,10 @@ jest.mock('child-process-promise');
 const { exec } = require('child-process-promise');
 
 describe('generateLockFiles()', () => {
+  it('returns if no lernaClient', async () => {
+    const res = await lernaHelper.generateLockFiles(undefined, 'some-dir', {});
+    expect(res.error).toBe(false);
+  });
   it('generates package-lock.json files', async () => {
     platform.getFile.mockReturnValueOnce(
       JSON.stringify({ dependencies: { lerna: '2.0.0' } })

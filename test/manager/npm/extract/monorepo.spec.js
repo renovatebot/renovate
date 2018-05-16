@@ -23,7 +23,7 @@ describe('manager/npm/extract', () => {
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
-      expect(packageFiles[1].monorepoPackages).toEqual(['@org/b']);
+      expect(packageFiles[1].internalPackages).toEqual(['@org/b']);
     });
     it('uses yarn workspaces package settings', async () => {
       const packageFiles = [
@@ -46,7 +46,7 @@ describe('manager/npm/extract', () => {
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
-      expect(packageFiles[1].monorepoPackages).toEqual(['@org/b']);
+      expect(packageFiles[1].internalPackages).toEqual(['@org/b']);
     });
   });
 });
