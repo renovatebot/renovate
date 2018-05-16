@@ -74,6 +74,22 @@ describe('platform/gh-got-wrapper', () => {
     }
     expect(e).toBeDefined();
   });
+  it('should throw Bad credentials', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        statusCode: 401,
+        message: 'Bad credentials. (401)',
+      })
+    );
+    let e;
+    try {
+      await get('some-url');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('bad-credentials');
+  });
   it('should retry 502s', async () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
@@ -118,8 +134,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
-        statusCode: 401,
-        message: 'Bad credentials',
+        statusCode: 502,
       })
     );
     ghGot.mockImplementationOnce(() =>
