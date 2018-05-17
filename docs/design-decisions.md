@@ -74,7 +74,7 @@ and 2.0.0 exist, then `renovate` will raise PRs for both the 1.x upgrade(s) and
 * Projects should get Minor and Patch updates for their current Major release
   even if a new Major release exists
 
-This can be overridden via the config option `separateMajorReleases`.
+This can be overridden via the config option `separateMajorMinor`.
 
 ## Branch naming
 

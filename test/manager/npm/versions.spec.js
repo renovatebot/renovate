@@ -98,12 +98,12 @@ describe('manager/npm/versions', () => {
       expect(res).toMatchSnapshot();
     });
     it('disables major release separation (major)', () => {
-      config.separateMajorReleases = false;
+      config.separateMajorMinor = false;
       config.currentVersion = '^0.4.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('disables major release separation (minor)', () => {
-      config.separateMajorReleases = false;
+      config.separateMajorMinor = false;
       config.currentVersion = '1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });

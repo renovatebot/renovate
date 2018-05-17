@@ -117,6 +117,7 @@ Object {
   "schedule": "on the first day of the month",
   "semanticCommitScope": "deps",
   "semanticCommitType": "fix",
+  "separateMajorMinor": true,
   "separateMultipleMajor": true,
   "travis": Object {
     "enabled": true,

@@ -207,7 +207,7 @@ Object {
   "semanticCommitScope": "deps",
   "semanticCommitType": "chore",
   "semanticCommits": null,
-  "separateMajorReleases": true,
+  "separateMajorMinor": true,
   "separateMultipleMajor": false,
   "separatePatchReleases": true,
   "statusCheckVerify": false,

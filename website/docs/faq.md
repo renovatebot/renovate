@@ -112,7 +112,7 @@ at the top level of your `renovate.json` or `package.json`.
 
 ### Use separate branches per dependency, but not one per major release
 
-Set configuration option `separateMajorReleases` to `false`.
+Set configuration option `separateMajorMinor` to `false`.
 
 ### Keep using semver ranges, instead of pinning dependencies
 

@@ -304,7 +304,7 @@ Object {
     "before 8am",
   ],
   "semanticCommits": true,
-  "separateMajorReleases": true,
+  "separateMajorMinor": true,
   "separatePatchReleases": false,
   "timezone": "Asia/Taipei",
   "unpublishSafe": false,

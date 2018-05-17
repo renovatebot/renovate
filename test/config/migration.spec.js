@@ -10,6 +10,7 @@ describe('config/migration', () => {
         maintainYarnLock: true,
         onboarding: 'false',
         multipleMajorPrs: true,
+        separateMajorReleases: true,
         automerge: 'none',
         automergeMajor: false,
         automergeMinor: true,
