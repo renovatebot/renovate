@@ -141,7 +141,6 @@ Object {
   },
   "minor": Object {},
   "mirrorMode": false,
-  "multipleMajorPrs": false,
   "node": Object {
     "group": Object {
       "commitMessageTopic": "Node.js",
@@ -209,6 +208,7 @@ Object {
   "semanticCommitType": "chore",
   "semanticCommits": null,
   "separateMajorReleases": true,
+  "separateMultipleMajor": false,
   "separatePatchReleases": true,
   "statusCheckVerify": false,
   "supportPolicy": Array [],

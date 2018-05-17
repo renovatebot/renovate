@@ -9,6 +9,7 @@ describe('config/migration', () => {
         extends: [':js-app', 'config:library'],
         maintainYarnLock: true,
         onboarding: 'false',
+        multipleMajorPrs: true,
         automerge: 'none',
         automergeMajor: false,
         automergeMinor: true,

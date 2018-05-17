@@ -353,7 +353,7 @@ describe('manager/npm/versions', () => {
     });
     it('should upgrade to two majors', () => {
       config.currentVersion = '1.0.0';
-      config.multipleMajorPrs = true;
+      config.separateMultipleMajor = true;
       const res = versions.determineUpgrades(webpackJson, config);
       expect(res).toHaveLength(3);
     });
