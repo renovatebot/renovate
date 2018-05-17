@@ -10,7 +10,7 @@ let config;
 describe('manager/npm/versions', () => {
   beforeEach(() => {
     config = { ...require('../../../lib/config/defaults').getConfig() };
-    config.pinVersions = true;
+    config.rangeStrategy = 'pin';
   });
 
   describe('.determineUpgrades(npmDep, config)', () => {
@@ -85,25 +85,25 @@ describe('manager/npm/versions', () => {
       expect(res).toMatchSnapshot();
       expect(res[0].type).toEqual('minor');
     });
-    it('returns patch update if separatePatchReleases', () => {
-      config.separatePatchReleases = true;
+    it('returns patch update if separateMinorPatch', () => {
+      config.separateMinorPatch = true;
       config.currentVersion = '0.9.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('returns patch minor and major', () => {
-      config.separatePatchReleases = true;
+      config.separateMinorPatch = true;
       config.currentVersion = '0.8.0';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toHaveLength(3);
       expect(res).toMatchSnapshot();
     });
     it('disables major release separation (major)', () => {
-      config.separateMajorReleases = false;
+      config.separateMajorMinor = false;
       config.currentVersion = '^0.4.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('disables major release separation (minor)', () => {
-      config.separateMajorReleases = false;
+      config.separateMajorMinor = false;
       config.currentVersion = '1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
@@ -120,27 +120,23 @@ describe('manager/npm/versions', () => {
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('widens minor ranged versions if configured', () => {
-      config.pinVersions = false;
       config.currentVersion = '~1.3.0';
-      config.versionStrategy = 'widen';
+      config.rangeStrategy = 'widen';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('replaces minor complex ranged versions if configured', () => {
-      config.pinVersions = false;
       config.currentVersion = '~1.2.0 || ~1.3.0';
-      config.versionStrategy = 'replace';
+      config.rangeStrategy = 'replace';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('widens major ranged versions if configured', () => {
-      config.pinVersions = false;
       config.currentVersion = '^2.0.0';
-      config.versionStrategy = 'widen';
+      config.rangeStrategy = 'widen';
       expect(versions.determineUpgrades(webpackJson, config)).toMatchSnapshot();
     });
     it('replaces major complex ranged versions if configured', () => {
-      config.pinVersions = false;
       config.currentVersion = '^1.0.0 || ^2.0.0';
-      config.versionStrategy = 'replace';
+      config.rangeStrategy = 'replace';
       expect(versions.determineUpgrades(webpackJson, config)).toMatchSnapshot();
     });
     it('pins minor ranged versions', () => {
@@ -153,7 +149,7 @@ describe('manager/npm/versions', () => {
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('ignores minor ranged versions when not pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '^1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toHaveLength(0);
     });
@@ -166,115 +162,115 @@ describe('manager/npm/versions', () => {
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('upgrades tilde ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '~1.3.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('upgrades .x major ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '0.x';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('upgrades .x minor ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '1.3.x';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('upgrades shorthand major ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('upgrades shorthand minor ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '1.3';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('upgrades multiple tilde ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '~0.7.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('upgrades multiple caret ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '^0.7.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('supports complex ranges', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'widen';
       config.currentVersion = '^0.7.0 || ^0.8.0';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toHaveLength(2);
       expect(res[0]).toMatchSnapshot();
     });
     it('supports complex major ranges', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'widen';
       config.currentVersion = '^1.0.0 || ^2.0.0';
       const res = versions.determineUpgrades(webpackJson, config);
       expect(res).toMatchSnapshot();
     });
     it('supports complex major hyphen ranges', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'widen';
       config.currentVersion = '1.x - 2.x';
       const res = versions.determineUpgrades(webpackJson, config);
       expect(res).toMatchSnapshot();
     });
     it('widens .x OR ranges', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'widen';
       config.currentVersion = '1.x || 2.x';
       const res = versions.determineUpgrades(webpackJson, config);
       expect(res).toMatchSnapshot();
     });
     it('widens stanndalone major OR ranges', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'widen';
       config.currentVersion = '1 || 2';
       const res = versions.determineUpgrades(webpackJson, config);
       expect(res).toMatchSnapshot();
     });
     it('supports complex tilde ranges', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'widen';
       config.currentVersion = '~1.2.0 || ~1.3.0';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toMatchSnapshot();
     });
     it('returns nothing for greater than ranges', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '>= 0.7.0';
       expect(versions.determineUpgrades(qJson, config)).toHaveLength(0);
     });
     it('upgrades less than equal ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '<= 0.7.2';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('upgrades less than ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '< 0.7.2';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('upgrades major less than equal ranges', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '<= 1.0.0';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toMatchSnapshot();
       expect(res[0].newVersion).toEqual('<= 2.0.0');
     });
     it('upgrades major less than ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '< 1.0.0';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toMatchSnapshot();
       expect(res[0].newVersion).toEqual('< 2.0.0');
     });
     it('upgrades major greater than less than ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '>= 0.5.0 < 1.0.0';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toMatchSnapshot();
       expect(res[0].newVersion).toEqual('>= 0.5.0 < 2.0.0');
     });
     it('upgrades minor greater than less than ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '>= 0.5.0 <0.8';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toMatchSnapshot();
@@ -282,7 +278,7 @@ describe('manager/npm/versions', () => {
       expect(res[1].newVersion).toEqual('>= 0.5.0 <1.5');
     });
     it('upgrades minor greater than less than equals ranges without pinning', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '>= 0.5.0 <= 0.8.0';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toMatchSnapshot();
@@ -290,7 +286,7 @@ describe('manager/npm/versions', () => {
       expect(res[1].newVersion).toEqual('>= 0.5.0 <= 1.5.0');
     });
     it('rejects reverse ordered less than greater than', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '<= 0.8.0 >= 0.5.0';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toMatchSnapshot();
@@ -335,12 +331,12 @@ describe('manager/npm/versions', () => {
       ).toMatchSnapshot();
     });
     it('should treat zero zero tilde ranges as 0.0.x', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '~0.0.34';
       expect(versions.determineUpgrades(helmetJson, config)).toEqual([]);
     });
     it('should treat zero zero caret ranges as pinned', () => {
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       config.currentVersion = '^0.0.34';
       expect(versions.determineUpgrades(helmetJson, config)).toMatchSnapshot();
     });
@@ -357,42 +353,38 @@ describe('manager/npm/versions', () => {
     });
     it('should upgrade to two majors', () => {
       config.currentVersion = '1.0.0';
-      config.multipleMajorPrs = true;
+      config.separateMultipleMajor = true;
       const res = versions.determineUpgrades(webpackJson, config);
       expect(res).toHaveLength(3);
     });
     it('does not jump  major unstable', () => {
       config.currentVersion = '^4.4.0-canary.3';
-      config.pinVersions = false;
+      config.rangeStrategy = 'replace';
       const res = versions.determineUpgrades(nextJson, config);
       expect(res).toHaveLength(0);
     });
     it('supports in-range updates', () => {
-      config.upgradeInRange = true;
+      config.rangeStrategy = 'bump';
       config.currentVersion = '~1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('rejects in-range unsupported operator', () => {
-      config.upgradeInRange = true;
-      config.pinVersions = false;
+      config.rangeStrategy = 'bump';
       config.currentVersion = '>=1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('rejects non-fully specified in-range updates', () => {
-      config.upgradeInRange = true;
-      config.pinVersions = false;
+      config.rangeStrategy = 'bump';
       config.currentVersion = '1.x';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('rejects complex range in-range updates', () => {
-      config.upgradeInRange = true;
-      config.pinVersions = false;
+      config.rangeStrategy = 'bump';
       config.currentVersion = '^0.9.0 || ^1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('rejects non-range in-range updates', () => {
-      config.upgradeInRange = true;
-      config.pinVersions = false;
+      config.rangeStrategy = 'bump';
       config.currentVersion = '1.0.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });

@@ -284,10 +284,6 @@ Set enabled to `true` to enable meteor package updating.
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
-## multipleMajorPrs
-
-Set this to true if you wish to receive one PR for every separate major version upgrade of a dependency. e.g. if you are on webpack@v1 currently then default behaviour is a PR for upgrading to webpack@v3 and not for webpack@v2. If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
-
 ## node
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
@@ -415,11 +411,11 @@ Use this field if you want to have one or more exact name matches in your packag
 ```
   "packageRules": [{
     "packageNames": ["angular"],
-    "pinVersions": true
+    "rangeStrategy": "pin"
   }]
 ```
 
-The above will enable `pinVersions` for the package `angular`.
+The above will enable set `rangeStrategy` to `pin` only for the package `angular`.
 
 ### packagePatterns
 
@@ -428,11 +424,11 @@ Use this field if you want to have one or more package names patterns in your pa
 ```
   "packageRules": [{
     "packageNames": ["^angular"],
-    "pinVersions": false
+    "rangeStrategy": "replace"
   }]
 ```
 
-The above will enable `pinVersions` for any package starting with `angular`.
+The above will set `rangeStrategy` to `replace` for any package starting with `angular`.
 
 ## patch
 
@@ -447,10 +443,6 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 ## pinDigests
 
 By default, Renovate will add sha256 digests to Docker source images so that they are then "immutable". Set this to false to continue using only tags to identify source images.
-
-## pinVersions
-
-This is a very important feature to consider, because not every repository's requirements are the same. The default value within the tool itself is false, which means no existing ranges are pinned. However if you are using the suggested preset `"config:base"`, then it changes the default of pinVersions to `null`, which means Renovate attempts to autodetect what's best for the project. In such cases `devDependencies` in `package.json` will alway be pinned, but `dependencies` will only be pinned if the package is `private` or has no `main` entry defined - both indicators that it is not intended to be published and consumed by other packages. To override the `"config:base"` setting, add the preset `":preserveSemverRanges"` to your `extends` array.
 
 ## pip_requirements
 
@@ -493,6 +485,32 @@ If you set `prCreation=not-pending`, then Renovate will wait until tests are non
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
 ## python
+
+## rangeStrategy
+
+Behaviour:
+
+* `auto` = Renovate decides (this will be done on a manager-by-manager basis)
+* `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
+* `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
+* `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
+* `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
+
+Renovate's "auto" strategy works like this for npm:
+
+1.  Always pin `devDependencies`
+2.  Pin `dependencies` if we detect that it's an app and not a library
+3.  Widen `peerDependencies`
+4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
+5.  Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
+
+**bump**
+
+By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open. As such, Renovate won't deliberately "narrow" any range by increasing the semver value inside.
+
+For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything because `1.2.0` satisfies the range. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `rangeStrategy` to `bump` in your Renovate config.
+
+This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`. It is not compatible with `pinVersions=true`.
 
 ## rebaseStalePrs
 
@@ -579,15 +597,19 @@ If you are using a semantic prefix for your commits, then you will want to enabl
 
 However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 
-## separateMajorReleases
+## separateMajorMinor
 
 Renovate's default behaviour is to create a separate branch/PR if both minor and major version updates exist. For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
 
 It is recommended that you leave this setting to true, because of the polite way that Renovate handles this. For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives. In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released. You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it. Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested. After that, Renovate will resume providing you updates to 3.x again! i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
-## separatePatchReleases
+## separateMinorPatch
 
 By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases - groups them together. e.g. if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0. If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can set this option to `true`.
+
+## separateMultipleMajor
+
+Set this to true if you wish to receive one PR for every separate major version upgrade of a dependency. e.g. if you are on webpack@v1 currently then default behaviour is a PR for upgrading to webpack@v3 and not for webpack@v2. If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
 ## statusCheckVerify
 
@@ -628,26 +650,5 @@ This field is currently used by some config prefixes.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
-
-## upgradeInRange
-
-By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open. As such, Renovate won't deliberately "narrow" the range by increasing the semver value inside.
-
-For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `upgradeInRange` to `true` in your Renovate config.
-
-This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`. It is not compatible with `pinVersions=true`.
-
-## versionStrategy
-
-npm-only.
-
-Renovate's "auto" strategy for updating versions is like this:
-
-1.  If the existing version already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
-2.  Otherwise, replace it. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
-
-You can override logic either way, by setting it to `replace` or `widen`. e.g. if the currentVersion is `"^1.0.0 || ^2.0.0"` but you configure `versionStrategy=replace` then the result will be `"^3.0.0"`.
-
-Or for example if you configure all `peerDependencies` with `versionStrategy=widen` and have `"react": "^15.0.0"` as current version then it will be updated to `"react": "^15.0.0 || ^16.0.0"`.
 
 ## yarnrc

@@ -333,7 +333,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns patch update if separatePatchReleases 1`] = `
+exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns patch update if separateMinorPatch 1`] = `
 Array [
   Object {
     "changeLogFromVersion": "0.9.0",
