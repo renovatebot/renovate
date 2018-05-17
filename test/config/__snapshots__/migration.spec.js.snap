@@ -118,7 +118,8 @@ Object {
   "semanticCommitScope": "deps",
   "semanticCommitType": "fix",
   "separateMajorMinor": true,
-  "separateMultipleMajor": true,
+  "separateMajorReleases": true,
+  "separateMinorPatch": true,
   "travis": Object {
     "enabled": true,
   },

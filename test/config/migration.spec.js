@@ -11,6 +11,7 @@ describe('config/migration', () => {
         onboarding: 'false',
         multipleMajorPrs: true,
         separateMajorReleases: true,
+        separatePatchReleases: true,
         automerge: 'none',
         automergeMajor: false,
         automergeMinor: true,
@@ -218,7 +219,7 @@ describe('config/migration', () => {
       const config = {
         enabled: true,
         semanticCommits: true,
-        separatePatchReleases: true,
+        separateMinorPatch: true,
       };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
         config

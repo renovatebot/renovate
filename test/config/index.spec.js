@@ -213,7 +213,7 @@ describe('config/index', () => {
         })
       );
       const actual = await configParser.parseConfigs(env, defaultArgv);
-      expect(actual.separatePatchReleases).toBe(true);
+      expect(actual.separateMinorPatch).toBe(true);
       expect(actual.patch.automerge).toBe(true);
       expect(actual.minor.automerge).toBeUndefined();
       expect(actual.major.automerge).toBeUndefined();

@@ -305,7 +305,7 @@ Object {
   ],
   "semanticCommits": true,
   "separateMajorMinor": true,
-  "separatePatchReleases": false,
+  "separateMinorPatch": false,
   "timezone": "Asia/Taipei",
   "unpublishSafe": false,
 }

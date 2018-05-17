@@ -603,13 +603,13 @@ Renovate's default behaviour is to create a separate branch/PR if both minor and
 
 It is recommended that you leave this setting to true, because of the polite way that Renovate handles this. For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives. In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released. You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it. Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested. After that, Renovate will resume providing you updates to 3.x again! i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
+## separateMinorPatch
+
+By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases - groups them together. e.g. if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0. If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can set this option to `true`.
+
 ## separateMultipleMajor
 
 Set this to true if you wish to receive one PR for every separate major version upgrade of a dependency. e.g. if you are on webpack@v1 currently then default behaviour is a PR for upgrading to webpack@v3 and not for webpack@v2. If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
-
-## separatePatchReleases
-
-By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases - groups them together. e.g. if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0. If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can set this option to `true`.
 
 ## statusCheckVerify
 

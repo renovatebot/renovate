@@ -85,13 +85,13 @@ describe('manager/npm/versions', () => {
       expect(res).toMatchSnapshot();
       expect(res[0].type).toEqual('minor');
     });
-    it('returns patch update if separatePatchReleases', () => {
-      config.separatePatchReleases = true;
+    it('returns patch update if separateMinorPatch', () => {
+      config.separateMinorPatch = true;
       config.currentVersion = '0.9.0';
       expect(versions.determineUpgrades(qJson, config)).toMatchSnapshot();
     });
     it('returns patch minor and major', () => {
-      config.separatePatchReleases = true;
+      config.separateMinorPatch = true;
       config.currentVersion = '0.8.0';
       const res = versions.determineUpgrades(qJson, config);
       expect(res).toHaveLength(3);

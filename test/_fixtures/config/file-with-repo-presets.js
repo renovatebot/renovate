@@ -2,7 +2,7 @@ module.exports = {
   logLevel: 'error',
   extends: [':prHourlyLimit1', ':automergePatch'],
   automerge: true,
-  separatePatchReleases: true,
+  separateMinorPatch: true,
   repositories: [
     'bar/baz',
     {
