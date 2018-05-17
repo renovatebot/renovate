@@ -173,7 +173,37 @@ describe('workers/pr/changelog', () => {
         await getChangeLogJSON({ ...upgrade, manager: 'pip_requirements' })
       ).toBe(null);
     });
-    it('supports github enterprise', async () => {
+    it('supports github enterprise and github.com changelog', async () => {
+      // clear the mock
+      npmRegistry.getDependency.mockReset();
+      const res = npmResponse();
+      npmRegistry.getDependency.mockReturnValueOnce(Promise.resolve(res));
+
+      const endpoint = process.env.GITHUB_ENDPOINT;
+      process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
+
+      process.env.GITHUB_ENDPOINT = endpoint;
+    });
+    it('supports github enterprise and github enterprise changelog', async () => {
+      // clear the mock
+      npmRegistry.getDependency.mockReset();
+      const res = npmResponse();
+      res.repositoryUrl = 'https://github-enterprise.example.com/chalk/chalk';
+      npmRegistry.getDependency.mockReturnValueOnce(Promise.resolve(res));
+
+      const endpoint = process.env.GITHUB_ENDPOINT;
+      process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+        })
+      ).toMatchSnapshot();
+
+      process.env.GITHUB_ENDPOINT = endpoint;
+    });
+
+    it('supports github enterprise alwo when retrieving data from cache', async () => {
       // clear the mock
       npmRegistry.getDependency.mockReset();
       const res = npmResponse();
@@ -184,6 +214,7 @@ describe('workers/pr/changelog', () => {
       process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
       expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
 
+      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
       process.env.GITHUB_ENDPOINT = endpoint;
     });
   });
