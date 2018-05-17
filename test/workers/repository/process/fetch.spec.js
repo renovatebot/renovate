@@ -51,7 +51,7 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles.npm[0].deps[2].updates).toHaveLength(0);
     });
     it('fetches updates', async () => {
-      config.pinVersions = null;
+      config.rangeStrategy = 'auto';
       const packageFiles = {
         npm: [
           {
