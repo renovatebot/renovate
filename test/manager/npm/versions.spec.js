@@ -7,6 +7,8 @@ const webpackJson = require('../../_fixtures/npm/webpack.json');
 const nextJson = require('../../_fixtures/npm/next.json');
 const typescriptJson = require('../../_fixtures/npm/typescript.json');
 
+qJson.latestVersion = '1.4.1';
+
 let config;
 
 describe('manager/npm/versions', () => {
@@ -392,6 +394,8 @@ describe('manager/npm/versions', () => {
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('rejects non-range in-range updates', () => {
+      config.depName = 'q';
+      config.packageFile = 'package.json';
       config.rangeStrategy = 'bump';
       config.currentVersion = '1.0.0';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
