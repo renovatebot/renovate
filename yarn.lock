@@ -959,9 +959,9 @@ chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.3.0:
     escape-string-regexp "^1.0.5"
     supports-color "^4.0.0"
 
-changelog-filename-regex@1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/changelog-filename-regex/-/changelog-filename-regex-1.1.1.tgz#8a2eb3049a652e3c03c8b601e3cbb032ee9f4e6d"
+changelog-filename-regex@1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/changelog-filename-regex/-/changelog-filename-regex-1.1.2.tgz#19e98e38248cff0c1cf3ae3bf51bfb22c48592d6"
 
 check-error@^1.0.1:
   version "1.0.2"
