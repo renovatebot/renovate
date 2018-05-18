@@ -1,7 +1,6 @@
 const npm = require('../../../lib/datasource/npm');
 const registryAuthToken = require('registry-auth-token');
 const nock = require('nock');
-const fs = require('fs');
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
@@ -48,17 +47,6 @@ describe('api/npm', () => {
       .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-  });
-  it('ignores deprecated versions', async () => {
-    const verdaccio = fs.readFileSync(
-      'test/_fixtures/npm/verdaccio.json',
-      'utf8'
-    );
-    nock('https://registry.npmjs.org')
-      .get('/verdaccio')
-      .reply(200, verdaccio);
-    const res = await npm.getDependency('verdaccio');
-    expect(res.versions['3.0.0-test.1']).toBeUndefined();
   });
   it('should use homepage', async () => {
     const npmResponseHomepage = { ...npmResponse };
