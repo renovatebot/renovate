@@ -37,6 +37,22 @@ Array [
 ]
 `;
 
+exports[`manager/npm/versions .determineUpgrades(npmDep, config) handles prerelease jumps 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "2.9.0-rc",
+    "changeLogToVersion": "2.9.1-insiders.20180516",
+    "isMinor": true,
+    "isRange": true,
+    "newVersion": "^2.9.1-insiders.20180516",
+    "newVersionMajor": 2,
+    "newVersionMinor": 9,
+    "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
