@@ -112,7 +112,7 @@ at the top level of your `renovate.json` or `package.json`.
 
 ### Use separate branches per dependency, but not one per major release
 
-Set configuration option `separateMajorReleases` to `false`.
+Set configuration option `separateMajorMinor` to `false`.
 
 ### Keep using semver ranges, instead of pinning dependencies
 
@@ -206,7 +206,7 @@ patch releases are also consider "minor". For example if you were running
 `q@0.8.7` you would receive one branch for the minor update to `q@0.9.7` and a
 second for the major update to `q@1.4.1`.
 
-If you set the configuration option `separatePatchReleases` to `true`, or you
+If you set the configuration option `separateMinorPatch` to `true`, or you
 configure `automerge` to have value `"patch"`, then Renovate will then separate
 patch releases as well. For example, if you did this when running `q@0.8.7` then
 you'd receive three PRs - for `q@0.8.13`, `q@0.9.7` and `q@1.4.1`.

@@ -199,7 +199,7 @@ describe('config/index', () => {
       expect(get.mock.calls.length).toBe(0);
     });
     it('resolves all presets', async () => {
-      defaultArgv.push('--pr-hourly-limit=10', '--upgrade-in-range=false');
+      defaultArgv.push('--pr-hourly-limit=10', '--automerge=false');
       const env = {
         GITHUB_TOKEN: 'abc',
         RENOVATE_CONFIG_FILE: require.resolve(
@@ -213,12 +213,12 @@ describe('config/index', () => {
         })
       );
       const actual = await configParser.parseConfigs(env, defaultArgv);
-      expect(actual.separatePatchReleases).toBe(true);
+      expect(actual.separateMinorPatch).toBe(true);
       expect(actual.patch.automerge).toBe(true);
       expect(actual.minor.automerge).toBeUndefined();
       expect(actual.major.automerge).toBeUndefined();
       expect(actual.prHourlyLimit).toBe(10);
-      expect(actual.upgradeInRange).toBe(false);
+      expect(actual.automerge).toBe(false);
       actual.repositories.forEach(repo => {
         if (typeof repo === 'object') {
           expect(repo).toMatchSnapshot(repo.repository);
@@ -233,7 +233,7 @@ describe('config/index', () => {
       const parentConfig = { ...defaultConfig };
       const childConfig = {
         foo: 'bar',
-        pinVersions: false,
+        rangeStrategy: 'replace',
         lockFileMaintenance: {
           schedule: ['on monday'],
         },
@@ -241,7 +241,7 @@ describe('config/index', () => {
       const configParser = require('../../lib/config/index.js');
       const config = configParser.mergeChildConfig(parentConfig, childConfig);
       expect(config.foo).toEqual('bar');
-      expect(config.pinVersions).toBe(false);
+      expect(config.rangeStrategy).toEqual('replace');
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
       expect(config.lockFileMaintenance).toMatchSnapshot();
     });

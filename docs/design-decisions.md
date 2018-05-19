@@ -74,7 +74,7 @@ and 2.0.0 exist, then `renovate` will raise PRs for both the 1.x upgrade(s) and
 * Projects should get Minor and Patch updates for their current Major release
   even if a new Major release exists
 
-This can be overridden via the config option `separateMajorReleases`.
+This can be overridden via the config option `separateMajorMinor`.
 
 ## Branch naming
 
@@ -93,14 +93,6 @@ By default, the script does not create a new PR if it finds an identical one
 already closed. This allows users to close unwelcome upgrade PRs and worry about
 them being recreated every run. Typically this is most useful for major
 upgrades. This option is configurable.
-
-## Range handling
-
-`renovate` prefers pinned dependency versions, instead of maintaining ranges.
-Even if the project is using tilde ranges, why not pin them for consistency if
-you're also using `renovate` every day?
-
-This is now configurable via the `pinVersions` configuration option.
 
 ## Rebasing Unmergeable Pull Requests
 
