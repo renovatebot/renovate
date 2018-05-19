@@ -4,6 +4,7 @@ const helmetJson = require('../../_fixtures/npm/02.json');
 const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
 const webpackJson = require('../../_fixtures/npm/webpack.json');
 const nextJson = require('../../_fixtures/npm/next.json');
+const typescriptJson = require('../../_fixtures/npm/typescript.json');
 
 let config;
 
@@ -362,6 +363,12 @@ describe('manager/npm/versions', () => {
       config.rangeStrategy = 'replace';
       const res = versions.determineUpgrades(nextJson, config);
       expect(res).toHaveLength(0);
+    });
+    it('handles prerelease jumps', () => {
+      config.currentVersion = '^2.9.0-rc';
+      config.rangeStrategy = 'replace';
+      const res = versions.determineUpgrades(typescriptJson, config);
+      expect(res).toMatchSnapshot();
     });
     it('supports in-range updates', () => {
       config.rangeStrategy = 'bump';
