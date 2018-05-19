@@ -14,7 +14,7 @@ let config;
 describe('manager/npm/versions', () => {
   beforeEach(() => {
     config = { ...require('../../../lib/config/defaults').getConfig() };
-    config.rangeStrategy = 'pin';
+    config.rangeStrategy = 'replace';
   });
 
   describe('.determineUpgrades(npmDep, config)', () => {
@@ -43,6 +43,7 @@ describe('manager/npm/versions', () => {
     });
     it('supports minor and major upgrades for tilde ranges', () => {
       config.currentVersion = '^0.4.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('returns only one update if grouping', () => {
@@ -113,6 +114,7 @@ describe('manager/npm/versions', () => {
     });
     it('supports minor and major upgrades for ranged versions', () => {
       config.currentVersion = '~0.4.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('ignores pinning for ranges when other upgrade exists', () => {
@@ -145,11 +147,13 @@ describe('manager/npm/versions', () => {
     });
     it('pins minor ranged versions', () => {
       config.currentVersion = '^1.0.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('uses the locked version for pinning', () => {
       config.currentVersion = '^1.0.0';
       config.lockedVersion = '1.0.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('ignores minor ranged versions when not pinning', () => {
@@ -158,11 +162,13 @@ describe('manager/npm/versions', () => {
       expect(lookup.lookupUpdates(qJson, config)).toHaveLength(0);
     });
     it('upgrades tilde ranges', () => {
+      config.rangeStrategy = 'pin';
       config.currentVersion = '~1.3.0';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('upgrades .x minor ranges', () => {
       config.currentVersion = '1.3.x';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('upgrades tilde ranges without pinning', () => {
@@ -298,10 +304,6 @@ describe('manager/npm/versions', () => {
     it('supports > latest versions if configured', () => {
       config.respectLatest = false;
       config.currentVersion = '1.4.1';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
-    });
-    it('supports future versions if already future', () => {
-      config.currentVersion = '^2.0.0';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('should ignore unstable versions if the current version is stable', () => {
