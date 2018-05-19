@@ -23,6 +23,7 @@ describe('workers/repository/error', () => {
       'blocked',
       'not-found',
       'forbidden',
+      'write-forbidden',
       'rate-limit-exceeded',
     ];
     errors.forEach(err => {
