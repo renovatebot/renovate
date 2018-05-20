@@ -108,14 +108,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) rejects reverse ordered less than greater than 1`] = `
-Array [
-  Object {
-    "message": "Complex semver ranges such as \\"<= 0.8.0 >= 0.5.0\\" are not yet supported so will be skipped",
-    "type": "warning",
-  },
-]
-`;
+exports[`manager/npm/versions .determineUpgrades(npmDep, config) rejects reverse ordered less than greater than 1`] = `Array []`;
 
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) replaces major complex ranged versions if configured 1`] = `
 Array [
@@ -510,21 +503,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports in-range updates 1`] = `
-Array [
-  Object {
-    "fromVersion": "1.0.0",
-    "isMinor": true,
-    "isRange": true,
-    "newVersion": "~1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
-    "toVersion": "1.4.1",
-    "type": "minor",
-    "unpublishable": false,
-  },
-]
-`;
+exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports in-range updates 1`] = `Array []`;
 
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports minor and major upgrades for ranged versions 1`] = `
 Array [
