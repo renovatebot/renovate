@@ -66,6 +66,7 @@ describe('manager/npm/versions', () => {
     });
     it('returns minor update if separate patches not configured', () => {
       config.currentVersion = '0.9.0';
+      config.rangeStrategy = 'pin';
       const res = lookup.lookupUpdates(qJson, config);
       expect(res).toMatchSnapshot();
       expect(res.length).toBe(2);
@@ -77,6 +78,7 @@ describe('manager/npm/versions', () => {
         automerge: true,
       };
       config.currentVersion = '0.9.0';
+      config.rangeStrategy = 'pin';
       const res = lookup.lookupUpdates(qJson, config);
       expect(res).toMatchSnapshot();
       expect(res[0].type).toEqual('patch');
@@ -89,6 +91,7 @@ describe('manager/npm/versions', () => {
         automerge: true,
       };
       config.currentVersion = '0.9.0';
+      config.rangeStrategy = 'pin';
       const res = lookup.lookupUpdates(qJson, config);
       expect(res).toMatchSnapshot();
       expect(res[0].type).toEqual('minor');
@@ -96,11 +99,13 @@ describe('manager/npm/versions', () => {
     it('returns patch update if separateMinorPatch', () => {
       config.separateMinorPatch = true;
       config.currentVersion = '0.9.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('returns patch minor and major', () => {
       config.separateMinorPatch = true;
       config.currentVersion = '0.8.0';
+      config.rangeStrategy = 'pin';
       const res = lookup.lookupUpdates(qJson, config);
       expect(res).toHaveLength(3);
       expect(res).toMatchSnapshot();
@@ -108,11 +113,13 @@ describe('manager/npm/versions', () => {
     it('disables major release separation (major)', () => {
       config.separateMajorMinor = false;
       config.currentVersion = '^0.4.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('disables major release separation (minor)', () => {
       config.separateMajorMinor = false;
       config.currentVersion = '1.0.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('supports minor and major upgrades for ranged versions', () => {
@@ -122,10 +129,12 @@ describe('manager/npm/versions', () => {
     });
     it('ignores pinning for ranges when other upgrade exists', () => {
       config.currentVersion = '~0.9.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('upgrades minor ranged versions', () => {
       config.currentVersion = '~1.0.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('widens minor ranged versions if configured', () => {
