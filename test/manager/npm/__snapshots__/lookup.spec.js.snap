@@ -503,7 +503,23 @@ Array [
 ]
 `;
 
-exports[`manager/npm/lookup .lookupUpdates() supports in-range updates 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports in-range caret updates 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.0.0",
+    "isMinor": true,
+    "isRange": true,
+    "newVersion": "^1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() supports in-range tilde updates 1`] = `
 Array [
   Object {
     "fromVersion": "1.0.0",
@@ -578,6 +594,22 @@ Array [
     "newVersionMinor": 4,
     "toVersion": "1.4.1",
     "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() upgrades .x complex minor ranges without pinning 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.3.0",
+    "isMinor": true,
+    "isRange": true,
+    "newVersion": "1.2.x - 1.4.x",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "minor",
     "unpublishable": false,
   },
 ]

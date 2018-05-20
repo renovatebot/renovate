@@ -197,6 +197,11 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '1.3.x';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
+    it('upgrades .x complex minor ranges without pinning', () => {
+      config.rangeStrategy = 'widen';
+      config.currentVersion = '1.2.x - 1.3.x';
+      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+    });
     it('upgrades shorthand major ranges without pinning', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '0';
@@ -386,7 +391,12 @@ describe('manager/npm/lookup', () => {
       const res = lookup.lookupUpdates(typescriptJson, config);
       expect(res).toMatchSnapshot();
     });
-    it('supports in-range updates', () => {
+    it('supports in-range caret updates', () => {
+      config.rangeStrategy = 'bump';
+      config.currentVersion = '^1.0.0';
+      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+    });
+    it('supports in-range tilde updates', () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '~1.0.0';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
