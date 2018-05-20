@@ -285,14 +285,14 @@ describe('manager/npm/versions', () => {
       expect(res[0].newVersion).toEqual('< 2.0.0');
     });
     it('upgrades major greater than less than ranges without pinning', () => {
-      config.rangeStrategy = 'replace';
+      config.rangeStrategy = 'widen';
       config.currentVersion = '>= 0.5.0 < 1.0.0';
       const res = lookup.lookupUpdates(qJson, config);
       expect(res).toMatchSnapshot();
       expect(res[0].newVersion).toEqual('>= 0.5.0 < 2.0.0');
     });
     it('upgrades minor greater than less than ranges without pinning', () => {
-      config.rangeStrategy = 'replace';
+      config.rangeStrategy = 'widen';
       config.currentVersion = '>= 0.5.0 <0.8';
       const res = lookup.lookupUpdates(qJson, config);
       expect(res).toMatchSnapshot();
@@ -300,15 +300,15 @@ describe('manager/npm/versions', () => {
       expect(res[1].newVersion).toEqual('>= 0.5.0 <1.5');
     });
     it('upgrades minor greater than less than equals ranges without pinning', () => {
-      config.rangeStrategy = 'replace';
+      config.rangeStrategy = 'widen';
       config.currentVersion = '>= 0.5.0 <= 0.8.0';
       const res = lookup.lookupUpdates(qJson, config);
       expect(res).toMatchSnapshot();
-      expect(res[0].newVersion).toEqual('>= 0.5.0 <= 0.10.0');
-      expect(res[1].newVersion).toEqual('>= 0.5.0 <= 1.5.0');
+      expect(res[0].newVersion).toEqual('>= 0.5.0 <= 0.9.7');
+      expect(res[1].newVersion).toEqual('>= 0.5.0 <= 1.4.1');
     });
     it('rejects reverse ordered less than greater than', () => {
-      config.rangeStrategy = 'replace';
+      config.rangeStrategy = 'widen';
       config.currentVersion = '<= 0.8.0 >= 0.5.0';
       const res = lookup.lookupUpdates(qJson, config);
       expect(res).toMatchSnapshot();
