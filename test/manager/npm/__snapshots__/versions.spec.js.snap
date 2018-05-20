@@ -911,6 +911,13 @@ Array [
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades tilde ranges 1`] = `
 Array [
   Object {
+    "isPin": true,
+    "newVersion": "1.3.0",
+    "newVersionMajor": 1,
+    "type": "pin",
+    "unpublishable": false,
+  },
+  Object {
     "fromVersion": "1.3.0",
     "isMinor": true,
     "newVersion": "1.4.1",
@@ -918,13 +925,6 @@ Array [
     "newVersionMinor": 4,
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
-  },
-  Object {
-    "isPin": true,
-    "newVersion": "1.3.0",
-    "newVersionMajor": 1,
-    "type": "pin",
     "unpublishable": false,
   },
 ]
