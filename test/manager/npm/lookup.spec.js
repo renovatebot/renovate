@@ -10,13 +10,13 @@ qJson.latestVersion = '1.4.1';
 
 let config;
 
-describe('manager/npm/versions', () => {
+describe('manager/npm/lookup', () => {
   beforeEach(() => {
     config = { ...require('../../../lib/config/defaults').getConfig() };
     config.rangeStrategy = 'replace';
   });
 
-  describe('.determineUpgrades(npmDep, config)', () => {
+  describe('.lookupUpdates()', () => {
     it('return warning if null versions', () => {
       config.currentVersion = '1.0.0';
       const testDep = {
