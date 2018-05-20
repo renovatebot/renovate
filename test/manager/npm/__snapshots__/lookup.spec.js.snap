@@ -238,6 +238,21 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() returns only one update if automerging 1`] = `
+Array [
+  Object {
+    "fromVersion": "0.4.0",
+    "isMajor": true,
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() returns only one update if automerging major 1`] = `
 Array [
   Object {
@@ -669,6 +684,38 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() upgrades less than equal major ranges 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.4.1",
+    "isMajor": true,
+    "isRange": true,
+    "newVersion": "<= 2",
+    "newVersionMajor": 2,
+    "newVersionMinor": 0,
+    "toVersion": "2.0.3",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() upgrades less than equal minor ranges 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.3.0",
+    "isMinor": true,
+    "isRange": true,
+    "newVersion": "<= 1.4",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() upgrades less than equal ranges without pinning 1`] = `
 Array [
   Object {
@@ -687,6 +734,22 @@ Array [
     "isMajor": true,
     "isRange": true,
     "newVersion": "<= 1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() upgrades less than major ranges 1`] = `
+Array [
+  Object {
+    "fromVersion": "0.9.7",
+    "isMajor": true,
+    "isRange": true,
+    "newVersion": "< 2",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "toVersion": "1.4.1",

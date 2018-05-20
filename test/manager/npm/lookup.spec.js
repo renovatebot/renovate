@@ -51,6 +51,14 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
+    it('returns only one update if automerging', () => {
+      config.automerge = true;
+      config.currentVersion = '0.4.0';
+      config.rangeStrategy = 'pin';
+      const res = lookup.lookupUpdates(qJson, config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
     it('returns only one update if automerging major', () => {
       config.major = { automerge: true };
       config.currentVersion = '^0.4.0';
@@ -272,6 +280,22 @@ describe('manager/npm/lookup', () => {
     it('upgrades less than ranges without pinning', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '< 0.7.2';
+      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+    });
+    it('upgrades less than major ranges', () => {
+      config.rangeStrategy = 'replace';
+      config.currentVersion = '< 1';
+      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+    });
+    it('upgrades less than equal minor ranges', () => {
+      config.rangeStrategy = 'replace';
+      config.currentVersion = '<= 1.3';
+      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+    });
+    it('upgrades less than equal major ranges', () => {
+      config.rangeStrategy = 'replace';
+      config.respectLatest = false;
+      config.currentVersion = '<= 1';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('upgrades major less than equal ranges', () => {
