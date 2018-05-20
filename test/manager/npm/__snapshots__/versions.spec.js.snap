@@ -720,7 +720,7 @@ Array [
     "fromVersion": "1.0.0",
     "isMinor": true,
     "isRange": true,
-    "newVersion": "<= 2.0.0",
+    "newVersion": "<= 1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "toVersion": "1.4.1",

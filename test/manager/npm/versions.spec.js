@@ -275,7 +275,7 @@ describe('manager/npm/versions', () => {
       config.currentVersion = '<= 1.0.0';
       const res = lookup.lookupUpdates(qJson, config);
       expect(res).toMatchSnapshot();
-      expect(res[0].newVersion).toEqual('<= 2.0.0');
+      expect(res[0].newVersion).toEqual('<= 1.4.1');
     });
     it('upgrades major less than ranges without pinning', () => {
       config.rangeStrategy = 'replace';
