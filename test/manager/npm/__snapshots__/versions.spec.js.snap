@@ -166,6 +166,13 @@ Object {
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns both updates if automerging minor 1`] = `
 Array [
   Object {
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "type": "pin",
+    "unpublishable": false,
+  },
+  Object {
     "fromVersion": "0.4.4",
     "isMinor": true,
     "newVersion": "0.9.7",
@@ -173,13 +180,6 @@ Array [
     "newVersionMinor": 9,
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
-  },
-  Object {
-    "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
-    "type": "pin",
     "unpublishable": false,
   },
   Object {
@@ -374,11 +374,17 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns warning if range not found 1`] = `
+exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns rollback if range not found 1`] = `
 Array [
   Object {
-    "message": "No satisfying version found for existing dependency range \\"^8.4.0\\"",
-    "type": "warning",
+    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+    "commitMessageAction": "Roll back",
+    "isRollback": true,
+    "newVersion": "^2.0.0",
+    "newVersionMajor": 2,
+    "semanticCommitType": "fix",
+    "type": "rollback",
+    "unpublishable": false,
   },
 ]
 `;

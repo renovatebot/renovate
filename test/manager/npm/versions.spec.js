@@ -37,7 +37,7 @@ describe('manager/npm/versions', () => {
       expect(res).toHaveLength(1);
       expect(res[0]).toMatchSnapshot();
     });
-    it('returns warning if range not found', () => {
+    it('returns rollback if range not found', () => {
       config.currentVersion = '^8.4.0';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
@@ -49,16 +49,19 @@ describe('manager/npm/versions', () => {
     it('returns only one update if grouping', () => {
       config.groupName = 'somegroup';
       config.currentVersion = '^0.4.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('returns only one update if automerging major', () => {
       config.major = { automerge: true };
       config.currentVersion = '^0.4.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('returns both updates if automerging minor', () => {
       config.minor = { automerge: true };
       config.currentVersion = '^0.4.0';
+      config.rangeStrategy = 'pin';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('returns minor update if separate patches not configured', () => {
