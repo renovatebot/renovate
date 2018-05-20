@@ -293,22 +293,22 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns patch m
 Array [
   Object {
     "fromVersion": "0.8.0",
-    "isMinor": true,
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
-    "toVersion": "0.9.7",
-    "type": "minor",
-    "unpublishable": false,
-  },
-  Object {
-    "fromVersion": "0.8.0",
     "isPatch": true,
     "newVersion": "0.8.12",
     "newVersionMajor": 0,
     "newVersionMinor": 8,
     "toVersion": "0.8.12",
     "type": "patch",
+    "unpublishable": false,
+  },
+  Object {
+    "fromVersion": "0.8.0",
+    "isMinor": true,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "toVersion": "0.9.7",
+    "type": "minor",
     "unpublishable": false,
   },
   Object {
