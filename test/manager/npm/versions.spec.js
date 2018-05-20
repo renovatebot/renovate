@@ -1,5 +1,4 @@
 const lookup = require('../../../lib/manager/npm/lookup');
-const versions = require('../../../lib/manager/npm/versions');
 const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
 const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
@@ -320,8 +319,8 @@ describe('manager/npm/versions', () => {
     });
     it('should ignore unstable versions if the current version is stable', () => {
       config.currentVersion = '1.0.0';
-      versions
-        .determineUpgrades(
+      lookup
+        .lookupUpdates(
           {
             name: 'amazing-package',
             versions: {
@@ -413,17 +412,6 @@ describe('manager/npm/versions', () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '1.0.0';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
-    });
-  });
-  describe('.isPastLatest(dep, version)', () => {
-    it('should return false for less than', () => {
-      versions.isPastLatest(qJson, '1.0.0').should.eql(false);
-    });
-    it('should return false for equal', () => {
-      versions.isPastLatest(qJson, '1.4.1').should.eql(false);
-    });
-    it('should return true for greater than', () => {
-      versions.isPastLatest(qJson, '2.0.3').should.eql(true);
     });
   });
 });
