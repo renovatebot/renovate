@@ -52,7 +52,7 @@
     "bunyan": "1.8.12",
     "cacache": "11.0.2",
     "chalk": "2.4.1",
-    "changelog-filename-regex": "1.1.2",
+    "changelog-filename-regex": "2.0.0",
     "child-process-promise": "2.2.1",
     "clean-git-ref": "1.0.3",
     "commander": "2.15.1",
