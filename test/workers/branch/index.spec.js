@@ -81,7 +81,7 @@ describe('workers/branch', () => {
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
-      config.isDigest = true;
+      config.type = 'digest';
       checkExisting.prAlreadyExisted.mockReturnValueOnce({
         number: 13,
         state: 'closed',

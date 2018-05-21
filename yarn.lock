@@ -959,9 +959,9 @@ chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.3.0:
     escape-string-regexp "^1.0.5"
     supports-color "^4.0.0"
 
-changelog-filename-regex@1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/changelog-filename-regex/-/changelog-filename-regex-1.1.2.tgz#19e98e38248cff0c1cf3ae3bf51bfb22c48592d6"
+changelog-filename-regex@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/changelog-filename-regex/-/changelog-filename-regex-2.0.0.tgz#b5c2525c3d1fc2be7f00ecf0d414a1e001085604"
 
 check-error@^1.0.1:
   version "1.0.2"
@@ -1432,9 +1432,11 @@ deep-is@~0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/deep-is/-/deep-is-0.1.3.tgz#b369d6fb5dbc13eecf524f91b070feedc357cf34"
 
-deepcopy@0.6.3:
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/deepcopy/-/deepcopy-0.6.3.tgz#634780f2f8656ab771af8fa8431ed1ccee55c7b0"
+deepcopy@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/deepcopy/-/deepcopy-1.0.0.tgz#cea0f3443b3617d2421e066be370cc8126f8959c"
+  dependencies:
+    type-detect "^4.0.8"
 
 default-require-extensions@^1.0.0:
   version "1.0.0"
@@ -5258,9 +5260,9 @@ pn@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.0.0.tgz#1cf5a30b0d806cd18f88fc41a6b5d4ad615b3ba9"
 
-pnpm@1.43.1:
-  version "1.43.1"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-1.43.1.tgz#0766354192aa2d843bcf1ddb277627e5cbc9c1e9"
+pnpm@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.0.0.tgz#e45d8c65cc04e3bf7a54edeaadf4d5bab9d0f5e3"
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
@@ -5935,9 +5937,9 @@ sax@^1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.4.1:
-  version "15.4.1"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.4.1.tgz#47d4fc3b4c00252b78988f3dcfc22f2a4a02ccc4"
+semantic-release@15.4.2:
+  version "15.4.2"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.4.2.tgz#25e15c831d00db30b91a41b489ae6a5871e13764"
   dependencies:
     "@semantic-release/commit-analyzer" "^5.0.0"
     "@semantic-release/error" "^2.2.0"
@@ -6677,6 +6679,10 @@ type-check@~0.3.2:
 type-detect@^4.0.0:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.3.tgz#0e3f2670b44099b0b46c284d136a7ef49c74c2ea"
+
+type-detect@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
 
 typed-rest-client@^0.12.0:
   version "0.12.0"
