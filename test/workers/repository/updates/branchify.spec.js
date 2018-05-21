@@ -29,11 +29,14 @@ describe('workers/repository/updates/branchify', () => {
           branchName: 'foo-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
+          type: 'minor',
         },
       ]);
       config.repoIsOnboarded = true;
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(1);
+      expect(res.branches[0].isMinor).toBe(true);
+      expect(res.branches[0].upgrades[0].isMinor).toBe(true);
     });
     it('does not group if different compiled branch names', async () => {
       flattenUpdates.mockReturnValueOnce([
