@@ -4123,9 +4123,9 @@ marked-terminal@^2.0.0:
     lodash.assign "^4.2.0"
     node-emoji "^1.4.1"
 
-marked@^0.3.9:
-  version "0.3.12"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.12.tgz#7cf25ff2252632f3fe2406bde258e94eee927519"
+marked@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-0.4.0.tgz#9ad2c2a7a1791f10a852e0112f77b571dce10c66"
 
 mdurl@^1.0.1:
   version "1.0.1"
@@ -5937,9 +5937,9 @@ sax@^1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.4.2:
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.4.2.tgz#25e15c831d00db30b91a41b489ae6a5871e13764"
+semantic-release@15.4.3:
+  version "15.4.3"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.4.3.tgz#08e8e8062b08aca02ea3d827ad8440a600c27548"
   dependencies:
     "@semantic-release/commit-analyzer" "^5.0.0"
     "@semantic-release/error" "^2.2.0"
@@ -5958,7 +5958,7 @@ semantic-release@15.4.2:
     hook-std "^0.4.0"
     hosted-git-info "^2.6.0"
     lodash "^4.17.4"
-    marked "^0.3.9"
+    marked "^0.4.0"
     marked-terminal "^2.0.0"
     p-locate "^2.0.0"
     p-reduce "^1.0.0"
