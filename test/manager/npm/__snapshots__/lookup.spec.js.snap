@@ -396,6 +396,20 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if the ignoreUnstable=false 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.0.0",
+    "newVersion": "1.1.0-beta",
+    "newVersionMajor": 1,
+    "newVersionMinor": 1,
+    "toVersion": "1.1.0-beta",
+    "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() should downgrade from missing versions 1`] = `
 Object {
   "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",

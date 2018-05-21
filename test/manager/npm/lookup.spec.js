@@ -352,6 +352,23 @@ describe('manager/npm/lookup', () => {
         )
         .should.eql([]);
     });
+    it('should allow unstable versions if the ignoreUnstable=false', () => {
+      config.currentVersion = '1.0.0';
+      config.ignoreUnstable = false;
+      expect(
+        lookup.lookupUpdates(
+          {
+            name: 'amazing-package',
+            versions: {
+              '1.0.0-beta': {},
+              '1.0.0': {},
+              '1.1.0-beta': {},
+            },
+          },
+          config
+        )
+      ).toMatchSnapshot();
+    });
     it('should allow unstable versions if the current version is unstable', () => {
       config.currentVersion = '1.0.0-beta';
       expect(
