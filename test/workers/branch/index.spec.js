@@ -70,7 +70,7 @@ describe('workers/branch', () => {
     it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
-      config.isMajor = true;
+      config.type = 'major';
       checkExisting.prAlreadyExisted.mockReturnValueOnce({
         number: 13,
         state: 'closed',
