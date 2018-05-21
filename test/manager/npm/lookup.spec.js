@@ -17,15 +17,6 @@ describe('manager/npm/lookup', () => {
   });
 
   describe('.lookupUpdates()', () => {
-    it('return warning if null versions', () => {
-      config.currentVersion = '1.0.0';
-      const testDep = {
-        name: 'q',
-      };
-      const res = lookup.lookupUpdates(testDep, config);
-      expect(res).toHaveLength(1);
-      expect(res[0]).toMatchSnapshot();
-    });
     it('return warning if empty versions', () => {
       const testDep = {
         name: 'q',

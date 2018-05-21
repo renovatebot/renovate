@@ -149,13 +149,6 @@ Object {
 }
 `;
 
-exports[`manager/npm/lookup .lookupUpdates() return warning if null versions 1`] = `
-Object {
-  "message": "No versions returned from registry for this package",
-  "type": "warning",
-}
-`;
-
 exports[`manager/npm/lookup .lookupUpdates() returns both updates if automerging minor 1`] = `
 Array [
   Object {
