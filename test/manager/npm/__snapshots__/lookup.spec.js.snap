@@ -397,6 +397,21 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if ignoreUnstable is false 1`] = `
+Array [
+  Object {
+    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+    "commitMessageAction": "Roll back",
+    "isRollback": true,
+    "newVersion": "1.0.0-beta",
+    "newVersionMajor": 1,
+    "semanticCommitType": "fix",
+    "type": "rollback",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if the current version is unstable 1`] = `
 Array [
   Object {

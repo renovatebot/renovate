@@ -376,6 +376,22 @@ describe('manager/npm/lookup', () => {
         )
       ).toMatchSnapshot();
     });
+    it('should allow unstable versions if ignoreUnstable is false', () => {
+      config.currentVersion = '1.0.0';
+      config.ignoreUnstable = false;
+      expect(
+        lookup.lookupUpdates(
+          {
+            name: 'amazing-package',
+            versions: {
+              '1.0.0-beta': {},
+              '1.1.0-beta': {},
+            },
+          },
+          config
+        )
+      ).toMatchSnapshot();
+    });
     it('should treat zero zero tilde ranges as 0.0.x', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '~0.0.34';
