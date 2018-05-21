@@ -1,4 +1,4 @@
-const semver = require('../../lib/util/semver');
+const semver = require('../../lib/versioning/semver');
 
 describe('.isValidSemver(input)', () => {
   it('should return null for irregular versions', () => {
