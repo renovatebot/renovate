@@ -172,7 +172,7 @@
     "semanticCommitScope": null
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "stable"
   },
   "release": {
     "branch": "stable",
