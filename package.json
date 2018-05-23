@@ -105,7 +105,7 @@
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "codecov": "3.0.2",
-    "cross-env": "5.1.5",
+    "cross-env": "5.1.6",
     "eslint": "4.19.1",
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-config-prettier": "2.9.0",
@@ -115,7 +115,7 @@
     "mockdate": "2.0.2",
     "nock": "9.2.6",
     "prettier": "1.12.1",
-    "semantic-release": "15.4.2"
+    "semantic-release": "15.5.0"
   },
   "files": [
     "bin/config-validator.js",
@@ -172,7 +172,7 @@
     "semanticCommitScope": null
   },
   "publishConfig": {
-    "tag": "next"
+    "tag": "latest"
   },
   "release": {
     "branch": "master",
