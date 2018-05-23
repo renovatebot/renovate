@@ -195,7 +195,7 @@ Object {
   "prTitle": null,
   "privateKey": null,
   "python": Object {},
-  "rangeStrategy": "auto",
+  "rangeStrategy": "replace",
   "rebaseStalePrs": null,
   "recreateClosed": false,
   "renovateFork": false,
