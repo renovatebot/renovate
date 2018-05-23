@@ -94,6 +94,12 @@
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
 
+"@sindresorhus/is@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.9.0.tgz#1a65a8fab2d4efa5a32a5f5f40cf9b0806aabd69"
+  dependencies:
+    symbol-observable "^1.2.0"
+
 "@types/node@*":
   version "8.5.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.5.2.tgz#83b8103fa9a2c2e83d78f701a9aa7c9539739aa5"
@@ -4727,7 +4733,6 @@ npm@6.0.1:
     cmd-shim "~2.0.2"
     columnify "~1.5.4"
     config-chain "~1.1.11"
-    debuglog "*"
     detect-indent "~5.0.0"
     detect-newline "^2.1.0"
     dezalgo "~1.0.3"
@@ -4742,7 +4747,6 @@ npm@6.0.1:
     has-unicode "~2.0.1"
     hosted-git-info "^2.6.0"
     iferr "^1.0.0"
-    imurmurhash "*"
     inflight "~1.0.6"
     inherits "~2.0.3"
     ini "^1.3.5"
@@ -4755,14 +4759,8 @@ npm@6.0.1:
     libnpx "^10.2.0"
     lock-verify "^2.0.2"
     lockfile "^1.0.4"
-    lodash._baseindexof "*"
     lodash._baseuniq "~4.6.0"
-    lodash._bindcallback "*"
-    lodash._cacheindexof "*"
-    lodash._createcache "*"
-    lodash._getnative "*"
     lodash.clonedeep "~4.5.0"
-    lodash.restparam "*"
     lodash.union "~4.6.0"
     lodash.uniq "~4.5.0"
     lodash.without "~4.4.0"
@@ -4801,7 +4799,6 @@ npm@6.0.1:
     read-package-json "^2.0.13"
     read-package-tree "^5.2.1"
     readable-stream "^2.3.6"
-    readdir-scoped-modules "*"
     request "^2.85.0"
     retry "^0.12.0"
     rimraf "~2.6.2"
@@ -6479,6 +6476,10 @@ supports-color@^5.3.0:
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.3.0.tgz#5b24ac15db80fa927cf5227a4a33fd3c4c7676c0"
   dependencies:
     has-flag "^3.0.0"
+
+symbol-observable@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
 
 symbol-tree@^3.2.1:
   version "3.2.2"
