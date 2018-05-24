@@ -81,7 +81,7 @@
     "minimatch": "3.0.4",
     "moment": "2.22.1",
     "moment-timezone": "0.5.17",
-    "npm": "6.0.1",
+    "npm": "6.1.0",
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-link-header": "1.0.1",
