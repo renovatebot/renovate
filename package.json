@@ -81,7 +81,7 @@
     "minimatch": "3.0.4",
     "moment": "2.22.1",
     "moment-timezone": "0.5.17",
-    "npm": "6.0.1",
+    "npm": "6.1.0",
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-link-header": "1.0.1",
@@ -99,7 +99,7 @@
     "upath": "1.1.0",
     "validator": "10.2.0",
     "vso-node-api": "6.5.0",
-    "yarn": "1.6.0"
+    "yarn": "1.7.0"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
@@ -110,8 +110,8 @@
     "eslint-config-airbnb-base": "12.1.0",
     "eslint-config-prettier": "2.9.0",
     "eslint-plugin-import": "2.12.0",
-    "eslint-plugin-promise": "3.7.0",
-    "jest": "22.4.4",
+    "eslint-plugin-promise": "3.8.0",
+    "jest": "23.0.0",
     "mockdate": "2.0.2",
     "nock": "9.2.6",
     "prettier": "1.12.1",
