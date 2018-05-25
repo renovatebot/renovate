@@ -65,6 +65,7 @@ Object {
   "pnpmShrinkwrap": undefined,
   "yarnLock": "yarn.lock",
   "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
 }
 `;
 
@@ -133,6 +134,7 @@ Object {
   "pnpmShrinkwrap": undefined,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
 }
 `;
 
@@ -201,5 +203,6 @@ Object {
   "pnpmShrinkwrap": undefined,
   "yarnLock": undefined,
   "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
 }
 `;
