@@ -9,18 +9,34 @@ describe('config/migration', () => {
         extends: [':js-app', 'config:library'],
         maintainYarnLock: true,
         onboarding: 'false',
+        multipleMajorPrs: true,
+        separateMajorReleases: true,
+        separatePatchReleases: true,
         automerge: 'none',
         automergeMajor: false,
         automergeMinor: true,
         automergePatch: true,
+        upgradeInRange: true,
         baseBranch: 'next',
         ignoreNodeModules: true,
+        node: {
+          enabled: true,
+        },
         meteor: true,
         autodiscover: 'true',
         schedule: 'on the last day of the month',
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
+        pathRules: [
+          {
+            paths: ['examples/**'],
+            extends: ['foo'],
+          },
+        ],
+        peerDependencies: {
+          versionStrategy: 'widen',
+        },
         packageRules: [
           {
             packagePatterns: '^(@angular|typescript)',
@@ -45,6 +61,14 @@ describe('config/migration', () => {
           automerge: 'minor',
           schedule: null,
         },
+        nvmrc: {
+          pathRules: [
+            {
+              paths: ['node/**'],
+              extends: ['node'],
+            },
+          ],
+        },
         depTypes: [
           'dependencies',
           {
@@ -60,18 +84,18 @@ describe('config/migration', () => {
         config,
         parentConfig
       );
+      expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
-      expect(migratedConfig.optionalDependencies.respectLatest).toBe(false);
       expect(migratedConfig.automerge).toEqual(false);
-      expect(migratedConfig).toMatchSnapshot();
+      expect(migratedConfig.packageRules).toHaveLength(7);
     });
     it('migrates before and after schedules', () => {
       const config = {
-        dependencies: {
+        major: {
           schedule: 'after 10pm and before 7am',
         },
-        devDependencies: {
+        minor: {
           schedule: 'after 10pm and before 7am on every weekday',
         },
       };
@@ -82,15 +106,15 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
-      expect(migratedConfig.dependencies.schedule.length).toBe(2);
-      expect(migratedConfig.dependencies.schedule[0]).toEqual('after 10pm');
-      expect(migratedConfig.dependencies.schedule[1]).toEqual('before 7am');
-      expect(migratedConfig.devDependencies.schedule).toMatchSnapshot();
-      expect(migratedConfig.devDependencies.schedule.length).toBe(2);
-      expect(migratedConfig.devDependencies.schedule[0]).toEqual(
+      expect(migratedConfig.major.schedule.length).toBe(2);
+      expect(migratedConfig.major.schedule[0]).toEqual('after 10pm');
+      expect(migratedConfig.major.schedule[1]).toEqual('before 7am');
+      expect(migratedConfig.minor.schedule).toMatchSnapshot();
+      expect(migratedConfig.minor.schedule.length).toBe(2);
+      expect(migratedConfig.minor.schedule[0]).toEqual(
         'after 10pm every weekday'
       );
-      expect(migratedConfig.devDependencies.schedule[1]).toEqual(
+      expect(migratedConfig.minor.schedule[1]).toEqual(
         'before 7am every weekday'
       );
     });
@@ -195,7 +219,7 @@ describe('config/migration', () => {
       const config = {
         enabled: true,
         semanticCommits: true,
-        separatePatchReleases: true,
+        separateMinorPatch: true,
       };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
         config
@@ -221,10 +245,81 @@ describe('config/migration', () => {
       );
       expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
-      expect(migratedConfig.lockFileMaintenance.depTypes).not.toBeDefined();
+      expect(migratedConfig.lockFileMaintenance.packageRules).toHaveLength(1);
       expect(
-        migratedConfig.lockFileMaintenance.optionalDependencies.respectLatest
+        migratedConfig.lockFileMaintenance.packageRules[0].respectLatest
       ).toBe(false);
+    });
+    it('it migrates node to travis', () => {
+      const config = {
+        node: {
+          enabled: true,
+          supportPolicy: ['lts'],
+          automerge: 'none',
+        },
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig.node.enabled).toBeUndefined();
+      expect(migratedConfig.travis.enabled).toBe(true);
+      expect(migratedConfig.node.supportPolicy).toBeDefined();
+    });
+    it('it migrates packageFiles', () => {
+      const config = {
+        packageFiles: [
+          'package.json',
+          { packageFile: 'backend/package.json', pinVersions: false },
+          { packageFile: 'frontend/package.json', pinVersions: true },
+          {
+            packageFile: 'other/package.json',
+            devDependencies: { pinVersions: true },
+            dependencies: { pinVersions: true },
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig.includePaths).toHaveLength(4);
+      expect(migratedConfig.packageFiles).toBeUndefined();
+      expect(migratedConfig.packageRules).toHaveLength(4);
+      expect(migratedConfig.packageRules[0].rangeStrategy).toBe('replace');
+      expect(migratedConfig.packageRules[1].rangeStrategy).toBe('pin');
+    });
+    it('it migrates more packageFiles', () => {
+      const config = {
+        packageFiles: [
+          {
+            packageFile: 'package.json',
+            packageRules: [
+              {
+                pinVersions: true,
+                depTypeList: ['devDependencies'],
+              },
+              {
+                pinVersions: true,
+                depTypeList: ['dependencies'],
+              },
+            ],
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(migratedConfig).toMatchSnapshot();
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig.includePaths).toHaveLength(1);
+      expect(migratedConfig.packageFiles).toBeUndefined();
+      expect(migratedConfig.packageRules).toHaveLength(2);
     });
   });
 });

@@ -1,0 +1,60 @@
+This Pull Request updates buildkite plugin {{#if repositoryUrl}}[{{{depName}}}]({{{repositoryUrl}}}){{else}}`{{{depName}}}`{{/if}} from `{{{currentVersion}}}` to `{{{newVersion}}}` ([release notes]({{{repositoryUrl}}}/releases/tag/{{{newVersion}}})).
+
+[Compare source commits]({{{repositoryUrl}}}/compare/{{{currentVersion}}}...{{{newVersion}}})
+
+{{#if releases.length}}
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule ("{{{schedule}}}"{{#if timezone}} in timezone `{{{timezone}}}`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#if isPin}}
+**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.
+{{/if}}
+{{#if hasReleaseNotes}}
+
+<details>
+<summary>Release Notes</summary>
+
+{{#each releases as |release|}}
+{{#if release.releaseNotes}}
+### [`v{{{release.version}}}`]({{{release.releaseNotes.url}}})
+{{#if release.compare.url}}
+[Compare Source]({{release.compare.url}})
+{{/if}}
+{{{release.releaseNotes.body}}}
+
+---
+
+{{/if}}
+{{/each}}
+</details>
+{{/if}}
+
+{{/if}}
+
+{{#if hasErrors}}
+
+---
+
+# Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   `{{error.depName}}`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+# Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   `{{warning.depName}}`: {{warning.message}}
+{{/each}}
+{{/if}}

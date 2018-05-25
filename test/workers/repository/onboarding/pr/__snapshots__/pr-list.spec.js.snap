@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/onboarding/pr/pr-list getPrList() handles emptyu 1`] = `
+"
+### What to Expect
+
+It looks like your repository dependencies are already up-to-date and no Pull Requests will be necessary right away.
+"
+`;
+
 exports[`workers/repository/onboarding/pr/pr-list getPrList() handles multiple 1`] = `
 "
 ### What to Expect
@@ -10,7 +18,7 @@ With your current configuration, Renovate will create 2 Pull Requests:
 
   - Branch name: \`renovate/pin-dependencies\`
   - Pins [a](https://a) in \`devDependencies\` to \`1.1.0\`
-  - Pins b in \`devDependencies\` to \`1.5.3\`
+  - Pins b to \`1.5.3\`
 
 
 2. **Update a to v2**

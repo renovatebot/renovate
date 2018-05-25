@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+
+# We need to parse $IMAGE_NAME because $CACHE_TAG is broken on Docker Hub post_push
+
+IFS=: read DOCKER_REPO CACHE_TAG <<< $IMAGE_NAME
+
+echo "repo=${DOCKER_REPO}"
+echo "tag=${CACHE_TAG}"
+
+SEMVER_REGEX="^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"
+
+if ! [[ "$CACHE_TAG" =~ $SEMVER_REGEX ]]; then
+  echo Not a semver tag - skipping
+  exit
+fi
+
+major=${BASH_REMATCH[1]}
+minor=${BASH_REMATCH[2]}
+
+# Tag and push image for each additional tag
+for tag in {"$major","${major}.${minor}","latest"}; do
+  echo "Tagging ${DOCKER_REPO}:${tag}"
+  docker tag $IMAGE_NAME ${DOCKER_REPO}:${tag}
+  docker push ${DOCKER_REPO}:${tag}
+done

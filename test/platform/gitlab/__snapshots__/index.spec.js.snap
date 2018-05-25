@@ -70,6 +70,7 @@ Array [
 
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 1`] = `
 Object {
+  "branchName": "some-branch",
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
@@ -97,6 +98,7 @@ Array [
 
 exports[`platform/gitlab createPr(branchName, title, body) uses default branch 1`] = `
 Object {
+  "branchName": "some-branch",
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
@@ -131,41 +133,15 @@ Array [
 
 exports[`platform/gitlab getBranchLastCommitTime should return a Date 1`] = `2012-09-20T08:50:22.000Z`;
 
-exports[`platform/gitlab getBranchPr(branchName) should return null if no PR exists 1`] = `
-Array [
-  Array [
-    "projects/undefined/merge_requests?state=opened&per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-]
-`;
-
 exports[`platform/gitlab getBranchPr(branchName) should return the PR object 1`] = `
-Array [
-  Array [
-    "projects/undefined/merge_requests?state=opened&per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "projects/undefined/merge_requests/undefined",
-  ],
-  Array [
-    "projects/undefined/repository/branches/some-branch",
-  ],
-]
-`;
-
-exports[`platform/gitlab getBranchPr(branchName) should return the PR object 2`] = `
 Object {
   "additions": 1,
   "base": Object {
     "sha": "1234",
   },
   "body": undefined,
+  "branchName": "some-branch",
+  "canMerge": true,
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Merge Request #91",
@@ -202,6 +178,8 @@ Array [
 exports[`platform/gitlab getPr(prNo) returns the PR 1`] = `
 Object {
   "body": "a merge request",
+  "branchName": "some-branch",
+  "canMerge": false,
   "canRebase": true,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
@@ -212,6 +190,23 @@ Object {
   "number": 12345,
   "source_branch": "some-branch",
   "state": "merged",
+}
+`;
+
+exports[`platform/gitlab getPr(prNo) returns the PR with nonexisting branch 1`] = `
+Object {
+  "body": "a merge request",
+  "branchName": "some-branch",
+  "canMerge": false,
+  "description": "a merge request",
+  "displayNumber": "Merge Request #12345",
+  "id": 1,
+  "iid": 12345,
+  "isUnmergeable": true,
+  "merge_status": "cannot_be_merged",
+  "number": 12345,
+  "source_branch": "some-branch",
+  "state": "open",
 }
 `;
 

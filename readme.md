@@ -4,7 +4,7 @@
 
 Automated dependency updates. Flexible, so you don't need to be.
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/renovateapp/renovate/master/license)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://raw.githubusercontent.com/renovateapp/renovate/master/license)
 [![codecov](https://codecov.io/gh/renovateapp/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovateapp/renovate)
 [![Join the chat at https://gitter.im/renovate-app/Lobby](https://badges.gitter.im/renovate-app/Lobby.svg)](https://gitter.im/renovate-app/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovateapp.com/)
@@ -41,8 +41,8 @@ Renovate was released in 2017 and is now widely used in the developer community.
 
 ## Using Renovate
 
-The easiest way to use Renovate if you are on GitHub is to enable the free Renovate app. Go to
-[https://github.com/apps/renovate](https://github.com/apps/renovate) to enable
+The easiest way to use Renovate if you are on GitHub is to use the Renovate app. Go to
+[https://github.com/marketplace/renovate](https://github.com/marketplace/renovate) to install
 it now.
 
 ## Configuration
@@ -53,9 +53,17 @@ and
 [Configuration FAQ](https://github.com/renovateapp/renovate/blob/master/docs/faq.md)
 documents should be helpful.
 
-You can also raise an issue in https://github.com/renovateapp/config-help if
+You can also raise an issue in https://github.com/renovatebot/config-help if
 you'd like to get your config reviewed or ask any questions.
 
 ## Self-Hosting
 
-If you are not on GitHub or you prefer to run your own copy of Renovate, then it takes only seconds to set up. Please see [docs/self-hosting.md](https://github.com/renovateapp/renovate/blob/master/docs/self-hosting.md) for instructions.
+If you are not on GitHub or you prefer to run your own copy of Renovate, then you can easily run your own copy. Please see [docs/self-hosting.md](https://github.com/renovateapp/renovate/blob/master/docs/self-hosting.md) for instructions. There is also a commercially licensed [Renovate Pro Edition](https://renovatebot.com/pro) available for GitHub Enterprise.
+
+## Contributing
+
+If you would like to contribute to Renovate or get a local copy running for some other reason, please see the instructions in [contributing.md](.github/contributing.md).
+
+## Security / Disclosure
+
+If you discover any important bug with Renovate that may pose a security problem, please disclose it confidentially to security@renovateapp.com first, so that it can be assessed and hopefully fixed prior to being exploited. Please do not raise GitHub issues for security-related doubts or problems.

@@ -1,20 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`platform/vsts/vsts-got-wrapper gitApi should set token and endpoint 1`] = `
-GitApi {
-  "baseUrl": "myEndpoint",
-  "http": HttpClient {
-    "_certConfig": undefined,
-    "_httpProxy": undefined,
-    "_ignoreSslError": false,
-    "_socketTimeout": undefined,
-    "handlers": Array [
-      PersonalAccessTokenCredentialHandler {
-        "token": "myToken",
-      },
-    ],
-    "requestOptions": Object {},
-    "userAgent": "node-Git-api",
+WebApi {
+  "authHandler": PersonalAccessTokenCredentialHandler {
+    "token": "myToken",
+  },
+  "options": Object {
+    "ignoreSslError": false,
   },
   "rest": RestClient {
     "client": HttpClient {
@@ -27,11 +19,13 @@ GitApi {
           "token": "myToken",
         },
       ],
-      "requestOptions": Object {},
-      "userAgent": "node-Git-api",
+      "requestOptions": Object {
+        "ignoreSslError": false,
+      },
+      "userAgent": "vsts-node-api",
     },
   },
-  "userAgent": "node-Git-api",
+  "serverUrl": "myEndpoint",
   "vsoClient": VsoClient {
     "_initializationPromise": Promise {},
     "_locationsByAreaPromises": Object {},
@@ -48,64 +42,10 @@ GitApi {
             "token": "myToken",
           },
         ],
-        "requestOptions": Object {},
-        "userAgent": "node-Git-api",
-      },
-    },
-  },
-}
-`;
-
-exports[`platform/vsts/vsts-got-wrapper gitApi should set token and endpoint 2`] = `
-CoreApi {
-  "baseUrl": "myEndpoint",
-  "http": HttpClient {
-    "_certConfig": undefined,
-    "_httpProxy": undefined,
-    "_ignoreSslError": false,
-    "_socketTimeout": undefined,
-    "handlers": Array [
-      PersonalAccessTokenCredentialHandler {
-        "token": "myToken",
-      },
-    ],
-    "requestOptions": Object {},
-    "userAgent": "node-Core-api",
-  },
-  "rest": RestClient {
-    "client": HttpClient {
-      "_certConfig": undefined,
-      "_httpProxy": undefined,
-      "_ignoreSslError": false,
-      "_socketTimeout": undefined,
-      "handlers": Array [
-        PersonalAccessTokenCredentialHandler {
-          "token": "myToken",
+        "requestOptions": Object {
+          "ignoreSslError": false,
         },
-      ],
-      "requestOptions": Object {},
-      "userAgent": "node-Core-api",
-    },
-  },
-  "userAgent": "node-Core-api",
-  "vsoClient": VsoClient {
-    "_initializationPromise": Promise {},
-    "_locationsByAreaPromises": Object {},
-    "basePath": "myEndpoint",
-    "baseUrl": "myEndpoint",
-    "restClient": RestClient {
-      "client": HttpClient {
-        "_certConfig": undefined,
-        "_httpProxy": undefined,
-        "_ignoreSslError": false,
-        "_socketTimeout": undefined,
-        "handlers": Array [
-          PersonalAccessTokenCredentialHandler {
-            "token": "myToken",
-          },
-        ],
-        "requestOptions": Object {},
-        "userAgent": "node-Core-api",
+        "userAgent": "vsts-node-api",
       },
     },
   },

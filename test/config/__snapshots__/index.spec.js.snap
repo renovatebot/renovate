@@ -1,52 +1,274 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`config/index .parseConfigs(env, defaultArgv) resolves all presets: foo/bar 1`] = `
+Object {
+  "automerge": false,
+  "repository": "foo/bar",
+}
+`;
+
+exports[`config/index .parseConfigs(env, defaultArgv) resolves all presets: globalConfig 1`] = `
+Object {
+  "assignees": Array [],
+  "autodiscover": false,
+  "automerge": false,
+  "automergeComment": "automergeComment",
+  "automergeType": "pr",
+  "baseBranches": Array [],
+  "bazel": Object {
+    "fileMatch": Array [
+      "(^|/)WORKSPACE$",
+    ],
+  },
+  "branchName": "{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}",
+  "branchPrefix": "renovate/",
+  "branchTopic": "{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+  "buildkite": Object {
+    "commitMessageExtra": "to {{newVersion}}",
+    "commitMessageTopic": "buildkite plugin {{depName}}",
+    "fileMatch": Array [
+      "\\\\.buildkite/.+\\\\.yml$",
+    ],
+    "managerBranchPrefix": "buildkite-",
+    "prBody": "This Pull Request updates buildkite plugin {{#if repositoryUrl}}[{{{depName}}}]({{{repositoryUrl}}}){{else}}\`{{{depName}}}\`{{/if}} from \`{{{currentVersion}}}\` to \`{{{newVersion}}}\` ([release notes]({{{repositoryUrl}}}/releases/tag/{{{newVersion}}})).\\n\\n[Compare source commits]({{{repositoryUrl}}}/compare/{{{currentVersion}}}...{{{newVersion}}})\\n\\n{{#if releases.length}}\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if isPin}}\\n**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.\\n{{/if}}\\n{{#if hasReleaseNotes}}\\n\\n<details>\\n<summary>Release Notes</summary>\\n\\n{{#each releases as |release|}}\\n{{#if release.releaseNotes}}\\n### [\`v{{{release.version}}}\`]({{{release.releaseNotes.url}}})\\n{{#if release.compare.url}}\\n[Compare Source]({{release.compare.url}})\\n{{/if}}\\n{{{release.releaseNotes.body}}}\\n\\n---\\n\\n{{/if}}\\n{{/each}}\\n</details>\\n{{/if}}\\n\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+  },
+  "bumpVersion": null,
+  "circleci": Object {
+    "fileMatch": Array [
+      "^.circleci/config.yml$",
+    ],
+  },
+  "commitBody": null,
+  "commitMessage": "{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}",
+  "commitMessageAction": "Update",
+  "commitMessageExtra": "to {{#if isMajor}}v{{{newVersionMajor}}}{{else}}{{#unless isRange}}v{{/unless}}{{{newVersion}}}{{/if}}",
+  "commitMessagePrefix": null,
+  "commitMessageTopic": "dependency {{depName}}",
+  "copyLocalLibs": false,
+  "description": Array [
+    "Rate limit PR creation to a maximum of one per hour",
+    "Automerge patch upgrades if they pass tests",
+  ],
+  "digest": Object {},
+  "docker": Object {
+    "commitMessageTopic": "{{{depName}}} Docker tag",
+    "digest": Object {
+      "branchTopic": "{{{depNameSanitized}}}-{{{currentTag}}}",
+      "commitMessageExtra": "to {{newDigestShort}}",
+      "commitMessageTopic": "{{{depName}}}:{{{currentTag}}} Docker digest",
+      "group": Object {
+        "commitMessageTopic": "{{{groupName}}}",
+        "prBody": "This Pull Request updates Dockerfiles to the latest image digests. For details on Renovate's Docker support, please visit https://renovatebot.com/docs/docker\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#each upgrades as |upgrade|}}\\n-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{{depName}}}\`{{/if}}: \`{{upgrade.newDigest}}\`\\n{{/each}}\\n\\n**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+      },
+      "prBody": "This Pull Request updates Docker base image \`{{{depName}}}:{{{currentTag}}}\` to the latest digest (\`{{{newDigest}}}\`). For details on Renovate's Docker support, please visit https://renovatebot.com/docs/docker\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+    },
+    "fileMatch": Array [
+      "(^|/)Dockerfile$",
+    ],
+    "group": Object {
+      "commitMessageTopic": "{{{groupName}}} Docker tags",
+      "prBody": "This Pull Request updates Dockerfiles to use image digests.\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#each upgrades as |upgrade|}}\\n-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{{depName}}}\`{{/if}}: \`{{upgrade.newDigest}}\`\\n{{/each}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+    },
+    "major": Object {
+      "enabled": false,
+    },
+    "managerBranchPrefix": "docker-",
+    "pin": Object {
+      "commitMessageExtra": "",
+      "group": Object {
+        "branchTopic": "digests-pin",
+        "commitMessageTopic": "{{{groupName}}}",
+        "prBody": "This Pull Request pins Dockerfiles to use image digests. For details on Renovate's Docker support, please visit https://renovatebot.com/docs/docker\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#each upgrades as |upgrade|}}\\n-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}\`{{{depName}}}\`{{/if}}: \`{{upgrade.newDigest}}\`\\n{{/each}}\\n\\n**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+      },
+      "groupName": "Docker digests",
+      "prBody": "This Pull Request pins Docker base image \`{{{depName}}}:{{{currentTag}}}\` to use a digest (\`{{{newDigest}}}\`).\\nThis digest will then be kept updated via Pull Requests whenever the image is updated on the Docker registry. For details on Renovate's Docker support, please visit https://renovatebot.com/docs/docker\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+    },
+    "prBody": "This Pull Request updates Docker base image \`{{{depName}}}\` from tag \`{{{currentTag}}}\` to new tag \`{{{newTag}}}\`. For details on Renovate's Docker support, please visit https://renovatebot.com/docs/docker\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+  },
+  "docker-compose": Object {
+    "fileMatch": Array [
+      "(^|/)docker-compose[^/]*\\\\.ya?ml$",
+    ],
+  },
+  "enabled": true,
+  "enabledManagers": Array [],
+  "encrypted": null,
+  "endpoint": null,
+  "engines": Object {},
+  "exposeEnv": false,
+  "fileMatch": Array [],
+  "forkMode": false,
+  "gitAuthor": null,
+  "gitPrivateKey": null,
+  "group": Object {
+    "branchTopic": "{{{groupSlug}}}",
+    "commitMessageTopic": "{{{groupName}}}",
+    "prBody": "This Pull Request renovates the package group \\"{{{groupName}}}\\".\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#each upgrades as |upgrade|}}\\n-   {{#if repositoryUrl}}[{{{upgrade.depName}}}]({{upgrade.repositoryUrl}}){{else}}\`{{{depName}}}\`{{/if}}{{#if depType}} (\`{{{depType}}}\`){{/if}}: from \`{{{upgrade.currentVersion}}}\` to \`{{{upgrade.newVersion}}}\`\\n{{/each}}\\n\\n{{#if hasReleaseNotes}}\\n# Release Notes\\n{{#each upgrades as |upgrade|}}\\n{{#if upgrade.hasReleaseNotes}}\\n<details>\\n<summary>{{upgrade.githubName}}</summary>\\n\\n{{#each upgrade.releases as |release|}}\\n{{#if release.releaseNotes}}\\n### [\`v{{{release.version}}}\`]({{{release.releaseNotes.url}}})\\n{{#if release.compare.url}}\\n[Compare Source]({{release.compare.url}})\\n{{/if}}\\n{{{release.releaseNotes.body}}}\\n\\n---\\n\\n{{/if}}\\n{{/each}}\\n\\n</details>\\n{{/if}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if isPin}}\\n**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+  },
+  "groupName": null,
+  "groupSlug": null,
+  "ignoreDeps": Array [],
+  "ignoreNpmrcFile": false,
+  "ignorePaths": Array [
+    "**/node_modules/**",
+    "**/bower_components/**",
+  ],
+  "ignoreUnstable": true,
+  "includePaths": Array [],
+  "labels": Array [],
+  "lazyGrouping": true,
+  "lockFileMaintenance": Object {
+    "branchTopic": "lock-file-maintenance",
+    "commitMessageAction": "Lock file maintenance",
+    "commitMessageExtra": null,
+    "commitMessageTopic": null,
+    "enabled": false,
+    "groupName": null,
+    "prBody": "This Pull Request updates \`package.json\` lock files to use the latest dependency versions.\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+    "rebaseStalePrs": true,
+    "recreateClosed": true,
+    "schedule": Array [
+      "before 5am on monday",
+    ],
+  },
+  "logLevel": "error",
+  "major": Object {},
+  "managerBranchPrefix": "",
+  "meteor": Object {
+    "fileMatch": Array [
+      "(^|/)package.js$",
+    ],
+  },
+  "minor": Object {},
+  "mirrorMode": false,
+  "node": Object {
+    "group": Object {
+      "commitMessageTopic": "Node.js",
+    },
+    "groupName": "Node.js",
+    "lazyGrouping": false,
+  },
+  "npm": Object {
+    "fileMatch": Array [
+      "(^|/)package.json$",
+    ],
+  },
+  "npmToken": null,
+  "npmrc": null,
+  "nvm": Object {
+    "fileMatch": Array [
+      "^.nvmrc$",
+    ],
+  },
+  "onboarding": true,
+  "onboardingConfig": Object {},
+  "packageRules": Array [],
+  "patch": Object {
+    "automerge": true,
+    "branchTopic": "{{{depNameSanitized}}}-{{{newVersionMajor}}}.{{{newVersionMinor}}}.x",
+  },
+  "paths": Array [],
+  "pin": Object {
+    "commitMessageAction": "Pin",
+    "group": Object {
+      "commitMessageTopic": "dependencies",
+    },
+    "groupName": "Pin Dependencies",
+    "rebaseStalePrs": true,
+    "recreateClosed": true,
+    "unpublishSafe": false,
+  },
+  "pinDigests": true,
+  "pip_requirements": Object {
+    "enabled": false,
+    "fileMatch": Array [
+      "(^|\\\\/)([\\\\w-]*)requirements.(txt|pip)$",
+    ],
+  },
+  "platform": "github",
+  "prBody": "This Pull Request {{#if isRollback}}rolls back{{else}}updates{{/if}} dependency {{#if repositoryUrl}}[{{{depName}}}]({{{repositoryUrl}}}){{else}}\`{{{depName}}}\`{{/if}} from \`{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{{currentVersion}}}\` to \`{{#unless isRange}}v{{/unless}}{{{newVersion}}}\`{{#if isRollback}}. This is necessary and important because \`v{{{currentVersion}}}\` cannot be found in the npm registry - probably because of it being unpublished.{{/if}}\\n{{#if hasTypes}}\\n\\nThis PR also includes an upgrade to the corresponding [@types/{{{depName}}}](https://npmjs.com/package/@types/{{{depName}}}) package.\\n{{/if}}\\n{{#if releases.length}}\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if isPin}}\\n**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.\\n{{/if}}\\n{{#if hasReleaseNotes}}\\n\\n<details>\\n<summary>Release Notes</summary>\\n\\n{{#each releases as |release|}}\\n{{#if release.releaseNotes}}\\n### [\`v{{{release.version}}}\`]({{{release.releaseNotes.url}}})\\n{{#if release.compare.url}}\\n[Compare Source]({{release.compare.url}})\\n{{/if}}\\n{{{release.releaseNotes.body}}}\\n\\n---\\n\\n{{/if}}\\n{{/each}}\\n</details>\\n{{/if}}\\n\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+  "prConcurrentLimit": 0,
+  "prCreation": "immediate",
+  "prFooter": "This PR has been generated by [Renovate Bot](https://renovatebot.com).",
+  "prHourlyLimit": 10,
+  "prNotPendingHours": 25,
+  "prTitle": null,
+  "privateKey": null,
+  "python": Object {},
+  "rangeStrategy": "replace",
+  "rebaseStalePrs": null,
+  "recreateClosed": false,
+  "renovateFork": false,
+  "requireConfig": false,
+  "requiredStatusChecks": Array [],
+  "respectLatest": true,
+  "reviewers": Array [],
+  "schedule": Array [],
+  "semanticCommitScope": "deps",
+  "semanticCommitType": "chore",
+  "semanticCommits": null,
+  "separateMajorMinor": true,
+  "separateMinorPatch": true,
+  "separateMultipleMajor": false,
+  "statusCheckVerify": false,
+  "supportPolicy": Array [],
+  "timezone": null,
+  "token": null,
+  "travis": Object {
+    "enabled": false,
+    "fileMatch": Array [
+      "^.travis.yml$",
+    ],
+  },
+  "unpublishSafe": false,
+  "unstablePattern": null,
+  "updateLockFiles": true,
+  "updateNotScheduled": true,
+  "yarnrc": null,
+}
+`;
+
+exports[`config/index .parseConfigs(env, defaultArgv) resolves all presets: rennovateapp/github-app-cli 1`] = `
+Object {
+  "description": Array [
+    "Rate limit PR creation to a maximum of two per hour",
+  ],
+  "prHourlyLimit": 2,
+  "repository": "rennovateapp/github-app-cli",
+}
+`;
+
+exports[`config/index .parseConfigs(env, defaultArgv) resolves all presets: renovateapp/renovate 1`] = `
+Object {
+  "description": Array [
+    "Use version pinning (maintain a single version only and not semver ranges)",
+  ],
+  "rangeStrategy": "pin",
+  "repository": "renovateapp/renovate",
+}
+`;
+
+exports[`config/index .parseConfigs(env, defaultArgv) uses configured repositories when autodiscovery is to replacde it & logs warn 1`] = `
+Array [
+  "bar/baz",
+  "renovateapp/renovate",
+  "not/configured",
+]
+`;
+
 exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
 Object {
-  "branchName": "{{{branchPrefix}}}lock-file-maintenance",
-  "commitMessage": "Update lock file",
+  "branchTopic": "lock-file-maintenance",
+  "commitMessageAction": "Lock file maintenance",
+  "commitMessageExtra": null,
+  "commitMessageTopic": null,
   "enabled": false,
   "groupName": null,
-  "prBody": "This Pull Request updates \`package.json\` lock files to use the latest dependency versions.
-
-{{#if schedule}}
-**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.
-{{/if}}
-
-{{#if hasErrors}}
-
----
-
-# Errors
-
-Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
-
-{{#each errors as |error|}}
--   \`{{error.depName}}\`: {{error.message}}
-{{/each}}
-{{/if}}
-
-{{#if hasWarnings}}
-
----
-
-# Warnings
-
-Please make sure the following warnings are safe to ignore:
-
-{{#each warnings as |warning|}}
--   \`{{warning.depName}}\`: {{warning.message}}
-{{/each}}
-{{/if}}
-
----
-
-This PR has been generated by [Renovate Bot](https://renovateapp.com).",
-  "prTitle": "Lock file maintenance",
+  "prBody": "This Pull Request updates \`package.json\` lock files to use the latest dependency versions.\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}\\n\\n{{#if hasErrors}}\\n\\n---\\n\\n# Errors\\n\\nRenovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.\\n\\n{{#each errors as |error|}}\\n-   \`{{error.depName}}\`: {{error.message}}\\n{{/each}}\\n{{/if}}\\n\\n{{#if hasWarnings}}\\n\\n---\\n\\n# Warnings\\n\\nPlease make sure the following warnings are safe to ignore:\\n\\n{{#each warnings as |warning|}}\\n-   \`{{warning.depName}}\`: {{warning.message}}\\n{{/each}}\\n{{/if}}",
+  "rebaseStalePrs": true,
   "recreateClosed": true,
   "schedule": Array [
     "on monday",
   ],
 }
 `;
-
-exports[`config/index mergeChildConfig(parentConfig, childConfig) merges depTypes 1`] = `undefined`;

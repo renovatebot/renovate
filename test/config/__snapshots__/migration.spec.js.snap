@@ -13,16 +13,7 @@ Object {
   "baseBranches": Array [
     "next",
   ],
-  "commitMessage": "some commit message",
-  "devDependencies": Object {
-    "major": Object {
-      "automerge": false,
-    },
-    "minor": Object {
-      "automerge": true,
-    },
-    "schedule": Array [],
-  },
+  "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
   "enabled": true,
   "extends": Array [
     "config:js-app",
@@ -44,18 +35,28 @@ Object {
   "minor": Object {
     "automerge": true,
   },
-  "onboarding": false,
-  "optionalDependencies": Object {
-    "major": Object {
-      "automerge": false,
-    },
-    "minor": Object {
-      "automerge": true,
-    },
-    "respectLatest": false,
-    "schedule": "before 5am on Monday",
+  "nvmrc": Object {
+    "packageRules": Array [
+      Object {
+        "extends": Array [
+          "node",
+        ],
+        "paths": Array [
+          "node/**",
+        ],
+      },
+    ],
   },
+  "onboarding": false,
   "packageRules": Array [
+    Object {
+      "extends": Array [
+        "foo",
+      ],
+      "paths": Array [
+        "examples/**",
+      ],
+    },
     Object {
       "excludePackageNames": "foo",
       "groupName": "angular packages",
@@ -76,14 +77,137 @@ Object {
         "ang",
       ],
     },
+    Object {
+      "depTypeList": Array [
+        "peerDependencies",
+      ],
+      "rangeStrategy": "widen",
+    },
+    Object {
+      "depTypeList": Array [
+        "devDependencies",
+      ],
+      "major": Object {
+        "automerge": false,
+      },
+      "minor": Object {
+        "automerge": true,
+      },
+      "schedule": Array [],
+    },
+    Object {
+      "depTypeList": Array [
+        "optionalDependencies",
+      ],
+      "major": Object {
+        "automerge": false,
+      },
+      "minor": Object {
+        "automerge": true,
+      },
+      "respectLatest": false,
+      "schedule": "before 5am on Monday",
+    },
   ],
   "patch": Object {
     "automerge": true,
   },
-  "prTitle": "some pr title",
+  "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title",
+  "rangeStrategy": "bump",
   "schedule": "on the first day of the month",
   "semanticCommitScope": "deps",
   "semanticCommitType": "fix",
+  "separateMajorMinor": true,
+  "separateMajorReleases": true,
+  "separateMinorPatch": true,
+  "travis": Object {
+    "enabled": true,
+  },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it migrates more packageFiles 1`] = `
+Object {
+  "includePaths": Array [
+    "package.json",
+  ],
+  "packageRules": Array [
+    Object {
+      "depTypeList": Array [
+        "devDependencies",
+      ],
+      "paths": Array [
+        "package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+    Object {
+      "depTypeList": Array [
+        "dependencies",
+      ],
+      "paths": Array [
+        "package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+  ],
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it migrates node to travis 1`] = `
+Object {
+  "node": Object {
+    "automerge": false,
+    "supportPolicy": Array [
+      "lts",
+    ],
+  },
+  "travis": Object {
+    "enabled": true,
+  },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) it migrates packageFiles 1`] = `
+Object {
+  "includePaths": Array [
+    "package.json",
+    "backend/package.json",
+    "frontend/package.json",
+    "other/package.json",
+  ],
+  "packageRules": Array [
+    Object {
+      "paths": Array [
+        "backend/package.json",
+      ],
+      "rangeStrategy": "replace",
+    },
+    Object {
+      "paths": Array [
+        "frontend/package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+    Object {
+      "depTypeList": Array [
+        "devDependencies",
+      ],
+      "paths": Array [
+        "other/package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+    Object {
+      "depTypeList": Array [
+        "dependencies",
+      ],
+      "paths": Array [
+        "other/package.json",
+      ],
+      "rangeStrategy": "pin",
+    },
+  ],
 }
 `;
 
@@ -101,9 +225,14 @@ Object {
 exports[`config/migration migrateConfig(config, parentConfig) it migrates subconfig 1`] = `
 Object {
   "lockFileMaintenance": Object {
-    "optionalDependencies": Object {
-      "respectLatest": false,
-    },
+    "packageRules": Array [
+      Object {
+        "depTypeList": Array [
+          "optionalDependencies",
+        ],
+        "respectLatest": false,
+      },
+    ],
   },
 }
 `;
@@ -135,13 +264,13 @@ Object {
 
 exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
 Object {
-  "dependencies": Object {
+  "major": Object {
     "schedule": Array [
       "after 10pm",
       "before 7am",
     ],
   },
-  "devDependencies": Object {
+  "minor": Object {
     "schedule": Array [
       "after 10pm every weekday",
       "before 7am every weekday",

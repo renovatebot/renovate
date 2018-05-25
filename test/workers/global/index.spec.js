@@ -34,7 +34,9 @@ describe('lib/workers/global', () => {
   });
   it('catches errors', async () => {
     configParser.parseConfigs.mockImplementationOnce(() => {
-      throw new Error('a');
+      throw new Error(
+        'This fatal error is thrown for testing purposes and can be ignored'
+      );
     });
     await globalWorker.start();
   });

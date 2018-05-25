@@ -1,0 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/nvm/update updateDependency updates values 1`] = `
+"8.9.1
+"
+`;

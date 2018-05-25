@@ -201,6 +201,7 @@ Array [
 
 exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
+  "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
   "number": 123,
 }
@@ -235,7 +236,7 @@ Array [
         "context": "renovate/verify",
         "description": "Renovate verified pull request",
         "state": "success",
-        "target_url": "https://renovateapp.com",
+        "target_url": "https://renovatebot.com",
       },
     },
   ],
@@ -244,6 +245,7 @@ Array [
 
 exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
+  "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
   "number": 123,
 }
@@ -300,6 +302,7 @@ content",
 exports[`platform/github getAllRenovateBranches() should return all renovate branches 1`] = `
 Array [
   "renovate/a",
+  "renovate",
   "renovate/b",
 ]
 `;
@@ -350,7 +353,7 @@ Array [
     "repos/some/repo/contents/backend/package-lock.json?ref=master",
   ],
   Array [
-    "repos/some/repo/git/trees/master.backend",
+    "repos/some/repo/git/trees/master/backend",
   ],
   Array [
     "repos/some/repo/git/blobs/some-sha",
@@ -446,12 +449,14 @@ Object {
   "base": Object {
     "sha": "1234",
   },
+  "branchName": undefined,
   "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -461,12 +466,15 @@ Object {
   "base": Object {
     "sha": "5678",
   },
+  "branchName": undefined,
+  "canMerge": true,
   "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isStale": true,
   "mergeable": true,
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -476,12 +484,14 @@ Object {
   "base": Object {
     "sha": "1234",
   },
+  "branchName": undefined,
   "canRebase": true,
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -491,12 +501,14 @@ Object {
   "base": Object {
     "sha": "1234",
   },
+  "branchName": undefined,
   "canRebase": true,
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;
@@ -506,11 +518,13 @@ Object {
   "base": Object {
     "sha": "1234",
   },
+  "branchName": undefined,
   "commits": 2,
   "displayNumber": "Pull Request #1",
   "isUnmergeable": true,
   "mergeable_state": "dirty",
   "number": 1,
+  "sha": undefined,
   "state": "open",
 }
 `;

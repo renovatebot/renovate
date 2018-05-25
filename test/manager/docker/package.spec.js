@@ -1,4 +1,4 @@
-const dockerApi = require('../../../lib/manager/docker/registry');
+const dockerApi = require('../../../lib/datasource/docker');
 const docker = require('../../../lib/manager/docker/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
@@ -6,7 +6,7 @@ const defaultConfig = require('../../../lib/config/defaults').getConfig();
 dockerApi.getDigest = jest.fn();
 dockerApi.getTags = jest.fn();
 
-describe('lib/workers/package/docker', () => {
+describe('lib/manager/docker/package', () => {
   describe('isStable', () => {
     it('returns true if no pattern', () => {
       expect(docker.isStable('8', null)).toBe(true);
@@ -47,6 +47,15 @@ describe('lib/workers/package/docker', () => {
       expect(res).toHaveLength(1);
       expect(res[0].type).toEqual('digest');
     });
+    it('returns a digest when registry is present', async () => {
+      config.dockerRegistry = 'docker.io';
+      config.currentFrom = 'docker.io/some-dep:1.0.0@sha256:abcdefghijklmnop';
+      dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
+      const res = await docker.getPackageUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].type).toEqual('digest');
+    });
     it('adds latest tag', async () => {
       delete config.currentTag;
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
@@ -56,6 +65,7 @@ describe('lib/workers/package/docker', () => {
     });
     it('returns a pin', async () => {
       delete config.currentDigest;
+      config.currentTag = 'some-text-tag';
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
       const res = await docker.getPackageUpdates(config);
       expect(res).toHaveLength(1);
@@ -67,6 +77,7 @@ describe('lib/workers/package/docker', () => {
       expect(await docker.getPackageUpdates(config)).toEqual([]);
     });
     it('returns only one upgrade if automerging major', async () => {
+      config.dockerRegistry = 'docker.io';
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
       dockerApi.getTags.mockReturnValueOnce([
@@ -83,7 +94,7 @@ describe('lib/workers/package/docker', () => {
       config.major.automerge = false;
     });
     it('returns major and minor upgrades', async () => {
-      config.multipleMajorPrs = true;
+      config.separateMultipleMajor = true;
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
       dockerApi.getDigest.mockReturnValueOnce('sha256:two');
@@ -194,6 +205,7 @@ describe('lib/workers/package/docker', () => {
       delete config.currentDigest;
       config.currentTag = '1.0.0-something';
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
+      dockerApi.getDigest.mockReturnValueOnce('sha256:two');
       dockerApi.getTags.mockReturnValueOnce([
         '1.1.0-something',
         '1.2.0-otherthing',

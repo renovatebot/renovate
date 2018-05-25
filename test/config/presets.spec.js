@@ -1,4 +1,4 @@
-const npm = require('../../lib/manager/npm/registry');
+const npm = require('../../lib/datasource/npm');
 const presets = require('../../lib/config/presets');
 const presetDefaults = require('../_fixtures/npm/renovate-config-default');
 const presetPackages = require('../_fixtures/npm/renovate-config-packages');
@@ -107,7 +107,7 @@ describe('config/presets', () => {
       config.extends = [':pinVersions'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.pinVersions).toBe(true);
+      expect(res.rangeStrategy).toEqual('pin');
     });
     it('throws if valid and invalid', async () => {
       config.foo = 1;
@@ -122,11 +122,6 @@ describe('config/presets', () => {
       expect(e.configFile).toMatchSnapshot();
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
-    });
-    it('resolves app preset', async () => {
-      config.extends = [':app'];
-      const res = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
     });
     it('resolves group monorepos', async () => {
       config.extends = ['group:monorepos'];

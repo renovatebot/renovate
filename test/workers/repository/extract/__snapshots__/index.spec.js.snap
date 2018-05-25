@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/extract/index extractAllDependencies() runs 1`] = `
+Object {
+  "bazel": Array [
+    Object {},
+  ],
+  "buildkite": Array [
+    Object {},
+  ],
+  "circleci": Array [
+    Object {},
+  ],
+  "docker": Array [
+    Object {},
+  ],
+  "docker-compose": Array [
+    Object {},
+  ],
+  "meteor": Array [
+    Object {},
+  ],
+  "npm": Array [
+    Object {},
+  ],
+  "nvm": Array [
+    Object {},
+  ],
+  "pip_requirements": Array [
+    Object {},
+  ],
+  "travis": Array [
+    Object {},
+  ],
+}
+`;

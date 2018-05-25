@@ -60,7 +60,11 @@ describe('platform/gitlab', () => {
       expect(repos).toMatchSnapshot();
     });
   });
-
+  describe('cleanRepo()', () => {
+    it('exists', () => {
+      gitlab.cleanRepo();
+    });
+  });
   function initRepo(...args) {
     // projects/${config.repository
     get.mockImplementationOnce(() => ({
@@ -235,20 +239,62 @@ describe('platform/gitlab', () => {
     });
   });
   describe('isBranchStale()', () => {
-    it('exists', () => {
-      gitlab.isBranchStale();
+    it('should return false if same SHA as master', async () => {
+      // getBranchDetails - same as master
+      get.mockImplementationOnce(() => ({
+        body: {
+          commit: {
+            parent_ids: ['1234'],
+          },
+        },
+      }));
+      // getBranchDetails - master
+      get.mockImplementationOnce(() => ({
+        body: {
+          commit: {
+            id: '1234',
+          },
+        },
+      }));
+      expect(await gitlab.isBranchStale('thebranchname')).toBe(false);
+    });
+    it('should return true if SHA different from master', async () => {
+      // getBranchDetails - different from master
+      get.mockImplementationOnce(() => ({
+        body: {
+          commit: {
+            parent_ids: ['12345678'],
+          },
+        },
+      }));
+      // getBranchDetails - master
+      get.mockImplementationOnce(() => ({
+        body: {
+          commit: {
+            id: '1234',
+          },
+        },
+      }));
+      expect(await gitlab.isBranchStale('thebranchname')).toBe(true);
     });
   });
   describe('getBranchPr(branchName)', () => {
-    it('should return null if no PR exists', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [],
-      }));
+    it('should return null if branch does not exist', async () => {
+      get.mockReturnValueOnce({ statusCode: 500 }); // branchExists
       const pr = await gitlab.getBranchPr('somebranch');
-      expect(get.mock.calls).toMatchSnapshot();
+      expect(pr).toBe(null);
+    });
+    it('should return null if no PR exists', async () => {
+      get.mockReturnValueOnce({ statusCode: 200 }); // branchExists
+      get.mockReturnValueOnce({
+        // branchExists
+        body: [],
+      });
+      const pr = await gitlab.getBranchPr('somebranch');
       expect(pr).toBe(null);
     });
     it('should return the PR object', async () => {
+      get.mockReturnValueOnce({ statusCode: 200 }); // branchExists
       get.mockReturnValueOnce({
         body: [{ number: 91, source_branch: 'somebranch' }],
       });
@@ -266,7 +312,6 @@ describe('platform/gitlab', () => {
       });
       get.mockReturnValueOnce({ body: 'foo' });
       const pr = await gitlab.getBranchPr('somebranch');
-      expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
     });
   });
@@ -302,9 +347,23 @@ describe('platform/gitlab', () => {
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('success');
     });
-    it('returns failure if any are failed', async () => {
+    it('returns success if optional jobs fail', async () => {
       get.mockReturnValueOnce({
-        body: [{ status: 'success' }, { status: 'failed' }],
+        body: [
+          { status: 'success' },
+          { status: 'failed', allow_failure: true },
+        ],
+      });
+      const res = await gitlab.getBranchStatus('somebranch', []);
+      expect(res).toEqual('success');
+    });
+    it('returns failure if any mandatory jobs fails', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          { status: 'success' },
+          { status: 'failed', allow_failure: true },
+          { status: 'failed' },
+        ],
       });
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('failure');
@@ -584,6 +643,25 @@ describe('platform/gitlab', () => {
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
     });
+    it('returns the PR with nonexisting branch', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          id: 1,
+          iid: 12345,
+          description: 'a merge request',
+          state: 'open',
+          merge_status: 'cannot_be_merged',
+          source_branch: 'some-branch',
+        },
+      }));
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
+      const pr = await gitlab.getPr(12345);
+      expect(pr).toMatchSnapshot();
+    });
   });
   describe('getPrFiles()', () => {
     it('should return empty', async () => {
@@ -647,6 +725,11 @@ describe('platform/gitlab', () => {
           statusCode: 404,
         })
       ); // branch exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       const file = {
         name: 'some-new-file',
         contents: 'some new-contents',
@@ -673,6 +756,11 @@ describe('platform/gitlab', () => {
       });
       // branch exists
       get.mockImplementationOnce(() => ({ statusCode: 200 }));
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       const files = [
         {
           name: 'some-existing-file',
@@ -691,9 +779,13 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.post.mock.calls).toHaveLength(1);
     });
-
     it('should parse valid gitAuthor', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
@@ -719,9 +811,13 @@ describe('platform/gitlab', () => {
         'bot@renovateapp.com'
       );
     });
-
     it('should skip invalid gitAuthor', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
+      get.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      ); // branch exists
       get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,

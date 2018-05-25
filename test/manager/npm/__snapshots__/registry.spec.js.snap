@@ -6,6 +6,7 @@ Object {
     "latest": "0.0.1",
   },
   "homepage": undefined,
+  "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
   "repositoryUrl": undefined,
@@ -23,6 +24,7 @@ Object {
     "latest": "0.0.1",
   },
   "homepage": undefined,
+  "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
@@ -40,6 +42,7 @@ Object {
     "latest": "0.0.1",
   },
   "homepage": undefined,
+  "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
   "repositoryUrl": undefined,
@@ -51,12 +54,15 @@ Object {
 }
 `;
 
+exports[`api/npm should retry when 408 or 5xx 1`] = `null`;
+
 exports[`api/npm should send an authorization header if provided 1`] = `
 Object {
   "dist-tags": Object {
     "latest": "0.0.1",
   },
   "homepage": undefined,
+  "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
   "repositoryUrl": undefined,
@@ -74,6 +80,7 @@ Object {
     "latest": "0.0.1",
   },
   "homepage": undefined,
+  "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
   "repositoryUrl": undefined,
@@ -91,6 +98,7 @@ Object {
     "latest": "0.0.1",
   },
   "homepage": undefined,
+  "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
   "repositoryUrl": undefined,
@@ -108,6 +116,7 @@ Object {
     "latest": "0.0.1",
   },
   "homepage": undefined,
+  "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
   "repositoryUrl": undefined,
@@ -125,6 +134,7 @@ Object {
     "latest": "0.0.1",
   },
   "homepage": "https://google.com",
+  "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
   "repositoryUrl": "https://google.com",

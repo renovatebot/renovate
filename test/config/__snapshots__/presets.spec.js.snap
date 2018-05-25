@@ -76,7 +76,7 @@ Object {
   "description": Array [
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
-  "pinVersions": true,
+  "rangeStrategy": "pin",
 }
 `;
 
@@ -246,29 +246,13 @@ Object {
 exports[`config/presets resolvePreset migrates automerge in presets 1`] = `
 Object {
   "automergeType": "pr",
-  "branchprefix": "renovate/",
-  "dependencies": Object {
-    "description": Array [
-      "Preserve (but continue to upgrade) any existing semver ranges",
-    ],
-    "pinVersions": false,
-    "semanticCommitScope": "deps",
-    "semanticCommitType": "fix",
-  },
+  "branchPrefix": "renovate/",
   "description": Array [
     "Use <code>renovate/</code> as prefix for all branch names",
-    "If semantic commits detected, use <code>fix(deps):</code> for dependencies and <code>chore(deps):</code> for all others",
+    "If semantic commits detected, use semantic commit type <code>fix</code> for dependencies and <code>chore</code> for all others",
     "Require all status checks to pass before any automerging",
     "Pin dependency versions for <code>devDependencies</code> and retain semver ranges for others",
   ],
-  "devDependencies": Object {
-    "description": Array [
-      "Use version pinning (maintain a single version only and not semver ranges)",
-    ],
-    "pinVersions": true,
-    "semanticCommitScope": "deps",
-    "semanticCommitType": "chore",
-  },
   "ignoreUnstable": true,
   "labels": Array [
     "dependencies",
@@ -286,22 +270,32 @@ Object {
   "minor": Object {
     "automerge": true,
   },
-  "optionalDependencies": Object {
-    "description": Array [
-      "Preserve (but continue to upgrade) any existing semver ranges",
-    ],
-    "pinVersions": false,
-    "semanticCommitScope": "deps",
-    "semanticCommitType": "chore",
-  },
-  "peerDependencies": Object {
-    "description": Array [
-      "Preserve (but continue to upgrade) any existing semver ranges",
-    ],
-    "pinVersions": false,
-    "semanticCommitScope": "deps",
-    "semanticCommitType": "chore",
-  },
+  "packageRules": Array [
+    Object {
+      "packagePatterns": Array [
+        "*",
+      ],
+      "semanticCommitType": "chore",
+    },
+    Object {
+      "depTypeList": Array [
+        "dependencies",
+      ],
+      "semanticCommitType": "fix",
+    },
+    Object {
+      "packagePatterns": Array [
+        "*",
+      ],
+      "rangeStrategy": "replace",
+    },
+    Object {
+      "depTypeList": Array [
+        "devDependencies",
+      ],
+      "rangeStrategy": "pin",
+    },
+  ],
   "prCreation": "immediate",
   "rebaseStalePrs": true,
   "requiredStatusChecks": Array [],
@@ -310,67 +304,9 @@ Object {
     "before 8am",
   ],
   "semanticCommits": true,
-  "separateMajorReleases": true,
-  "separatePatchReleases": false,
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
   "timezone": "Asia/Taipei",
-  "unpublishSafe": false,
-}
-`;
-
-exports[`config/presets resolvePreset resolves app preset 1`] = `
-Object {
-  "automerge": false,
-  "branchprefix": "renovate/",
-  "dependencies": Object {
-    "description": Array [
-      "Use <code>fix(deps):</code> as semantic prefix for commit messages and PR titles",
-    ],
-    "semanticCommitScope": "deps",
-    "semanticCommitType": "fix",
-  },
-  "description": Array [
-    "Use version pinning (maintain a single version only and not semver ranges)",
-    "Separate major versions of dependencies into individual branches/PRs",
-    "Use the same branch/PR for both patch and minor upgrades of a dependency",
-    "Only upgrade to stable npm versions",
-    "Upgrade versions up to the \\"latest\\" tag in npm registry",
-    "Create branches/PRs for dependency upgrades as soon as they're available",
-    "Wait until branch tests have passed or failed before creating the PR",
-    "Use <code>renovate/</code> as prefix for all branch names",
-    "If semantic commits detected, use <code>fix(deps):</code> for dependencies and <code>chore(deps):</code> for all others",
-    "Disable automerging feature - wait for humans to merge all PRs",
-    "Update existing lock files only when <code>package.json</code> is modified",
-  ],
-  "devDependencies": Object {
-    "description": Array [
-      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
-    ],
-    "semanticCommitScope": "deps",
-    "semanticCommitType": "chore",
-  },
-  "ignoreUnstable": true,
-  "lockFileMaintenance": Object {
-    "enabled": false,
-  },
-  "optionalDependencies": Object {
-    "description": Array [
-      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
-    ],
-    "semanticCommitScope": "deps",
-    "semanticCommitType": "chore",
-  },
-  "peerDependencies": Object {
-    "description": Array [
-      "Use <code>chore(deps):</code> as semantic prefix for commit messages and PR titles",
-    ],
-    "semanticCommitScope": "deps",
-    "semanticCommitType": "chore",
-  },
-  "pinVersions": true,
-  "prCreation": "not-pending",
-  "respectLatest": true,
-  "separateMajorReleases": true,
-  "separatePatchReleases": false,
   "unpublishSafe": false,
 }
 `;
@@ -734,6 +670,6 @@ Object {
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
   "foo": 1,
-  "pinVersions": true,
+  "rangeStrategy": "pin",
 }
 `;

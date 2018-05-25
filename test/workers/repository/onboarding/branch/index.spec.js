@@ -55,12 +55,28 @@ describe('workers/repository/onboarding/branch', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
-    it('creates onboarding branch', async () => {
-      platform.getFileList.mockReturnValue(['package.json']);
+    it('detects repo is onboarded via PR and merged', async () => {
+      config.requireConfig = true;
+      platform.findPr.mockReturnValue(true);
+      platform.getPrList.mockReturnValueOnce([
+        { branchName: 'renovate/something', state: 'merged' },
+      ]);
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(false);
-      expect(res.branchList).toEqual(['renovate/configure']);
-      expect(platform.setBaseBranch.mock.calls).toHaveLength(1);
+      expect(res.repoIsOnboarded).toBe(true);
+    });
+    it('throws if no required config', async () => {
+      config.requireConfig = true;
+      platform.findPr.mockReturnValue(true);
+      platform.getPrList.mockReturnValueOnce([
+        { branchName: 'renovate/something', state: 'open' },
+      ]);
+      let e;
+      try {
+        await checkOnboardingBranch(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
     it('creates onboarding branch with greenkeeper migration', async () => {
       platform.getFileList.mockReturnValue(['package.json']);
@@ -82,11 +98,12 @@ describe('workers/repository/onboarding/branch', () => {
     it('updates onboarding branch', async () => {
       platform.getFileList.mockReturnValue(['package.json']);
       platform.findPr.mockReturnValueOnce(null);
-      platform.findPr.mockReturnValueOnce({});
+      platform.getBranchPr.mockReturnValueOnce({});
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(platform.setBaseBranch.mock.calls).toHaveLength(1);
+      expect(platform.commitFilesToBranch.mock.calls).toHaveLength(0);
     });
   });
 });

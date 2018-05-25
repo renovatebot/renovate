@@ -1,13 +1,16 @@
 const get = require('../../../lib/platform/github/gh-got-wrapper');
 const ghGot = require('gh-got');
+const delay = require('delay');
 
 jest.mock('gh-got');
+jest.mock('delay');
 
 describe('platform/gh-got-wrapper', () => {
   const body = ['a', 'b'];
   beforeEach(() => {
     jest.resetAllMocks();
     get.setAppMode(false);
+    delay.mockImplementation(() => Promise.resolve());
   });
   it('supports app mode', async () => {
     get.setAppMode(true);
@@ -20,14 +23,14 @@ describe('platform/gh-got-wrapper', () => {
     ghGot.mockReturnValueOnce({
       headers: {
         link:
-          '<https://api.github.com/search/code?q=addClass+user%3Amozilla&page=2>; rel="next", <https://api.github.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
+          '<https://api.github.com/search/code?q=addClass+user%3Amozilla&page=2>; rel="next", <https://api.github.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="last"',
       },
       body: ['a'],
     });
     ghGot.mockReturnValueOnce({
       headers: {
         link:
-          '<https://api.github.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="next", <https://api.github.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
+          '<https://api.github.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="next", <https://api.github.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="last"',
       },
       body: ['b', 'c'],
     });
@@ -36,7 +39,7 @@ describe('platform/gh-got-wrapper', () => {
       body: ['d'],
     });
     const res = await get('some-url', { paginate: true });
-    expect(res.body).toHaveLength(4);
+    expect(res.body).toEqual(['a', 'b', 'c', 'd']);
     expect(ghGot.mock.calls).toHaveLength(3);
   });
   it('attempts to paginate', async () => {
@@ -54,6 +57,38 @@ describe('platform/gh-got-wrapper', () => {
     const res = await get('some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
     expect(ghGot.mock.calls).toHaveLength(1);
+  });
+  it('should throw rate limit exceeded', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        statusCode: 403,
+        message:
+          'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
+      })
+    );
+    let e;
+    try {
+      await get('some-url');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+  });
+  it('should throw Bad credentials', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        statusCode: 401,
+        message: 'Bad credentials. (401)',
+      })
+    );
+    let e;
+    try {
+      await get('some-url');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('bad-credentials');
   });
   it('should retry 502s', async () => {
     ghGot.mockImplementationOnce(() =>
@@ -94,13 +129,12 @@ describe('platform/gh-got-wrapper', () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
         statusCode: 403,
-        message: 'API rate limit exceeded for x.',
+        message: 'Bad bot.',
       })
     );
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
-        statusCode: 401,
-        message: 'Bad credentials',
+        statusCode: 502,
       })
     );
     ghGot.mockImplementationOnce(() =>
@@ -152,7 +186,7 @@ describe('platform/gh-got-wrapper', () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
         statusCode: 403,
-        message: 'API rate limit exceeded for x.',
+        message: 'Bad bot.',
       })
     );
     let err;

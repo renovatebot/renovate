@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/npm/extract .extractDependencies() finds a lock file 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentVersion": "6.5.0",
+      "depName": "autoprefixer",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "~1.6.0",
+      "depName": "bower",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "13.1.0",
+      "depName": "browserify",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "0.9.2",
+      "depName": "browserify-css",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "0.22.0",
+      "depName": "cheerio",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "1.21.0",
+      "depName": "config",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "^1.5.8",
+      "depName": "angular",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentVersion": "1.5.8",
+      "depName": "angular-touch",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentVersion": "1.5.8",
+      "depName": "angular-sanitize",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentVersion": "4.0.0-beta.1",
+      "depName": "@angular/core",
+      "depType": "devDependencies",
+    },
+  ],
+  "lernaClient": undefined,
+  "lernaDir": undefined,
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": "renovate",
+  "packageJsonType": "app",
+  "packageJsonVersion": "1.0.0",
+  "pnpmShrinkwrap": undefined,
+  "yarnLock": "yarn.lock",
+  "yarnWorkspacesPackages": undefined,
+}
+`;
+
+exports[`manager/npm/extract .extractDependencies() finds lerna 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentVersion": "6.5.0",
+      "depName": "autoprefixer",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "~1.6.0",
+      "depName": "bower",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "13.1.0",
+      "depName": "browserify",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "0.9.2",
+      "depName": "browserify-css",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "0.22.0",
+      "depName": "cheerio",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "1.21.0",
+      "depName": "config",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "^1.5.8",
+      "depName": "angular",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentVersion": "1.5.8",
+      "depName": "angular-touch",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentVersion": "1.5.8",
+      "depName": "angular-sanitize",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentVersion": "4.0.0-beta.1",
+      "depName": "@angular/core",
+      "depType": "devDependencies",
+    },
+  ],
+  "lernaClient": "npm",
+  "lernaDir": ".",
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": "renovate",
+  "packageJsonType": "app",
+  "packageJsonVersion": "1.0.0",
+  "pnpmShrinkwrap": undefined,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+}
+`;
+
+exports[`manager/npm/extract .extractDependencies() returns an array of dependencies 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentVersion": "6.5.0",
+      "depName": "autoprefixer",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "~1.6.0",
+      "depName": "bower",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "13.1.0",
+      "depName": "browserify",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "0.9.2",
+      "depName": "browserify-css",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "0.22.0",
+      "depName": "cheerio",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "1.21.0",
+      "depName": "config",
+      "depType": "dependencies",
+    },
+    Object {
+      "currentVersion": "^1.5.8",
+      "depName": "angular",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentVersion": "1.5.8",
+      "depName": "angular-touch",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentVersion": "1.5.8",
+      "depName": "angular-sanitize",
+      "depType": "devDependencies",
+    },
+    Object {
+      "currentVersion": "4.0.0-beta.1",
+      "depName": "@angular/core",
+      "depType": "devDependencies",
+    },
+  ],
+  "lernaClient": undefined,
+  "lernaDir": undefined,
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": "renovate",
+  "packageJsonType": "app",
+  "packageJsonVersion": "1.0.0",
+  "pnpmShrinkwrap": undefined,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+}
+`;

@@ -1,0 +1,37 @@
+This Pull Request updates Dockerfiles to the latest image digests. For details on Renovate's Docker support, please visit https://renovatebot.com/docs/docker
+
+{{#if schedule}}
+**Note**: This PR was created on a configured schedule ("{{{schedule}}}"{{#if timezone}} in timezone `{{{timezone}}}`{{/if}}) and will not receive updates outside those times.
+{{/if}}
+
+{{#each upgrades as |upgrade|}}
+-   {{#if repositoryUrl}}[{{upgrade.depName}}]({{upgrade.repositoryUrl}}){{else}}`{{{depName}}}`{{/if}}: `{{upgrade.newDigest}}`
+{{/each}}
+
+**Important**: Renovate will wait until you have merged this Pin request before creating PRs for any *upgrades*. If you do not wish to pin anything, please update your config accordingly instead of leaving this PR open.
+
+{{#if hasErrors}}
+
+---
+
+# Errors
+
+Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
+
+{{#each errors as |error|}}
+-   `{{error.depName}}`: {{error.message}}
+{{/each}}
+{{/if}}
+
+{{#if hasWarnings}}
+
+---
+
+# Warnings
+
+Please make sure the following warnings are safe to ignore:
+
+{{#each warnings as |warning|}}
+-   `{{warning.depName}}`: {{warning.message}}
+{{/each}}
+{{/if}}

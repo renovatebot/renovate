@@ -6,37 +6,41 @@ describe('lib/manager/docker/extract', () => {
     beforeEach(() => {
       config = {};
     });
+    it('handles no FROM', () => {
+      const res = extractDependencies('no from!', config);
+      expect(res).toBe(null);
+    });
     it('handles naked dep', () => {
-      const res = extractDependencies('FROM node\n', config);
+      const res = extractDependencies('FROM node\n', config).deps;
       expect(res).toMatchSnapshot();
     });
     it('is case insensitive', () => {
-      const res = extractDependencies('From node\n', config);
+      const res = extractDependencies('From node\n', config).deps;
       expect(res).toMatchSnapshot();
     });
     it('handles tag', () => {
-      const res = extractDependencies('FROM node:8.9.0-alpine\n', config);
+      const res = extractDependencies('FROM node:8.9.0-alpine\n', config).deps;
       expect(res).toMatchSnapshot();
     });
     it('handles digest', () => {
       const res = extractDependencies(
         'FROM node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063\n',
         config
-      );
+      ).deps;
       expect(res).toMatchSnapshot();
     });
     it('handles tag and digest', () => {
       const res = extractDependencies(
         'FROM node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063\n',
         config
-      );
+      ).deps;
       expect(res).toMatchSnapshot();
     });
     it('handles from as', () => {
       const res = extractDependencies(
         'FROM node:8.9.0-alpine as base\n',
         config
-      );
+      ).deps;
       expect(res).toMatchSnapshot();
       //  expect(res.currentTag.includes(' ')).toBe(false);
     });
@@ -44,14 +48,14 @@ describe('lib/manager/docker/extract', () => {
       const res = extractDependencies(
         '# some comment\n# another\n\nFROM node\n',
         config
-      );
+      ).deps;
       expect(res).toMatchSnapshot();
     });
     it('handles custom hosts', () => {
       const res = extractDependencies(
         'FROM registry2.something.info/node:8\n',
         config
-      );
+      ).deps;
       expect(res).toMatchSnapshot();
       expect(res[0].dockerRegistry).toEqual('registry2.something.info');
     });
@@ -59,12 +63,12 @@ describe('lib/manager/docker/extract', () => {
       const res = extractDependencies(
         'FROM registry2.something.info:5005/node:8\n',
         config
-      );
+      ).deps;
       expect(res).toMatchSnapshot();
       expect(res[0].dockerRegistry).toEqual('registry2.something.info:5005');
     });
     it('handles namespaced images', () => {
-      const res = extractDependencies('FROM mynamespace/node:8\n', config);
+      const res = extractDependencies('FROM mynamespace/node:8\n', config).deps;
       expect(res).toMatchSnapshot();
       expect(res[0].dockerRegistry).toBeUndefined();
     });
@@ -72,7 +76,7 @@ describe('lib/manager/docker/extract', () => {
       const res = extractDependencies(
         'FROM registry2.something.info/someaccount/node:8\n',
         config
-      );
+      ).deps;
       expect(res).toMatchSnapshot();
       expect(res[0].dockerRegistry).toEqual('registry2.something.info');
       expect(res[0].depName).toEqual('someaccount/node');
@@ -80,15 +84,28 @@ describe('lib/manager/docker/extract', () => {
     it('handles abnoral spacing', () => {
       const res = extractDependencies(
         'FROM    registry.allmine.info:5005/node:8.7.0\n\n'
-      );
+      ).deps;
       expect(res).toMatchSnapshot();
     });
     it('extracts multiple FROM tags', () => {
       const res = extractDependencies(
         'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM python:3.6-slim\n',
         config
-      );
+      ).deps;
       expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
+    });
+    it('skips scratchs', () => {
+      const res = extractDependencies('FROM scratch\nADD foo\n', config);
+      expect(res).toBe(null);
+    });
+    it('skips named multistage FROM tags', () => {
+      const res = extractDependencies(
+        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM frontend\n',
+        config
+      ).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
     });
   });
 });

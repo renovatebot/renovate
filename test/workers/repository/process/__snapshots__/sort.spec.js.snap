@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/process/sort sortBranches() sorts based on type and prTitle 1`] = `
+Array [
+  Object {
+    "prTitle": "some other pin",
+    "type": "pin",
+  },
+  Object {
+    "prTitle": "some pin",
+    "type": "pin",
+  },
+  Object {
+    "prTitle": "a minor update",
+    "type": "minor",
+  },
+  Object {
+    "prTitle": "some major update",
+    "type": "major",
+  },
+]
+`;

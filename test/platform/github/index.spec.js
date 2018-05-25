@@ -530,6 +530,9 @@ describe('platform/github', () => {
             ref: 'refs/heads/master',
           },
           {
+            ref: 'refs/heads/renovate',
+          },
+          {
             ref: 'refs/heads/renovate/b',
           },
         ],
@@ -720,7 +723,8 @@ describe('platform/github', () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-      }); // getBranchCommit
+      });
+      // getBranchCommit
       get.mockImplementationOnce(() => ({
         body: {
           object: {
@@ -749,11 +753,66 @@ describe('platform/github', () => {
     });
   });
   describe('setBranchStatus', () => {
+    it('returns if already set', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            context: 'some-context',
+            state: 'some-state',
+          },
+        ],
+      }));
+      await github.setBranchStatus(
+        'some-branch',
+        'some-context',
+        'some-description',
+        'some-state',
+        'some-url'
+      );
+      expect(get.post.mock.calls).toHaveLength(0);
+    });
     it('sets branch status', async () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-      }); // getBranchCommit
+      });
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            context: 'context-1',
+            state: 'state-1',
+          },
+          {
+            context: 'context-2',
+            state: 'state-2',
+          },
+          {
+            context: 'context-3',
+            state: 'state-3',
+          },
+        ],
+      }));
+      // getBranchCommit
       get.mockImplementationOnce(() => ({
         body: {
           object: {
@@ -1047,6 +1106,16 @@ describe('platform/github', () => {
       expect(get.post.mock.calls).toHaveLength(0);
       expect(get.patch.mock.calls).toHaveLength(0);
     });
+    it('handles comment with no description', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
+      await github.ensureComment(42, null, '!merge');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(0);
+    });
   });
   describe('ensureCommentRemoval', () => {
     it('deletes comment if found', async () => {
@@ -1116,12 +1185,23 @@ describe('platform/github', () => {
           number: 123,
         },
       }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: [],
+      }));
+      // res.body.object.sha
       get.mockImplementationOnce(() => ({
         body: {
           object: { sha: 'some-sha' },
         },
       }));
-      // res.body.object.sha
       const pr = await github.createPr(
         'some-branch',
         'The Title',
