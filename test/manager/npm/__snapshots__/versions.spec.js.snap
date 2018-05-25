@@ -3,7 +3,6 @@
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) disables major release separation (major) 1`] = `
 Array [
   Object {
-    "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
@@ -11,7 +10,6 @@ Array [
   },
   Object {
     "fromVersion": "0.4.4",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -26,7 +24,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) disables major 
 Array [
   Object {
     "fromVersion": "1.0.0",
-    "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -41,7 +38,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) handles prerele
 Array [
   Object {
     "fromVersion": "2.9.0-rc",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "^2.9.1-insiders.20180516",
     "newVersionMajor": 2,
@@ -56,7 +52,6 @@ Array [
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
-    "isPin": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "type": "pin",
@@ -64,7 +59,6 @@ Array [
   },
   Object {
     "fromVersion": "0.9.7",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -78,7 +72,6 @@ Array [
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) pins minor ranged versions 1`] = `
 Array [
   Object {
-    "isPin": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "type": "pin",
@@ -97,7 +90,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) rejects non-ran
 Array [
   Object {
     "fromVersion": "1.0.0",
-    "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -121,7 +113,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) replaces major 
 Array [
   Object {
     "fromVersion": "2.7.0",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "^3.0.0",
     "newVersionMajor": 3,
@@ -137,7 +128,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) replaces minor 
 Array [
   Object {
     "fromVersion": "1.3.0",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "~1.4.0",
     "newVersionMajor": 1,
@@ -167,7 +157,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns both up
 Array [
   Object {
     "fromVersion": "0.4.4",
-    "isMinor": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
@@ -176,7 +165,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
@@ -184,7 +172,6 @@ Array [
   },
   Object {
     "fromVersion": "0.4.4",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -199,7 +186,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns minor u
 Array [
   Object {
     "fromVersion": "0.9.0",
-    "isMinor": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
@@ -209,7 +195,6 @@ Array [
   },
   Object {
     "fromVersion": "0.9.0",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -224,7 +209,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns minor u
 Array [
   Object {
     "fromVersion": "0.9.0",
-    "isMinor": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
@@ -234,7 +218,6 @@ Array [
   },
   Object {
     "fromVersion": "0.9.0",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -248,7 +231,6 @@ Array [
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns only one update if automerging major 1`] = `
 Array [
   Object {
-    "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
@@ -256,7 +238,6 @@ Array [
   },
   Object {
     "fromVersion": "0.4.4",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -270,7 +251,6 @@ Array [
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns only one update if grouping 1`] = `
 Array [
   Object {
-    "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
@@ -278,7 +258,6 @@ Array [
   },
   Object {
     "fromVersion": "0.4.4",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -293,7 +272,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns patch m
 Array [
   Object {
     "fromVersion": "0.8.0",
-    "isMinor": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
@@ -303,7 +281,6 @@ Array [
   },
   Object {
     "fromVersion": "0.8.0",
-    "isPatch": true,
     "newVersion": "0.8.12",
     "newVersionMajor": 0,
     "newVersionMinor": 8,
@@ -313,7 +290,6 @@ Array [
   },
   Object {
     "fromVersion": "0.8.0",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -328,7 +304,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns patch u
 Array [
   Object {
     "fromVersion": "0.9.0",
-    "isPatch": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
@@ -338,7 +313,6 @@ Array [
   },
   Object {
     "fromVersion": "0.9.0",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -353,7 +327,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns patch u
 Array [
   Object {
     "fromVersion": "0.9.0",
-    "isPatch": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
@@ -363,7 +336,6 @@ Array [
   },
   Object {
     "fromVersion": "0.9.0",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -387,7 +359,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) should allow un
 Array [
   Object {
     "fromVersion": "1.0.0-beta",
-    "isMinor": true,
     "newVersion": "1.1.0-beta",
     "newVersionMajor": 1,
     "newVersionMinor": 1,
@@ -402,7 +373,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) should downgrad
 Object {
   "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
   "commitMessageAction": "Roll back",
-  "isRollback": true,
   "newVersion": "1.16.0",
   "newVersionMajor": 1,
   "semanticCommitType": "fix",
@@ -415,7 +385,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) should treat ze
 Array [
   Object {
     "fromVersion": "0.0.34",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "^0.0.35",
     "newVersionMajor": 0,
@@ -431,7 +400,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports > late
 Array [
   Object {
     "fromVersion": "1.4.1",
-    "isMajor": true,
     "newVersion": "2.0.3",
     "newVersionMajor": 2,
     "newVersionMinor": 0,
@@ -446,7 +414,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports comple
 Array [
   Object {
     "fromVersion": "2.7.0",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "1.x - 3.x",
     "newVersionMajor": 3,
@@ -462,7 +429,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports comple
 Array [
   Object {
     "fromVersion": "2.7.0",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "^1.0.0 || ^2.0.0 || ^3.0.0",
     "newVersionMajor": 3,
@@ -477,7 +443,6 @@ Array [
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports complex ranges 1`] = `
 Object {
   "fromVersion": "0.8.12",
-  "isMinor": true,
   "isRange": true,
   "newVersion": "^0.7.0 || ^0.8.0 || ^0.9.0",
   "newVersionMajor": 0,
@@ -492,7 +457,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports comple
 Array [
   Object {
     "fromVersion": "1.3.0",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "~1.2.0 || ~1.3.0 || ~1.4.0",
     "newVersionMajor": 1,
@@ -507,7 +471,6 @@ Array [
 exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports future versions if already future 1`] = `
 Array [
   Object {
-    "isPin": true,
     "newVersion": "2.0.3",
     "newVersionMajor": 2,
     "type": "pin",
@@ -520,7 +483,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports in-ran
 Array [
   Object {
     "fromVersion": "1.0.0",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "~1.4.1",
     "newVersionMajor": 1,
@@ -536,7 +498,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports minor 
 Array [
   Object {
     "fromVersion": "0.4.4",
-    "isMinor": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
@@ -545,7 +506,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
@@ -553,7 +513,6 @@ Array [
   },
   Object {
     "fromVersion": "0.4.4",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -568,7 +527,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports minor 
 Array [
   Object {
     "fromVersion": "0.4.4",
-    "isMinor": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
@@ -577,7 +535,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
@@ -585,7 +542,6 @@ Array [
   },
   Object {
     "fromVersion": "0.4.4",
-    "isMajor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -600,7 +556,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades .x maj
 Array [
   Object {
     "fromVersion": "0.9.7",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "1.x",
     "newVersionMajor": 1,
@@ -616,7 +571,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades .x min
 Array [
   Object {
     "fromVersion": "1.3.0",
-    "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -625,7 +579,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "isPin": true,
     "newVersion": "1.3.0",
     "newVersionMajor": 1,
     "type": "pin",
@@ -638,7 +591,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades .x min
 Array [
   Object {
     "fromVersion": "1.3.0",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "1.4.x",
     "newVersionMajor": 1,
@@ -654,7 +606,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades less t
 Array [
   Object {
     "fromVersion": "0.7.2",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "<= 0.9.7",
     "newVersionMajor": 0,
@@ -665,7 +616,6 @@ Array [
   },
   Object {
     "fromVersion": "0.7.2",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "<= 1.4.1",
     "newVersionMajor": 1,
@@ -681,7 +631,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades less t
 Array [
   Object {
     "fromVersion": "0.7.1",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "< 0.9.8",
     "newVersionMajor": 0,
@@ -692,7 +641,6 @@ Array [
   },
   Object {
     "fromVersion": "0.7.1",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "< 1.4.2",
     "newVersionMajor": 1,
@@ -708,7 +656,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades major 
 Array [
   Object {
     "fromVersion": "0.9.7",
-    "isMajor": true,
     "isRange": true,
     "newVersion": ">= 0.5.0 < 2.0.0",
     "newVersionMajor": 1,
@@ -724,7 +671,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades major 
 Array [
   Object {
     "fromVersion": "1.0.0",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "<= 2.0.0",
     "newVersionMajor": 1,
@@ -740,7 +686,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades major 
 Array [
   Object {
     "fromVersion": "0.9.7",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "< 2.0.0",
     "newVersionMajor": 1,
@@ -756,7 +701,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades minor 
 Array [
   Object {
     "fromVersion": "0.8.0",
-    "isMinor": true,
     "isRange": true,
     "newVersion": ">= 0.5.0 <= 0.10.0",
     "newVersionMajor": 0,
@@ -767,7 +711,6 @@ Array [
   },
   Object {
     "fromVersion": "0.8.0",
-    "isMajor": true,
     "isRange": true,
     "newVersion": ">= 0.5.0 <= 1.5.0",
     "newVersionMajor": 1,
@@ -783,7 +726,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades minor 
 Array [
   Object {
     "fromVersion": "0.7.2",
-    "isMinor": true,
     "isRange": true,
     "newVersion": ">= 0.5.0 <0.10",
     "newVersionMajor": 0,
@@ -794,7 +736,6 @@ Array [
   },
   Object {
     "fromVersion": "0.7.2",
-    "isMajor": true,
     "isRange": true,
     "newVersion": ">= 0.5.0 <1.5",
     "newVersionMajor": 1,
@@ -810,7 +751,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades minor 
 Array [
   Object {
     "fromVersion": "1.0.1",
-    "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -819,7 +759,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "isPin": true,
     "newVersion": "1.0.1",
     "newVersionMajor": 1,
     "type": "pin",
@@ -832,7 +771,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades multip
 Array [
   Object {
     "fromVersion": "0.7.2",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "^0.9.0",
     "newVersionMajor": 0,
@@ -843,7 +781,6 @@ Array [
   },
   Object {
     "fromVersion": "0.7.2",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "^1.0.0",
     "newVersionMajor": 1,
@@ -859,7 +796,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades multip
 Array [
   Object {
     "fromVersion": "0.7.2",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "~0.9.0",
     "newVersionMajor": 0,
@@ -870,7 +806,6 @@ Array [
   },
   Object {
     "fromVersion": "0.7.2",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "~1.4.0",
     "newVersionMajor": 1,
@@ -886,7 +821,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades shorth
 Array [
   Object {
     "fromVersion": "0.9.7",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "1",
     "newVersionMajor": 1,
@@ -902,7 +836,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades shorth
 Array [
   Object {
     "fromVersion": "1.3.0",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "1.4",
     "newVersionMajor": 1,
@@ -918,7 +851,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades tilde 
 Array [
   Object {
     "fromVersion": "1.3.0",
-    "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -927,7 +859,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "isPin": true,
     "newVersion": "1.3.0",
     "newVersionMajor": 1,
     "type": "pin",
@@ -940,7 +871,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades tilde 
 Array [
   Object {
     "fromVersion": "1.3.0",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "~1.4.0",
     "newVersionMajor": 1,
@@ -956,7 +886,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) uses the locked
 Array [
   Object {
     "fromVersion": "1.0.0",
-    "isMinor": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -965,7 +894,6 @@ Array [
     "unpublishable": false,
   },
   Object {
-    "isPin": true,
     "newVersion": "1.0.0",
     "newVersionMajor": 1,
     "type": "pin",
@@ -978,7 +906,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) widens .x OR ra
 Array [
   Object {
     "fromVersion": "2.7.0",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "1.x || 2.x || 3.x",
     "newVersionMajor": 3,
@@ -994,7 +921,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) widens major ra
 Array [
   Object {
     "fromVersion": "2.7.0",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "^2.0.0 || ^3.0.0",
     "newVersionMajor": 3,
@@ -1010,7 +936,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) widens minor ra
 Array [
   Object {
     "fromVersion": "1.3.0",
-    "isMinor": true,
     "isRange": true,
     "newVersion": "~1.3.0 || ~1.4.0",
     "newVersionMajor": 1,
@@ -1026,7 +951,6 @@ exports[`manager/npm/versions .determineUpgrades(npmDep, config) widens stanndal
 Array [
   Object {
     "fromVersion": "2.7.0",
-    "isMajor": true,
     "isRange": true,
     "newVersion": "1 || 2 || 3",
     "newVersionMajor": 3,

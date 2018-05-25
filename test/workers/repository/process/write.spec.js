@@ -17,7 +17,7 @@ describe('workers/repository/write', () => {
   describe('writeUpdates()', () => {
     const packageFiles = {};
     it('runs pins first', async () => {
-      const branches = [{ isPin: true }, {}, {}];
+      const branches = [{ type: 'pin' }, {}, {}];
       const res = await writeUpdates(config, packageFiles, branches);
       expect(res).toEqual('done');
       expect(branchWorker.processBranch.mock.calls).toHaveLength(1);

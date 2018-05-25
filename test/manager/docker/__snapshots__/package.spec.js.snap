@@ -3,7 +3,6 @@
 exports[`lib/manager/docker/package getPackageUpdates adds digest 1`] = `
 Array [
   Object {
-    "isPin": true,
     "newDigest": "sha256:one",
     "newDigestShort": "one",
     "newFrom": "some-dep:1.0.0-something@sha256:one",
@@ -12,7 +11,6 @@ Array [
     "type": "pin",
   },
   Object {
-    "isMinor": true,
     "newDepTag": "some-dep:1.1.0-something",
     "newDigest": "sha256:two",
     "newFrom": "some-dep:1.1.0-something@sha256:two",
@@ -27,7 +25,6 @@ Array [
 exports[`lib/manager/docker/package getPackageUpdates ignores unstable upgrades 1`] = `
 Array [
   Object {
-    "isMajor": true,
     "newDepTag": "node:8",
     "newFrom": "node:8",
     "newTag": "8",
@@ -41,7 +38,6 @@ Array [
 exports[`lib/manager/docker/package getPackageUpdates returns a digest when registry is present 1`] = `
 Array [
   Object {
-    "isDigest": true,
     "newDigest": "sha256:1234567890",
     "newDigestShort": "123456",
     "newFrom": "docker.io/some-dep:1.0.0@sha256:1234567890",
@@ -55,7 +51,6 @@ Array [
 exports[`lib/manager/docker/package getPackageUpdates returns major and minor upgrades 1`] = `
 Array [
   Object {
-    "isMinor": true,
     "newDepTag": "some-dep:1.2.0",
     "newDigest": "sha256:one",
     "newFrom": "some-dep:1.2.0@sha256:one",
@@ -65,7 +60,6 @@ Array [
     "type": "minor",
   },
   Object {
-    "isMajor": true,
     "newDepTag": "some-dep:2.0.0",
     "newDigest": "sha256:two",
     "newFrom": "some-dep:2.0.0@sha256:two",
@@ -75,7 +69,6 @@ Array [
     "type": "major",
   },
   Object {
-    "isMajor": true,
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:three",
     "newFrom": "some-dep:3.0.0@sha256:three",
@@ -90,7 +83,6 @@ Array [
 exports[`lib/manager/docker/package getPackageUpdates returns only one major 1`] = `
 Array [
   Object {
-    "isMinor": true,
     "newDepTag": "some-dep:1.2.0",
     "newDigest": "sha256:one",
     "newFrom": "some-dep:1.2.0@sha256:one",
@@ -100,7 +92,6 @@ Array [
     "type": "minor",
   },
   Object {
-    "isMajor": true,
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:two",
     "newFrom": "some-dep:3.0.0@sha256:two",
@@ -115,7 +106,6 @@ Array [
 exports[`lib/manager/docker/package getPackageUpdates returns only one upgrade 1`] = `
 Array [
   Object {
-    "isMajor": true,
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:one",
     "newFrom": "some-dep:3.0.0@sha256:one",
@@ -130,7 +120,6 @@ Array [
 exports[`lib/manager/docker/package getPackageUpdates returns only one upgrade if automerging major 1`] = `
 Array [
   Object {
-    "isMajor": true,
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:one",
     "newFrom": "docker.io/some-dep:3.0.0@sha256:one",
@@ -145,7 +134,6 @@ Array [
 exports[`lib/manager/docker/package getPackageUpdates upgrades from unstable to stable 1`] = `
 Array [
   Object {
-    "isMajor": true,
     "newDepTag": "node:8",
     "newFrom": "node:8",
     "newTag": "8",
@@ -159,7 +147,6 @@ Array [
 exports[`lib/manager/docker/package getPackageUpdates upgrades from unstable to unstable if not ignoring 1`] = `
 Array [
   Object {
-    "isMajor": true,
     "newDepTag": "node:9",
     "newFrom": "node:9",
     "newTag": "9",
