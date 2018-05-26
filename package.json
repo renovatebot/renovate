@@ -60,7 +60,7 @@
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
     "deepcopy": "1.0.0",
-    "delay": "2.0.0",
+    "delay": "3.0.0",
     "detect-indent": "5.0.0",
     "email-addresses": "3.0.1",
     "fast-clone": "1.5.3",
