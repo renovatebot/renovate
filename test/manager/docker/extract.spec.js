@@ -6,6 +6,10 @@ describe('lib/manager/docker/extract', () => {
     beforeEach(() => {
       config = {};
     });
+    it('handles no FROM', () => {
+      const res = extractDependencies('no from!', config);
+      expect(res).toBe(null);
+    });
     it('handles naked dep', () => {
       const res = extractDependencies('FROM node\n', config).deps;
       expect(res).toMatchSnapshot();

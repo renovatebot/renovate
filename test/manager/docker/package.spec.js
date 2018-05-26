@@ -94,7 +94,7 @@ describe('lib/manager/docker/package', () => {
       config.major.automerge = false;
     });
     it('returns major and minor upgrades', async () => {
-      config.multipleMajorPrs = true;
+      config.separateMultipleMajor = true;
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
       dockerApi.getDigest.mockReturnValueOnce('sha256:two');

@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/meteor/extract extractDependencies() returns results 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentVersion": "0.2.0",
+      "depName": "xml2js",
+    },
+    Object {
+      "currentVersion": "0.6.0",
+      "depName": "xml-crypto",
+    },
+    Object {
+      "currentVersion": "0.1.19",
+      "depName": "xmldom",
+    },
+    Object {
+      "currentVersion": "2.7.10",
+      "depName": "connect",
+    },
+    Object {
+      "currentVersion": "2.6.4",
+      "depName": "xmlbuilder",
+    },
+    Object {
+      "currentVersion": "0.2.0",
+      "depName": "querystring",
+    },
+  ],
+}
+`;

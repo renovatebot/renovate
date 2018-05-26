@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files 1`] = `
+Array [
+  Object {
+    "manager": "npm",
+    "packageFile": "package.json",
+    "some": "result",
+  },
+]
+`;

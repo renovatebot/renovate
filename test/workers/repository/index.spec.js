@@ -1,35 +1,20 @@
-const { initRepo } = require('../../../lib/workers/repository/init');
-const { determineUpdates } = require('../../../lib/workers/repository/updates');
-const {
-  writeUpdates,
-} = require('../../../lib/workers/repository/process/write');
 const { renovateRepository } = require('../../../lib/workers/repository/index');
+const process = require('../../../lib/workers/repository/process');
 
 jest.mock('../../../lib/workers/repository/init');
-jest.mock('../../../lib/workers/repository/init/apis');
-jest.mock('../../../lib/workers/repository/updates');
-jest.mock('../../../lib/workers/repository/onboarding/pr');
-jest.mock('../../../lib/workers/repository/process/write');
-jest.mock('../../../lib/workers/repository/finalise');
-jest.mock('../../../lib/manager');
-jest.mock('delay');
-
-let config;
-beforeEach(() => {
-  jest.resetAllMocks();
-  config = require('../../_fixtures/config');
-});
+jest.mock('../../../lib/workers/repository/process');
+jest.mock('../../../lib/workers/repository/result');
+jest.mock('../../../lib/workers/repository/error');
 
 describe('workers/repository', () => {
   describe('renovateRepository()', () => {
-    it('writes', async () => {
-      initRepo.mockReturnValue({});
-      determineUpdates.mockReturnValue({
-        repoIsOnboarded: true,
-        branches: [{ type: 'minor' }, { type: 'pin' }],
-      });
-      writeUpdates.mockReturnValueOnce('done');
-      const res = await renovateRepository(config, 'some-token');
+    let config;
+    beforeEach(() => {
+      config = require('../../_fixtures/config');
+    });
+    it('runs', async () => {
+      process.processRepo = jest.fn(() => ({}));
+      const res = await renovateRepository(config);
       expect(res).toMatchSnapshot();
     });
   });

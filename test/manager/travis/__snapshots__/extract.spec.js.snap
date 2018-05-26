@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/travis/extract extractDependencies() returns results 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentVersion": Array [
+        6,
+        8,
+      ],
+      "depName": "node",
+    },
+  ],
+}
+`;

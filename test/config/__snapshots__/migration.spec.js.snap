@@ -79,6 +79,12 @@ Object {
     },
     Object {
       "depTypeList": Array [
+        "peerDependencies",
+      ],
+      "rangeStrategy": "widen",
+    },
+    Object {
+      "depTypeList": Array [
         "devDependencies",
       ],
       "major": Object {
@@ -107,9 +113,13 @@ Object {
     "automerge": true,
   },
   "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title",
+  "rangeStrategy": "bump",
   "schedule": "on the first day of the month",
   "semanticCommitScope": "deps",
   "semanticCommitType": "fix",
+  "separateMajorMinor": true,
+  "separateMajorReleases": true,
+  "separateMinorPatch": true,
   "travis": Object {
     "enabled": true,
   },
@@ -129,7 +139,7 @@ Object {
       "paths": Array [
         "package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
     Object {
       "depTypeList": Array [
@@ -138,7 +148,7 @@ Object {
       "paths": Array [
         "package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
   ],
 }
@@ -171,13 +181,13 @@ Object {
       "paths": Array [
         "backend/package.json",
       ],
-      "pinVersions": false,
+      "rangeStrategy": "replace",
     },
     Object {
       "paths": Array [
         "frontend/package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
     Object {
       "depTypeList": Array [
@@ -186,7 +196,7 @@ Object {
       "paths": Array [
         "other/package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
     Object {
       "depTypeList": Array [
@@ -195,7 +205,7 @@ Object {
       "paths": Array [
         "other/package.json",
       ],
-      "pinVersions": true,
+      "rangeStrategy": "pin",
     },
   ],
 }

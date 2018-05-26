@@ -41,14 +41,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           branchName: 'renovate/pin-dependencies',
           upgrades: [
             {
-              isPin: true,
+              type: 'pin',
               repositoryUrl: 'https://a',
               depName: 'a',
               depType: 'devDependencies',
               newVersion: '1.1.0',
             },
             {
-              isPin: true,
+              type: 'pin',
               depName: 'b',
               newVersion: '1.5.3',
             },

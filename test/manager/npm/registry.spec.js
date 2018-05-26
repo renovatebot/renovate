@@ -169,6 +169,10 @@ describe('api/npm', () => {
     process.env.NPM_TOKEN = oldToken;
     expect(res).toMatchSnapshot();
   });
+  it('resets npmrc', () => {
+    npm.setNpmrc('something=something');
+    npm.setNpmrc();
+  });
   it('should use default registry if missing from npmrc', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
@@ -187,6 +191,7 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
   });
   it('should cache package info from npm', async () => {
+    npm.setNpmrc('//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz');
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
@@ -199,7 +204,10 @@ describe('api/npm', () => {
     nock('https://npm.mycustomregistry.com')
       .get('/foobar')
       .reply(200, npmResponse);
-    npm.setNpmrc('registry=https://npm.mycustomregistry.com/');
+    npm.setNpmrc(
+      'registry=https://npm.mycustomregistry.com/\n//npm.mycustomregistry.com/:_auth = ' +
+        Buffer.from('abcdef').toString('base64')
+    );
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });

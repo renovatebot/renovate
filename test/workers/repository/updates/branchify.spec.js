@@ -9,29 +9,37 @@ beforeEach(() => {
 const {
   branchifyUpgrades,
 } = require('../../../../lib/workers/repository/updates/branchify');
+const {
+  flattenUpdates,
+} = require('../../../../lib/workers/repository/updates/flatten');
+
+jest.mock('../../../../lib/workers/repository/updates/flatten');
 
 describe('workers/repository/updates/branchify', () => {
   describe('branchifyUpgrades()', () => {
     it('returns empty', async () => {
-      config.upgrades = [];
+      flattenUpdates.mockReturnValueOnce([]);
       const res = await branchifyUpgrades(config);
       expect(res.branches).toEqual([]);
     });
     it('returns one branch if one input', async () => {
-      config.upgrades = [
+      flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
           branchName: 'foo-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
+          type: 'minor',
         },
-      ];
+      ]);
       config.repoIsOnboarded = true;
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(1);
+      expect(res.branches[0].isMinor).toBe(true);
+      expect(res.branches[0].upgrades[0].isMinor).toBe(true);
     });
     it('does not group if different compiled branch names', async () => {
-      config.upgrades = [
+      flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
           branchName: 'foo-{{version}}',
@@ -50,12 +58,12 @@ describe('workers/repository/updates/branchify', () => {
           version: '1.1.0',
           prTitle: 'some-title',
         },
-      ];
+      ]);
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(3);
     });
     it('groups if same compiled branch names', async () => {
-      config.upgrades = [
+      flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
           branchName: 'foo',
@@ -74,12 +82,12 @@ describe('workers/repository/updates/branchify', () => {
           version: '1.1.0',
           prTitle: 'some-title',
         },
-      ];
+      ]);
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(2);
     });
     it('groups if same compiled group name', async () => {
-      config.upgrades = [
+      flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
           branchName: 'foo',
@@ -102,12 +110,12 @@ describe('workers/repository/updates/branchify', () => {
           groupName: 'My Group',
           group: { branchName: 'renovate/my-group' },
         },
-      ];
+      ]);
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(2);
     });
     it('mixes errors and warnings', async () => {
-      config.upgrades = [
+      flattenUpdates.mockReturnValueOnce([
         {
           type: 'error',
         },
@@ -127,7 +135,7 @@ describe('workers/repository/updates/branchify', () => {
           prTitle: 'some-title',
           version: '1.1.0',
         },
-      ];
+      ]);
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(2);
       expect(res.errors).toHaveLength(1);
@@ -193,7 +201,9 @@ describe('workers/repository/updates/branchify', () => {
           expectedBranchName: 'renovate/bad-branch-name9',
         },
       ];
-      config.upgrades = fixtures.map(({ upgrade }) => upgrade);
+      flattenUpdates.mockReturnValueOnce(
+        fixtures.map(({ upgrade }) => upgrade)
+      );
 
       (await branchifyUpgrades(config)).branches.forEach(
         ({ branchName }, index) => {
