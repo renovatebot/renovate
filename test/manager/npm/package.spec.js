@@ -30,6 +30,11 @@ describe('lib/manager/npm/package', () => {
       const res = await npm.getPackageUpdates(config);
       expect(res).toBeUndefined();
     });
+    it('returns if using a * reference', async () => {
+      config.currentVersion = '*';
+      const res = await npm.getPackageUpdates(config);
+      expect(res).toHaveLength(0);
+    });
     it('returns if using a file reference', async () => {
       config.currentVersion = 'file:../sibling/package.json';
       const res = await npm.getPackageUpdates(config);
