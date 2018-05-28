@@ -1,8 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) disables major release separation (major) 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() disables major release separation (major) 1`] = `
 Array [
   Object {
+    "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
@@ -20,7 +21,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) disables major release separation (minor) 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() disables major release separation (minor) 1`] = `
 Array [
   Object {
     "fromVersion": "1.0.0",
@@ -34,7 +35,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) handles prerelease jumps 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() handles prerelease jumps 1`] = `
 Array [
   Object {
     "fromVersion": "2.9.0-rc",
@@ -49,9 +50,10 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) ignores pinning for ranges when other upgrade exists 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
+    "isPin": true,
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
     "type": "pin",
@@ -69,9 +71,10 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) pins minor ranged versions 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() pins minor ranged versions 1`] = `
 Array [
   Object {
+    "isPin": true,
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "type": "pin",
@@ -80,13 +83,13 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) rejects complex range in-range updates 1`] = `Array []`;
+exports[`manager/npm/lookup .lookupUpdates() rejects complex range in-range updates 1`] = `Array []`;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) rejects in-range unsupported operator 1`] = `Array []`;
+exports[`manager/npm/lookup .lookupUpdates() rejects in-range unsupported operator 1`] = `Array []`;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) rejects non-fully specified in-range updates 1`] = `Array []`;
+exports[`manager/npm/lookup .lookupUpdates() rejects non-fully specified in-range updates 1`] = `Array []`;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) rejects non-range in-range updates 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() rejects non-range in-range updates 1`] = `
 Array [
   Object {
     "fromVersion": "1.0.0",
@@ -100,16 +103,9 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) rejects reverse ordered less than greater than 1`] = `
-Array [
-  Object {
-    "message": "Complex semver ranges such as \\"<= 0.8.0 >= 0.5.0\\" are not yet supported so will be skipped",
-    "type": "warning",
-  },
-]
-`;
+exports[`manager/npm/lookup .lookupUpdates() rejects reverse ordered less than greater than 1`] = `Array []`;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) replaces major complex ranged versions if configured 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() replaces major complex ranged versions if configured 1`] = `
 Array [
   Object {
     "fromVersion": "2.7.0",
@@ -124,7 +120,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) replaces minor complex ranged versions if configured 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() replaces minor complex ranged versions if configured 1`] = `
 Array [
   Object {
     "fromVersion": "1.3.0",
@@ -139,22 +135,22 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) return warning if empty versions 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() return warning if empty versions 1`] = `
 Object {
   "message": "No versions returned from registry for this package",
   "type": "warning",
 }
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) return warning if null versions 1`] = `
-Object {
-  "message": "No versions returned from registry for this package",
-  "type": "warning",
-}
-`;
-
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns both updates if automerging minor 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() returns both updates if automerging minor 1`] = `
 Array [
+  Object {
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "type": "pin",
+    "unpublishable": false,
+  },
   Object {
     "fromVersion": "0.4.4",
     "newVersion": "0.9.7",
@@ -165,6 +161,81 @@ Array [
     "unpublishable": false,
   },
   Object {
+    "fromVersion": "0.4.4",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() returns minor update if automerging both patch and minor 1`] = `
+Array [
+  Object {
+    "fromVersion": "0.9.0",
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "toVersion": "0.9.7",
+    "type": "minor",
+    "unpublishable": false,
+  },
+  Object {
+    "fromVersion": "0.9.0",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() returns minor update if separate patches not configured 1`] = `
+Array [
+  Object {
+    "fromVersion": "0.9.0",
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "toVersion": "0.9.7",
+    "type": "minor",
+    "unpublishable": false,
+  },
+  Object {
+    "fromVersion": "0.9.0",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() returns only one update if automerging 1`] = `
+Array [
+  Object {
+    "fromVersion": "0.4.0",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() returns only one update if automerging major 1`] = `
+Array [
+  Object {
+    "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
@@ -182,55 +253,10 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns minor update if automerging both patch and minor 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() returns only one update if grouping 1`] = `
 Array [
   Object {
-    "fromVersion": "0.9.0",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
-    "toVersion": "0.9.7",
-    "type": "minor",
-    "unpublishable": false,
-  },
-  Object {
-    "fromVersion": "0.9.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
-    "toVersion": "1.4.1",
-    "type": "major",
-    "unpublishable": false,
-  },
-]
-`;
-
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns minor update if separate patches not configured 1`] = `
-Array [
-  Object {
-    "fromVersion": "0.9.0",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
-    "toVersion": "0.9.7",
-    "type": "minor",
-    "unpublishable": false,
-  },
-  Object {
-    "fromVersion": "0.9.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
-    "toVersion": "1.4.1",
-    "type": "major",
-    "unpublishable": false,
-  },
-]
-`;
-
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns only one update if automerging major 1`] = `
-Array [
-  Object {
+    "isPin": true,
     "newVersion": "0.4.4",
     "newVersionMajor": 0,
     "type": "pin",
@@ -248,37 +274,8 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns only one update if grouping 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() returns patch minor and major 1`] = `
 Array [
-  Object {
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
-    "type": "pin",
-    "unpublishable": false,
-  },
-  Object {
-    "fromVersion": "0.4.4",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
-    "toVersion": "1.4.1",
-    "type": "major",
-    "unpublishable": false,
-  },
-]
-`;
-
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns patch minor and major 1`] = `
-Array [
-  Object {
-    "fromVersion": "0.8.0",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
-    "toVersion": "0.9.7",
-    "type": "minor",
-    "unpublishable": false,
-  },
   Object {
     "fromVersion": "0.8.0",
     "newVersion": "0.8.12",
@@ -290,6 +287,15 @@ Array [
   },
   Object {
     "fromVersion": "0.8.0",
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "toVersion": "0.9.7",
+    "type": "minor",
+    "unpublishable": false,
+  },
+  Object {
+    "fromVersion": "0.8.0",
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -300,7 +306,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns patch update if automerging patch 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() returns patch update if automerging patch 1`] = `
 Array [
   Object {
     "fromVersion": "0.9.0",
@@ -323,7 +329,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns patch update if separateMinorPatch 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() returns patch update if separateMinorPatch 1`] = `
 Array [
   Object {
     "fromVersion": "0.9.0",
@@ -346,16 +352,37 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) returns warning if range not found 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() returns rollback if range not found 1`] = `
 Array [
   Object {
-    "message": "No satisfying version found for existing dependency range \\"^8.4.0\\"",
-    "type": "warning",
+    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+    "commitMessageAction": "Roll back",
+    "isRollback": true,
+    "newVersion": "^2.0.0",
+    "newVersionMajor": 2,
+    "semanticCommitType": "fix",
+    "type": "rollback",
+    "unpublishable": false,
   },
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) should allow unstable versions if the current version is unstable 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if ignoreUnstable is false 1`] = `
+Array [
+  Object {
+    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+    "commitMessageAction": "Roll back",
+    "isRollback": true,
+    "newVersion": "1.0.0-beta",
+    "newVersionMajor": 1,
+    "semanticCommitType": "fix",
+    "type": "rollback",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if the current version is unstable 1`] = `
 Array [
   Object {
     "fromVersion": "1.0.0-beta",
@@ -369,10 +396,25 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) should downgrade from missing versions 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if the ignoreUnstable=false 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.0.0",
+    "newVersion": "1.1.0-beta",
+    "newVersionMajor": 1,
+    "newVersionMinor": 1,
+    "toVersion": "1.1.0-beta",
+    "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() should downgrade from missing versions 1`] = `
 Object {
   "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
   "commitMessageAction": "Roll back",
+  "isRollback": true,
   "newVersion": "1.16.0",
   "newVersionMajor": 1,
   "semanticCommitType": "fix",
@@ -381,7 +423,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) should treat zero zero caret ranges as pinned 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() should treat zero zero caret ranges as pinned 1`] = `
 Array [
   Object {
     "fromVersion": "0.0.34",
@@ -396,7 +438,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports > latest versions if configured 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports > latest versions if configured 1`] = `
 Array [
   Object {
     "fromVersion": "1.4.1",
@@ -410,7 +452,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports complex major hyphen ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports complex major hyphen ranges 1`] = `
 Array [
   Object {
     "fromVersion": "2.7.0",
@@ -425,7 +467,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports complex major ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports complex major ranges 1`] = `
 Array [
   Object {
     "fromVersion": "2.7.0",
@@ -440,7 +482,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports complex ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports complex ranges 1`] = `
 Object {
   "fromVersion": "0.8.12",
   "isRange": true,
@@ -453,7 +495,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports complex tilde ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports complex tilde ranges 1`] = `
 Array [
   Object {
     "fromVersion": "1.3.0",
@@ -468,18 +510,22 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports future versions if already future 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports in-range caret updates 1`] = `
 Array [
   Object {
-    "newVersion": "2.0.3",
-    "newVersionMajor": 2,
-    "type": "pin",
+    "fromVersion": "1.0.0",
+    "isRange": true,
+    "newVersion": "^1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "minor",
     "unpublishable": false,
   },
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports in-range updates 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports in-range tilde updates 1`] = `
 Array [
   Object {
     "fromVersion": "1.0.0",
@@ -494,8 +540,15 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports minor and major upgrades for ranged versions 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports minor and major upgrades for ranged versions 1`] = `
 Array [
+  Object {
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "type": "pin",
+    "unpublishable": false,
+  },
   Object {
     "fromVersion": "0.4.4",
     "newVersion": "0.9.7",
@@ -503,12 +556,6 @@ Array [
     "newVersionMinor": 9,
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
-  },
-  Object {
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
-    "type": "pin",
     "unpublishable": false,
   },
   Object {
@@ -523,8 +570,15 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) supports minor and major upgrades for tilde ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() supports minor and major upgrades for tilde ranges 1`] = `
 Array [
+  Object {
+    "isPin": true,
+    "newVersion": "0.4.4",
+    "newVersionMajor": 0,
+    "type": "pin",
+    "unpublishable": false,
+  },
   Object {
     "fromVersion": "0.4.4",
     "newVersion": "0.9.7",
@@ -532,12 +586,6 @@ Array [
     "newVersionMinor": 9,
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
-  },
-  Object {
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
-    "type": "pin",
     "unpublishable": false,
   },
   Object {
@@ -552,7 +600,22 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades .x major ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades .x complex minor ranges without pinning 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.3.0",
+    "isRange": true,
+    "newVersion": "1.2.x - 1.4.x",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() upgrades .x major ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.9.7",
@@ -567,8 +630,15 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades .x minor ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades .x minor ranges 1`] = `
 Array [
+  Object {
+    "isPin": true,
+    "newVersion": "1.3.0",
+    "newVersionMajor": 1,
+    "type": "pin",
+    "unpublishable": false,
+  },
   Object {
     "fromVersion": "1.3.0",
     "newVersion": "1.4.1",
@@ -578,16 +648,10 @@ Array [
     "type": "minor",
     "unpublishable": false,
   },
-  Object {
-    "newVersion": "1.3.0",
-    "newVersionMajor": 1,
-    "type": "pin",
-    "unpublishable": false,
-  },
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades .x minor ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades .x minor ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "1.3.0",
@@ -602,7 +666,37 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades less than equal ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades less than equal major ranges 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.4.1",
+    "isRange": true,
+    "newVersion": "<= 2",
+    "newVersionMajor": 2,
+    "newVersionMinor": 0,
+    "toVersion": "2.0.3",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() upgrades less than equal minor ranges 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.3.0",
+    "isRange": true,
+    "newVersion": "<= 1.4",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() upgrades less than equal ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.7.2",
@@ -627,7 +721,22 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades less than ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades less than major ranges 1`] = `
+Array [
+  Object {
+    "fromVersion": "0.9.7",
+    "isRange": true,
+    "newVersion": "< 2",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() upgrades less than ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.7.1",
@@ -652,7 +761,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades major greater than less than ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades major greater than less than ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.9.7",
@@ -667,12 +776,12 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades major less than equal ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades major less than equal ranges 1`] = `
 Array [
   Object {
     "fromVersion": "1.0.0",
     "isRange": true,
-    "newVersion": "<= 2.0.0",
+    "newVersion": "<= 1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "toVersion": "1.4.1",
@@ -682,7 +791,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades major less than ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades major less than ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.9.7",
@@ -697,12 +806,12 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades minor greater than less than equals ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades minor greater than less than equals ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.8.0",
     "isRange": true,
-    "newVersion": ">= 0.5.0 <= 0.10.0",
+    "newVersion": ">= 0.5.0 <= 0.9.7",
     "newVersionMajor": 0,
     "newVersionMinor": 9,
     "toVersion": "0.9.7",
@@ -712,7 +821,7 @@ Array [
   Object {
     "fromVersion": "0.8.0",
     "isRange": true,
-    "newVersion": ">= 0.5.0 <= 1.5.0",
+    "newVersion": ">= 0.5.0 <= 1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
     "toVersion": "1.4.1",
@@ -722,7 +831,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades minor greater than less than ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades minor greater than less than ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.7.2",
@@ -747,8 +856,15 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades minor ranged versions 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades minor ranged versions 1`] = `
 Array [
+  Object {
+    "isPin": true,
+    "newVersion": "1.0.1",
+    "newVersionMajor": 1,
+    "type": "pin",
+    "unpublishable": false,
+  },
   Object {
     "fromVersion": "1.0.1",
     "newVersion": "1.4.1",
@@ -758,16 +874,10 @@ Array [
     "type": "minor",
     "unpublishable": false,
   },
-  Object {
-    "newVersion": "1.0.1",
-    "newVersionMajor": 1,
-    "type": "pin",
-    "unpublishable": false,
-  },
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades multiple caret ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades multiple caret ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.7.2",
@@ -792,7 +902,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades multiple tilde ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades multiple tilde ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.7.2",
@@ -817,7 +927,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades shorthand major ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades shorthand major ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "0.9.7",
@@ -832,7 +942,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades shorthand minor ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades shorthand minor ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "1.3.0",
@@ -847,8 +957,15 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades tilde ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades tilde ranges 1`] = `
 Array [
+  Object {
+    "isPin": true,
+    "newVersion": "1.3.0",
+    "newVersionMajor": 1,
+    "type": "pin",
+    "unpublishable": false,
+  },
   Object {
     "fromVersion": "1.3.0",
     "newVersion": "1.4.1",
@@ -858,16 +975,10 @@ Array [
     "type": "minor",
     "unpublishable": false,
   },
-  Object {
-    "newVersion": "1.3.0",
-    "newVersionMajor": 1,
-    "type": "pin",
-    "unpublishable": false,
-  },
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) upgrades tilde ranges without pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() upgrades tilde ranges without pinning 1`] = `
 Array [
   Object {
     "fromVersion": "1.3.0",
@@ -882,8 +993,15 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) uses the locked version for pinning 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() uses the locked version for pinning 1`] = `
 Array [
+  Object {
+    "isPin": true,
+    "newVersion": "1.0.0",
+    "newVersionMajor": 1,
+    "type": "pin",
+    "unpublishable": false,
+  },
   Object {
     "fromVersion": "1.0.0",
     "newVersion": "1.4.1",
@@ -893,16 +1011,10 @@ Array [
     "type": "minor",
     "unpublishable": false,
   },
-  Object {
-    "newVersion": "1.0.0",
-    "newVersionMajor": 1,
-    "type": "pin",
-    "unpublishable": false,
-  },
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) widens .x OR ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() widens .x OR ranges 1`] = `
 Array [
   Object {
     "fromVersion": "2.7.0",
@@ -917,7 +1029,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) widens major ranged versions if configured 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() widens major ranged versions if configured 1`] = `
 Array [
   Object {
     "fromVersion": "2.7.0",
@@ -932,7 +1044,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) widens minor ranged versions if configured 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() widens minor ranged versions if configured 1`] = `
 Array [
   Object {
     "fromVersion": "1.3.0",
@@ -947,7 +1059,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/versions .determineUpgrades(npmDep, config) widens stanndalone major OR ranges 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() widens stanndalone major OR ranges 1`] = `
 Array [
   Object {
     "fromVersion": "2.7.0",

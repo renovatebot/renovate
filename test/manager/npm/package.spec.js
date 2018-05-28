@@ -1,5 +1,5 @@
 const npmApi = require('../../../lib/datasource/npm');
-const versions = require('../../../lib/manager/npm/versions');
+const lookup = require('../../../lib/manager/npm/lookup');
 const npm = require('../../../lib/manager/npm/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
@@ -84,7 +84,7 @@ describe('lib/manager/npm/package', () => {
     });
     it('returns warning if warning found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades = jest.fn(() => [
+      lookup.lookupUpdates = jest.fn(() => [
         {
           type: 'warning',
           message: 'bad version',
@@ -95,7 +95,7 @@ describe('lib/manager/npm/package', () => {
     });
     it('returns array if upgrades found', async () => {
       npmApi.getDependency.mockReturnValueOnce({ repositoryUrl: 'some-url' });
-      versions.determineUpgrades = jest.fn(() => [{}]);
+      lookup.lookupUpdates = jest.fn(() => [{}]);
       const res = await npm.getPackageUpdates(config);
       expect(res).toHaveLength(1);
       expect(Object.keys(res[0])).toMatchSnapshot();
@@ -104,7 +104,7 @@ describe('lib/manager/npm/package', () => {
     it('sets repositoryUrl for @types', async () => {
       config.depName = '@types/some-dep';
       npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades = jest.fn(() => [{}]);
+      lookup.lookupUpdates = jest.fn(() => [{}]);
       const res = await npm.getPackageUpdates(config);
       expect(res[0].repositoryUrl).toEqual(
         'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/some-dep'
