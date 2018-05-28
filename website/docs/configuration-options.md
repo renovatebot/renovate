@@ -458,9 +458,9 @@ This setting - if enabled - limits Renovate to a maximum of x concurrent PRs ope
 
 This setting tells Renovate when you would like it to raise PRs:
 
-* `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
-* `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
-* `status-success`: Renovate won't raise PRs unless tests pass
+- `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
+- `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
+- `status-success`: Renovate won't raise PRs unless tests pass
 
 Renovate defaults to `immediate` but some like to change to `not-pending`. If you set to immediate, it means you will usually get GitHub notifications that a new PR is available but if you view it immediately then it will still have "pending" tests so you can't take any action. With `not-pending`, it means that when you receive the PR notification, you can see if it passed or failed and take action immediately. Therefore you can customise this setting if you wish to be notified a little later in order to reduce "noise".
 
@@ -490,11 +490,11 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 Behaviour:
 
-* `auto` = Renovate decides (this will be done on a manager-by-manager basis)
-* `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
-* `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
-* `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
-* `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
+- `auto` = Renovate decides (this will be done on a manager-by-manager basis)
+- `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
+- `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
+- `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
+- `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
 
 Renovate's "auto" strategy works like this for npm:
 
@@ -522,9 +522,9 @@ If you set it to `false` then that will take precedence - it means Renovate will
 
 By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again. For example the Webpack 3.x case described above. This field lets you customise this behaviour down to a per-package level. For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
 
-* Package groups
-* When pinning versions
-* Lock file maintenance
+- Package groups
+- When pinning versions
+- Lock file maintenance
 
 Typically you shouldn't need to modify this setting.
 
@@ -619,7 +619,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-* **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 
