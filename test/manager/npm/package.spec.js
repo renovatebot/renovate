@@ -37,6 +37,14 @@ describe('lib/manager/npm/package', () => {
       };
       expect(npm.getRangeStrategy(config)).toEqual('widen');
     });
+    it('widens complex bump', () => {
+      const config = {
+        rangeStrategy: 'bump',
+        depType: 'dependencies',
+        currentVersion: '^1.6.0 || ^2.0.0',
+      };
+      expect(npm.getRangeStrategy(config)).toEqual('widen');
+    });
     it('defaults to replace', () => {
       const config = { rangeStrategy: 'auto', depType: 'dependencies' };
       expect(npm.getRangeStrategy(config)).toEqual('replace');
