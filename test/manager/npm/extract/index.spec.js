@@ -10,6 +10,7 @@ function readFixture(fixture) {
 }
 
 const input01Content = readFixture('inputs/01.json');
+const workspacesContent = readFixture('inputs/workspaces.json');
 
 describe('manager/npm/extract', () => {
   describe('.extractDependencies()', () => {
@@ -99,6 +100,20 @@ describe('manager/npm/extract', () => {
       });
       const res = await npmExtract.extractDependencies(
         input01Content,
+        'package.json',
+        {}
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('finds complex yarn workspaces', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === 'lerna.json') {
+          return '{}';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractDependencies(
+        workspacesContent,
         'package.json',
         {}
       );

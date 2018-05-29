@@ -69,6 +69,26 @@ Object {
 }
 `;
 
+exports[`manager/npm/extract .extractDependencies() finds complex yarn workspaces 1`] = `
+Object {
+  "deps": Array [],
+  "lernaClient": "npm",
+  "lernaDir": ".",
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": "@a/b",
+  "packageJsonType": "app",
+  "packageJsonVersion": "0.0.8",
+  "pnpmShrinkwrap": undefined,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": Array [
+    "packages/*",
+  ],
+  "yarnrc": undefined,
+}
+`;
+
 exports[`manager/npm/extract .extractDependencies() finds lerna 1`] = `
 Object {
   "deps": Array [
