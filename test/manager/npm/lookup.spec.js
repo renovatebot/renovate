@@ -27,8 +27,12 @@ describe('manager/npm/lookup', () => {
       expect(res).toHaveLength(1);
       expect(res[0]).toMatchSnapshot();
     });
-    it('returns rollback if range not found', () => {
-      config.currentVersion = '^8.4.0';
+    it('returns rollback for pinned version', () => {
+      config.currentVersion = '0.9.99';
+      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+    });
+    it('returns rollback for ranged version', () => {
+      config.currentVersion = '^0.9.99';
       expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
     });
     it('supports minor and major upgrades for tilde ranges', () => {
@@ -355,38 +359,22 @@ describe('manager/npm/lookup', () => {
     it('should allow unstable versions if the ignoreUnstable=false', () => {
       config.currentVersion = '1.0.0';
       config.ignoreUnstable = false;
-      expect(
-        lookup.lookupUpdates(
-          {
-            name: 'amazing-package',
-            versions: {
-              '1.0.0-beta': {},
-              '1.0.0': {},
-              '1.1.0-beta': {},
-            },
+      const res = lookup.lookupUpdates(
+        {
+          name: 'amazing-package',
+          versions: {
+            '1.0.0-beta': {},
+            '1.0.0': {},
+            '1.1.0-beta': {},
           },
-          config
-        )
-      ).toMatchSnapshot();
+        },
+        config
+      );
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
     });
     it('should allow unstable versions if the current version is unstable', () => {
       config.currentVersion = '1.0.0-beta';
-      expect(
-        lookup.lookupUpdates(
-          {
-            name: 'amazing-package',
-            versions: {
-              '1.0.0-beta': {},
-              '1.1.0-beta': {},
-            },
-          },
-          config
-        )
-      ).toMatchSnapshot();
-    });
-    it('should allow unstable versions if ignoreUnstable is false', () => {
-      config.currentVersion = '1.0.0';
-      config.ignoreUnstable = false;
       expect(
         lookup.lookupUpdates(
           {

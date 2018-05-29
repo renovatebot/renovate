@@ -352,29 +352,38 @@ Array [
 ]
 `;
 
-exports[`manager/npm/lookup .lookupUpdates() returns rollback if range not found 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() returns rollback for pinned version 1`] = `
 Array [
   Object {
     "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
     "commitMessageAction": "Roll back",
     "isRollback": true,
-    "newVersion": "^2.0.0",
-    "newVersionMajor": 2,
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
     "semanticCommitType": "fix",
     "type": "rollback",
+    "unpublishable": false,
+  },
+  Object {
+    "fromVersion": "0.9.99",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "toVersion": "1.4.1",
+    "type": "major",
     "unpublishable": false,
   },
 ]
 `;
 
-exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if ignoreUnstable is false 1`] = `
+exports[`manager/npm/lookup .lookupUpdates() returns rollback for ranged version 1`] = `
 Array [
   Object {
     "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
     "commitMessageAction": "Roll back",
     "isRollback": true,
-    "newVersion": "1.0.0-beta",
-    "newVersionMajor": 1,
+    "newVersion": "^0.9.7",
+    "newVersionMajor": 0,
     "semanticCommitType": "fix",
     "type": "rollback",
     "unpublishable": false,
