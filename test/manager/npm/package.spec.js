@@ -64,22 +64,5 @@ describe('lib/manager/npm/package', () => {
       const res = await npm.getPackageUpdates(config);
       expect(res[0].type).toEqual('warning');
     });
-    it('returns array if upgrades found', async () => {
-      npmApi.getDependency.mockReturnValueOnce({ repositoryUrl: 'some-url' });
-      lookup.lookupUpdates = jest.fn(() => [{}]);
-      const res = await npm.getPackageUpdates(config);
-      expect(res).toHaveLength(1);
-      expect(Object.keys(res[0])).toMatchSnapshot();
-      expect(res[0].repositoryUrl).toBeDefined();
-    });
-    it('sets repositoryUrl for @types', async () => {
-      config.depName = '@types/some-dep';
-      npmApi.getDependency.mockReturnValueOnce({});
-      lookup.lookupUpdates = jest.fn(() => [{}]);
-      const res = await npm.getPackageUpdates(config);
-      expect(res[0].repositoryUrl).toEqual(
-        'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/some-dep'
-      );
-    });
   });
 });
