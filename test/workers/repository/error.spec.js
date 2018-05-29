@@ -24,6 +24,7 @@ describe('workers/repository/error', () => {
       'not-found',
       'forbidden',
       'rate-limit-exceeded',
+      'lockfile-error',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {
