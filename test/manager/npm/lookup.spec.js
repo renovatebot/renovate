@@ -1,10 +1,14 @@
+const nock = require('nock');
 const lookup = require('../../../lib/manager/npm/lookup');
 const qJson = require('../../_fixtures/npm/01.json');
 const helmetJson = require('../../_fixtures/npm/02.json');
 const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
 const webpackJson = require('../../_fixtures/npm/webpack.json');
 const nextJson = require('../../_fixtures/npm/next.json');
+const vueJson = require('../../_fixtures/npm/vue.json');
 const typescriptJson = require('../../_fixtures/npm/typescript.json');
+const typesJson = require('../../_fixtures/npm/types_openjscad.json');
+// const npmApi = require('../../../lib/datasource/npm');
 
 qJson.latestVersion = '1.4.1';
 
@@ -14,78 +18,105 @@ describe('manager/npm/lookup', () => {
   beforeEach(() => {
     config = { ...require('../../../lib/config/defaults').getConfig() };
     config.rangeStrategy = 'replace';
+    jest.resetAllMocks();
   });
 
   describe('.lookupUpdates()', () => {
-    it('return warning if empty versions', () => {
-      const testDep = {
-        name: 'q',
-        versions: [],
-      };
-      config.currentVersion = '1.0.0';
-      const res = lookup.lookupUpdates(testDep, config);
-      expect(res).toHaveLength(1);
-      expect(res[0]).toMatchSnapshot();
-    });
-    it('returns rollback for pinned version', () => {
+    it('returns rollback for pinned version', async () => {
       config.currentVersion = '0.9.99';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('returns rollback for ranged version', () => {
+    it('returns rollback for ranged version', async () => {
       config.currentVersion = '^0.9.99';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('supports minor and major upgrades for tilde ranges', () => {
+    it('supports minor and major upgrades for tilde ranges', async () => {
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('returns only one update if grouping', () => {
+    it('returns only one update if grouping', async () => {
       config.groupName = 'somegroup';
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('returns only one update if automerging', () => {
+    it('returns only one update if automerging', async () => {
       config.automerge = true;
       config.currentVersion = '0.4.0';
       config.rangeStrategy = 'pin';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
-    it('returns only one update if automerging major', () => {
+    it('returns only one update if automerging major', async () => {
       config.major = { automerge: true };
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('returns both updates if automerging minor', () => {
+    it('returns both updates if automerging minor', async () => {
       config.minor = { automerge: true };
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('returns minor update if separate patches not configured', () => {
+    it('returns minor update if separate patches not configured', async () => {
       config.currentVersion = '0.9.0';
       config.rangeStrategy = 'pin';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res.length).toBe(2);
       expect(res[0].type).not.toEqual('patch');
       expect(res[1].type).not.toEqual('patch');
     });
-    it('returns patch update if automerging patch', () => {
+    it('returns patch update if automerging patch', async () => {
       config.patch = {
         automerge: true,
       };
       config.currentVersion = '0.9.0';
       config.rangeStrategy = 'pin';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res[0].type).toEqual('patch');
     });
-    it('returns minor update if automerging both patch and minor', () => {
+    it('returns minor update if automerging both patch and minor', async () => {
       config.patch = {
         automerge: true,
       };
@@ -94,370 +125,586 @@ describe('manager/npm/lookup', () => {
       };
       config.currentVersion = '0.9.0';
       config.rangeStrategy = 'pin';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res[0].type).toEqual('minor');
     });
-    it('returns patch update if separateMinorPatch', () => {
+    it('returns patch update if separateMinorPatch', async () => {
       config.separateMinorPatch = true;
       config.currentVersion = '0.9.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('returns patch minor and major', () => {
+    it('returns patch minor and major', async () => {
       config.separateMinorPatch = true;
       config.currentVersion = '0.8.0';
       config.rangeStrategy = 'pin';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toHaveLength(3);
       expect(res).toMatchSnapshot();
     });
-    it('disables major release separation (major)', () => {
+    it('disables major release separation (major)', async () => {
       config.separateMajorMinor = false;
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('disables major release separation (minor)', () => {
+    it('disables major release separation (minor)', async () => {
       config.separateMajorMinor = false;
       config.currentVersion = '1.0.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('supports minor and major upgrades for ranged versions', () => {
+    it('supports minor and major upgrades for ranged versions', async () => {
       config.currentVersion = '~0.4.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('ignores pinning for ranges when other upgrade exists', () => {
+    it('ignores pinning for ranges when other upgrade exists', async () => {
       config.currentVersion = '~0.9.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades minor ranged versions', () => {
+    it('upgrades minor ranged versions', async () => {
       config.currentVersion = '~1.0.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('widens minor ranged versions if configured', () => {
+    it('widens minor ranged versions if configured', async () => {
       config.currentVersion = '~1.3.0';
       config.rangeStrategy = 'widen';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('replaces minor complex ranged versions if configured', () => {
+    it('replaces minor complex ranged versions if configured', async () => {
       config.currentVersion = '~1.2.0 || ~1.3.0';
       config.rangeStrategy = 'replace';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('widens major ranged versions if configured', () => {
+    it('widens major ranged versions if configured', async () => {
       config.currentVersion = '^2.0.0';
       config.rangeStrategy = 'widen';
-      expect(lookup.lookupUpdates(webpackJson, config)).toMatchSnapshot();
+      config.depName = 'webpack';
+      nock('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('replaces major complex ranged versions if configured', () => {
+    it('replaces major complex ranged versions if configured', async () => {
       config.currentVersion = '^1.0.0 || ^2.0.0';
       config.rangeStrategy = 'replace';
-      expect(lookup.lookupUpdates(webpackJson, config)).toMatchSnapshot();
+      config.depName = 'webpack';
+      nock('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('pins minor ranged versions', () => {
+    it('pins minor ranged versions', async () => {
       config.currentVersion = '^1.0.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('uses the locked version for pinning', () => {
+    it('uses the locked version for pinning', async () => {
       config.currentVersion = '^1.0.0';
       config.lockedVersion = '1.0.0';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('ignores minor ranged versions when not pinning', () => {
+    it('ignores minor ranged versions when not pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '^1.0.0';
-      expect(lookup.lookupUpdates(qJson, config)).toHaveLength(0);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toHaveLength(0);
     });
-    it('upgrades tilde ranges', () => {
+    it('upgrades tilde ranges', async () => {
       config.rangeStrategy = 'pin';
       config.currentVersion = '~1.3.0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades .x minor ranges', () => {
+    it('upgrades .x minor ranges', async () => {
       config.currentVersion = '1.3.x';
       config.rangeStrategy = 'pin';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades tilde ranges without pinning', () => {
+    it('upgrades tilde ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '~1.3.0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades .x major ranges without pinning', () => {
+    it('upgrades .x major ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '0.x';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades .x minor ranges without pinning', () => {
+    it('upgrades .x minor ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '1.3.x';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades .x complex minor ranges without pinning', () => {
+    it('upgrades .x complex minor ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '1.2.x - 1.3.x';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades shorthand major ranges without pinning', () => {
+    it('upgrades shorthand major ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades shorthand minor ranges without pinning', () => {
+    it('upgrades shorthand minor ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '1.3';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades multiple tilde ranges without pinning', () => {
+    it('upgrades multiple tilde ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '~0.7.0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades multiple caret ranges without pinning', () => {
+    it('upgrades multiple caret ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '^0.7.0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('supports complex ranges', () => {
+    it('supports complex ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '^0.7.0 || ^0.8.0';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toHaveLength(2);
       expect(res[0]).toMatchSnapshot();
     });
-    it('supports complex major ranges', () => {
+    it('supports complex major ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '^1.0.0 || ^2.0.0';
-      const res = lookup.lookupUpdates(webpackJson, config);
-      expect(res).toMatchSnapshot();
+      config.depName = 'webpack';
+      nock('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('supports complex major hyphen ranges', () => {
+    it('supports complex major hyphen ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '1.x - 2.x';
-      const res = lookup.lookupUpdates(webpackJson, config);
-      expect(res).toMatchSnapshot();
+      config.depName = 'webpack';
+      nock('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('widens .x OR ranges', () => {
+    it('widens .x OR ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '1.x || 2.x';
-      const res = lookup.lookupUpdates(webpackJson, config);
-      expect(res).toMatchSnapshot();
+      config.depName = 'webpack';
+      nock('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('widens stanndalone major OR ranges', () => {
+    it('widens stanndalone major OR ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '1 || 2';
-      const res = lookup.lookupUpdates(webpackJson, config);
-      expect(res).toMatchSnapshot();
+      config.depName = 'webpack';
+      nock('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('supports complex tilde ranges', () => {
+    it('supports complex tilde ranges', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '~1.2.0 || ~1.3.0';
-      const res = lookup.lookupUpdates(qJson, config);
-      expect(res).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('returns nothing for greater than ranges', () => {
+    it('returns nothing for greater than ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '>= 0.7.0';
-      expect(lookup.lookupUpdates(qJson, config)).toHaveLength(0);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toHaveLength(0);
     });
-    it('upgrades less than equal ranges without pinning', () => {
+    it('upgrades less than equal ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '<= 0.7.2';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades less than ranges without pinning', () => {
+    it('upgrades less than ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '< 0.7.2';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades less than major ranges', () => {
+    it('upgrades less than major ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '< 1';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades less than equal minor ranges', () => {
+    it('upgrades less than equal minor ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '<= 1.3';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades less than equal major ranges', () => {
+    it('upgrades less than equal major ranges', async () => {
       config.rangeStrategy = 'replace';
       config.respectLatest = false;
       config.currentVersion = '<= 1';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('upgrades major less than equal ranges', () => {
+    it('upgrades major less than equal ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '<= 1.0.0';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res[0].newVersion).toEqual('<= 1.4.1');
     });
-    it('upgrades major less than ranges without pinning', () => {
+    it('upgrades major less than ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '< 1.0.0';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res[0].newVersion).toEqual('< 2.0.0');
     });
-    it('upgrades major greater than less than ranges without pinning', () => {
+    it('upgrades major greater than less than ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '>= 0.5.0 < 1.0.0';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res[0].newVersion).toEqual('>= 0.5.0 < 2.0.0');
     });
-    it('upgrades minor greater than less than ranges without pinning', () => {
+    it('upgrades minor greater than less than ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '>= 0.5.0 <0.8';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res[0].newVersion).toEqual('>= 0.5.0 <0.10');
       expect(res[1].newVersion).toEqual('>= 0.5.0 <1.5');
     });
-    it('upgrades minor greater than less than equals ranges without pinning', () => {
+    it('upgrades minor greater than less than equals ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '>= 0.5.0 <= 0.8.0';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res[0].newVersion).toEqual('>= 0.5.0 <= 0.9.7');
       expect(res[1].newVersion).toEqual('>= 0.5.0 <= 1.4.1');
     });
-    it('rejects reverse ordered less than greater than', () => {
+    it('rejects reverse ordered less than greater than', async () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '<= 0.8.0 >= 0.5.0';
-      const res = lookup.lookupUpdates(qJson, config);
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
-    it('supports > latest versions if configured', () => {
+    it('supports > latest versions if configured', async () => {
       config.respectLatest = false;
       config.currentVersion = '1.4.1';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('should ignore unstable versions if the current version is stable', () => {
-      config.currentVersion = '1.0.0';
-      lookup
-        .lookupUpdates(
-          {
-            name: 'amazing-package',
-            versions: {
-              '1.0.0': {},
-              '1.1.0-beta': {},
-            },
-          },
-          config
-        )
-        .should.eql([]);
+    it('should ignore unstable versions if the current version is stable', async () => {
+      config.currentVersion = '2.5.16';
+      config.depName = 'vue';
+      nock('https://registry.npmjs.org')
+        .get('/vue')
+        .reply(200, vueJson);
+      expect(await lookup.lookupUpdates(config)).toHaveLength(0);
     });
-    it('should allow unstable versions if the ignoreUnstable=false', () => {
-      config.currentVersion = '1.0.0';
+    it('should allow unstable versions if the ignoreUnstable=false', async () => {
+      config.currentVersion = '2.5.16';
       config.ignoreUnstable = false;
-      const res = lookup.lookupUpdates(
-        {
-          name: 'amazing-package',
-          versions: {
-            '1.0.0-beta': {},
-            '1.0.0': {},
-            '1.1.0-beta': {},
-          },
-        },
-        config
-      );
+      config.depName = 'vue';
+      nock('https://registry.npmjs.org')
+        .get('/vue')
+        .reply(200, vueJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
+      expect(res[0].newVersion).toEqual('2.5.17-beta.0');
     });
-    it('should allow unstable versions if the current version is unstable', () => {
-      config.currentVersion = '1.0.0-beta';
-      expect(
-        lookup.lookupUpdates(
-          {
-            name: 'amazing-package',
-            versions: {
-              '1.0.0-beta': {},
-              '1.1.0-beta': {},
-            },
-          },
-          config
-        )
-      ).toMatchSnapshot();
+    it('should allow unstable versions if the current version is unstable', async () => {
+      config.currentVersion = '2.3.0-beta.1';
+      config.depName = 'vue';
+      nock('https://registry.npmjs.org')
+        .get('/vue')
+        .reply(200, vueJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+      expect(res[0].newVersion).toEqual('2.5.17-beta.0');
     });
-    it('should treat zero zero tilde ranges as 0.0.x', () => {
+    it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '~0.0.34';
-      expect(lookup.lookupUpdates(helmetJson, config)).toEqual([]);
+      config.depName = 'helmet';
+      nock('https://registry.npmjs.org')
+        .get('/helmet')
+        .reply(200, helmetJson);
+      expect(await lookup.lookupUpdates(config)).toEqual([]);
     });
-    it('should treat zero zero caret ranges as pinned', () => {
+    it('should treat zero zero caret ranges as pinned', async () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '^0.0.34';
-      expect(lookup.lookupUpdates(helmetJson, config)).toMatchSnapshot();
+      config.depName = 'helmet';
+      nock('https://registry.npmjs.org')
+        .get('/helmet')
+        .reply(200, helmetJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('should downgrade from missing versions', () => {
+    it('should downgrade from missing versions', async () => {
       config.currentVersion = '1.16.1';
-      const res = lookup.lookupUpdates(coffeelintJson, config);
+      config.depName = 'coffeelint';
+      nock('https://registry.npmjs.org')
+        .get('/coffeelint')
+        .reply(200, coffeelintJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toHaveLength(1);
       expect(res[0]).toMatchSnapshot();
     });
-    it('should upgrade to only one major', () => {
+    it('should upgrade to only one major', async () => {
       config.currentVersion = '1.0.0';
-      const res = lookup.lookupUpdates(webpackJson, config);
+      config.depName = 'webpack';
+      nock('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toHaveLength(2);
     });
-    it('should upgrade to two majors', () => {
+    it('should upgrade to two majors', async () => {
       config.currentVersion = '1.0.0';
       config.separateMultipleMajor = true;
-      const res = lookup.lookupUpdates(webpackJson, config);
+      config.depName = 'webpack';
+      nock('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toHaveLength(3);
     });
-    it('does not jump  major unstable', () => {
+    it('does not jump  major unstable', async () => {
       config.currentVersion = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';
-      const res = lookup.lookupUpdates(nextJson, config);
+      config.depName = 'next';
+      nock('https://registry.npmjs.org')
+        .get('/next')
+        .reply(200, nextJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toHaveLength(0);
     });
-    it('handles prerelease jumps', () => {
+    it('handles prerelease jumps', async () => {
       config.currentVersion = '^2.9.0-rc';
       config.rangeStrategy = 'replace';
-      const res = lookup.lookupUpdates(typescriptJson, config);
+      config.depName = 'typescript';
+      nock('https://registry.npmjs.org')
+        .get('/typescript')
+        .reply(200, typescriptJson);
+      const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
-    it('supports in-range caret updates', () => {
+    it('supports in-range caret updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '^1.0.0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('supports in-range tilde updates', () => {
+    it('supports in-range tilde updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '~1.0.0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('rejects in-range unsupported operator', () => {
+    it('rejects in-range unsupported operator', async () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '>=1.0.0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('rejects non-fully specified in-range updates', () => {
+    it('rejects non-fully specified in-range updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '1.x';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('rejects complex range in-range updates', () => {
+    it('rejects complex range in-range updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '^0.9.0 || ^1.0.0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('rejects non-range in-range updates', () => {
+    it('rejects non-range in-range updates', async () => {
       config.depName = 'q';
       config.packageFile = 'package.json';
       config.rangeStrategy = 'bump';
       config.currentVersion = '1.0.0';
-      expect(lookup.lookupUpdates(qJson, config)).toMatchSnapshot();
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
+    });
+    it('massages @types', async () => {
+      config.depName = '@types/openjscad';
+      config.currentVersion = '0.0.27';
+      config.depName = '@types/openjscad';
+      nock('https://registry.npmjs.org')
+        .get('/@types%2Fopenjscad')
+        .reply(200, typesJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
   });
 });
