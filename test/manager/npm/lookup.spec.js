@@ -89,6 +89,24 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
+    it('enforces allowedVersions', async () => {
+      config.currentVersion = '0.4.0';
+      config.allowedVersions = '<1';
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toHaveLength(1);
+    });
+    it('skips invalid allowedVersions', async () => {
+      config.currentVersion = '0.4.0';
+      config.allowedVersions = 'less than 1';
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toHaveLength(2);
+    });
     it('returns minor update if separate patches not configured', async () => {
       config.currentVersion = '0.9.0';
       config.rangeStrategy = 'pin';
