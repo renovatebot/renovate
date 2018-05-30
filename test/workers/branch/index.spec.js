@@ -112,18 +112,12 @@ describe('workers/branch', () => {
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
-      platform.findPr.mockReturnValueOnce({});
-      platform.getPr.mockReturnValueOnce({ state: 'open', canRebase: false });
+      platform.getBranchPr.mockReturnValueOnce({
+        state: 'open',
+        canRebase: false,
+      });
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
-    });
-    it('warns if edited PR is actually closed', async () => {
-      schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockReturnValueOnce(true);
-      platform.findPr.mockReturnValueOnce({});
-      platform.getPr.mockReturnValueOnce({ state: 'closed' });
-      const res = await branchWorker.processBranch(config);
-      expect(res).not.toEqual('pr-edited');
     });
     it('returns if pr creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
