@@ -6,26 +6,32 @@ Object {
     Object {
       "currentVersion": "0.2.0",
       "depName": "xml2js",
+      "purl": "pkg:npm/xml2js",
     },
     Object {
       "currentVersion": "0.6.0",
       "depName": "xml-crypto",
+      "purl": "pkg:npm/xml-crypto",
     },
     Object {
       "currentVersion": "0.1.19",
       "depName": "xmldom",
+      "purl": "pkg:npm/xmldom",
     },
     Object {
       "currentVersion": "2.7.10",
       "depName": "connect",
+      "purl": "pkg:npm/connect",
     },
     Object {
       "currentVersion": "2.6.4",
       "depName": "xmlbuilder",
+      "purl": "pkg:npm/xmlbuilder",
     },
     Object {
       "currentVersion": "0.2.0",
       "depName": "querystring",
+      "purl": "pkg:npm/querystring",
     },
   ],
 }
