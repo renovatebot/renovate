@@ -9,7 +9,7 @@ We consider it a great responsibility that you have trusted us with your GitHub 
 
 The content in this document does not replace or override anything in our [Privacy Policy](/privacy). We provide it for your "peace of mind" and with the hope of receiving feedback that may enable us to improve security and data handling even further.
 
-If you have any suggestions or questions about our security, please contact us at support@renovatepp.com immediately. Please do not disclose any security concerns in a public forum.
+If you have any suggestions or questions about our security, please contact us at security@renovatebot.com immediately. Please do not disclose any security concerns in a public forum.
 
 ## GitHub App Private Key
 
