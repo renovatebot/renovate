@@ -119,6 +119,30 @@ describe('manager/npm/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('extracts engines', async () => {
+      const pJson = {
+        dependencies: {
+          angular: '1.6.0',
+        },
+        devDependencies: {
+          '@angular/cli': '1.6.0',
+          foo: '*',
+          bar: 'file:../foo/bar',
+          other: 'latest',
+        },
+        engines: {
+          node: '>= 8.9.2',
+          yarn: '1.7.0',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractDependencies(
+        pJsonStr,
+        'package.json',
+        {}
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('.postExtract()', () => {
     it('runs', async () => {
