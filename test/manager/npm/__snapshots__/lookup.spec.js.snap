@@ -581,6 +581,22 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() supports in-range gte updates 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.0.0",
+    "isRange": true,
+    "newVersion": ">=1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "repositoryUrl": "https://github.com/kriskowal/q",
+    "toVersion": "1.4.1",
+    "type": "minor",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() supports in-range tilde updates 1`] = `
 Array [
   Object {

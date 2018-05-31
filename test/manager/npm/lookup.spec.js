@@ -677,9 +677,18 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('rejects in-range unsupported operator', async () => {
+    it('supports in-range gte updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '>=1.0.0';
+      config.depName = 'q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
+    });
+    it('rejects in-range unsupported operator', async () => {
+      config.rangeStrategy = 'bump';
+      config.currentVersion = '>1.0.0';
       config.depName = 'q';
       nock('https://registry.npmjs.org')
         .get('/q')
