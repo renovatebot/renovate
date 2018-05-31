@@ -86,7 +86,7 @@
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-link-header": "1.0.1",
-    "pnpm": "2.0.0",
+    "pnpm": "2.2.1",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "safe-regex": "1.1.0",
@@ -112,10 +112,10 @@
     "eslint-config-prettier": "2.9.0",
     "eslint-plugin-import": "2.12.0",
     "eslint-plugin-promise": "3.8.0",
-    "jest": "23.0.0",
+    "jest": "23.1.0",
     "mockdate": "2.0.2",
-    "nock": "9.2.6",
-    "prettier": "1.12.1",
+    "nock": "9.3.0",
+    "prettier": "1.13.3",
     "semantic-release": "15.5.0"
   },
   "files": [

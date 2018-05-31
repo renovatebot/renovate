@@ -1,5 +1,5 @@
 const npmApi = require('../../../lib/datasource/npm');
-const versions = require('../../../lib/manager/npm/versions');
+const lookup = require('../../../lib/manager/npm/lookup');
 const npm = require('../../../lib/manager/npm/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
@@ -8,40 +8,6 @@ jest.mock('../../../lib/manager/_helpers/node/package');
 npmApi.getDependency = jest.fn();
 
 describe('lib/manager/npm/package', () => {
-  describe('getRangeStrategy', () => {
-    it('returns same if not auto', () => {
-      const config = { rangeStrategy: 'widen' };
-      expect(npm.getRangeStrategy(config)).toEqual('widen');
-    });
-    it('pins devDependencies', () => {
-      const config = { rangeStrategy: 'auto', depType: 'devDependencies' };
-      expect(npm.getRangeStrategy(config)).toEqual('pin');
-    });
-    it('pins app dependencies', () => {
-      const config = {
-        rangeStrategy: 'auto',
-        depType: 'dependencies',
-        packageJsonType: 'app',
-      };
-      expect(npm.getRangeStrategy(config)).toEqual('pin');
-    });
-    it('widens peerDependencies', () => {
-      const config = { rangeStrategy: 'auto', depType: 'peerDependencies' };
-      expect(npm.getRangeStrategy(config)).toEqual('widen');
-    });
-    it('widens complex ranges', () => {
-      const config = {
-        rangeStrategy: 'auto',
-        depType: 'dependencies',
-        currentVersion: '^1.6.0 || ^2.0.0',
-      };
-      expect(npm.getRangeStrategy(config)).toEqual('widen');
-    });
-    it('defaults to replace', () => {
-      const config = { rangeStrategy: 'auto', depType: 'dependencies' };
-      expect(npm.getRangeStrategy(config)).toEqual('replace');
-    });
-  });
   describe('getPackageUpdates', () => {
     let config;
     beforeEach(() => {
@@ -64,6 +30,11 @@ describe('lib/manager/npm/package', () => {
       const res = await npm.getPackageUpdates(config);
       expect(res).toBeUndefined();
     });
+    it('returns if using a * reference', async () => {
+      config.currentVersion = '*';
+      const res = await npm.getPackageUpdates(config);
+      expect(res).toHaveLength(0);
+    });
     it('returns if using a file reference', async () => {
       config.currentVersion = 'file:../sibling/package.json';
       const res = await npm.getPackageUpdates(config);
@@ -84,7 +55,7 @@ describe('lib/manager/npm/package', () => {
     });
     it('returns warning if warning found', async () => {
       npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades = jest.fn(() => [
+      lookup.lookupUpdates = jest.fn(() => [
         {
           type: 'warning',
           message: 'bad version',
@@ -92,23 +63,6 @@ describe('lib/manager/npm/package', () => {
       ]);
       const res = await npm.getPackageUpdates(config);
       expect(res[0].type).toEqual('warning');
-    });
-    it('returns array if upgrades found', async () => {
-      npmApi.getDependency.mockReturnValueOnce({ repositoryUrl: 'some-url' });
-      versions.determineUpgrades = jest.fn(() => [{}]);
-      const res = await npm.getPackageUpdates(config);
-      expect(res).toHaveLength(1);
-      expect(Object.keys(res[0])).toMatchSnapshot();
-      expect(res[0].repositoryUrl).toBeDefined();
-    });
-    it('sets repositoryUrl for @types', async () => {
-      config.depName = '@types/some-dep';
-      npmApi.getDependency.mockReturnValueOnce({});
-      versions.determineUpgrades = jest.fn(() => [{}]);
-      const res = await npm.getPackageUpdates(config);
-      expect(res[0].repositoryUrl).toEqual(
-        'https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/some-dep'
-      );
     });
   });
 });

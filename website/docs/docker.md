@@ -42,8 +42,8 @@ Currently, Renovate will upgrade minor/patch versions (e.g. from `8.8` to `8.9` 
 
 Renovate has a some docker-specific intelligence when it comes to versions. For example:
 
-* It understands that tag suffixes are frequently used, such as `node:8.9-onbuild`. Renovate will only upgrade from/to the same suffix.
-* It understands that some dependencies (e.g. `node` and `ubuntu`) use even numbers for stable and odd for unstable. Renovate won't upgrade from stable unstable
+- It understands that tag suffixes are frequently used, such as `node:8.9-onbuild`. Renovate will only upgrade from/to the same suffix.
+- It understands that some dependencies (e.g. `node` and `ubuntu`) use even numbers for stable and odd for unstable. Renovate won't upgrade from stable unstable
 
 ## Configuring/Disabling
 

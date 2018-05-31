@@ -10,15 +10,15 @@
 
 #### This is a:
 
-* [ ] Bug report (non-security related)
-* [ ] Feature request
-* [ ] I'm not sure which of those it is
+- [ ] Bug report (non-security related)
+- [ ] Feature request
+- [ ] I'm not sure which of those it is
 
 #### I'm using:
 
-* [ ] The Renovate GitHub App
-* [ ] Self-hosted GitHub
-* [ ] Self-hosted GitLab
-* [ ] Self-hosted VSTS
+- [ ] The Renovate GitHub App
+- [ ] Self-hosted GitHub
+- [ ] Self-hosted GitLab
+- [ ] Self-hosted VSTS
 
 #### Please describe the issue:

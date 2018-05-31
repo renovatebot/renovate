@@ -1,16 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/npm/package getPackageUpdates returns array if upgrades found 1`] = `
-Array [
-  "repositoryUrl",
-]
-`;
-
 exports[`lib/manager/npm/package getPackageUpdates returns warning if no npm dep found 1`] = `
 Array [
   Object {
     "message": "Failed to look up dependency some-dep",
-    "repositoryUrl": null,
     "type": "warning",
   },
 ]

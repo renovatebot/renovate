@@ -64,7 +64,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(13);
+      expect(errors).toHaveLength(12);
     });
     it('selectors outside packageRules array trigger errors', async () => {
       const config = {
@@ -106,22 +106,6 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(0);
-    });
-    it('invalid matchCurrentVersion triggers an error', async () => {
-      const config = {
-        packageRules: [
-          {
-            packageNames: ['angular'],
-            matchCurrentVersion: '>= 2.-1.4',
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(1);
     });
     it('errors for unsafe fileMatches', async () => {
       const config = {
