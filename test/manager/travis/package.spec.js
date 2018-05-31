@@ -34,14 +34,16 @@ describe('lib/manager/node/package', () => {
     it('detects pinning', async () => {
       config.currentVersion = ['6.1.0', '8.4.0'];
       config.supportPolicy = ['lts'];
-      githubDatasource.getRepoReleases.mockReturnValueOnce([
-        'v4.4.4',
-        'v5.5.5',
-        'v6.11.0',
-        'v7.0.0',
-        'v8.9.4',
-        'v9.5.0',
-      ]);
+      githubDatasource.getDependency.mockReturnValueOnce({
+        versions: {
+          '4.4.4': {},
+          '5.5.5': {},
+          '6.11.0': {},
+          '7.0.0': {},
+          '8.9.4': {},
+          '9.5.0': {},
+        },
+      });
       expect(await node.getPackageUpdates(config)).toMatchSnapshot();
     });
   });
