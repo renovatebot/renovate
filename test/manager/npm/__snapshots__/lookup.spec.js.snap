@@ -77,21 +77,6 @@ Array [
 ]
 `;
 
-exports[`manager/npm/lookup .lookupUpdates() massages @types 1`] = `
-Array [
-  Object {
-    "fromVersion": "0.0.27",
-    "newVersion": "0.0.28",
-    "newVersionMajor": 0,
-    "newVersionMinor": 0,
-    "repositoryUrl": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/openjscad",
-    "toVersion": "0.0.28",
-    "type": "minor",
-    "unpublishable": false,
-  },
-]
-`;
-
 exports[`manager/npm/lookup .lookupUpdates() pins minor ranged versions 1`] = `
 Array [
   Object {
