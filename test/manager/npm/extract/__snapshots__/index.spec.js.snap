@@ -35,12 +35,14 @@ Object {
       "skipReason": "unknown-version",
     },
     Object {
+      "commitMessageTopic": "Node.js",
       "currentVersion": ">= 8.9.2",
       "depName": "node",
       "depType": "engines",
       "purl": "pkg:github/nodejs/node",
     },
     Object {
+      "commitMessageTopic": "Yarn",
       "currentVersion": "1.7.0",
       "depName": "yarn",
       "depType": "engines",
