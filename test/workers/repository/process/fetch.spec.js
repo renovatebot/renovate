@@ -3,6 +3,9 @@ const {
 } = require('../../../../lib/workers/repository/process/fetch');
 
 const npm = require('../../../../lib/manager/npm');
+const lookup = require('../../../../lib/workers/repository/process/lookup');
+
+jest.mock('../../../../lib/workers/repository/process/lookup');
 
 describe('workers/repository/process/fetch', () => {
   describe('fetchUpdates()', () => {
@@ -59,12 +62,17 @@ describe('workers/repository/process/fetch', () => {
             packageFile: 'package.json',
             packageJsonType: 'app',
             deps: [
-              { depName: 'aaa', depType: 'devDependencies' },
+              {
+                depName: 'aaa',
+                depType: 'devDependencies',
+                purl: 'pkg:npm/aaa',
+              },
               { depName: 'bbb', depType: 'dependencies' },
             ],
           },
         ],
       };
+      lookup.lookupUpdates.mockReturnValue(['a', 'b']);
       npm.getPackageUpdates = jest.fn(() => ['a', 'b']);
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
