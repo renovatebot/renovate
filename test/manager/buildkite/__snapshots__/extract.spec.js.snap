@@ -1,16 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/buildkite/extract extractDependencies() adds skipReason 1`] = `
+Array [
+  Object {
+    "currentVersion": "v1.3.2.5",
+    "depName": "namespace/docker-compose",
+    "lineNumber": 4,
+    "purl": undefined,
+    "skipReason": "invalid-version",
+  },
+  Object {
+    "currentVersion": "v1.3.2",
+    "depName": "https://github.com/buildkite/plugin-docker-compose",
+    "lineNumber": 15,
+    "purl": undefined,
+    "skipReason": "git-plugin",
+  },
+  Object {
+    "currentVersion": "v1.3.2",
+    "depName": "github.com/buildkite/plugin-docker-compose",
+    "lineNumber": 22,
+    "purl": undefined,
+    "skipReason": "unknown",
+  },
+]
+`;
+
 exports[`lib/manager/buildkite/extract extractDependencies() extracts multiple plugins in same file 1`] = `
 Array [
   Object {
     "currentVersion": "v1.3.2",
     "depName": "docker-compose",
     "lineNumber": 4,
+    "purl": "pkg:github/buildkite-plugins/docker-compose-buildkite-plugin",
+    "skipReason": undefined,
   },
   Object {
     "currentVersion": "v1.3.2",
     "depName": "docker-compose",
     "lineNumber": 15,
+    "purl": "pkg:github/buildkite-plugins/docker-compose-buildkite-plugin",
+    "skipReason": undefined,
   },
 ]
 `;
@@ -19,8 +49,10 @@ exports[`lib/manager/buildkite/extract extractDependencies() extracts simple sin
 Array [
   Object {
     "currentVersion": "v2.0.0",
-    "depName": "detect-clowns",
+    "depName": "abc/detect-clowns",
     "lineNumber": 2,
+    "purl": "pkg:github/abc/detect-clowns-buildkite-plugin",
+    "skipReason": undefined,
   },
 ]
 `;
