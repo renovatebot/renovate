@@ -38,6 +38,15 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() handles github 404 1`] = `
+Array [
+  Object {
+    "message": "Failed to look up dependency foo",
+    "type": "warning",
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() handles prerelease jumps 1`] = `
 Array [
   Object {
@@ -53,6 +62,8 @@ Array [
   },
 ]
 `;
+
+exports[`manager/npm/lookup .lookupUpdates() handles unknown purl 1`] = `Array []`;
 
 exports[`manager/npm/lookup .lookupUpdates() ignores pinning for ranges when other upgrade exists 1`] = `
 Array [

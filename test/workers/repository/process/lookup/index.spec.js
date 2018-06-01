@@ -787,11 +787,26 @@ describe('manager/npm/lookup', () => {
       config.packageFile = 'package.json';
       config.rangeStrategy = 'bump';
       config.currentVersion = '1.0.0';
-      config.depName = 'q';
-      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
+    });
+    it('handles github 404', async () => {
+      config.depName = 'foo';
+      config.purl = 'pkg:github/some/repo';
+      config.packageFile = 'package.json';
+      config.currentVersion = '1.0.0';
+      nock('https://api.github.com')
+        .get('/repos/some/repo/git/refs/tags?per_page=100')
+        .reply(404);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
+    });
+    it('handles unknown purl', async () => {
+      config.depName = 'foo';
+      config.purl = 'pkg:typo/some/repo';
+      config.packageFile = 'package.json';
+      config.currentVersion = '1.0.0';
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
   });
