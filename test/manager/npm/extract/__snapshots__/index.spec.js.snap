@@ -35,6 +35,12 @@ Object {
       "skipReason": "unknown-version",
     },
     Object {
+      "currentVersion": ">=1.7.0 <2.0.0",
+      "depName": "atom",
+      "depType": "engines",
+      "skipReason": "unknown-engines",
+    },
+    Object {
       "commitMessageTopic": "Node.js",
       "currentVersion": ">= 8.9.2",
       "depName": "node",
@@ -45,11 +51,19 @@ Object {
       "purl": "pkg:github/nodejs/node?clean=true",
     },
     Object {
+      "commitMessageTopic": "npm",
+      "currentVersion": "^8.0.0",
+      "depName": "npm",
+      "depType": "engines",
+      "purl": "pkg:github/npm/npm?clean=true",
+    },
+    Object {
       "commitMessageTopic": "Yarn",
-      "currentVersion": "1.7.0",
+      "currentVersion": "disabled",
       "depName": "yarn",
       "depType": "engines",
       "purl": "pkg:github/yarnpkg/yarn?clean=true",
+      "skipReason": "unknown-version",
     },
   ],
   "lernaClient": undefined,

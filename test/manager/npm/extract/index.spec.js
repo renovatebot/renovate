@@ -131,8 +131,10 @@ describe('manager/npm/extract', () => {
           other: 'latest',
         },
         engines: {
+          atom: '>=1.7.0 <2.0.0',
           node: '>= 8.9.2',
-          yarn: '1.7.0',
+          npm: '^8.0.0',
+          yarn: 'disabled',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
