@@ -42,14 +42,14 @@ Object {
       "major": Object {
         "enabled": false,
       },
-      "purl": "pkg:github/nodejs/node",
+      "purl": "pkg:github/nodejs/node?clean=true",
     },
     Object {
       "commitMessageTopic": "Yarn",
       "currentVersion": "1.7.0",
       "depName": "yarn",
       "depType": "engines",
-      "purl": "pkg:github/yarnpkg/yarn",
+      "purl": "pkg:github/yarnpkg/yarn?clean=true",
     },
   ],
   "lernaClient": undefined,
