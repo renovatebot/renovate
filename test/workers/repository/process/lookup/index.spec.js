@@ -1,12 +1,12 @@
 const nock = require('nock');
-const lookup = require('../../../lib/manager/npm/lookup');
-const qJson = require('../../_fixtures/npm/01.json');
-const helmetJson = require('../../_fixtures/npm/02.json');
-const coffeelintJson = require('../../_fixtures/npm/coffeelint.json');
-const webpackJson = require('../../_fixtures/npm/webpack.json');
-const nextJson = require('../../_fixtures/npm/next.json');
-const vueJson = require('../../_fixtures/npm/vue.json');
-const typescriptJson = require('../../_fixtures/npm/typescript.json');
+const lookup = require('../../../../../lib/workers/repository/process/lookup');
+const qJson = require('../../../../_fixtures/npm/01.json');
+const helmetJson = require('../../../../_fixtures/npm/02.json');
+const coffeelintJson = require('../../../../_fixtures/npm/coffeelint.json');
+const webpackJson = require('../../../../_fixtures/npm/webpack.json');
+const nextJson = require('../../../../_fixtures/npm/next.json');
+const vueJson = require('../../../../_fixtures/npm/vue.json');
+const typescriptJson = require('../../../../_fixtures/npm/typescript.json');
 
 qJson.latestVersion = '1.4.1';
 
@@ -14,7 +14,7 @@ let config;
 
 describe('manager/npm/lookup', () => {
   beforeEach(() => {
-    config = { ...require('../../../lib/config/defaults').getConfig() };
+    config = { ...require('../../../../../lib/config/defaults').getConfig() };
     config.rangeStrategy = 'replace';
     jest.resetAllMocks();
   });
@@ -23,6 +23,7 @@ describe('manager/npm/lookup', () => {
     it('returns rollback for pinned version', async () => {
       config.currentVersion = '0.9.99';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -31,6 +32,7 @@ describe('manager/npm/lookup', () => {
     it('returns rollback for ranged version', async () => {
       config.currentVersion = '^0.9.99';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -40,6 +42,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -50,6 +53,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -60,6 +64,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -72,6 +77,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -82,6 +88,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -91,6 +98,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '0.4.0';
       config.allowedVersions = '<1';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -100,6 +108,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '0.4.0';
       config.allowedVersions = 'less than 1';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -109,6 +118,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -125,6 +135,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -142,6 +153,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -154,6 +166,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -164,6 +177,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '0.8.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -176,6 +190,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '^0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -186,6 +201,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '1.0.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -195,6 +211,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '~0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -204,6 +221,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '~0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -213,6 +231,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '~1.0.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -222,6 +241,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '~1.3.0';
       config.rangeStrategy = 'widen';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -231,6 +251,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '~1.2.0 || ~1.3.0';
       config.rangeStrategy = 'replace';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -240,6 +261,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '^2.0.0';
       config.rangeStrategy = 'widen';
       config.depName = 'webpack';
+      config.purl = 'pkg:npm/webpack';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -249,6 +271,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '^1.0.0 || ^2.0.0';
       config.rangeStrategy = 'replace';
       config.depName = 'webpack';
+      config.purl = 'pkg:npm/webpack';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -258,6 +281,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '^1.0.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -268,6 +292,7 @@ describe('manager/npm/lookup', () => {
       config.lockedVersion = '1.0.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -277,6 +302,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '^1.0.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -286,6 +312,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'pin';
       config.currentVersion = '~1.3.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -295,6 +322,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '1.3.x';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -304,6 +332,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '~1.3.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -313,6 +342,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '0.x';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -322,6 +352,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '1.3.x';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -331,6 +362,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '1.2.x - 1.3.x';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -340,6 +372,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -349,6 +382,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '1.3';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -358,6 +392,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '~0.7.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -367,6 +402,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '^0.7.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -376,6 +412,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '^0.7.0 || ^0.8.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -387,6 +424,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '^1.0.0 || ^2.0.0';
       config.depName = 'webpack';
+      config.purl = 'pkg:npm/webpack';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -396,6 +434,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '1.x - 2.x';
       config.depName = 'webpack';
+      config.purl = 'pkg:npm/webpack';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -405,6 +444,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '1.x || 2.x';
       config.depName = 'webpack';
+      config.purl = 'pkg:npm/webpack';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -414,6 +454,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '1 || 2';
       config.depName = 'webpack';
+      config.purl = 'pkg:npm/webpack';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -423,6 +464,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '~1.2.0 || ~1.3.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -432,6 +474,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '>= 0.7.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -441,6 +484,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '<= 0.7.2';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -450,6 +494,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '< 0.7.2';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -459,6 +504,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '< 1';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -468,6 +514,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '<= 1.3';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -478,6 +525,7 @@ describe('manager/npm/lookup', () => {
       config.respectLatest = false;
       config.currentVersion = '<= 1';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -487,6 +535,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '<= 1.0.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -498,6 +547,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '< 1.0.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -509,6 +559,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '>= 0.5.0 < 1.0.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -520,6 +571,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '>= 0.5.0 <0.8';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -532,6 +584,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '>= 0.5.0 <= 0.8.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -544,6 +597,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentVersion = '<= 0.8.0 >= 0.5.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -554,6 +608,7 @@ describe('manager/npm/lookup', () => {
       config.respectLatest = false;
       config.currentVersion = '1.4.1';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -562,6 +617,7 @@ describe('manager/npm/lookup', () => {
     it('should ignore unstable versions if the current version is stable', async () => {
       config.currentVersion = '2.5.16';
       config.depName = 'vue';
+      config.purl = 'pkg:npm/vue';
       nock('https://registry.npmjs.org')
         .get('/vue')
         .reply(200, vueJson);
@@ -571,6 +627,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '2.5.16';
       config.ignoreUnstable = false;
       config.depName = 'vue';
+      config.purl = 'pkg:npm/vue';
       nock('https://registry.npmjs.org')
         .get('/vue')
         .reply(200, vueJson);
@@ -582,6 +639,7 @@ describe('manager/npm/lookup', () => {
     it('should allow unstable versions if the current version is unstable', async () => {
       config.currentVersion = '2.3.0-beta.1';
       config.depName = 'vue';
+      config.purl = 'pkg:npm/vue';
       nock('https://registry.npmjs.org')
         .get('/vue')
         .reply(200, vueJson);
@@ -594,6 +652,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '~0.0.34';
       config.depName = 'helmet';
+      config.purl = 'pkg:npm/helmet';
       nock('https://registry.npmjs.org')
         .get('/helmet')
         .reply(200, helmetJson);
@@ -603,6 +662,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentVersion = '^0.0.34';
       config.depName = 'helmet';
+      config.purl = 'pkg:npm/helmet';
       nock('https://registry.npmjs.org')
         .get('/helmet')
         .reply(200, helmetJson);
@@ -611,6 +671,7 @@ describe('manager/npm/lookup', () => {
     it('should downgrade from missing versions', async () => {
       config.currentVersion = '1.16.1';
       config.depName = 'coffeelint';
+      config.purl = 'pkg:npm/coffeelint';
       nock('https://registry.npmjs.org')
         .get('/coffeelint')
         .reply(200, coffeelintJson);
@@ -621,6 +682,7 @@ describe('manager/npm/lookup', () => {
     it('should upgrade to only one major', async () => {
       config.currentVersion = '1.0.0';
       config.depName = 'webpack';
+      config.purl = 'pkg:npm/webpack';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -631,6 +693,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '1.0.0';
       config.separateMultipleMajor = true;
       config.depName = 'webpack';
+      config.purl = 'pkg:npm/webpack';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -651,6 +714,7 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '^2.9.0-rc';
       config.rangeStrategy = 'replace';
       config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
@@ -661,6 +725,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '^1.0.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -670,6 +735,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '~1.0.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -679,6 +745,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '>=1.0.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -688,6 +755,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '>1.0.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -697,6 +765,7 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '1.x';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -706,20 +775,38 @@ describe('manager/npm/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentVersion = '^0.9.0 || ^1.0.0';
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
-    it('rejects non-range in-range updates', async () => {
+    it('replaces non-range in-range updates', async () => {
       config.depName = 'q';
+      config.purl = 'pkg:npm/q';
       config.packageFile = 'package.json';
       config.rangeStrategy = 'bump';
       config.currentVersion = '1.0.0';
-      config.depName = 'q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
+    });
+    it('handles github 404', async () => {
+      config.depName = 'foo';
+      config.purl = 'pkg:github/some/repo';
+      config.packageFile = 'package.json';
+      config.currentVersion = '1.0.0';
+      nock('https://api.github.com')
+        .get('/repos/some/repo/git/refs/tags?per_page=100')
+        .reply(404);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
+    });
+    it('handles unknown purl', async () => {
+      config.depName = 'foo';
+      config.purl = 'pkg:typo/some/repo';
+      config.packageFile = 'package.json';
+      config.currentVersion = '1.0.0';
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
   });
