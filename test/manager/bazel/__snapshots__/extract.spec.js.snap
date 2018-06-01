@@ -12,6 +12,7 @@ Array [
 ",
     "depName": "build_bazel_rules_nodejs",
     "depType": "git_repository",
+    "purl": "pkg:github/bazelbuild/rules_nodejs",
     "remote": "https://github.com/bazelbuild/rules_nodejs.git",
   },
   Object {
@@ -24,6 +25,7 @@ Array [
 ",
     "depName": "build_bazel_rules_typescript",
     "depType": "git_repository",
+    "purl": "pkg:github/bazelbuild/rules_typescript",
     "remote": "https://github.com/bazelbuild/rules_typescript.git",
   },
   Object {
@@ -36,6 +38,7 @@ Array [
 ",
     "depName": "io_bazel_rules_sass",
     "depType": "git_repository",
+    "purl": "pkg:github/bazelbuild/rules_sass",
     "remote": "https://github.com/bazelbuild/rules_sass.git",
   },
   Object {
@@ -48,6 +51,7 @@ Array [
 ",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
+    "purl": "pkg:github/bazelbuild/rules_go",
     "repo": "bazelbuild/rules_go",
   },
 ]

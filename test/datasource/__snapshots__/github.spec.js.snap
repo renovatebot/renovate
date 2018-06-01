@@ -19,13 +19,3 @@ Object {
   },
 }
 `;
-
-exports[`datasource/github getDependency returns stripped versions 1`] = `
-Object {
-  "repositoryUrl": "https://github.com/some/dep",
-  "versions": Object {
-    "1.0.0": Object {},
-    "1.1.0": Object {},
-  },
-}
-`;
