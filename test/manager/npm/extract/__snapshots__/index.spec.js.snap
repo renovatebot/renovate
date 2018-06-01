@@ -55,7 +55,7 @@ Object {
       "currentVersion": "^8.0.0",
       "depName": "npm",
       "depType": "engines",
-      "purl": "pkg:github/npm/npm?clean=true",
+      "purl": "pkg:npm/npm",
     },
     Object {
       "commitMessageTopic": "Yarn",
