@@ -476,7 +476,7 @@ Array [
     "newVersion": "^0.0.35",
     "newVersionMajor": 0,
     "newVersionMinor": 0,
-    "repositoryUrl": null,
+    "repositoryUrl": "https://github.com/DefinitelyTyped/DefinitelyTyped",
     "toVersion": "0.0.35",
     "type": "minor",
     "unpublishable": false,
