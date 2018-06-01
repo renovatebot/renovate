@@ -18,7 +18,7 @@ describe('workers/repository/process/fetch', () => {
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
     });
-    it('handles ignores and disabled', async () => {
+    it('handles ignored, skipped and disabled', async () => {
       config.ignoreDeps = ['abcd'];
       config.packageRules = [
         {
@@ -34,6 +34,7 @@ describe('workers/repository/process/fetch', () => {
               { depName: 'abcd' },
               { depName: 'zzzz' },
               { depName: 'foo' },
+              { depName: 'skipped', skipReason: 'some-reason' },
             ],
             internalPackages: ['zzzz'],
           },

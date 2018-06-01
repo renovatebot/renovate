@@ -7,8 +7,6 @@ const webpackJson = require('../../_fixtures/npm/webpack.json');
 const nextJson = require('../../_fixtures/npm/next.json');
 const vueJson = require('../../_fixtures/npm/vue.json');
 const typescriptJson = require('../../_fixtures/npm/typescript.json');
-const typesJson = require('../../_fixtures/npm/types_openjscad.json');
-// const npmApi = require('../../../lib/datasource/npm');
 
 qJson.latestVersion = '1.4.1';
 
@@ -722,15 +720,6 @@ describe('manager/npm/lookup', () => {
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
-      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
-    });
-    it('massages @types', async () => {
-      config.depName = '@types/openjscad';
-      config.currentVersion = '0.0.27';
-      config.depName = '@types/openjscad';
-      nock('https://registry.npmjs.org')
-        .get('/@types%2Fopenjscad')
-        .reply(200, typesJson);
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
   });
