@@ -51,7 +51,7 @@ This function is essential. It takes a file content and returns an array of dete
 
 - dependency name
 - dependency type (e.g. dependencies, devDependencies, etc)
-- currentVersion
+- currentValue
 
 The fields returned here can be customised to suit the package manager, e.g. Docker uses `currentFrom`
 

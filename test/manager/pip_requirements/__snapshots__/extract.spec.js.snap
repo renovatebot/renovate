@@ -3,7 +3,7 @@
 exports[`lib/manager/pip_requirements/extract extractDependencies() extracts dependencies 1`] = `
 Array [
   Object {
-    "currentVersion": "0.3.1",
+    "currentValue": "0.3.1",
     "depName": "some-package",
     "lineNumber": 2,
   },

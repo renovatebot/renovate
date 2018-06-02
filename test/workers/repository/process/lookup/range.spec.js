@@ -27,7 +27,7 @@ describe('getRangeStrategy', () => {
     const config = {
       rangeStrategy: 'auto',
       depType: 'dependencies',
-      currentVersion: '^1.6.0 || ^2.0.0',
+      currentValue: '^1.6.0 || ^2.0.0',
     };
     expect(getRangeStrategy(config)).toEqual('widen');
   });
@@ -35,7 +35,7 @@ describe('getRangeStrategy', () => {
     const config = {
       rangeStrategy: 'bump',
       depType: 'dependencies',
-      currentVersion: '^1.6.0 || ^2.0.0',
+      currentValue: '^1.6.0 || ^2.0.0',
     };
     expect(getRangeStrategy(config)).toEqual('widen');
   });

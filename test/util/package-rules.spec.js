@@ -167,7 +167,7 @@ describe('applyPackageRules()', () => {
       ...config,
       ...{
         depName: 'test',
-        currentVersion: '^1.0.0',
+        currentValue: '^1.0.0',
       },
     });
     expect(res1.x).toBeDefined();
@@ -186,7 +186,7 @@ describe('applyPackageRules()', () => {
       ...config,
       ...{
         depName: 'test',
-        currentVersion: '2.4.6',
+        currentValue: '2.4.6',
       },
     });
     expect(res1.x).toBeDefined();
@@ -205,7 +205,7 @@ describe('applyPackageRules()', () => {
       ...config,
       ...{
         depName: 'test',
-        currentVersion: '4.6.0',
+        currentValue: '4.6.0',
       },
     });
     expect(res1.x).toBeDefined();

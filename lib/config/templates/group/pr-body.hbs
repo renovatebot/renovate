@@ -5,7 +5,7 @@ This Pull Request renovates the package group "{{{groupName}}}".
 {{/if}}
 
 {{#each upgrades as |upgrade|}}
--   {{#if repositoryUrl}}[{{{upgrade.depName}}}]({{upgrade.repositoryUrl}}){{else}}`{{{depName}}}`{{/if}}{{#if depType}} (`{{{depType}}}`){{/if}}: from `{{{upgrade.currentVersion}}}` to `{{{upgrade.newVersion}}}`
+-   {{#if repositoryUrl}}[{{{upgrade.depName}}}]({{upgrade.repositoryUrl}}){{else}}`{{{depName}}}`{{/if}}{{#if depType}} (`{{{depType}}}`){{/if}}: from `{{{upgrade.currentValue}}}` to `{{{upgrade.newVersion}}}`
 {{/each}}
 
 {{#if hasReleaseNotes}}
