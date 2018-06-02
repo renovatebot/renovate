@@ -7,24 +7,24 @@ Array [
     "depName": "namespace/docker-compose",
     "lineNumber": 4,
     "purl": undefined,
-    "semverScheme": "semver",
     "skipReason": "invalid-version",
+    "versionScheme": "semver",
   },
   Object {
     "currentVersion": "v1.3.2",
     "depName": "https://github.com/buildkite/plugin-docker-compose",
     "lineNumber": 15,
     "purl": undefined,
-    "semverScheme": "semver",
     "skipReason": "git-plugin",
+    "versionScheme": "semver",
   },
   Object {
     "currentVersion": "v1.3.2",
     "depName": "github.com/buildkite/plugin-docker-compose",
     "lineNumber": 22,
     "purl": undefined,
-    "semverScheme": "semver",
     "skipReason": "unknown",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -36,16 +36,16 @@ Array [
     "depName": "docker-compose",
     "lineNumber": 4,
     "purl": "pkg:github/buildkite-plugins/docker-compose-buildkite-plugin",
-    "semverScheme": "semver",
     "skipReason": undefined,
+    "versionScheme": "semver",
   },
   Object {
     "currentVersion": "v1.3.2",
     "depName": "docker-compose",
     "lineNumber": 15,
     "purl": "pkg:github/buildkite-plugins/docker-compose-buildkite-plugin",
-    "semverScheme": "semver",
     "skipReason": undefined,
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -57,8 +57,8 @@ Array [
     "depName": "abc/detect-clowns",
     "lineNumber": 2,
     "purl": "pkg:github/abc/detect-clowns-buildkite-plugin",
-    "semverScheme": "semver",
     "skipReason": undefined,
+    "versionScheme": "semver",
   },
 ]
 `;
