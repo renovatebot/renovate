@@ -21,7 +21,7 @@ describe('manager/npm/lookup', () => {
 
   describe('.lookupUpdates()', () => {
     it('returns rollback for pinned version', async () => {
-      config.currentVersion = '0.9.99';
+      config.currentVersion = '0.9.4';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
@@ -30,7 +30,7 @@ describe('manager/npm/lookup', () => {
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
     it('returns rollback for ranged version', async () => {
-      config.currentVersion = '^0.9.99';
+      config.currentVersion = '^0.9.4';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')

@@ -1,6 +1,6 @@
-const semver = require('../../lib/versioning/semver');
+const semver = require('../../lib/versioning')('semver');
 
-describe('.isValid(input)', () => {
+describe('semver.isValid(input)', () => {
   it('should return null for irregular versions', () => {
     expect(!!semver.isValid('17.04.0')).toBe(false);
   });
@@ -26,7 +26,7 @@ describe('.isValid(input)', () => {
     ).toBe(false);
   });
 });
-describe('.isRange(input)', () => {
+describe('semver.isRange(input)', () => {
   it('rejects simple semver', () => {
     expect(!!semver.isRange('1.2.3')).toBe(false);
   });

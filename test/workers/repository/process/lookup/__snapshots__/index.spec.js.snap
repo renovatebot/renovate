@@ -387,18 +387,17 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns rollback for pinned version 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
-    "commitMessageAction": "Roll back",
-    "isRollback": true,
+    "fromVersion": "0.9.4",
     "newVersion": "0.9.7",
     "newVersionMajor": 0,
+    "newVersionMinor": 9,
     "repositoryUrl": "https://github.com/kriskowal/q",
-    "semanticCommitType": "fix",
-    "type": "rollback",
+    "toVersion": "0.9.7",
+    "type": "minor",
     "unpublishable": false,
   },
   Object {
-    "fromVersion": "0.9.99",
+    "fromVersion": "0.9.4",
     "newVersion": "1.4.1",
     "newVersionMajor": 1,
     "newVersionMinor": 4,
@@ -413,13 +412,14 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns rollback for ranged version 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
-    "commitMessageAction": "Roll back",
-    "isRollback": true,
-    "newVersion": "^0.9.7",
-    "newVersionMajor": 0,
-    "semanticCommitType": "fix",
-    "type": "rollback",
+    "fromVersion": "0.9.7",
+    "isRange": true,
+    "newVersion": "^1.0.0",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "repositoryUrl": "https://github.com/kriskowal/q",
+    "toVersion": "1.4.1",
+    "type": "major",
     "unpublishable": false,
   },
 ]
