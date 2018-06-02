@@ -11,14 +11,14 @@ Automated dependency updates. Flexible, so you don't need to be.
 
 ## Why Use Renovate?
 
-* Receive automated Pull Requests whenever dependencies need updating. Or whenever you schedule it for.
-* Renovate discovers and processes all dependency files in a repository (e.g. supports
+- Receive automated Pull Requests whenever dependencies need updating. Or whenever you schedule it for.
+- Renovate discovers and processes all dependency files in a repository (e.g. supports
   monorepo architecture such as lerna or yarn workspaces)
-* Extremely customisable behaviour via configuration files or within your `package.json`
-* Use eslint-like shared config presets for ease of use and simplifying configuration
-* Update lock files natively in the same commit, including immediately resolving conflicts whenever PRs are merged
-* Supports GitHub, GitLab (APIv4) and VSTS. BitBucket is a WIP.
-* Open source (installable via npm/yarn) so can be self-hosted or used for free via GitHub App
+- Extremely customisable behaviour via configuration files or within your `package.json`
+- Use eslint-like shared config presets for ease of use and simplifying configuration
+- Update lock files natively in the same commit, including immediately resolving conflicts whenever PRs are merged
+- Supports GitHub, GitLab (APIv4) and VSTS. BitBucket is a WIP.
+- Open source (installable via npm/yarn) so can be self-hosted or used for free via GitHub App
 
 ## Who Uses Renovate?
 
@@ -34,10 +34,10 @@ Renovate was released in 2017 and is now widely used in the developer community.
 
 ## The Renovate Approach
 
-* Everyone can benefit from automation, whether it's a little or a lot
-* Renovate should not cause you to change your workflow against your wishes - don't enforce opinions on users
-* All behaviour should be configurable, down to a ridiculous level if desired
-* Autodetect settings wherever possible (to minimise configuration) but always allow overrides
+- Everyone can benefit from automation, whether it's a little or a lot
+- Renovate should not cause you to change your workflow against your wishes - don't enforce opinions on users
+- All behaviour should be configurable, down to a ridiculous level if desired
+- Autodetect settings wherever possible (to minimise configuration) but always allow overrides
 
 ## Using Renovate
 

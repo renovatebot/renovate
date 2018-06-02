@@ -91,9 +91,12 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(429);
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(429);
     let e;
     try {
-      await npm.getDependency('foobar');
+      await npm.getDependency('foobar', 1);
     } catch (err) {
       e = err;
     }

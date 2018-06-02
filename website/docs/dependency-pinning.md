@@ -73,10 +73,10 @@ Another example of a good candidate for automerging might be a database driver l
 
 In the above suggestion of Pull Request automerging, you might still find it annoying if you receive GitHub Notifications for every PR that is created and merged. In that case, you could set `automergeType` to `branch-push`, which means Renovate will:
 
-* Create a new branch for testing
-* Wait until after tests have completed
-* Push the commit directly to `master` if tests pass, or
-* Raise a PR only if tests failed
+- Create a new branch for testing
+- Wait until after tests have completed
+- Push the commit directly to `master` if tests pass, or
+- Raise a PR only if tests failed
 
 With this approach, updates will be essentially "silent" - causing no notifications - but you will be able to see each commit on `master` of course.
 
@@ -86,8 +86,8 @@ Although it can feel satisfying to receive updates "immediately" when they're av
 
 So to reduce the interruptions of automated dependency updates, consider putting Renovate on a schedule, such as:
 
-* Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway.
-* Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them.
+- Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway.
+- Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them.
 
 ##### Grouping related packages
 

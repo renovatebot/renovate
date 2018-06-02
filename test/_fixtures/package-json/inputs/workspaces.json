@@ -1,0 +1,28 @@
+{
+  "name": "@a/b",
+  "version": "0.0.8",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/react-native",
+      "**/react-native/**",
+      "**/react-native-scripts",
+      "**/react-native-scripts/**",
+      "**/polished",
+      "**/polished/**",
+      "**/react-native-linear-gradient",
+      "**/react-native-linear-gradient/**",
+      "**/react-native-*",
+      "**/react-native-*/**",
+      "**/react-native-vector-icons",
+      "**/react-native-vector-icons/**",
+      "**/styled-components",
+      "**/styled-components/**"
+    ]
+  },
+  "license": "MIT",
+  "dependencies": {}
+}
