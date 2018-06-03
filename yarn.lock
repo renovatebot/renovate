@@ -30,9 +30,9 @@
     node-fetch "^2.1.1"
     url-template "^2.0.8"
 
-"@renovate/pep440@0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@renovate/pep440/-/pep440-0.1.1.tgz#1f52f35a3fb536b184376059b547a1f48cdf95a5"
+"@renovate/pep440@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@renovate/pep440/-/pep440-0.2.0.tgz#dbfea48b726a6cada912031c2a06c02eccfe9753"
   dependencies:
     xregexp "^4.1.1"
 
@@ -7078,7 +7078,7 @@ xml-name-validator@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/xml-name-validator/-/xml-name-validator-2.0.1.tgz#4d8b8f1eccd3419aa362061becef515e1e559635"
 
-xregexp@^4.1.1:
+xregexp@4.1.1, xregexp@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.1.1.tgz#eb8a032aa028d403f7b1b22c47a5f16c24b21d8d"
 

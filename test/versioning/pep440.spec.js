@@ -35,42 +35,6 @@ describe('pep440.isRange(input)', () => {
   });
 });
 
-describe('pep440.getMinor(input)', () => {
-  it('returns correct value', () => {
-    expect(pep440.getMinor('1.2.3')).toBe(2);
-  });
-  it('pads zeros', () => {
-    expect(pep440.getMinor('1')).toBe(0);
-  });
-  it('throws when version invalid', () => {
-    expect(() => pep440.getMinor('not_version')).toThrowError(TypeError);
-  });
-});
-
-describe('pep440.getMajor(version)', () => {
-  it('returns correct value', () => {
-    expect(pep440.getMajor('1.2.3')).toBe(1);
-  });
-  it('handles epoch', () => {
-    expect(pep440.getMajor('25!1.2.3')).toBe(1);
-  });
-  it('throws when version invalid', () => {
-    expect(() => pep440.getMajor('not_version')).toThrowError(TypeError);
-  });
-});
-
-describe('pep440.getMajor(version)', () => {
-  it('returns correct value', () => {
-    expect(pep440.getMajor('1.2.3')).toBe(1);
-  });
-  it('handles epoch', () => {
-    expect(pep440.getMajor('25!1.2.3')).toBe(1);
-  });
-  it('throws when version invalid', () => {
-    expect(() => pep440.getMajor('not_version')).toThrowError(TypeError);
-  });
-});
-
 describe('pep440.isStable(version)', () => {
   it('returns correct value', () => {
     expect(pep440.isStable('1.2.3')).toBe(true);
