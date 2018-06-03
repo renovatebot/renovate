@@ -30,6 +30,12 @@
     node-fetch "^2.1.1"
     url-template "^2.0.8"
 
+"@renovate/pep440@0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@renovate/pep440/-/pep440-0.1.1.tgz#1f52f35a3fb536b184376059b547a1f48cdf95a5"
+  dependencies:
+    xregexp "^4.1.1"
+
 "@semantic-release/commit-analyzer@^5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@semantic-release/commit-analyzer/-/commit-analyzer-5.0.0.tgz#767a2055b5cd0a67421b1d504f3ca7db97055c42"
@@ -7071,6 +7077,10 @@ xdg-basedir@^3.0.0:
 xml-name-validator@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/xml-name-validator/-/xml-name-validator-2.0.1.tgz#4d8b8f1eccd3419aa362061becef515e1e559635"
+
+xregexp@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.1.1.tgz#eb8a032aa028d403f7b1b22c47a5f16c24b21d8d"
 
 xtend@~4.0.1:
   version "4.0.1"
