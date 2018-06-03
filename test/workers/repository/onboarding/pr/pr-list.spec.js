@@ -61,7 +61,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
             {
               repositoryUrl: 'https://a',
               depName: 'a',
-              currentVersion: '^1.0.0',
+              currentValue: '^1.0.0',
               depType: 'devDependencies',
               newVersion: '2.0.1',
             },

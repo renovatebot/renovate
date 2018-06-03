@@ -13,11 +13,11 @@ const input01Content = readFixture('package-1.js');
 const input02Content = readFixture('package-2.js');
 
 describe('workers/branch/package-js', () => {
-  describe('.updateDependency(fileContent, depName, currentVersion, newVersion)', () => {
+  describe('.updateDependency(fileContent, depName, currentValue, newVersion)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {
         depName: 'xmldom',
-        currentVersion: '0.1.19',
+        currentValue: '0.1.19',
         newVersion: '0.22.1',
       };
       const testContent = meteorUpdater.updateDependency(
@@ -29,7 +29,7 @@ describe('workers/branch/package-js', () => {
     it('handles alternative quotes and white space', () => {
       const upgrade = {
         depName: 'xmldom',
-        currentVersion: '0.1.19',
+        currentValue: '0.1.19',
         newVersion: '0.22.1',
       };
       const testContent = meteorUpdater.updateDependency(
@@ -41,7 +41,7 @@ describe('workers/branch/package-js', () => {
     it('handles the case where the desired version is already supported', () => {
       const upgrade = {
         depName: 'query-string',
-        currentVersion: '0.2.0',
+        currentValue: '0.2.0',
         newVersion: '0.2.0',
       };
       const testContent = meteorUpdater.updateDependency(
