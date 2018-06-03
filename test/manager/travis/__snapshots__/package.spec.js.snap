@@ -4,7 +4,7 @@ exports[`lib/manager/node/package getPackageUpdates detects pinning 1`] = `
 Array [
   Object {
     "isRange": true,
-    "newVersion": Array [
+    "newValue": Array [
       "8.9.4",
       "6.11.0",
     ],

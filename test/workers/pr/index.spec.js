@@ -112,7 +112,7 @@ describe('workers/pr', () => {
       config.isGitHub = true;
       config.privateRepo = true;
       config.currentValue = '1.0.0';
-      config.newVersion = '1.1.0';
+      config.newValue = '1.1.0';
       config.repositoryUrl = 'https://github.com/renovateapp/dummy';
       platform.createPr.mockReturnValue({ displayNumber: 'New Pull Request' });
       config.upgrades = [config];
@@ -124,7 +124,7 @@ describe('workers/pr', () => {
       platform.updatePr.mockImplementationOnce(() => {
         throw new Error('oops');
       });
-      config.newVersion = '1.2.0';
+      config.newValue = '1.2.0';
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBe(null);
@@ -281,13 +281,13 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject(existingPr);
     });
     it('should return modified existing PR', async () => {
-      config.newVersion = '1.2.0';
+      config.newValue = '1.2.0';
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchSnapshot();
     });
     it('should return modified existing PR title', async () => {
-      config.newVersion = '1.2.0';
+      config.newValue = '1.2.0';
       platform.getBranchPr.mockReturnValueOnce({
         ...existingPr,
         title: 'wrong',

@@ -13,12 +13,12 @@ const input01Content = readFixture('package-1.js');
 const input02Content = readFixture('package-2.js');
 
 describe('workers/branch/package-js', () => {
-  describe('.updateDependency(fileContent, depName, currentValue, newVersion)', () => {
+  describe('.updateDependency(fileContent, depName, currentValue, newValue)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {
         depName: 'xmldom',
         currentValue: '0.1.19',
-        newVersion: '0.22.1',
+        newValue: '0.22.1',
       };
       const testContent = meteorUpdater.updateDependency(
         input01Content,
@@ -30,7 +30,7 @@ describe('workers/branch/package-js', () => {
       const upgrade = {
         depName: 'xmldom',
         currentValue: '0.1.19',
-        newVersion: '0.22.1',
+        newValue: '0.22.1',
       };
       const testContent = meteorUpdater.updateDependency(
         input02Content,
@@ -42,7 +42,7 @@ describe('workers/branch/package-js', () => {
       const upgrade = {
         depName: 'query-string',
         currentValue: '0.2.0',
-        newVersion: '0.2.0',
+        newValue: '0.2.0',
       };
       const testContent = meteorUpdater.updateDependency(
         input01Content,

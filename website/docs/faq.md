@@ -191,7 +191,7 @@ options:
 
 ```
 "branchName": "vroom/{{depName}}-{{newVersionMajor}}.x",
-"commitMessage": "Vroom vroom dependency {{depName}} to version {{newVersion}}",
+"commitMessage": "Vroom vroom dependency {{depName}} to version {{newValue}}",
 "prTitle": "Vroom {{depName}},
 ```
 

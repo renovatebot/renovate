@@ -542,7 +542,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res[0].newVersion).toEqual('<= 1.4.1');
+      expect(res[0].newValue).toEqual('<= 1.4.1');
     });
     it('upgrades major less than ranges without pinning', async () => {
       config.rangeStrategy = 'replace';
@@ -554,7 +554,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res[0].newVersion).toEqual('< 2.0.0');
+      expect(res[0].newValue).toEqual('< 2.0.0');
     });
     it('upgrades major greater than less than ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
@@ -566,7 +566,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res[0].newVersion).toEqual('>= 0.5.0 < 2.0.0');
+      expect(res[0].newValue).toEqual('>= 0.5.0 < 2.0.0');
     });
     it('upgrades minor greater than less than ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
@@ -578,8 +578,8 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res[0].newVersion).toEqual('>= 0.5.0 <0.10');
-      expect(res[1].newVersion).toEqual('>= 0.5.0 <1.5');
+      expect(res[0].newValue).toEqual('>= 0.5.0 <0.10');
+      expect(res[1].newValue).toEqual('>= 0.5.0 <1.5');
     });
     it('upgrades minor greater than less than equals ranges without pinning', async () => {
       config.rangeStrategy = 'widen';
@@ -591,8 +591,8 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
-      expect(res[0].newVersion).toEqual('>= 0.5.0 <= 0.9.7');
-      expect(res[1].newVersion).toEqual('>= 0.5.0 <= 1.4.1');
+      expect(res[0].newValue).toEqual('>= 0.5.0 <= 0.9.7');
+      expect(res[1].newValue).toEqual('>= 0.5.0 <= 1.4.1');
     });
     it('rejects reverse ordered less than greater than', async () => {
       config.rangeStrategy = 'widen';
@@ -635,7 +635,7 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].newVersion).toEqual('2.5.17-beta.0');
+      expect(res[0].newValue).toEqual('2.5.17-beta.0');
     });
     it('should allow unstable versions if the current version is unstable', async () => {
       config.currentValue = '2.3.0-beta.1';
@@ -647,7 +647,7 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].newVersion).toEqual('2.5.17-beta.0');
+      expect(res[0].newValue).toEqual('2.5.17-beta.0');
     });
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';

@@ -109,7 +109,7 @@ describe('lib/manager/docker/package', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
       expect(res[0].type).toEqual('minor');
-      expect(res[0].newVersion).toEqual('1.2.0');
+      expect(res[0].newValue).toEqual('1.2.0');
       expect(res[1].type).toEqual('major');
       expect(res[2].newVersionMajor).toEqual('3');
     });
@@ -127,7 +127,7 @@ describe('lib/manager/docker/package', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
       expect(res[0].type).toEqual('minor');
-      expect(res[0].newVersion).toEqual('1.2.0');
+      expect(res[0].newValue).toEqual('1.2.0');
       expect(res[1].type).toEqual('major');
       expect(res[1].newVersionMajor).toEqual('3');
     });
@@ -163,7 +163,7 @@ describe('lib/manager/docker/package', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
       expect(res[0].type).toEqual('major');
-      expect(res[0].newVersion).toEqual('8');
+      expect(res[0].newValue).toEqual('8');
     });
     it('upgrades from unstable to stable', async () => {
       config = {
@@ -181,7 +181,7 @@ describe('lib/manager/docker/package', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
       expect(res[0].type).toEqual('major');
-      expect(res[0].newVersion).toEqual('8');
+      expect(res[0].newValue).toEqual('8');
     });
     it('upgrades from unstable to unstable if not ignoring', async () => {
       config = {
@@ -214,7 +214,7 @@ describe('lib/manager/docker/package', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
       expect(res[1].type).toEqual('minor');
-      expect(res[1].newVersion).toEqual('1.1.0-something');
+      expect(res[1].newValue).toEqual('1.1.0-something');
     });
     it('ignores deps with custom registry', async () => {
       delete config.currentDigest;
