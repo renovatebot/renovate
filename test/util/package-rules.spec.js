@@ -172,6 +172,14 @@ describe('applyPackageRules()', () => {
       },
     });
     expect(res1.x).toBeDefined();
+    const res2 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentVersion: '^1.0.0',
+      },
+    });
+    expect(res2.x).toBeUndefined();
   });
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
     const config = {
