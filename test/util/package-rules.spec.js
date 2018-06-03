@@ -168,9 +168,18 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentVersion: '^1.0.0',
+        fromVersion: '1.0.3',
       },
     });
     expect(res1.x).toBeDefined();
+    const res2 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentVersion: '^1.0.0',
+      },
+    });
+    expect(res2.x).toBeUndefined();
   });
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
     const config = {
@@ -187,6 +196,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentVersion: '2.4.6',
+        fromVersion: '2.4.6',
       },
     });
     expect(res1.x).toBeDefined();
@@ -206,6 +216,7 @@ describe('applyPackageRules()', () => {
       ...{
         depName: 'test',
         currentVersion: '4.6.0',
+        fromVersion: '4.6.0',
       },
     });
     expect(res1.x).toBeDefined();
