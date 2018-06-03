@@ -6,6 +6,7 @@ Array [
     "currentVersion": "8.4.0",
     "depName": "node",
     "purl": "pkg:github/nodejs/node?clean=true",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -17,6 +18,7 @@ Array [
     "depName": "node",
     "purl": "pkg:github/nodejs/node?clean=true",
     "skipReason": "unsupported-version",
+    "versionScheme": "semver",
   },
 ]
 `;
