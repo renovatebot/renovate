@@ -8,7 +8,6 @@ Array [
     "lineNumber": 4,
     "purl": undefined,
     "skipReason": "invalid-version",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.3.2",
@@ -16,7 +15,6 @@ Array [
     "lineNumber": 15,
     "purl": undefined,
     "skipReason": "git-plugin",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.3.2",
@@ -24,7 +22,6 @@ Array [
     "lineNumber": 22,
     "purl": undefined,
     "skipReason": "unknown",
-    "versionScheme": "semver",
   },
 ]
 `;
@@ -37,7 +34,6 @@ Array [
     "lineNumber": 4,
     "purl": "pkg:github/buildkite-plugins/docker-compose-buildkite-plugin",
     "skipReason": undefined,
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.3.2",
@@ -45,7 +41,6 @@ Array [
     "lineNumber": 15,
     "purl": "pkg:github/buildkite-plugins/docker-compose-buildkite-plugin",
     "skipReason": undefined,
-    "versionScheme": "semver",
   },
 ]
 `;
@@ -58,7 +53,6 @@ Array [
     "lineNumber": 2,
     "purl": "pkg:github/abc/detect-clowns-buildkite-plugin",
     "skipReason": undefined,
-    "versionScheme": "semver",
   },
 ]
 `;
