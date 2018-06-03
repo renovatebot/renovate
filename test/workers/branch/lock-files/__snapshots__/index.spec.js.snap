@@ -13,17 +13,3 @@ Object {
   "updatedLockFiles": Array [],
 }
 `;
-
-exports[`manager/npm/post-update getAdditionalFiles returns no error and empty lockfiles if lock file maintenance exists 1`] = `
-Object {
-  "lockFileErrors": Array [],
-  "updatedLockFiles": Array [],
-}
-`;
-
-exports[`manager/npm/post-update getAdditionalFiles returns no error and empty lockfiles if updateLockFiles false 1`] = `
-Object {
-  "lockFileErrors": Array [],
-  "updatedLockFiles": Array [],
-}
-`;

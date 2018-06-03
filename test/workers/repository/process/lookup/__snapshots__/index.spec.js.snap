@@ -38,6 +38,39 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() handles PEP440 1`] = `
+Array [
+  Object {
+    "isPin": true,
+    "newVersion": "0.9.4",
+    "newVersionMajor": 0,
+    "repositoryUrl": "https://github.com/kriskowal/q",
+    "type": "pin",
+    "unpublishable": false,
+  },
+  Object {
+    "fromVersion": "0.9.4",
+    "newVersion": "0.9.7",
+    "newVersionMajor": 0,
+    "newVersionMinor": 9,
+    "repositoryUrl": "https://github.com/kriskowal/q",
+    "toVersion": "0.9.7",
+    "type": "minor",
+    "unpublishable": false,
+  },
+  Object {
+    "fromVersion": "0.9.4",
+    "newVersion": "1.4.1",
+    "newVersionMajor": 1,
+    "newVersionMinor": 4,
+    "repositoryUrl": "https://github.com/kriskowal/q",
+    "toVersion": "1.4.1",
+    "type": "major",
+    "unpublishable": false,
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() handles github 404 1`] = `
 Array [
   Object {

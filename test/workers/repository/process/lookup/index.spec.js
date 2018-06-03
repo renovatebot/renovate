@@ -810,5 +810,20 @@ describe('manager/npm/lookup', () => {
       config.currentVersion = '1.0.0';
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
+    it('handles PEP440', async () => {
+      config.manager = 'pip_requirements';
+      config.versionScheme = 'pep440';
+      config.rangeStrategy = 'pin';
+      config.lockedVersion = '0.9.4';
+      config.currentVersion = '~=0.9';
+      config.depName = 'q';
+      // TODO: we are using npm as source, since purl for pypi is not implimented
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
   });
 });
