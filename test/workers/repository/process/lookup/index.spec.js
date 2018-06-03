@@ -15,6 +15,7 @@ let config;
 describe('manager/npm/lookup', () => {
   beforeEach(() => {
     config = { ...require('../../../../../lib/config/defaults').getConfig() };
+    config.manager = 'npm';
     config.rangeStrategy = 'replace';
     jest.resetAllMocks();
   });

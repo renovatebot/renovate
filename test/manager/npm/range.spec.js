@@ -1,6 +1,4 @@
-const {
-  getRangeStrategy,
-} = require('../../../../../lib/workers/repository/process/lookup/range');
+const { getRangeStrategy } = require('../../../lib/manager/npm');
 
 describe('getRangeStrategy', () => {
   it('returns same if not auto', () => {
