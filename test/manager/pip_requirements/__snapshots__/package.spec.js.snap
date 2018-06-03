@@ -6,7 +6,7 @@ Array [
     "depName": "some-package",
     "fromVersion": "0.3.2",
     "newValue": "1.0.2",
-    "newVersionMajor": 1,
+    "newMajor": 1,
     "toVersion": "1.0.2",
   },
 ]

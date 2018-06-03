@@ -90,7 +90,7 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].newVersionMajor).toEqual('3');
+      expect(res[0].newMajor).toEqual('3');
       config.major.automerge = false;
     });
     it('returns major and minor upgrades', async () => {
@@ -111,7 +111,7 @@ describe('lib/manager/docker/package', () => {
       expect(res[0].type).toEqual('minor');
       expect(res[0].newValue).toEqual('1.2.0');
       expect(res[1].type).toEqual('major');
-      expect(res[2].newVersionMajor).toEqual('3');
+      expect(res[2].newMajor).toEqual('3');
     });
     it('returns only one major', async () => {
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
@@ -129,7 +129,7 @@ describe('lib/manager/docker/package', () => {
       expect(res[0].type).toEqual('minor');
       expect(res[0].newValue).toEqual('1.2.0');
       expect(res[1].type).toEqual('major');
-      expect(res[1].newVersionMajor).toEqual('3');
+      expect(res[1].newMajor).toEqual('3');
     });
     it('returns only one upgrade', async () => {
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
@@ -145,7 +145,7 @@ describe('lib/manager/docker/package', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
       expect(res[0].type).toEqual('major');
-      expect(res[0].newVersionMajor).toEqual('3');
+      expect(res[0].newMajor).toEqual('3');
     });
     it('ignores unstable upgrades', async () => {
       config = {
@@ -199,7 +199,7 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].newVersionMajor).toEqual('9');
+      expect(res[0].newMajor).toEqual('9');
     });
     it('adds digest', async () => {
       delete config.currentDigest;

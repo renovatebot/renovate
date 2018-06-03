@@ -16,7 +16,7 @@ Array [
     "newFrom": "some-dep:1.1.0-something@sha256:two",
     "newTag": "1.1.0-something",
     "newValue": "1.1.0-something",
-    "newVersionMajor": "1",
+    "newMajor": "1",
     "type": "minor",
   },
 ]
@@ -29,7 +29,7 @@ Array [
     "newFrom": "node:8",
     "newTag": "8",
     "newValue": "8",
-    "newVersionMajor": "8",
+    "newMajor": "8",
     "type": "major",
   },
 ]
@@ -56,7 +56,7 @@ Array [
     "newFrom": "some-dep:1.2.0@sha256:one",
     "newTag": "1.2.0",
     "newValue": "1.2.0",
-    "newVersionMajor": "1",
+    "newMajor": "1",
     "type": "minor",
   },
   Object {
@@ -65,7 +65,7 @@ Array [
     "newFrom": "some-dep:2.0.0@sha256:two",
     "newTag": "2.0.0",
     "newValue": "2.0.0",
-    "newVersionMajor": "2",
+    "newMajor": "2",
     "type": "major",
   },
   Object {
@@ -74,7 +74,7 @@ Array [
     "newFrom": "some-dep:3.0.0@sha256:three",
     "newTag": "3.0.0",
     "newValue": "3.0.0",
-    "newVersionMajor": "3",
+    "newMajor": "3",
     "type": "major",
   },
 ]
@@ -88,7 +88,7 @@ Array [
     "newFrom": "some-dep:1.2.0@sha256:one",
     "newTag": "1.2.0",
     "newValue": "1.2.0",
-    "newVersionMajor": "1",
+    "newMajor": "1",
     "type": "minor",
   },
   Object {
@@ -97,7 +97,7 @@ Array [
     "newFrom": "some-dep:3.0.0@sha256:two",
     "newTag": "3.0.0",
     "newValue": "3.0.0",
-    "newVersionMajor": "3",
+    "newMajor": "3",
     "type": "major",
   },
 ]
@@ -111,7 +111,7 @@ Array [
     "newFrom": "some-dep:3.0.0@sha256:one",
     "newTag": "3.0.0",
     "newValue": "3.0.0",
-    "newVersionMajor": "3",
+    "newMajor": "3",
     "type": "major",
   },
 ]
@@ -125,7 +125,7 @@ Array [
     "newFrom": "docker.io/some-dep:3.0.0@sha256:one",
     "newTag": "3.0.0",
     "newValue": "3.0.0",
-    "newVersionMajor": "3",
+    "newMajor": "3",
     "type": "major",
   },
 ]
@@ -138,7 +138,7 @@ Array [
     "newFrom": "node:8",
     "newTag": "8",
     "newValue": "8",
-    "newVersionMajor": "8",
+    "newMajor": "8",
     "type": "major",
   },
 ]
@@ -151,7 +151,7 @@ Array [
     "newFrom": "node:9",
     "newTag": "9",
     "newValue": "9",
-    "newVersionMajor": "9",
+    "newMajor": "9",
     "type": "major",
   },
 ]

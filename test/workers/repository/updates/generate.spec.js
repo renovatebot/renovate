@@ -83,7 +83,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newVersionMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           lazyGrouping: true,
           foo: 1,
           newValue: '5.1.2',
@@ -97,7 +97,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newVersionMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           lazyGrouping: true,
           foo: 1,
           newValue: '5.1.2',
@@ -118,7 +118,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newVersionMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           lazyGrouping: true,
           foo: 1,
           newValue: '5.1.2',
@@ -132,7 +132,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           commitMessageExtra:
-            'to {{#if isMajor}}v{{newVersionMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           lazyGrouping: true,
           foo: 1,
           newValue: '1.1.0',
