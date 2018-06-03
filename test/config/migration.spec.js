@@ -28,6 +28,7 @@ describe('config/migration', () => {
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
+        prBody: '{{currentVersion}} something',
         pathRules: [
           {
             paths: ['examples/**'],
