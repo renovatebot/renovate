@@ -6,6 +6,7 @@ Array [
     "currentVersion": "0.3.1",
     "depName": "some-package",
     "lineNumber": 2,
+    "versionScheme": "pep440",
   },
 ]
 `;
