@@ -54,7 +54,7 @@ Array [
 ",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
-    "purl": "pkg:github/bazelbuild/rules_go",
+    "purl": "pkg:github/bazelbuild/rules_go?ref=release",
     "repo": "bazelbuild/rules_go",
     "versionScheme": "semver",
   },
