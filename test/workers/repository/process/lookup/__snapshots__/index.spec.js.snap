@@ -3,22 +3,22 @@
 exports[`manager/npm/lookup .lookupUpdates() disables major release separation (major) 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
+    "newMajor": 0,
+    "newValue": "0.4.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.4",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -26,14 +26,47 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() disables major release separation (minor) 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.0.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() handles PEP440 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "isPin": true,
+    "newMajor": 0,
+    "newValue": "0.9.4",
+    "repositoryUrl": "https://github.com/kriskowal/q",
+    "type": "pin",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.9.4",
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
+    "repositoryUrl": "https://github.com/kriskowal/q",
+    "toVersion": "0.9.7",
+    "type": "minor",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.9.4",
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
+    "repositoryUrl": "https://github.com/kriskowal/q",
+    "toVersion": "1.4.1",
+    "type": "major",
   },
 ]
 `;
@@ -50,15 +83,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() handles prerelease jumps 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "2.9.0-rc",
     "isRange": true,
-    "newVersion": "^2.9.1-insiders.20180516",
-    "newVersionMajor": 2,
-    "newVersionMinor": 9,
+    "newMajor": 2,
+    "newMinor": 9,
+    "newValue": "^2.9.1-insiders.20180516",
     "repositoryUrl": "https://github.com/Microsoft/TypeScript",
     "toVersion": "2.9.1-insiders.20180516",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -68,22 +101,22 @@ exports[`manager/npm/lookup .lookupUpdates() handles unknown purl 1`] = `Array [
 exports[`manager/npm/lookup .lookupUpdates() ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
+    "newMajor": 0,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.7",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -91,11 +124,11 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() pins minor ranged versions 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
+    "newMajor": 1,
+    "newValue": "1.4.1",
     "type": "pin",
-    "unpublishable": false,
   },
 ]
 `;
@@ -111,15 +144,15 @@ exports[`manager/npm/lookup .lookupUpdates() rejects reverse ordered less than g
 exports[`manager/npm/lookup .lookupUpdates() replaces major complex ranged versions if configured 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
-    "newVersion": "^3.0.0",
-    "newVersionMajor": 3,
-    "newVersionMinor": 8,
+    "newMajor": 3,
+    "newMinor": 8,
+    "newValue": "^3.0.0",
     "repositoryUrl": "https://github.com/webpack/webpack",
     "toVersion": "3.8.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -127,15 +160,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() replaces minor complex ranged versions if configured 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
-    "newVersion": "~1.4.0",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "~1.4.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -143,14 +176,14 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() replaces non-range in-range updates 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.0.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -158,32 +191,32 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns both updates if automerging minor 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
+    "newMajor": 0,
+    "newValue": "0.4.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.4",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.4",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -191,24 +224,24 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns minor update if automerging both patch and minor 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.0",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -216,24 +249,24 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns minor update if separate patches not configured 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.0",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -241,14 +274,14 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns only one update if automerging 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -256,22 +289,22 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns only one update if automerging major 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
+    "newMajor": 0,
+    "newValue": "0.4.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.4",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -279,22 +312,22 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns only one update if grouping 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
+    "newMajor": 0,
+    "newValue": "0.4.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.4",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -302,34 +335,34 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns patch minor and major 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.8.0",
-    "newVersion": "0.8.12",
-    "newVersionMajor": 0,
-    "newVersionMinor": 8,
+    "newMajor": 0,
+    "newMinor": 8,
+    "newValue": "0.8.12",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.8.12",
     "type": "patch",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.8.0",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.8.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -337,24 +370,24 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns patch update if automerging patch 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.0",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "patch",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -362,24 +395,24 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns patch update if separateMinorPatch 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.0",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "patch",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -387,25 +420,25 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns rollback for pinned version 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
+    "canBeUnpublished": false,
     "commitMessageAction": "Roll back",
     "isRollback": true,
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
+    "newMajor": 0,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "semanticCommitType": "fix",
     "type": "rollback",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.99",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -413,14 +446,14 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns rollback for ranged version 1`] = `
 Array [
   Object {
-    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
+    "canBeUnpublished": false,
     "commitMessageAction": "Roll back",
     "isRollback": true,
-    "newVersion": "^0.9.7",
-    "newVersionMajor": 0,
+    "newMajor": 0,
+    "newValue": "^0.9.7",
     "semanticCommitType": "fix",
     "type": "rollback",
-    "unpublishable": false,
   },
 ]
 `;
@@ -428,14 +461,14 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if the current version is unstable 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "2.3.0-beta.1",
-    "newVersion": "2.5.17-beta.0",
-    "newVersionMajor": 2,
-    "newVersionMinor": 5,
+    "newMajor": 2,
+    "newMinor": 5,
+    "newValue": "2.5.17-beta.0",
     "repositoryUrl": "https://github.com/vuejs/vue",
     "toVersion": "2.5.17-beta.0",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -443,43 +476,43 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if the ignoreUnstable=false 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "2.5.16",
-    "newVersion": "2.5.17-beta.0",
-    "newVersionMajor": 2,
-    "newVersionMinor": 5,
+    "newMajor": 2,
+    "newMinor": 5,
+    "newValue": "2.5.17-beta.0",
     "repositoryUrl": "https://github.com/vuejs/vue",
     "toVersion": "2.5.17-beta.0",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
 
 exports[`manager/npm/lookup .lookupUpdates() should downgrade from missing versions 1`] = `
 Object {
-  "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newVersionMajor}}}.x",
+  "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
+  "canBeUnpublished": false,
   "commitMessageAction": "Roll back",
   "isRollback": true,
-  "newVersion": "1.16.0",
-  "newVersionMajor": 1,
+  "newMajor": 1,
+  "newValue": "1.16.0",
   "semanticCommitType": "fix",
   "type": "rollback",
-  "unpublishable": false,
 }
 `;
 
 exports[`manager/npm/lookup .lookupUpdates() should treat zero zero caret ranges as pinned 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.0.34",
     "isRange": true,
-    "newVersion": "^0.0.35",
-    "newVersionMajor": 0,
-    "newVersionMinor": 0,
+    "newMajor": 0,
+    "newMinor": 0,
+    "newValue": "^0.0.35",
     "repositoryUrl": "https://github.com/DefinitelyTyped/DefinitelyTyped",
     "toVersion": "0.0.35",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -487,14 +520,14 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports > latest versions if configured 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.4.1",
-    "newVersion": "2.0.3",
-    "newVersionMajor": 2,
-    "newVersionMinor": 0,
+    "newMajor": 2,
+    "newMinor": 0,
+    "newValue": "2.0.3",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "2.0.3",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -502,15 +535,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports complex major hyphen ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
-    "newVersion": "1.x - 3.x",
-    "newVersionMajor": 3,
-    "newVersionMinor": 8,
+    "newMajor": 3,
+    "newMinor": 8,
+    "newValue": "1.x - 3.x",
     "repositoryUrl": "https://github.com/webpack/webpack",
     "toVersion": "3.8.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -518,45 +551,45 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports complex major ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
-    "newVersion": "^1.0.0 || ^2.0.0 || ^3.0.0",
-    "newVersionMajor": 3,
-    "newVersionMinor": 8,
+    "newMajor": 3,
+    "newMinor": 8,
+    "newValue": "^1.0.0 || ^2.0.0 || ^3.0.0",
     "repositoryUrl": "https://github.com/webpack/webpack",
     "toVersion": "3.8.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
 
 exports[`manager/npm/lookup .lookupUpdates() supports complex ranges 1`] = `
 Object {
+  "canBeUnpublished": false,
   "fromVersion": "0.8.12",
   "isRange": true,
-  "newVersion": "^0.7.0 || ^0.8.0 || ^0.9.0",
-  "newVersionMajor": 0,
-  "newVersionMinor": 9,
+  "newMajor": 0,
+  "newMinor": 9,
+  "newValue": "^0.7.0 || ^0.8.0 || ^0.9.0",
   "repositoryUrl": "https://github.com/kriskowal/q",
   "toVersion": "0.9.7",
   "type": "minor",
-  "unpublishable": false,
 }
 `;
 
 exports[`manager/npm/lookup .lookupUpdates() supports complex tilde ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
-    "newVersion": "~1.2.0 || ~1.3.0 || ~1.4.0",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "~1.2.0 || ~1.3.0 || ~1.4.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -564,15 +597,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports in-range caret updates 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
-    "newVersion": "^1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "^1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -580,15 +613,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports in-range gte updates 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
-    "newVersion": ">=1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": ">=1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -596,15 +629,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports in-range tilde updates 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
-    "newVersion": "~1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "~1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -612,32 +645,32 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports minor and major upgrades for ranged versions 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
+    "newMajor": 0,
+    "newValue": "0.4.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.4",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.4",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -645,32 +678,32 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports minor and major upgrades for tilde ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "0.4.4",
-    "newVersionMajor": 0,
+    "newMajor": 0,
+    "newValue": "0.4.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.4",
-    "newVersion": "0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.4.4",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -678,15 +711,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades .x complex minor ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
-    "newVersion": "1.2.x - 1.4.x",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.2.x - 1.4.x",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -694,15 +727,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades .x major ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
-    "newVersion": "1.x",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.x",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -710,22 +743,22 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades .x minor ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "1.3.0",
-    "newVersionMajor": 1,
+    "newMajor": 1,
+    "newValue": "1.3.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -733,15 +766,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades .x minor ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
-    "newVersion": "1.4.x",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.x",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -749,15 +782,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades less than equal major ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.4.1",
     "isRange": true,
-    "newVersion": "<= 2",
-    "newVersionMajor": 2,
-    "newVersionMinor": 0,
+    "newMajor": 2,
+    "newMinor": 0,
+    "newValue": "<= 2",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "2.0.3",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -765,15 +798,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades less than equal minor ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
-    "newVersion": "<= 1.4",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "<= 1.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -781,26 +814,26 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades less than equal ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
-    "newVersion": "<= 0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "<= 0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
-    "newVersion": "<= 1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "<= 1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -808,15 +841,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades less than major ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
-    "newVersion": "< 2",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "< 2",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -824,26 +857,26 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades less than ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.1",
     "isRange": true,
-    "newVersion": "< 0.9.8",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "< 0.9.8",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.1",
     "isRange": true,
-    "newVersion": "< 1.4.2",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "< 1.4.2",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -851,15 +884,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades major greater than less than ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
-    "newVersion": ">= 0.5.0 < 2.0.0",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": ">= 0.5.0 < 2.0.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -867,15 +900,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades major less than equal ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
-    "newVersion": "<= 1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "<= 1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -883,15 +916,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades major less than ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
-    "newVersion": "< 2.0.0",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "< 2.0.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -899,26 +932,26 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades minor greater than less than equals ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.8.0",
     "isRange": true,
-    "newVersion": ">= 0.5.0 <= 0.9.7",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": ">= 0.5.0 <= 0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.8.0",
     "isRange": true,
-    "newVersion": ">= 0.5.0 <= 1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": ">= 0.5.0 <= 1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -926,26 +959,26 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades minor greater than less than ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
-    "newVersion": ">= 0.5.0 <0.10",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": ">= 0.5.0 <0.10",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
-    "newVersion": ">= 0.5.0 <1.5",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": ">= 0.5.0 <1.5",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -953,22 +986,22 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades minor ranged versions 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "1.0.1",
-    "newVersionMajor": 1,
+    "newMajor": 1,
+    "newValue": "1.0.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.0.1",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -976,26 +1009,26 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades multiple caret ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
-    "newVersion": "^0.9.0",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "^0.9.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
-    "newVersion": "^1.0.0",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "^1.0.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1003,26 +1036,26 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades multiple tilde ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
-    "newVersion": "~0.9.0",
-    "newVersionMajor": 0,
-    "newVersionMinor": 9,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "~0.9.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
-    "newVersion": "~1.4.0",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "~1.4.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1030,15 +1063,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades shorthand major ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
-    "newVersion": "1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1046,15 +1079,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades shorthand minor ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
-    "newVersion": "1.4",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1062,22 +1095,22 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades tilde ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "1.3.0",
-    "newVersionMajor": 1,
+    "newMajor": 1,
+    "newValue": "1.3.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1085,15 +1118,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades tilde ranges without pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
-    "newVersion": "~1.4.0",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "~1.4.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1101,22 +1134,22 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() uses the locked version for pinning 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "isPin": true,
-    "newVersion": "1.0.0",
-    "newVersionMajor": 1,
+    "newMajor": 1,
+    "newValue": "1.0.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
-    "unpublishable": false,
   },
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.0.0",
-    "newVersion": "1.4.1",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1124,15 +1157,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() widens .x OR ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
-    "newVersion": "1.x || 2.x || 3.x",
-    "newVersionMajor": 3,
-    "newVersionMinor": 8,
+    "newMajor": 3,
+    "newMinor": 8,
+    "newValue": "1.x || 2.x || 3.x",
     "repositoryUrl": "https://github.com/webpack/webpack",
     "toVersion": "3.8.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1140,15 +1173,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() widens major ranged versions if configured 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
-    "newVersion": "^2.0.0 || ^3.0.0",
-    "newVersionMajor": 3,
-    "newVersionMinor": 8,
+    "newMajor": 3,
+    "newMinor": 8,
+    "newValue": "^2.0.0 || ^3.0.0",
     "repositoryUrl": "https://github.com/webpack/webpack",
     "toVersion": "3.8.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1156,15 +1189,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() widens minor ranged versions if configured 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
-    "newVersion": "~1.3.0 || ~1.4.0",
-    "newVersionMajor": 1,
-    "newVersionMinor": 4,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "~1.3.0 || ~1.4.0",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "minor",
-    "unpublishable": false,
   },
 ]
 `;
@@ -1172,15 +1205,15 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() widens stanndalone major OR ranges 1`] = `
 Array [
   Object {
+    "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
-    "newVersion": "1 || 2 || 3",
-    "newVersionMajor": 3,
-    "newVersionMinor": 8,
+    "newMajor": 3,
+    "newMinor": 8,
+    "newValue": "1 || 2 || 3",
     "repositoryUrl": "https://github.com/webpack/webpack",
     "toVersion": "3.8.1",
     "type": "major",
-    "unpublishable": false,
   },
 ]
 `;

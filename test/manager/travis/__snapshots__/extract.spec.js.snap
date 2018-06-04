@@ -4,11 +4,12 @@ exports[`lib/manager/travis/extract extractDependencies() returns results 1`] = 
 Object {
   "deps": Array [
     Object {
-      "currentVersion": Array [
+      "currentValue": Array [
         6,
         8,
       ],
       "depName": "node",
+      "versionScheme": "semver",
     },
   ],
 }

@@ -1,6 +1,4 @@
-const {
-  getRangeStrategy,
-} = require('../../../../../lib/workers/repository/process/lookup/range');
+const { getRangeStrategy } = require('../../../lib/manager/npm');
 
 describe('getRangeStrategy', () => {
   it('returns same if not auto', () => {
@@ -27,7 +25,7 @@ describe('getRangeStrategy', () => {
     const config = {
       rangeStrategy: 'auto',
       depType: 'dependencies',
-      currentVersion: '^1.6.0 || ^2.0.0',
+      currentValue: '^1.6.0 || ^2.0.0',
     };
     expect(getRangeStrategy(config)).toEqual('widen');
   });
@@ -35,7 +33,7 @@ describe('getRangeStrategy', () => {
     const config = {
       rangeStrategy: 'bump',
       depType: 'dependencies',
-      currentVersion: '^1.6.0 || ^2.0.0',
+      currentValue: '^1.6.0 || ^2.0.0',
     };
     expect(getRangeStrategy(config)).toEqual('widen');
   });

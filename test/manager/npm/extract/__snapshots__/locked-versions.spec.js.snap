@@ -5,11 +5,11 @@ Array [
   Object {
     "deps": Array [
       Object {
-        "currentVersion": "1.0.0",
+        "currentValue": "1.0.0",
         "depName": "a",
       },
       Object {
-        "currentVersion": "2.0.0",
+        "currentValue": "2.0.0",
         "depName": "b",
       },
     ],
@@ -23,12 +23,12 @@ Array [
   Object {
     "deps": Array [
       Object {
-        "currentVersion": "1.0.0",
+        "currentValue": "1.0.0",
         "depName": "a",
         "lockedVersion": "1.0.0",
       },
       Object {
-        "currentVersion": "2.0.0",
+        "currentValue": "2.0.0",
         "depName": "b",
         "lockedVersion": "2.0.0",
       },
@@ -43,12 +43,12 @@ Array [
   Object {
     "deps": Array [
       Object {
-        "currentVersion": "1.0.0",
+        "currentValue": "1.0.0",
         "depName": "a",
         "lockedVersion": "1.0.0",
       },
       Object {
-        "currentVersion": "2.0.0",
+        "currentValue": "2.0.0",
         "depName": "b",
         "lockedVersion": "2.0.0",
       },

@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`lib/manager/node/package getPackageUpdates returns result if needing updates 1`] = `Array []`;

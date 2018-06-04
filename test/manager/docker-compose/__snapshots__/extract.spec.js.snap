@@ -11,6 +11,7 @@ Array [
     "depName": "something/redis",
     "dockerRegistry": "quay.io",
     "lineNumber": 4,
+    "versionScheme": "semver",
   },
   Object {
     "currentDepTag": "postgres:9.4.0",
@@ -21,6 +22,7 @@ Array [
     "depName": "postgres",
     "dockerRegistry": undefined,
     "lineNumber": 18,
+    "versionScheme": "semver",
   },
   Object {
     "currentDepTag": "dockersamples/examplevotingapp_vote:before",
@@ -31,6 +33,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_vote",
     "dockerRegistry": undefined,
     "lineNumber": 28,
+    "versionScheme": "semver",
   },
   Object {
     "currentDepTag": "dockersamples/examplevotingapp_result:before",
@@ -41,6 +44,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_result",
     "dockerRegistry": undefined,
     "lineNumber": 43,
+    "versionScheme": "semver",
   },
   Object {
     "currentDepTag": "dockersamples/examplevotingapp_worker",
@@ -51,6 +55,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_worker",
     "dockerRegistry": undefined,
     "lineNumber": 59,
+    "versionScheme": "semver",
   },
   Object {
     "currentDepTag": "dockersamples/visualizer:stable",
@@ -61,6 +66,7 @@ Array [
     "depName": "dockersamples/visualizer",
     "dockerRegistry": undefined,
     "lineNumber": 76,
+    "versionScheme": "semver",
   },
 ]
 `;
