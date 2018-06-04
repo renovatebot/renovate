@@ -99,7 +99,7 @@
     "tmp-promise": "1.0.4",
     "traverse": "0.6.6",
     "upath": "1.1.0",
-    "validator": "10.2.0",
+    "validator": "10.3.0",
     "vso-node-api": "6.5.0",
     "xregexp": "4.1.1",
     "yarn": "1.7.0"
