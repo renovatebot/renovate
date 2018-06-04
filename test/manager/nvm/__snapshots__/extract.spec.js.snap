@@ -3,7 +3,7 @@
 exports[`lib/manager/nvm/extract extractDependencies() returns a result 1`] = `
 Array [
   Object {
-    "currentVersion": "8.4.0",
+    "currentValue": "8.4.0",
     "depName": "node",
     "purl": "pkg:github/nodejs/node?clean=true",
     "versionScheme": "semver",
@@ -14,7 +14,7 @@ Array [
 exports[`lib/manager/nvm/extract extractDependencies() skips non-pinned 1`] = `
 Array [
   Object {
-    "currentVersion": "8.4",
+    "currentValue": "8.4",
     "depName": "node",
     "purl": "pkg:github/nodejs/node?clean=true",
     "skipReason": "unsupported-version",

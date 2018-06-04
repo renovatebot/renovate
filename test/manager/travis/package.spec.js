@@ -13,26 +13,26 @@ describe('lib/manager/node/package', () => {
       };
     });
     it('returns empty if missing supportPolicy', async () => {
-      config.currentVersion = ['6', '8'];
+      config.currentValue = ['6', '8'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if invalid supportPolicy', async () => {
-      config.currentVersion = ['6', '8'];
+      config.currentValue = ['6', '8'];
       config.supportPolicy = ['foo'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
-      config.currentVersion = ['8'];
+      config.currentValue = ['8'];
       config.supportPolicy = ['lts_active'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns result if needing updates', async () => {
-      config.currentVersion = ['6', '8'];
+      config.currentValue = ['6', '8'];
       config.supportPolicy = ['lts'];
       expect(await node.getPackageUpdates(config)).toMatchSnapshot();
     });
     it('detects pinning', async () => {
-      config.currentVersion = ['6.1.0', '8.4.0'];
+      config.currentValue = ['6.1.0', '8.4.0'];
       config.supportPolicy = ['lts'];
       githubDatasource.getDependency.mockReturnValueOnce({
         versions: {

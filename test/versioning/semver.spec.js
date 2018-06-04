@@ -37,3 +37,20 @@ describe('semver.isRange(input)', () => {
     expect(!!semver.isRange('^1.2.3')).toBe(true);
   });
 });
+describe('semver.getNewValue()', () => {
+  it('bumps equals', () => {
+    expect(
+      semver.getNewValue({ rangeStrategy: 'bump' }, '=1.0.0', '1.0.0', '1.1.0')
+    ).toEqual('=1.1.0');
+  });
+  it('replaces equals', () => {
+    expect(
+      semver.getNewValue(
+        { rangeStrategy: 'replace' },
+        '=1.0.0',
+        '1.0.0',
+        '1.1.0'
+      )
+    ).toEqual('=1.1.0');
+  });
+});
