@@ -24,7 +24,7 @@ describe('lib/manager/pip_requirements/extract', () => {
     it('extracts dependencies', () => {
       const res = extractDependencies(requirements1, config).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(2);
+      expect(res).toHaveLength(3);
     });
     it('extracts multiple dependencies', () => {
       const res = extractDependencies(requirements2, config).deps;
