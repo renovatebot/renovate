@@ -20,7 +20,7 @@ describe('lib/manager/pip_requirements/extract', () => {
     it('extracts dependencies', () => {
       const res = extractDependencies(requirements, config).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
     });
   });
 });

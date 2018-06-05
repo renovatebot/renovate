@@ -8,5 +8,11 @@ Array [
     "lineNumber": 2,
     "versionScheme": "pep440",
   },
+  Object {
+    "currentValue": "1.0.0",
+    "depName": "some-other-package",
+    "lineNumber": 3,
+    "versionScheme": "pep440",
+  },
 ]
 `;
