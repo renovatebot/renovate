@@ -40,14 +40,17 @@ describe('semver.isRange(input)', () => {
 describe('semver.getNewValue()', () => {
   it('bumps equals', () => {
     expect(
-      semver.getNewValue({ rangeStrategy: 'bump' }, '=1.0.0', '1.0.0', '1.1.0')
+      semver.getNewValue(
+        { currentValue: '=1.0.0', rangeStrategy: 'bump' },
+        '1.0.0',
+        '1.1.0'
+      )
     ).toEqual('=1.1.0');
   });
   it('replaces equals', () => {
     expect(
       semver.getNewValue(
-        { rangeStrategy: 'replace' },
-        '=1.0.0',
+        { currentValue: '=1.0.0', rangeStrategy: 'replace' },
         '1.0.0',
         '1.1.0'
       )

@@ -70,7 +70,7 @@ Object {
       "currentValue": "disabled",
       "depName": "yarn",
       "depType": "engines",
-      "purl": "pkg:github/yarnpkg/yarn?clean=true",
+      "purl": "pkg:npm/yarn",
       "skipReason": "unknown-version",
       "versionScheme": "semver",
     },
