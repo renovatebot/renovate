@@ -5,7 +5,48 @@ Array [
   Object {
     "currentValue": "==0.3.1",
     "depName": "some-package",
-    "lineNumber": 2,
+    "purl": "pkg:pypi/some-package",
+    "versionScheme": "pep440",
+  },
+  Object {
+    "currentValue": "==1.9",
+    "depName": "not_semver",
+    "purl": "pkg:pypi/not_semver",
+    "versionScheme": "pep440",
+  },
+]
+`;
+
+exports[`lib/manager/pip_requirements/extract extractDependencies() extracts multiple dependencies 1`] = `
+Array [
+  Object {
+    "currentValue": "==1.4.1",
+    "depName": "Django",
+    "purl": "pkg:pypi/Django",
+    "versionScheme": "pep440",
+  },
+  Object {
+    "currentValue": "==0.6.27",
+    "depName": "distribute",
+    "purl": "pkg:pypi/distribute",
+    "versionScheme": "pep440",
+  },
+  Object {
+    "currentValue": "==0.2.1",
+    "depName": "dj-database-url",
+    "purl": "pkg:pypi/dj-database-url",
+    "versionScheme": "pep440",
+  },
+  Object {
+    "currentValue": "==2.4.5",
+    "depName": "psycopg2",
+    "purl": "pkg:pypi/psycopg2",
+    "versionScheme": "pep440",
+  },
+  Object {
+    "currentValue": "==0.1.2",
+    "depName": "wsgiref",
+    "purl": "pkg:pypi/wsgiref",
     "versionScheme": "pep440",
   },
 ]

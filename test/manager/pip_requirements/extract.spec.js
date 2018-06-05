@@ -3,8 +3,12 @@ const {
   extractDependencies,
 } = require('../../../lib/manager/pip_requirements/extract');
 
-const requirements = fs.readFileSync(
-  'test/_fixtures/pip_requirements/requirements.txt',
+const requirements1 = fs.readFileSync(
+  'test/_fixtures/pip_requirements/requirements1.txt',
+  'utf8'
+);
+const requirements2 = fs.readFileSync(
+  'test/_fixtures/pip_requirements/requirements2.txt',
   'utf8'
 );
 
@@ -18,9 +22,14 @@ describe('lib/manager/pip_requirements/extract', () => {
       expect(extractDependencies('nothing here', config)).toBe(null);
     });
     it('extracts dependencies', () => {
-      const res = extractDependencies(requirements, config).deps;
+      const res = extractDependencies(requirements1, config).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
+    });
+    it('extracts multiple dependencies', () => {
+      const res = extractDependencies(requirements2, config).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(5);
     });
   });
 });
