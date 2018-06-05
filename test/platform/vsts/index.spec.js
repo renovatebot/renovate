@@ -539,6 +539,15 @@ describe('platform/vsts', () => {
       await vsts.updatePr(1234, 'The New Title', 'Hello world again');
       expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
     });
+
+    it('should update the PR without description', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      vstsApi.gitApi.mockImplementationOnce(() => ({
+        updatePullRequest: jest.fn(),
+      }));
+      await vsts.updatePr(1234, 'The New Title - autoclose');
+      expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
+    });
   });
 
   describe('ensureComment', () => {
@@ -647,6 +656,16 @@ describe('platform/vsts', () => {
         ]),
       }));
       const res = await vsts.deleteBranch();
+      expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('abandonPr', () => {
+    it('should abandon the PR', async () => {
+      vstsApi.gitApi.mockImplementationOnce(() => ({
+        updatePullRequest: jest.fn(()=> 'abandoned'),
+      }));
+      const res = await vsts.abandonPr();
       expect(res).toMatchSnapshot();
     });
   });

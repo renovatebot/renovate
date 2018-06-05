@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/vsts abandonPr should abandon the PR 1`] = `undefined`;
+
 exports[`platform/vsts createPr() should create and return a PR object 1`] = `
 Object {
   "displayNumber": "Pull Request #456",
@@ -167,6 +169,14 @@ Array [
 `;
 
 exports[`platform/vsts updatePr(prNo, title, body) should update the PR 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/vsts updatePr(prNo, title, body) should update the PR without description 1`] = `
 Array [
   Array [],
   Array [],
