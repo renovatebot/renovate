@@ -798,6 +798,16 @@ describe('manager/npm/lookup', () => {
       config.purl = 'pkg:github/some/repo';
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
+      nock('https://pypi.org')
+        .get('/pypi/foo/json')
+        .reply(404);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
+    });
+    it('handles pypi 404', async () => {
+      config.depName = 'foo';
+      config.purl = 'pkg:pypi/foo';
+      config.packageFile = 'requirements.txt';
+      config.currentValue = '1.0.0';
       nock('https://api.github.com')
         .get('/repos/some/repo/git/refs/tags?per_page=100')
         .reply(404);

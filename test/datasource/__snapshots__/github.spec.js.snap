@@ -6,6 +6,8 @@ Object {
   "versions": Object {
     "1.0.0": Object {},
     "1.1.0": Object {},
+    "a": Object {},
+    "v": Object {},
   },
 }
 `;
@@ -15,6 +17,8 @@ Object {
   "repositoryUrl": "https://github.com/some/dep",
   "versions": Object {
     "1.0.0": Object {},
+    "a": Object {},
+    "v": Object {},
     "v1.1.0": Object {},
   },
 }
