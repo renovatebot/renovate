@@ -45,6 +45,21 @@ describe('pep440.isStable(version)', () => {
   });
 });
 
+describe('pep440.isSingleVersion()', () => {
+  it('returns true if naked version', () => {
+    expect(!!pep440.isSingleVersion('1.2.3')).toBe(true);
+    expect(!!pep440.isSingleVersion('1.2.3rc0')).toBe(true);
+  });
+  it('returns true if double equals', () => {
+    expect(!!pep440.isSingleVersion('==1.2.3')).toBe(true);
+    expect(!!pep440.isSingleVersion('==1.2')).toBe(true);
+    expect(!!pep440.isSingleVersion('== 1.2.3')).toBe(true);
+  });
+  it('returns false when not version', () => {
+    expect(!!pep440.isSingleVersion('==1.*')).toBe(false);
+  });
+});
+
 const versions = [
   '0.9.4',
   '1.0.0',

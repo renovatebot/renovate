@@ -37,6 +37,19 @@ describe('semver.isRange(input)', () => {
     expect(!!semver.isRange('^1.2.3')).toBe(true);
   });
 });
+describe('semver.isSingleVersion()', () => {
+  it('returns true if naked version', () => {
+    expect(!!semver.isSingleVersion('1.2.3')).toBe(true);
+    expect(!!semver.isSingleVersion('1.2.3-alpha.1')).toBe(true);
+  });
+  it('returns true if equals', () => {
+    expect(!!semver.isSingleVersion('=1.2.3')).toBe(true);
+    expect(!!semver.isSingleVersion('= 1.2.3')).toBe(true);
+  });
+  it('returns false when not version', () => {
+    expect(!!semver.isSingleVersion('1.x')).toBe(false);
+  });
+});
 describe('semver.getNewValue()', () => {
   it('bumps equals', () => {
     expect(
