@@ -528,16 +528,6 @@ describe('platform/gitlab', () => {
       await gitlab.addReviewers(42, ['someuser', 'someotheruser']);
     });
   });
-  describe('ensureComment', () => {
-    it('exists', async () => {
-      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
-    });
-  });
-  describe('ensureCommentRemoval', () => {
-    it('exists', async () => {
-      await gitlab.ensureCommentRemoval(42, 'some-subject');
-    });
-  });
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns true if no title and all state', async () => {
       get.mockReturnValueOnce({
