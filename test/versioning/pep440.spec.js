@@ -23,17 +23,6 @@ describe('pep440.isValid(input)', () => {
     ).toBe(false);
   });
 });
-describe('pep440.isRange(input)', () => {
-  it('rejects simple pep440', () => {
-    expect(!!pep440.isRange('1.2.3')).toBe(false);
-  });
-  it('accepts tilde', () => {
-    expect(!!pep440.isRange('~=1.2.3')).toBe(true);
-  });
-  it('accepts glob', () => {
-    expect(!!pep440.isRange('==1.2.*')).toBe(true);
-  });
-});
 
 describe('pep440.isStable(version)', () => {
   it('returns correct value', () => {

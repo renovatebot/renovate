@@ -42,7 +42,7 @@ Array [
   Object {
     "isPin": true,
     "newMajor": 0,
-    "newValue": "0.9.4",
+    "newValue": "==0.9.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
   },
