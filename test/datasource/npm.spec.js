@@ -184,15 +184,6 @@ describe('api/npm', () => {
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });
-  it('should use dummy time if missing', async () => {
-    const noTimeResponse = { ...npmResponse };
-    delete noTimeResponse.time;
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, noTimeResponse);
-    const res = await npm.getDependency('foobar');
-    expect(res).toMatchSnapshot();
-  });
   it('should cache package info from npm', async () => {
     npm.setNpmrc('//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz');
     nock('https://registry.npmjs.org')

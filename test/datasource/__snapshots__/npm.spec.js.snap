@@ -11,9 +11,7 @@ Object {
   "renovate-config": undefined,
   "repositoryUrl": undefined,
   "versions": Object {
-    "0.0.1": Object {
-      "time": "",
-    },
+    "0.0.1": Object {},
   },
 }
 `;
@@ -29,9 +27,7 @@ Object {
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {
-    "0.0.1": Object {
-      "time": "",
-    },
+    "0.0.1": Object {},
   },
 }
 `;
@@ -47,9 +43,7 @@ Object {
   "renovate-config": undefined,
   "repositoryUrl": undefined,
   "versions": Object {
-    "0.0.1": Object {
-      "time": "",
-    },
+    "0.0.1": Object {},
   },
 }
 `;
@@ -67,9 +61,7 @@ Object {
   "renovate-config": undefined,
   "repositoryUrl": undefined,
   "versions": Object {
-    "0.0.1": Object {
-      "time": "",
-    },
+    "0.0.1": Object {},
   },
 }
 `;
@@ -85,9 +77,7 @@ Object {
   "renovate-config": undefined,
   "repositoryUrl": undefined,
   "versions": Object {
-    "0.0.1": Object {
-      "time": "",
-    },
+    "0.0.1": Object {},
   },
 }
 `;
@@ -103,27 +93,7 @@ Object {
   "renovate-config": undefined,
   "repositoryUrl": undefined,
   "versions": Object {
-    "0.0.1": Object {
-      "time": "",
-    },
-  },
-}
-`;
-
-exports[`api/npm should use dummy time if missing 1`] = `
-Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
-  "homepage": undefined,
-  "latestVersion": "0.0.1",
-  "name": undefined,
-  "renovate-config": undefined,
-  "repositoryUrl": undefined,
-  "versions": Object {
-    "0.0.1": Object {
-      "time": "2017-01-01T12:00:00.000Z",
-    },
+    "0.0.1": Object {},
   },
 }
 `;
@@ -139,9 +109,7 @@ Object {
   "renovate-config": undefined,
   "repositoryUrl": "https://google.com",
   "versions": Object {
-    "0.0.1": Object {
-      "time": "",
-    },
+    "0.0.1": Object {},
   },
 }
 `;
