@@ -48,7 +48,7 @@ This is necessary so that Renovate can learn enough about the repository to dete
 
 ##### **Write** access to commit statuses
 
-Renovate can utilise commit statuses for purposes such as to warn if a package in the current update is unpublishable. For example npm packages can be revoked within the first 24 hours of publication.
+Renovate can utilise commit statuses for purposes such as to warn if a package in the current update is canBeUnpublished. For example npm packages can be revoked within the first 24 hours of publication.
 
 ##### **Write** access to issues
 

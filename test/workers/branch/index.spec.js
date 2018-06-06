@@ -56,6 +56,7 @@ describe('workers/branch', () => {
     it('skips branch if not unpublishSafe + pending', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.unpublishSafe = true;
+      config.canBeUnpublished = true;
       config.prCreation = 'not-pending';
       platform.branchExists.mockReturnValueOnce(true);
       const res = await branchWorker.processBranch(config);

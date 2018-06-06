@@ -49,6 +49,8 @@
     "node": ">= 8.11.0"
   },
   "dependencies": {
+    "@renovate/pep440": "0.2.0",
+    "@sindresorhus/is": "0.9.0",
     "@yarnpkg/lockfile": "1.0.1",
     "bunyan": "1.8.12",
     "cacache": "11.0.2",
@@ -86,7 +88,7 @@
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-link-header": "1.0.1",
-    "pnpm": "2.2.1",
+    "pnpm": "2.2.2",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "safe-regex": "1.1.0",
@@ -98,8 +100,9 @@
     "tmp-promise": "1.0.4",
     "traverse": "0.6.6",
     "upath": "1.1.0",
-    "validator": "10.2.0",
+    "validator": "10.3.0",
     "vso-node-api": "6.5.0",
+    "xregexp": "4.1.1",
     "yarn": "1.7.0"
   },
   "devDependencies": {

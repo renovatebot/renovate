@@ -15,7 +15,7 @@ const upgrade = {
   manager: 'npm',
   depName: 'renovate',
   fromVersion: '1.0.0',
-  newVersion: '3.0.0',
+  newValue: '3.0.0',
 };
 
 function npmResponse() {
@@ -70,12 +70,12 @@ describe('workers/pr/changelog', () => {
       expect(npmRegistry.getDependency.mock.calls).toHaveLength(0);
       expect(ghGot.mock.calls).toHaveLength(0);
     });
-    it('returns null if fromVersion equals newVersion', async () => {
+    it('returns null if fromVersion equals newValue', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
           fromVersion: '1.0.0',
-          newVersion: '1.0.0',
+          newValue: '1.0.0',
         })
       ).toBe(null);
       expect(ghGot.mock.calls).toHaveLength(0);

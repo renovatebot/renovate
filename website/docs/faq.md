@@ -190,8 +190,8 @@ Set the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration
 options:
 
 ```
-"branchName": "vroom/{{depName}}-{{newVersionMajor}}.x",
-"commitMessage": "Vroom vroom dependency {{depName}} to version {{newVersion}}",
+"branchName": "vroom/{{depName}}-{{newMajor}}.x",
+"commitMessage": "Vroom vroom dependency {{depName}} to version {{newValue}}",
 "prTitle": "Vroom {{depName}},
 ```
 

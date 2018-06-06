@@ -1,6 +1,6 @@
-const semver = require('../../lib/versioning/semver');
+const semver = require('../../lib/versioning')('semver');
 
-describe('.isValid(input)', () => {
+describe('semver.isValid(input)', () => {
   it('should return null for irregular versions', () => {
     expect(!!semver.isValid('17.04.0')).toBe(false);
   });
@@ -26,7 +26,7 @@ describe('.isValid(input)', () => {
     ).toBe(false);
   });
 });
-describe('.isRange(input)', () => {
+describe('semver.isRange(input)', () => {
   it('rejects simple semver', () => {
     expect(!!semver.isRange('1.2.3')).toBe(false);
   });
@@ -35,5 +35,38 @@ describe('.isRange(input)', () => {
   });
   it('accepts caret', () => {
     expect(!!semver.isRange('^1.2.3')).toBe(true);
+  });
+});
+describe('semver.isSingleVersion()', () => {
+  it('returns true if naked version', () => {
+    expect(!!semver.isSingleVersion('1.2.3')).toBe(true);
+    expect(!!semver.isSingleVersion('1.2.3-alpha.1')).toBe(true);
+  });
+  it('returns true if equals', () => {
+    expect(!!semver.isSingleVersion('=1.2.3')).toBe(true);
+    expect(!!semver.isSingleVersion('= 1.2.3')).toBe(true);
+  });
+  it('returns false when not version', () => {
+    expect(!!semver.isSingleVersion('1.x')).toBe(false);
+  });
+});
+describe('semver.getNewValue()', () => {
+  it('bumps equals', () => {
+    expect(
+      semver.getNewValue(
+        { currentValue: '=1.0.0', rangeStrategy: 'bump' },
+        '1.0.0',
+        '1.1.0'
+      )
+    ).toEqual('=1.1.0');
+  });
+  it('replaces equals', () => {
+    expect(
+      semver.getNewValue(
+        { currentValue: '=1.0.0', rangeStrategy: 'replace' },
+        '1.0.0',
+        '1.1.0'
+      )
+    ).toEqual('=1.1.0');
   });
 });
