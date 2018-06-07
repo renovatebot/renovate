@@ -76,6 +76,20 @@ describe('manager/npm/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('finds and filters .npmrc', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === '.npmrc') {
+          return 'save-exact = true\npackage-lock = false\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractDependencies(
+        input01Content,
+        'package.json',
+        { global: {} }
+      );
+      expect(res.npmrc).toBeDefined();
+    });
     it('finds and discards .npmrc', async () => {
       platform.getFile = jest.fn(fileName => {
         if (fileName === '.npmrc') {
