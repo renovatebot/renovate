@@ -105,7 +105,6 @@ Array [
   "getPrFiles",
   "updatePr",
   "mergePr",
-  "abandonPr",
   "commitFilesToBranch",
   "getFile",
   "getCommitMessages",
