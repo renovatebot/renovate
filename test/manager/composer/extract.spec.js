@@ -17,6 +17,9 @@ describe('lib/manager/pip_requirements/extract', () => {
     it('returns null for invalid json', () => {
       expect(extractDependencies('nothing here', config)).toBe(null);
     });
+    it('returns null for empty deps', () => {
+      expect(extractDependencies('{}', config)).toBe(null);
+    });
     it('extracts dependencies', () => {
       const res = extractDependencies(requirements1, config);
       expect(res).toMatchSnapshot();

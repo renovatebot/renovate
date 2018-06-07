@@ -8,7 +8,7 @@ Object {
       "depName": "php",
       "depType": "require",
       "purl": "pkg:packagist/php",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -16,7 +16,7 @@ Object {
       "depName": "symfony/assetic-bundle",
       "depType": "require",
       "purl": "pkg:packagist/symfony/assetic-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -24,7 +24,7 @@ Object {
       "depName": "symfony/monolog-bundle",
       "depType": "require",
       "purl": "pkg:packagist/symfony/monolog-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -32,7 +32,7 @@ Object {
       "depName": "symfony/swiftmailer-bundle",
       "depType": "require",
       "purl": "pkg:packagist/symfony/swiftmailer-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -40,7 +40,7 @@ Object {
       "depName": "symfony/symfony",
       "depType": "require",
       "purl": "pkg:packagist/symfony/symfony",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -55,7 +55,7 @@ Object {
       "depName": "doctrine/doctrine-bundle",
       "depType": "require",
       "purl": "pkg:packagist/doctrine/doctrine-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -63,7 +63,7 @@ Object {
       "depName": "doctrine/doctrine-fixtures-bundle",
       "depType": "require",
       "purl": "pkg:packagist/doctrine/doctrine-fixtures-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -71,7 +71,7 @@ Object {
       "depName": "doctrine/orm",
       "depType": "require",
       "purl": "pkg:packagist/doctrine/orm",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -79,7 +79,7 @@ Object {
       "depName": "exercise/elastica-bundle",
       "depType": "require",
       "purl": "pkg:packagist/exercise/elastica-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -87,7 +87,7 @@ Object {
       "depName": "friendsofsymfony/rest-bundle",
       "depType": "require",
       "purl": "pkg:packagist/friendsofsymfony/rest-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -95,7 +95,7 @@ Object {
       "depName": "friendsofsymfony/user-bundle",
       "depType": "require",
       "purl": "pkg:packagist/friendsofsymfony/user-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -103,7 +103,7 @@ Object {
       "depName": "fzaninotto/faker",
       "depType": "require",
       "purl": "pkg:packagist/fzaninotto/faker",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -118,7 +118,7 @@ Object {
       "depName": "jms/payment-core-bundle",
       "depType": "require",
       "purl": "pkg:packagist/jms/payment-core-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -133,7 +133,7 @@ Object {
       "depName": "knplabs/knp-menu-bundle",
       "depType": "require",
       "purl": "pkg:packagist/knplabs/knp-menu-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -141,7 +141,7 @@ Object {
       "depName": "knplabs/knp-paginator-bundle",
       "depType": "require",
       "purl": "pkg:packagist/knplabs/knp-paginator-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -149,7 +149,7 @@ Object {
       "depName": "liip/imagine-bundle",
       "depType": "require",
       "purl": "pkg:packagist/liip/imagine-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -157,7 +157,7 @@ Object {
       "depName": "merk/dough-bundle",
       "depType": "require",
       "purl": "pkg:packagist/merk/dough-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -165,7 +165,7 @@ Object {
       "depName": "sensio/distribution-bundle",
       "depType": "require",
       "purl": "pkg:packagist/sensio/distribution-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -173,7 +173,7 @@ Object {
       "depName": "sensio/framework-extra-bundle",
       "depType": "require",
       "purl": "pkg:packagist/sensio/framework-extra-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -181,7 +181,7 @@ Object {
       "depName": "sensio/generator-bundle",
       "depType": "require",
       "purl": "pkg:packagist/sensio/generator-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -189,7 +189,7 @@ Object {
       "depName": "simplethings/entity-audit-bundle",
       "depType": "require",
       "purl": "pkg:packagist/simplethings/entity-audit-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -197,7 +197,7 @@ Object {
       "depName": "stof/doctrine-extensions-bundle",
       "depType": "require",
       "purl": "pkg:packagist/stof/doctrine-extensions-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -205,7 +205,7 @@ Object {
       "depName": "twig/extensions",
       "depType": "require",
       "purl": "pkg:packagist/twig/extensions",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -213,7 +213,7 @@ Object {
       "depName": "behat/behat",
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/behat",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -221,7 +221,7 @@ Object {
       "depName": "behat/behat-bundle",
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/behat-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -229,7 +229,7 @@ Object {
       "depName": "behat/mink-bundle",
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/mink-bundle",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -237,7 +237,7 @@ Object {
       "depName": "behat/sahi-client",
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/sahi-client",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
     Object {
@@ -245,7 +245,7 @@ Object {
       "depName": "behat/common-contexts",
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/common-contexts",
-      "skipReason": "unsupported-range",
+      "skipReason": "unsupported-constraint",
       "verionScheme": "semver",
     },
   ],
