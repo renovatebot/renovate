@@ -9,10 +9,15 @@ Object {
   "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {
     "0.0.1": Object {
-      "time": "",
+      "canBeUnpublished": false,
+      "time": "2018-05-06T07:21:53+02:00",
+    },
+    "0.0.2": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-07T07:21:53+02:00",
     },
   },
 }
@@ -30,8 +35,33 @@ Object {
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {
     "0.0.1": Object {
-      "time": "",
+      "canBeUnpublished": false,
+      "time": "2018-05-06T07:21:53+02:00",
     },
+    "0.0.2": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-07T07:21:53+02:00",
+    },
+  },
+}
+`;
+
+exports[`api/npm should handle no time 1`] = `
+Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
+  "homepage": undefined,
+  "latestVersion": "0.0.1",
+  "name": undefined,
+  "renovate-config": undefined,
+  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "versions": Object {
+    "0.0.1": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-06T07:21:53+02:00",
+    },
+    "0.0.2": Object {},
   },
 }
 `;
@@ -45,10 +75,15 @@ Object {
   "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {
     "0.0.1": Object {
-      "time": "",
+      "canBeUnpublished": false,
+      "time": "2018-05-06T07:21:53+02:00",
+    },
+    "0.0.2": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-07T07:21:53+02:00",
     },
   },
 }
@@ -65,10 +100,15 @@ Object {
   "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {
     "0.0.1": Object {
-      "time": "",
+      "canBeUnpublished": false,
+      "time": "2018-05-06T07:21:53+02:00",
+    },
+    "0.0.2": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-07T07:21:53+02:00",
     },
   },
 }
@@ -83,10 +123,15 @@ Object {
   "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {
     "0.0.1": Object {
-      "time": "",
+      "canBeUnpublished": false,
+      "time": "2018-05-06T07:21:53+02:00",
+    },
+    "0.0.2": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-07T07:21:53+02:00",
     },
   },
 }
@@ -101,28 +146,15 @@ Object {
   "latestVersion": "0.0.1",
   "name": undefined,
   "renovate-config": undefined,
-  "repositoryUrl": undefined,
+  "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {
     "0.0.1": Object {
-      "time": "",
+      "canBeUnpublished": false,
+      "time": "2018-05-06T07:21:53+02:00",
     },
-  },
-}
-`;
-
-exports[`api/npm should use dummy time if missing 1`] = `
-Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
-  "homepage": undefined,
-  "latestVersion": "0.0.1",
-  "name": undefined,
-  "renovate-config": undefined,
-  "repositoryUrl": undefined,
-  "versions": Object {
-    "0.0.1": Object {
-      "time": "2017-01-01T12:00:00.000Z",
+    "0.0.2": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-07T07:21:53+02:00",
     },
   },
 }
@@ -140,7 +172,12 @@ Object {
   "repositoryUrl": "https://google.com",
   "versions": Object {
     "0.0.1": Object {
-      "time": "",
+      "canBeUnpublished": false,
+      "time": "2018-05-06T07:21:53+02:00",
+    },
+    "0.0.2": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-07T07:21:53+02:00",
     },
   },
 }

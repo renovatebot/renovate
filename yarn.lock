@@ -4189,9 +4189,9 @@ nice-try@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.4.tgz#d93962f6c52f2c1558c0fbda6d512819f1efe1c4"
 
-nock@9.3.0:
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-9.3.0.tgz#4dcfdd37bd249836754d05bbac5a1f05e12e0f16"
+nock@9.3.1:
+  version "9.3.1"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-9.3.1.tgz#8c5c6428240d5bf337b7b72c04e63a6737183b95"
   dependencies:
     chai "^4.1.2"
     debug "^3.1.0"
@@ -5548,9 +5548,9 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.5.0:
-  version "15.5.0"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.5.0.tgz#cbbaefb311a41c6f41b2f1f4fbab91bd95db409b"
+semantic-release@15.5.1:
+  version "15.5.1"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.5.1.tgz#e151bd3292588424f6a478d28b91d76c2c15d06a"
   dependencies:
     "@semantic-release/commit-analyzer" "^5.0.0"
     "@semantic-release/error" "^2.2.0"

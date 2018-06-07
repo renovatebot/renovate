@@ -26,17 +26,6 @@ describe('semver.isValid(input)', () => {
     ).toBe(false);
   });
 });
-describe('semver.isRange(input)', () => {
-  it('rejects simple semver', () => {
-    expect(!!semver.isRange('1.2.3')).toBe(false);
-  });
-  it('accepts tilde', () => {
-    expect(!!semver.isRange('~1.2.3')).toBe(true);
-  });
-  it('accepts caret', () => {
-    expect(!!semver.isRange('^1.2.3')).toBe(true);
-  });
-});
 describe('semver.isSingleVersion()', () => {
   it('returns true if naked version', () => {
     expect(!!semver.isSingleVersion('1.2.3')).toBe(true);

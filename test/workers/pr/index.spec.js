@@ -298,6 +298,7 @@ describe('workers/pr', () => {
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch-push';
+      config.branchAutomergeFailureMessage = 'branch status error';
       platform.getBranchStatus.mockReturnValueOnce('failure');
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
