@@ -38,10 +38,6 @@ Object {
       "gitHead": "1.0.8",
       "time": "2018-03-14T17:40:06+00:00",
     },
-    "dev-master": Object {
-      "gitHead": "dev-master",
-      "time": "2018-03-14T17:40:06+00:00",
-    },
   },
 }
 `;
