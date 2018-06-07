@@ -4,7 +4,7 @@ const {
 } = require('../../../lib/manager/pip_requirements/update');
 
 const requirements = fs.readFileSync(
-  'test/_fixtures/pip_requirements/requirements.txt',
+  'test/_fixtures/pip_requirements/requirements1.txt',
   'utf8'
 );
 

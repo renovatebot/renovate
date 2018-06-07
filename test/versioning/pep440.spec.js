@@ -23,17 +23,6 @@ describe('pep440.isValid(input)', () => {
     ).toBe(false);
   });
 });
-describe('pep440.isRange(input)', () => {
-  it('rejects simple pep440', () => {
-    expect(!!pep440.isRange('1.2.3')).toBe(false);
-  });
-  it('accepts tilde', () => {
-    expect(!!pep440.isRange('~=1.2.3')).toBe(true);
-  });
-  it('accepts glob', () => {
-    expect(!!pep440.isRange('==1.2.*')).toBe(true);
-  });
-});
 
 describe('pep440.isStable(version)', () => {
   it('returns correct value', () => {
@@ -42,6 +31,21 @@ describe('pep440.isStable(version)', () => {
   });
   it('returns false when version invalid', () => {
     expect(pep440.isStable('not_version')).toBe(false);
+  });
+});
+
+describe('pep440.isSingleVersion()', () => {
+  it('returns true if naked version', () => {
+    expect(!!pep440.isSingleVersion('1.2.3')).toBe(true);
+    expect(!!pep440.isSingleVersion('1.2.3rc0')).toBe(true);
+  });
+  it('returns true if double equals', () => {
+    expect(!!pep440.isSingleVersion('==1.2.3')).toBe(true);
+    expect(!!pep440.isSingleVersion('==1.2')).toBe(true);
+    expect(!!pep440.isSingleVersion('== 1.2.3')).toBe(true);
+  });
+  it('returns false when not version', () => {
+    expect(!!pep440.isSingleVersion('==1.*')).toBe(false);
   });
 });
 
@@ -71,5 +75,18 @@ describe('pep440.minSatisfyingVersion(versions, range)', () => {
   });
   it('returns null when none found', () => {
     expect(pep440.minSatisfyingVersion(versions, '~=2.1')).toBe(null);
+  });
+});
+
+describe('pep440.getNewValue()', () => {
+  it('returns double equals', () => {
+    expect(
+      pep440.getNewValue({ currentValue: '==1.0.0' }, '1.0.0', '1.0.1')
+    ).toBe('==1.0.1');
+  });
+  it('returns version', () => {
+    expect(
+      pep440.getNewValue({ currentValue: '>=1.0.0' }, '1.0.0', '1.0.1')
+    ).toBe('1.0.1');
   });
 });

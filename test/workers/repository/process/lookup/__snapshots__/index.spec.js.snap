@@ -3,7 +3,6 @@
 exports[`manager/npm/lookup .lookupUpdates() disables major release separation (major) 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
@@ -41,19 +40,19 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() handles PEP440 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 0,
-    "newValue": "0.9.4",
+    "newValue": "==0.9.4",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "type": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.4",
+    "isRange": true,
     "newMajor": 0,
     "newMinor": 9,
-    "newValue": "0.9.7",
+    "newValue": "==0.9.7",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "0.9.7",
     "type": "minor",
@@ -61,9 +60,10 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.4",
+    "isRange": true,
     "newMajor": 1,
     "newMinor": 4,
-    "newValue": "1.4.1",
+    "newValue": "==1.4.1",
     "repositoryUrl": "https://github.com/kriskowal/q",
     "toVersion": "1.4.1",
     "type": "major",
@@ -96,12 +96,20 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() handles pypi 404 1`] = `
+Array [
+  Object {
+    "message": "Failed to look up dependency foo",
+    "type": "warning",
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() handles unknown purl 1`] = `Array []`;
 
 exports[`manager/npm/lookup .lookupUpdates() ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.9.7",
@@ -124,7 +132,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() pins minor ranged versions 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.4.1",
@@ -191,7 +198,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns both updates if automerging minor 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
@@ -289,7 +295,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns only one update if automerging major 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
@@ -312,7 +317,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() returns only one update if grouping 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
@@ -421,7 +425,6 @@ exports[`manager/npm/lookup .lookupUpdates() returns rollback for pinned version
 Array [
   Object {
     "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-    "canBeUnpublished": false,
     "commitMessageAction": "Roll back",
     "isRollback": true,
     "newMajor": 0,
@@ -447,7 +450,6 @@ exports[`manager/npm/lookup .lookupUpdates() returns rollback for ranged version
 Array [
   Object {
     "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-    "canBeUnpublished": false,
     "commitMessageAction": "Roll back",
     "isRollback": true,
     "newMajor": 0,
@@ -491,7 +493,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() should downgrade from missing versions 1`] = `
 Object {
   "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
-  "canBeUnpublished": false,
   "commitMessageAction": "Roll back",
   "isRollback": true,
   "newMajor": 1,
@@ -645,7 +646,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports minor and major upgrades for ranged versions 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
@@ -678,7 +678,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() supports minor and major upgrades for tilde ranges 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
@@ -743,7 +742,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades .x minor ranges 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.3.0",
@@ -986,7 +984,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades minor ranged versions 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.0.1",
@@ -1095,7 +1092,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() upgrades tilde ranges 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.3.0",
@@ -1134,7 +1130,6 @@ Array [
 exports[`manager/npm/lookup .lookupUpdates() uses the locked version for pinning 1`] = `
 Array [
   Object {
-    "canBeUnpublished": false,
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.0.0",
