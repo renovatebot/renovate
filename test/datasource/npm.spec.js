@@ -1,33 +1,39 @@
-const npm = require('../../../lib/datasource/npm');
+const npm = require('../../lib/datasource/npm');
 const registryAuthToken = require('registry-auth-token');
 const nock = require('nock');
+const moment = require('moment');
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
 
-const npmResponse = {
-  versions: {
-    '0.0.1': {
-      foo: 1,
-    },
-  },
-  repository: {
-    type: 'git',
-    url: 'git://github.com/renovateapp/dummy.git',
-  },
-  'dist-tags': {
-    latest: '0.0.1',
-  },
-  time: {
-    '0.0.1': '',
-  },
-};
+let npmResponse;
 
 describe('api/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
     npm.resetCache();
+    npmResponse = {
+      versions: {
+        '0.0.1': {
+          foo: 1,
+        },
+        '0.0.2': {
+          foo: 2,
+        },
+      },
+      repository: {
+        type: 'git',
+        url: 'git://github.com/renovateapp/dummy.git',
+      },
+      'dist-tags': {
+        latest: '0.0.1',
+      },
+      time: {
+        '0.0.1': '2018-05-06T07:21:53+02:00',
+        '0.0.2': '2018-05-07T07:21:53+02:00',
+      },
+    };
   });
   it('should return null for no versions', async () => {
     const missingVersions = { ...npmResponse };
@@ -47,6 +53,29 @@ describe('api/npm', () => {
       .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
+    expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
+    expect(res.versions['0.0.2'].canBeUnpublished).toBe(false);
+  });
+  it('should handle no time', async () => {
+    delete npmResponse.time['0.0.2'];
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
+    const res = await npm.getDependency('foobar');
+    expect(res).toMatchSnapshot();
+    expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
+    expect(res.versions['0.0.2'].canBeUnpublished).toBeUndefined();
+  });
+  it('should return canBeUnpublished=true', async () => {
+    npmResponse.time['0.0.2'] = moment()
+      .subtract(6, 'hours')
+      .format();
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
+    const res = await npm.getDependency('foobar');
+    expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
+    expect(res.versions['0.0.2'].canBeUnpublished).toBe(true);
   });
   it('should use homepage', async () => {
     const npmResponseHomepage = { ...npmResponse };
@@ -181,15 +210,6 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     npm.setNpmrc('foo=bar');
-    const res = await npm.getDependency('foobar');
-    expect(res).toMatchSnapshot();
-  });
-  it('should use dummy time if missing', async () => {
-    const noTimeResponse = { ...npmResponse };
-    delete noTimeResponse.time;
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, noTimeResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
   });
