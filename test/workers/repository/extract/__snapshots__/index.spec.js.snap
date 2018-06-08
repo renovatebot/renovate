@@ -11,6 +11,9 @@ Object {
   "circleci": Array [
     Object {},
   ],
+  "composer": Array [
+    Object {},
+  ],
   "docker": Array [
     Object {},
   ],

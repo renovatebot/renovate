@@ -124,6 +124,10 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. "dependency react".
 
+## composer
+
+Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
+
 ## copyLocalLibs
 
 Set to true if repository package.json files contain any local (file) dependencies + lock files. The `package.json` files from each will be copied to disk before lock file generation, even if they are within ignored directories.
@@ -435,6 +439,10 @@ The above will set `rangeStrategy` to `replace` for any package starting with `a
 Add to this object if you wish to define rules that apply only to patch updates. See also `major` and `minor` configuration options.
 
 ## paths
+
+## php
+
+Warning: PHP Composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
 ## pin
 
