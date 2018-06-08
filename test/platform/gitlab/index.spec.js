@@ -79,15 +79,15 @@ describe('platform/gitlab', () => {
       },
     }));
     get.mockReturnValue({
-        body: [
-          {
-            number: 1,
-            source_branch: 'branch-a',
-            title: 'branch a pr',
-            state: 'opened',
-          },
-        ],
-      });
+      body: [
+        {
+          number: 1,
+          source_branch: 'branch-a',
+          title: 'branch a pr',
+          state: 'opened',
+        },
+      ],
+    });
     return gitlab.initRepo(...args);
   }
 
@@ -548,7 +548,9 @@ describe('platform/gitlab', () => {
     });
     it('add updates comment if necessary', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
-      get.mockReturnValueOnce({ body: [{ id: 1234, body: '### some-subject\n\nblablabla' }], });
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
+      });
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
       expect(get.post.mock.calls).toHaveLength(0);
       expect(get.patch.mock.calls).toHaveLength(1);
@@ -574,7 +576,9 @@ describe('platform/gitlab', () => {
   describe('ensureCommentRemoval', () => {
     it('deletes comment if found', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
-      get.mockReturnValueOnce({ body: [{ id: 1234, body: '### some-subject\n\nblablabla' }], });
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
+      });
       await gitlab.ensureCommentRemoval(42, 'some-subject');
       expect(get.delete.mock.calls).toHaveLength(1);
     });
