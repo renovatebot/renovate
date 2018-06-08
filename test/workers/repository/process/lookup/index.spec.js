@@ -705,6 +705,7 @@ describe('manager/npm/lookup', () => {
       config.currentValue = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';
       config.depName = 'next';
+      config.purl = 'pkg:npm/next';
       nock('https://registry.npmjs.org')
         .get('/next')
         .reply(200, nextJson);

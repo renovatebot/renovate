@@ -1,4 +1,4 @@
-const github = require('../../lib/datasource/github');
+const datasource = require('../../lib/datasource');
 const ghGot = require('../../lib/platform/github/gh-got-wrapper');
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
@@ -14,7 +14,9 @@ describe('datasource/github', () => {
         { ref: 'refs/tags/v1.1.0' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await github.getDependency('some/dep', { clean: 'true' });
+      const res = await datasource.getDependency(
+        'pkg:github/some/dep?clean=true'
+      );
       expect(res).toMatchSnapshot();
       expect(Object.keys(res.versions)).toHaveLength(4);
       expect(res.versions['1.1.0']).toBeDefined();
@@ -27,14 +29,16 @@ describe('datasource/github', () => {
         { tag_name: 'v1.1.0' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await github.getDependency('some/dep', { ref: 'release' });
+      const res = await datasource.getDependency(
+        'pkg:github/some/dep?ref=release'
+      );
       expect(res).toMatchSnapshot();
       expect(Object.keys(res.versions)).toHaveLength(4);
       expect(res.versions['v1.1.0']).toBeDefined();
     });
     it('returns null for invalid ref', async () => {
       expect(
-        await github.getDependency('some/dep', { ref: 'invalid' })
+        await datasource.getDependency('pkg:github/some/dep?ref=invalid')
       ).toBeNull();
     });
   });
