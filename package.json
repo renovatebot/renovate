@@ -118,9 +118,9 @@
     "jest": "23.1.0",
     "jest-silent-reporter": "0.0.5",
     "mockdate": "2.0.2",
-    "nock": "9.3.0",
+    "nock": "9.3.2",
     "prettier": "1.13.4",
-    "semantic-release": "15.5.0"
+    "semantic-release": "15.5.1"
   },
   "files": [
     "bin/config-validator.js",

@@ -705,6 +705,7 @@ describe('manager/npm/lookup', () => {
       config.currentValue = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';
       config.depName = 'next';
+      config.purl = 'pkg:npm/next';
       nock('https://registry.npmjs.org')
         .get('/next')
         .reply(200, nextJson);
@@ -810,6 +811,16 @@ describe('manager/npm/lookup', () => {
       config.currentValue = '1.0.0';
       nock('https://api.github.com')
         .get('/repos/some/repo/git/refs/tags?per_page=100')
+        .reply(404);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
+    });
+    it('handles packagist', async () => {
+      config.depName = 'foo/bar';
+      config.purl = 'pkg:packagist/foo/bar';
+      config.packageFile = 'composer.json';
+      config.currentValue = '1.0.0';
+      nock('https://packagist.org')
+        .get('/packages/foo/bar.json')
         .reply(404);
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
