@@ -80,6 +80,15 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() handles packagist 1`] = `
+Array [
+  Object {
+    "message": "Failed to look up dependency foo/bar",
+    "type": "warning",
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() handles prerelease jumps 1`] = `
 Array [
   Object {

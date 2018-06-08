@@ -813,6 +813,16 @@ describe('manager/npm/lookup', () => {
         .reply(404);
       expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
     });
+    it('handles packagist', async () => {
+      config.depName = 'foo/bar';
+      config.purl = 'pkg:packagist/foo/bar';
+      config.packageFile = 'composer.json';
+      config.currentValue = '1.0.0';
+      nock('https://packagist.org')
+        .get('/packages/foo/bar.json')
+        .reply(404);
+      expect(await lookup.lookupUpdates(config)).toMatchSnapshot();
+    });
     it('handles unknown purl', async () => {
       config.depName = 'foo';
       config.purl = 'pkg:typo/some/repo';
