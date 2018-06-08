@@ -142,6 +142,7 @@ describe('manager/npm/extract', () => {
           '@angular/cli': '1.6.0',
           foo: '*',
           bar: 'file:../foo/bar',
+          baz: '',
           other: 'latest',
         },
         engines: {

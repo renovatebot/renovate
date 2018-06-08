@@ -33,6 +33,14 @@ Object {
       "versionScheme": "semver",
     },
     Object {
+      "currentValue": "",
+      "depName": "baz",
+      "depType": "devDependencies",
+      "purl": "pkg:npm/baz",
+      "skipReason": "empty",
+      "versionScheme": "semver",
+    },
+    Object {
       "currentValue": "latest",
       "depName": "other",
       "depType": "devDependencies",
