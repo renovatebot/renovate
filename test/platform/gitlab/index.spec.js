@@ -78,6 +78,16 @@ describe('platform/gitlab', () => {
         email: 'a@b.com',
       },
     }));
+    get.mockReturnValue({
+        body: [
+          {
+            number: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'opened',
+          },
+        ],
+      });
     return gitlab.initRepo(...args);
   }
 
@@ -526,6 +536,47 @@ describe('platform/gitlab', () => {
   describe('addReviewers(issueNo, reviewers)', () => {
     it('should add the given reviewers to the PR', async () => {
       await gitlab.addReviewers(42, ['someuser', 'someotheruser']);
+    });
+  });
+  describe('ensureComment', () => {
+    it('add comment if not found', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({ body: [] });
+      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(1);
+      expect(get.post.mock.calls).toMatchSnapshot();
+    });
+    it('add updates comment if necessary', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({ body: [{ id: 1234, body: '### some-subject\n\nblablabla' }], });
+      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(1);
+      expect(get.patch.mock.calls).toMatchSnapshot();
+    });
+    it('skips comment', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
+      });
+      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(0);
+    });
+    it('handles comment with no description', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
+      await gitlab.ensureComment(42, null, '!merge');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(0);
+    });
+  });
+  describe('ensureCommentRemoval', () => {
+    it('deletes comment if found', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({ body: [{ id: 1234, body: '### some-subject\n\nblablabla' }], });
+      await gitlab.ensureCommentRemoval(42, 'some-subject');
+      expect(get.delete.mock.calls).toHaveLength(1);
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
