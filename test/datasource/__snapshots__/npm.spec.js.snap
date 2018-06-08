@@ -66,6 +66,29 @@ Object {
 }
 `;
 
+exports[`api/npm should handle purl 1`] = `
+Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
+  "homepage": undefined,
+  "latestVersion": "0.0.1",
+  "name": undefined,
+  "renovate-config": undefined,
+  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "versions": Object {
+    "0.0.1": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-06T07:21:53+02:00",
+    },
+    "0.0.2": Object {
+      "canBeUnpublished": false,
+      "time": "2018-05-07T07:21:53+02:00",
+    },
+  },
+}
+`;
+
 exports[`api/npm should replace any environment variable in npmrc 1`] = `
 Object {
   "dist-tags": Object {

@@ -44,7 +44,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, missingVersions);
-    const res = await npm.getDependency('foobar', 1);
+    const res = await npm.getDependency('foobar', { retries: 1 });
     expect(res).toBe(null);
   });
   it('should fetch package info from npm', async () => {
@@ -55,6 +55,13 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
     expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
     expect(res.versions['0.0.2'].canBeUnpublished).toBe(false);
+  });
+  it('should handle purl', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
+    const res = await npm.getDependency({ fullname: 'foobar' });
+    expect(res).toMatchSnapshot();
   });
   it('should handle no time', async () => {
     delete npmResponse.time['0.0.2'];
@@ -110,7 +117,7 @@ describe('api/npm', () => {
       .reply(200, 'oops');
     let e;
     try {
-      await npm.getDependency('foobar', 1);
+      await npm.getDependency('foobar', { retries: 1 });
     } catch (err) {
       e = err;
     }
@@ -125,7 +132,7 @@ describe('api/npm', () => {
       .reply(429);
     let e;
     try {
-      await npm.getDependency('foobar', 1);
+      await npm.getDependency('foobar', { retries: 1 });
     } catch (err) {
       e = err;
     }
@@ -137,7 +144,7 @@ describe('api/npm', () => {
       .reply(503);
     let e;
     try {
-      await npm.getDependency('foobar', 0);
+      await npm.getDependency('foobar', { retries: 0 });
     } catch (err) {
       e = err;
     }
@@ -149,7 +156,7 @@ describe('api/npm', () => {
       .reply(408);
     let e;
     try {
-      await npm.getDependency('foobar', 0);
+      await npm.getDependency('foobar', { retries: 0 });
     } catch (err) {
       e = err;
     }
@@ -165,7 +172,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200);
-    const res = await npm.getDependency('foobar', 2);
+    const res = await npm.getDependency('foobar', { retries: 2 });
     expect(res).toMatchSnapshot();
   });
   it('should throw error for others', async () => {
