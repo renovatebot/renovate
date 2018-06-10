@@ -2,113 +2,119 @@
 
 exports[`api/npm should fetch package info from custom registry 1`] = `
 Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": undefined,
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
-  "versions": Object {
-    "0.0.1": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-06T07:21:53+02:00",
-    },
-    "0.0.2": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-07T07:21:53+02:00",
-    },
-  },
 }
 `;
 
 exports[`api/npm should fetch package info from npm 1`] = `
 Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": undefined,
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
-  "versions": Object {
-    "0.0.1": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-06T07:21:53+02:00",
-    },
-    "0.0.2": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-07T07:21:53+02:00",
-    },
-  },
 }
 `;
 
 exports[`api/npm should handle no time 1`] = `
 Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": undefined,
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "gitHead": undefined,
+      "version": "0.0.2",
+    },
+  ],
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
-  "versions": Object {
-    "0.0.1": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-06T07:21:53+02:00",
-    },
-    "0.0.2": Object {},
-  },
 }
 `;
 
 exports[`api/npm should handle purl 1`] = `
 Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": undefined,
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
-  "versions": Object {
-    "0.0.1": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-06T07:21:53+02:00",
-    },
-    "0.0.2": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-07T07:21:53+02:00",
-    },
-  },
 }
 `;
 
 exports[`api/npm should replace any environment variable in npmrc 1`] = `
 Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": undefined,
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
-  "versions": Object {
-    "0.0.1": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-06T07:21:53+02:00",
-    },
-    "0.0.2": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-07T07:21:53+02:00",
-    },
-  },
 }
 `;
 
@@ -116,92 +122,96 @@ exports[`api/npm should retry when 408 or 5xx 1`] = `null`;
 
 exports[`api/npm should send an authorization header if provided 1`] = `
 Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": undefined,
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
-  "versions": Object {
-    "0.0.1": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-06T07:21:53+02:00",
-    },
-    "0.0.2": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-07T07:21:53+02:00",
-    },
-  },
 }
 `;
 
 exports[`api/npm should use NPM_TOKEN if provided 1`] = `
 Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": undefined,
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
-  "versions": Object {
-    "0.0.1": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-06T07:21:53+02:00",
-    },
-    "0.0.2": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-07T07:21:53+02:00",
-    },
-  },
 }
 `;
 
 exports[`api/npm should use default registry if missing from npmrc 1`] = `
 Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": undefined,
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
   "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
-  "versions": Object {
-    "0.0.1": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-06T07:21:53+02:00",
-    },
-    "0.0.2": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-07T07:21:53+02:00",
-    },
-  },
 }
 `;
 
 exports[`api/npm should use homepage 1`] = `
 Object {
-  "dist-tags": Object {
-    "latest": "0.0.1",
-  },
   "homepage": "https://google.com",
   "latestVersion": "0.0.1",
   "name": undefined,
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitHead": undefined,
+      "time": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
   "renovate-config": undefined,
   "repositoryUrl": "https://google.com",
-  "versions": Object {
-    "0.0.1": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-06T07:21:53+02:00",
-    },
-    "0.0.2": Object {
-      "canBeUnpublished": false,
-      "time": "2018-05-07T07:21:53+02:00",
-    },
-  },
 }
 `;
