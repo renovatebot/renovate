@@ -2488,9 +2488,9 @@ homedir-polyfill@^1.0.1:
   dependencies:
     parse-passwd "^1.0.0"
 
-hook-std@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/hook-std/-/hook-std-0.4.0.tgz#fa8b2f84d358763137cb7d17e3308b28714bd174"
+hook-std@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/hook-std/-/hook-std-1.0.1.tgz#fc91e6836c5b174f405dc4b57aa2228e4c599981"
 
 hosted-git-info@^2.1.4, hosted-git-info@^2.6.0:
   version "2.6.0"
@@ -4965,9 +4965,9 @@ pn@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
 
-pnpm@2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.2.2.tgz#23d5ed8d7c5133ad46b4ac7b0ee63cbe7bdec688"
+pnpm@2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.4.0.tgz#54c27537e831f91d5afe63320a5aa2df597efe84"
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
@@ -5552,9 +5552,9 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.5.1:
-  version "15.5.1"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.5.1.tgz#e151bd3292588424f6a478d28b91d76c2c15d06a"
+semantic-release@15.5.2:
+  version "15.5.2"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.5.2.tgz#ce26932465de6d58c4f4a52e1de07e9e0e4c2a5a"
   dependencies:
     "@semantic-release/commit-analyzer" "^5.0.0"
     "@semantic-release/error" "^2.2.0"
@@ -5571,7 +5571,7 @@ semantic-release@15.5.1:
     get-stream "^3.0.0"
     git-log-parser "^1.2.0"
     git-url-parse "^9.0.0"
-    hook-std "^0.4.0"
+    hook-std "^1.0.1"
     hosted-git-info "^2.6.0"
     lodash "^4.17.4"
     marked "^0.4.0"
