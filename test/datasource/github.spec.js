@@ -33,7 +33,7 @@ describe('datasource/github', () => {
         'pkg:github/some/dep?ref=release'
       );
       expect(res).toMatchSnapshot();
-      expect(Object.keys(res.versions)).toHaveLength(4);
+      expect(Object.keys(res.versions)).toHaveLength(2);
       expect(res.versions['v1.1.0']).toBeDefined();
     });
     it('returns null for invalid ref', async () => {
