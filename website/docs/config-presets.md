@@ -63,7 +63,7 @@ You then need to publish the `renovate-config-fastcore` package where the `packa
   ...
   "renovate-config": {
     "default": {
-      "extends": ["config:base", "schedule:nonOfficeHours"]  
+      "extends": ["config:base", "schedule:nonOfficeHours"]
     }
   }
 }
