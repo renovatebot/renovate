@@ -18,8 +18,10 @@ describe('datasource/github', () => {
         'pkg:github/some/dep?sanitize=true'
       );
       expect(res).toMatchSnapshot();
-      expect(Object.keys(res.versions)).toHaveLength(2);
-      expect(res.versions['1.1.0']).toBeDefined();
+      expect(res.releases).toHaveLength(2);
+      expect(
+        res.releases.find(release => release.version === '1.1.0')
+      ).toBeDefined();
     });
     it('returns releases', async () => {
       const body = [
@@ -33,8 +35,10 @@ describe('datasource/github', () => {
         'pkg:github/some/dep?ref=release'
       );
       expect(res).toMatchSnapshot();
-      expect(Object.keys(res.versions)).toHaveLength(2);
-      expect(res.versions['v1.1.0']).toBeDefined();
+      expect(res.releases).toHaveLength(2);
+      expect(
+        res.releases.find(release => release.version === 'v1.1.0')
+      ).toBeDefined();
     });
     it('returns null for invalid ref', async () => {
       expect(

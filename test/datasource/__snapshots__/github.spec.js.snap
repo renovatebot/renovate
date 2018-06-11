@@ -2,28 +2,32 @@
 
 exports[`datasource/github getDependency returns cleaned tags 1`] = `
 Object {
-  "repositoryUrl": "https://github.com/some/dep",
-  "versions": Object {
-    "1.0.0": Object {
+  "releases": Array [
+    Object {
       "gitRef": "1.0.0",
+      "version": "1.0.0",
     },
-    "1.1.0": Object {
+    Object {
       "gitRef": "v1.1.0",
+      "version": "1.1.0",
     },
-  },
+  ],
+  "repositoryUrl": "https://github.com/some/dep",
 }
 `;
 
 exports[`datasource/github getDependency returns releases 1`] = `
 Object {
-  "repositoryUrl": "https://github.com/some/dep",
-  "versions": Object {
-    "1.0.0": Object {
+  "releases": Array [
+    Object {
       "gitRef": "1.0.0",
+      "version": "1.0.0",
     },
-    "v1.1.0": Object {
+    Object {
       "gitRef": "v1.1.0",
+      "version": "v1.1.0",
     },
-  },
+  ],
+  "repositoryUrl": "https://github.com/some/dep",
 }
 `;
