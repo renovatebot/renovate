@@ -15,10 +15,10 @@ describe('datasource/github', () => {
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getDependency(
-        'pkg:github/some/dep?clean=true'
+        'pkg:github/some/dep?sanitize=true'
       );
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(4);
+      expect(res.releases).toHaveLength(2);
       expect(
         res.releases.find(release => release.version === '1.1.0')
       ).toBeDefined();
@@ -35,9 +35,9 @@ describe('datasource/github', () => {
         'pkg:github/some/dep?ref=release'
       );
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(4);
+      expect(res.releases).toHaveLength(2);
       expect(
-        res.releases.find(release => release.version === '1.1.0')
+        res.releases.find(release => release.version === 'v1.1.0')
       ).toBeDefined();
     });
     it('returns null for invalid ref', async () => {
