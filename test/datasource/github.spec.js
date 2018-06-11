@@ -8,10 +8,10 @@ describe('datasource/github', () => {
   describe('getDependency', () => {
     it('returns cleaned tags', async () => {
       const body = [
-        { ref: 'refs/tags/a' },
-        { ref: 'refs/tags/v' },
-        { ref: 'refs/tags/1.0.0' },
-        { ref: 'refs/tags/v1.1.0' },
+        { name: 'a' },
+        { name: 'v' },
+        { name: '1.0.0' },
+        { name: 'v1.1.0' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getDependency(
