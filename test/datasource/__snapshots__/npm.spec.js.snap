@@ -13,10 +13,12 @@ Object {
   "versions": Object {
     "0.0.1": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-06T07:21:53+02:00",
     },
     "0.0.2": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-07T07:21:53+02:00",
     },
   },
@@ -36,10 +38,12 @@ Object {
   "versions": Object {
     "0.0.1": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-06T07:21:53+02:00",
     },
     "0.0.2": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-07T07:21:53+02:00",
     },
   },
@@ -59,6 +63,7 @@ Object {
   "versions": Object {
     "0.0.1": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-06T07:21:53+02:00",
     },
     "0.0.2": Object {},
@@ -79,10 +84,12 @@ Object {
   "versions": Object {
     "0.0.1": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-06T07:21:53+02:00",
     },
     "0.0.2": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-07T07:21:53+02:00",
     },
   },
@@ -102,10 +109,12 @@ Object {
   "versions": Object {
     "0.0.1": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-06T07:21:53+02:00",
     },
     "0.0.2": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-07T07:21:53+02:00",
     },
   },
@@ -127,10 +136,12 @@ Object {
   "versions": Object {
     "0.0.1": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-06T07:21:53+02:00",
     },
     "0.0.2": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-07T07:21:53+02:00",
     },
   },
@@ -150,10 +161,12 @@ Object {
   "versions": Object {
     "0.0.1": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-06T07:21:53+02:00",
     },
     "0.0.2": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-07T07:21:53+02:00",
     },
   },
@@ -173,10 +186,12 @@ Object {
   "versions": Object {
     "0.0.1": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-06T07:21:53+02:00",
     },
     "0.0.2": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-07T07:21:53+02:00",
     },
   },
@@ -196,10 +211,12 @@ Object {
   "versions": Object {
     "0.0.1": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-06T07:21:53+02:00",
     },
     "0.0.2": Object {
       "canBeUnpublished": false,
+      "gitRef": undefined,
       "time": "2018-05-07T07:21:53+02:00",
     },
   },
