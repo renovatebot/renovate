@@ -62,7 +62,7 @@ Object {
       "major": Object {
         "enabled": false,
       },
-      "purl": "pkg:github/nodejs/node?clean=true",
+      "purl": "pkg:github/nodejs/node?sanitize=true",
       "versionScheme": "semver",
     },
     Object {

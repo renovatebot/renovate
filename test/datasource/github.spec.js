@@ -15,10 +15,10 @@ describe('datasource/github', () => {
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getDependency(
-        'pkg:github/some/dep?clean=true'
+        'pkg:github/some/dep?sanitize=true'
       );
       expect(res).toMatchSnapshot();
-      expect(Object.keys(res.versions)).toHaveLength(4);
+      expect(Object.keys(res.versions)).toHaveLength(2);
       expect(res.versions['1.1.0']).toBeDefined();
     });
     it('returns releases', async () => {

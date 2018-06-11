@@ -6,8 +6,6 @@ Object {
   "versions": Object {
     "1.0.0": Object {},
     "1.1.0": Object {},
-    "a": Object {},
-    "v": Object {},
   },
 }
 `;
