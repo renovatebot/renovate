@@ -7,35 +7,35 @@ Object {
   "repositoryUrl": "https://github.com/cristianvuolo/uploader",
   "versions": Object {
     "1.0.0": Object {
-      "gitHead": "1.0.0",
+      "gitRef": "1.0.0",
       "time": "2017-02-07T20:01:41+00:00",
     },
     "1.0.1": Object {
-      "gitHead": "1.0.1",
+      "gitRef": "1.0.1",
       "time": "2017-02-07T20:10:08+00:00",
     },
     "1.0.3": Object {
-      "gitHead": "1.0.3",
+      "gitRef": "1.0.3",
       "time": "2017-07-11T16:52:54+00:00",
     },
     "1.0.4": Object {
-      "gitHead": "1.0.4",
+      "gitRef": "1.0.4",
       "time": "2017-08-02T13:08:31+00:00",
     },
     "1.0.5": Object {
-      "gitHead": "1.0.5",
+      "gitRef": "1.0.5",
       "time": "2017-08-02T13:23:33+00:00",
     },
     "1.0.6": Object {
-      "gitHead": "1.0.6",
+      "gitRef": "1.0.6",
       "time": "2018-01-25T18:57:17+00:00",
     },
     "1.0.7": Object {
-      "gitHead": "1.0.7",
+      "gitRef": "1.0.7",
       "time": "2018-02-19T12:22:34+00:00",
     },
     "1.0.8": Object {
-      "gitHead": "1.0.8",
+      "gitRef": "1.0.8",
       "time": "2018-03-14T17:40:06+00:00",
     },
   },
