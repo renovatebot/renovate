@@ -119,7 +119,7 @@
     "jest-silent-reporter": "0.0.5",
     "mockdate": "2.0.2",
     "nock": "9.3.2",
-    "prettier": "1.13.4",
+    "prettier": "1.13.5",
     "semantic-release": "15.5.1"
   },
   "files": [
