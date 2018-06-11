@@ -51,7 +51,7 @@
   "dependencies": {
     "@renovate/pep440": "0.2.0",
     "@sindresorhus/is": "0.9.0",
-    "@yarnpkg/lockfile": "1.0.1",
+    "@yarnpkg/lockfile": "1.0.2",
     "bunyan": "1.8.12",
     "cacache": "11.0.2",
     "chalk": "2.4.1",
@@ -59,7 +59,7 @@
     "child-process-promise": "2.2.1",
     "clean-git-ref": "1.0.3",
     "commander": "2.15.1",
-    "compare-versions": "3.2.1",
+    "compare-versions": "3.3.0",
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
     "deepcopy": "1.0.0",
@@ -102,7 +102,7 @@
     "upath": "1.1.0",
     "validator": "10.3.0",
     "vso-node-api": "6.5.0",
-    "xregexp": "4.1.1",
+    "xregexp": "4.2.0",
     "yarn": "1.7.0"
   },
   "devDependencies": {

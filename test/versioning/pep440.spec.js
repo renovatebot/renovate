@@ -80,13 +80,13 @@ describe('pep440.minSatisfyingVersion(versions, range)', () => {
 
 describe('pep440.getNewValue()', () => {
   it('returns double equals', () => {
-    expect(
-      pep440.getNewValue({ currentValue: '==1.0.0' }, '1.0.0', '1.0.1')
-    ).toBe('==1.0.1');
+    expect(pep440.getNewValue('==1.0.0', 'replace', '1.0.0', '1.0.1')).toBe(
+      '==1.0.1'
+    );
   });
   it('returns version', () => {
-    expect(
-      pep440.getNewValue({ currentValue: '>=1.0.0' }, '1.0.0', '1.0.1')
-    ).toBe('1.0.1');
+    expect(pep440.getNewValue('>=1.0.0', 'replace', '1.0.0', '1.0.1')).toBe(
+      '1.0.1'
+    );
   });
 });
