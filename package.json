@@ -120,7 +120,7 @@
     "mockdate": "2.0.2",
     "nock": "9.3.2",
     "prettier": "1.13.4",
-    "semantic-release": "15.5.1"
+    "semantic-release": "15.5.2"
   },
   "files": [
     "bin/config-validator.js",
