@@ -846,5 +846,17 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
     });
+    it('returns complex object', async () => {
+      config.currentValue = '1.3.0';
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(3);
+      expect(res.repositoryUrl).toBeDefined();
+    });
   });
 });
