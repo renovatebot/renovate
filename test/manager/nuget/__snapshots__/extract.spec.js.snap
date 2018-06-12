@@ -1,0 +1,84 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/nuget/extract extractDependencies() extracts all dependencies 1`] = `
+Array [
+  Object {
+    "currentVersion": "4.5.0",
+    "depName": "Autofac",
+    "depType": "nuget",
+    "lineNumber": 12,
+  },
+  Object {
+    "currentVersion": "4.1.0",
+    "depName": "Autofac.Extensions.DependencyInjection",
+    "depType": "nuget",
+    "lineNumber": 13,
+  },
+  Object {
+    "currentVersion": "1.1.2",
+    "depName": "Microsoft.AspNetCore.Hosting",
+    "depType": "nuget",
+    "lineNumber": 14,
+  },
+  Object {
+    "currentVersion": "1.1.3",
+    "depName": "Microsoft.AspNetCore.Mvc.Core",
+    "depType": "nuget",
+    "lineNumber": 15,
+  },
+  Object {
+    "currentVersion": "1.1.2",
+    "depName": "Microsoft.AspNetCore.Server.Kestrel",
+    "depType": "nuget",
+    "lineNumber": 16,
+  },
+  Object {
+    "currentVersion": "1.1.2",
+    "depName": "Microsoft.Extensions.Configuration.Json",
+    "depType": "nuget",
+    "lineNumber": 17,
+  },
+  Object {
+    "currentVersion": "1.1.2",
+    "depName": "Microsoft.Extensions.Logging.Debug",
+    "depType": "nuget",
+    "lineNumber": 18,
+  },
+  Object {
+    "currentVersion": "10.0.2",
+    "depName": "Newtonsoft.Json",
+    "depType": "nuget",
+    "lineNumber": 19,
+  },
+  Object {
+    "currentVersion": "2.4.0",
+    "depName": "Serilog",
+    "depType": "nuget",
+    "lineNumber": 20,
+  },
+  Object {
+    "currentVersion": "1.4.0",
+    "depName": "Serilog.Extensions.Logging",
+    "depType": "nuget",
+    "lineNumber": 21,
+  },
+  Object {
+    "currentVersion": "2.1.0",
+    "depName": "Serilog.Sinks.Literate",
+    "depType": "nuget",
+    "lineNumber": 22,
+  },
+  Object {
+    "currentVersion": "3.1.0",
+    "depName": "Stateless",
+    "depType": "nuget",
+    "lineNumber": 23,
+  },
+]
+`;
+
+exports[`lib/manager/nuget/extract extractDependencies() returns empty for invalid csproj 1`] = `
+Object {
+  "deps": Array [],
+}
+`;
