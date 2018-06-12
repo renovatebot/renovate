@@ -88,7 +88,7 @@
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-link-header": "1.0.1",
-    "pnpm": "2.2.2",
+    "pnpm": "2.4.0",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "safe-regex": "1.1.0",
@@ -119,8 +119,8 @@
     "jest-silent-reporter": "0.0.5",
     "mockdate": "2.0.2",
     "nock": "9.3.2",
-    "prettier": "1.13.4",
-    "semantic-release": "15.5.1"
+    "prettier": "1.13.5",
+    "semantic-release": "15.5.2"
   },
   "files": [
     "bin/config-validator.js",
