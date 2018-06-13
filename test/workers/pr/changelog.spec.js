@@ -14,9 +14,6 @@ const upgrade = {
   versionScheme: 'semver',
   fromVersion: '1.0.0',
   toVersion: '3.0.0',
-};
-
-const dependency = {
   repositoryUrl: 'https://github.com/chalk/chalk',
   releases: [
     { version: '0.9.0' },
@@ -43,7 +40,6 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
           fromVersion: null,
         })
       ).toBe(null);
@@ -53,22 +49,16 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
           fromVersion: '1.0.0',
           toVersion: '1.0.0',
         })
       ).toBe(null);
       expect(ghGot.mock.calls).toHaveLength(0);
     });
-    it('logs when no dependency', async () => {
-      // clear the mock
-      expect(await getChangeLogJSON({ ...upgrade })).toBe(null);
-    });
     it('skips invalid repos', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
           repositoryUrl: 'https://github.com/about',
         })
       ).toBe(null);
@@ -77,7 +67,6 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
         })
       ).toMatchSnapshot();
     });
@@ -97,7 +86,6 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
         })
       ).toMatchSnapshot();
     });
@@ -113,17 +101,18 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
           depName: '@renovate/no',
         })
       ).toMatchSnapshot();
     });
     it('returns cached JSON', async () => {
       const first = await getChangeLogJSON({ ...upgrade });
+      const firstCalls = [...ghGot.mock.calls];
       ghGot.mockClear();
       const second = await getChangeLogJSON({ ...upgrade });
+      const secondCalls = [...ghGot.mock.calls];
       expect(first).toEqual(second);
-      expect(ghGot.mock.calls).toHaveLength(0);
+      expect(firstCalls.length).toBeGreaterThan(secondCalls.length);
     });
     it('filters unnecessary warns', async () => {
       ghGot.mockImplementation(() => {
@@ -132,25 +121,64 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
           depName: '@renovate/no',
         })
       ).toMatchSnapshot();
     });
-    it('skips node engines', async () => {
-      expect(await getChangeLogJSON({ ...upgrade, depType: 'engines' })).toBe(
-        null
-      );
-    });
-    it('supports github enterprise and github.com changelog', async () => {
-      const endpoint = process.env.GITHUB_ENDPOINT;
-      process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
+    it('supports node engines', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
+          depType: 'engines',
         })
       ).toMatchSnapshot();
+    });
+    it('handles no repositoryUrl', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          repositoryUrl: undefined,
+        })
+      ).toBe(null);
+    });
+    it('handles invalid repositoryUrl', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          repositoryUrl: 'http://example.com',
+        })
+      ).toBe(null);
+    });
+    it('handles no releases', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          releases: [],
+        })
+      ).toBe(null);
+    });
+    it('handles not enough releases', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          releases: [{ version: '0.9.0' }],
+        })
+      ).toBe(null);
+    });
+    it('supports github enterprise and github.com changelog', async () => {
+      const token = process.env.GITHUB_TOKEN;
+      const endpoint = process.env.GITHUB_ENDPOINT;
+      process.env.GITHUB_TOKEN = 'super_secret';
+      process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
+      const oldenv = { ...process.env };
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+        })
+      ).toMatchSnapshot();
+      // check that process env was restored
+      expect(process.env).toEqual(oldenv);
+      process.env.GITHUB_TOKEN = token;
       process.env.GITHUB_ENDPOINT = endpoint;
     });
     it('supports github enterprise and github enterprise changelog', async () => {
@@ -159,7 +187,6 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
           repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
         })
       ).toMatchSnapshot();
@@ -173,7 +200,6 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
           repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
         })
       ).toMatchSnapshot();
@@ -181,7 +207,6 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          ...dependency,
           repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
         })
       ).toMatchSnapshot();
