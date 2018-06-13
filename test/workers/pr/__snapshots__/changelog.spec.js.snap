@@ -163,6 +163,7 @@ Object {
     Object {
       "changes": Array [],
       "compare": Object {},
+      "date": undefined,
       "releaseNotes": undefined,
       "version": "2.5.2",
     },
@@ -189,6 +190,7 @@ Object {
       "compare": Object {
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
+      "date": undefined,
       "releaseNotes": Object {
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },

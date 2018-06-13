@@ -3,7 +3,6 @@ jest.mock('../../../lib/datasource/npm');
 jest.mock('got');
 
 const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
-const got = require('got');
 
 const { getChangeLogJSON } = require('../../../lib/workers/pr/changelog');
 const {
@@ -12,6 +11,7 @@ const {
 
 const upgrade = {
   depName: 'renovate',
+  versionScheme: 'semver',
   fromVersion: '1.0.0',
   toVersion: '3.0.0',
 };
@@ -20,13 +20,13 @@ const dependency = {
   repositoryUrl: 'https://github.com/chalk/chalk',
   releases: [
     { version: '0.9.0' },
-    { version: '1.0.0', gitHead: 'npm_1.0.0' },
+    { version: '1.0.0', gitRef: 'npm_1.0.0' },
     {
       version: '2.3.0',
-      gitHead: 'npm_2.3.0',
+      gitRef: 'npm_2.3.0',
       time: '2017-10-24T03:20:46.238Z',
     },
-    { version: '2.2.2', gitHead: 'npm_2.2.2' },
+    { version: '2.2.2', gitRef: 'npm_2.2.2' },
     { version: '2.4.2', time: '2017-12-24T03:20:46.238Z' },
     { version: '2.5.2' },
   ],
