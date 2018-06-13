@@ -1,4 +1,7 @@
+const fs = require('fs');
 const { extractDependencies } = require('../../../lib/manager/docker/extract');
+
+const d1 = fs.readFileSync('test/_fixtures/docker/Dockerfile1', 'utf8');
 
 describe('lib/manager/docker/extract', () => {
   describe('extractDependencies()', () => {
@@ -106,6 +109,11 @@ describe('lib/manager/docker/extract', () => {
       ).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
+    });
+    it('extracts images on adjacent lines', () => {
+      const res = extractDependencies(d1, config).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
     });
   });
 });
