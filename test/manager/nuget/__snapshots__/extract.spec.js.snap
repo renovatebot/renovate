@@ -91,11 +91,12 @@ Array [
     "versionScheme": "semver",
   },
   Object {
-    "currentValue": "3.1.0",
+    "currentValue": "3.1.0.5",
     "depName": "Stateless",
     "depType": "nuget",
     "lineNumber": 23,
     "purl": "pkg:nuget/Stateless",
+    "skipReason": "not-version",
     "versionScheme": "semver",
   },
 ]
