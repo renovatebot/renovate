@@ -1,44 +1,43 @@
 const fs = require('fs');
-const nuget = require('../../lib/datasource/nuget');
+const datasource = require('../../lib/datasource');
 const got = require('got');
 
-const withRepositoryInNuspec = fs.readFileSync(
-  'test/_fixtures/nuget/sample.nuspec',
-  'utf8'
-);
 jest.mock('got');
 
-describe('api/nuget', () => {
-  describe('getVersions', () => {
-    it('returns null if errored', async () => {
-      got.mockReturnValueOnce({});
-      const nuspec = await nuget.getVersions('MyPackage');
-      expect(nuspec).toBe(null);
-    });
-    it('returns versions list', async () => {
-      got.mockReturnValueOnce({
-        body: { versions: ['1.0.0', '2.0.0', '2.1.0', '2.1.1-alpha'] },
-      });
-      const versions = await nuget.getVersions('MyPackage');
-      expect(versions).toHaveLength(4);
-    });
-  });
+const res1 = fs.readFileSync('test/_fixtures/nuget/nunit.json', 'utf8');
+const res2 = fs.readFileSync('test/_fixtures/nuget/sample.nuspec', 'utf8');
 
-  describe('getNuspec', () => {
-    it('returns null if errored', async () => {
+describe('datasource/nuget', () => {
+  describe('getDependency', () => {
+    it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
-      const nuspec = await nuget.getNuspec('MyPackage', '1.0.0.0');
-      expect(nuspec).toBe(null);
+      expect(await datasource.getDependency('pkg:nuget/something')).toBeNull();
     });
-    it('returns json-ified nuspec with attributes', async () => {
-      got.mockReturnValueOnce({ headers: {}, body: withRepositoryInNuspec });
-      const nuspec = await nuget.getNuspec('MyPackage', '1.0.0.0');
-
-      expect(nuspec.metadata.id).toBe('Newtonsoft.Json');
-      expect(nuspec.metadata.version).toBe('11.0.2');
-      expect(nuspec.metadata.repository['@_url']).toBe(
-        'https://github.com/JamesNK/Newtonsoft.Json.git'
+    it('returns null for 404', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
       );
+      expect(await datasource.getDependency('pkg:nuget/something')).toBeNull();
+    });
+    it('returns null for unknown error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      expect(await datasource.getDependency('pkg:nuget/something')).toBeNull();
+    });
+    it('processes real data', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(res1),
+      });
+      got.mockReturnValueOnce({
+        body: res2,
+      });
+      const res = await datasource.getDependency('pkg:nuget/nunit');
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+      expect(res.repositoryUrl).toBeDefined();
     });
   });
 });
