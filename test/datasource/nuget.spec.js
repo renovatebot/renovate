@@ -30,9 +30,9 @@ describe('datasource/nuget', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(res1),
       });
-      expect(
-        await datasource.getDependency('pkg:nuget/nunit')
-      ).toMatchSnapshot();
+      const res = await datasource.getDependency('pkg:nuget/nunit');
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
     });
   });
 });
