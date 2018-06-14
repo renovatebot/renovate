@@ -304,6 +304,8 @@ See https://renovateapp.com/docs/deep-dives/private-modules for details on how t
 
 See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
 
+## nuget
+
 ## nvm
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.

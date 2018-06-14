@@ -1,9 +1,11 @@
 jest.mock('../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../lib/datasource/npm');
+jest.mock('../../../lib/datasource/nuget');
 jest.mock('got');
 
 const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
 const npmRegistry = require('../../../lib/datasource/npm');
+const nuget = require('../../../lib/datasource/nuget');
 const got = require('got');
 
 const { getChangeLogJSON } = require('../../../lib/workers/pr/changelog');
@@ -53,6 +55,8 @@ describe('workers/pr/changelog', () => {
     beforeEach(async () => {
       npmRegistry.getDependency.mockClear();
       ghGot.mockClear();
+      nuget.getNuspec.mockClear();
+      nuget.getVersions.mockClear();
 
       npmRegistry.getDependency.mockReturnValueOnce(
         Promise.resolve(npmResponse())
@@ -173,6 +177,54 @@ describe('workers/pr/changelog', () => {
         await getChangeLogJSON({ ...upgrade, manager: 'pip_requirements' })
       ).toBe(null);
     });
+    it('supports nuget', async () => {
+      nuget.getNuspec.mockReturnValueOnce(
+        Promise.resolve({
+          metadata: {
+            projectUrl: 'https://github.com/chalk/chalk',
+          },
+        })
+      );
+      nuget.getVersions.mockReturnValueOnce(
+        Promise.resolve(['1.0.0', '1.1.0', '3.0.0'])
+      );
+      expect(
+        await getChangeLogJSON({ ...upgrade, manager: 'nuget' })
+      ).toMatchSnapshot();
+    });
+    it('supports nuget with repository info', async () => {
+      nuget.getNuspec.mockReturnValueOnce(
+        Promise.resolve({
+          metadata: {
+            repository: {
+              '@_type': 'git',
+              '@_url': 'https://github.com/chalk/chalk',
+            },
+          },
+        })
+      );
+      nuget.getVersions.mockReturnValueOnce(
+        Promise.resolve(['1.0.0', '1.1.0', '3.0.0'])
+      );
+      expect(
+        await getChangeLogJSON({ ...upgrade, manager: 'nuget' })
+      ).toMatchSnapshot();
+    });
+
+    it('works without nuget', async () => {
+      expect(await getChangeLogJSON({ ...upgrade, manager: 'nuget' })).toBe(
+        null
+      );
+    });
+    it('handles nuget errors', async () => {
+      got.mockImplementation(() => {
+        throw new Error('Unknown nuget repo');
+      });
+      expect(await getChangeLogJSON({ ...upgrade, manager: 'nuget' })).toBe(
+        null
+      );
+    });
+
     it('supports github enterprise and github.com changelog', async () => {
       // clear the mock
       npmRegistry.getDependency.mockReset();
