@@ -242,6 +242,13 @@ Object {
 }
 `;
 
+exports[`platform/gitlab getPrFiles() returns files 1`] = `
+Array [
+  "renovate.json",
+  "not renovate.json",
+]
+`;
+
 exports[`platform/gitlab getRepos should return an array of repos 1`] = `
 Array [
   Array [
