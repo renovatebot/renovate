@@ -4746,11 +4746,23 @@ p-limit@^1.1.0:
   dependencies:
     p-try "^1.0.0"
 
+p-limit@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/p-limit/-/p-limit-2.0.0.tgz#e624ed54ee8c460a778b3c9f3670496ff8a57aec"
+  dependencies:
+    p-try "^2.0.0"
+
 p-locate@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/p-locate/-/p-locate-2.0.0.tgz#20a0103b222a70c8fd39cc2e580680f3dde5ec43"
   dependencies:
     p-limit "^1.1.0"
+
+p-locate@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/p-locate/-/p-locate-3.0.0.tgz#322d69a05c0264b25997d9f40cd8a891ab0064a4"
+  dependencies:
+    p-limit "^2.0.0"
 
 p-map@^1.0.0:
   version "1.2.0"
@@ -4781,6 +4793,10 @@ p-timeout@^2.0.1:
 p-try@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/p-try/-/p-try-1.0.0.tgz#cbc79cdbaf8fd4228e13f621f2b1a237c1b207b3"
+
+p-try@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/p-try/-/p-try-2.0.0.tgz#85080bb87c64688fa47996fe8f7dfbe8211760b1"
 
 package-json@^4.0.0:
   version "4.0.1"
@@ -5577,9 +5593,9 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.5.2:
-  version "15.5.2"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.5.2.tgz#ce26932465de6d58c4f4a52e1de07e9e0e4c2a5a"
+semantic-release@15.5.3:
+  version "15.5.3"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.5.3.tgz#0ca8269a54345940655db608d09a88f49b75c0f6"
   dependencies:
     "@semantic-release/commit-analyzer" "^5.0.0"
     "@semantic-release/error" "^2.2.0"
@@ -5601,7 +5617,7 @@ semantic-release@15.5.2:
     lodash "^4.17.4"
     marked "^0.4.0"
     marked-terminal "^3.0.0"
-    p-locate "^2.0.0"
+    p-locate "^3.0.0"
     p-reduce "^1.0.0"
     read-pkg-up "^3.0.0"
     resolve-from "^4.0.0"
