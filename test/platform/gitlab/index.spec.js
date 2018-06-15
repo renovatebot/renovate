@@ -709,7 +709,7 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getPrFiles()', () => {
-    it('should return empty if no prNo is passed', async () => {
+    it('should return empty if no mrNo is passed', async () => {
       const prFiles = await gitlab.getPrFiles(null);
       expect(prFiles).toEqual([]);
     });
