@@ -306,6 +306,8 @@ See https://renovateapp.com/docs/deep-dives/private-modules for details on how t
 
 ## nuget
 
+The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style .csproj's, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj` format in order to be detected and supported by Renovate.
+
 ## nvm
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
