@@ -40,9 +40,9 @@
     node-fetch "^2.1.1"
     url-template "^2.0.8"
 
-"@renovate/pep440@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@renovate/pep440/-/pep440-0.2.0.tgz#dbfea48b726a6cada912031c2a06c02eccfe9753"
+"@renovate/pep440@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@renovate/pep440/-/pep440-0.3.0.tgz#72d8130a0208f3e15eeef32e6d1b3c6b7f5f05ca"
   dependencies:
     xregexp "^4.1.1"
 
