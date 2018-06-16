@@ -5006,9 +5006,9 @@ pn@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
 
-pnpm@2.6.1:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.6.1.tgz#caccfe45201971227275545e02747d659e350296"
+pnpm@2.6.2:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.6.2.tgz#5507ebe92373aa133c871c9571b5af73aac7728f"
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
