@@ -13,35 +13,49 @@ describe('lib/manager/node/package', () => {
       };
     });
     it('returns empty if missing supportPolicy', async () => {
-      config.currentVersion = ['6', '8'];
+      config.currentValue = ['6', '8'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if invalid supportPolicy', async () => {
-      config.currentVersion = ['6', '8'];
+      config.currentValue = ['6', '8'];
       config.supportPolicy = ['foo'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
-      config.currentVersion = ['8'];
+      config.currentValue = ['8'];
       config.supportPolicy = ['lts_active'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns result if needing updates', async () => {
-      config.currentVersion = ['6', '8'];
+      config.currentValue = ['6', '8'];
       config.supportPolicy = ['lts'];
       expect(await node.getPackageUpdates(config)).toMatchSnapshot();
     });
     it('detects pinning', async () => {
-      config.currentVersion = ['6.1.0', '8.4.0'];
+      config.currentValue = ['6.1.0', '8.4.0'];
       config.supportPolicy = ['lts'];
-      githubDatasource.getRepoReleases.mockReturnValueOnce([
-        'v4.4.4',
-        'v5.5.5',
-        'v6.11.0',
-        'v7.0.0',
-        'v8.9.4',
-        'v9.5.0',
-      ]);
+      githubDatasource.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '4.4.4',
+          },
+          {
+            version: '5.5.5',
+          },
+          {
+            version: '6.11.0',
+          },
+          {
+            version: '7.0.0',
+          },
+          {
+            version: '8.9.4',
+          },
+          {
+            version: '9.5.0',
+          },
+        ],
+      });
       expect(await node.getPackageUpdates(config)).toMatchSnapshot();
     });
   });

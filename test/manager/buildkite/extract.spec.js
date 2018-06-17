@@ -11,6 +11,10 @@ const pipeline2 = fs.readFileSync(
   'test/_fixtures/buildkite/pipeline2.yml',
   'utf8'
 );
+const pipeline3 = fs.readFileSync(
+  'test/_fixtures/buildkite/pipeline3.yml',
+  'utf8'
+);
 
 describe('lib/manager/buildkite/extract', () => {
   describe('extractDependencies()', () => {
@@ -30,6 +34,11 @@ describe('lib/manager/buildkite/extract', () => {
       const res = extractDependencies(pipeline2, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
+    });
+    it('adds skipReason', () => {
+      const res = extractDependencies(pipeline3, config).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(3);
     });
   });
 });

@@ -163,14 +163,12 @@ Object {
     Object {
       "changes": Array [],
       "compare": Object {},
-      "releaseNotes": undefined,
       "version": "2.5.2",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2017-12-24T03:20:46.238Z",
-      "releaseNotes": undefined,
       "version": "2.4.2",
     },
     Object {
@@ -296,9 +294,9 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports pip 1`] = `
+exports[`workers/pr/changelog getChangeLogJSON supports node engines 1`] = `
 Object {
-  "hasReleaseNotes": false,
+  "hasReleaseNotes": true,
   "project": Object {
     "github": "chalk/chalk",
     "githubBaseURL": "https://github.com/",
@@ -321,16 +319,24 @@ Object {
     },
     Object {
       "changes": Array [],
-      "compare": Object {},
+      "compare": Object {
+        "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
+      },
       "date": "2017-10-24T03:20:46.238Z",
-      "releaseNotes": undefined,
+      "releaseNotes": Object {
+        "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
+      },
       "version": "2.3.0",
     },
     Object {
       "changes": Array [],
-      "compare": Object {},
+      "compare": Object {
+        "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
+      },
       "date": undefined,
-      "releaseNotes": undefined,
+      "releaseNotes": Object {
+        "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
+      },
       "version": "2.2.2",
     },
   ],

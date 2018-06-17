@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/nuget/package getPackageUpdates() returns higher version if available 1`] = `
+Array [
+  Object {
+    "changeLogFromVersion": "2.3.0",
+    "changeLogToVersion": "2.4.0",
+    "lineNumber": 1337,
+    "newVersion": "2.4.0",
+    "newVersionMajor": 2,
+    "newVersionMinor": 4,
+    "type": "minor",
+  },
+]
+`;

@@ -30,5 +30,5 @@ In that case Renovate PRs will be continuously rebased off the repository's base
 
 If an existing PR is open to upgrade dependency "foo" to v1.1.0 and then v1.1.1 is released, then Renovate will regenerate the branch again. This way:
 
-* Each Renovate branch will always have 1 and only 1 commit
-* The newest version will be based off the latest base branch commit at the time
+- Each Renovate branch will always have 1 and only 1 commit
+- The newest version will be based off the latest base branch commit at the time

@@ -8,6 +8,7 @@ Object {
         Object {
           "depName": "aaa",
           "depType": "devDependencies",
+          "purl": "pkg:npm/aaa",
           "updates": Array [
             "a",
             "b",
@@ -40,7 +41,7 @@ Object {
 }
 `;
 
-exports[`workers/repository/process/fetch fetchUpdates() handles ignores and disabled 1`] = `
+exports[`workers/repository/process/fetch fetchUpdates() handles ignored, skipped and disabled 1`] = `
 Object {
   "npm": Array [
     Object {
@@ -58,6 +59,11 @@ Object {
         Object {
           "depName": "foo",
           "skipReason": "disabled",
+          "updates": Array [],
+        },
+        Object {
+          "depName": "skipped",
+          "skipReason": "some-reason",
           "updates": Array [],
         },
       ],

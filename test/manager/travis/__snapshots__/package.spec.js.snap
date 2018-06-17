@@ -4,9 +4,10 @@ exports[`lib/manager/node/package getPackageUpdates detects pinning 1`] = `
 Array [
   Object {
     "isRange": true,
-    "newVersion": Array [
-      "8.9.4",
+    "newMajor": 8,
+    "newValue": Array [
       "6.11.0",
+      "8.9.4",
     ],
     "repositoryUrl": "https://github.com/nodejs/node",
   },

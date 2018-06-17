@@ -49,9 +49,9 @@ For most managers, it is not necessary.
 
 This function is essential. It takes a file content and returns an array of detected/extracted dependencies, including:
 
-* dependency name
-* dependency type (e.g. dependencies, devDependencies, etc)
-* currentVersion
+- dependency name
+- dependency type (e.g. dependencies, devDependencies, etc)
+- currentValue
 
 The fields returned here can be customised to suit the package manager, e.g. Docker uses `currentFrom`
 
