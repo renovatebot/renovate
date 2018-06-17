@@ -304,6 +304,10 @@ See https://renovateapp.com/docs/deep-dives/private-modules for details on how t
 
 See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
 
+## nuget
+
+The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style .csproj's, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj` format in order to be detected and supported by Renovate.
+
 ## nvm
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.
@@ -518,7 +522,7 @@ By default, Renovate assumes that if you are using ranges then it's because you 
 
 For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything because `1.2.0` satisfies the range. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `rangeStrategy` to `bump` in your Renovate config.
 
-This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`. It is not compatible with `pinVersions=true`.
+This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`.
 
 ## rebaseStalePrs
 

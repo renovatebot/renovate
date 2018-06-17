@@ -8,6 +8,10 @@ jest.mock('delay');
 
 let npmResponse;
 
+function getRelease(dependency, version) {
+  return dependency.releases.find(release => release.version === version);
+}
+
 describe('api/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
@@ -53,8 +57,8 @@ describe('api/npm', () => {
       .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
-    expect(res.versions['0.0.2'].canBeUnpublished).toBe(false);
+    expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
+    expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(false);
   });
   it('should handle purl', async () => {
     nock('https://registry.npmjs.org')
@@ -70,8 +74,8 @@ describe('api/npm', () => {
       .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
-    expect(res.versions['0.0.2'].canBeUnpublished).toBeUndefined();
+    expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
+    expect(getRelease(res, '0.0.2').canBeUnpublished).toBeUndefined();
   });
   it('should return canBeUnpublished=true', async () => {
     npmResponse.time['0.0.2'] = moment()
@@ -81,18 +85,8 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
-    expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
-    expect(res.versions['0.0.2'].canBeUnpublished).toBe(true);
-  });
-  it('should use homepage', async () => {
-    const npmResponseHomepage = { ...npmResponse };
-    npmResponseHomepage.repository.url = '';
-    npmResponseHomepage.homepage = 'https://google.com';
-    nock('https://registry.npmjs.org')
-      .get('/foobarhome')
-      .reply(200, npmResponseHomepage);
-    const res = await npm.getDependency('foobarhome');
-    expect(res).toMatchSnapshot();
+    expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
+    expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(true);
   });
   it('should return null if lookup fails 401', async () => {
     nock('https://registry.npmjs.org')

@@ -26,6 +26,9 @@ Object {
   "npm": Array [
     Object {},
   ],
+  "nuget": Array [
+    Object {},
+  ],
   "nvm": Array [
     Object {},
   ],

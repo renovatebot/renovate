@@ -8,18 +8,20 @@ describe('datasource/github', () => {
   describe('getDependency', () => {
     it('returns cleaned tags', async () => {
       const body = [
-        { ref: 'refs/tags/a' },
-        { ref: 'refs/tags/v' },
-        { ref: 'refs/tags/1.0.0' },
-        { ref: 'refs/tags/v1.1.0' },
+        { name: 'a' },
+        { name: 'v' },
+        { name: '1.0.0' },
+        { name: 'v1.1.0' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getDependency(
-        'pkg:github/some/dep?clean=true'
+        'pkg:github/some/dep?sanitize=true'
       );
       expect(res).toMatchSnapshot();
-      expect(Object.keys(res.versions)).toHaveLength(4);
-      expect(res.versions['1.1.0']).toBeDefined();
+      expect(res.releases).toHaveLength(2);
+      expect(
+        res.releases.find(release => release.version === '1.1.0')
+      ).toBeDefined();
     });
     it('returns releases', async () => {
       const body = [
@@ -33,8 +35,10 @@ describe('datasource/github', () => {
         'pkg:github/some/dep?ref=release'
       );
       expect(res).toMatchSnapshot();
-      expect(Object.keys(res.versions)).toHaveLength(4);
-      expect(res.versions['v1.1.0']).toBeDefined();
+      expect(res.releases).toHaveLength(2);
+      expect(
+        res.releases.find(release => release.version === 'v1.1.0')
+      ).toBeDefined();
     });
     it('returns null for invalid ref', async () => {
       expect(
