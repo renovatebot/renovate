@@ -4113,9 +4113,9 @@ modify-values@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/modify-values/-/modify-values-1.0.1.tgz#b3939fa605546474e3e3e3c63d64bd43b4ee6022"
 
-moment-timezone@0.5.17:
-  version "0.5.17"
-  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.17.tgz#3c8fef32051d84c3af174d91dc52977dcb0ad7e5"
+moment-timezone@0.5.20:
+  version "0.5.20"
+  resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.20.tgz#fe66da425dd9f9bbf416f131bf17659680aabb99"
   dependencies:
     moment ">= 2.9.0"
 
