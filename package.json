@@ -107,7 +107,6 @@
     "upath": "1.1.0",
     "validator": "10.3.0",
     "vso-node-api": "6.5.0",
-    "xregexp": "4.2.0",
     "yarn": "1.7.0"
   },
   "devDependencies": {

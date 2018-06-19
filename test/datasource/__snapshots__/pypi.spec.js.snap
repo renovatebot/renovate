@@ -92,7 +92,7 @@ Object {
       "version": "0.1.7",
     },
   ],
-  "repository_url": "https://github.com/Azure/azure-cli",
+  "repositoryUrl": "https://github.com/Azure/azure-cli",
 }
 `;
 
