@@ -101,6 +101,8 @@ describe('workers/pr', () => {
     const existingPr = {
       displayNumber: 'Existing PR',
       title: 'Update dependency dummy to v1.1.0',
+      body:
+        'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     };
     beforeEach(() => {
       config = {
