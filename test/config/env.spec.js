@@ -3,36 +3,36 @@ const env = require('../../lib/config/env.js');
 describe('config/env', () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', () => {
-      env.getConfig({}).should.eql({});
+      expect(env.getConfig({})).toEqual({ endpoints: [] });
     });
     it('supports boolean true', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'true' };
-      env.getConfig(envParam).should.eql({ recreateClosed: true });
+      expect(env.getConfig(envParam).recreateClosed).toBe(true);
     });
     it('supports boolean false', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'false' };
-      env.getConfig(envParam).should.eql({ recreateClosed: false });
+      expect(env.getConfig(envParam).recreateClosed).toBe(false);
     });
     it('supports boolean nonsense as false', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'foo' };
-      env.getConfig(envParam).should.eql({ recreateClosed: false });
+      expect(env.getConfig(envParam).recreateClosed).toBe(false);
     });
     delete process.env.RENOVATE_RECREATE_CLOSED;
     it('supports list single', () => {
       const envParam = { RENOVATE_LABELS: 'a' };
-      env.getConfig(envParam).should.eql({ labels: ['a'] });
+      expect(env.getConfig(envParam).labels).toEqual(['a']);
     });
     it('supports list multiple', () => {
       const envParam = { RENOVATE_LABELS: 'a,b,c' };
-      env.getConfig(envParam).should.eql({ labels: ['a', 'b', 'c'] });
+      expect(env.getConfig(envParam).labels).toEqual(['a', 'b', 'c']);
     });
     it('supports string', () => {
       const envParam = { RENOVATE_TOKEN: 'a' };
-      env.getConfig(envParam).should.eql({ token: 'a' });
+      expect(env.getConfig(envParam).token).toBe('a');
     });
     it('supports json', () => {
       const envParam = { RENOVATE_LOCK_FILE_MAINTENANCE: '{}' };
-      expect(env.getConfig(envParam)).toEqual({ lockFileMaintenance: {} });
+      expect(env.getConfig(envParam).lockFileMaintenance).toEqual({});
     });
   });
   describe('.getEnvName(definition)', () => {

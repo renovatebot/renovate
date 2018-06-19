@@ -1,9 +1,10 @@
+const endpoints = require('../../../lib/util/endpoints');
+
 describe('platform/vsts/vsts-got-wrapper', () => {
   let vsts;
   beforeEach(() => {
-    // clean up env
-    delete process.env.VSTS_TOKEN;
-    delete process.env.VSTS_ENDPOINT;
+    // clean up endpoints
+    endpoints.clear();
 
     // reset module
     jest.resetModules();
@@ -23,7 +24,10 @@ describe('platform/vsts/vsts-got-wrapper', () => {
     it('should throw an error if no endpoint is provided', async () => {
       let err;
       try {
-        process.env.VSTS_TOKEN = 'myToken';
+        endpoints.update({
+          platform: 'vsts',
+          token: 'myToken',
+        });
         await vsts.getCoreApi();
       } catch (e) {
         err = e;
@@ -33,14 +37,15 @@ describe('platform/vsts/vsts-got-wrapper', () => {
       );
     });
     it('should set token and endpoint', async () => {
-      process.env.VSTS_TOKEN = 'myToken';
-      process.env.VSTS_ENDPOINT = 'myEndpoint';
+      endpoints.update({
+        platform: 'vsts',
+        token: 'myToken',
+        endpoint: 'myEndpoint',
+      });
       const res = await vsts.vstsObj();
 
       // We will track if the lib vso-node-api change
       expect(res).toMatchSnapshot();
-      expect(process.env.VSTS_TOKEN).toBe(`myToken`);
-      expect(process.env.VSTS_ENDPOINT).toBe(`myEndpoint`);
     });
   });
 });

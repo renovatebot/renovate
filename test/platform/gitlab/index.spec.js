@@ -2,10 +2,6 @@ describe('platform/gitlab', () => {
   let gitlab;
   let get;
   beforeEach(() => {
-    // clean up env
-    delete process.env.GITLAB_TOKEN;
-    delete process.env.GITLAB_ENDPOINT;
-
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
@@ -111,8 +107,6 @@ describe('platform/gitlab', () => {
         });
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
-        expect(process.env.GITLAB_TOKEN).toBe(token);
-        expect(process.env.GITLAB_ENDPOINT).toBe(endpoint);
       });
     });
     it(`should escape all forward slashes in project names`, async () => {

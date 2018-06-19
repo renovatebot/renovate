@@ -3,10 +3,6 @@ describe('platform/vsts', () => {
   let vstsApi;
   let vstsHelper;
   beforeEach(() => {
-    // clean up env
-    delete process.env.VSTS_TOKEN;
-    delete process.env.VSTS_ENDPOINT;
-
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/vsts/vsts-got-wrapper');

@@ -44,36 +44,6 @@ describe('config/index', () => {
       }
       expect(err.message).toBe('Unsupported platform: foo.');
     });
-    it('throws for no GitHub token', async () => {
-      const env = {};
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('You need to supply a GitHub token.');
-    });
-    it('throws for no GitLab token', async () => {
-      const env = { RENOVATE_PLATFORM: 'gitlab' };
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('You need to supply a GitLab token.');
-    });
-    it('throws for no vsts token', async () => {
-      const env = { RENOVATE_PLATFORM: 'vsts' };
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('You need to supply a VSTS token.');
-    });
     it('supports token in env', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);
