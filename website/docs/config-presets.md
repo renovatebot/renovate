@@ -22,7 +22,7 @@ In order to achieve the above goals, preset configs have been implemented to all
 
 ## Example configs
 
-An example of a small rule is [":preserveSemverRanges"](https://github.com/singapore/renovate-config/blob/ad65548cd1612ce1d93b2139df7d0f53b3350c3a/packages/renovate-config-default/package.json#L32-L35), which has the description "Preserve (but continue to upgrade) any existing semver ranges". It simply sets the configuration option `pinVersions` to `false`.
+An example of a small rule is [":preserveSemverRanges"](https://github.com/singapore/renovate-config/blob/ad65548cd1612ce1d93b2139df7d0f53b3350c3a/packages/renovate-config-default/package.json#L32-L35), which has the description "Preserve (but continue to upgrade) any existing semver ranges". It simply sets the configuration option `rangeStrategy` to `replace`.
 
 An example of a full config is ["config:base"](https://github.com/singapore/renovate-config/blob/master/packages/renovate-config-config/package.json#L16-L32), which is Renovate's default configuration. It mostly uses Renovate config defaults but adds a few smart customisations such as grouping monorepo packages together.
 

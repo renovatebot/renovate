@@ -79,14 +79,64 @@ describe('pep440.minSatisfyingVersion(versions, range)', () => {
 });
 
 describe('pep440.getNewValue()', () => {
-  it('returns double equals', () => {
-    expect(pep440.getNewValue('==1.0.0', 'replace', '1.0.0', '1.0.1')).toBe(
-      '==1.0.1'
-    );
+  const { getNewValue } = pep440;
+
+  // cases: [currentValue, expectedBump]
+  [
+    // simple cases
+    ['==1.0.3', '==1.2.3'],
+    ['>=1.2.0', '>=1.2.3'],
+    ['~=1.2.0', '~=1.2.3'],
+    ['~=1.0.3', '~=1.2.3'],
+
+    // glob
+    ['==1.2.*', '==1.2.*'],
+    ['==1.0.*', '==1.2.*'],
+
+    // future versions guard
+    ['<1.2.2.3', '<1.2.4.0'],
+    ['<1.2.3', '<1.2.4'],
+    ['<1.2', '<1.3'],
+    ['<1', '<2'],
+    ['<2.0.0', '<2.0.0'],
+
+    // minimum version guard
+    ['>0.9.8', '>0.9.8'],
+    // rollback
+    ['>2.0.0', '>=1.2.3'],
+    ['>=2.0.0', '>=1.2.3'],
+
+    // complex ranges
+    ['~=1.1.0, !=1.1.1', '~=1.2.3, !=1.1.1'],
+
+    // invalid & not supported
+    [' ', ' '],
+    ['invalid', null],
+    ['===1.0.3', null],
+    // impossible
+    ['!=1.2.3', null],
+  ].forEach(([currentValue, expectedBump]) => {
+    const bumped = getNewValue(currentValue, 'bump', '1.0.0', '1.2.3');
+    it(`bumps '${currentValue}' to '${expectedBump}'`, () => {
+      expect(bumped).toBe(expectedBump);
+    });
+
+    const replaced = getNewValue(currentValue, 'replace', '1.0.0', '1.2.3');
+    const needReplace = pep440.matches('1.2.3', currentValue);
+    const expectedReplace = needReplace ? currentValue : bumped;
+    it(`replaces '${currentValue}' to '${expectedReplace}'`, () => {
+      expect(replaced).toBe(expectedReplace);
+    });
+
+    const pinned = getNewValue(currentValue, 'pin', '1.0.0', '1.2.3');
+    const expectedPin = '==1.2.3';
+    it(`pins '${currentValue}' to '${expectedPin}'`, () => {
+      expect(pinned).toBe(expectedPin);
+    });
   });
-  it('returns version', () => {
-    expect(pep440.getNewValue('>=1.0.0', 'replace', '1.0.0', '1.0.1')).toBe(
-      '1.0.1'
-    );
+
+  it('guards against unsupported rangeStrategy', () => {
+    const invalid = getNewValue('==1.2.3', 'invalid', '1.0.0', '1.2.3');
+    expect(invalid).toBe(null);
   });
 });
