@@ -512,6 +512,75 @@ describe('platform/gitlab', () => {
       expect(res).toBeDefined();
     });
   });
+  describe('ensureIssue()', () => {
+    it('creates issue', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      }));
+      const res = await gitlab.ensureIssue('new-title', 'new-content');
+      expect(res).toEqual('created');
+    });
+    it('updates issue', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'new-content' } });
+      const res = await gitlab.ensureIssue('title-2', 'newer-content');
+      expect(res).toEqual('updated');
+    });
+    it('skips update if unchanged', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'newer-content' } });
+      const res = await gitlab.ensureIssue('title-2', 'newer-content');
+      expect(res).toBe(null);
+    });
+  });
+  describe('ensureIssueClosing()', () => {
+    it('closes issue', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      }));
+      await gitlab.ensureIssueClosing('title-2');
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       get.mockReturnValueOnce({
