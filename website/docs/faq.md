@@ -116,7 +116,7 @@ Set configuration option `separateMajorMinor` to `false`.
 
 ### Keep using semver ranges, instead of pinning dependencies
 
-Set configuration option `pinVersions` to `false`.
+Set configuration option `rangeStrategy` to `"replace"`.
 
 ### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` hasn't changed
 

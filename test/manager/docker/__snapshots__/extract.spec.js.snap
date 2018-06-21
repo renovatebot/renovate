@@ -1,5 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/docker/extract extractDependencies() extracts images on adjacent lines 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node:8.11.3-alpine",
+    "currentDepTagDigest": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+    "currentDigest": "sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+    "currentFrom": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+    "currentTag": "8.11.3-alpine",
+    "depName": "node",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d AS node",
+    "fromPrefix": "FROM",
+    "fromSuffix": "AS node",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentDepTag": "buildkite/puppeteer:1.1.1",
+    "currentDepTagDigest": "buildkite/puppeteer:1.1.1",
+    "currentDigest": undefined,
+    "currentFrom": "buildkite/puppeteer:1.1.1",
+    "currentTag": "1.1.1",
+    "depName": "buildkite/puppeteer",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM buildkite/puppeteer:1.1.1 AS puppeteer",
+    "fromPrefix": "FROM",
+    "fromSuffix": "AS puppeteer",
+    "versionScheme": "semver",
+  },
+]
+`;
+
 exports[`lib/manager/docker/extract extractDependencies() extracts multiple FROM tags 1`] = `
 Array [
   Object {

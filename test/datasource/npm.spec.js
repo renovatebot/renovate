@@ -8,6 +8,10 @@ jest.mock('delay');
 
 let npmResponse;
 
+function getRelease(dependency, version) {
+  return dependency.releases.find(release => release.version === version);
+}
+
 describe('api/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
@@ -44,7 +48,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, missingVersions);
-    const res = await npm.getDependency('foobar', 1);
+    const res = await npm.getDependency('foobar', { retries: 1 });
     expect(res).toBe(null);
   });
   it('should fetch package info from npm', async () => {
@@ -53,8 +57,15 @@ describe('api/npm', () => {
       .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
-    expect(res.versions['0.0.2'].canBeUnpublished).toBe(false);
+    expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
+    expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(false);
+  });
+  it('should handle purl', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, npmResponse);
+    const res = await npm.getDependency({ fullname: 'foobar' });
+    expect(res).toMatchSnapshot();
   });
   it('should handle no time', async () => {
     delete npmResponse.time['0.0.2'];
@@ -63,8 +74,8 @@ describe('api/npm', () => {
       .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
-    expect(res.versions['0.0.2'].canBeUnpublished).toBeUndefined();
+    expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
+    expect(getRelease(res, '0.0.2').canBeUnpublished).toBeUndefined();
   });
   it('should return canBeUnpublished=true', async () => {
     npmResponse.time['0.0.2'] = moment()
@@ -74,18 +85,8 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     const res = await npm.getDependency('foobar');
-    expect(res.versions['0.0.1'].canBeUnpublished).toBe(false);
-    expect(res.versions['0.0.2'].canBeUnpublished).toBe(true);
-  });
-  it('should use homepage', async () => {
-    const npmResponseHomepage = { ...npmResponse };
-    npmResponseHomepage.repository.url = '';
-    npmResponseHomepage.homepage = 'https://google.com';
-    nock('https://registry.npmjs.org')
-      .get('/foobarhome')
-      .reply(200, npmResponseHomepage);
-    const res = await npm.getDependency('foobarhome');
-    expect(res).toMatchSnapshot();
+    expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
+    expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(true);
   });
   it('should return null if lookup fails 401', async () => {
     nock('https://registry.npmjs.org')
@@ -110,7 +111,7 @@ describe('api/npm', () => {
       .reply(200, 'oops');
     let e;
     try {
-      await npm.getDependency('foobar', 1);
+      await npm.getDependency('foobar', { retries: 1 });
     } catch (err) {
       e = err;
     }
@@ -125,7 +126,7 @@ describe('api/npm', () => {
       .reply(429);
     let e;
     try {
-      await npm.getDependency('foobar', 1);
+      await npm.getDependency('foobar', { retries: 1 });
     } catch (err) {
       e = err;
     }
@@ -137,7 +138,7 @@ describe('api/npm', () => {
       .reply(503);
     let e;
     try {
-      await npm.getDependency('foobar', 0);
+      await npm.getDependency('foobar', { retries: 0 });
     } catch (err) {
       e = err;
     }
@@ -149,7 +150,7 @@ describe('api/npm', () => {
       .reply(408);
     let e;
     try {
-      await npm.getDependency('foobar', 0);
+      await npm.getDependency('foobar', { retries: 0 });
     } catch (err) {
       e = err;
     }
@@ -165,7 +166,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200);
-    const res = await npm.getDependency('foobar', 2);
+    const res = await npm.getDependency('foobar', { retries: 2 });
     expect(res).toMatchSnapshot();
   });
   it('should throw error for others', async () => {

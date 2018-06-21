@@ -101,6 +101,8 @@ describe('workers/pr', () => {
     const existingPr = {
       displayNumber: 'Existing PR',
       title: 'Update dependency dummy to v1.1.0',
+      body:
+        'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     };
     beforeEach(() => {
       config = {
@@ -298,6 +300,7 @@ describe('workers/pr', () => {
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch-push';
+      config.branchAutomergeFailureMessage = 'branch status error';
       platform.getBranchStatus.mockReturnValueOnce('failure');
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });

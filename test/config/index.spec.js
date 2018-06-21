@@ -83,6 +83,11 @@ describe('config/index', () => {
       const env = {};
       await configParser.parseConfigs(env, defaultArgv);
     });
+    it('supports forceCli', async () => {
+      defaultArgv = defaultArgv.concat(['--force-cli=true']);
+      const env = { GITHUB_TOKEN: 'abc' };
+      await configParser.parseConfigs(env, defaultArgv);
+    });
     it('autodiscovers github platform', async () => {
       const env = {};
       defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);

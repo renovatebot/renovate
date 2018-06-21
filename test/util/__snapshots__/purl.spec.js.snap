@@ -5,6 +5,7 @@ Object {
   "fullname": "@foo/bar",
   "name": "bar",
   "namespace": "@foo",
+  "qualifiers": Object {},
   "type": "npm",
 }
 `;
@@ -14,6 +15,7 @@ Object {
   "fullname": "@foo/bar",
   "name": "bar",
   "namespace": "@foo",
+  "qualifiers": Object {},
   "type": "npm",
   "version": "1.0.0",
 }
@@ -62,6 +64,7 @@ exports[`util/purl parse() parses simple npm 1`] = `
 Object {
   "fullname": "foo",
   "name": "foo",
+  "qualifiers": Object {},
   "type": "npm",
 }
 `;
