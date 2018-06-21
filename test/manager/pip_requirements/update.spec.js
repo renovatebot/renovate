@@ -4,7 +4,7 @@ const {
 } = require('../../../lib/manager/pip_requirements/update');
 
 const requirements = fs.readFileSync(
-  'test/_fixtures/pip_requirements/requirements.txt',
+  'test/_fixtures/pip_requirements/requirements1.txt',
   'utf8'
 );
 
@@ -14,11 +14,11 @@ describe('manager/pip_requirements/update', () => {
       const upgrade = {
         depName: 'url',
         lineNumber: 2,
-        newVersion: '1.0.1',
+        newValue: '1.0.1',
       };
       const res = updateDependency(requirements, upgrade);
       expect(res).not.toEqual(requirements);
-      expect(res.includes(upgrade.newVersion)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('returns null if error', () => {
       const res = updateDependency(null, null);

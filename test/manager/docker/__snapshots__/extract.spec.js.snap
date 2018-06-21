@@ -1,5 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/docker/extract extractDependencies() extracts images on adjacent lines 1`] = `
+Array [
+  Object {
+    "currentDepTag": "node:8.11.3-alpine",
+    "currentDepTagDigest": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+    "currentDigest": "sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+    "currentFrom": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+    "currentTag": "8.11.3-alpine",
+    "depName": "node",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d AS node",
+    "fromPrefix": "FROM",
+    "fromSuffix": "AS node",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentDepTag": "buildkite/puppeteer:1.1.1",
+    "currentDepTagDigest": "buildkite/puppeteer:1.1.1",
+    "currentDigest": undefined,
+    "currentFrom": "buildkite/puppeteer:1.1.1",
+    "currentTag": "1.1.1",
+    "depName": "buildkite/puppeteer",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM buildkite/puppeteer:1.1.1 AS puppeteer",
+    "fromPrefix": "FROM",
+    "fromSuffix": "AS puppeteer",
+    "versionScheme": "semver",
+  },
+]
+`;
+
 exports[`lib/manager/docker/extract extractDependencies() extracts multiple FROM tags 1`] = `
 Array [
   Object {
@@ -13,6 +44,7 @@ Array [
     "fromLine": "FROM node:6.12.3 as frontend",
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
+    "versionScheme": "semver",
   },
   Object {
     "currentDepTag": "python:3.6-slim",
@@ -25,6 +57,7 @@ Array [
     "fromLine": "FROM python:3.6-slim",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -42,6 +75,7 @@ Array [
     "fromLine": "FROM    registry.allmine.info:5005/node:8.7.0",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -59,6 +93,7 @@ Array [
     "fromLine": "FROM node",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -76,6 +111,7 @@ Array [
     "fromLine": "FROM registry2.something.info/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -93,6 +129,7 @@ Array [
     "fromLine": "FROM registry2.something.info/someaccount/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -110,6 +147,7 @@ Array [
     "fromLine": "FROM registry2.something.info:5005/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -127,6 +165,7 @@ Array [
     "fromLine": "FROM node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -144,6 +183,7 @@ Array [
     "fromLine": "FROM node:8.9.0-alpine as base",
     "fromPrefix": "FROM",
     "fromSuffix": "as base",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -161,6 +201,7 @@ Array [
     "fromLine": "FROM node",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -178,6 +219,7 @@ Array [
     "fromLine": "FROM mynamespace/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -195,6 +237,7 @@ Array [
     "fromLine": "FROM node:8.9.0-alpine",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -212,6 +255,7 @@ Array [
     "fromLine": "FROM node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -229,6 +273,7 @@ Array [
     "fromLine": "From node",
     "fromPrefix": "From",
     "fromSuffix": "",
+    "versionScheme": "semver",
   },
 ]
 `;
@@ -246,6 +291,7 @@ Array [
     "fromLine": "FROM node:6.12.3 as frontend",
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
+    "versionScheme": "semver",
   },
 ]
 `;

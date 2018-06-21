@@ -90,6 +90,23 @@ describe('platform/gh-got-wrapper', () => {
     expect(e).toBeDefined();
     expect(e.message).toEqual('bad-credentials');
   });
+  it('should throw for blob size', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        statusCode: 403,
+        message:
+          'This API returns blobs up to 1 MB in size. The requested blob is too large to fetch via the API, but you can use the Git Data API to request blobs up to 100 MB in size. (403)',
+      })
+    );
+    let e;
+    try {
+      await get('some-url');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e).toMatchSnapshot();
+  });
   it('should retry 502s', async () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({

@@ -4,28 +4,40 @@ exports[`lib/manager/meteor/extract extractDependencies() returns results 1`] = 
 Object {
   "deps": Array [
     Object {
-      "currentVersion": "0.2.0",
+      "currentValue": "0.2.0",
       "depName": "xml2js",
+      "purl": "pkg:npm/xml2js",
+      "versionScheme": "semver",
     },
     Object {
-      "currentVersion": "0.6.0",
+      "currentValue": "0.6.0",
       "depName": "xml-crypto",
+      "purl": "pkg:npm/xml-crypto",
+      "versionScheme": "semver",
     },
     Object {
-      "currentVersion": "0.1.19",
+      "currentValue": "0.1.19",
       "depName": "xmldom",
+      "purl": "pkg:npm/xmldom",
+      "versionScheme": "semver",
     },
     Object {
-      "currentVersion": "2.7.10",
+      "currentValue": "2.7.10",
       "depName": "connect",
+      "purl": "pkg:npm/connect",
+      "versionScheme": "semver",
     },
     Object {
-      "currentVersion": "2.6.4",
+      "currentValue": "2.6.4",
       "depName": "xmlbuilder",
+      "purl": "pkg:npm/xmlbuilder",
+      "versionScheme": "semver",
     },
     Object {
-      "currentVersion": "0.2.0",
+      "currentValue": "0.2.0",
       "depName": "querystring",
+      "purl": "pkg:npm/querystring",
+      "versionScheme": "semver",
     },
   ],
 }

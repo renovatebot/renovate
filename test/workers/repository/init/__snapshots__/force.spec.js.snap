@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/init/flatten flattenPackageRules() forces 1`] = `
+Object {
+  "a": 2,
+  "b": 2,
+  "packageRules": Array [
+    Object {
+      "a": 2,
+      "b": 2,
+      "packagePatterns": Array [
+        ".*",
+      ],
+    },
+  ],
+}
+`;

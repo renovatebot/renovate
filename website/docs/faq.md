@@ -9,15 +9,15 @@ description: Frequently Asked Questions for Renovate Configuration
 
 Renovate will:
 
-* Look for configuration options in a configuration file (e.g. `renovate.json`) and in each
+- Look for configuration options in a configuration file (e.g. `renovate.json`) and in each
   `package.json` file
-* Find and process all package files (e.g. `package.json`, `package.js`, `Dockerfile`, etc) in each repository
-* Use separate branches/PR for each dependency
-* Use separate branches for each _major_ version of each dependency
-* Pin devDependencies to a single version, rather than use ranges
-* Pin dependencies to a single version if it appears not to be a library
-* Update `yarn.lock` and/or `package-lock.json` files if found
-* Create Pull Requests immediately after branch creation
+- Find and process all package files (e.g. `package.json`, `package.js`, `Dockerfile`, etc) in each repository
+- Use separate branches/PR for each dependency
+- Use separate branches for each _major_ version of each dependency
+- Pin devDependencies to a single version, rather than use ranges
+- Pin dependencies to a single version if it appears not to be a library
+- Update `yarn.lock` and/or `package-lock.json` files if found
+- Create Pull Requests immediately after branch creation
 
 ## What If I Need To .. ?
 
@@ -96,9 +96,9 @@ present. Multiple entries in the array means "or".
 
 You could:
 
-* Use `ignorePaths` to ignore certain paths in the repository, or
-* Explicitly list every package file you want renovated, in the `packageFiles` configuration object, or
-* Add a `renovate` section to any `package.json` files you don't want renovated,
+- Use `ignorePaths` to ignore certain paths in the repository, or
+- Explicitly list every package file you want renovated, in the `packageFiles` configuration object, or
+- Add a `renovate` section to any `package.json` files you don't want renovated,
   with the configuration option `"enabled": false`
 
 ### Disable renovate for certain dependency types
@@ -116,7 +116,7 @@ Set configuration option `separateMajorMinor` to `false`.
 
 ### Keep using semver ranges, instead of pinning dependencies
 
-Set configuration option `pinVersions` to `false`.
+Set configuration option `rangeStrategy` to `"replace"`.
 
 ### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` hasn't changed
 
@@ -190,8 +190,8 @@ Set the `branchName`, `commitMessage`, `prTitle` or `prBody` configuration
 options:
 
 ```
-"branchName": "vroom/{{depName}}-{{newVersionMajor}}.x",
-"commitMessage": "Vroom vroom dependency {{depName}} to version {{newVersion}}",
+"branchName": "vroom/{{depName}}-{{newMajor}}.x",
+"commitMessage": "Vroom vroom dependency {{depName}} to version {{newValue}}",
 "prTitle": "Vroom {{depName}},
 ```
 
@@ -215,8 +215,8 @@ Of course, most people don't want _more_ PRs, so you would probably want to
 utilise this feature to make less work for yourself instead. As an example, you
 might:
 
-* Update patch updates daily and automerge if they pass tests
-* Update minor and major updates weekly
+- Update patch updates daily and automerge if they pass tests
+- Update minor and major updates weekly
 
 The result of this would hopefully be that you barely notice Renovate during the
 week while still getting the benefits of patch updates.

@@ -4,11 +4,11 @@
 
 Configuration is supported via any or all of the below:
 
-* Configuration file
-* Environment
-* CLI
-* `renovate.json`, `.renovaterc.json`, or `.renovaterc` in target repository
-* `renovate` field of `package.json` in target repository
+- Configuration file
+- Environment
+- CLI
+- `renovate.json`, `.renovaterc.json`, or `.renovaterc` in target repository
+- `renovate` field of `package.json` in target repository
 
 The above are listed in reverse order of preference. i.e. `package.json`
 settings will override `renovate.json` settings, CLI, which overrides env, which

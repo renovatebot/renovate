@@ -11,8 +11,8 @@ Currently, Renovate ignores commit conventions apart from "angular".
 
 If angular-style commits are found then Renovate will structure its commit messages and PR titles to be like so:
 
-* chore(deps): update eslint to v4.2.0
-* fix(deps): update express to v4.16.2
+- chore(deps): update eslint to v4.2.0
+- fix(deps): update express to v4.16.2
 
 `chore` is used by default, but `fix` is used for anything in the "dependencies" section of `package.json`.
 

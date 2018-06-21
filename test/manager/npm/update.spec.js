@@ -13,12 +13,12 @@ function readFixture(fixture) {
 const input01Content = readFixture('inputs/01.json');
 
 describe('workers/branch/package-json', () => {
-  describe('.updateDependency(fileContent, depType, depName, newVersion)', () => {
+  describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
     it('replaces a dependency value', () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'cheerio',
-        newVersion: '0.22.1',
+        newValue: '0.22.1',
       };
       const outputContent = readFixture('outputs/011.json');
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
@@ -28,7 +28,7 @@ describe('workers/branch/package-json', () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'config',
-        newVersion: '1.22.0',
+        newValue: '1.22.0',
       };
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
@@ -38,7 +38,7 @@ describe('workers/branch/package-json', () => {
       const upgrade = {
         depType: 'devDependencies',
         depName: 'angular-touch',
-        newVersion: '1.6.1',
+        newValue: '1.6.1',
       };
       const outputContent = readFixture('outputs/012.json');
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
@@ -48,7 +48,7 @@ describe('workers/branch/package-json', () => {
       const upgrade = {
         depType: 'devDependencies',
         depName: 'angular-sanitize',
-        newVersion: '1.6.1',
+        newValue: '1.6.1',
       };
       const outputContent = readFixture('outputs/013.json');
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
@@ -58,7 +58,7 @@ describe('workers/branch/package-json', () => {
       const upgrade = {
         depType: 'devDependencies',
         depName: 'angular-touch',
-        newVersion: '1.5.8',
+        newValue: '1.5.8',
       };
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       testContent.should.equal(input01Content);
@@ -67,7 +67,7 @@ describe('workers/branch/package-json', () => {
       const upgrade = {
         depType: 'blah',
         depName: 'angular-touch-not',
-        newVersion: '1.5.8',
+        newValue: '1.5.8',
       };
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       expect(testContent).toBe(null);

@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/nuget/extract extractDependencies() extracts all dependencies 1`] = `
+Array [
+  Object {
+    "currentValue": "4.5.0",
+    "depName": "Autofac",
+    "depType": "nuget",
+    "lineNumber": 12,
+    "purl": "pkg:nuget/Autofac",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "4.1.0",
+    "depName": "Autofac.Extensions.DependencyInjection",
+    "depType": "nuget",
+    "lineNumber": 13,
+    "purl": "pkg:nuget/Autofac.Extensions.DependencyInjection",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "1.1.2",
+    "depName": "Microsoft.AspNetCore.Hosting",
+    "depType": "nuget",
+    "lineNumber": 14,
+    "purl": "pkg:nuget/Microsoft.AspNetCore.Hosting",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "1.1.3",
+    "depName": "Microsoft.AspNetCore.Mvc.Core",
+    "depType": "nuget",
+    "lineNumber": 15,
+    "purl": "pkg:nuget/Microsoft.AspNetCore.Mvc.Core",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "1.1.2",
+    "depName": "Microsoft.AspNetCore.Server.Kestrel",
+    "depType": "nuget",
+    "lineNumber": 16,
+    "purl": "pkg:nuget/Microsoft.AspNetCore.Server.Kestrel",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "1.1.2",
+    "depName": "Microsoft.Extensions.Configuration.Json",
+    "depType": "nuget",
+    "lineNumber": 17,
+    "purl": "pkg:nuget/Microsoft.Extensions.Configuration.Json",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "1.1.2",
+    "depName": "Microsoft.Extensions.Logging.Debug",
+    "depType": "nuget",
+    "lineNumber": 18,
+    "purl": "pkg:nuget/Microsoft.Extensions.Logging.Debug",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "10.0.2",
+    "depName": "Newtonsoft.Json",
+    "depType": "nuget",
+    "lineNumber": 19,
+    "purl": "pkg:nuget/Newtonsoft.Json",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "2.4.0",
+    "depName": "Serilog",
+    "depType": "nuget",
+    "lineNumber": 20,
+    "purl": "pkg:nuget/Serilog",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "1.4.0",
+    "depName": "Serilog.Extensions.Logging",
+    "depType": "nuget",
+    "lineNumber": 21,
+    "purl": "pkg:nuget/Serilog.Extensions.Logging",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "2.1.0",
+    "depName": "Serilog.Sinks.Literate",
+    "depType": "nuget",
+    "lineNumber": 22,
+    "purl": "pkg:nuget/Serilog.Sinks.Literate",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "3.1.0.5",
+    "depName": "Stateless",
+    "depType": "nuget",
+    "lineNumber": 23,
+    "purl": "pkg:nuget/Stateless",
+    "skipReason": "not-version",
+    "versionScheme": "semver",
+  },
+]
+`;
+
+exports[`lib/manager/nuget/extract extractDependencies() returns empty for invalid csproj 1`] = `
+Object {
+  "deps": Array [],
+}
+`;

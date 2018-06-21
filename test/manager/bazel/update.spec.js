@@ -25,7 +25,7 @@ describe('manager/bazel/update', () => {
         depName: 'build_bazel_rules_nodejs',
         depType: 'git_repository',
         def: `git_repository(\n    name = "build_bazel_rules_nodejs",\n    remote = "https://github.com/bazelbuild/rules_nodejs.git",\n    tag = "0.1.8",\n)`,
-        newVersion: '0.2.0',
+        newValue: '0.2.0',
       };
       const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
@@ -36,7 +36,7 @@ describe('manager/bazel/update', () => {
         depType: 'http_archive',
         repo: 'bazelbuild/rules_go',
         def: `http_archive(\n    name = "io_bazel_rules_go",\n    url = "https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz",\n    sha256 = "341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c",\n)`,
-        newVersion: '0.8.1',
+        newValue: '0.8.1',
       };
       got.mockReturnValueOnce({ body: '' });
       const res = await bazelfile.updateDependency(content, upgrade);
@@ -49,7 +49,7 @@ describe('manager/bazel/update', () => {
         depType: 'http_archive',
         repo: 'bazelbuild/rules_go',
         def: `http_archive(\n    name = "io_bazel_rules_go",\n    url = "https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz",\n    sha256 = "341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c",\n)`,
-        newVersion: '0.8.1',
+        newValue: '0.8.1',
       };
       got.mockImplementationOnce(() => {
         throw new Error('some error');

@@ -78,6 +78,16 @@ describe('platform/gitlab', () => {
         email: 'a@b.com',
       },
     }));
+    get.mockReturnValue({
+      body: [
+        {
+          number: 1,
+          source_branch: 'branch-a',
+          title: 'branch a pr',
+          state: 'opened',
+        },
+      ],
+    });
     return gitlab.initRepo(...args);
   }
 
@@ -502,6 +512,75 @@ describe('platform/gitlab', () => {
       expect(res).toBeDefined();
     });
   });
+  describe('ensureIssue()', () => {
+    it('creates issue', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      }));
+      const res = await gitlab.ensureIssue('new-title', 'new-content');
+      expect(res).toEqual('created');
+    });
+    it('updates issue', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'new-content' } });
+      const res = await gitlab.ensureIssue('title-2', 'newer-content');
+      expect(res).toEqual('updated');
+    });
+    it('skips update if unchanged', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'newer-content' } });
+      const res = await gitlab.ensureIssue('title-2', 'newer-content');
+      expect(res).toBe(null);
+    });
+  });
+  describe('ensureIssueClosing()', () => {
+    it('closes issue', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      }));
+      await gitlab.ensureIssueClosing('title-2');
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       get.mockReturnValueOnce({
@@ -529,13 +608,48 @@ describe('platform/gitlab', () => {
     });
   });
   describe('ensureComment', () => {
-    it('exists', async () => {
+    it('add comment if not found', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({ body: [] });
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(1);
+      expect(get.post.mock.calls).toMatchSnapshot();
+    });
+    it('add updates comment if necessary', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
+      });
+      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(1);
+      expect(get.patch.mock.calls).toMatchSnapshot();
+    });
+    it('skips comment', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
+      });
+      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(0);
+    });
+    it('handles comment with no description', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
+      await gitlab.ensureComment(42, null, '!merge');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(0);
     });
   });
   describe('ensureCommentRemoval', () => {
-    it('exists', async () => {
+    it('deletes comment if found', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
+      });
       await gitlab.ensureCommentRemoval(42, 'some-subject');
+      expect(get.delete.mock.calls).toHaveLength(1);
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
@@ -664,9 +778,20 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getPrFiles()', () => {
-    it('should return empty', async () => {
-      const prFiles = await gitlab.getPrFiles();
+    it('should return empty if no mrNo is passed', async () => {
+      const prFiles = await gitlab.getPrFiles(null);
       expect(prFiles).toEqual([]);
+    });
+    it('returns files', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          { filename: 'renovate.json' },
+          { filename: 'not renovate.json' },
+        ],
+      });
+      const prFiles = await gitlab.getPrFiles(123);
+      expect(prFiles).toMatchSnapshot();
+      expect(prFiles).toHaveLength(2);
     });
   });
   describe('updatePr(prNo, title, body)', () => {
