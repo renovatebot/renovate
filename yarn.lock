@@ -1566,6 +1566,16 @@ es-abstract@^1.5.1:
     is-callable "^1.1.3"
     is-regex "^1.0.4"
 
+es-abstract@^1.6.1:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/es-abstract/-/es-abstract-1.12.0.tgz#9dbbdd27c6856f0001421ca18782d786bf8a6165"
+  dependencies:
+    es-to-primitive "^1.1.1"
+    function-bind "^1.1.1"
+    has "^1.0.1"
+    is-callable "^1.1.3"
+    is-regex "^1.0.4"
+
 es-to-primitive@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/es-to-primitive/-/es-to-primitive-1.1.1.tgz#45355248a88979034b6792e19bb81f2b7975dd0d"
@@ -1599,11 +1609,13 @@ escodegen@^1.9.0:
   optionalDependencies:
     source-map "~0.6.1"
 
-eslint-config-airbnb-base@12.1.0:
-  version "12.1.0"
-  resolved "https://registry.yarnpkg.com/eslint-config-airbnb-base/-/eslint-config-airbnb-base-12.1.0.tgz#386441e54a12ccd957b0a92564a4bafebd747944"
+eslint-config-airbnb-base@13.0.0:
+  version "13.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-airbnb-base/-/eslint-config-airbnb-base-13.0.0.tgz#2ee6279c4891128e49d6445b24aa13c2d1a21450"
   dependencies:
     eslint-restricted-globals "^0.1.1"
+    object.assign "^4.1.0"
+    object.entries "^1.0.4"
 
 eslint-config-prettier@2.9.0:
   version "2.9.0"
@@ -2101,7 +2113,7 @@ fstream@^1.0.0, fstream@^1.0.2:
     mkdirp ">=0.5 0"
     rimraf "2"
 
-function-bind@^1.0.2, function-bind@^1.1.1:
+function-bind@^1.0.2, function-bind@^1.1.0, function-bind@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
 
@@ -2439,6 +2451,10 @@ has-flag@^3.0.0:
 has-symbol-support-x@^1.4.1:
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/has-symbol-support-x/-/has-symbol-support-x-1.4.2.tgz#1409f98bc00247da45da67cee0a36f282ff26455"
+
+has-symbols@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/has-symbols/-/has-symbols-1.0.0.tgz#ba1a8f1af2a0fc39650f5c850367704122063b44"
 
 has-to-string-tag-x@^1.2.0:
   version "1.4.1"
@@ -4631,6 +4647,10 @@ object-copy@^0.1.0:
     define-property "^0.2.5"
     kind-of "^3.0.3"
 
+object-keys@^1.0.11:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/object-keys/-/object-keys-1.0.12.tgz#09c53855377575310cca62f55bb334abff7b3ed2"
+
 object-keys@^1.0.8:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/object-keys/-/object-keys-1.0.11.tgz#c54601778ad560f1142ce0e01bcca8b56d13426d"
@@ -4640,6 +4660,24 @@ object-visit@^1.0.0:
   resolved "https://registry.yarnpkg.com/object-visit/-/object-visit-1.0.1.tgz#f79c4493af0c5377b59fe39d395e41042dd045bb"
   dependencies:
     isobject "^3.0.0"
+
+object.assign@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/object.assign/-/object.assign-4.1.0.tgz#968bf1100d7956bb3ca086f006f846b3bc4008da"
+  dependencies:
+    define-properties "^1.1.2"
+    function-bind "^1.1.1"
+    has-symbols "^1.0.0"
+    object-keys "^1.0.11"
+
+object.entries@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/object.entries/-/object.entries-1.0.4.tgz#1bf9a4dd2288f5b33f3a993d257661f05d161a5f"
+  dependencies:
+    define-properties "^1.1.2"
+    es-abstract "^1.6.1"
+    function-bind "^1.1.0"
+    has "^1.0.1"
 
 object.getownpropertydescriptors@^2.0.3:
   version "2.0.3"
