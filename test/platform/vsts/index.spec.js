@@ -1,8 +1,13 @@
+const endpoints = require('../../../lib/util/endpoints');
+
 describe('platform/vsts', () => {
   let vsts;
   let vstsApi;
   let vstsHelper;
   beforeEach(() => {
+    // clean up endpoints
+    endpoints.clear();
+
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/vsts/vsts-got-wrapper');

@@ -1,7 +1,12 @@
+const endpoints = require('../../../lib/util/endpoints');
+
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
   beforeEach(() => {
+    // clean up endpoints
+    endpoints.clear();
+
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
