@@ -165,6 +165,7 @@
       ":rebaseStalePrs",
       ":automergeMinor",
       ":label(ready)",
+      "group:linters",
       ":assignee(rarkins)"
     ],
     "docker": {
