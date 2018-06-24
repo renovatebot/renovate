@@ -5,7 +5,9 @@ description: Docker Package Manager Support in Renovate
 
 # Docker
 
-Renovate supports upgrading dependencies in Docker's `Dockerfile` files.
+Renovate supports upgrading dependencies in Docker's `Dockerfile` files and Docker Compose files.
+
+You can find the Docker Compose documentation [here](./configuration-options/#docker-compose).
 
 ## How It Works
 
@@ -83,6 +85,5 @@ The following features are planned but not supported today:
 2.  `ARG` arguments in `Dockerfile` `FROM` lines
 3.  Custom `Dockerfile` filenames (e.g. `Dockerfile-dev`)
 4.  Custom Docker registries (only Docker Hub is currently supported)
-5.  Docker Compose file support
 
 If any of these features are important to you, please add a comment or at least a `+1` in Renovate's [Issues Tracker](https://github.com/renovateapp/renovate/issues?q=is%3Aopen+is%3Aissue+label%3A%23docker).
