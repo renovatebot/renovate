@@ -197,10 +197,6 @@ See https://renovateapp.com/docs/configuration-reference/config-presets for deta
 
 ## fileMatch
 
-## gitAuthor
-
-RFC5322-compliant string if you wish to customise the git author for commits.
-
 ## group
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to _add_ settings to any group by defining your own `group` configuration object.
