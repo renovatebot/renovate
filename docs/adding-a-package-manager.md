@@ -9,29 +9,25 @@ Over time, additional "package managers" (e.g. Meteor.js, Dockerfile, nvm) have 
 
 ### Code structure
 
-Each package manager lives under `lib/managers/*`, and are often tightly coupled to datasources under `lib/datasource/*`.
+Each package manager lives under `lib/manager/*`, and are often tightly coupled to datasources under `lib/datasource/*`.
+
+Versioning logic (e.g. semver, pep440) lives under `lib/versioning/*`.
+
 Common logic for Renovate - not specific to particular managers - generally lives under `lib/workers/*`.
 
 ### Manager requirements
 
 Each manager needs its own subdirectory under `lib/managers` and to be added to the list of managers in `lib/managers/index.js`.
 
-The manager's `index.js` file then needs to export up to 7 functions or values:
+The manager's `index.js` file supports the following values/functions:
 
-```js
-module.exports = {
-  contentPattern,
-  extractDependencies,
-  getPackageUpdates,
-  language,
-  resolvePackageFile,
-  updateDependency,
-};
-```
-
-##### language (optional)
-
-This is used when more than one package manager share settings from a common language. e.g. docker-compose, circleci and gitlabci all specify "docker" as their language and inherit all config settings from there.
+- contentPattern (optional)
+- extractDependencies
+- getRangeStrategy (optional)
+- language (optional)
+- postExtract (optional)
+- supportsLockFileMaintenance (optional)
+- updateDependency
 
 ##### contentPattern (optional)
 
@@ -39,38 +35,47 @@ This is used when more than one package manager share settings from a common lan
 
 An example `contentPattern` is from Meteor.js: `(^|\\n)\\s*Npm.depends\\(\\s*{`. Because Meteor's `package.js` is not particularly "unique", it's quite possible that repositories will have one or more `package.js` files that have nothing to do with Meteor.js, so we filter out only the ones that include `Npm.depends` in it.
 
-##### resolvePackageFile (optional)
+Note: it's possible that the `extractDependencies` function can perform this filtering instead.
 
-`resolvePackageFile` is a function only necessary if you need to do anything "special" with the file after downloading it and before parsing it.
-For example, it is used in the npm package manager to detect additional files like `.npmrc`, `package-lock.json` and `yarn.lock`.
-For most managers, it is not necessary.
+##### `extractDependencies(content, packageFile, config)` (async, mandatory)
 
-##### extractDependencies
-
-This function is essential. It takes a file content and returns an array of detected/extracted dependencies, including:
+This function is mandatory. It takes a file content and optionally the packageFile name/config, and returns an array of detected/extracted dependencies, including:
 
 - dependency name
 - dependency type (e.g. dependencies, devDependencies, etc)
 - currentValue
+- version scheme used (e.g. semver, pep440)
 
 The fields returned here can be customised to suit the package manager, e.g. Docker uses `currentFrom`
 
-Until now, `extractDependencies` has been done 100% in Renovate's JS, however it's possible that some future package manager's configuration file may be so complex that we may need to spawn to a CLI command to help parse and extract dependencies.
+This function doesn't necessarily need to _understand_ the file or even syntax that it is passed, instead it just needs to understand enough to extract the list of dependencies.
 
-##### getPackageUpdates
+As a general approach, we want to extract _all_ dependencies from each dependency file, even if they contain values we don't support. For any that have unsupported values that we cannot renovate, this `extractDependencies` function should set a `skipReason` to a value that would be helpful to someone reading the logs.
 
-This function is called per-dependency to return a list of possible updates for that dependency. If it is up to date, then an empty array is returned.
-Again, this has been done completely in JS so far, however to continue doing it entirely in JS means that we may have to build accurate implementations of other language's versioning and range specification, which could be hard.
-Additionally, some package managers may use complex algorithms to determine the best updated set of dependencies - more complex than simply "is there a newer version of x?"
-Therefore, there is the possibility that for some future package managers we may need to use a child process to spawn the package manager itself rather than reinvent it within JS.
+Also, if a file is passed to `extractDependencies` that is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files. A common case for this is in Meteor, where its `package.js` file name is not unique and there many be many non-Meteor paojects using that filename.
 
-##### updateDependency
+#### `getRangeStrategy(config)` (optional)
 
-This function is the final one called for a manager. It's purpose is to patch the package file with the new version and return an updated file.
+This optional function should be written if you wish the manager to support "auto" range strategies, e.g. pinning or not pinning depending on other values in the package file. `npm` uses this to pin `devDependencies` but not `dependencies` unless the package file is detected as an app.
 
-##### fileMatch
+If left undefined, then a default `getRangeStrategy` will be used that always returns "replace".
 
-`fileMatch` is a javascript `RegExp` string or an exact filename string used to detect the manager's files within the repository.
-It is located within `lib/config/definitions.js` so that it can be configured by the user.
+##### `language` (optional)
 
-An example `fileMatch` from Docker Compose is `(^|/)docker-compose[^/]*\\.ya?ml$`. You can see that it's designed to match files both in the root as well as in subdirectories, and to be flexible with matching yaml files that start with `docker-compose` but may have additional characters in the filename.
+This is used when more than one package manager share settings from a common language. e.g. docker-compose, circleci and gitlabci all specify "docker" as their language and inherit all config settings from there.
+
+#### `postExtract(packageFiles)` (async, optional)
+
+This function takes an array of package files (extracted earlier using `extractDependencies`) and is useful if some form of "correlation" is required between the files.
+
+For example, Yarn Workspaces and Lerna are tools for working with multiple package files at once, including generating a single lock file instead of one per package file. It is therefore necessary to have a "full view" of all package files to determine if such logic is necessary, because the `extractDependencies` function only sees each package file in isolation.
+
+Currently `npm` is the only package manager using this function, because all other ones are able to extract enough data from package files in isolation.
+
+#### `supportsLockFileMaintenance` (optional)
+
+Set to true if this package manager needs to update lock files in addition to package files.
+
+##### `updateDependency(fileContent, upgrade)`
+
+This function is the final one called for most managers. It's purpose is to patch the package file with the new value (described in the upgrade) and return an updated file. If the file was already updated then it would return the same contents as it was provided.
