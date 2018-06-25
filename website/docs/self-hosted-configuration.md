@@ -29,6 +29,10 @@ This is set to true by default, meaning that any settings (such as `schedule`) t
 
 You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
 
+## gitAuthor
+
+RFC5322-compliant string if you wish to customise the git author for commits.
+
 ## gitPrivateKey
 
 ## logFile
