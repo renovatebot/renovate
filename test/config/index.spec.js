@@ -90,7 +90,11 @@ describe('config/index', () => {
     });
     it('autodiscovers github platform', async () => {
       const env = {};
-      defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);
+      defaultArgv = defaultArgv.concat([
+        '--autodiscover',
+        '--token=abc',
+        '--pr-footer=custom',
+      ]);
       ghGot.mockImplementationOnce(() => ({
         headers: {},
         body: [
