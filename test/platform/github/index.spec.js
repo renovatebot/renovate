@@ -1388,6 +1388,116 @@ describe('platform/github', () => {
       expect(pr.canRebase).toBe(true);
       expect(pr).toMatchSnapshot();
     });
+    it('should return a rebaseable PR if gitAuthor matches 1 commit', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
+      });
+      get.mockImplementationOnce(() => ({
+        body: {
+          number: 1,
+          state: 'open',
+          mergeable_state: 'dirty',
+          base: { sha: '1234' },
+          commits: 1,
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            commit: {
+              author: {
+                email: 'bot@renovateapp.com',
+              },
+            },
+          },
+        ],
+      }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1234',
+          },
+        },
+      }));
+      const pr = await github.getPr(1234);
+      expect(pr.canRebase).toBe(true);
+      expect(pr).toMatchSnapshot();
+    });
+    it('should return a not rebaseable PR if gitAuthor does not match 1 commit', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
+      });
+      get.mockImplementationOnce(() => ({
+        body: {
+          number: 1,
+          state: 'open',
+          mergeable_state: 'dirty',
+          base: { sha: '1234' },
+          commits: 1,
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            commit: {
+              author: {
+                email: 'foo@bar.com',
+              },
+            },
+          },
+        ],
+      }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1234',
+          },
+        },
+      }));
+      const pr = await github.getPr(1234);
+      expect(pr.canRebase).toBe(false);
+      expect(pr).toMatchSnapshot();
+    });
+    it('should return a not rebaseable PR if gitAuthor and error', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
+      });
+      get.mockImplementationOnce(() => ({
+        body: {
+          number: 1,
+          state: 'open',
+          mergeable_state: 'dirty',
+          base: { sha: '1234' },
+          commits: 1,
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            commit: {},
+          },
+        ],
+      }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1234',
+          },
+        },
+      }));
+      const pr = await github.getPr(1234);
+      expect(pr.canRebase).toBe(false);
+      expect(pr).toMatchSnapshot();
+    });
   });
   describe('getPrFiles()', () => {
     it('should return empty if no prNo is passed', async () => {
