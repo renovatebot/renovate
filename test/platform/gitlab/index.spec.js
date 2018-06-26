@@ -451,6 +451,84 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
   });
+  describe('mergeBranch(branchName, mergeType)', () => {
+    it('should perform a branch-push merge', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      }); // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      get.patch.mockImplementationOnce();
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      // deleteBranch
+      get.delete.mockImplementationOnce();
+      await gitlab.mergeBranch('thebranchname', 'branch-push');
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should throw if branch-push merge throws', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      }); // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      get.patch.mockImplementationOnce(() => {
+        throw new Error('branch-push failed');
+      });
+      let e;
+      try {
+        await gitlab.mergeBranch('thebranchname', 'branch-push');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should throw if unknown merge type', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      let e;
+      try {
+        await gitlab.mergeBranch('thebranchname', 'wrong-merge-type');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+  });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       get.delete = jest.fn();
