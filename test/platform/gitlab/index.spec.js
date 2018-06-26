@@ -926,14 +926,14 @@ describe('platform/gitlab', () => {
         [file],
         'Update something',
         undefined,
-        'Renovate Bot <bot@renovateapp.com>'
+        'Renovate Bot <bot@renovatebot.com>'
       );
 
       expect(get.post.mock.calls[0][1].body.author_name).toEqual(
         'Renovate Bot'
       );
       expect(get.post.mock.calls[0][1].body.author_email).toEqual(
-        'bot@renovateapp.com'
+        'bot@renovatebot.com'
       );
     });
     it('should skip invalid gitAuthor', async () => {
@@ -958,7 +958,7 @@ describe('platform/gitlab', () => {
         [file],
         'Update something',
         undefined,
-        'Renovate Bot bot@renovateapp.com'
+        'Renovate Bot bot@renovatebot.com'
       );
 
       expect(get.post.mock.calls[0][1].body.author_name).toBeUndefined();

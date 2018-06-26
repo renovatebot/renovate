@@ -185,7 +185,7 @@ Example:
 
 ## encrypted
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -193,7 +193,7 @@ Extend this if you wish to configure rules specifically for `engines` definition
 
 ## extends
 
-See https://renovateapp.com/docs/configuration-reference/config-presets for details.
+See https://renovatebot.com/docs/configuration-reference/config-presets for details.
 
 ## fileMatch
 
@@ -292,17 +292,17 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovateapp.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
 ## npmToken
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used.
 
 ## nuget
 
@@ -460,7 +460,7 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 ## prBody
 
-Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovateapp/renovate/issues) and let us solve it for you and for everyone else too.
+Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovatebot/renovate/issues) and let us solve it for you and for everyone else too.
 
 ## prConcurrentLimit
 
@@ -631,7 +631,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-- **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 

@@ -1777,13 +1777,13 @@ describe('platform/github', () => {
         files,
         'my other commit message',
         undefined,
-        'Renovate Bot <bot@renovateapp.com>'
+        'Renovate Bot <bot@renovatebot.com>'
       );
       expect(get.post.mock.calls[2][1].body.author.name).toEqual(
         'Renovate Bot'
       );
       expect(get.post.mock.calls[2][1].body.author.email).toEqual(
-        'bot@renovateapp.com'
+        'bot@renovatebot.com'
       );
     });
     it('should skip invalid gitAuthor', async () => {
@@ -1806,7 +1806,7 @@ describe('platform/github', () => {
         files,
         'my other commit message',
         undefined,
-        'Renovate Bot bot@renovateapp.com'
+        'Renovate Bot bot@renovatebot.com'
       );
       expect(get.post.mock.calls[2][1].body.author).toBeUndefined();
     });

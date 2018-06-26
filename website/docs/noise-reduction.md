@@ -133,7 +133,7 @@ As mentioned earlier. using lock files greatly increase the chance that merging 
 
 ## The Future of Noise Reduction
 
-First of all, if you every have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovateapp/renovate). Our philosophy is:
+First of all, if you every have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovatebot/renovate). Our philosophy is:
 
 1.  Nearly everyone should probably use Renovate-like dependency update automation
 2.  Over time, you should "see" Renovate less and less

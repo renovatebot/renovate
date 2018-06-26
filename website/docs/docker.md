@@ -86,4 +86,4 @@ The following features are planned but not supported today:
 3.  Custom `Dockerfile` filenames (e.g. `Dockerfile-dev`)
 4.  Custom Docker registries (only Docker Hub is currently supported)
 
-If any of these features are important to you, please add a comment or at least a `+1` in Renovate's [Issues Tracker](https://github.com/renovateapp/renovate/issues?q=is%3Aopen+is%3Aissue+label%3A%23docker).
+If any of these features are important to you, please add a comment or at least a `+1` in Renovate's [Issues Tracker](https://github.com/renovatebot/renovate/issues?q=is%3Aopen+is%3Aissue+label%3A%23docker).

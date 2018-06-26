@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/renovateapp/renovate.git"
+    "url": "https://github.com/renovatebot/renovate.git"
   },
   "keywords": [
     "automated",
@@ -45,9 +45,9 @@
   ],
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/renovateapp/renovate/issues"
+    "url": "https://github.com/renovatebot/renovate/issues"
   },
-  "homepage": "https://github.com/renovateapp/renovate#readme",
+  "homepage": "https://renovatebot.com",
   "engines": {
     "node": ">= 8.11.0"
   },

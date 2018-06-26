@@ -63,5 +63,5 @@ configuration option to `false` before running.
 ## Deployment
 
 See
-[deployment docs](https://github.com/renovateapp/renovate/blob/master/docs/deployment.md)
+[deployment docs](https://github.com/renovatebot/renovate/blob/master/docs/deployment.md)
 for details.
