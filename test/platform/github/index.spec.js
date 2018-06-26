@@ -831,7 +831,7 @@ describe('platform/github', () => {
     });
   });
   describe('mergeBranch(branchName, mergeType)', () => {
-    it('should perform a branch-push merge', async () => {
+    it('should perform a branch merge', async () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
@@ -854,14 +854,14 @@ describe('platform/github', () => {
       }));
       // deleteBranch
       get.delete.mockImplementationOnce();
-      await github.mergeBranch('thebranchname', 'branch-push');
+      await github.mergeBranch('thebranchname', 'branch');
       expect(get.mock.calls).toMatchSnapshot();
       expect(get.patch.mock.calls).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.put.mock.calls).toMatchSnapshot();
       expect(get.delete.mock.calls).toMatchSnapshot();
     });
-    it('should throw if branch-push merge throws', async () => {
+    it('should throw if branch merge throws', async () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
@@ -874,51 +874,11 @@ describe('platform/github', () => {
         },
       }));
       get.patch.mockImplementationOnce(() => {
-        throw new Error('branch-push failed');
+        throw new Error('branch failed');
       });
       let e;
       try {
-        await github.mergeBranch('thebranchname', 'branch-push');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toMatchSnapshot();
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(get.patch.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.put.mock.calls).toMatchSnapshot();
-      expect(get.delete.mock.calls).toMatchSnapshot();
-    });
-    it('should perform a branch-merge-commit merge', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      }); // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1235',
-          },
-        },
-      }));
-      await github.mergeBranch('thebranchname', 'branch-merge-commit');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(get.patch.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.put.mock.calls).toMatchSnapshot();
-      expect(get.delete.mock.calls).toMatchSnapshot();
-    });
-    it('should throw if branch-merge-commit throws', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      });
-      get.post.mockImplementationOnce(() => {
-        throw new Error('branch-push failed');
-      });
-      let e;
-      try {
-        await github.mergeBranch('thebranchname', 'branch-merge-commit');
+        await github.mergeBranch('thebranchname', 'branch');
       } catch (err) {
         e = err;
       }
@@ -1887,13 +1847,13 @@ describe('platform/github', () => {
         files,
         'my other commit message',
         undefined,
-        'Renovate Bot <bot@renovateapp.com>'
+        'Renovate Bot <bot@renovatebot.com>'
       );
       expect(get.post.mock.calls[2][1].body.author.name).toEqual(
         'Renovate Bot'
       );
       expect(get.post.mock.calls[2][1].body.author.email).toEqual(
-        'bot@renovateapp.com'
+        'bot@renovatebot.com'
       );
     });
     it('should skip invalid gitAuthor', async () => {
@@ -1916,7 +1876,7 @@ describe('platform/github', () => {
         files,
         'my other commit message',
         undefined,
-        'Renovate Bot bot@renovateapp.com'
+        'Renovate Bot bot@renovatebot.com'
       );
       expect(get.post.mock.calls[2][1].body.author).toBeUndefined();
     });

@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/renovateapp/renovate.git"
+    "url": "https://github.com/renovatebot/renovate.git"
   },
   "keywords": [
     "automated",
@@ -45,9 +45,9 @@
   ],
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/renovateapp/renovate/issues"
+    "url": "https://github.com/renovatebot/renovate/issues"
   },
-  "homepage": "https://github.com/renovateapp/renovate#readme",
+  "homepage": "https://renovatebot.com",
   "engines": {
     "node": ">= 8.11.0"
   },
@@ -119,11 +119,11 @@
     "eslint-config-prettier": "2.9.0",
     "eslint-plugin-import": "2.12.0",
     "eslint-plugin-promise": "3.8.0",
-    "jest": "23.1.0",
+    "jest": "23.2.0",
     "jest-silent-reporter": "0.0.5",
     "mockdate": "2.0.2",
     "nock": "9.3.3",
-    "prettier": "1.13.5",
+    "prettier": "1.13.6",
     "semantic-release": "15.6.0"
   },
   "files": [

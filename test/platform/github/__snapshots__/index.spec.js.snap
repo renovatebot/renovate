@@ -737,51 +737,7 @@ Object {
 }
 `;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 2`] = `Array []`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 3`] = `
-Array [
-  Array [
-    "repos/some/repo/merges",
-    Object {
-      "body": Object {
-        "base": "master",
-        "head": "thebranchname",
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 4`] = `Array []`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-merge-commit merge 5`] = `
-Array [
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 1`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch merge 1`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -801,7 +757,7 @@ Array [
 ]
 `;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 2`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch merge 2`] = `
 Array [
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -814,11 +770,11 @@ Array [
 ]
 `;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 3`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch merge 3`] = `Array []`;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 4`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch merge 4`] = `Array []`;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch-push merge 5`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should perform a branch merge 5`] = `
 Array [
   Array [
     "repos/some/repo/git/refs/heads/thebranchname",
@@ -827,48 +783,9 @@ Array [
 ]
 `;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 1`] = `[Error: branch-merge-commit failed]`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch merge throws 1`] = `[Error: Branch automerge failed]`;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 2`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 3`] = `Array []`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 4`] = `
-Array [
-  Array [
-    "repos/some/repo/merges",
-    Object {
-      "body": Object {
-        "base": "master",
-        "head": "thebranchname",
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 5`] = `Array []`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-merge-commit throws 6`] = `Array []`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 1`] = `[Error: branch-push failed]`;
-
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 2`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch merge throws 2`] = `
 Array [
   Array [
     "repos/some/repo",
@@ -888,7 +805,7 @@ Array [
 ]
 `;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 3`] = `
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch merge throws 3`] = `
 Array [
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -901,11 +818,11 @@ Array [
 ]
 `;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 4`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch merge throws 4`] = `Array []`;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 5`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch merge throws 5`] = `Array []`;
 
-exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch-push merge throws 6`] = `Array []`;
+exports[`platform/github mergeBranch(branchName, mergeType) should throw if branch merge throws 6`] = `Array []`;
 
 exports[`platform/github mergeBranch(branchName, mergeType) should throw if unknown merge type 1`] = `[Error: Unsupported branch merge type: wrong-merge-type]`;
 

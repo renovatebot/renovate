@@ -10,7 +10,7 @@ module.exports = {
       automerge: false,
     },
     {
-      repository: 'renovateapp/renovate',
+      repository: 'renovatebot/renovate',
       extends: [':pinVersions']
     },
     {

@@ -59,16 +59,16 @@ describe('workers/branch/parent', () => {
       expect(res.parentBranch).toBe(undefined);
       expect(platform.deleteBranch.mock.calls.length).toBe(1);
     });
-    it('returns branchName if automerge branch-push and not stale', async () => {
+    it('returns branchName if automerge branch and not stale', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       platform.branchExists.mockReturnValue(true);
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBe(config.branchName);
     });
-    it('returns undefined if automerge branch-push and stale', async () => {
+    it('returns undefined if automerge branch and stale', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       platform.branchExists.mockReturnValue(true);
       platform.isBranchStale.mockReturnValueOnce(true);
       const res = await getParentBranch(config);

@@ -299,7 +299,7 @@ describe('workers/pr', () => {
     });
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       config.branchAutomergeFailureMessage = 'branch status error';
       platform.getBranchStatus.mockReturnValueOnce('failure');
       const pr = await prWorker.ensurePr(config);
@@ -307,7 +307,7 @@ describe('workers/pr', () => {
     });
     it('should create PR if branch automerging failed', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       platform.getBranchStatus.mockReturnValueOnce('success');
       config.forcePr = true;
       const pr = await prWorker.ensurePr(config);
@@ -315,7 +315,7 @@ describe('workers/pr', () => {
     });
     it('should return null if branch automerging not failed', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       platform.getBranchStatus.mockReturnValueOnce('pending');
       platform.getBranchLastCommitTime.mockReturnValueOnce(new Date());
       const pr = await prWorker.ensurePr(config);
@@ -323,7 +323,7 @@ describe('workers/pr', () => {
     });
     it('should not return null if branch automerging taking too long', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       platform.getBranchStatus.mockReturnValueOnce('pending');
       platform.getBranchLastCommitTime.mockReturnValueOnce(
         new Date('2018-01-01')

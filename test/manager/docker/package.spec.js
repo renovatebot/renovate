@@ -32,6 +32,7 @@ describe('lib/manager/docker/package', () => {
         currentDepTag: 'some-dep:1.0.0',
         currentTag: '1.0.0',
         currentDigest: 'sha256:abcdefghijklmnop',
+        pinDigests: true,
       };
     });
     it('returns empty if no digest', async () => {
