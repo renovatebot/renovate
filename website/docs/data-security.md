@@ -66,7 +66,7 @@ Renovate needs write access to code in order to create branches within the repos
 
 ## Renovate source code
 
-Although the Renovate App runs as a wrapper around the `renovate` open source code in order to schedule repositories and retrieve tokens, the entire logic of the application remains as open source, located at [https://github.com/renovateapp/renovate](https://github.com/renovateapp/renovate). In other words, you can always know what code/logic is running on your repository because we always run the open source code - there is no "fork" of the open source repository in use.
+Although the Renovate App runs as a wrapper around the `renovate` open source code in order to schedule repositories and retrieve tokens, the entire logic of the application remains as open source, located at [https://github.com/renovatebot/renovate](https://github.com/renovatebot/renovate). In other words, you can always know what code/logic is running on your repository because we always run the open source code - there is no "fork" of the open source repository in use.
 
 ## AWS Region
 

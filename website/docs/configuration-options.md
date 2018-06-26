@@ -185,7 +185,7 @@ Example:
 
 ## encrypted
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -193,13 +193,9 @@ Extend this if you wish to configure rules specifically for `engines` definition
 
 ## extends
 
-See https://renovateapp.com/docs/configuration-reference/config-presets for details.
+See https://renovatebot.com/docs/configuration-reference/config-presets for details.
 
 ## fileMatch
-
-## gitAuthor
-
-RFC5322-compliant string if you wish to customise the git author for commits.
 
 ## group
 
@@ -292,17 +288,17 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovateapp.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
 ## npmToken
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used.
 
 ## nuget
 
@@ -460,7 +456,7 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 ## prBody
 
-Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovateapp/renovate/issues) and let us solve it for you and for everyone else too.
+Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovatebot/renovate/issues) and let us solve it for you and for everyone else too.
 
 ## prConcurrentLimit
 
@@ -528,7 +524,7 @@ This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0
 
 This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
 
-If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch-push` automerge then Renovate will still rebase as necessary for that.
+If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch` automerge then Renovate will still rebase as necessary for that.
 
 ## recreateClosed
 
@@ -631,7 +627,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-- **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 

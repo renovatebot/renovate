@@ -185,7 +185,7 @@ describe('config/index', () => {
         headers: {},
         body: [
           { full_name: 'bar/BAZ' },
-          { full_name: 'renovateapp/renovate' },
+          { full_name: 'renovatebot/renovate' },
           { full_name: 'not/configured' },
         ],
       }));
