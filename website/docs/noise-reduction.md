@@ -86,7 +86,7 @@ For example, if you have `jest` or `mocha` as a dependency, and it has an upgrad
 
 #### Branch automerging
 
-Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged. For this reason we recommend you consider setting `automergeType=branch-push` which will mean:
+Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged. For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
 - Renovate first creates a branch and no PR
 - If tests pass, Renovate pushes a commit directly to `master` without PR
@@ -116,7 +116,7 @@ Remember our running `eslint` example? Let's automerge it if all the linting upd
       "groupName": "eslint",
       "schedule": ["before 2am on monday"],
       "automerge": true,
-      "automergeType": "branch-push"
+      "automergeType": "branch"
     }
   ]
 ```
