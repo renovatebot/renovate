@@ -110,6 +110,17 @@ describe('workers/branch', () => {
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
     });
+    it('throws error if closed PR found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockReturnValueOnce({
+        state: 'merged',
+        canRebase: false,
+      });
+      await expect(branchWorker.processBranch(config)).rejects.toThrow(
+        /repository-changed/
+      );
+    });
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
