@@ -71,7 +71,7 @@ Another example of a good candidate for automerging might be a database driver l
 
 ##### Branch automerging
 
-In the above suggestion of Pull Request automerging, you might still find it annoying if you receive GitHub Notifications for every PR that is created and merged. In that case, you could set `automergeType` to `branch-push`, which means Renovate will:
+In the above suggestion of Pull Request automerging, you might still find it annoying if you receive GitHub Notifications for every PR that is created and merged. In that case, you could set `automergeType` to `branch`, which means Renovate will:
 
 - Create a new branch for testing
 - Wait until after tests have completed
