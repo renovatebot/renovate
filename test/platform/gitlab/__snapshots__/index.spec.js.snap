@@ -300,7 +300,7 @@ Array [
     },
   ],
   Array [
-    "projects/some%2Frepo%2Fproject/repository/tree?ref=undefined&recursive=true&per_page=100",
+    "projects/some%2Frepo%2Fproject/repository/tree?ref=undefined&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },
@@ -323,7 +323,7 @@ Array [
     },
   ],
   Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&recursive=true&per_page=100",
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },
@@ -348,7 +348,7 @@ Array [
     },
   ],
   Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&recursive=true&per_page=100",
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },
@@ -373,7 +373,7 @@ Array [
     },
   ],
   Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&recursive=true&per_page=100",
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },
@@ -386,7 +386,7 @@ exports[`platform/gitlab initRepo should initialise the config for the repo - 2 
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
-    "projects/undefined/repository/tree?ref=some-branch&recursive=true&per_page=100",
+    "projects/undefined/repository/tree?ref=some-branch&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },
