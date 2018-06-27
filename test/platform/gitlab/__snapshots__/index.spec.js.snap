@@ -127,7 +127,7 @@ Array [
 exports[`platform/gitlab ensureComment add comment if not found 1`] = `
 Array [
   Array [
-    "/api/v4/projects/some%2Frepo/merge_requests/42/notes",
+    "projects/some%2Frepo/merge_requests/42/notes",
     Object {
       "body": Object {
         "body": "### some-subject
@@ -143,7 +143,7 @@ content",
 exports[`platform/gitlab ensureComment add updates comment if necessary 1`] = `
 Array [
   Array [
-    "/api/v4/projects/some%2Frepo/merge_requests/42/notes/1234",
+    "projects/some%2Frepo/merge_requests/42/notes/1234",
     Object {
       "body": Object {
         "body": "### some-subject
