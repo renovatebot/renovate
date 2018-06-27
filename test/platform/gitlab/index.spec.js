@@ -451,91 +451,57 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
   });
-  describe('checkCompatibility(branchName, targetBranch)', () => {
-    it('should check the compatibility', async () => {
+  describe('mergeBranch(branchName, mergeType)', () => {
+    it('should perform a branch merge', async () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
       }); // getBranchCommit
-      get.mockReturnValueOnce(
+      get.mockImplementationOnce(
         {
           "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
           "short_id": "8b090c1b",
           "title": "Feature added"
         }
       );
-      // getBranchCommit
-      get.mockReturnValueOnce(
-        [
-          {
-            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
-            "short_id": "8b090c1b",
-            "title": "Another Feature"
-          },
-          {
-            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
-            "short_id": "8b090c1b",
-            "title": "Feature added"
-          },
-          {
-            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
-            "short_id": "8b090c1b",
-            "title": "Some other feature"
-          }
-        ]
-      );
-      expect(gitlab.checkCompatibility('testBranch', 'targetBranch')).toBe(true);
-    });
-  });
-  describe('mergeBranch(branchName, mergeType)', () => {
-    it('should perform a branch-push merge', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      }); // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1235',
-          },
-        },
-      }));
+      get.mockReturnValueOnce('thebranchname');
+      get.mockReturnValueOnce(true);
       get.patch.mockImplementationOnce();
       // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1235',
-          },
-        },
-      }));
+      get.mockImplementationOnce(
+        {
+          "id": "8b090c1b79a14f2bd9e8a738f717824ff53aasdf",
+          "short_id": "8b09asdf",
+          "title": "Another"
+        }
+      );
       // deleteBranch
       get.delete.mockImplementationOnce();
-      await gitlab.mergeBranch('thebranchname', 'branch-push');
+      await gitlab.mergeBranch('thebranchname', 'branch');
       expect(get.mock.calls).toMatchSnapshot();
       expect(get.patch.mock.calls).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.put.mock.calls).toMatchSnapshot();
       expect(get.delete.mock.calls).toMatchSnapshot();
     });
-    it('should throw if branch-push merge throws', async () => {
+    it('should throw if branch merge throws', async () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
       }); // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1235',
-          },
-        },
-      }));
+      get.mockImplementationOnce(
+        {
+          "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
+          "short_id": "8b090c1b",
+          "title": "Feature added"
+        }
+      );
       get.patch.mockImplementationOnce(() => {
         throw new Error('branch-push failed');
       });
       let e;
       try {
-        await gitlab.mergeBranch('thebranchname', 'branch-push');
+        await gitlab.mergeBranch('thebranchname', 'branch');
       } catch (err) {
         e = err;
       }
@@ -578,9 +544,42 @@ describe('platform/gitlab', () => {
       expect(get.delete.mock.calls.length).toBe(1);
     });
   });
-  describe('mergeBranch()', () => {
-    it('exists', () => {
-      gitlab.mergeBranch();
+  describe('checkCompatibility(branchName, targetBranch)', () => {
+    it('should check the compatibility', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      }); // getBranchCommit
+
+      gitlab.getCommitMessages = jest.fn();
+      getCommitMessages.mockReturnValueOnce(
+        {
+          "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
+          "short_id": "8b090c1b",
+          "title": "Feature added"
+        }
+      );
+      // getBranchCommit
+      getCommitMessages.mockReturnValueOnce(
+        [
+          {
+            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
+            "short_id": "8b090c1b",
+            "title": "Another Feature"
+          },
+          {
+            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
+            "short_id": "8b090c1b",
+            "title": "Feature added"
+          },
+          {
+            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
+            "short_id": "8b090c1b",
+            "title": "Some other feature"
+          }
+        ]
+      );
+      expect(gitlab.checkCompatibility('testBranch', 'targetBranch')).toBe(true);
     });
   });
   describe('getBranchLastCommitTime', () => {
