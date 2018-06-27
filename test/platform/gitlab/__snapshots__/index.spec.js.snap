@@ -383,6 +383,31 @@ Array [
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 2 2`] = `Object {}`;
 
+exports[`platform/gitlab initRepo should initialise the config for the repo - 3 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
+    Object {
+      "paginate": true,
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab initRepo should initialise the config for the repo - 3 2`] = `Object {}`;
+
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [

@@ -1625,7 +1625,11 @@ describe('platform/github', () => {
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
     beforeEach(async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        gitAuthor: 'Renovate Bot <bot@renovatebot.com>',
+      });
 
       // getBranchCommit
       get.mockImplementationOnce(() => ({
@@ -1690,8 +1694,8 @@ describe('platform/github', () => {
         'my commit message'
       );
       expect(get.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toHaveLength(3);
+      expect(get.patch.mock.calls).toHaveLength(1);
     });
     it('should add a commit to a new branch if the branch does not already exist', async () => {
       // branchExists
@@ -1714,8 +1718,8 @@ describe('platform/github', () => {
         'my other commit message'
       );
       expect(get.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toHaveLength(4);
+      expect(get.patch.mock.calls).toHaveLength(0);
     });
     it('should parse valid gitAuthor', async () => {
       // branchExists
@@ -1735,9 +1739,7 @@ describe('platform/github', () => {
       await github.commitFilesToBranch(
         'the-branch',
         files,
-        'my other commit message',
-        undefined,
-        'Renovate Bot <bot@renovatebot.com>'
+        'my other commit message'
       );
       expect(get.post.mock.calls[2][1].body.author.name).toEqual(
         'Renovate Bot'
@@ -1745,30 +1747,6 @@ describe('platform/github', () => {
       expect(get.post.mock.calls[2][1].body.author.email).toEqual(
         'bot@renovatebot.com'
       );
-    });
-    it('should skip invalid gitAuthor', async () => {
-      // branchExists
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            name: 'master',
-          },
-        ],
-      }));
-      const files = [
-        {
-          name: 'package.json',
-          contents: 'hello world',
-        },
-      ];
-      await github.commitFilesToBranch(
-        'the-branch',
-        files,
-        'my other commit message',
-        undefined,
-        'Renovate Bot bot@renovatebot.com'
-      );
-      expect(get.post.mock.calls[2][1].body.author).toBeUndefined();
     });
   });
   describe('getCommitMessages()', () => {
