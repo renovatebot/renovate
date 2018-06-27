@@ -451,6 +451,42 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
   });
+  describe('checkCompatibility(branchName, targetBranch)', () => {
+    it('should check the compatibility', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      }); // getBranchCommit
+      get.mockReturnValueOnce(
+        {
+          "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
+          "short_id": "8b090c1b",
+          "title": "Feature added"
+        }
+      );
+      // getBranchCommit
+      get.mockReturnValueOnce(
+        [
+          {
+            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
+            "short_id": "8b090c1b",
+            "title": "Another Feature"
+          },
+          {
+            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
+            "short_id": "8b090c1b",
+            "title": "Feature added"
+          },
+          {
+            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
+            "short_id": "8b090c1b",
+            "title": "Some other feature"
+          }
+        ]
+      );
+      expect(gitlab.checkCompatibility('testBranch', 'targetBranch')).toBe(true);
+    });
+  });
   describe('mergeBranch(branchName, mergeType)', () => {
     it('should perform a branch-push merge', async () => {
       await initRepo({
