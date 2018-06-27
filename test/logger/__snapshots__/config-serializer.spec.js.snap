@@ -8,6 +8,15 @@ Object {
 }
 `;
 
+exports[`logger/config-serializer simplifies releases 1`] = `
+Object {
+  "releases": Array [
+    "1.0.0-rc.2",
+    "1.0.0-rc.3",
+  ],
+}
+`;
+
 exports[`logger/config-serializer squashes templates 1`] = `
 Object {
   "nottoken": "b",
