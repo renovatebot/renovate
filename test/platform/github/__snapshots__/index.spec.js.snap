@@ -61,59 +61,6 @@ Array [
 ]
 `;
 
-exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 2`] = `
-Array [
-  Array [
-    "repos/some/repo/git/blobs",
-    Object {
-      "body": Object {
-        "content": "aGVsbG8gd29ybGQ=",
-        "encoding": "base64",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees",
-    Object {
-      "body": Object {
-        "base_tree": "2222",
-        "tree": Array [
-          Object {
-            "mode": "100644",
-            "path": "package.json",
-            "sha": "3333",
-            "type": "blob",
-          },
-        ],
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/commits",
-    Object {
-      "body": Object {
-        "message": "my other commit message",
-        "parents": Array [
-          "1111",
-        ],
-        "tree": "4444",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/refs",
-    Object {
-      "body": Object {
-        "ref": "refs/heads/the-branch",
-        "sha": "5555",
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 3`] = `Array []`;
-
 exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 1`] = `
 Array [
   Array [
@@ -138,62 +85,6 @@ Array [
     "repos/some/repo/branches?per_page=100",
     Object {
       "paginate": true,
-    },
-  ],
-]
-`;
-
-exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 2`] = `
-Array [
-  Array [
-    "repos/some/repo/git/blobs",
-    Object {
-      "body": Object {
-        "content": "aGVsbG8gd29ybGQ=",
-        "encoding": "base64",
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees",
-    Object {
-      "body": Object {
-        "base_tree": "2222",
-        "tree": Array [
-          Object {
-            "mode": "100644",
-            "path": "package.json",
-            "sha": "3333",
-            "type": "blob",
-          },
-        ],
-      },
-    },
-  ],
-  Array [
-    "repos/some/repo/git/commits",
-    Object {
-      "body": Object {
-        "message": "my commit message",
-        "parents": Array [
-          "1111",
-        ],
-        "tree": "4444",
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 3`] = `
-Array [
-  Array [
-    "repos/some/repo/git/refs/heads/the-branch",
-    Object {
-      "body": Object {
-        "force": true,
-        "sha": "5555",
-      },
     },
   ],
 ]
