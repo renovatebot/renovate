@@ -90,7 +90,11 @@ describe('config/index', () => {
     });
     it('autodiscovers github platform', async () => {
       const env = {};
-      defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);
+      defaultArgv = defaultArgv.concat([
+        '--autodiscover',
+        '--token=abc',
+        '--pr-footer=custom',
+      ]);
       ghGot.mockImplementationOnce(() => ({
         headers: {},
         body: [
@@ -181,7 +185,7 @@ describe('config/index', () => {
         headers: {},
         body: [
           { full_name: 'bar/BAZ' },
-          { full_name: 'renovateapp/renovate' },
+          { full_name: 'renovatebot/renovate' },
           { full_name: 'not/configured' },
         ],
       }));

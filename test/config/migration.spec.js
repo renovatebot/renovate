@@ -17,6 +17,7 @@ describe('config/migration', () => {
         automergeMinor: true,
         automergePatch: true,
         upgradeInRange: true,
+        automergeType: 'branch-push',
         baseBranch: 'next',
         ignoreNodeModules: true,
         node: {

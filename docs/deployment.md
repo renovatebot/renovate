@@ -29,7 +29,7 @@ following commands:
 The best way to deploy to Heroku is via git and Heroku CLI.
 
 ```
-$ git clone https://github.com/renovateapp/renovate
+$ git clone https://github.com/renovatebot/renovate
 $ cd renovate
 $ heroku create [app name]
 $ git push heroku master
