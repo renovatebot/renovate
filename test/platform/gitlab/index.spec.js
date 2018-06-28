@@ -451,6 +451,37 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
   });
+    describe('checkCompatibility(branchName, targetBranch)', () => {
+    it('should check the compatibility', async () => {
+
+      get.mockReturnValueOnce({
+        body: [
+          {
+            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
+            short_id: 'ed899a2f4b5',
+            title: 'Test Commit',
+          },
+        ],
+      });
+
+      get.mockReturnValueOnce({
+        body: [
+            {
+              id: 'ed899a2f4b50b4370feeea94676502b42asdfsadf',
+              short_id: 'ed899a290909',
+              title: 'Another Commit',
+            },
+            {
+              id: 'ed899a2f4b50b4370feeea94676502b42383c746',
+              short_id: 'ed899a2f4b5',
+              title: 'Test Commit',
+            },
+        ],
+      });
+      const res = await gitlab.checkCompatibility('testBranch', 'targetBranch');
+      expect(res).toBe(true);
+    });
+  });
   describe('mergeBranch(branchName, mergeType)', () => {
     it('should perform a branch merge', async () => {
       await initRepo({
@@ -542,44 +573,6 @@ describe('platform/gitlab', () => {
       get.mockReturnValueOnce({ body: [] }); // getBranchPr
       await gitlab.deleteBranch('some-branch', true);
       expect(get.delete.mock.calls.length).toBe(1);
-    });
-  });
-  describe('checkCompatibility(branchName, targetBranch)', () => {
-    it('should check the compatibility', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      }); // getBranchCommit
-
-      gitlab.getCommitMessages = jest.fn();
-      getCommitMessages.mockReturnValueOnce(
-        {
-          "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
-          "short_id": "8b090c1b",
-          "title": "Feature added"
-        }
-      );
-      // getBranchCommit
-      getCommitMessages.mockReturnValueOnce(
-        [
-          {
-            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
-            "short_id": "8b090c1b",
-            "title": "Another Feature"
-          },
-          {
-            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
-            "short_id": "8b090c1b",
-            "title": "Feature added"
-          },
-          {
-            "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
-            "short_id": "8b090c1b",
-            "title": "Some other feature"
-          }
-        ]
-      );
-      expect(gitlab.checkCompatibility('testBranch', 'targetBranch')).toBe(true);
     });
   });
   describe('getBranchLastCommitTime', () => {
