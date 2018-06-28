@@ -21,10 +21,10 @@ const upgrade = {
     {
       version: '2.3.0',
       gitRef: 'npm_2.3.0',
-      time: '2017-10-24T03:20:46.238Z',
+      releaseTimestamp: '2017-10-24T03:20:46.238Z',
     },
     { version: '2.2.2', gitRef: 'npm_2.2.2' },
-    { version: '2.4.2', time: '2017-12-24T03:20:46.238Z' },
+    { version: '2.4.2', releaseTimestamp: '2017-12-24T03:20:46.238Z' },
     { version: '2.5.2' },
   ],
 };

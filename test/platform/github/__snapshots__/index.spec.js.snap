@@ -370,6 +370,40 @@ Object {
 }
 `;
 
+exports[`platform/github getPr(prNo) should return a not rebaseable PR if gitAuthor and error 1`] = `
+Object {
+  "base": Object {
+    "sha": "1234",
+  },
+  "branchName": undefined,
+  "canRebase": false,
+  "commits": 1,
+  "displayNumber": "Pull Request #1",
+  "isUnmergeable": true,
+  "mergeable_state": "dirty",
+  "number": 1,
+  "sha": undefined,
+  "state": "open",
+}
+`;
+
+exports[`platform/github getPr(prNo) should return a not rebaseable PR if gitAuthor does not match 1 commit 1`] = `
+Object {
+  "base": Object {
+    "sha": "1234",
+  },
+  "branchName": undefined,
+  "canRebase": false,
+  "commits": 1,
+  "displayNumber": "Pull Request #1",
+  "isUnmergeable": true,
+  "mergeable_state": "dirty",
+  "number": 1,
+  "sha": undefined,
+  "state": "open",
+}
+`;
+
 exports[`platform/github getPr(prNo) should return a rebaseable PR despite multiple commits 1`] = `
 Object {
   "base": Object {
@@ -378,6 +412,23 @@ Object {
   "branchName": undefined,
   "canRebase": true,
   "commits": 2,
+  "displayNumber": "Pull Request #1",
+  "isUnmergeable": true,
+  "mergeable_state": "dirty",
+  "number": 1,
+  "sha": undefined,
+  "state": "open",
+}
+`;
+
+exports[`platform/github getPr(prNo) should return a rebaseable PR if gitAuthor matches 1 commit 1`] = `
+Object {
+  "base": Object {
+    "sha": "1234",
+  },
+  "branchName": undefined,
+  "canRebase": true,
+  "commits": 1,
   "displayNumber": "Pull Request #1",
   "isUnmergeable": true,
   "mergeable_state": "dirty",
