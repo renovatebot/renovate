@@ -96,7 +96,8 @@ describe('platform/gitlab', () => {
       [undefined, 'mytoken', undefined],
       [undefined, 'mytoken', 'https://my.custom.endpoint/'],
       ['myenvtoken', 'myenvtoken', undefined],
-    ].forEach(([envToken, token, endpoint], i) => {
+      [undefined, 'mytoken', undefined, 'Renovate Bot <bot@renovatebot.com>'],
+    ].forEach(([envToken, token, endpoint, gitAuthor], i) => {
       it(`should initialise the config for the repo - ${i}`, async () => {
         if (envToken !== undefined) {
           process.env.GITLAB_TOKEN = envToken;
@@ -106,6 +107,7 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           token,
           endpoint,
+          gitAuthor,
         });
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
@@ -903,66 +905,6 @@ describe('platform/gitlab', () => {
       );
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.post.mock.calls).toHaveLength(1);
-    });
-    it('should parse valid gitAuthor', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-
-      await gitlab.commitFilesToBranch(
-        'renovate/something',
-        [file],
-        'Update something',
-        undefined,
-        'Renovate Bot <bot@renovateapp.com>'
-      );
-
-      expect(get.post.mock.calls[0][1].body.author_name).toEqual(
-        'Renovate Bot'
-      );
-      expect(get.post.mock.calls[0][1].body.author_email).toEqual(
-        'bot@renovateapp.com'
-      );
-    });
-    it('should skip invalid gitAuthor', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-
-      await gitlab.commitFilesToBranch(
-        'renovate/something',
-        [file],
-        'Update something',
-        undefined,
-        'Renovate Bot bot@renovateapp.com'
-      );
-
-      expect(get.post.mock.calls[0][1].body.author_name).toBeUndefined();
-      expect(get.post.mock.calls[0][1].body.author_email).toBeUndefined();
     });
   });
   describe('getCommitMessages()', () => {
