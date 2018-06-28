@@ -830,7 +830,7 @@ describe('platform/github', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
   });
-  describe('mergeBranch(branchName, mergeType)', () => {
+  describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
       await initRepo({
         repository: 'some/repo',
@@ -879,24 +879,6 @@ describe('platform/github', () => {
       let e;
       try {
         await github.mergeBranch('thebranchname', 'branch');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toMatchSnapshot();
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(get.patch.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.put.mock.calls).toMatchSnapshot();
-      expect(get.delete.mock.calls).toMatchSnapshot();
-    });
-    it('should throw if unknown merge type', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      });
-      let e;
-      try {
-        await github.mergeBranch('thebranchname', 'wrong-merge-type');
       } catch (err) {
         e = err;
       }
