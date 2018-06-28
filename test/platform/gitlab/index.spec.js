@@ -453,7 +453,7 @@ describe('platform/gitlab', () => {
   });
     describe('checkCompatibility(branchName, targetBranch)', () => {
     it('should check the compatibility', async () => {
-
+      // targetLastCommit
       get.mockReturnValueOnce({
         body: [
           {
@@ -463,7 +463,7 @@ describe('platform/gitlab', () => {
           },
         ],
       });
-
+      // sourceCommits
       get.mockReturnValueOnce({
         body: [
             {
@@ -481,6 +481,35 @@ describe('platform/gitlab', () => {
       const res = await gitlab.checkCompatibility('testBranch', 'targetBranch');
       expect(res).toBe(true);
     });
+    it('should return false', async () => {
+      // targetLastCommit
+      get.mockReturnValueOnce({
+        body: [
+          {
+            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
+            short_id: 'ed899a2f4b5',
+            title: 'Test Commit',
+          },
+        ],
+      });
+      // sourceCommits
+      get.mockReturnValueOnce({
+        body: [
+            {
+              id: 'ed899a2f4b50b4370feeea94676502b42asdfsadf',
+              short_id: 'ed899a290909',
+              title: 'Another Commit',
+            },
+            {
+              id: 'ed899a2f4b50b4370feeea94676502b42383a123',
+              short_id: 'ed899a2f123',
+              title: 'Completely different commit',
+            },
+        ],
+      });
+      const res = await gitlab.checkCompatibility('testBranch', 'targetBranch');
+      expect(res).toBe(false);
+    });
   });
   describe('mergeBranch(branchName, mergeType)', () => {
     it('should perform a branch merge', async () => {
@@ -488,13 +517,15 @@ describe('platform/gitlab', () => {
         repository: 'some/repo',
         token: 'token',
       }); // getBranchCommit
-      get.mockImplementationOnce(
-        {
-          "id": "8b090c1b79a14f2bd9e8a738f717824ff53aebad",
-          "short_id": "8b090c1b",
-          "title": "Feature added"
-        }
-      );
+      get.mockReturnValueOnce({
+        body: [
+          {
+            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
+            short_id: 'ed899a2f4b5',
+            title: 'Test Commit',
+          },
+        ],
+      });
       get.mockReturnValueOnce('thebranchname');
       get.mockReturnValueOnce(true);
       get.patch.mockImplementationOnce();
