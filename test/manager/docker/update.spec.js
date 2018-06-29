@@ -43,6 +43,34 @@ describe('workers/branch/dockerfile', () => {
       const res = dockerfile.updateDependency(fileContent, upgrade);
       expect(res).toMatchSnapshot();
     });
+    it('returns null if mismatch', () => {
+      const fileContent =
+        '# comment FROM node:8\nFROM   node:8 as base\nRUN something\n';
+      const upgrade = {
+        lineNumber: 0,
+        depName: 'node',
+        currentValue: 'node:8',
+        fromPrefix: 'FROM',
+        fromSuffix: '',
+        newFrom: 'node:8@sha256:abcdefghijklmnop',
+      };
+      const res = dockerfile.updateDependency(fileContent, upgrade);
+      expect(res).toBe(null);
+    });
+    it('returns unchanged', () => {
+      const fileContent =
+        '# comment FROM node:8\nFROM node:8 as base\nRUN something\n';
+      const upgrade = {
+        lineNumber: 1,
+        depName: 'node',
+        currentValue: 'node:8',
+        fromPrefix: 'FROM',
+        fromSuffix: 'as base',
+        newFrom: 'node:8',
+      };
+      const res = dockerfile.updateDependency(fileContent, upgrade);
+      expect(res).toBe(fileContent);
+    });
     it('returns null on error', () => {
       const fileContent = null;
       const upgrade = {
