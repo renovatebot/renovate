@@ -31,6 +31,7 @@ describe('lib/manager/docker/package', () => {
         currentFrom: 'some-dep:1.0.0@sha256:abcdefghijklmnop',
         currentDepTag: 'some-dep:1.0.0',
         currentTag: '1.0.0',
+        currentValue: '1.0.0',
         currentDigest: 'sha256:abcdefghijklmnop',
         pinDigests: true,
       };
@@ -59,6 +60,7 @@ describe('lib/manager/docker/package', () => {
     });
     it('adds latest tag', async () => {
       delete config.currentTag;
+      delete config.currentValue;
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
       const res = await docker.getPackageUpdates(config);
       expect(res).toHaveLength(1);
@@ -67,6 +69,8 @@ describe('lib/manager/docker/package', () => {
     it('returns a pin', async () => {
       delete config.currentDigest;
       config.currentTag = 'some-text-tag';
+      config.currentValue = 'some';
+      config.tagSuffix = 'text-tag';
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
       const res = await docker.getPackageUpdates(config);
       expect(res).toHaveLength(1);
@@ -74,6 +78,8 @@ describe('lib/manager/docker/package', () => {
     });
     it('returns empty if current tag is not valid version', async () => {
       config.currentTag = 'some-text-tag';
+      config.currentValue = 'some';
+      config.tagSuffix = 'text-tag';
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       expect(await docker.getPackageUpdates(config)).toEqual([]);
     });
@@ -155,6 +161,7 @@ describe('lib/manager/docker/package', () => {
         currentFrom: 'node:6',
         currentDepTag: 'node:6',
         currentTag: '6',
+        currentValue: '6',
         currentDigest: undefined,
         pinDigests: false,
         unstablePattern: '^\\d*[13579]($|.)',
@@ -173,6 +180,7 @@ describe('lib/manager/docker/package', () => {
         currentFrom: 'node:7',
         currentDepTag: 'node:7',
         currentTag: '7',
+        currentValue: '7',
         currentDigest: undefined,
         pinDigests: false,
         unstablePattern: '^\\d*[13579]($|.)',
@@ -191,6 +199,7 @@ describe('lib/manager/docker/package', () => {
         currentFrom: 'node:7',
         currentDepTag: 'node:7',
         currentTag: '7',
+        currentValue: '7',
         currentDigest: undefined,
         pinDigests: false,
         unstablePattern: '^\\d*[13579]($|.)',
@@ -205,6 +214,8 @@ describe('lib/manager/docker/package', () => {
     it('adds digest', async () => {
       delete config.currentDigest;
       config.currentTag = '1.0.0-something';
+      config.currentValue = '1.0.0';
+      config.tagSuffix = 'something';
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
       dockerApi.getDigest.mockReturnValueOnce('sha256:two');
       dockerApi.getTags.mockReturnValueOnce(['1.1.0']);
