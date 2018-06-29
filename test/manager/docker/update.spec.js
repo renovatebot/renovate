@@ -5,6 +5,7 @@ describe('workers/branch/dockerfile', () => {
     it('replaces existing value', () => {
       const fileContent = '# comment FROM node:8\nFROM node:8\nRUN something\n';
       const upgrade = {
+        lineNumber: 1,
         depName: 'node',
         currentValue: 'node:8',
         fromPrefix: 'FROM',
@@ -18,6 +19,7 @@ describe('workers/branch/dockerfile', () => {
       const fileContent =
         '# comment FROM node:8\nFROM node:8 as base\nRUN something\n';
       const upgrade = {
+        lineNumber: 1,
         depName: 'node',
         currentValue: 'node:8',
         fromPrefix: 'FROM',
@@ -31,6 +33,7 @@ describe('workers/branch/dockerfile', () => {
       const fileContent =
         '# comment FROM node:8\nFROM   node:8 as base\nRUN something\n';
       const upgrade = {
+        lineNumber: 1,
         depName: 'node',
         currentValue: 'node:8',
         fromPrefix: 'FROM',
@@ -43,6 +46,7 @@ describe('workers/branch/dockerfile', () => {
     it('returns null on error', () => {
       const fileContent = null;
       const upgrade = {
+        lineNumber: 1,
         depName: 'node',
         currentValue: 'node:8',
         fromPrefix: 'FROM',
@@ -56,6 +60,7 @@ describe('workers/branch/dockerfile', () => {
       const fileContent =
         'FROM debian:wheezy as stage-1\nRUN something\nFROM debian:wheezy\nRUN something else';
       const upgrade1 = {
+        lineNumber: 0,
         depName: 'debian',
         currentValue: 'debian:wheezy',
         fromPrefix: 'FROM',
@@ -63,6 +68,7 @@ describe('workers/branch/dockerfile', () => {
         newFrom: 'debian:wheezy@sha256:abcdefghijklmnop',
       };
       const upgrade2 = {
+        lineNumber: 2,
         depName: 'debian',
         currentValue: 'debian:wheezy',
         fromPrefix: 'FROM',

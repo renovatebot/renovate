@@ -223,7 +223,7 @@ describe('lib/manager/docker/package', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
       expect(res[1].type).toEqual('minor');
-      expect(res[1].newValue).toEqual('1.1.0-something');
+      expect(res[1].newValue).toEqual('1.1.0');
     });
     it('ignores deps with custom registry', async () => {
       delete config.currentDigest;
