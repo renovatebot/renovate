@@ -15,7 +15,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "AS node",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "buildkite/puppeteer:1.1.1",
@@ -29,7 +29,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "AS puppeteer",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -49,7 +49,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "python:3.6-slim",
@@ -63,7 +63,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -83,7 +83,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -103,7 +103,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -123,7 +123,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -143,7 +143,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -163,7 +163,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -183,7 +183,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -203,7 +203,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "as base",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -223,7 +223,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -243,7 +243,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -263,7 +263,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -283,7 +283,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -303,7 +303,7 @@ Array [
     "fromPrefix": "From",
     "fromSuffix": "",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -323,7 +323,7 @@ Array [
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "language": "docker",
-    "versionScheme": "semver",
+    "versionScheme": "docker",
   },
 ]
 `;
