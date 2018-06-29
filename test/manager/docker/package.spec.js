@@ -207,10 +207,7 @@ describe('lib/manager/docker/package', () => {
       config.currentTag = '1.0.0-something';
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
       dockerApi.getDigest.mockReturnValueOnce('sha256:two');
-      dockerApi.getTags.mockReturnValueOnce([
-        '1.1.0-something',
-        '1.2.0-otherthing',
-      ]);
+      dockerApi.getTags.mockReturnValueOnce(['1.1.0']);
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
