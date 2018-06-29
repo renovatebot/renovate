@@ -3,6 +3,7 @@
 exports[`lib/manager/circleci/extract extractDependencies() extracts multiple image lines 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
     "currentDepTagDigest": "node",
     "currentDigest": undefined,
@@ -15,6 +16,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:4",
     "currentDepTagDigest": "node:4",
     "currentDigest": undefined,
@@ -27,6 +29,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:6",
     "currentDepTagDigest": "node:6",
     "currentDigest": undefined,
@@ -39,6 +42,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0",
     "currentDepTagDigest": "node:8.9.0",
     "currentDigest": undefined,

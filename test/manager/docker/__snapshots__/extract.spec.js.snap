@@ -3,6 +3,7 @@
 exports[`lib/manager/docker/extract extractDependencies() extracts images on adjacent lines 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.11.3-alpine",
     "currentDepTagDigest": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
     "currentDigest": "sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
@@ -13,6 +14,7 @@ Array [
     "fromLine": "FROM node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d AS node",
     "fromPrefix": "FROM",
     "fromSuffix": "AS node",
+    "language": "docker",
     "versionScheme": "semver",
   },
   Object {
@@ -26,6 +28,7 @@ Array [
     "fromLine": "FROM buildkite/puppeteer:1.1.1 AS puppeteer",
     "fromPrefix": "FROM",
     "fromSuffix": "AS puppeteer",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -34,6 +37,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() extracts multiple FROM tags 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:6.12.3",
     "currentDepTagDigest": "node:6.12.3",
     "currentDigest": undefined,
@@ -44,6 +48,7 @@ Array [
     "fromLine": "FROM node:6.12.3 as frontend",
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
+    "language": "docker",
     "versionScheme": "semver",
   },
   Object {
@@ -57,6 +62,7 @@ Array [
     "fromLine": "FROM python:3.6-slim",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -65,6 +71,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles abnoral spacing 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.7.0",
     "currentDepTagDigest": "node:8.7.0",
     "currentDigest": undefined,
@@ -75,6 +82,7 @@ Array [
     "fromLine": "FROM    registry.allmine.info:5005/node:8.7.0",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -83,6 +91,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles comments 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
     "currentDepTagDigest": "node",
     "currentDigest": undefined,
@@ -93,6 +102,7 @@ Array [
     "fromLine": "FROM node",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -101,6 +111,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles custom hosts 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8",
     "currentDepTagDigest": "node:8",
     "currentDigest": undefined,
@@ -111,6 +122,7 @@ Array [
     "fromLine": "FROM registry2.something.info/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -119,6 +131,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles custom hosts with namespace 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "someaccount/node:8",
     "currentDepTagDigest": "someaccount/node:8",
     "currentDigest": undefined,
@@ -129,6 +142,7 @@ Array [
     "fromLine": "FROM registry2.something.info/someaccount/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -137,6 +151,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles custom hosts with port 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8",
     "currentDepTagDigest": "node:8",
     "currentDigest": undefined,
@@ -147,6 +162,7 @@ Array [
     "fromLine": "FROM registry2.something.info:5005/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -155,6 +171,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles digest 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
     "currentDepTagDigest": "node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
@@ -165,6 +182,7 @@ Array [
     "fromLine": "FROM node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -173,6 +191,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles from as 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0-alpine",
     "currentDepTagDigest": "node:8.9.0-alpine",
     "currentDigest": undefined,
@@ -183,6 +202,7 @@ Array [
     "fromLine": "FROM node:8.9.0-alpine as base",
     "fromPrefix": "FROM",
     "fromSuffix": "as base",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -191,6 +211,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles naked dep 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
     "currentDepTagDigest": "node",
     "currentDigest": undefined,
@@ -201,6 +222,7 @@ Array [
     "fromLine": "FROM node",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -209,6 +231,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles namespaced images 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "mynamespace/node:8",
     "currentDepTagDigest": "mynamespace/node:8",
     "currentDigest": undefined,
@@ -219,6 +242,7 @@ Array [
     "fromLine": "FROM mynamespace/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -227,6 +251,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles tag 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0-alpine",
     "currentDepTagDigest": "node:8.9.0-alpine",
     "currentDigest": undefined,
@@ -237,6 +262,7 @@ Array [
     "fromLine": "FROM node:8.9.0-alpine",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -245,6 +271,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles tag and digest 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0",
     "currentDepTagDigest": "node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
@@ -255,6 +282,7 @@ Array [
     "fromLine": "FROM node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -263,6 +291,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() is case insensitive 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
     "currentDepTagDigest": "node",
     "currentDigest": undefined,
@@ -273,6 +302,7 @@ Array [
     "fromLine": "From node",
     "fromPrefix": "From",
     "fromSuffix": "",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
@@ -281,6 +311,7 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() skips named multistage FROM tags 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:6.12.3",
     "currentDepTagDigest": "node:6.12.3",
     "currentDigest": undefined,
@@ -291,6 +322,7 @@ Array [
     "fromLine": "FROM node:6.12.3 as frontend",
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
+    "language": "docker",
     "versionScheme": "semver",
   },
 ]
