@@ -81,7 +81,18 @@ describe('platform/vsts', () => {
       repo: 'some-repo',
     }));
 
-    return vsts.initRepo(...args);
+    if (typeof args[0] === 'string') {
+      return vsts.initRepo({
+        repository: args[0],
+        token: args[1],
+        endpoint: 'https://my.custom.endpoint/',
+      });
+    }
+
+    return vsts.initRepo({
+      endpoint: 'https://my.custom.endpoint/',
+      ...args[0],
+    });
   }
 
   describe('initRepo', () => {

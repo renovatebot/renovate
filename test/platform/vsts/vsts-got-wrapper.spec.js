@@ -1,13 +1,10 @@
-const endpoints = require('../../../lib/util/endpoints');
-
 describe('platform/vsts/vsts-got-wrapper', () => {
+  let endpoints;
   let vsts;
   beforeEach(() => {
-    // clean up endpoints
-    endpoints.clear();
-
     // reset module
     jest.resetModules();
+    endpoints = require('../../../lib/util/endpoints');
     vsts = require('../../../lib/platform/vsts/vsts-got-wrapper');
   });
 
@@ -33,7 +30,7 @@ describe('platform/vsts/vsts-got-wrapper', () => {
         err = e;
       }
       expect(err.message).toBe(
-        `You need an endpoint with vsts. Something like this: https://{instance}.VisualStudio.com/{collection} (https://fabrikam.visualstudio.com/DefaultCollection)`
+        `Failed to configure platform 'vsts': no endpoint defined`
       );
     });
     it('should set token and endpoint', async () => {
