@@ -34,6 +34,35 @@ describe('config/env', () => {
       const envParam = { RENOVATE_LOCK_FILE_MAINTENANCE: '{}' };
       expect(env.getConfig(envParam).lockFileMaintenance).toEqual({});
     });
+    it('supports GitHub token', () => {
+      const envParam = { GITHUB_TOKEN: 'token' };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('supports GitHub custom endpoint', () => {
+      const envParam = { GITHUB_ENDPOINT: 'endpoint' };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+
+    it('supports GitHub custom endpoint and github.com', () => {
+      const envParam = {
+        GITHUB_COM_TOKEN: 'public',
+        GITHUB_ENDPOINT: 'endpoint',
+        GITHUB_TOKEN: 'token',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('supports GitLab token', () => {
+      const envParam = { GITLAB_TOKEN: 'token' };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('supports GitLab custom endpoint', () => {
+      const envParam = { GITLAB_TOKEN: 'token', GITLAB_ENDPOINT: 'endpoint' };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('supports VSTS', () => {
+      const envParam = { VSTS_TOKEN: 'token', VSTS_ENDPOINT: 'endpoint' };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
   });
   describe('.getEnvName(definition)', () => {
     it('returns empty', () => {

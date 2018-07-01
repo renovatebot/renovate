@@ -9,29 +9,9 @@ describe('platform/vsts/vsts-got-wrapper', () => {
   });
 
   describe('gitApi', () => {
-    it('should throw an error if no token is provided', async () => {
-      let err;
-      try {
-        await vsts.gitApi();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('No token found for vsts');
-    });
-    it('should throw an error if no endpoint is provided', async () => {
-      let err;
-      try {
-        endpoints.update({
-          platform: 'vsts',
-          token: 'myToken',
-        });
-        await vsts.getCoreApi();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe(
-        `Failed to configure platform 'vsts': no endpoint defined`
-      );
+    it('should throw an error if no token is provided', () => {
+      expect(vsts.gitApi).toThrow('No token found for vsts');
+      expect(vsts.getCoreApi).toThrow('No token found for vsts');
     });
     it('should set token and endpoint', async () => {
       endpoints.update({
