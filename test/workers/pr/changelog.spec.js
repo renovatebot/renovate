@@ -37,7 +37,7 @@ describe('workers/pr/changelog', () => {
       endpoints.clear();
       endpoints.update({
         platform: 'github',
-        endpoint: 'https://github.com/',
+        endpoint: 'https://api.github.com/',
       });
       await rmAllCache();
     });
