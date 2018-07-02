@@ -2,6 +2,7 @@ jest.mock('../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../lib/datasource/npm');
 jest.mock('got');
 
+const endpoints = require('../../../lib/util/endpoints');
 const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
 
 const { getChangeLogJSON } = require('../../../lib/workers/pr/changelog');
@@ -33,7 +34,11 @@ describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(async () => {
       ghGot.mockClear();
-
+      endpoints.clear();
+      endpoints.update({
+        platform: 'github',
+        endpoint: 'https://api.github.com/',
+      });
       await rmAllCache();
     });
     it('returns null if no fromVersion', async () => {
@@ -166,37 +171,36 @@ describe('workers/pr/changelog', () => {
       ).toBe(null);
     });
     it('supports github enterprise and github.com changelog', async () => {
-      const token = process.env.GITHUB_TOKEN;
-      const endpoint = process.env.GITHUB_ENDPOINT;
-      process.env.GITHUB_TOKEN = 'super_secret';
-      process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
-      const oldenv = { ...process.env };
+      endpoints.update({
+        platform: 'github',
+        token: 'super_secret',
+        endpoint: 'https://github-enterprise.example.com/',
+      });
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
       ).toMatchSnapshot();
-      // check that process env was restored
-      expect(process.env).toEqual(oldenv);
-      process.env.GITHUB_TOKEN = token;
-      process.env.GITHUB_ENDPOINT = endpoint;
     });
     it('supports github enterprise and github enterprise changelog', async () => {
-      const endpoint = process.env.GITHUB_ENDPOINT;
-      process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
+      endpoints.update({
+        platform: 'github',
+        endpoint: 'https://github-enterprise.example.com/',
+      });
+      process.env.GITHUB_ENDPOINT = '';
       expect(
         await getChangeLogJSON({
           ...upgrade,
           repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
         })
       ).toMatchSnapshot();
-
-      process.env.GITHUB_ENDPOINT = endpoint;
     });
 
     it('supports github enterprise alwo when retrieving data from cache', async () => {
-      const endpoint = process.env.GITHUB_ENDPOINT;
-      process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
+      endpoints.update({
+        platform: 'github',
+        endpoint: 'https://github-enterprise.example.com/',
+      });
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -210,7 +214,6 @@ describe('workers/pr/changelog', () => {
           repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
         })
       ).toMatchSnapshot();
-      process.env.GITHUB_ENDPOINT = endpoint;
     });
   });
 });
