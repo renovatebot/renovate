@@ -408,6 +408,106 @@ Array [
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 3 2`] = `Object {}`;
 
+exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/repository/commits?ref_name=undefined",
+  ],
+  Array [
+    "projects/some%2Frepo/repository/commits?ref_name=thebranchname",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 2`] = `Array []`;
+
+exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 3`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/commits/thebranchname/cherry_pick?branch=undefined",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 4`] = `Array []`;
+
+exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 5`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/branches/thebranchname",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 1`] = `undefined`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 2`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/repository/commits?ref_name=undefined",
+  ],
+  Array [
+    "projects/some%2Frepo/repository/commits?ref_name=thebranchname",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 3`] = `Array []`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 4`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/commits/thebranchname/cherry_pick?branch=undefined",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 5`] = `Array []`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 6`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/branches/thebranchname",
+  ],
+]
+`;
+
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
