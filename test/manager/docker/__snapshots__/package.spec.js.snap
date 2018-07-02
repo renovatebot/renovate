@@ -16,7 +16,7 @@ Array [
     "newFrom": "some-dep:1.1.0-something@sha256:two",
     "newMajor": "1",
     "newTag": "1.1.0-something",
-    "newValue": "1.1.0-something",
+    "newValue": "1.1.0",
     "type": "minor",
   },
 ]

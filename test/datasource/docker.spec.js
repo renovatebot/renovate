@@ -41,12 +41,19 @@ describe('api/docker', () => {
       const res = await docker.getTags(undefined, 'node');
       expect(res).toBe(null);
     });
-    it('returns tags', async () => {
-      const tags = ['a', 'b'];
+    it('returns tags with no suffix', async () => {
+      const tags = ['a', 'b', '1.0.0', '1.1.0', '1.1.0-alpine'];
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
       const res = await docker.getTags(undefined, 'my/node');
-      expect(res).toEqual(tags);
+      expect(res).toEqual(['1.0.0', '1.1.0', '1.1.0-alpine']);
+    });
+    it('returns tags with suffix', async () => {
+      const tags = ['a', 'b', '1.0.0', '1.1.0-alpine'];
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      const res = await docker.getTags(undefined, 'my/node', 'alpine');
+      expect(res).toEqual(['1.1.0']);
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});

@@ -24,6 +24,18 @@ describe('workers/repository/updates/flatten', () => {
             ],
           },
         ],
+        docker: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'amd64/node',
+                language: 'docker',
+                updates: [{ newValue: '10.0.1' }],
+              },
+            ],
+          },
+        ],
       };
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toMatchSnapshot();

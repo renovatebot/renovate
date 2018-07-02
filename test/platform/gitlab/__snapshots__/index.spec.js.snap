@@ -180,6 +180,7 @@ Object {
   "iid": 91,
   "number": 91,
   "source_branch": "some-branch",
+  "state": undefined,
 }
 `;
 

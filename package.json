@@ -61,7 +61,7 @@
     "changelog-filename-regex": "2.0.0",
     "child-process-promise": "2.2.1",
     "clean-git-ref": "1.0.3",
-    "commander": "2.15.1",
+    "commander": "2.16.0",
     "compare-versions": "3.3.0",
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
@@ -93,7 +93,7 @@
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-link-header": "1.0.1",
-    "pnpm": "2.7.0",
+    "pnpm": "2.9.0",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "safe-regex": "1.1.0",
@@ -122,9 +122,9 @@
     "jest": "23.2.0",
     "jest-silent-reporter": "0.0.5",
     "mockdate": "2.0.2",
-    "nock": "9.3.3",
-    "prettier": "1.13.6",
-    "semantic-release": "15.6.0"
+    "nock": "9.4.0",
+    "prettier": "1.13.7",
+    "semantic-release": "15.6.1"
   },
   "files": [
     "bin/config-validator.js",
