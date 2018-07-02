@@ -134,7 +134,6 @@ describe('config/index', () => {
       defaultArgv = defaultArgv.concat([
         '--autodiscover',
         '--platform=vsts',
-        '--endpoint=endpoint',
         '--token=abc',
       ]);
       vstsHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);

@@ -1,12 +1,11 @@
-const endpoints = require('../../../lib/util/endpoints');
-
 describe('platform/vsts', () => {
   let vsts;
   let vstsApi;
   let vstsHelper;
   beforeEach(() => {
-    // clean up endpoints
-    endpoints.clear();
+    // clean up env
+    delete process.env.VSTS_TOKEN;
+    delete process.env.VSTS_ENDPOINT;
 
     // reset module
     jest.resetModules();
@@ -81,18 +80,7 @@ describe('platform/vsts', () => {
       repo: 'some-repo',
     }));
 
-    if (typeof args[0] === 'string') {
-      return vsts.initRepo({
-        repository: args[0],
-        token: args[1],
-        endpoint: 'https://my.custom.endpoint/',
-      });
-    }
-
-    return vsts.initRepo({
-      endpoint: 'https://my.custom.endpoint/',
-      ...args[0],
-    });
+    return vsts.initRepo(...args);
   }
 
   describe('initRepo', () => {

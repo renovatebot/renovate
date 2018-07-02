@@ -33,7 +33,7 @@ describe('workers/repository/init/apis', () => {
         await initApis(config);
       } catch (error) {
         expect(error.message).toBe(
-          `Failed to configure platform 'vsts': no endpoint defined`
+          'You need an endpoint with vsts. Something like this: https://{instance}.VisualStudio.com/{collection} (https://fabrikam.visualstudio.com/DefaultCollection)'
         );
       }
     });
