@@ -409,6 +409,34 @@ Array [
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 3 2`] = `Object {}`;
 
+exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/commits/thebranchname/cherry_pick?branch=undefined",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 2`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/branches/thebranchname",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 1`] = `[Error: Branch automerge failed]`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 2`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/commits/thebranchname/cherry_pick?branch=undefined",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 3`] = `Array []`;
+
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
