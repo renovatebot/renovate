@@ -1,5 +1,5 @@
 ---
-title: Nuget
+title: Nuget (.NET)
 description: Nuget (.NET) dependencies support in Renovate
 ---
 
