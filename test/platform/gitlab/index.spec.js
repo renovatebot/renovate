@@ -457,68 +457,22 @@ describe('platform/gitlab', () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-      }); // getBranchCommit
-      get.mockReturnValueOnce({
-        body: [
-          {
-            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
-            short_id: 'ed899a2f4b5',
-            title: 'Test Commit',
-          },
-        ],
-      });
-      get.mockReturnValueOnce({
-        body: [
-          {
-            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
-            short_id: 'ed899a2f4b5',
-            title: 'Another Commit',
-          },
-          {
-            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
-            short_id: 'ed899a2f4b5',
-            title: 'Test Commit',
-          },
-        ],
       });
 
-      // deleteBranch
       await gitlab.mergeBranch('thebranchname');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(get.patch.mock.calls).toMatchSnapshot();
+
+      // deleteBranch
+      get.delete.mockImplementationOnce();
+
       expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.put.mock.calls).toMatchSnapshot();
       expect(get.delete.mock.calls).toMatchSnapshot();
     });
     it('should throw if branch merge throws', async () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-      }); // getBranchCommit
-      get.mockReturnValueOnce({
-        body: [
-          {
-            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
-            short_id: 'ed899a2f4b5',
-            title: 'Test Commit',
-          },
-        ],
       });
-      get.mockReturnValueOnce({
-        body: [
-          {
-            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
-            short_id: 'ed899a2f4b5',
-            title: 'Another Commit',
-          },
-          {
-            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
-            short_id: 'ed899a2f4b5',
-            title: 'Test Commit',
-          },
-        ],
-      });
-      get.patch.mockImplementationOnce(() => {
+      get.post.mockImplementationOnce(() => {
         throw new Error('branch-push failed');
       });
       let e;
@@ -527,11 +481,12 @@ describe('platform/gitlab', () => {
       } catch (err) {
         e = err;
       }
+
+      // deleteBranch
+      get.delete.mockImplementationOnce();
+
       expect(e).toMatchSnapshot();
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(get.patch.mock.calls).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.put.mock.calls).toMatchSnapshot();
       expect(get.delete.mock.calls).toMatchSnapshot();
     });
   });
