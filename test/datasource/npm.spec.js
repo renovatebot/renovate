@@ -204,6 +204,7 @@ describe('api/npm', () => {
   });
   it('resets npmrc', () => {
     npm.setNpmrc('something=something');
+    npm.setNpmrc('something=something');
     npm.setNpmrc();
   });
   it('should use default registry if missing from npmrc', async () => {
