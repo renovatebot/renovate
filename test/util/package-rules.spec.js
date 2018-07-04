@@ -120,7 +120,7 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
-    it('filters updateType', () => {
+  it('filters updateType', () => {
     const config = {
       packageRules: [
         {
@@ -132,7 +132,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      type: 'patch'
+      type: 'patch',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
