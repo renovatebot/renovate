@@ -126,8 +126,8 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates.length).toBe(2);
-      expect(res.updates[0].type).not.toEqual('patch');
-      expect(res.updates[1].type).not.toEqual('patch');
+      expect(res.updates[0].updateType).not.toEqual('patch');
+      expect(res.updates[1].updateType).not.toEqual('patch');
     });
     it('returns patch update if automerging patch', async () => {
       config.patch = {
@@ -142,7 +142,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].type).toEqual('patch');
+      expect(res.updates[0].updateType).toEqual('patch');
     });
     it('returns minor update if automerging both patch and minor', async () => {
       config.patch = {
@@ -160,7 +160,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].type).toEqual('minor');
+      expect(res.updates[0].updateType).toEqual('minor');
     });
     it('returns patch update if separateMinorPatch', async () => {
       config.separateMinorPatch = true;

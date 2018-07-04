@@ -132,7 +132,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      type: 'patch',
+      updateType: 'patch',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);

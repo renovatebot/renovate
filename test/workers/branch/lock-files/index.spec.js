@@ -44,7 +44,7 @@ describe('manager/npm/post-update', () => {
       ];
     });
     it('returns all directories if lock file maintenance', () => {
-      config.upgrades = [{ type: 'lockFileMaintenance' }];
+      config.upgrades = [{ updateType: 'lockFileMaintenance' }];
       const res = determineLockFileDirs(config, packageFiles);
       expect(res).toMatchSnapshot();
     });
@@ -317,7 +317,7 @@ describe('manager/npm/post-update', () => {
       expect(res.updatedLockFiles).toHaveLength(0);
     });
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
-      config.type = 'lockFileMaintenance';
+      config.updateType = 'lockFileMaintenance';
       config.parentBranch = 'renovate/lock-file-maintenance';
       platform.branchExists.mockReturnValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });

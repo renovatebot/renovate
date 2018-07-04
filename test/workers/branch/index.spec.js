@@ -71,7 +71,7 @@ describe('workers/branch', () => {
     it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
-      config.type = 'major';
+      config.updateType = 'major';
       checkExisting.prAlreadyExisted.mockReturnValueOnce({
         number: 13,
         state: 'closed',
@@ -82,7 +82,7 @@ describe('workers/branch', () => {
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
-      config.type = 'digest';
+      config.updateType = 'digest';
       checkExisting.prAlreadyExisted.mockReturnValueOnce({
         number: 13,
         state: 'closed',
