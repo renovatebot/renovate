@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/packagist getDependency processes real data 1`] = `
+Object {
+  "homepage": "https://github.com/cristianvuolo/uploader",
+  "name": "cristianvuolo/uploader",
+  "releases": Array [
+    Object {
+      "gitRef": "1.0.0",
+      "releaseTimestamp": "2017-02-07T20:01:41+00:00",
+      "version": "1.0.0",
+    },
+    Object {
+      "gitRef": "1.0.1",
+      "releaseTimestamp": "2017-02-07T20:10:08+00:00",
+      "version": "1.0.1",
+    },
+    Object {
+      "gitRef": "1.0.3",
+      "releaseTimestamp": "2017-07-11T16:52:54+00:00",
+      "version": "1.0.3",
+    },
+    Object {
+      "gitRef": "1.0.4",
+      "releaseTimestamp": "2017-08-02T13:08:31+00:00",
+      "version": "1.0.4",
+    },
+    Object {
+      "gitRef": "1.0.5",
+      "releaseTimestamp": "2017-08-02T13:23:33+00:00",
+      "version": "1.0.5",
+    },
+    Object {
+      "gitRef": "1.0.6",
+      "releaseTimestamp": "2018-01-25T18:57:17+00:00",
+      "version": "1.0.6",
+    },
+    Object {
+      "gitRef": "1.0.7",
+      "releaseTimestamp": "2018-02-19T12:22:34+00:00",
+      "version": "1.0.7",
+    },
+    Object {
+      "gitRef": "1.0.8",
+      "releaseTimestamp": "2018-03-14T17:40:06+00:00",
+      "version": "1.0.8",
+    },
+  ],
+  "repositoryUrl": "https://github.com/cristianvuolo/uploader",
+  "versions": Object {},
+}
+`;

@@ -3,26 +3,26 @@
 Renovate uses the term "presets" to refer to shareable config snippets, similar
 to eslint. Unlike eslint though:
 
-* Presets may be as small as a list of package names, or as large as a full
+- Presets may be as small as a list of package names, or as large as a full
   config
-* Shared config files can contain many presets
+- Shared config files can contain many presets
 
 ## Preset config URIs
 
 In human-understandable form, the rules are:
 
-* A full preset URI consists of package name, preset name, and preset
+- A full preset URI consists of package name, preset name, and preset
   parameters, such as `package:preset(param)`
-* If a package scope is specified and no package, then the package name is
+- If a package scope is specified and no package, then the package name is
   assumed to be `renovate-config`, e.g. `@rarkins:webapp` is expanded to
   `@rarkins/renovate-config:webapp`
-* If a non-scoped package is specified then it is assumed to have prefix
+- If a non-scoped package is specified then it is assumed to have prefix
   `renovate-config-`. e.g. `rarkins:webapp` is expanded to
   `renovate-config-rarkins:webapp`
-* If a package name is specified and no preset name, then `default` is assumed,
+- If a package name is specified and no preset name, then `default` is assumed,
   e.g. `@rarkins` expands in full to `@rarkins/renovate-config:default` and
   `rarkins` expands in full to `renovate-config-rarkins:default`
-* There is a special "default" namespace where no package name is necessary.
+- There is a special "default" namespace where no package name is necessary.
   e.g. `:webapp` (not the leading `:`) expands to
   `renovate-config-default:webapp`
 

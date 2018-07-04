@@ -1,18 +1,64 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/docker/extract extractDependencies() extracts images on adjacent lines 1`] = `
+Array [
+  Object {
+    "commitMessageTopic": "Node.js",
+    "currentDepTag": "node:8.11.3-alpine",
+    "currentDepTagDigest": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+    "currentDigest": "sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+    "currentFrom": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
+    "currentTag": "8.11.3-alpine",
+    "currentValue": "8.11.3",
+    "depName": "node",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d AS node",
+    "fromPrefix": "FROM",
+    "fromSuffix": "AS node",
+    "language": "docker",
+    "lineNumber": 2,
+    "tagSuffix": "alpine",
+    "versionScheme": "docker",
+  },
+  Object {
+    "currentDepTag": "buildkite/puppeteer:1.1.1",
+    "currentDepTagDigest": "buildkite/puppeteer:1.1.1",
+    "currentDigest": undefined,
+    "currentFrom": "buildkite/puppeteer:1.1.1",
+    "currentTag": "1.1.1",
+    "currentValue": "1.1.1",
+    "depName": "buildkite/puppeteer",
+    "dockerRegistry": undefined,
+    "fromLine": "FROM buildkite/puppeteer:1.1.1 AS puppeteer",
+    "fromPrefix": "FROM",
+    "fromSuffix": "AS puppeteer",
+    "language": "docker",
+    "lineNumber": 3,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
+  },
+]
+`;
+
 exports[`lib/manager/docker/extract extractDependencies() extracts multiple FROM tags 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:6.12.3",
     "currentDepTagDigest": "node:6.12.3",
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentTag": "6.12.3",
+    "currentValue": "6.12.3",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromLine": "FROM node:6.12.3 as frontend",
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "python:3.6-slim",
@@ -20,11 +66,16 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "python:3.6-slim",
     "currentTag": "3.6-slim",
+    "currentValue": "3.6",
     "depName": "python",
     "dockerRegistry": undefined,
     "fromLine": "FROM python:3.6-slim",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 4,
+    "tagSuffix": "slim",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -32,16 +83,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles abnoral spacing 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.7.0",
     "currentDepTagDigest": "node:8.7.0",
     "currentDigest": undefined,
     "currentFrom": "registry.allmine.info:5005/node:8.7.0",
     "currentTag": "8.7.0",
+    "currentValue": "8.7.0",
     "depName": "node",
     "dockerRegistry": "registry.allmine.info:5005",
     "fromLine": "FROM    registry.allmine.info:5005/node:8.7.0",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -49,16 +106,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles comments 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
     "currentDepTagDigest": "node",
     "currentDigest": undefined,
     "currentFrom": "node",
     "currentTag": undefined,
+    "currentValue": undefined,
     "depName": "node",
     "dockerRegistry": undefined,
     "fromLine": "FROM node",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 3,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -66,16 +129,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles custom hosts 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8",
     "currentDepTagDigest": "node:8",
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info/node:8",
     "currentTag": "8",
+    "currentValue": "8",
     "depName": "node",
     "dockerRegistry": "registry2.something.info",
     "fromLine": "FROM registry2.something.info/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -83,16 +152,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles custom hosts with namespace 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "someaccount/node:8",
     "currentDepTagDigest": "someaccount/node:8",
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info/someaccount/node:8",
     "currentTag": "8",
+    "currentValue": "8",
     "depName": "someaccount/node",
     "dockerRegistry": "registry2.something.info",
     "fromLine": "FROM registry2.something.info/someaccount/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -100,16 +175,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles custom hosts with port 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8",
     "currentDepTagDigest": "node:8",
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info:5005/node:8",
     "currentTag": "8",
+    "currentValue": "8",
     "depName": "node",
     "dockerRegistry": "registry2.something.info:5005",
     "fromLine": "FROM registry2.something.info:5005/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -117,16 +198,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles digest 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
     "currentDepTagDigest": "node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentFrom": "node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentTag": undefined,
+    "currentValue": undefined,
     "depName": "node",
     "dockerRegistry": undefined,
     "fromLine": "FROM node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -134,16 +221,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles from as 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0-alpine",
     "currentDepTagDigest": "node:8.9.0-alpine",
     "currentDigest": undefined,
     "currentFrom": "node:8.9.0-alpine",
     "currentTag": "8.9.0-alpine",
+    "currentValue": "8.9.0",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromLine": "FROM node:8.9.0-alpine as base",
     "fromPrefix": "FROM",
     "fromSuffix": "as base",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": "alpine",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -151,16 +244,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles naked dep 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
     "currentDepTagDigest": "node",
     "currentDigest": undefined,
     "currentFrom": "node",
     "currentTag": undefined,
+    "currentValue": undefined,
     "depName": "node",
     "dockerRegistry": undefined,
     "fromLine": "FROM node",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -168,16 +267,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles namespaced images 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "mynamespace/node:8",
     "currentDepTagDigest": "mynamespace/node:8",
     "currentDigest": undefined,
     "currentFrom": "mynamespace/node:8",
     "currentTag": "8",
+    "currentValue": "8",
     "depName": "mynamespace/node",
     "dockerRegistry": undefined,
     "fromLine": "FROM mynamespace/node:8",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -185,16 +290,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles tag 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0-alpine",
     "currentDepTagDigest": "node:8.9.0-alpine",
     "currentDigest": undefined,
     "currentFrom": "node:8.9.0-alpine",
     "currentTag": "8.9.0-alpine",
+    "currentValue": "8.9.0",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromLine": "FROM node:8.9.0-alpine",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": "alpine",
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -202,16 +313,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() handles tag and digest 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0",
     "currentDepTagDigest": "node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentFrom": "node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentTag": "8.9.0",
+    "currentValue": "8.9.0",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromLine": "FROM node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "fromPrefix": "FROM",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -219,16 +336,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() is case insensitive 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
     "currentDepTagDigest": "node",
     "currentDigest": undefined,
     "currentFrom": "node",
     "currentTag": undefined,
+    "currentValue": undefined,
     "depName": "node",
     "dockerRegistry": undefined,
     "fromLine": "From node",
     "fromPrefix": "From",
     "fromSuffix": "",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;
@@ -236,16 +359,22 @@ Array [
 exports[`lib/manager/docker/extract extractDependencies() skips named multistage FROM tags 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "node:6.12.3",
     "currentDepTagDigest": "node:6.12.3",
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentTag": "6.12.3",
+    "currentValue": "6.12.3",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromLine": "FROM node:6.12.3 as frontend",
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
+    "language": "docker",
+    "lineNumber": 0,
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
   },
 ]
 `;

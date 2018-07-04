@@ -3,7 +3,7 @@
 exports[`lib/manager/bazel/extract extractDependencies() extracts multiple types of dependencies 1`] = `
 Array [
   Object {
-    "currentVersion": "0.3.1",
+    "currentValue": "0.3.1",
     "def": "git_repository(
     name = \\"build_bazel_rules_nodejs\\",
     remote = \\"https://github.com/bazelbuild/rules_nodejs.git\\",
@@ -12,10 +12,12 @@ Array [
 ",
     "depName": "build_bazel_rules_nodejs",
     "depType": "git_repository",
+    "purl": "pkg:github/bazelbuild/rules_nodejs",
     "remote": "https://github.com/bazelbuild/rules_nodejs.git",
+    "versionScheme": "semver",
   },
   Object {
-    "currentVersion": "0.6.1",
+    "currentValue": "0.6.1",
     "def": "git_repository(
     name = \\"build_bazel_rules_typescript\\",
     remote = \\"https://github.com/bazelbuild/rules_typescript.git\\",
@@ -24,10 +26,12 @@ Array [
 ",
     "depName": "build_bazel_rules_typescript",
     "depType": "git_repository",
+    "purl": "pkg:github/bazelbuild/rules_typescript",
     "remote": "https://github.com/bazelbuild/rules_typescript.git",
+    "versionScheme": "semver",
   },
   Object {
-    "currentVersion": "0.0.3",
+    "currentValue": "0.0.3",
     "def": "git_repository(
     name = \\"io_bazel_rules_sass\\",
     remote = \\"https://github.com/bazelbuild/rules_sass.git\\",
@@ -36,10 +40,12 @@ Array [
 ",
     "depName": "io_bazel_rules_sass",
     "depType": "git_repository",
+    "purl": "pkg:github/bazelbuild/rules_sass",
     "remote": "https://github.com/bazelbuild/rules_sass.git",
+    "versionScheme": "semver",
   },
   Object {
-    "currentVersion": "0.7.1",
+    "currentValue": "0.7.1",
     "def": "http_archive(
     name = \\"io_bazel_rules_go\\",
     url = \\"https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz\\",
@@ -48,7 +54,9 @@ Array [
 ",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
+    "purl": "pkg:github/bazelbuild/rules_go?ref=release",
     "repo": "bazelbuild/rules_go",
+    "versionScheme": "semver",
   },
 ]
 `;

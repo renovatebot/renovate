@@ -78,6 +78,16 @@ describe('platform/gitlab', () => {
         email: 'a@b.com',
       },
     }));
+    get.mockReturnValue({
+      body: [
+        {
+          number: 1,
+          source_branch: 'branch-a',
+          title: 'branch a pr',
+          state: 'opened',
+        },
+      ],
+    });
     return gitlab.initRepo(...args);
   }
 
@@ -86,7 +96,8 @@ describe('platform/gitlab', () => {
       [undefined, 'mytoken', undefined],
       [undefined, 'mytoken', 'https://my.custom.endpoint/'],
       ['myenvtoken', 'myenvtoken', undefined],
-    ].forEach(([envToken, token, endpoint], i) => {
+      [undefined, 'mytoken', undefined, 'Renovate Bot <bot@renovatebot.com>'],
+    ].forEach(([envToken, token, endpoint, gitAuthor], i) => {
       it(`should initialise the config for the repo - ${i}`, async () => {
         if (envToken !== undefined) {
           process.env.GITLAB_TOKEN = envToken;
@@ -96,6 +107,7 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           token,
           endpoint,
+          gitAuthor,
         });
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
@@ -441,6 +453,44 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
   });
+  describe('mergeBranch(branchName)', () => {
+    it('should perform a branch merge', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+
+      await gitlab.mergeBranch('thebranchname');
+
+      // deleteBranch
+      get.delete.mockImplementationOnce();
+
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should throw if branch merge throws', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      get.post.mockImplementationOnce(() => {
+        throw new Error('branch-push failed');
+      });
+      let e;
+      try {
+        await gitlab.mergeBranch('thebranchname');
+      } catch (err) {
+        e = err;
+      }
+
+      // deleteBranch
+      get.delete.mockImplementationOnce();
+
+      expect(e).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+  });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       get.delete = jest.fn();
@@ -452,11 +502,6 @@ describe('platform/gitlab', () => {
       get.mockReturnValueOnce({ body: [] }); // getBranchPr
       await gitlab.deleteBranch('some-branch', true);
       expect(get.delete.mock.calls.length).toBe(1);
-    });
-  });
-  describe('mergeBranch()', () => {
-    it('exists', () => {
-      gitlab.mergeBranch();
     });
   });
   describe('getBranchLastCommitTime', () => {
@@ -502,6 +547,75 @@ describe('platform/gitlab', () => {
       expect(res).toBeDefined();
     });
   });
+  describe('ensureIssue()', () => {
+    it('creates issue', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      }));
+      const res = await gitlab.ensureIssue('new-title', 'new-content');
+      expect(res).toEqual('created');
+    });
+    it('updates issue', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'new-content' } });
+      const res = await gitlab.ensureIssue('title-2', 'newer-content');
+      expect(res).toEqual('updated');
+    });
+    it('skips update if unchanged', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'newer-content' } });
+      const res = await gitlab.ensureIssue('title-2', 'newer-content');
+      expect(res).toBe(null);
+    });
+  });
+  describe('ensureIssueClosing()', () => {
+    it('closes issue', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      }));
+      await gitlab.ensureIssueClosing('title-2');
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       get.mockReturnValueOnce({
@@ -529,13 +643,48 @@ describe('platform/gitlab', () => {
     });
   });
   describe('ensureComment', () => {
-    it('exists', async () => {
+    it('add comment if not found', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({ body: [] });
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(1);
+      expect(get.post.mock.calls).toMatchSnapshot();
+    });
+    it('add updates comment if necessary', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
+      });
+      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(1);
+      expect(get.patch.mock.calls).toMatchSnapshot();
+    });
+    it('skips comment', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
+      });
+      await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(0);
+    });
+    it('handles comment with no description', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
+      await gitlab.ensureComment(42, null, '!merge');
+      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.patch.mock.calls).toHaveLength(0);
     });
   });
   describe('ensureCommentRemoval', () => {
-    it('exists', async () => {
+    it('deletes comment if found', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      get.mockReturnValueOnce({
+        body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
+      });
       await gitlab.ensureCommentRemoval(42, 'some-subject');
+      expect(get.delete.mock.calls).toHaveLength(1);
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
@@ -664,9 +813,20 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getPrFiles()', () => {
-    it('should return empty', async () => {
-      const prFiles = await gitlab.getPrFiles();
+    it('should return empty if no mrNo is passed', async () => {
+      const prFiles = await gitlab.getPrFiles(null);
       expect(prFiles).toEqual([]);
+    });
+    it('returns files', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          { filename: 'renovate.json' },
+          { filename: 'not renovate.json' },
+        ],
+      });
+      const prFiles = await gitlab.getPrFiles(123);
+      expect(prFiles).toMatchSnapshot();
+      expect(prFiles).toHaveLength(2);
     });
   });
   describe('updatePr(prNo, title, body)', () => {
@@ -778,66 +938,6 @@ describe('platform/gitlab', () => {
       );
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.post.mock.calls).toHaveLength(1);
-    });
-    it('should parse valid gitAuthor', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-
-      await gitlab.commitFilesToBranch(
-        'renovate/something',
-        [file],
-        'Update something',
-        undefined,
-        'Renovate Bot <bot@renovateapp.com>'
-      );
-
-      expect(get.post.mock.calls[0][1].body.author_name).toEqual(
-        'Renovate Bot'
-      );
-      expect(get.post.mock.calls[0][1].body.author_email).toEqual(
-        'bot@renovateapp.com'
-      );
-    });
-    it('should skip invalid gitAuthor', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-
-      await gitlab.commitFilesToBranch(
-        'renovate/something',
-        [file],
-        'Update something',
-        undefined,
-        'Renovate Bot bot@renovateapp.com'
-      );
-
-      expect(get.post.mock.calls[0][1].body.author_name).toBeUndefined();
-      expect(get.post.mock.calls[0][1].body.author_email).toBeUndefined();
     });
   });
   describe('getCommitMessages()', () => {

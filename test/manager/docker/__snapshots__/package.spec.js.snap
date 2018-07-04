@@ -7,17 +7,17 @@ Array [
     "newDigestShort": "one",
     "newFrom": "some-dep:1.0.0-something@sha256:one",
     "newTag": "1.0.0-something",
-    "newVersion": "one",
-    "type": "pin",
+    "newValue": "one",
+    "updateType": "pin",
   },
   Object {
     "newDepTag": "some-dep:1.1.0-something",
     "newDigest": "sha256:two",
     "newFrom": "some-dep:1.1.0-something@sha256:two",
+    "newMajor": "1",
     "newTag": "1.1.0-something",
-    "newVersion": "1.1.0-something",
-    "newVersionMajor": "1",
-    "type": "minor",
+    "newValue": "1.1.0",
+    "updateType": "minor",
   },
 ]
 `;
@@ -27,10 +27,10 @@ Array [
   Object {
     "newDepTag": "node:8",
     "newFrom": "node:8",
+    "newMajor": "8",
     "newTag": "8",
-    "newVersion": "8",
-    "newVersionMajor": "8",
-    "type": "major",
+    "newValue": "8",
+    "updateType": "major",
   },
 ]
 `;
@@ -42,8 +42,8 @@ Array [
     "newDigestShort": "123456",
     "newFrom": "docker.io/some-dep:1.0.0@sha256:1234567890",
     "newTag": "1.0.0",
-    "newVersion": "123456",
-    "type": "digest",
+    "newValue": "123456",
+    "updateType": "digest",
   },
 ]
 `;
@@ -54,28 +54,28 @@ Array [
     "newDepTag": "some-dep:1.2.0",
     "newDigest": "sha256:one",
     "newFrom": "some-dep:1.2.0@sha256:one",
+    "newMajor": "1",
     "newTag": "1.2.0",
-    "newVersion": "1.2.0",
-    "newVersionMajor": "1",
-    "type": "minor",
+    "newValue": "1.2.0",
+    "updateType": "minor",
   },
   Object {
     "newDepTag": "some-dep:2.0.0",
     "newDigest": "sha256:two",
     "newFrom": "some-dep:2.0.0@sha256:two",
+    "newMajor": "2",
     "newTag": "2.0.0",
-    "newVersion": "2.0.0",
-    "newVersionMajor": "2",
-    "type": "major",
+    "newValue": "2.0.0",
+    "updateType": "major",
   },
   Object {
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:three",
     "newFrom": "some-dep:3.0.0@sha256:three",
+    "newMajor": "3",
     "newTag": "3.0.0",
-    "newVersion": "3.0.0",
-    "newVersionMajor": "3",
-    "type": "major",
+    "newValue": "3.0.0",
+    "updateType": "major",
   },
 ]
 `;
@@ -86,19 +86,19 @@ Array [
     "newDepTag": "some-dep:1.2.0",
     "newDigest": "sha256:one",
     "newFrom": "some-dep:1.2.0@sha256:one",
+    "newMajor": "1",
     "newTag": "1.2.0",
-    "newVersion": "1.2.0",
-    "newVersionMajor": "1",
-    "type": "minor",
+    "newValue": "1.2.0",
+    "updateType": "minor",
   },
   Object {
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:two",
     "newFrom": "some-dep:3.0.0@sha256:two",
+    "newMajor": "3",
     "newTag": "3.0.0",
-    "newVersion": "3.0.0",
-    "newVersionMajor": "3",
-    "type": "major",
+    "newValue": "3.0.0",
+    "updateType": "major",
   },
 ]
 `;
@@ -109,10 +109,10 @@ Array [
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:one",
     "newFrom": "some-dep:3.0.0@sha256:one",
+    "newMajor": "3",
     "newTag": "3.0.0",
-    "newVersion": "3.0.0",
-    "newVersionMajor": "3",
-    "type": "major",
+    "newValue": "3.0.0",
+    "updateType": "major",
   },
 ]
 `;
@@ -123,10 +123,10 @@ Array [
     "newDepTag": "some-dep:3.0.0",
     "newDigest": "sha256:one",
     "newFrom": "docker.io/some-dep:3.0.0@sha256:one",
+    "newMajor": "3",
     "newTag": "3.0.0",
-    "newVersion": "3.0.0",
-    "newVersionMajor": "3",
-    "type": "major",
+    "newValue": "3.0.0",
+    "updateType": "major",
   },
 ]
 `;
@@ -136,10 +136,10 @@ Array [
   Object {
     "newDepTag": "node:8",
     "newFrom": "node:8",
+    "newMajor": "8",
     "newTag": "8",
-    "newVersion": "8",
-    "newVersionMajor": "8",
-    "type": "major",
+    "newValue": "8",
+    "updateType": "major",
   },
 ]
 `;
@@ -149,10 +149,10 @@ Array [
   Object {
     "newDepTag": "node:9",
     "newFrom": "node:9",
+    "newMajor": "9",
     "newTag": "9",
-    "newVersion": "9",
-    "newVersionMajor": "9",
-    "type": "major",
+    "newValue": "9",
+    "updateType": "major",
   },
 ]
 `;

@@ -19,8 +19,20 @@ describe('workers/repository/updates/flatten', () => {
           {
             packageFile: 'package.json ',
             deps: [
-              { depName: '@org/a', updates: [{ newVersion: '1.0.0' }] },
-              { updates: [{ newVersion: '2.0.0' }] },
+              { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
+              { updates: [{ newValue: '2.0.0' }] },
+            ],
+          },
+        ],
+        docker: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'amd64/node',
+                language: 'docker',
+                updates: [{ newValue: '10.0.1' }],
+              },
             ],
           },
         ],

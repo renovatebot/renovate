@@ -3,8 +3,6 @@ jest.mock('../../../lib/datasource/npm');
 jest.mock('got');
 
 const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
-const npmRegistry = require('../../../lib/datasource/npm');
-const got = require('got');
 
 const { getChangeLogJSON } = require('../../../lib/workers/pr/changelog');
 const {
@@ -12,51 +10,29 @@ const {
 } = require('../../../lib/workers/pr/changelog/source-cache');
 
 const upgrade = {
-  manager: 'npm',
   depName: 'renovate',
+  versionScheme: 'semver',
   fromVersion: '1.0.0',
-  newVersion: '3.0.0',
+  toVersion: '3.0.0',
+  repositoryUrl: 'https://github.com/chalk/chalk',
+  releases: [
+    { version: '0.9.0' },
+    { version: '1.0.0', gitRef: 'npm_1.0.0' },
+    {
+      version: '2.3.0',
+      gitRef: 'npm_2.3.0',
+      releaseTimestamp: '2017-10-24T03:20:46.238Z',
+    },
+    { version: '2.2.2', gitRef: 'npm_2.2.2' },
+    { version: '2.4.2', releaseTimestamp: '2017-12-24T03:20:46.238Z' },
+    { version: '2.5.2' },
+  ],
 };
-
-function npmResponse() {
-  return {
-    repositoryUrl: 'https://github.com/chalk/chalk',
-    versions: {
-      '0.9.0': {},
-      '1.0.0': { gitHead: 'npm_1.0.0' },
-      '2.3.0': { gitHead: 'npm_2.3.0', time: '2017-10-24T03:20:46.238Z' },
-      '2.2.2': { gitHead: 'npm_2.2.2' },
-      '2.4.2': { time: '2017-12-24T03:20:46.238Z' },
-      '2.5.2': {},
-    },
-  };
-}
-
-function pipResponse() {
-  return {
-    info: {
-      home_page: 'https://github.com/chalk/chalk',
-    },
-    releases: {
-      '0.9.0': [],
-      '1.0.0': [],
-      '2.3.0': [{ upload_time: '2017-10-24T03:20:46.238Z' }],
-      '2.2.2': [{}],
-      '2.4.2': [{ upload_time: '2017-12-24T03:20:46.238Z' }],
-      '2.5.2': [],
-    },
-  };
-}
 
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(async () => {
-      npmRegistry.getDependency.mockClear();
       ghGot.mockClear();
-
-      npmRegistry.getDependency.mockReturnValueOnce(
-        Promise.resolve(npmResponse())
-      );
 
       await rmAllCache();
     });
@@ -67,34 +43,32 @@ describe('workers/pr/changelog', () => {
           fromVersion: null,
         })
       ).toBe(null);
-      expect(npmRegistry.getDependency.mock.calls).toHaveLength(0);
       expect(ghGot.mock.calls).toHaveLength(0);
     });
-    it('returns null if fromVersion equals newVersion', async () => {
+    it('returns null if fromVersion equals toVersion', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
           fromVersion: '1.0.0',
-          newVersion: '1.0.0',
+          toVersion: '1.0.0',
         })
       ).toBe(null);
       expect(ghGot.mock.calls).toHaveLength(0);
     });
-    it('logs when no JSON', async () => {
-      // clear the mock
-      npmRegistry.getDependency.mockReset();
-      expect(await getChangeLogJSON({ ...upgrade })).toBe(null);
-    });
     it('skips invalid repos', async () => {
-      // clear the mock
-      npmRegistry.getDependency.mockReset();
-      const res = npmResponse();
-      res.repositoryUrl = 'https://github.com/about';
-      npmRegistry.getDependency.mockReturnValueOnce(Promise.resolve(res));
-      expect(await getChangeLogJSON({ ...upgrade })).toBe(null);
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          repositoryUrl: 'https://github.com/about',
+        })
+      ).toBe(null);
     });
     it('works without Github', async () => {
-      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+        })
+      ).toMatchSnapshot();
     });
     it('uses GitHub tags', async () => {
       ghGot.mockReturnValueOnce(
@@ -109,7 +83,11 @@ describe('workers/pr/changelog', () => {
           ],
         })
       );
-      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+        })
+      ).toMatchSnapshot();
     });
     it('falls back to commit from release time', async () => {
       // mock tags response
@@ -129,10 +107,12 @@ describe('workers/pr/changelog', () => {
     });
     it('returns cached JSON', async () => {
       const first = await getChangeLogJSON({ ...upgrade });
-      npmRegistry.getDependency.mockClear();
+      const firstCalls = [...ghGot.mock.calls];
+      ghGot.mockClear();
       const second = await getChangeLogJSON({ ...upgrade });
+      const secondCalls = [...ghGot.mock.calls];
       expect(first).toEqual(second);
-      expect(npmRegistry.getDependency.mock.calls).toHaveLength(0);
+      expect(firstCalls.length).toBeGreaterThan(secondCalls.length);
     });
     it('filters unnecessary warns', async () => {
       ghGot.mockImplementation(() => {
@@ -145,58 +125,69 @@ describe('workers/pr/changelog', () => {
         })
       ).toMatchSnapshot();
     });
-    it('skips node engines', async () => {
-      expect(await getChangeLogJSON({ ...upgrade, depType: 'engines' })).toBe(
-        null
-      );
-    });
-    it('supports pip', async () => {
-      got.mockReturnValueOnce(
-        Promise.resolve({
-          body: pipResponse(),
-        })
-      );
+    it('supports node engines', async () => {
       expect(
-        await getChangeLogJSON({ ...upgrade, manager: 'pip_requirements' })
+        await getChangeLogJSON({
+          ...upgrade,
+          depType: 'engines',
+        })
       ).toMatchSnapshot();
     });
-    it('works without pip', async () => {
+    it('handles no repositoryUrl', async () => {
       expect(
-        await getChangeLogJSON({ ...upgrade, manager: 'pip_requirements' })
+        await getChangeLogJSON({
+          ...upgrade,
+          repositoryUrl: undefined,
+        })
       ).toBe(null);
     });
-    it('handles pip errors', async () => {
-      got.mockImplementation(() => {
-        throw new Error('Unknown Pip Repo');
-      });
+    it('handles invalid repositoryUrl', async () => {
       expect(
-        await getChangeLogJSON({ ...upgrade, manager: 'pip_requirements' })
+        await getChangeLogJSON({
+          ...upgrade,
+          repositoryUrl: 'http://example.com',
+        })
+      ).toBe(null);
+    });
+    it('handles no releases', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          releases: [],
+        })
+      ).toBe(null);
+    });
+    it('handles not enough releases', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          releases: [{ version: '0.9.0' }],
+        })
       ).toBe(null);
     });
     it('supports github enterprise and github.com changelog', async () => {
-      // clear the mock
-      npmRegistry.getDependency.mockReset();
-      const res = npmResponse();
-      npmRegistry.getDependency.mockReturnValueOnce(Promise.resolve(res));
-
+      const token = process.env.GITHUB_TOKEN;
       const endpoint = process.env.GITHUB_ENDPOINT;
+      process.env.GITHUB_TOKEN = 'super_secret';
       process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
-      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
-
+      const oldenv = { ...process.env };
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+        })
+      ).toMatchSnapshot();
+      // check that process env was restored
+      expect(process.env).toEqual(oldenv);
+      process.env.GITHUB_TOKEN = token;
       process.env.GITHUB_ENDPOINT = endpoint;
     });
     it('supports github enterprise and github enterprise changelog', async () => {
-      // clear the mock
-      npmRegistry.getDependency.mockReset();
-      const res = npmResponse();
-      res.repositoryUrl = 'https://github-enterprise.example.com/chalk/chalk';
-      npmRegistry.getDependency.mockReturnValueOnce(Promise.resolve(res));
-
       const endpoint = process.env.GITHUB_ENDPOINT;
       process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
       expect(
         await getChangeLogJSON({
           ...upgrade,
+          repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
         })
       ).toMatchSnapshot();
 
@@ -204,17 +195,21 @@ describe('workers/pr/changelog', () => {
     });
 
     it('supports github enterprise alwo when retrieving data from cache', async () => {
-      // clear the mock
-      npmRegistry.getDependency.mockReset();
-      const res = npmResponse();
-      res.repositoryUrl = 'https://github-enterprise.example.com/chalk/chalk';
-      npmRegistry.getDependency.mockReturnValueOnce(Promise.resolve(res));
-
       const endpoint = process.env.GITHUB_ENDPOINT;
       process.env.GITHUB_ENDPOINT = 'https://github-enterprise.example.com/';
-      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
+        })
+      ).toMatchSnapshot();
 
-      expect(await getChangeLogJSON({ ...upgrade })).toMatchSnapshot();
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
+        })
+      ).toMatchSnapshot();
       process.env.GITHUB_ENDPOINT = endpoint;
     });
   });

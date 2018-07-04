@@ -124,6 +124,38 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab ensureComment add comment if not found 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42/notes",
+    Object {
+      "body": Object {
+        "body": "### some-subject
+
+some
+content",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab ensureComment add updates comment if necessary 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/merge_requests/42/notes/1234",
+    Object {
+      "body": Object {
+        "body": "### some-subject
+
+some
+content",
+      },
+    },
+  ],
+]
+`;
+
 exports[`platform/gitlab getAllRenovateBranches() should return all renovate branches 1`] = `
 Array [
   "renovate/a",
@@ -148,6 +180,7 @@ Object {
   "iid": 91,
   "number": 91,
   "source_branch": "some-branch",
+  "state": undefined,
 }
 `;
 
@@ -210,6 +243,13 @@ Object {
 }
 `;
 
+exports[`platform/gitlab getPrFiles() returns files 1`] = `
+Array [
+  "renovate.json",
+  "not renovate.json",
+]
+`;
+
 exports[`platform/gitlab getRepos should return an array of repos 1`] = `
 Array [
   Array [
@@ -261,7 +301,7 @@ Array [
     },
   ],
   Array [
-    "projects/some%2Frepo%2Fproject/repository/tree?ref=undefined&recursive=true&per_page=100",
+    "projects/some%2Frepo%2Fproject/repository/tree?ref=undefined&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },
@@ -284,7 +324,7 @@ Array [
     },
   ],
   Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&recursive=true&per_page=100",
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },
@@ -309,7 +349,7 @@ Array [
     },
   ],
   Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&recursive=true&per_page=100",
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },
@@ -334,7 +374,7 @@ Array [
     },
   ],
   Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&recursive=true&per_page=100",
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },
@@ -344,10 +384,63 @@ Array [
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 2 2`] = `Object {}`;
 
+exports[`platform/gitlab initRepo should initialise the config for the repo - 3 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+  Array [
+    "projects/some%2Frepo/merge_requests?per_page=100",
+    Object {
+      "paginate": true,
+    },
+  ],
+  Array [
+    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
+    Object {
+      "paginate": true,
+    },
+  ],
+]
+`;
+
+exports[`platform/gitlab initRepo should initialise the config for the repo - 3 2`] = `Object {}`;
+
+exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/commits/thebranchname/cherry_pick?branch=undefined",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 2`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/branches/thebranchname",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 1`] = `[Error: Branch automerge failed]`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 2`] = `
+Array [
+  Array [
+    "projects/some%2Frepo/repository/commits/thebranchname/cherry_pick?branch=undefined",
+  ],
+]
+`;
+
+exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 3`] = `Array []`;
+
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
-    "projects/undefined/repository/tree?ref=some-branch&recursive=true&per_page=100",
+    "projects/undefined/repository/tree?ref=some-branch&per_page=100&recursive=true",
     Object {
       "paginate": true,
     },

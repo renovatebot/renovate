@@ -10,6 +10,7 @@ exports[`config/migration migrateConfig(config, parentConfig) it migrates config
 Object {
   "autodiscover": true,
   "automerge": false,
+  "automergeType": "branch",
   "baseBranches": Array [
     "next",
   ],
@@ -112,6 +113,7 @@ Object {
   "patch": Object {
     "automerge": true,
   },
+  "prBody": "{{currentValue}} something",
   "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title",
   "rangeStrategy": "bump",
   "schedule": "on the first day of the month",

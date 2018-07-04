@@ -86,11 +86,11 @@ For example, if you have `jest` or `mocha` as a dependency, and it has an upgrad
 
 #### Branch automerging
 
-Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged. For this reason we recommend you consider setting `automergeType=branch-push` which will mean:
+Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged. For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
-* Renovate first creates a branch and no PR
-* If tests pass, Renovate pushes a commit directly to `master` without PR
-* If tests fail, Renovate raises a PR for you to review
+- Renovate first creates a branch and no PR
+- If tests pass, Renovate pushes a commit directly to `master` without PR
+- If tests fail, Renovate raises a PR for you to review
 
 The result is that passing updates are essentially "silent" - the only sign of them are the commits to your `master` branch.
 
@@ -98,12 +98,12 @@ The result is that passing updates are essentially "silent" - the only sign of t
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates. And this is especially so if your repository needs rebasing, e.g. because you use lock files. e.g. let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.
 
-* At start of schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
-* After `abc` passes tests, `Renovate` will automerge it to `master`
-* The `xyz` branch probably now has `yarn.lock` conflicts
-* Renovate will immediately check all other branches and rebase them
-* The change to `xyz` branch will trigger another round of CI tests
-* After the updated `xyz` branch passes, Renovate will automerge it too
+- At start of schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
+- After `abc` passes tests, `Renovate` will automerge it to `master`
+- The `xyz` branch probably now has `yarn.lock` conflicts
+- Renovate will immediately check all other branches and rebase them
+- The change to `xyz` branch will trigger another round of CI tests
+- After the updated `xyz` branch passes, Renovate will automerge it too
 
 This is a lot better than you waking up to two PRs and then having to deal with conflicts yourself after you merge the first one.
 
@@ -116,7 +116,7 @@ Remember our running `eslint` example? Let's automerge it if all the linting upd
       "groupName": "eslint",
       "schedule": ["before 2am on monday"],
       "automerge": true,
-      "automergeType": "branch-push"
+      "automergeType": "branch"
     }
   ]
 ```
@@ -127,13 +127,13 @@ Have you come up with a rule that you think others would benefit from? How about
 
 As mentioned earlier. using lock files greatly increase the chance that merging one PR will result in a second PR becoming conflicted with `master`. Therefore:
 
-* The more groups you use, the separate PRs you have, and hence the less overall chance at lock file conflicts
-* The less your schedule, the more chance that you pile up concurrent PRs, which increases the chance of lock file conflicts
-* The more automerging you do, the less chance you have concurrent PRs, which decreases the chance of lock file conflicts
+- The more groups you use, the separate PRs you have, and hence the less overall chance at lock file conflicts
+- The less your schedule, the more chance that you pile up concurrent PRs, which increases the chance of lock file conflicts
+- The more automerging you do, the less chance you have concurrent PRs, which decreases the chance of lock file conflicts
 
 ## The Future of Noise Reduction
 
-First of all, if you every have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovateapp/renovate). Our philosophy is:
+First of all, if you every have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovatebot/renovate). Our philosophy is:
 
 1.  Nearly everyone should probably use Renovate-like dependency update automation
 2.  Over time, you should "see" Renovate less and less

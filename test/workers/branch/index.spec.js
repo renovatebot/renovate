@@ -56,6 +56,7 @@ describe('workers/branch', () => {
     it('skips branch if not unpublishSafe + pending', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.unpublishSafe = true;
+      config.canBeUnpublished = true;
       config.prCreation = 'not-pending';
       platform.branchExists.mockReturnValueOnce(true);
       const res = await branchWorker.processBranch(config);
@@ -70,7 +71,7 @@ describe('workers/branch', () => {
     it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
-      config.type = 'major';
+      config.updateType = 'major';
       checkExisting.prAlreadyExisted.mockReturnValueOnce({
         number: 13,
         state: 'closed',
@@ -81,7 +82,7 @@ describe('workers/branch', () => {
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
-      config.type = 'digest';
+      config.updateType = 'digest';
       checkExisting.prAlreadyExisted.mockReturnValueOnce({
         number: 13,
         state: 'closed',
@@ -109,21 +110,26 @@ describe('workers/branch', () => {
       await branchWorker.processBranch(config);
       expect(parent.getParentBranch.mock.calls.length).toBe(0);
     });
+    it('throws error if closed PR found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockReturnValueOnce({
+        state: 'merged',
+        canRebase: false,
+      });
+      await expect(branchWorker.processBranch(config)).rejects.toThrow(
+        /repository-changed/
+      );
+    });
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
-      platform.findPr.mockReturnValueOnce({});
-      platform.getPr.mockReturnValueOnce({ state: 'open', canRebase: false });
+      platform.getBranchPr.mockReturnValueOnce({
+        state: 'open',
+        canRebase: false,
+      });
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
-    });
-    it('warns if edited PR is actually closed', async () => {
-      schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockReturnValueOnce(true);
-      platform.findPr.mockReturnValueOnce({});
-      platform.getPr.mockReturnValueOnce({ state: 'closed' });
-      const res = await branchWorker.processBranch(config);
-      expect(res).not.toEqual('pr-edited');
     });
     it('returns if pr creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({

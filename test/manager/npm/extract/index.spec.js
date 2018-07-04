@@ -10,6 +10,7 @@ function readFixture(fixture) {
 }
 
 const input01Content = readFixture('inputs/01.json');
+const workspacesContent = readFixture('inputs/workspaces.json');
 
 describe('manager/npm/extract', () => {
   describe('.extractDependencies()', () => {
@@ -75,6 +76,20 @@ describe('manager/npm/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('finds and filters .npmrc', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === '.npmrc') {
+          return 'save-exact = true\npackage-lock = false\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractDependencies(
+        input01Content,
+        'package.json',
+        { global: {} }
+      );
+      expect(res.npmrc).toBeDefined();
+    });
     it('finds and discards .npmrc', async () => {
       platform.getFile = jest.fn(fileName => {
         if (fileName === '.npmrc') {
@@ -99,6 +114,47 @@ describe('manager/npm/extract', () => {
       });
       const res = await npmExtract.extractDependencies(
         input01Content,
+        'package.json',
+        {}
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('finds complex yarn workspaces', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === 'lerna.json') {
+          return '{}';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractDependencies(
+        workspacesContent,
+        'package.json',
+        {}
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('extracts engines', async () => {
+      const pJson = {
+        dependencies: {
+          angular: '1.6.0',
+        },
+        devDependencies: {
+          '@angular/cli': '1.6.0',
+          foo: '*',
+          bar: 'file:../foo/bar',
+          baz: '',
+          other: 'latest',
+        },
+        engines: {
+          atom: '>=1.7.0 <2.0.0',
+          node: '>= 8.9.2',
+          npm: '^8.0.0',
+          yarn: 'disabled',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractDependencies(
+        pJsonStr,
         'package.json',
         {}
       );

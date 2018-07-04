@@ -72,7 +72,7 @@ It's possible to add this setting into the `renovate.json` file as part of the "
 
 ## branchName
 
-It's recommended to use our default templates, but you may override branch name if you really wish. It's recommended to still keep `depName` and `newVersionMajor` in the branch name to make sure all other Renovate features can still work.
+It's recommended to use our default templates, but you may override branch name if you really wish. It's recommended to still keep `depName` and `newMajor` in the branch name to make sure all other Renovate features can still work.
 
 Example branch name: `renovate/eslint-4.x`.
 
@@ -123,6 +123,10 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 ## commitMessageTopic
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. "dependency react".
+
+## composer
+
+Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
 ## copyLocalLibs
 
@@ -181,7 +185,7 @@ Example:
 
 ## encrypted
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -189,13 +193,9 @@ Extend this if you wish to configure rules specifically for `engines` definition
 
 ## extends
 
-See https://renovateapp.com/docs/configuration-reference/config-presets for details.
+See https://renovatebot.com/docs/configuration-reference/config-presets for details.
 
 ## fileMatch
-
-## gitAuthor
-
-RFC5322-compliant string if you wish to customise the git author for commits.
 
 ## gitlabci
 
@@ -292,17 +292,21 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovateapp.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
 ## npmToken
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used.
+
+## nuget
+
+The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style .csproj's, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj` format in order to be detected and supported by Renovate.
 
 ## nvm
 
@@ -434,11 +438,26 @@ Use this field if you want to have one or more package names patterns in your pa
 
 The above will set `rangeStrategy` to `replace` for any package starting with `angular`.
 
+### updateTypes
+
+USe this field to match rules against types of updates. For example to apply a special label for Major updates:
+
+```
+  "packageRules: [{
+    "updateTypes": ["major"],
+    "labels": ["UPDATE-MAJOR"]
+  }]
+```
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates. See also `major` and `minor` configuration options.
 
 ## paths
+
+## php
+
+Warning: PHP Composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
 ## pin
 
@@ -450,9 +469,11 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 ## pip_requirements
 
+Add configuration here to specifically override settings for `pip` requirements files. Supports `requirements.txt` and `requirements.pip` files. The default file pattern is fairly flexible in an attempt to catch similarly named ones too but may be extended/changed.
+
 ## prBody
 
-Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovateapp/renovate/issues) and let us solve it for you and for everyone else too.
+Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovatebot/renovate/issues) and let us solve it for you and for everyone else too.
 
 ## prConcurrentLimit
 
@@ -462,9 +483,9 @@ This setting - if enabled - limits Renovate to a maximum of x concurrent PRs ope
 
 This setting tells Renovate when you would like it to raise PRs:
 
-* `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
-* `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
-* `status-success`: Renovate won't raise PRs unless tests pass
+- `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
+- `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
+- `status-success`: Renovate won't raise PRs unless tests pass
 
 Renovate defaults to `immediate` but some like to change to `not-pending`. If you set to immediate, it means you will usually get GitHub notifications that a new PR is available but if you view it immediately then it will still have "pending" tests so you can't take any action. With `not-pending`, it means that when you receive the PR notification, you can see if it passed or failed and take action immediately. Therefore you can customise this setting if you wish to be notified a little later in order to reduce "noise".
 
@@ -490,15 +511,17 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 ## python
 
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
+
 ## rangeStrategy
 
 Behaviour:
 
-* `auto` = Renovate decides (this will be done on a manager-by-manager basis)
-* `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
-* `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
-* `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
-* `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
+- `auto` = Renovate decides (this will be done on a manager-by-manager basis)
+- `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
+- `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
+- `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
+- `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
 
 Renovate's "auto" strategy works like this for npm:
 
@@ -514,21 +537,21 @@ By default, Renovate assumes that if you are using ranges then it's because you 
 
 For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything because `1.2.0` satisfies the range. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `rangeStrategy` to `bump` in your Renovate config.
 
-This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`. It is not compatible with `pinVersions=true`.
+This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`.
 
 ## rebaseStalePrs
 
 This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
 
-If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch-push` automerge then Renovate will still rebase as necessary for that.
+If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch` automerge then Renovate will still rebase as necessary for that.
 
 ## recreateClosed
 
 By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again. For example the Webpack 3.x case described above. This field lets you customise this behaviour down to a per-package level. For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
 
-* Package groups
-* When pinning versions
-* Lock file maintenance
+- Package groups
+- When pinning versions
+- Lock file maintenance
 
 Typically you shouldn't need to modify this setting.
 
@@ -623,7 +646,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-* **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 

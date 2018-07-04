@@ -9,7 +9,6 @@ describe('workers/branch/status-checks', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        upgrades: [],
       };
     });
     afterEach(() => {
@@ -19,23 +18,23 @@ describe('workers/branch/status-checks', () => {
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck.mock.calls.length).toBe(0);
     });
-    it('defaults to unpublishable', async () => {
+    it('defaults to canBeUnpublished', async () => {
       config.unpublishSafe = true;
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
       expect(platform.setBranchStatus.mock.calls.length).toBe(1);
     });
-    it('finds unpublishable false and sets status', async () => {
+    it('finds canBeUnpublished false and sets status', async () => {
+      config.canBeUnpublished = true;
       config.unpublishSafe = true;
-      config.upgrades = [{ unpublishable: true }, { unpublishable: false }];
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
       expect(platform.setBranchStatus.mock.calls.length).toBe(1);
     });
-    it('finds unpublishable false and skips status', async () => {
+    it('finds canBeUnpublished false and skips status', async () => {
       config.unpublishSafe = true;
-      config.upgrades = [{ unpublishable: true }, { unpublishable: false }];
-      platform.getBranchStatusCheck.mockReturnValueOnce('pending');
+      config.canBeUnpublished = false;
+      platform.getBranchStatusCheck.mockReturnValueOnce('success');
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck.mock.calls.length).toBe(1);
       expect(platform.setBranchStatus.mock.calls.length).toBe(0);

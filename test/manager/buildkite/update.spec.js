@@ -15,23 +15,23 @@ describe('manager/buildkite/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         lineNumber: 2,
-        newVersion: 'v2.2.0',
+        newValue: 'v2.2.0',
       };
       const res = bkUpdate.updateDependency(pipeline1, upgrade);
       expect(res).not.toEqual(pipeline1);
-      expect(res.includes(upgrade.newVersion)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('replaces two values in one file', () => {
       const upgrade1 = {
         lineNumber: 4,
-        newVersion: 'v1.5.0',
+        newValue: 'v1.5.0',
       };
       const res1 = bkUpdate.updateDependency(pipeline2, upgrade1);
       expect(res1).not.toEqual(pipeline2);
-      expect(res1.includes(upgrade1.newVersion)).toBe(true);
+      expect(res1.includes(upgrade1.newValue)).toBe(true);
       const upgrade2 = {
         lineNumber: 15,
-        newVersion: 'v1.5.0',
+        newValue: 'v1.5.0',
       };
       const res2 = bkUpdate.updateDependency(res1, upgrade2);
       expect(res2).not.toEqual(res1);
@@ -40,7 +40,7 @@ describe('manager/buildkite/update', () => {
     it('returns same', () => {
       const upgrade = {
         lineNumber: 2,
-        newVersion: 'v2.0.0',
+        newValue: 'v2.0.0',
       };
       const res = bkUpdate.updateDependency(pipeline1, upgrade);
       expect(res).toEqual(pipeline1);
@@ -48,7 +48,7 @@ describe('manager/buildkite/update', () => {
     it('returns null if mismatch', () => {
       const upgrade = {
         lineNumber: 3,
-        newVersion: 'v2.2.0',
+        newValue: 'v2.2.0',
       };
       const res = bkUpdate.updateDependency(pipeline1, upgrade);
       expect(res).toBe(null);

@@ -23,11 +23,11 @@ describe('manager/npm/extract/locked-versions', () => {
           deps: [
             {
               depName: 'a',
-              currentVersion: '1.0.0',
+              currentValue: '1.0.0',
             },
             {
               depName: 'b',
-              currentVersion: '2.0.0',
+              currentValue: '2.0.0',
             },
           ],
         },
@@ -47,11 +47,11 @@ describe('manager/npm/extract/locked-versions', () => {
           deps: [
             {
               depName: 'a',
-              currentVersion: '1.0.0',
+              currentValue: '1.0.0',
             },
             {
               depName: 'b',
-              currentVersion: '2.0.0',
+              currentValue: '2.0.0',
             },
           ],
         },
@@ -66,11 +66,11 @@ describe('manager/npm/extract/locked-versions', () => {
           deps: [
             {
               depName: 'a',
-              currentVersion: '1.0.0',
+              currentValue: '1.0.0',
             },
             {
               depName: 'b',
-              currentVersion: '2.0.0',
+              currentValue: '2.0.0',
             },
           ],
         },

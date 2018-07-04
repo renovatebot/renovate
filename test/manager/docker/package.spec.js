@@ -31,7 +31,9 @@ describe('lib/manager/docker/package', () => {
         currentFrom: 'some-dep:1.0.0@sha256:abcdefghijklmnop',
         currentDepTag: 'some-dep:1.0.0',
         currentTag: '1.0.0',
+        currentValue: '1.0.0',
         currentDigest: 'sha256:abcdefghijklmnop',
+        pinDigests: true,
       };
     });
     it('returns empty if no digest', async () => {
@@ -45,7 +47,7 @@ describe('lib/manager/docker/package', () => {
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
       const res = await docker.getPackageUpdates(config);
       expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('digest');
+      expect(res[0].updateType).toEqual('digest');
     });
     it('returns a digest when registry is present', async () => {
       config.dockerRegistry = 'docker.io';
@@ -54,25 +56,30 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('digest');
+      expect(res[0].updateType).toEqual('digest');
     });
     it('adds latest tag', async () => {
       delete config.currentTag;
+      delete config.currentValue;
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
       const res = await docker.getPackageUpdates(config);
       expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('digest');
+      expect(res[0].updateType).toEqual('digest');
     });
     it('returns a pin', async () => {
       delete config.currentDigest;
       config.currentTag = 'some-text-tag';
+      config.currentValue = 'some';
+      config.tagSuffix = 'text-tag';
       dockerApi.getDigest.mockReturnValueOnce('sha256:1234567890');
       const res = await docker.getPackageUpdates(config);
       expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('pin');
+      expect(res[0].updateType).toEqual('pin');
     });
     it('returns empty if current tag is not valid version', async () => {
       config.currentTag = 'some-text-tag';
+      config.currentValue = 'some';
+      config.tagSuffix = 'text-tag';
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
       expect(await docker.getPackageUpdates(config)).toEqual([]);
     });
@@ -90,7 +97,7 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].newVersionMajor).toEqual('3');
+      expect(res[0].newMajor).toEqual('3');
       config.major.automerge = false;
     });
     it('returns major and minor upgrades', async () => {
@@ -108,10 +115,10 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
-      expect(res[0].type).toEqual('minor');
-      expect(res[0].newVersion).toEqual('1.2.0');
-      expect(res[1].type).toEqual('major');
-      expect(res[2].newVersionMajor).toEqual('3');
+      expect(res[0].updateType).toEqual('minor');
+      expect(res[0].newValue).toEqual('1.2.0');
+      expect(res[1].updateType).toEqual('major');
+      expect(res[2].newMajor).toEqual('3');
     });
     it('returns only one major', async () => {
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
@@ -126,10 +133,10 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
-      expect(res[0].type).toEqual('minor');
-      expect(res[0].newVersion).toEqual('1.2.0');
-      expect(res[1].type).toEqual('major');
-      expect(res[1].newVersionMajor).toEqual('3');
+      expect(res[0].updateType).toEqual('minor');
+      expect(res[0].newValue).toEqual('1.2.0');
+      expect(res[1].updateType).toEqual('major');
+      expect(res[1].newMajor).toEqual('3');
     });
     it('returns only one upgrade', async () => {
       dockerApi.getDigest.mockReturnValueOnce(config.currentDigest);
@@ -144,8 +151,8 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('major');
-      expect(res[0].newVersionMajor).toEqual('3');
+      expect(res[0].updateType).toEqual('major');
+      expect(res[0].newMajor).toEqual('3');
     });
     it('ignores unstable upgrades', async () => {
       config = {
@@ -154,6 +161,7 @@ describe('lib/manager/docker/package', () => {
         currentFrom: 'node:6',
         currentDepTag: 'node:6',
         currentTag: '6',
+        currentValue: '6',
         currentDigest: undefined,
         pinDigests: false,
         unstablePattern: '^\\d*[13579]($|.)',
@@ -162,8 +170,8 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('major');
-      expect(res[0].newVersion).toEqual('8');
+      expect(res[0].updateType).toEqual('major');
+      expect(res[0].newValue).toEqual('8');
     });
     it('upgrades from unstable to stable', async () => {
       config = {
@@ -172,6 +180,7 @@ describe('lib/manager/docker/package', () => {
         currentFrom: 'node:7',
         currentDepTag: 'node:7',
         currentTag: '7',
+        currentValue: '7',
         currentDigest: undefined,
         pinDigests: false,
         unstablePattern: '^\\d*[13579]($|.)',
@@ -180,8 +189,8 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].type).toEqual('major');
-      expect(res[0].newVersion).toEqual('8');
+      expect(res[0].updateType).toEqual('major');
+      expect(res[0].newValue).toEqual('8');
     });
     it('upgrades from unstable to unstable if not ignoring', async () => {
       config = {
@@ -190,6 +199,7 @@ describe('lib/manager/docker/package', () => {
         currentFrom: 'node:7',
         currentDepTag: 'node:7',
         currentTag: '7',
+        currentValue: '7',
         currentDigest: undefined,
         pinDigests: false,
         unstablePattern: '^\\d*[13579]($|.)',
@@ -199,22 +209,21 @@ describe('lib/manager/docker/package', () => {
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
-      expect(res[0].newVersionMajor).toEqual('9');
+      expect(res[0].newMajor).toEqual('9');
     });
     it('adds digest', async () => {
       delete config.currentDigest;
       config.currentTag = '1.0.0-something';
+      config.currentValue = '1.0.0';
+      config.tagSuffix = 'something';
       dockerApi.getDigest.mockReturnValueOnce('sha256:one');
       dockerApi.getDigest.mockReturnValueOnce('sha256:two');
-      dockerApi.getTags.mockReturnValueOnce([
-        '1.1.0-something',
-        '1.2.0-otherthing',
-      ]);
+      dockerApi.getTags.mockReturnValueOnce(['1.1.0']);
       const res = await docker.getPackageUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
-      expect(res[1].type).toEqual('minor');
-      expect(res[1].newVersion).toEqual('1.1.0-something');
+      expect(res[1].updateType).toEqual('minor');
+      expect(res[1].newValue).toEqual('1.1.0');
     });
     it('ignores deps with custom registry', async () => {
       delete config.currentDigest;

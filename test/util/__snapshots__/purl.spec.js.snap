@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`util/purl parse() parses namespaced npm 1`] = `
+Object {
+  "fullname": "@foo/bar",
+  "name": "bar",
+  "namespace": "@foo",
+  "qualifiers": Object {},
+  "type": "npm",
+}
+`;
+
+exports[`util/purl parse() parses namespaced npm with version 1`] = `
+Object {
+  "fullname": "@foo/bar",
+  "name": "bar",
+  "namespace": "@foo",
+  "qualifiers": Object {},
+  "type": "npm",
+  "version": "1.0.0",
+}
+`;
+
+exports[`util/purl parse() parses npm with version and 1 qualifier 1`] = `
+Object {
+  "fullname": "foo",
+  "name": "foo",
+  "qualifiers": Object {
+    "a": "b",
+  },
+  "type": "npm",
+  "version": "1.0.0",
+}
+`;
+
+exports[`util/purl parse() parses npm with version and 2 qualifiers 1`] = `
+Object {
+  "fullname": "foo",
+  "name": "foo",
+  "qualifiers": Object {
+    "a": "b",
+    "c": "d",
+  },
+  "type": "npm",
+  "version": "1.0.0",
+}
+`;
+
+exports[`util/purl parse() parses npm with version and 2 qualifiers and subpath 1`] = `
+Object {
+  "fullname": "foo",
+  "name": "foo",
+  "qualifiers": Object {
+    "a": "b",
+    "c": "d",
+  },
+  "subpath": "stop",
+  "type": "npm",
+  "version": "1.0.0",
+}
+`;
+
+exports[`util/purl parse() parses simple npm 1`] = `
+Object {
+  "fullname": "foo",
+  "name": "foo",
+  "qualifiers": Object {},
+  "type": "npm",
+}
+`;
