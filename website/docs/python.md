@@ -9,11 +9,11 @@ Renovate supports upgrading dependencies in `pip` requirements (e.g. `requiremen
 
 ## Versioning Support
 
-The [PEP440](https://www.python.org/dev/peps/pep-0440/) versioning scheme has been rewritten for JavaScript for the purposes of use in this project is published as [@renovatebot/pep440](https://github.com/renovatebot/pep440). It supports both pinned versions as well as ranges. Legacy versions (`===` prefix) as not supported.
+The [PEP440](https://www.python.org/dev/peps/pep-0440/) versioning scheme has been rewritten for JavaScript for the purposes of use in this project is published as [@renovatebot/pep440](https://github.com/renovatebot/pep440). It supports both pinned versions as well as ranges. Legacy versions (`===` prefix) are ignored.
 
 ## How It Works
 
-1.  Renovate will search each repository for any files requirements files it finds.
+1.  Renovate will search each repository for any requirements files it finds.
 2.  Existing dependencies will be extracted from the file(s)
 3.  Renovate will look up the latest version on [PyPI](https://pypi.org/) to determine if any upgrades are available
 4.  If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
