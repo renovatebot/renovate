@@ -20,6 +20,9 @@ Object {
   "docker-compose": Array [
     Object {},
   ],
+  "gitlabci": Array [
+    Object {},
+  ],
   "meteor": Array [
     Object {},
   ],
