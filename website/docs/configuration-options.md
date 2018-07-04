@@ -454,6 +454,8 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 ## pip_requirements
 
+Add configuration here to specifically override settings for `pip` requirements files. Supports `requirements.txt` and `requirements.pip` files. The default file pattern is fairly flexible in an attempt to catch similarly named ones too but may be extended/changed.
+
 ## prBody
 
 Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovatebot/renovate/issues) and let us solve it for you and for everyone else too.
@@ -493,6 +495,8 @@ If you set `prCreation=not-pending`, then Renovate will wait until tests are non
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
 ## python
+
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
 ## rangeStrategy
 
