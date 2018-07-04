@@ -7,6 +7,9 @@ Array [
     "depName": "some-package",
     "lineNumber": 2,
     "purl": "pkg:pypi/some-package",
+    "registryUrls": Array [
+      "http://example.com/private-pypi/",
+    ],
     "versionScheme": "pep440",
   },
   Object {
@@ -14,6 +17,9 @@ Array [
     "depName": "some-other-package",
     "lineNumber": 3,
     "purl": "pkg:pypi/some-other-package",
+    "registryUrls": Array [
+      "http://example.com/private-pypi/",
+    ],
     "versionScheme": "pep440",
   },
   Object {
@@ -21,6 +27,9 @@ Array [
     "depName": "not_semver",
     "lineNumber": 4,
     "purl": "pkg:pypi/not_semver",
+    "registryUrls": Array [
+      "http://example.com/private-pypi/",
+    ],
     "versionScheme": "pep440",
   },
 ]
@@ -33,6 +42,7 @@ Array [
     "depName": "Django",
     "lineNumber": 0,
     "purl": "pkg:pypi/Django",
+    "registryUrls": undefined,
     "versionScheme": "pep440",
   },
   Object {
@@ -40,6 +50,7 @@ Array [
     "depName": "distribute",
     "lineNumber": 1,
     "purl": "pkg:pypi/distribute",
+    "registryUrls": undefined,
     "versionScheme": "pep440",
   },
   Object {
@@ -47,6 +58,7 @@ Array [
     "depName": "dj-database-url",
     "lineNumber": 2,
     "purl": "pkg:pypi/dj-database-url",
+    "registryUrls": undefined,
     "versionScheme": "pep440",
   },
   Object {
@@ -54,6 +66,7 @@ Array [
     "depName": "psycopg2",
     "lineNumber": 3,
     "purl": "pkg:pypi/psycopg2",
+    "registryUrls": undefined,
     "versionScheme": "pep440",
   },
   Object {
@@ -61,6 +74,7 @@ Array [
     "depName": "wsgiref",
     "lineNumber": 4,
     "purl": "pkg:pypi/wsgiref",
+    "registryUrls": undefined,
     "versionScheme": "pep440",
   },
 ]
