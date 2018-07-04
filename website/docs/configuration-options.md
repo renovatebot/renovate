@@ -434,6 +434,17 @@ Use this field if you want to have one or more package names patterns in your pa
 
 The above will set `rangeStrategy` to `replace` for any package starting with `angular`.
 
+### updateTypes
+
+USe this field to match rules against types of updates. For example to apply a special label for Major updates:
+
+```
+  "packageRules: [{
+    "updateTypes": ["major"],
+    "labels": ["UPDATE-MAJOR"]
+  }]
+```
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates. See also `major` and `minor` configuration options.
