@@ -127,6 +127,8 @@ exports[`api/npm should retry when 408 or 5xx 1`] = `null`;
 
 exports[`api/npm should return deprecated 1`] = `
 Object {
+  "deprecationMessage": "This is deprecated",
+  "deprecationSource": "npm",
   "homepage": undefined,
   "latestVersion": "0.0.2",
   "name": undefined,
