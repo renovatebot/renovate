@@ -182,10 +182,10 @@
     "semanticCommitScope": null
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "stable"
   },
   "release": {
-    "branch": "master",
+    "branch": "stable",
     "tagFormat": "${version}",
     "analyzeCommits": {
       "preset": "angular",
