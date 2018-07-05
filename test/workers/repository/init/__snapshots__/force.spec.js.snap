@@ -4,6 +4,10 @@ exports[`workers/repository/init/flatten flattenPackageRules() forces 1`] = `
 Object {
   "a": 2,
   "b": 2,
+  "force": Object {
+    "a": 2,
+    "b": 2,
+  },
   "packageRules": Array [
     Object {
       "a": 2,

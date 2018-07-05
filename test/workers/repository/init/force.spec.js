@@ -12,7 +12,6 @@ describe('workers/repository/init/flatten', () => {
       expect(res).toMatchSnapshot();
       expect(res.a).toEqual(2);
       expect(res.b).toEqual(2);
-      expect(res.force).toBeUndefined();
     });
   });
 });
