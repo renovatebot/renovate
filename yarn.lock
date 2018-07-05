@@ -110,9 +110,9 @@
     into-stream "^3.1.0"
     lodash "^4.17.4"
 
-"@sindresorhus/is@0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.9.0.tgz#1a65a8fab2d4efa5a32a5f5f40cf9b0806aabd69"
+"@sindresorhus/is@0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.10.0.tgz#f42dd6a9d12cd79fa6f53b27cf5bea3a30d2cafa"
   dependencies:
     symbol-observable "^1.2.0"
 
