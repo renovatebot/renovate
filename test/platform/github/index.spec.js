@@ -973,6 +973,23 @@ describe('platform/github', () => {
       const res = await github.ensureIssue('title-2', 'newer-content');
       expect(res).toBe(null);
     });
+    it('deletes if duplicate', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-1',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'newer-content' } });
+      const res = await github.ensureIssue('title-1', 'newer-content');
+      expect(res).toBe(null);
+    });
   });
   describe('ensureIssueClosing()', () => {
     it('closes issue', async () => {
