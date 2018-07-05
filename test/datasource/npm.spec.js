@@ -18,6 +18,7 @@ describe('api/npm', () => {
     jest.resetAllMocks();
     npm.resetCache();
     npmResponse = {
+      name: 'foobar',
       versions: {
         '0.0.1': {
           foo: 1,
@@ -62,6 +63,7 @@ describe('api/npm', () => {
   });
   it('should return deprecated', async () => {
     const deprecatedPackage = {
+      name: 'foobar',
       versions: {
         '0.0.1': {
           foo: 1,
