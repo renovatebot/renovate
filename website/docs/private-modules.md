@@ -115,10 +115,8 @@ The configure it like:
 }
 ```
 
-## Future npm authentication approaches
+Renovate will then use the following logic:
 
-#### Webhooks from npm registry
-
-The npm registry allows for owners of packages to send webhooks to custom destinations whenever the package is updated. Using this approach, it would be possible to notify the Renovate App API of updates to your private npm modules and we store these in our database.
-
-An important downside of this approach to be aware of is that this could solve only Use #1 (module lookup) and not Use #2 (Lock file generation). As it seems inevitable that most projects will adopt lock files - especially projects advanced enough to be using private npm modules - this solution is taking a lower priority compared to the first two, because it may ultimately not be required if lock file support becomes as widespread as expected.
+1.  If no `npmrc` string is present in config then one will be created with the `_authToken` pointing to the default npmjs registry
+2.  If an `npmrc` string is present and contains `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
+3.  If an `npmrc` string is present but doesn't contain `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
