@@ -857,6 +857,6 @@ describe('manager/npm/lookup', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
       expect(res.repositoryUrl).toBeDefined();
-    });    
+    });
   });
 });
