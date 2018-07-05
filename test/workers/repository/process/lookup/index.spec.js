@@ -858,5 +858,20 @@ describe('manager/npm/lookup', () => {
       expect(res.releases).toHaveLength(3);
       expect(res.repositoryUrl).toBeDefined();
     });
+    it('ignores deprecated', async () => {
+      config.currentValue = '1.3.0';
+      config.depName = 'q2';
+      config.purl = 'pkg:npm/q2';
+      const returnJson = JSON.parse(JSON.stringify(qJson));
+      returnJson.name = 'q2';
+      returnJson.versions['1.4.1'].deprecated = 'true';
+      nock('https://registry.npmjs.org')
+        .get('/q2')
+        .reply(200, returnJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+      expect(res.updates[0].toVersion).toEqual('1.4.0');
+    });
   });
 });

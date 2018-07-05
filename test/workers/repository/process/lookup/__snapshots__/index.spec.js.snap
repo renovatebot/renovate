@@ -121,6 +121,43 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() ignores deprecated 1`] = `
+Object {
+  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v1.4.1) of dependency \`q2\` has the following deprecation notice:
+
+\`true\`
+
+Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": "b26cace16f6070e756b6a546cf2693bece03f8f8",
+      "releaseTimestamp": "2015-04-26T16:42:11.311Z",
+      "version": "1.3.0",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": "05e20dc704421ca820553721c7178168a8461506",
+      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
+      "version": "1.4.0",
+    },
+  ],
+  "repositoryUrl": "https://github.com/kriskowal/q",
+  "updates": Array [
+    Object {
+      "canBeUnpublished": false,
+      "fromVersion": "1.3.0",
+      "newMajor": 1,
+      "newMinor": 4,
+      "newValue": "1.4.0",
+      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
+      "toVersion": "1.4.0",
+      "updateType": "minor",
+    },
+  ],
+}
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
