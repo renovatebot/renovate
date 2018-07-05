@@ -127,7 +127,11 @@ exports[`api/npm should retry when 408 or 5xx 1`] = `null`;
 
 exports[`api/npm should return deprecated 1`] = `
 Object {
-  "deprecationMessage": "This is deprecated",
+  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v0.0.2) of dependency \`foobar\` has the following deprecation notice:
+
+\`This is deprecated\`
+
+Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "deprecationSource": "npm",
   "homepage": undefined,
   "latestVersion": "0.0.2",
@@ -150,6 +154,14 @@ Object {
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
+`;
+
+exports[`api/npm should return deprecated 2`] = `
+"On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v0.0.2) of dependency \`foobar\` has the following deprecation notice:
+
+\`This is deprecated\`
+
+Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake."
 `;
 
 exports[`api/npm should send an authorization header if provided 1`] = `

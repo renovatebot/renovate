@@ -88,7 +88,7 @@ describe('api/npm', () => {
       .reply(200, deprecatedPackage);
     const res = await npm.getDependency('foobar');
     expect(res).toMatchSnapshot();
-    expect(res.deprecationMessage).toEqual('This is deprecated');
+    expect(res.deprecationMessage).toMatchSnapshot();
   });
   it('should handle purl', async () => {
     nock('https://registry.npmjs.org')
