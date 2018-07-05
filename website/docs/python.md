@@ -28,6 +28,32 @@ The default file matching regex for requirements.txt aims to pick up the most po
   }
 ```
 
+## Alternate registries
+
+Renovate will default to performing all lookups on pypi.org, but it also supports alternative index URLs. There are two ways to achieve this:
+
+#### index-url in `requirements.txt`
+
+The index URL can be specified in the first line of the file, For example:
+
+```
+--index-url http://example.com/private-pypi/
+some-package==0.3.1
+some-other-package==1.0.0
+```
+
+#### Specify URL in configuration
+
+The configuration option `registryUrls` can be used to configure an alternate index URL. Example:
+
+```json
+  "python": {
+    "registryUrls": ["http://example.com/private-pypi/"]
+  }
+```
+
+Note: an index-url found in the `requirements.txt` will take precedent over a registryUrl configured like the above. To override the URL found in `requirements.txt`, you need to configure it in `packageRules`, as they are applied _after_ package file extraction.
+
 ## Disabling Python Support
 
 The most direct way to disable all Python support in Renovate is like this:

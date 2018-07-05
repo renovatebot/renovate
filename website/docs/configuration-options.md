@@ -553,6 +553,10 @@ By default, Renovate will detect if it has proposed an update to a project befor
 
 Typically you shouldn't need to modify this setting.
 
+## registryUrls
+
+This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forwards compatibility.
+
 ## renovateFork
 
 By default, Renovate will skip over any repositories that are forked, even if they contain a `renovate.json`, because that config may have been from the source repository. To enable Renovate on forked repositories, you need to add `renovateFork: true` to your renovate config.

@@ -8,6 +8,9 @@ const res1 = fs.readFileSync('test/_fixtures/pypi/azure-cli-monitor.json');
 
 describe('datasource/pypi', () => {
   describe('getDependency', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
       expect(await datasource.getDependency('pkg:pypi/something')).toBeNull();
@@ -25,6 +28,16 @@ describe('datasource/pypi', () => {
       expect(
         await datasource.getDependency('pkg:pypi/azure-cli-monitor')
       ).toMatchSnapshot();
+    });
+    it('supports custom datasource url', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(res1),
+      });
+      const config = {
+        registryUrls: ['https://custom.pypi.net/foo'],
+      };
+      await datasource.getDependency('pkg:pypi/azure-cli-monitor', config);
+      expect(got.mock.calls).toMatchSnapshot();
     });
     it('returns non-github home_page', async () => {
       got.mockReturnValueOnce({
