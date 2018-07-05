@@ -19,7 +19,7 @@ Assuming the lookup succeeds (solutions for that are described later in this doc
 
 If you are using a lock file (yarn's `yarn.lock` or npm's `package-lock.json`) then Renovate needs to regenerate that lock file whenever _any_ npm module listed in your `package.json` is updated to a new version.
 
-To do this, Renovate will run `npm install` or `yarn install` and save the resulting lock file. The "problem" here is that for the install to succeed - and lock file to be generated - then all modules must be found, including private ones. Therefore if a private module can't be found, and you're using lock files, then the private module install failure will then block _any_ module from being renovated.
+To do this, Renovate will run `npm install` or `yarn install` and save the resulting lock file. The "problem" here is that for the install to succeed - and lock file to be generated - then all touched packages must be found in the registry, including possibly private ones. Therefore if a private module can't be found, and you're using lock files, then the private module install failure might then block _all_ modules from being renovated.
 
 Because lock files are quickly becoming "the new standard", we think it's essential that Renovate can access/install any private modules necessary.
 
@@ -92,6 +92,8 @@ You will then get an encrypted string that you can substitute into your renovate
   }
 }
 ```
+
+However be aware that if your `.npmrc` is too long to encrypt then the above command will fail. In that case, you should encrypt `npmToken` instead (see next section) and add replace the token with `${NPM_TOKEN}` in the (unencrypted) `npmrc` in your config.
 
 #### Add an encrypted npm token to repository
 
