@@ -43,6 +43,7 @@ describe('datasource/pypi', () => {
       got.mockReturnValueOnce({
         body: {
           info: {
+            name: 'something',
             home_page: 'https://microsoft.com',
           },
         },
@@ -50,6 +51,17 @@ describe('datasource/pypi', () => {
       expect(
         await datasource.getDependency('pkg:pypi/something')
       ).toMatchSnapshot();
+    });
+    it('returns null if mismatched name', async () => {
+      got.mockReturnValueOnce({
+        body: {
+          info: {
+            name: 'something-else',
+            home_page: 'https://microsoft.com',
+          },
+        },
+      });
+      expect(await datasource.getDependency('pkg:pypi/something')).toBeNull();
     });
   });
 });

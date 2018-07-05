@@ -509,6 +509,8 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
+## raiseDeprecationWarnings
+
 ## rangeStrategy
 
 Behaviour:

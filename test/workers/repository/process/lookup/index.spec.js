@@ -652,20 +652,20 @@ describe('manager/npm/lookup', () => {
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';
-      config.depName = 'helmet';
-      config.purl = 'pkg:npm/helmet';
+      config.depName = '@types/helmet';
+      config.purl = 'pkg:npm/%40types/helmet';
       nock('https://registry.npmjs.org')
-        .get('/helmet')
+        .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
     });
     it('should treat zero zero caret ranges as pinned', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^0.0.34';
-      config.depName = 'helmet';
-      config.purl = 'pkg:npm/helmet';
+      config.depName = '@types/helmet';
+      config.purl = 'pkg:npm/%40types/helmet';
       nock('https://registry.npmjs.org')
-        .get('/helmet')
+        .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
