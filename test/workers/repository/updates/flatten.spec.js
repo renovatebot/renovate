@@ -14,6 +14,12 @@ describe('workers/repository/updates/flatten', () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
       config.lockFileMaintenance.enabled = true;
+      config.packageRules = [
+        {
+          updateTypes: ['minor'],
+          automerge: true,
+        },
+      ];
       const packageFiles = {
         npm: [
           {
