@@ -112,7 +112,7 @@
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
-    "codecov": "3.0.2",
+    "codecov": "3.0.3",
     "cross-env": "5.2.0",
     "eslint": "4.19.1",
     "eslint-config-airbnb-base": "12.1.0",
