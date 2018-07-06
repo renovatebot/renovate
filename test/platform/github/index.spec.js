@@ -2,10 +2,6 @@ describe('platform/github', () => {
   let github;
   let get;
   beforeEach(() => {
-    // clean up env
-    delete process.env.GITHUB_TOKEN;
-    delete process.env.GITHUB_ENDPOINT;
-
     // reset module
     jest.resetModules();
     jest.mock('delay');
@@ -103,8 +99,6 @@ describe('platform/github', () => {
         });
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
-        expect(process.env.GITHUB_TOKEN).toBe(token);
-        expect(process.env.GITHUB_ENDPOINT).toBe(endpoint);
       });
     });
     it('should throw an error if no token is provided', async () => {
