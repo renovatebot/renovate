@@ -20,7 +20,7 @@ describe('lib/manager/docker-compose/extract', () => {
     it('extracts multiple image lines', () => {
       const res = extractDependencies(yamlFile, config);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(6);
+      expect(res.deps).toHaveLength(7);
     });
   });
 });

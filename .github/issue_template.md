@@ -1,6 +1,6 @@
 <!--
     Is this about a security problem?
-    DO NOT RAISE AN ISSUE - please email security@renovateapp.com instead
+    DO NOT RAISE AN ISSUE - please email security@renovatebot.com instead
 
     Is this question about config help?
     If so, please open an issue in https://github.com/renovateapp/config-help instead

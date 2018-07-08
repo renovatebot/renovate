@@ -8,7 +8,7 @@ Array [
     "newFrom": "some-dep:1.0.0-something@sha256:one",
     "newTag": "1.0.0-something",
     "newValue": "one",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "newDepTag": "some-dep:1.1.0-something",
@@ -16,8 +16,8 @@ Array [
     "newFrom": "some-dep:1.1.0-something@sha256:two",
     "newMajor": "1",
     "newTag": "1.1.0-something",
-    "newValue": "1.1.0-something",
-    "type": "minor",
+    "newValue": "1.1.0",
+    "updateType": "minor",
   },
 ]
 `;
@@ -30,7 +30,7 @@ Array [
     "newMajor": "8",
     "newTag": "8",
     "newValue": "8",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -43,7 +43,7 @@ Array [
     "newFrom": "docker.io/some-dep:1.0.0@sha256:1234567890",
     "newTag": "1.0.0",
     "newValue": "123456",
-    "type": "digest",
+    "updateType": "digest",
   },
 ]
 `;
@@ -57,7 +57,7 @@ Array [
     "newMajor": "1",
     "newTag": "1.2.0",
     "newValue": "1.2.0",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "newDepTag": "some-dep:2.0.0",
@@ -66,7 +66,7 @@ Array [
     "newMajor": "2",
     "newTag": "2.0.0",
     "newValue": "2.0.0",
-    "type": "major",
+    "updateType": "major",
   },
   Object {
     "newDepTag": "some-dep:3.0.0",
@@ -75,7 +75,7 @@ Array [
     "newMajor": "3",
     "newTag": "3.0.0",
     "newValue": "3.0.0",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -89,7 +89,7 @@ Array [
     "newMajor": "1",
     "newTag": "1.2.0",
     "newValue": "1.2.0",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "newDepTag": "some-dep:3.0.0",
@@ -98,7 +98,7 @@ Array [
     "newMajor": "3",
     "newTag": "3.0.0",
     "newValue": "3.0.0",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -112,7 +112,7 @@ Array [
     "newMajor": "3",
     "newTag": "3.0.0",
     "newValue": "3.0.0",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -126,7 +126,7 @@ Array [
     "newMajor": "3",
     "newTag": "3.0.0",
     "newValue": "3.0.0",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -139,7 +139,7 @@ Array [
     "newMajor": "8",
     "newTag": "8",
     "newValue": "8",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -152,7 +152,7 @@ Array [
     "newMajor": "9",
     "newTag": "9",
     "newValue": "9",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;

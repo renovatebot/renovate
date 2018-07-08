@@ -9,7 +9,7 @@ RUN something else"
 
 exports[`workers/branch/dockerfile updateDependency handles strange whitespace 1`] = `
 "# comment FROM node:8
-FROM   node:8@sha256:abcdefghijklmnop as base
+FROM node:8@sha256:abcdefghijklmnop as base
 RUN something
 "
 `;

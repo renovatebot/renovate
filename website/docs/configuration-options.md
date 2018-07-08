@@ -185,7 +185,7 @@ Example:
 
 ## encrypted
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -193,13 +193,9 @@ Extend this if you wish to configure rules specifically for `engines` definition
 
 ## extends
 
-See https://renovateapp.com/docs/configuration-reference/config-presets for details.
+See https://renovatebot.com/docs/configuration-reference/config-presets for details.
 
 ## fileMatch
-
-## gitAuthor
-
-RFC5322-compliant string if you wish to customise the git author for commits.
 
 ## group
 
@@ -219,6 +215,10 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```
 
 And then the branchName would be `renovate/eslint` instead.
+
+## ignoreDeprecated
+
+By default, Renovate won't update any packages to deprecated versions unless the package version was _already_ deprecated. The goal of this is to make sure you don't upgrade from a non-deprecated version to a deprecated one just because it's higher than the current version. If for some reason you wish to _force_ deprecated updates on Renovate, you can set `ignoreDeprecated` to `false`, but this is not recommended for most situations.
 
 ## ignoreDeps
 
@@ -292,17 +292,17 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovateapp.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
 ## npmToken
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used.
 
 ## nuget
 
@@ -438,6 +438,17 @@ Use this field if you want to have one or more package names patterns in your pa
 
 The above will set `rangeStrategy` to `replace` for any package starting with `angular`.
 
+### updateTypes
+
+USe this field to match rules against types of updates. For example to apply a special label for Major updates:
+
+```
+  "packageRules: [{
+    "updateTypes": ["major"],
+    "labels": ["UPDATE-MAJOR"]
+  }]
+```
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates. See also `major` and `minor` configuration options.
@@ -458,9 +469,11 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 ## pip_requirements
 
+Add configuration here to specifically override settings for `pip` requirements files. Supports `requirements.txt` and `requirements.pip` files. The default file pattern is fairly flexible in an attempt to catch similarly named ones too but may be extended/changed.
+
 ## prBody
 
-Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovateapp/renovate/issues) and let us solve it for you and for everyone else too.
+Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovatebot/renovate/issues) and let us solve it for you and for everyone else too.
 
 ## prConcurrentLimit
 
@@ -498,6 +511,10 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 ## python
 
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
+
+## raiseDeprecationWarnings
+
 ## rangeStrategy
 
 Behaviour:
@@ -528,7 +545,7 @@ This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0
 
 This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
 
-If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch-push` automerge then Renovate will still rebase as necessary for that.
+If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch` automerge then Renovate will still rebase as necessary for that.
 
 ## recreateClosed
 
@@ -539,6 +556,10 @@ By default, Renovate will detect if it has proposed an update to a project befor
 - Lock file maintenance
 
 Typically you shouldn't need to modify this setting.
+
+## registryUrls
+
+This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forwards compatibility.
 
 ## renovateFork
 
@@ -631,7 +652,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-- **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 

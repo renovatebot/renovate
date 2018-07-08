@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/process/deprecated raiseDeprecationWarnings() raises deprecation warnings 1`] = `
+Array [
+  Array [
+    "Dependency deprecation warning: foo (npm)",
+    "foo is deprecated
+
+Please take the actions necessary to rename or substitute this deprecated package and commit to your base branch. If you wish to ignore this deprecation warning and continue using \`foo\` as-is, please add it to your [ignoreDeps](https://renovatebot.com/docs/configuration-options/#ignoredeps) array in Renovate config before closing this issue, otherwise another issue will be recreated the next time Renovate runs.
+
+Affected package file(s): \`package.json\`, \`frontend/package.json\`",
+  ],
+]
+`;

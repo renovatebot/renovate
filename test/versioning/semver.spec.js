@@ -19,10 +19,10 @@ describe('semver.isValid(input)', () => {
     expect(!!semver.isValid('>1.2.3')).toBe(true);
   });
   it('should reject github repositories', () => {
-    expect(!!semver.isValid('renovateapp/renovate')).toBe(false);
-    expect(!!semver.isValid('renovateapp/renovate#master')).toBe(false);
+    expect(!!semver.isValid('renovatebot/renovate')).toBe(false);
+    expect(!!semver.isValid('renovatebot/renovate#master')).toBe(false);
     expect(
-      !!semver.isValid('https://github.com/renovateapp/renovate.git')
+      !!semver.isValid('https://github.com/renovatebot/renovate.git')
     ).toBe(false);
   });
 });

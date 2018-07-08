@@ -6,16 +6,18 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -25,11 +27,13 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -40,27 +44,31 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "==0.9.4",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.4",
     "isRange": true,
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "==0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.4",
     "isRange": true,
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "==1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -69,7 +77,7 @@ exports[`manager/npm/lookup .lookupUpdates() handles github 404 1`] = `
 Array [
   Object {
     "message": "Failed to look up dependency foo",
-    "type": "warning",
+    "updateType": "warning",
   },
 ]
 `;
@@ -78,7 +86,7 @@ exports[`manager/npm/lookup .lookupUpdates() handles packagist 1`] = `
 Array [
   Object {
     "message": "Failed to look up dependency foo/bar",
-    "type": "warning",
+    "updateType": "warning",
   },
 ]
 `;
@@ -89,11 +97,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.9.0-rc",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 2,
     "newMinor": 9,
     "newValue": "^2.9.1-insiders.20180516",
+    "releaseTimestamp": "2018-05-16T23:16:36.911Z",
     "toVersion": "2.9.1-insiders.20180516",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -102,7 +112,7 @@ exports[`manager/npm/lookup .lookupUpdates() handles pypi 404 1`] = `
 Array [
   Object {
     "message": "Failed to look up dependency foo",
-    "type": "warning",
+    "updateType": "warning",
   },
 ]
 `;
@@ -111,9 +121,47 @@ exports[`manager/npm/lookup .lookupUpdates() handles unknown purl 1`] = `
 Array [
   Object {
     "message": "Failed to look up dependency foo",
-    "type": "warning",
+    "updateType": "warning",
   },
 ]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() ignores deprecated 1`] = `
+Object {
+  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v1.4.1) of dependency \`q2\` has the following deprecation notice:
+
+\`true\`
+
+Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": "b26cace16f6070e756b6a546cf2693bece03f8f8",
+      "releaseTimestamp": "2015-04-26T16:42:11.311Z",
+      "version": "1.3.0",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": "05e20dc704421ca820553721c7178168a8461506",
+      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
+      "version": "1.4.0",
+    },
+  ],
+  "repositoryUrl": "https://github.com/kriskowal/q",
+  "updates": Array [
+    Object {
+      "canBeUnpublished": false,
+      "fromVersion": "1.3.0",
+      "isSingleVersion": true,
+      "newMajor": 1,
+      "newMinor": 4,
+      "newValue": "1.4.0",
+      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
+      "toVersion": "1.4.0",
+      "updateType": "minor",
+    },
+  ],
+}
 `;
 
 exports[`manager/npm/lookup .lookupUpdates() ignores pinning for ranges when other upgrade exists 1`] = `
@@ -122,16 +170,18 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.9.7",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -142,7 +192,7 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.4.1",
-    "type": "pin",
+    "updateType": "pin",
   },
 ]
 `;
@@ -161,11 +211,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^3.0.0",
+    "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "toVersion": "3.8.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -176,11 +228,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -190,11 +244,13 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -205,25 +261,29 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -234,19 +294,19 @@ Object {
     Object {
       "canBeUnpublished": false,
       "gitRef": "b26cace16f6070e756b6a546cf2693bece03f8f8",
-      "time": "2015-04-26T16:42:11.311Z",
+      "releaseTimestamp": "2015-04-26T16:42:11.311Z",
       "version": "1.3.0",
     },
     Object {
       "canBeUnpublished": false,
       "gitRef": "05e20dc704421ca820553721c7178168a8461506",
-      "time": "2015-05-09T16:52:40.699Z",
+      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
       "version": "1.4.0",
     },
     Object {
       "canBeUnpublished": false,
       "gitRef": "d373079d3620152e3d60e82f27265a09ee0e81bd",
-      "time": "2015-05-17T04:25:07.299Z",
+      "releaseTimestamp": "2015-05-17T04:25:07.299Z",
       "version": "1.4.1",
     },
   ],
@@ -255,11 +315,13 @@ Object {
     Object {
       "canBeUnpublished": false,
       "fromVersion": "1.3.0",
+      "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 4,
       "newValue": "1.4.1",
+      "releaseTimestamp": "2015-05-17T04:25:07.299Z",
       "toVersion": "1.4.1",
-      "type": "minor",
+      "updateType": "minor",
     },
   ],
 }
@@ -270,20 +332,24 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -293,20 +359,24 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -316,11 +386,13 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -331,16 +403,18 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -351,16 +425,18 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -370,29 +446,35 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 8,
     "newValue": "0.8.12",
+    "releaseTimestamp": "2012-12-29T22:51:00.329Z",
     "toVersion": "0.8.12",
-    "type": "patch",
+    "updateType": "patch",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -402,20 +484,24 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "patch",
+    "updateType": "patch",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -425,20 +511,24 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "patch",
+    "updateType": "patch",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -452,16 +542,18 @@ Array [
     "newMajor": 0,
     "newValue": "0.9.7",
     "semanticCommitType": "fix",
-    "type": "rollback",
+    "updateType": "rollback",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.99",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -475,7 +567,7 @@ Array [
     "newMajor": 0,
     "newValue": "^0.9.7",
     "semanticCommitType": "fix",
-    "type": "rollback",
+    "updateType": "rollback",
   },
 ]
 `;
@@ -485,11 +577,13 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "2.3.0-beta.1",
+    "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 5,
     "newValue": "2.5.17-beta.0",
+    "releaseTimestamp": "2018-03-23T23:29:13.819Z",
     "toVersion": "2.5.17-beta.0",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -499,11 +593,13 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "2.5.16",
+    "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 5,
     "newValue": "2.5.17-beta.0",
+    "releaseTimestamp": "2018-03-23T23:29:13.819Z",
     "toVersion": "2.5.17-beta.0",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -516,7 +612,7 @@ Object {
   "newMajor": 1,
   "newValue": "1.16.0",
   "semanticCommitType": "fix",
-  "type": "rollback",
+  "updateType": "rollback",
 }
 `;
 
@@ -526,11 +622,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.0.34",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 0,
     "newValue": "^0.0.35",
+    "releaseTimestamp": "2017-04-27T16:59:06.479Z",
     "toVersion": "0.0.35",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -540,11 +638,13 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.4.1",
+    "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "2.0.3",
+    "releaseTimestamp": "2015-01-31T08:11:47.852Z",
     "toVersion": "2.0.3",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -555,11 +655,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1.x - 3.x",
+    "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "toVersion": "3.8.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -570,11 +672,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^1.0.0 || ^2.0.0 || ^3.0.0",
+    "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "toVersion": "3.8.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -584,11 +688,13 @@ Object {
   "canBeUnpublished": false,
   "fromVersion": "0.8.12",
   "isRange": true,
+  "isSingleVersion": false,
   "newMajor": 0,
   "newMinor": 9,
   "newValue": "^0.7.0 || ^0.8.0 || ^0.9.0",
+  "releaseTimestamp": "2013-09-04T17:07:22.948Z",
   "toVersion": "0.9.7",
-  "type": "minor",
+  "updateType": "minor",
 }
 `;
 
@@ -598,11 +704,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.2.0 || ~1.3.0 || ~1.4.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -613,11 +721,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "bump",
   },
 ]
 `;
@@ -628,11 +738,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">=1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "bump",
   },
 ]
 `;
@@ -643,11 +755,25 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
+    "isSingleVersion": false,
+    "newMajor": 1,
+    "newMinor": 0,
+    "newValue": "~1.0.1",
+    "releaseTimestamp": "2014-03-11T18:47:17.560Z",
+    "toVersion": "1.0.1",
+    "updateType": "bump",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "1.0.0",
+    "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -658,25 +784,29 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -687,25 +817,29 @@ Array [
     "isPin": true,
     "newMajor": 0,
     "newValue": "0.4.4",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -716,11 +850,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.2.x - 1.4.x",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -731,11 +867,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.x",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -746,16 +884,18 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.3.0",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -766,11 +906,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.x",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -781,11 +923,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.4.1",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "<= 2",
+    "releaseTimestamp": "2015-01-31T08:11:47.852Z",
     "toVersion": "2.0.3",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -796,11 +940,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -811,21 +957,25 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "<= 0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -836,11 +986,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 2",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -851,21 +1003,25 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.1",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "< 0.9.8",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.7.1",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 1.4.2",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -876,11 +1032,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 < 2.0.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -891,11 +1049,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -906,11 +1066,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 2.0.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -921,21 +1083,25 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": ">= 0.5.0 <= 0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 <= 1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -946,21 +1112,25 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": ">= 0.5.0 <0.10",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 <1.5",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -971,16 +1141,18 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.0.1",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.0.1",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -991,21 +1163,25 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "^0.9.0",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.0.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -1016,21 +1192,25 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "~0.9.0",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
     "toVersion": "0.9.7",
-    "type": "minor",
+    "updateType": "minor",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -1041,11 +1221,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -1056,11 +1238,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -1071,16 +1255,18 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.3.0",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -1091,11 +1277,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -1106,16 +1294,18 @@ Array [
     "isPin": true,
     "newMajor": 1,
     "newValue": "1.0.0",
-    "type": "pin",
+    "updateType": "pin",
   },
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -1126,11 +1316,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1.x || 2.x || 3.x",
+    "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "toVersion": "3.8.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -1141,11 +1333,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^2.0.0 || ^3.0.0",
+    "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "toVersion": "3.8.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
@@ -1156,11 +1350,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.3.0 || ~1.4.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "type": "minor",
+    "updateType": "minor",
   },
 ]
 `;
@@ -1171,11 +1367,13 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1 || 2 || 3",
+    "releaseTimestamp": "2017-10-17T15:22:36.646Z",
     "toVersion": "3.8.1",
-    "type": "major",
+    "updateType": "major",
   },
 ]
 `;
