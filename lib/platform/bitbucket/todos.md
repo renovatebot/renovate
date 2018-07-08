@@ -1,1 +1,1 @@
-* [ ] where do we set config.baseCommitSHA?
+- [ ] where do we set config.baseCommitSHA?

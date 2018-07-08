@@ -2,7 +2,6 @@ describe('platform/bitbucket', () => {
   let bitbucket;
   let api;
   beforeEach(() => {
-
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/bitbucket/bb-got');
