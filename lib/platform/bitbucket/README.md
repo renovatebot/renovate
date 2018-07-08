@@ -4,7 +4,7 @@
 
 ### How to get
 
-BB_TOKEN for now is base64 encoded string of your `username:bbaAppPassword`.
+BITBUCKET_TOKEN for now is base64 encoded string of your `username:bbaAppPassword`.
 
 Where `bbaAppPassword` is BitBucket App password, which you can revoke. Read more here, how to create one https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html.
 
@@ -27,13 +27,13 @@ btoa(`${user}:${bbaAppPassword}`)
 Expose it temporarily, by running this in your shell:
 
 ```
-$ export BB_TOKEN='your-token-here-dont-show-it-to-anyone'
+$ export BITBUCKET_TOKEN='your-token-here-dont-show-it-to-anyone'
 ```
 
 or add it to your `~/.bash_profile` to keep it permanent:
 
 ```
-$ echo "export BB_TOKEN='your-token-here-dont-show-it-to-anyone'" >> ~/.bash_profile
+$ echo "export BITBUCKET_TOKEN='your-token-here-dont-show-it-to-anyone'" >> ~/.bash_profile
 ```
 
 ## Sandbox for debugging:

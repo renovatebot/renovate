@@ -2,8 +2,6 @@ describe('platform/bitbucket', () => {
   let bitbucket;
   let api;
   beforeEach(() => {
-    // clean up env
-    delete process.env.BB_TOKEN;
 
     // reset module
     jest.resetModules();
