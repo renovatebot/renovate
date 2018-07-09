@@ -1,5 +1,5 @@
-const { decryptConfig } = require('../../lib/config/decrypt.js');
 const fs = require('fs');
+const { decryptConfig } = require('../../lib/config/decrypt.js');
 
 const privateKey = fs.readFileSync('test/_fixtures/keys/private.pem');
 

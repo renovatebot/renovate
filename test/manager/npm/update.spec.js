@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const npmUpdater = require('../../../lib/manager/npm/update');
 const semver = require('semver');
+const npmUpdater = require('../../../lib/manager/npm/update');
 
 function readFixture(fixture) {
   return fs.readFileSync(

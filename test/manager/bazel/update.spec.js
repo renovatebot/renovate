@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const bazelfile = require('../../../lib/manager/bazel/update');
 const got = require('got');
+const bazelfile = require('../../../lib/manager/bazel/update');
 
 jest.mock('got');
 

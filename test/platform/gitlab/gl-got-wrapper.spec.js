@@ -1,5 +1,5 @@
-const get = require('../../../lib/platform/gitlab/gl-got-wrapper');
 const glGot = require('gl-got');
+const get = require('../../../lib/platform/gitlab/gl-got-wrapper');
 
 describe('platform/gl-got-wrapper', () => {
   const body = ['a', 'b'];

@@ -1,6 +1,6 @@
-const get = require('../../../lib/platform/github/gh-got-wrapper');
 const ghGot = require('gh-got');
 const delay = require('delay');
+const get = require('../../../lib/platform/github/gh-got-wrapper');
 
 jest.mock('gh-got');
 jest.mock('delay');
