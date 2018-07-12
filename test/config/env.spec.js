@@ -35,32 +35,51 @@ describe('config/env', () => {
       expect(env.getConfig(envParam).lockFileMaintenance).toEqual({});
     });
     it('supports GitHub token', () => {
-      const envParam = { GITHUB_TOKEN: 'token' };
+      const envParam = { GITHUB_TOKEN: 'github.com token' };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitHub custom endpoint', () => {
-      const envParam = { GITHUB_ENDPOINT: 'endpoint' };
+      const envParam = { GITHUB_ENDPOINT: 'a ghe endpoint' };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
-
     it('supports GitHub custom endpoint and github.com', () => {
       const envParam = {
-        GITHUB_COM_TOKEN: 'public',
-        GITHUB_ENDPOINT: 'endpoint',
-        GITHUB_TOKEN: 'token',
+        GITHUB_COM_TOKEN: 'a github.com token',
+        GITHUB_ENDPOINT: 'a ghe endpoint',
+        GITHUB_TOKEN: 'a ghe token',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
+    it('supports GitHub custom endpoint and github.com and gitlab.com', () => {
+      const envParam = {
+        GITHUB_COM_TOKEN: 'a github.com token',
+        GITHUB_ENDPOINT: 'a ghe endpoint',
+        GITHUB_TOKEN: 'a ghe token',
+        GITLAB_TOKEN: 'a gitlab token',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitLab token', () => {
-      const envParam = { GITLAB_TOKEN: 'token' };
+      const envParam = {
+        RENOVATE_PLATFORM: 'gitlab',
+        GITLAB_TOKEN: 'a gitlab.com token',
+      };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitLab custom endpoint', () => {
-      const envParam = { GITLAB_TOKEN: 'token', GITLAB_ENDPOINT: 'endpoint' };
+      const envParam = {
+        RENOVATE_PLATFORM: 'gitlab',
+        GITLAB_TOKEN: 'a gitlab token',
+        GITLAB_ENDPOINT: 'a gitlab endpoint',
+      };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports VSTS', () => {
-      const envParam = { VSTS_TOKEN: 'token', VSTS_ENDPOINT: 'endpoint' };
+      const envParam = {
+        RENOVATE_PLATFORM: 'vsts',
+        VSTS_TOKEN: 'a vsts token',
+        VSTS_ENDPOINT: 'a vsts endpoint',
+      };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
   });
