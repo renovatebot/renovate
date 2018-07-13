@@ -1,0 +1,20 @@
+{
+  "extends": [
+    "config:base",
+    ":rebaseStalePrs",
+    ":automergeMinor",
+    ":label(ready)",
+    "group:linters",
+    ":assignee(rarkins)"
+  ],
+  "docker": {
+    "semanticCommitType": "fix"
+  },
+  "packageRules": [
+    {
+      "packageNames": ["semantic-release"],
+      "semanticCommitType": "fix"
+    }
+  ],
+  "semanticCommitScope": null
+}
