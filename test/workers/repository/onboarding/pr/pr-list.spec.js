@@ -26,7 +26,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           branchName: 'renovate/lock-file-maintenance',
           upgrades: [
             {
-              type: 'lockFileMaintenance',
+              updateType: 'lockFileMaintenance',
             },
           ],
         },
@@ -41,14 +41,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           branchName: 'renovate/pin-dependencies',
           upgrades: [
             {
-              type: 'pin',
+              updateType: 'pin',
               repositoryUrl: 'https://a',
               depName: 'a',
               depType: 'devDependencies',
               newValue: '1.1.0',
             },
             {
-              type: 'pin',
+              updateType: 'pin',
               depName: 'b',
               newValue: '1.5.3',
             },

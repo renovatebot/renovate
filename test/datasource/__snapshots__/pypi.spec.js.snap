@@ -102,3 +102,25 @@ Object {
   "releases": Array [],
 }
 `;
+
+exports[`datasource/pypi getDependency supports custom datasource url 1`] = `
+Array [
+  Array [
+    "https://custom.pypi.net/azure-cli-monitor/json",
+    Object {
+      "json": true,
+    },
+  ],
+]
+`;
+
+exports[`datasource/pypi getDependency supports custom datasource url from environmental variable 1`] = `
+Array [
+  Array [
+    "https://my.pypi.python/pypi/azure-cli-monitor/json",
+    Object {
+      "json": true,
+    },
+  ],
+]
+`;

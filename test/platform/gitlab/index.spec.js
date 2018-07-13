@@ -1,10 +1,11 @@
+const endpoints = require('../../../lib/util/endpoints');
+
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
   beforeEach(() => {
-    // clean up env
-    delete process.env.GITLAB_TOKEN;
-    delete process.env.GITLAB_ENDPOINT;
+    // clean up endpoints
+    endpoints.clear();
 
     // reset module
     jest.resetModules();
@@ -111,8 +112,6 @@ describe('platform/gitlab', () => {
         });
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
-        expect(process.env.GITLAB_TOKEN).toBe(token);
-        expect(process.env.GITLAB_ENDPOINT).toBe(endpoint);
       });
     });
     it(`should escape all forward slashes in project names`, async () => {
@@ -453,6 +452,44 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
   });
+  describe('mergeBranch(branchName)', () => {
+    it('should perform a branch merge', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+
+      await gitlab.mergeBranch('thebranchname');
+
+      // deleteBranch
+      get.delete.mockImplementationOnce();
+
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should throw if branch merge throws', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      get.post.mockImplementationOnce(() => {
+        throw new Error('branch-push failed');
+      });
+      let e;
+      try {
+        await gitlab.mergeBranch('thebranchname');
+      } catch (err) {
+        e = err;
+      }
+
+      // deleteBranch
+      get.delete.mockImplementationOnce();
+
+      expect(e).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+  });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       get.delete = jest.fn();
@@ -464,11 +501,6 @@ describe('platform/gitlab', () => {
       get.mockReturnValueOnce({ body: [] }); // getBranchPr
       await gitlab.deleteBranch('some-branch', true);
       expect(get.delete.mock.calls.length).toBe(1);
-    });
-  });
-  describe('mergeBranch()', () => {
-    it('exists', () => {
-      gitlab.mergeBranch();
     });
   });
   describe('getBranchLastCommitTime', () => {

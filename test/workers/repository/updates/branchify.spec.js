@@ -29,7 +29,7 @@ describe('workers/repository/updates/branchify', () => {
           branchName: 'foo-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
-          type: 'minor',
+          updateType: 'minor',
         },
       ]);
       config.repoIsOnboarded = true;
@@ -117,7 +117,7 @@ describe('workers/repository/updates/branchify', () => {
     it('mixes errors and warnings', async () => {
       flattenUpdates.mockReturnValueOnce([
         {
-          type: 'error',
+          updateType: 'error',
         },
         {
           branchName: 'foo-{{version}}',
@@ -125,7 +125,7 @@ describe('workers/repository/updates/branchify', () => {
           version: '1.1.0',
         },
         {
-          type: 'warning',
+          updateType: 'warning',
           branchName: 'foo-{{version}}',
           prTitle: 'some-title',
           version: '2.0.0',

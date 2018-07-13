@@ -2,10 +2,6 @@ describe('platform/github', () => {
   let github;
   let get;
   beforeEach(() => {
-    // clean up env
-    delete process.env.GITHUB_TOKEN;
-    delete process.env.GITHUB_ENDPOINT;
-
     // reset module
     jest.resetModules();
     jest.mock('delay');
@@ -103,8 +99,6 @@ describe('platform/github', () => {
         });
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
-        expect(process.env.GITHUB_TOKEN).toBe(token);
-        expect(process.env.GITHUB_ENDPOINT).toBe(endpoint);
       });
     });
     it('should throw an error if no token is provided', async () => {
@@ -830,7 +824,7 @@ describe('platform/github', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
   });
-  describe('mergeBranch(branchName, mergeType)', () => {
+  describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
       await initRepo({
         repository: 'some/repo',
@@ -879,24 +873,6 @@ describe('platform/github', () => {
       let e;
       try {
         await github.mergeBranch('thebranchname', 'branch');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toMatchSnapshot();
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(get.patch.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.put.mock.calls).toMatchSnapshot();
-      expect(get.delete.mock.calls).toMatchSnapshot();
-    });
-    it('should throw if unknown merge type', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      });
-      let e;
-      try {
-        await github.mergeBranch('thebranchname', 'wrong-merge-type');
       } catch (err) {
         e = err;
       }
@@ -989,6 +965,23 @@ describe('platform/github', () => {
       });
       get.mockReturnValueOnce({ body: { body: 'newer-content' } });
       const res = await github.ensureIssue('title-2', 'newer-content');
+      expect(res).toBe(null);
+    });
+    it('deletes if duplicate', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-1',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'newer-content' } });
+      const res = await github.ensureIssue('title-1', 'newer-content');
       expect(res).toBe(null);
     });
   });
@@ -1409,40 +1402,6 @@ describe('platform/github', () => {
                 email: 'foo@bar.com',
               },
             },
-          },
-        ],
-      }));
-      // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1234',
-          },
-        },
-      }));
-      const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBe(false);
-      expect(pr).toMatchSnapshot();
-    });
-    it('should return a not rebaseable PR if gitAuthor and error', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
-      });
-      get.mockImplementationOnce(() => ({
-        body: {
-          number: 1,
-          state: 'open',
-          mergeable_state: 'dirty',
-          base: { sha: '1234' },
-          commits: 1,
-        },
-      }));
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            commit: {},
           },
         ],
       }));

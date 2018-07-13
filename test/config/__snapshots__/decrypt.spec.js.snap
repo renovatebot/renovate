@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/decrypt decryptConfig() appends npm token in npmrc 1`] = `
+"foo=bar
+_authToken=abcdef-ghijklm-nopqf-stuvwxyz
+"
+`;

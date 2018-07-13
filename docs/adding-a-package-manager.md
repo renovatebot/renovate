@@ -21,21 +21,12 @@ Each manager needs its own subdirectory under `lib/managers` and to be added to 
 
 The manager's `index.js` file supports the following values/functions:
 
-- contentPattern (optional)
 - extractDependencies
 - getRangeStrategy (optional)
 - language (optional)
 - postExtract (optional)
 - supportsLockFileMaintenance (optional)
 - updateDependency
-
-##### contentPattern (optional)
-
-`contentPattern` is only necessary if there's the possibility that some of the files matched by `fileMatch` may not belong to that package manager, or maybe don't have any dependencies.
-
-An example `contentPattern` is from Meteor.js: `(^|\\n)\\s*Npm.depends\\(\\s*{`. Because Meteor's `package.js` is not particularly "unique", it's quite possible that repositories will have one or more `package.js` files that have nothing to do with Meteor.js, so we filter out only the ones that include `Npm.depends` in it.
-
-Note: it's possible that the `extractDependencies` function can perform this filtering instead.
 
 ##### `extractDependencies(content, packageFile, config)` (async, mandatory)
 

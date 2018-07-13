@@ -14,6 +14,12 @@ describe('workers/repository/updates/flatten', () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
       config.lockFileMaintenance.enabled = true;
+      config.packageRules = [
+        {
+          updateTypes: ['minor'],
+          automerge: true,
+        },
+      ];
       const packageFiles = {
         npm: [
           {
@@ -21,6 +27,18 @@ describe('workers/repository/updates/flatten', () => {
             deps: [
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
               { updates: [{ newValue: '2.0.0' }] },
+            ],
+          },
+        ],
+        docker: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'amd64/node',
+                language: 'docker',
+                updates: [{ newValue: '10.0.1' }],
+              },
             ],
           },
         ],

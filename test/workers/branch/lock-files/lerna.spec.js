@@ -1,8 +1,7 @@
+const { exec } = require('child-process-promise');
 const lernaHelper = require('../../../../lib/manager/npm/post-update/lerna');
 
 jest.mock('child-process-promise');
-
-const { exec } = require('child-process-promise');
 
 describe('generateLockFiles()', () => {
   it('returns if no lernaClient', async () => {

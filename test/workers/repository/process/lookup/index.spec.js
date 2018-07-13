@@ -126,8 +126,8 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates.length).toBe(2);
-      expect(res.updates[0].type).not.toEqual('patch');
-      expect(res.updates[1].type).not.toEqual('patch');
+      expect(res.updates[0].updateType).not.toEqual('patch');
+      expect(res.updates[1].updateType).not.toEqual('patch');
     });
     it('returns patch update if automerging patch', async () => {
       config.patch = {
@@ -142,7 +142,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].type).toEqual('patch');
+      expect(res.updates[0].updateType).toEqual('patch');
     });
     it('returns minor update if automerging both patch and minor', async () => {
       config.patch = {
@@ -160,7 +160,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].type).toEqual('minor');
+      expect(res.updates[0].updateType).toEqual('minor');
     });
     it('returns patch update if separateMinorPatch', async () => {
       config.separateMinorPatch = true;
@@ -652,20 +652,20 @@ describe('manager/npm/lookup', () => {
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';
-      config.depName = 'helmet';
-      config.purl = 'pkg:npm/helmet';
+      config.depName = '@types/helmet';
+      config.purl = 'pkg:npm/%40types/helmet';
       nock('https://registry.npmjs.org')
-        .get('/helmet')
+        .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
     });
     it('should treat zero zero caret ranges as pinned', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^0.0.34';
-      config.depName = 'helmet';
-      config.purl = 'pkg:npm/helmet';
+      config.depName = '@types/helmet';
+      config.purl = 'pkg:npm/%40types/helmet';
       nock('https://registry.npmjs.org')
-        .get('/helmet')
+        .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
@@ -857,6 +857,21 @@ describe('manager/npm/lookup', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
       expect(res.repositoryUrl).toBeDefined();
+    });
+    it('ignores deprecated', async () => {
+      config.currentValue = '1.3.0';
+      config.depName = 'q2';
+      config.purl = 'pkg:npm/q2';
+      const returnJson = JSON.parse(JSON.stringify(qJson));
+      returnJson.name = 'q2';
+      returnJson.versions['1.4.1'].deprecated = 'true';
+      nock('https://registry.npmjs.org')
+        .get('/q2')
+        .reply(200, returnJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+      expect(res.updates[0].toVersion).toEqual('1.4.0');
     });
   });
 });
