@@ -113,3 +113,14 @@ Array [
   ],
 ]
 `;
+
+exports[`datasource/pypi getDependency supports custom datasource url from environmental variable 1`] = `
+Array [
+  Array [
+    "https://my.pypi.python/pypi/azure-cli-monitor/json",
+    Object {
+      "json": true,
+    },
+  ],
+]
+`;

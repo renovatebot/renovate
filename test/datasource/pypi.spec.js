@@ -39,6 +39,16 @@ describe('datasource/pypi', () => {
       await datasource.getDependency('pkg:pypi/azure-cli-monitor', config);
       expect(got.mock.calls).toMatchSnapshot();
     });
+    it('supports custom datasource url from environmental variable', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(res1),
+      });
+      const pipIndexUrl = process.env.PIP_INDEX_URL;
+      process.env.PIP_INDEX_URL = 'https://my.pypi.python/pypi/';
+      await datasource.getDependency('pkg:pypi/azure-cli-monitor');
+      expect(got.mock.calls).toMatchSnapshot();
+      process.env.PIP_INDEX_URL = pipIndexUrl;
+    });
     it('returns non-github home_page', async () => {
       got.mockReturnValueOnce({
         body: {
