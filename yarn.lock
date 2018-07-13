@@ -6312,9 +6312,9 @@ tiny-relative-date@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/tiny-relative-date/-/tiny-relative-date-1.3.0.tgz#fa08aad501ed730f31cc043181d995c39a935e07"
 
-tmp-promise@1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/tmp-promise/-/tmp-promise-1.0.4.tgz#cfe2131b78392992e756d8692a059dc4b48be7ac"
+tmp-promise@1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/tmp-promise/-/tmp-promise-1.0.5.tgz#3208d7fa44758f86a2a4c4060f3c33fea30e8038"
   dependencies:
     bluebird "^3.5.0"
     tmp "0.0.33"
