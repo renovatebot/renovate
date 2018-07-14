@@ -93,7 +93,7 @@
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-link-header": "1.0.1",
-    "pnpm": "2.10.6",
+    "pnpm": "2.11.2",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "safe-regex": "1.1.0",
