@@ -1,17 +1,31 @@
 describe('platform/bitbucket', () => {
   let bitbucket;
   let api;
+  let endpoints;
   beforeEach(() => {
     // reset module
     jest.resetModules();
-    jest.mock('../../../lib/platform/bitbucket/bb-got');
-    api = require('../../../lib/platform/bitbucket/bb-got');
+    jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
+    endpoints = require('../../../lib/util/endpoints');
+    api = require('../../../lib/platform/bitbucket/bb-got-wrapper');
     bitbucket = require('../../../lib/platform/bitbucket');
+
+    // clean up endpoints
+    endpoints.clear();
+    endpoints.update({
+      platform: 'bitbucket',
+      token: 'token',
+    });
   });
 
   describe('getRepos()', () => {
-    it('exists', () => {
-      expect(bitbucket.getRepos).toBeDefined();
+    it('returns repos', async () => {
+      api.get.mockReturnValueOnce({
+        body: {
+          values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
+        },
+      });
+      expect(await bitbucket.getRepos()).toEqual(['foo/bar', 'some/repo']);
     });
   });
 

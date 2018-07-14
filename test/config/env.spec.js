@@ -82,6 +82,14 @@ describe('config/env', () => {
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
+    it('supports Bitbucket', () => {
+      const envParam = {
+        RENOVATE_PLATFORM: 'bitbucket',
+        BITBUCKET_TOKEN: 'a bitbucket token',
+        BITBUCKET_ENDPOINT: 'a bitbucket endpoint',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
   });
   describe('.getEnvName(definition)', () => {
     it('returns empty', () => {
