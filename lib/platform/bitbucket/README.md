@@ -1,4 +1,4 @@
-# BitBucket platform
+# Bitbucket platform
 
 ## Credentials setup
 
@@ -6,7 +6,7 @@
 
 BITBUCKET_TOKEN for now is base64 encoded string of your `username:bbaAppPassword`.
 
-Where `bbaAppPassword` is BitBucket App password, which you can revoke. Read more here, how to create one https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html.
+Where `bbaAppPassword` is Bitbucket App password, which you can revoke. Read more here, how to create one https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html.
 
 to get it in node run this in repl:
 

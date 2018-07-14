@@ -17,7 +17,7 @@ Automated dependency updates. Flexible, so you don't need to be.
 - Extremely customisable behaviour via configuration files or within your `package.json`
 - Use eslint-like shared config presets for ease of use and simplifying configuration
 - Update lock files natively in the same commit, including immediately resolving conflicts whenever PRs are merged
-- Supports GitHub, GitLab (APIv4) and VSTS. BitBucket is a WIP.
+- Supports GitHub, GitLab (APIv4) and VSTS. Bitbucket is a WIP.
 - Open source (installable via npm/yarn) so can be self-hosted or used for free via GitHub App
 
 ## Who Uses Renovate?
