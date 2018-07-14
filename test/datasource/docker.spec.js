@@ -1,5 +1,5 @@
-const docker = require('../../lib/datasource/docker');
 const got = require('got');
+const docker = require('../../lib/datasource/docker');
 
 jest.mock('got');
 

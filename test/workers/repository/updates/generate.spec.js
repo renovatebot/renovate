@@ -236,5 +236,17 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
     });
+    it('overrides schedule for pin PRs', () => {
+      const branch = [
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          schedule: 'before 3am',
+          updateType: 'pin',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.schedule).toEqual([]);
+    });
   });
 });

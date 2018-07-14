@@ -11,6 +11,7 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "newDepTag": "some-dep:1.1.0-something",
     "newDigest": "sha256:two",
     "newFrom": "some-dep:1.1.0-something@sha256:two",

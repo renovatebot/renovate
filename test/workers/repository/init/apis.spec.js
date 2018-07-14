@@ -1,6 +1,5 @@
-const { initApis } = require('../../../../lib/workers/repository/init/apis');
-
 const glGot = require('gl-got');
+const { initApis } = require('../../../../lib/workers/repository/init/apis');
 
 jest.mock('../../../../lib/platform/github');
 

@@ -1,6 +1,6 @@
 const fs = require('fs');
-const datasource = require('../../lib/datasource');
 const got = require('got');
+const datasource = require('../../lib/datasource');
 
 jest.mock('got');
 
