@@ -34,6 +34,6 @@ describe('platform', () => {
   it('has same API for github and BitBucket', () => {
     const githubMethods = Object.keys(github);
     const bitbucketMethods = Object.keys(bitbucket);
-    expect(githubMethods).toMatchObject(bitbucketMethods);
+    expect(bitbucketMethods).toMatchObject(githubMethods);
   });
 });
