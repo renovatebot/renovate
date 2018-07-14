@@ -103,7 +103,7 @@ Array [
     "isSingleVersion": false,
     "newMajor": 2,
     "newMinor": 9,
-    "newValue": "^2.9.1-insiders.20180516",
+    "newValue": "^2.9.1-insiders",
     "releaseTimestamp": "2018-05-16T23:16:36.911Z",
     "toVersion": "2.9.1-insiders.20180516",
     "updateType": "minor",
