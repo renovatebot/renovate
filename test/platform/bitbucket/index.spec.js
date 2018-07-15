@@ -1,3 +1,6 @@
+
+const { basename } = require('path');
+
 describe('platform/bitbucket', () => {
   let bitbucket;
   let api;
@@ -18,6 +21,26 @@ describe('platform/bitbucket', () => {
     });
   });
 
+  function initRepo() {
+    api.get.mockReturnValueOnce({
+      body: {
+        is_private: false,
+        full_name: "some/repo",
+        owner: { username: 'some' },
+        mainbranch: { name: 'master' },
+      }
+    });
+    api.get.mockReturnValueOnce({
+      body: { values: [] }
+    });
+    api.get.mockReturnValueOnce({
+      body: { values: [] }
+    });
+    return bitbucket.initRepo({
+      repository: 'some/repo'
+    });
+  }
+
   describe('getRepos()', () => {
     it('returns repos', async () => {
       api.get.mockReturnValueOnce({
@@ -30,8 +53,8 @@ describe('platform/bitbucket', () => {
   });
 
   describe('initRepo()', () => {
-    it('exists', () => {
-      expect(bitbucket.initRepo).toBeDefined();
+    it('works', async () => {
+      expect(await initRepo()).toMatchSnapshot();
     });
   });
 
@@ -91,8 +114,14 @@ describe('platform/bitbucket', () => {
   });
 
   describe('isBranchStale()', () => {
-    it('exists', () => {
-      expect(bitbucket.isBranchStale).toBeDefined();
+    it('returns false for same hash', async () => {
+      await initRepo();
+      const branches = {
+        branch: { target: { parents: [{ hash: 'hash' }] } },
+        master: { target: { hash: 'hash' } },
+      };
+      api.get.mockImplementation(path => ({ body: branches[basename(path)] }));
+      expect(await bitbucket.isBranchStale('branch')).toBe(false);
     });
   });
 
@@ -187,8 +216,14 @@ describe('platform/bitbucket', () => {
   });
 
   describe('createPr()', () => {
-    it('exists', () => {
-      expect(bitbucket.createPr).toBeDefined();
+    it('posts PR', async () => {
+      await initRepo();
+      api.post.mockReturnValueOnce({
+        body: { id: 5 }
+      });
+      const { id } = await bitbucket.createPr('branch', 'title', 'body');
+      expect(id).toBe(5);
+      expect(api.post.mock.calls).toMatchSnapshot();
     });
   });
 
@@ -205,14 +240,18 @@ describe('platform/bitbucket', () => {
   });
 
   describe('updatePr()', () => {
-    it('exists', () => {
-      expect(bitbucket.updatePr).toBeDefined();
+    it('puts PR', async () => {
+      await initRepo();
+      await bitbucket.updatePr(5, 'title', 'body');
+      expect(api.put.mock.calls).toMatchSnapshot();
     });
   });
 
   describe('mergePr()', () => {
-    it('exists', () => {
-      expect(bitbucket.mergePr).toBeDefined();
+    it('posts Merge', async () => {
+      await initRepo();
+      await bitbucket.mergePr(5, 'branch');
+      expect(api.post.mock.calls).toMatchSnapshot();
     });
   });
 

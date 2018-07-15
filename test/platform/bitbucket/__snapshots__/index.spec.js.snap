@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/bitbucket createPr() posts PR 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/pullrequests",
+    Object {
+      "body": Object {
+        "close_source_branch": true,
+        "description": "body",
+        "destination": Object {
+          "branch": Object {
+            "name": "master",
+          },
+        },
+        "source": Object {
+          "branch": Object {
+            "name": "branch",
+          },
+        },
+        "title": "title",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket initRepo() works 1`] = `
+Object {
+  "isFork": false,
+  "privateRepo": false,
+  "repoFullName": "some/repo",
+}
+`;
+
+exports[`platform/bitbucket mergePr() posts Merge 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/pullrequests/5/merge",
+    Object {
+      "body": Object {
+        "close_source_branch": true,
+        "merge_strategy": "merge_commit",
+        "message": "auto merged",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket updatePr() puts PR 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/pullrequests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "title": "title",
+      },
+    },
+  ],
+]
+`;
