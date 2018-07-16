@@ -35,15 +35,3 @@ or add it to your `~/.bash_profile` to keep it permanent:
 ```
 $ echo "export BITBUCKET_TOKEN='your-token-here-dont-show-it-to-anyone'" >> ~/.bash_profile
 ```
-
-## Sandbox for debugging:
-
-We use `./cli.js` file from the gist as a sandbox for debugging.
-
-get it here https://gist.github.com/iamstarkov/725d20bc5fbf402b785eba06ff9c04c1
-
-Test your requests:
-
-```
-$ node cli
-```
