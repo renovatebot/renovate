@@ -16,6 +16,17 @@ describe('semver.isValid(input)', () => {
     expect(!!semver.isValid('>1.2.3')).toBe(true);
   });
 });
+describe('semver.isVersion(input)', () => {
+  it('should support simple semver', () => {
+    expect(!!semver.isValid('1.2.3')).toBe(true);
+  });
+  it('should support shortened version', () => {
+    expect(!!semver.isValid('2.5')).toBe(true);
+  });
+  it('should support shortened v version', () => {
+    expect(!!semver.isValid('v2.5')).toBe(true);
+  });
+});
 describe('semver.isLessThanRange()', () => {
   it('handles massaged tilde', () => {
     expect(semver.isLessThanRange('0.3.1', '~0.4')).toBe(true);
