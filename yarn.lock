@@ -2290,6 +2290,12 @@ git-up@^2.0.0:
     is-ssh "^1.3.0"
     parse-url "^1.3.0"
 
+git-url-parse@^10.0.1:
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-10.0.1.tgz#75f153b24ac7297447fc583cf9fac23a5ae687c1"
+  dependencies:
+    git-up "^2.0.0"
+
 git-url-parse@^9.0.0:
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-9.0.1.tgz#2905b897a3db6e5cb9e10819f0fac2e740b4481b"
@@ -5841,9 +5847,9 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.7.1:
-  version "15.7.1"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.7.1.tgz#636337219fad33cfcf35dfe86d8d0a9dc9ee6c35"
+semantic-release@15.7.2:
+  version "15.7.2"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.7.2.tgz#e79949d6dffd07a80bb3cefa1601df48ed08e8c7"
   dependencies:
     "@semantic-release/commit-analyzer" "^5.0.0"
     "@semantic-release/error" "^2.2.0"
@@ -5859,7 +5865,7 @@ semantic-release@15.7.1:
     find-versions "^2.0.0"
     get-stream "^3.0.0"
     git-log-parser "^1.2.0"
-    git-url-parse "^9.0.0"
+    git-url-parse "^10.0.1"
     hook-std "^1.0.1"
     hosted-git-info "^2.7.1"
     lodash "^4.17.4"
