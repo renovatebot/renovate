@@ -50,6 +50,16 @@ describe('semver.getNewValue()', () => {
       '^1.0'
     );
   });
+  it('bumps caret to prerelease', () => {
+    expect(
+      semver.getNewValue('^1', 'bump', '1.0.0', '1.0.7-prerelease.1')
+    ).toEqual('^1.0.7-prerelease');
+  });
+  it('replaces with newer', () => {
+    expect(semver.getNewValue('^1.0.0', 'replace', '1.0.0', '1.0.7')).toEqual(
+      '^1.0.7'
+    );
+  });
   it('bumps short caret to new', () => {
     expect(semver.getNewValue('^1.0', 'bump', '1.0.0', '1.1.7')).toEqual(
       '^1.1'
@@ -59,6 +69,11 @@ describe('semver.getNewValue()', () => {
     expect(semver.getNewValue('~1.0', 'bump', '1.0.0', '1.1.7')).toEqual(
       '~1.1'
     );
+  });
+  it('bumps tilde to prerelease', () => {
+    expect(
+      semver.getNewValue('~1.0', 'bump', '1.0.0', '1.0.7-prerelease.1')
+    ).toEqual('~1.0.7-prerelease');
   });
   it('updates naked caret', () => {
     expect(semver.getNewValue('^1', 'bump', '1.0.0', '2.1.7')).toEqual('^2');
@@ -80,5 +95,10 @@ describe('semver.getNewValue()', () => {
     expect(semver.getNewValue('1.*', 'replace', '1.0.0', '2.1.0')).toEqual(
       '2.*'
     );
+  });
+  it('handles updating from stable to unstable', () => {
+    expect(
+      semver.getNewValue('~0.6.1', 'replace', '0.6.8', '0.7.0-rc.2')
+    ).toEqual('~0.7.0-rc');
   });
 });
