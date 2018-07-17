@@ -440,7 +440,7 @@ The above will set `rangeStrategy` to `replace` for any package starting with `a
 
 ### updateTypes
 
-USe this field to match rules against types of updates. For example to apply a special label for Major updates:
+Use this field to match rules against types of updates. For example to apply a special label for Major updates:
 
 ```
   "packageRules: [{
