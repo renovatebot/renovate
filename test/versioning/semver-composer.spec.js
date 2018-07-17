@@ -91,4 +91,14 @@ describe('semver.getNewValue()', () => {
       '4.2.0'
     );
   });
+  it('returns versioned toVersion', () => {
+    expect(semver.getNewValue('v4.0.0', 'replace', '4.0.0', '4.2.0')).toEqual(
+      'v4.2.0'
+    );
+  });
+  it('bumps short caret with v', () => {
+    expect(semver.getNewValue('^v1.0', 'bump', '1.0.0', '1.1.7')).toEqual(
+      '^v1.1'
+    );
+  });
 });
