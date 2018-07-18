@@ -20,3 +20,21 @@ Object {
   "updatedPackageFiles": Array [],
 }
 `;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lock files 1`] = `
+Object {
+  "parentBranch": undefined,
+  "updatedLockFiles": Array [
+    Object {
+      "contents": "some contents",
+      "name": "composer.json",
+    },
+  ],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "some new content",
+      "name": "undefined",
+    },
+  ],
+}
+`;
