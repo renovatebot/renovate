@@ -7,6 +7,9 @@ const webpackJson = require('../../../../_fixtures/npm/webpack.json');
 const nextJson = require('../../../../_fixtures/npm/next.json');
 const vueJson = require('../../../../_fixtures/npm/vue.json');
 const typescriptJson = require('../../../../_fixtures/npm/typescript.json');
+const docker = require('../../../../../lib/datasource/docker');
+
+jest.mock('../../../../../lib/datasource/docker');
 
 qJson.latestVersion = '1.4.1';
 
@@ -872,6 +875,47 @@ describe('manager/npm/lookup', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
       expect(res.updates[0].toVersion).toEqual('1.4.0');
+    });
+    it('handles digest pin', async () => {
+      config.currentValue = '8.0.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest update', async () => {
+      config.currentValue = '8.0.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
     });
   });
 });
