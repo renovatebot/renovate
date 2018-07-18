@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/pip_requirements/extract extractDependencies() extracts dependencies with lock file 1`] = `
+exports[`lib/manager/composer/extract extractDependencies() extracts dependencies with lock file 1`] = `
 Object {
   "composerLock": "composer.lock",
   "deps": Array [
@@ -250,7 +250,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/pip_requirements/extract extractDependencies() extracts dependencies with no lock file 1`] = `
+exports[`lib/manager/composer/extract extractDependencies() extracts dependencies with no lock file 1`] = `
 Object {
   "composerLock": false,
   "deps": Array [

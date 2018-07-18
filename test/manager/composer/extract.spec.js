@@ -8,13 +8,11 @@ const requirements1 = fs.readFileSync(
   'utf8'
 );
 
-describe('lib/manager/pip_requirements/extract', () => {
+describe('lib/manager/composer/extract', () => {
   describe('extractDependencies()', () => {
     let packageFile;
     beforeEach(() => {
-      packageFile = {
-        packageFile: 'composer.json',
-      };
+      packageFile = 'composer.json';
     });
     it('returns null for invalid json', async () => {
       expect(await extractDependencies('nothing here', packageFile)).toBe(null);

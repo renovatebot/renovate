@@ -3,6 +3,7 @@
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles content change 1`] = `
 Object {
   "parentBranch": undefined,
+  "updatedLockFiles": Array [],
   "updatedPackageFiles": Array [
     Object {
       "contents": "some new content",
@@ -15,6 +16,7 @@ Object {
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles empty 1`] = `
 Object {
   "parentBranch": undefined,
+  "updatedLockFiles": Array [],
   "updatedPackageFiles": Array [],
 }
 `;

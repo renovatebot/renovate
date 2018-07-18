@@ -136,7 +136,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [],
       });
       platform.branchExists.mockReturnValue(false);
@@ -150,7 +150,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [],
       });
       platform.branchExists.mockReturnValueOnce(false);
@@ -161,7 +161,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
@@ -176,7 +176,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
@@ -193,7 +193,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
@@ -212,7 +212,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
@@ -232,7 +232,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
@@ -252,7 +252,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(false);
@@ -270,7 +270,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       config.recreateClosed = true;
@@ -296,7 +296,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: true,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       await branchWorker.processBranch(config);
@@ -306,7 +306,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
