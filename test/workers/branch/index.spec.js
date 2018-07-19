@@ -136,7 +136,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [],
       });
       platform.branchExists.mockReturnValue(false);
@@ -150,7 +150,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [],
       });
       platform.branchExists.mockReturnValueOnce(false);
@@ -161,7 +161,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
@@ -176,7 +176,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
@@ -193,14 +193,13 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
-      config.lockFileErrors = [{}];
       await branchWorker.processBranch(config);
       expect(platform.ensureComment.mock.calls).toHaveLength(1);
       expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
@@ -212,14 +211,13 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
-      config.lockFileErrors = [{}];
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
       await branchWorker.processBranch(config);
       expect(platform.ensureComment.mock.calls).toHaveLength(1);
@@ -232,14 +230,13 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
-      config.lockFileErrors = [{}];
       config.releaseTimestamp = new Date().toISOString();
       await branchWorker.processBranch(config);
       expect(platform.ensureComment.mock.calls).toHaveLength(1);
@@ -247,30 +244,33 @@ describe('workers/branch', () => {
       expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
       expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
     });
-    it('throws error if lock file errors and new releaseTimestamp', () => {
+    it('throws error if lock file errors and new releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(false);
       automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
-      config.lockFileErrors = [{}];
       config.releaseTimestamp = new Date().toISOString();
-      expect(branchWorker.processBranch(config)).rejects.toThrow(
-        'lockfile-error'
-      );
+      let e;
+      try {
+        await branchWorker.processBranch(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toEqual('lockfile-error');
     });
     it('ensures PR and adds lock file error comment recreate closed', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       config.recreateClosed = true;
@@ -278,7 +278,6 @@ describe('workers/branch', () => {
       automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
-      config.lockFileErrors = [{}];
       await branchWorker.processBranch(config);
       expect(platform.ensureComment.mock.calls).toHaveLength(1);
       expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
@@ -296,7 +295,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: true,
+        lockFileErrors: [{}],
         updatedLockFiles: [{}],
       });
       await branchWorker.processBranch(config);
@@ -306,7 +305,7 @@ describe('workers/branch', () => {
         updatedPackageFiles: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
-        lockFileError: false,
+        lockFileErrors: [],
         updatedLockFiles: [{}],
       });
       platform.branchExists.mockReturnValueOnce(true);
