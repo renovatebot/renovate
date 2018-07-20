@@ -241,10 +241,10 @@ Array [
     "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
-    "repos/some/repo/contents/backend/package-lock.json?ref=master",
+    "repos/some/repo/contents/package-lock.json?ref=master",
   ],
   Array [
-    "repos/some/repo/git/trees/master/backend",
+    "repos/some/repo/git/trees/master",
   ],
   Array [
     "repos/some/repo/git/blobs/some-sha",
