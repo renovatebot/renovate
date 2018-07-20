@@ -62,6 +62,14 @@ describe('lib/manager/docker/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res[0].dockerRegistry).toEqual('registry2.something.info');
     });
+    it('handles custom hosts and suffix', () => {
+      const res = extractDependencies(
+        'FROM registry2.something.info/node:8-alpine\n',
+        config
+      ).deps;
+      expect(res).toMatchSnapshot();
+      expect(res[0].dockerRegistry).toEqual('registry2.something.info');
+    });
     it('handles custom hosts with port', () => {
       const res = extractDependencies(
         'FROM registry2.something.info:5005/node:8\n',

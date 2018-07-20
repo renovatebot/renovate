@@ -76,6 +76,103 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() handles digest pin 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "8.0.0",
+    },
+    Object {
+      "version": "8.1.0",
+    },
+  ],
+  "repositoryUrl": null,
+  "updates": Array [
+    Object {
+      "blockedByPin": true,
+      "canBeUnpublished": undefined,
+      "fromVersion": "8.0.0",
+      "isSingleVersion": true,
+      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
+      "newDigestShort": "aaaaaa",
+      "newMajor": 8,
+      "newMinor": 1,
+      "newValue": "8.1.0",
+      "releaseTimestamp": undefined,
+      "toVersion": "8.1.0",
+      "updateType": "minor",
+    },
+    Object {
+      "newDigest": "sha256:bbbbbbbbbbbbbbbb",
+      "newDigestShort": "bbbbbb",
+      "newValue": "8.0.0",
+      "updateType": "pin",
+    },
+  ],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() handles digest pin for non-version 1`] = `
+Object {
+  "updates": Array [
+    Object {
+      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
+      "newDigestShort": "aaaaaa",
+      "newValue": "alpine",
+      "updateType": "pin",
+    },
+  ],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() handles digest update 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "8.0.0",
+    },
+    Object {
+      "version": "8.1.0",
+    },
+  ],
+  "repositoryUrl": null,
+  "updates": Array [
+    Object {
+      "canBeUnpublished": undefined,
+      "fromVersion": "8.0.0",
+      "isSingleVersion": true,
+      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
+      "newDigestShort": "aaaaaa",
+      "newMajor": 8,
+      "newMinor": 1,
+      "newValue": "8.1.0",
+      "releaseTimestamp": undefined,
+      "toVersion": "8.1.0",
+      "updateType": "minor",
+    },
+    Object {
+      "newDigest": "sha256:bbbbbbbbbbbbbbbb",
+      "newDigestShort": "bbbbbb",
+      "newValue": "8.0.0",
+      "updateType": "digest",
+    },
+  ],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() handles digest update for non-version 1`] = `
+Object {
+  "updates": Array [
+    Object {
+      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
+      "newDigestShort": "aaaaaa",
+      "newValue": "alpine",
+      "updateType": "digest",
+    },
+  ],
+}
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() handles github 404 1`] = `
 Array [
   Object {
@@ -639,6 +736,20 @@ Array [
     "updateType": "minor",
   },
 ]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() skips undefined values 1`] = `
+Object {
+  "skipReason": "unsupported-value",
+  "updates": Array [],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() skips unsupported values 1`] = `
+Object {
+  "skipReason": "unsupported-value",
+  "updates": Array [],
+}
 `;
 
 exports[`manager/npm/lookup .lookupUpdates() supports > latest versions if configured 1`] = `
