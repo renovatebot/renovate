@@ -201,7 +201,7 @@ See https://renovatebot.com/docs/configuration-reference/config-presets for deta
 
 ## gitlabci
 
-Add to this configuration setting if you need to override any of the Docker default settings.
+Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
 
 ## group
 
