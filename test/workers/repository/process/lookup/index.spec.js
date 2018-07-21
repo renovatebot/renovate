@@ -931,6 +931,28 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
+    it('handles digest lookup failure', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+          {
+            version: 'alpine',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce(null);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(0);
+    });
     it('handles digest update', async () => {
       config.currentValue = '8.0.0';
       config.depName = 'node';

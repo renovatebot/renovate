@@ -74,7 +74,7 @@ describe('platform/github', () => {
           },
           {
             type: 'blob',
-            path: 'backend/package-lock.json',
+            path: 'package-lock.json',
           },
         ],
       },
@@ -1644,7 +1644,7 @@ describe('platform/github', () => {
           content: Buffer.from('{"hello":"workd"}').toString('base64'),
         },
       }));
-      const content = await github.getFile('backend/package-lock.json');
+      const content = await github.getFile('package-lock.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
@@ -1663,7 +1663,7 @@ describe('platform/github', () => {
       }));
       let e;
       try {
-        await github.getFile('backend/package-lock.json');
+        await github.getFile('package-lock.json');
       } catch (err) {
         e = err;
       }
