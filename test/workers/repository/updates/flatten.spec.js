@@ -30,7 +30,7 @@ describe('workers/repository/updates/flatten', () => {
             ],
           },
         ],
-        docker: [
+        dockerfile: [
           {
             packageFile: 'Dockerfile',
             deps: [

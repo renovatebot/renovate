@@ -1,9 +1,11 @@
 const fs = require('fs');
-const { extractDependencies } = require('../../../lib/manager/docker/extract');
+const {
+  extractDependencies,
+} = require('../../../lib/manager/dockerfile/extract');
 
 const d1 = fs.readFileSync('test/_fixtures/docker/Dockerfile1', 'utf8');
 
-describe('lib/manager/docker/extract', () => {
+describe('lib/manager/dockerfile/extract', () => {
   describe('extractDependencies()', () => {
     let config;
     beforeEach(() => {

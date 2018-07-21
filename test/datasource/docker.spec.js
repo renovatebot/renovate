@@ -10,12 +10,18 @@ describe('api/docker', () => {
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
-      const res = await docker.getDigest(undefined, 'some-name', undefined);
+      const res = await docker.getDigest(
+        { depName: 'some-dep' },
+        'some-new-value'
+      );
       expect(res).toBe(null);
     });
     it('returns null if errored', async () => {
       got.mockReturnValueOnce({ body: { token: 'some-token' } });
-      const res = await docker.getDigest(undefined, 'some-name', undefined);
+      const res = await docker.getDigest(
+        { depName: 'some-dep' },
+        'some-new-value'
+      );
       expect(res).toBe(null);
     });
     it('returns digest', async () => {
@@ -23,7 +29,10 @@ describe('api/docker', () => {
       got.mockReturnValueOnce({
         headers: { 'docker-content-digest': 'some-digest' },
       });
-      const res = await docker.getDigest(undefined, 'some-name', undefined);
+      const res = await docker.getDigest(
+        { depName: 'some-dep' },
+        'some-new-value'
+      );
       expect(res).toBe('some-digest');
     });
     it('supports scoped names', async () => {
@@ -31,7 +40,10 @@ describe('api/docker', () => {
       got.mockReturnValueOnce({
         headers: { 'docker-content-digest': 'some-digest' },
       });
-      const res = await docker.getDigest(undefined, 'some/name', undefined);
+      const res = await docker.getDigest(
+        { depName: 'some-dep', tagSuffix: 'alpine' },
+        '8.0.0'
+      );
       expect(res).toBe('some-digest');
     });
   });

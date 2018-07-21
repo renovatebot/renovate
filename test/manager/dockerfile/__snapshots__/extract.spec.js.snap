@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/docker/extract extractDependencies() extracts images on adjacent lines 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() extracts images on adjacent lines 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -38,7 +38,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() extracts multiple FROM tags 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() extracts multiple FROM tags 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -76,7 +76,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles abnoral spacing 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles abnoral spacing 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -98,7 +98,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles comments 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles comments 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -120,7 +120,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles custom hosts 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles custom hosts 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -142,7 +142,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles custom hosts and suffix 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles custom hosts and suffix 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -164,7 +164,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles custom hosts with namespace 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles custom hosts with namespace 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -186,7 +186,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles custom hosts with port 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles custom hosts with port 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -208,7 +208,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles digest 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles digest 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -230,7 +230,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles from as 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles from as 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -252,7 +252,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles naked dep 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles naked dep 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -274,7 +274,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles namespaced images 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles namespaced images 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -296,7 +296,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles tag 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles tag 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -318,7 +318,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() handles tag and digest 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() handles tag and digest 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -340,7 +340,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() is case insensitive 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() is case insensitive 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",
@@ -362,7 +362,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/docker/extract extractDependencies() skips named multistage FROM tags 1`] = `
+exports[`lib/manager/dockerfile/extract extractDependencies() skips named multistage FROM tags 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",

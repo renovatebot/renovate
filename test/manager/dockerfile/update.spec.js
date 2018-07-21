@@ -1,6 +1,6 @@
-const dockerfile = require('../../../lib/manager/docker/update');
+const dockerfile = require('../../../lib/manager/dockerfile/update');
 
-describe('manager/docker/update', () => {
+describe('manager/dockerfile/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const fileContent = '# comment FROM node:8\nFROM node:8\nRUN something\n';
