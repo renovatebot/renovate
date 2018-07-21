@@ -9,8 +9,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -26,6 +28,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -45,9 +48,11 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.9.4",
     "isRange": true,
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "==0.9.7",
@@ -56,9 +61,11 @@ Array [
     "updateType": "minor",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.9.4",
     "isRange": true,
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "==1.4.1",
@@ -67,6 +74,103 @@ Array [
     "updateType": "major",
   },
 ]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() handles digest pin 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "8.0.0",
+    },
+    Object {
+      "version": "8.1.0",
+    },
+  ],
+  "repositoryUrl": null,
+  "updates": Array [
+    Object {
+      "blockedByPin": true,
+      "canBeUnpublished": undefined,
+      "fromVersion": "8.0.0",
+      "isSingleVersion": true,
+      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
+      "newDigestShort": "aaaaaa",
+      "newMajor": 8,
+      "newMinor": 1,
+      "newValue": "8.1.0",
+      "releaseTimestamp": undefined,
+      "toVersion": "8.1.0",
+      "updateType": "minor",
+    },
+    Object {
+      "newDigest": "sha256:bbbbbbbbbbbbbbbb",
+      "newDigestShort": "bbbbbb",
+      "newValue": "8.0.0",
+      "updateType": "pin",
+    },
+  ],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() handles digest pin for non-version 1`] = `
+Object {
+  "updates": Array [
+    Object {
+      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
+      "newDigestShort": "aaaaaa",
+      "newValue": "alpine",
+      "updateType": "pin",
+    },
+  ],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() handles digest update 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "8.0.0",
+    },
+    Object {
+      "version": "8.1.0",
+    },
+  ],
+  "repositoryUrl": null,
+  "updates": Array [
+    Object {
+      "canBeUnpublished": undefined,
+      "fromVersion": "8.0.0",
+      "isSingleVersion": true,
+      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
+      "newDigestShort": "aaaaaa",
+      "newMajor": 8,
+      "newMinor": 1,
+      "newValue": "8.1.0",
+      "releaseTimestamp": undefined,
+      "toVersion": "8.1.0",
+      "updateType": "minor",
+    },
+    Object {
+      "newDigest": "sha256:bbbbbbbbbbbbbbbb",
+      "newDigestShort": "bbbbbb",
+      "newValue": "8.0.0",
+      "updateType": "digest",
+    },
+  ],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() handles digest update for non-version 1`] = `
+Object {
+  "updates": Array [
+    Object {
+      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
+      "newDigestShort": "aaaaaa",
+      "newValue": "alpine",
+      "updateType": "digest",
+    },
+  ],
+}
 `;
 
 exports[`manager/npm/lookup .lookupUpdates() handles github 404 1`] = `
@@ -93,9 +197,10 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.9.0-rc",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 2,
     "newMinor": 9,
-    "newValue": "^2.9.1-insiders.20180516",
+    "newValue": "^2.9.1-insiders",
     "releaseTimestamp": "2018-05-16T23:16:36.911Z",
     "toVersion": "2.9.1-insiders.20180516",
     "updateType": "minor",
@@ -121,6 +226,44 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() ignores deprecated 1`] = `
+Object {
+  "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v1.4.1) of dependency \`q2\` has the following deprecation notice:
+
+\`true\`
+
+Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": "b26cace16f6070e756b6a546cf2693bece03f8f8",
+      "releaseTimestamp": "2015-04-26T16:42:11.311Z",
+      "version": "1.3.0",
+    },
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": "05e20dc704421ca820553721c7178168a8461506",
+      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
+      "version": "1.4.0",
+    },
+  ],
+  "repositoryUrl": "https://github.com/kriskowal/q",
+  "updates": Array [
+    Object {
+      "canBeUnpublished": false,
+      "fromVersion": "1.3.0",
+      "isSingleVersion": true,
+      "newMajor": 1,
+      "newMinor": 4,
+      "newValue": "1.4.0",
+      "releaseTimestamp": "2015-05-09T16:52:40.699Z",
+      "toVersion": "1.4.0",
+      "updateType": "minor",
+    },
+  ],
+}
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() ignores pinning for ranges when other upgrade exists 1`] = `
 Array [
   Object {
@@ -130,8 +273,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -167,6 +312,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^3.0.0",
@@ -183,6 +329,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
@@ -198,6 +345,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -217,8 +365,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -227,8 +377,10 @@ Array [
     "updateType": "minor",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -266,6 +418,7 @@ Object {
     Object {
       "canBeUnpublished": false,
       "fromVersion": "1.3.0",
+      "isSingleVersion": true,
       "newMajor": 1,
       "newMinor": 4,
       "newValue": "1.4.1",
@@ -282,6 +435,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -292,6 +446,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -307,6 +462,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -317,6 +473,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -332,6 +489,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -351,8 +509,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -372,8 +532,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -389,6 +551,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 8,
     "newValue": "0.8.12",
@@ -399,6 +562,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -409,6 +573,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -424,6 +589,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -434,6 +600,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -449,6 +616,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -459,6 +627,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -483,6 +652,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.9.99",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -512,6 +682,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "2.3.0-beta.1",
+    "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 5,
     "newValue": "2.5.17-beta.0",
@@ -527,6 +698,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "2.5.16",
+    "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 5,
     "newValue": "2.5.17-beta.0",
@@ -555,6 +727,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.0.34",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 0,
     "newValue": "^0.0.35",
@@ -565,11 +738,26 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() skips undefined values 1`] = `
+Object {
+  "skipReason": "unsupported-value",
+  "updates": Array [],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() skips unsupported values 1`] = `
+Object {
+  "skipReason": "unsupported-value",
+  "updates": Array [],
+}
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() supports > latest versions if configured 1`] = `
 Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.4.1",
+    "isSingleVersion": true,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "2.0.3",
@@ -586,6 +774,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1.x - 3.x",
@@ -602,6 +791,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^1.0.0 || ^2.0.0 || ^3.0.0",
@@ -617,6 +807,7 @@ Object {
   "canBeUnpublished": false,
   "fromVersion": "0.8.12",
   "isRange": true,
+  "isSingleVersion": false,
   "newMajor": 0,
   "newMinor": 9,
   "newValue": "^0.7.0 || ^0.8.0 || ^0.9.0",
@@ -632,6 +823,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.2.0 || ~1.3.0 || ~1.4.0",
@@ -648,6 +840,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.4.1",
@@ -664,6 +857,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">=1.4.1",
@@ -680,6 +874,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 0,
     "newValue": "~1.0.1",
@@ -691,6 +886,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.1",
@@ -710,8 +906,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -720,8 +918,10 @@ Array [
     "updateType": "minor",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -741,8 +941,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "0.9.7",
@@ -751,8 +953,10 @@ Array [
     "updateType": "minor",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "0.4.4",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -769,6 +973,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.2.x - 1.4.x",
@@ -785,6 +990,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.x",
@@ -804,8 +1010,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -822,6 +1030,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.x",
@@ -838,6 +1047,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.4.1",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 2,
     "newMinor": 0,
     "newValue": "<= 2",
@@ -854,6 +1064,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4",
@@ -870,6 +1081,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "<= 0.9.7",
@@ -881,6 +1093,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4.1",
@@ -897,6 +1110,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 2",
@@ -913,6 +1127,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.1",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "< 0.9.8",
@@ -924,6 +1139,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.1",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 1.4.2",
@@ -940,6 +1156,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 < 2.0.0",
@@ -956,6 +1173,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "<= 1.4.1",
@@ -972,6 +1190,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "< 2.0.0",
@@ -988,6 +1207,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": ">= 0.5.0 <= 0.9.7",
@@ -999,6 +1219,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.8.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 <= 1.4.1",
@@ -1015,6 +1236,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": ">= 0.5.0 <0.10",
@@ -1026,6 +1248,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": ">= 0.5.0 <1.5",
@@ -1045,8 +1268,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "1.0.1",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -1063,6 +1288,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "^0.9.0",
@@ -1074,6 +1300,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "^1.0.0",
@@ -1090,6 +1317,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 0,
     "newMinor": 9,
     "newValue": "~0.9.0",
@@ -1101,6 +1329,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.7.2",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
@@ -1117,6 +1346,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "0.9.7",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1",
@@ -1133,6 +1363,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4",
@@ -1152,8 +1383,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -1170,6 +1403,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.4.0",
@@ -1189,8 +1423,10 @@ Array [
     "updateType": "pin",
   },
   Object {
+    "blockedByPin": true,
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
+    "isSingleVersion": true,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
@@ -1207,6 +1443,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1.x || 2.x || 3.x",
@@ -1223,6 +1460,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "^2.0.0 || ^3.0.0",
@@ -1239,6 +1477,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "1.3.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "~1.3.0 || ~1.4.0",
@@ -1255,6 +1494,7 @@ Array [
     "canBeUnpublished": false,
     "fromVersion": "2.7.0",
     "isRange": true,
+    "isSingleVersion": false,
     "newMajor": 3,
     "newMinor": 8,
     "newValue": "1 || 2 || 3",

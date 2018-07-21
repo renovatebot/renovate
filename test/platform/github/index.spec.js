@@ -2,10 +2,6 @@ describe('platform/github', () => {
   let github;
   let get;
   beforeEach(() => {
-    // clean up env
-    delete process.env.GITHUB_TOKEN;
-    delete process.env.GITHUB_ENDPOINT;
-
     // reset module
     jest.resetModules();
     jest.mock('delay');
@@ -78,7 +74,7 @@ describe('platform/github', () => {
           },
           {
             type: 'blob',
-            path: 'backend/package-lock.json',
+            path: 'package-lock.json',
           },
         ],
       },
@@ -103,8 +99,6 @@ describe('platform/github', () => {
         });
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
-        expect(process.env.GITHUB_TOKEN).toBe(token);
-        expect(process.env.GITHUB_ENDPOINT).toBe(endpoint);
       });
     });
     it('should throw an error if no token is provided', async () => {
@@ -973,6 +967,23 @@ describe('platform/github', () => {
       const res = await github.ensureIssue('title-2', 'newer-content');
       expect(res).toBe(null);
     });
+    it('deletes if duplicate', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-1',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'newer-content' } });
+      const res = await github.ensureIssue('title-1', 'newer-content');
+      expect(res).toBe(null);
+    });
   });
   describe('ensureIssueClosing()', () => {
     it('closes issue', async () => {
@@ -1406,40 +1417,6 @@ describe('platform/github', () => {
       expect(pr.canRebase).toBe(false);
       expect(pr).toMatchSnapshot();
     });
-    it('should return a not rebaseable PR if gitAuthor and error', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
-      });
-      get.mockImplementationOnce(() => ({
-        body: {
-          number: 1,
-          state: 'open',
-          mergeable_state: 'dirty',
-          base: { sha: '1234' },
-          commits: 1,
-        },
-      }));
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            commit: {},
-          },
-        ],
-      }));
-      // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1234',
-          },
-        },
-      }));
-      const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBe(false);
-      expect(pr).toMatchSnapshot();
-    });
   });
   describe('getPrFiles()', () => {
     it('should return empty if no prNo is passed', async () => {
@@ -1667,7 +1644,7 @@ describe('platform/github', () => {
           content: Buffer.from('{"hello":"workd"}').toString('base64'),
         },
       }));
-      const content = await github.getFile('backend/package-lock.json');
+      const content = await github.getFile('package-lock.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
@@ -1686,7 +1663,7 @@ describe('platform/github', () => {
       }));
       let e;
       try {
-        await github.getFile('backend/package-lock.json');
+        await github.getFile('package-lock.json');
       } catch (err) {
         e = err;
       }

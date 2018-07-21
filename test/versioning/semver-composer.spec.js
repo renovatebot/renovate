@@ -1,5 +1,34 @@
 const semver = require('../../lib/versioning')('semverComposer');
 
+describe('semver.equals(a, b)', () => {
+  it('should pad short version', () => {
+    expect(semver.equals('1.2.0', 'v1.2')).toBe(true);
+  });
+  it('should pad really short version', () => {
+    expect(semver.equals('v1.0.0', '1')).toBe(true);
+  });
+});
+describe('semver.isGreaterThan(a, b)', () => {
+  it('should pad short version', () => {
+    expect(semver.isGreaterThan('1.2.0', 'v1.2')).toBe(false);
+  });
+  it('should pad really short version', () => {
+    expect(semver.isGreaterThan('v1.0.1', '1')).toBe(true);
+  });
+  it('should pad both versions', () => {
+    expect(semver.isGreaterThan('1', '1.1')).toBe(false);
+  });
+});
+describe('semver.isSingleVersion(input)', () => {
+  it('should pad short version', () => {
+    expect(!!semver.isSingleVersion('v1.2')).toBe(true);
+  });
+});
+describe('semver.isStable(input)', () => {
+  it('should pad short version', () => {
+    expect(!!semver.isStable('v1.2')).toBe(true);
+  });
+});
 describe('semver.isValid(input)', () => {
   it('should support simple semver', () => {
     expect(!!semver.isValid('1.2.3')).toBe(true);
@@ -14,6 +43,17 @@ describe('semver.isValid(input)', () => {
     expect(!!semver.isValid('~1.2.3')).toBe(true);
     expect(!!semver.isValid('^1.2.3')).toBe(true);
     expect(!!semver.isValid('>1.2.3')).toBe(true);
+  });
+});
+describe('semver.isVersion(input)', () => {
+  it('should support simple semver', () => {
+    expect(!!semver.isValid('1.2.3')).toBe(true);
+  });
+  it('should support shortened version', () => {
+    expect(!!semver.isValid('2.5')).toBe(true);
+  });
+  it('should support shortened v version', () => {
+    expect(!!semver.isValid('v2.5')).toBe(true);
   });
 });
 describe('semver.isLessThanRange()', () => {
@@ -61,6 +101,9 @@ describe('semver.matches()', () => {
   });
 });
 describe('semver.getNewValue()', () => {
+  it('returns toVersion', () => {
+    expect(semver.getNewValue('v1.0', 'replace', '1.0', '1.1')).toEqual('v1.1');
+  });
   it('bumps short caret to same', () => {
     expect(semver.getNewValue('^1.0', 'bump', '1.0.0', '1.0.7')).toEqual(
       '^1.0'
@@ -89,6 +132,16 @@ describe('semver.getNewValue()', () => {
   it('returns toVersion if unsupported', () => {
     expect(semver.getNewValue('+4.0.0', 'replace', '4.0.0', '4.2.0')).toEqual(
       '4.2.0'
+    );
+  });
+  it('returns versioned toVersion', () => {
+    expect(semver.getNewValue('v4.0.0', 'replace', '4.0.0', '4.2.0')).toEqual(
+      'v4.2.0'
+    );
+  });
+  it('bumps short caret with v', () => {
+    expect(semver.getNewValue('^v1.0', 'bump', '1.0.0', '1.1.7')).toEqual(
+      '^v1.1'
     );
   });
 });

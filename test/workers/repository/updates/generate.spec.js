@@ -171,6 +171,8 @@ describe('workers/repository/updates/generate', () => {
           semanticCommitScope: 'package',
           lazyGrouping: true,
           newValue: '1.2.0',
+          isSingleVersion: true,
+          toVersion: '1.2.0',
           foo: 1,
           group: {
             foo: 2,
@@ -189,6 +191,8 @@ describe('workers/repository/updates/generate', () => {
           depName: 'some-dep',
           commitBody: '[skip-ci]',
           newValue: '1.2.0',
+          isSingleVersion: true,
+          toVersion: '1.2.0',
         },
       ];
       const res = generateBranchConfig(branch);
@@ -231,6 +235,18 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
+    });
+    it('overrides schedule for pin PRs', () => {
+      const branch = [
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          schedule: 'before 3am',
+          updateType: 'pin',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.schedule).toEqual([]);
     });
   });
 });

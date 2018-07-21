@@ -241,10 +241,10 @@ Array [
     "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
-    "repos/some/repo/contents/backend/package-lock.json?ref=master",
+    "repos/some/repo/contents/package-lock.json?ref=master",
   ],
   Array [
-    "repos/some/repo/git/trees/master/backend",
+    "repos/some/repo/git/trees/master",
   ],
   Array [
     "repos/some/repo/git/blobs/some-sha",
@@ -364,23 +364,6 @@ Object {
   "displayNumber": "Pull Request #1",
   "isStale": true,
   "mergeable": true,
-  "number": 1,
-  "sha": undefined,
-  "state": "open",
-}
-`;
-
-exports[`platform/github getPr(prNo) should return a not rebaseable PR if gitAuthor and error 1`] = `
-Object {
-  "base": Object {
-    "sha": "1234",
-  },
-  "branchName": undefined,
-  "canRebase": false,
-  "commits": 1,
-  "displayNumber": "Pull Request #1",
-  "isUnmergeable": true,
-  "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
   "state": "open",

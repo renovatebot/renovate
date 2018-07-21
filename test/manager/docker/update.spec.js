@@ -1,16 +1,17 @@
 const dockerfile = require('../../../lib/manager/docker/update');
 
-describe('workers/branch/dockerfile', () => {
+describe('manager/docker/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const fileContent = '# comment FROM node:8\nFROM node:8\nRUN something\n';
       const upgrade = {
         lineNumber: 1,
         depName: 'node',
-        currentValue: 'node:8',
+        newValue: '8',
         fromPrefix: 'FROM',
         fromSuffix: '',
-        newFrom: 'node:8@sha256:abcdefghijklmnop',
+        tagSuffix: 'alpine',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
       expect(res).toMatchSnapshot();
@@ -21,10 +22,10 @@ describe('workers/branch/dockerfile', () => {
       const upgrade = {
         lineNumber: 1,
         depName: 'node',
-        currentValue: 'node:8',
+        newValue: '8',
         fromPrefix: 'FROM',
         fromSuffix: 'as base',
-        newFrom: 'node:8@sha256:abcdefghijklmnop',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
       expect(res).toMatchSnapshot();
@@ -35,10 +36,10 @@ describe('workers/branch/dockerfile', () => {
       const upgrade = {
         lineNumber: 1,
         depName: 'node',
-        currentValue: 'node:8',
+        newValue: '8',
         fromPrefix: 'FROM',
         fromSuffix: 'as base',
-        newFrom: 'node:8@sha256:abcdefghijklmnop',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
       expect(res).toMatchSnapshot();
@@ -49,10 +50,10 @@ describe('workers/branch/dockerfile', () => {
       const upgrade = {
         lineNumber: 0,
         depName: 'node',
-        currentValue: 'node:8',
+        newValue: '8',
         fromPrefix: 'FROM',
         fromSuffix: '',
-        newFrom: 'node:8@sha256:abcdefghijklmnop',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
       expect(res).toBe(null);
@@ -63,10 +64,9 @@ describe('workers/branch/dockerfile', () => {
       const upgrade = {
         lineNumber: 1,
         depName: 'node',
-        currentValue: 'node:8',
+        newValue: '8',
         fromPrefix: 'FROM',
         fromSuffix: 'as base',
-        newFrom: 'node:8',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
       expect(res).toBe(fileContent);
@@ -76,10 +76,10 @@ describe('workers/branch/dockerfile', () => {
       const upgrade = {
         lineNumber: 1,
         depName: 'node',
-        currentValue: 'node:8',
+        newValue: '8',
         fromPrefix: 'FROM',
         fromSuffix: '',
-        newFrom: 'node:8@sha256:abcdefghijklmnop',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
       expect(res).toBe(null);
@@ -90,18 +90,18 @@ describe('workers/branch/dockerfile', () => {
       const upgrade1 = {
         lineNumber: 0,
         depName: 'debian',
-        currentValue: 'debian:wheezy',
+        newValue: 'wheezy',
         fromPrefix: 'FROM',
         fromSuffix: 'as stage-1',
-        newFrom: 'debian:wheezy@sha256:abcdefghijklmnop',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       const upgrade2 = {
         lineNumber: 2,
         depName: 'debian',
-        currentValue: 'debian:wheezy',
+        newValue: 'wheezy',
         fromPrefix: 'FROM',
         fromSuffix: '',
-        newFrom: 'debian:wheezy@sha256:abcdefghijklmnop',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       let res = dockerfile.updateDependency(fileContent, upgrade1);
       res = dockerfile.updateDependency(res, upgrade2);

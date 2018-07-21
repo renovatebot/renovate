@@ -19,7 +19,7 @@ Assuming the lookup succeeds (solutions for that are described later in this doc
 
 If you are using a lock file (yarn's `yarn.lock` or npm's `package-lock.json`) then Renovate needs to regenerate that lock file whenever _any_ npm module listed in your `package.json` is updated to a new version.
 
-To do this, Renovate will run `npm install` or `yarn install` and save the resulting lock file. The "problem" here is that for the install to succeed - and lock file to be generated - then all modules must be found, including private ones. Therefore if a private module can't be found, and you're using lock files, then the private module install failure will then block _any_ module from being renovated.
+To do this, Renovate will run `npm install` or `yarn install` and save the resulting lock file. The "problem" here is that for the install to succeed - and lock file to be generated - then all touched packages must be found in the registry, including possibly private ones. Therefore if a private module can't be found, and you're using lock files, then the private module install failure might then block _all_ modules from being renovated.
 
 Because lock files are quickly becoming "the new standard", we think it's essential that Renovate can access/install any private modules necessary.
 
@@ -93,6 +93,8 @@ You will then get an encrypted string that you can substitute into your renovate
 }
 ```
 
+However be aware that if your `.npmrc` is too long to encrypt then the above command will fail. In that case, you should encrypt `npmToken` instead (see next section) and add replace the token with `${NPM_TOKEN}` in the (unencrypted) `npmrc` in your config.
+
 #### Add an encrypted npm token to repository
 
 Similar to the above, but using npm token. As described earlier, use [generate-npm-token](https://npmjs.com/package/generate-npm-token) to generate an npm token and then [renovate-encrypt](https://npmjs.com/package/renovate-encrypt) to encrypt it.
@@ -113,10 +115,8 @@ The configure it like:
 }
 ```
 
-## Future npm authentication approaches
+Renovate will then use the following logic:
 
-#### Webhooks from npm registry
-
-The npm registry allows for owners of packages to send webhooks to custom destinations whenever the package is updated. Using this approach, it would be possible to notify the Renovate App API of updates to your private npm modules and we store these in our database.
-
-An important downside of this approach to be aware of is that this could solve only Use #1 (module lookup) and not Use #2 (Lock file generation). As it seems inevitable that most projects will adopt lock files - especially projects advanced enough to be using private npm modules - this solution is taking a lower priority compared to the first two, because it may ultimately not be required if lock file support becomes as widespread as expected.
+1.  If no `npmrc` string is present in config then one will be created with the `_authToken` pointing to the default npmjs registry
+2.  If an `npmrc` string is present and contains `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
+3.  If an `npmrc` string is present but doesn't contain `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it

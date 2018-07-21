@@ -220,6 +220,10 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 
 And then the branchName would be `renovate/eslint` instead.
 
+## ignoreDeprecated
+
+By default, Renovate won't update any packages to deprecated versions unless the package version was _already_ deprecated. The goal of this is to make sure you don't upgrade from a non-deprecated version to a deprecated one just because it's higher than the current version. If for some reason you wish to _force_ deprecated updates on Renovate, you can set `ignoreDeprecated` to `false`, but this is not recommended for most situations.
+
 ## ignoreDeps
 
 The `ignoreDeps` configuration field allows you to define a list of dependency names to be ignored by Renovate. Currently it supports only "exact match" dependency names and not any patterns. e.g. to ignore both `eslint` and `eslint-config-base` you would add this to your config:
@@ -440,7 +444,7 @@ The above will set `rangeStrategy` to `replace` for any package starting with `a
 
 ### updateTypes
 
-USe this field to match rules against types of updates. For example to apply a special label for Major updates:
+Use this field to match rules against types of updates. For example to apply a special label for Major updates:
 
 ```
   "packageRules: [{
@@ -513,6 +517,8 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
+## raiseDeprecationWarnings
+
 ## rangeStrategy
 
 Behaviour:
@@ -554,6 +560,10 @@ By default, Renovate will detect if it has proposed an update to a project befor
 - Lock file maintenance
 
 Typically you shouldn't need to modify this setting.
+
+## registryUrls
+
+This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forwards compatibility.
 
 ## renovateFork
 

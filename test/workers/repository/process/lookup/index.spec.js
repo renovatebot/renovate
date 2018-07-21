@@ -7,6 +7,9 @@ const webpackJson = require('../../../../_fixtures/npm/webpack.json');
 const nextJson = require('../../../../_fixtures/npm/next.json');
 const vueJson = require('../../../../_fixtures/npm/vue.json');
 const typescriptJson = require('../../../../_fixtures/npm/typescript.json');
+const docker = require('../../../../../lib/datasource/docker');
+
+jest.mock('../../../../../lib/datasource/docker');
 
 qJson.latestVersion = '1.4.1';
 
@@ -652,20 +655,20 @@ describe('manager/npm/lookup', () => {
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';
-      config.depName = 'helmet';
-      config.purl = 'pkg:npm/helmet';
+      config.depName = '@types/helmet';
+      config.purl = 'pkg:npm/%40types/helmet';
       nock('https://registry.npmjs.org')
-        .get('/helmet')
+        .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
     });
     it('should treat zero zero caret ranges as pinned', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^0.0.34';
-      config.depName = 'helmet';
-      config.purl = 'pkg:npm/helmet';
+      config.depName = '@types/helmet';
+      config.purl = 'pkg:npm/%40types/helmet';
       nock('https://registry.npmjs.org')
-        .get('/helmet')
+        .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
@@ -857,6 +860,142 @@ describe('manager/npm/lookup', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
       expect(res.repositoryUrl).toBeDefined();
+    });
+    it('ignores deprecated', async () => {
+      config.currentValue = '1.3.0';
+      config.depName = 'q2';
+      config.purl = 'pkg:npm/q2';
+      const returnJson = JSON.parse(JSON.stringify(qJson));
+      returnJson.name = 'q2';
+      returnJson.versions['1.4.1'].deprecated = 'true';
+      nock('https://registry.npmjs.org')
+        .get('/q2')
+        .reply(200, returnJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+      expect(res.updates[0].toVersion).toEqual('1.4.0');
+    });
+    it('skips unsupported values', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('skips undefined values', async () => {
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest pin', async () => {
+      config.currentValue = '8.0.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest pin for non-version', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+          {
+            version: 'alpine',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest lookup failure', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+          {
+            version: 'alpine',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce(null);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(0);
+    });
+    it('handles digest update', async () => {
+      config.currentValue = '8.0.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest update for non-version', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: 'alpine',
+          },
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
     });
   });
 });

@@ -1,5 +1,5 @@
-const docker = require('../../lib/datasource/docker');
 const got = require('got');
+const docker = require('../../lib/datasource/docker');
 
 jest.mock('got');
 
@@ -35,29 +35,43 @@ describe('api/docker', () => {
       expect(res).toBe('some-digest');
     });
   });
-  describe('getTags', () => {
+  describe('getDependency', () => {
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
-      const res = await docker.getTags(undefined, 'node');
+      const res = await docker.getDependency({
+        fullname: 'node',
+        qualifiers: {},
+      });
       expect(res).toBe(null);
     });
     it('returns tags with no suffix', async () => {
       const tags = ['a', 'b', '1.0.0', '1.1.0', '1.1.0-alpine'];
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getTags(undefined, 'my/node');
-      expect(res).toEqual(['1.0.0', '1.1.0', '1.1.0-alpine']);
+      const res = await docker.getDependency({
+        fullname: 'my/node',
+        qualifiers: {},
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(3);
     });
     it('returns tags with suffix', async () => {
       const tags = ['a', 'b', '1.0.0', '1.1.0-alpine'];
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getTags(undefined, 'my/node', 'alpine');
-      expect(res).toEqual(['1.1.0']);
+      const res = await docker.getDependency({
+        fullname: 'my/node',
+        qualifiers: { suffix: 'alpine' },
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(1);
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
-      const res = await docker.getTags(undefined, 'node');
+      const res = await docker.getDependency({
+        fullname: 'my/node',
+        qualifiers: {},
+      });
       expect(res).toBe(null);
     });
   });
