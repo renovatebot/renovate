@@ -222,7 +222,7 @@ Array [
     "labels": Array [],
     "language": "docker",
     "lazyGrouping": true,
-    "manager": "docker",
+    "manager": "dockerfile",
     "managerBranchPrefix": "",
     "newValue": "10.0.1",
     "npmToken": null,

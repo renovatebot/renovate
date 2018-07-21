@@ -144,6 +144,8 @@ Add to this object if you wish to define rules that apply only to PRs that pin D
 
 ## docker-compose
 
+## dockerfile
+
 ## enabled
 
 Renovate is enabled for all packages by default, but this setting allows you to disable Renovate for specific packages, dependency types, package files, or even for the whole repository.
