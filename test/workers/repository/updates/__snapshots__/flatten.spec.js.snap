@@ -31,6 +31,7 @@ Array [
     "groupName": null,
     "groupSlug": null,
     "labels": Array [],
+    "language": "js",
     "lazyGrouping": true,
     "manager": "npm",
     "managerBranchPrefix": "",
@@ -89,6 +90,7 @@ Array [
     "groupName": null,
     "groupSlug": null,
     "labels": Array [],
+    "language": "js",
     "lazyGrouping": true,
     "manager": "npm",
     "managerBranchPrefix": "",
@@ -146,6 +148,7 @@ Array [
     "groupName": null,
     "groupSlug": null,
     "labels": Array [],
+    "language": "js",
     "lazyGrouping": true,
     "lockFileMaintenance": Object {
       "branchTopic": "lock-file-maintenance",

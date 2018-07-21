@@ -250,6 +250,10 @@ If you wish for Renovate to process only select paths in the repository, use `in
 If instead you need to just exclude/ignore certain paths then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
 
+## js
+
+Use this configuration option for shared config across npm/yarn/pnpm and meteor package managers.
+
 ## labels
 
 Add an array of 1 or more strings to `labels` and Renovate will apply these labels to any PR its created. Usually these will be a per-repository setting like "renovate", or "ready", or "dependencies", however you can configure them right down to per-package level.
