@@ -7,6 +7,8 @@ describe('datasource/index', () => {
     expect(await datasource.getDependency('pkggithub/some/dep')).toBeNull();
   });
   it('returns getDigest', async () => {
-    expect(await datasource.getDigest('pkg:docker/node')).toBeUndefined();
+    expect(
+      await datasource.getDigest({ purl: 'pkg:docker/node' })
+    ).toBeUndefined();
   });
 });
