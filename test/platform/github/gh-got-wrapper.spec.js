@@ -90,6 +90,25 @@ describe('platform/gh-got-wrapper', () => {
     expect(e).toBeDefined();
     expect(e.message).toEqual('bad-credentials');
   });
+  it('should throw platform failure', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        statusCode: 401,
+        message: 'Bad credentials. (401)',
+        headers: {
+          'x-ratelimit-limit': 60,
+        },
+      })
+    );
+    let e;
+    try {
+      await get('some-url');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('platform-failure');
+  });
   it('should throw for blob size', async () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
