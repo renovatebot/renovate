@@ -109,6 +109,7 @@ Object {
       "updateType": "pin",
     },
   ],
+  "warnings": Array [],
 }
 `;
 
@@ -122,6 +123,7 @@ Object {
       "updateType": "pin",
     },
   ],
+  "warnings": Array [],
 }
 `;
 
@@ -157,6 +159,7 @@ Object {
       "updateType": "digest",
     },
   ],
+  "warnings": Array [],
 }
 `;
 
@@ -170,26 +173,13 @@ Object {
       "updateType": "digest",
     },
   ],
+  "warnings": Array [],
 }
 `;
 
-exports[`manager/npm/lookup .lookupUpdates() handles github 404 1`] = `
-Array [
-  Object {
-    "message": "Failed to look up dependency foo",
-    "updateType": "warning",
-  },
-]
-`;
+exports[`manager/npm/lookup .lookupUpdates() handles github 404 1`] = `Array []`;
 
-exports[`manager/npm/lookup .lookupUpdates() handles packagist 1`] = `
-Array [
-  Object {
-    "message": "Failed to look up dependency foo/bar",
-    "updateType": "warning",
-  },
-]
-`;
+exports[`manager/npm/lookup .lookupUpdates() handles packagist 1`] = `Array []`;
 
 exports[`manager/npm/lookup .lookupUpdates() handles prerelease jumps 1`] = `
 Array [
@@ -208,23 +198,9 @@ Array [
 ]
 `;
 
-exports[`manager/npm/lookup .lookupUpdates() handles pypi 404 1`] = `
-Array [
-  Object {
-    "message": "Failed to look up dependency foo",
-    "updateType": "warning",
-  },
-]
-`;
+exports[`manager/npm/lookup .lookupUpdates() handles pypi 404 1`] = `Array []`;
 
-exports[`manager/npm/lookup .lookupUpdates() handles unknown purl 1`] = `
-Array [
-  Object {
-    "message": "Failed to look up dependency foo",
-    "updateType": "warning",
-  },
-]
-`;
+exports[`manager/npm/lookup .lookupUpdates() handles unknown purl 1`] = `Array []`;
 
 exports[`manager/npm/lookup .lookupUpdates() ignores deprecated 1`] = `
 Object {
@@ -261,6 +237,7 @@ Marking the latest version of an npm package as deprecated results in the entire
       "updateType": "minor",
     },
   ],
+  "warnings": Array [],
 }
 `;
 
@@ -427,6 +404,7 @@ Object {
       "updateType": "minor",
     },
   ],
+  "warnings": Array [],
 }
 `;
 
@@ -742,6 +720,7 @@ exports[`manager/npm/lookup .lookupUpdates() skips undefined values 1`] = `
 Object {
   "skipReason": "unsupported-value",
   "updates": Array [],
+  "warnings": Array [],
 }
 `;
 
@@ -749,6 +728,7 @@ exports[`manager/npm/lookup .lookupUpdates() skips unsupported values 1`] = `
 Object {
   "skipReason": "unsupported-value",
   "updates": Array [],
+  "warnings": Array [],
 }
 `;
 
