@@ -245,7 +245,7 @@ Array [
     "recreateClosed": false,
     "requiredStatusChecks": Array [],
     "reviewers": Array [],
-    "rollbackPrs": true,
+    "rollbackPrs": false,
     "schedule": Array [],
     "semanticCommitScope": "deps",
     "semanticCommitType": "chore",
