@@ -19,6 +19,7 @@ describe('workers/repository/onboarding/pr', () => {
       };
       packageFiles = { npm: [{ packageFile: 'package.json' }] };
       branches = [];
+      platform.getPrBody = jest.fn(input => input);
       platform.createPr.mockReturnValue({});
     });
     let createPrBody;

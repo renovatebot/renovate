@@ -14,18 +14,24 @@ exports[`workers/repository/onboarding/pr/pr-list getPrList() handles multiple 1
 
 With your current configuration, Renovate will create 2 Pull Requests:
 
-1. **Pin dependencies**
+<details>
+<summary>Pin dependencies</summary>
 
   - Branch name: \`renovate/pin-dependencies\`
   - Pins [a](https://a) in \`devDependencies\` to \`1.1.0\`
   - Pins b to \`1.5.3\`
 
 
-2. **Update a to v2**
+</details>
+
+<details>
+<summary>Update a to v2</summary>
 
   - Branch name: \`renovate/a-2.x\`
   - Upgrades [a](https://a) in \`devDependencies\` from \`^1.0.0\` to \`2.0.1\`
 
+
+</details>
 
 "
 `;
@@ -36,11 +42,14 @@ exports[`workers/repository/onboarding/pr/pr-list getPrList() has special lock f
 
 With your current configuration, Renovate will create 1 Pull Request:
 
-1. **Lock file maintenance**
+<details>
+<summary>Lock file maintenance</summary>
 
   - Schedule: [\\"before 5am\\"]
   - Branch name: \`renovate/lock-file-maintenance\`
   - Regenerates lock file to use latest dependency versions
+
+</details>
 
 "
 `;
