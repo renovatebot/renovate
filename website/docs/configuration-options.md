@@ -589,6 +589,10 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 
 Must be valid usernames. Note: does not currently work with the GitHub App due to an outstanding GitHub API bug.
 
+## rollbackPrs
+
+Set this to false either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
+
 ## schedule
 
 The `schedule` option allows you to define 1 or more times of week for Renovate updates. Running Renovate around the clock may seem too "noisy" for some projects and therefore `schedule` is a good way to reduce the noise by reducing the timeframe in which Renovate will operate on your repository.
