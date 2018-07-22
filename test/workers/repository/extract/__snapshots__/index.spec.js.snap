@@ -20,6 +20,9 @@ Object {
   "dockerfile": Array [
     Object {},
   ],
+  "gitlabci": Array [
+    Object {},
+  ],
   "meteor": Array [
     Object {},
   ],

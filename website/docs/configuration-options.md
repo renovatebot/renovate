@@ -199,6 +199,10 @@ See https://renovatebot.com/docs/configuration-reference/config-presets for deta
 
 ## fileMatch
 
+## gitlabci
+
+Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
+
 ## group
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to _add_ settings to any group by defining your own `group` configuration object.
