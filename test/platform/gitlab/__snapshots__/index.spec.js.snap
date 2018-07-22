@@ -243,6 +243,8 @@ Object {
 }
 `;
 
+exports[`platform/gitlab getPrBody(input) returns updated pr body 1`] = `"<p><a href=\\"https://github.com/foo/bar/issues/5\\">https://github.com/foo/bar/issues/5</a> plus also <a href=\\"https://github.com/foo/bar/issues/5\\">a link</a></p>"`;
+
 exports[`platform/gitlab getPrFiles() returns files 1`] = `
 Array [
   "renovate.json",

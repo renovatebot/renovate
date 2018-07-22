@@ -842,6 +842,13 @@ describe('platform/gitlab', () => {
       expect(get.put.mock.calls.length).toEqual(1);
     });
   });
+  describe('getPrBody(input)', () => {
+    it('returns updated pr body', () => {
+      const input =
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(gitlab.getPrBody(input)).toMatchSnapshot();
+    });
+  });
   describe('getFile(filePath, branchName)', () => {
     beforeEach(async () => {
       get.mockReturnValueOnce({ body: [{ type: 'blob', path: 'some-path' }] });

@@ -1481,6 +1481,13 @@ describe('platform/github', () => {
       expect(get.mock.calls).toHaveLength(3);
     });
   });
+  describe('getPrBody(input)', () => {
+    it('returns updated pr body', () => {
+      const input =
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(github.getPrBody(input)).toMatchSnapshot();
+    });
+  });
   describe('mergePr(prNo) - autodetection', () => {
     beforeEach(async () => {
       function guessInitRepo(...args) {
