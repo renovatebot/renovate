@@ -36,6 +36,7 @@ describe('workers/repository/onboarding/pr', () => {
       platform.getBranchPr.mockReturnValue({
         title: 'Configure Renovate',
         body: createPrBody,
+        canRebase: true,
       });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr.mock.calls).toHaveLength(0);
@@ -46,6 +47,17 @@ describe('workers/repository/onboarding/pr', () => {
       platform.getBranchPr.mockReturnValue({
         title: 'Configure Renovate',
         body: createPrBody,
+      });
+      await ensureOnboardingPr(config, [], branches);
+      expect(platform.createPr.mock.calls).toHaveLength(0);
+      expect(platform.updatePr.mock.calls).toHaveLength(1);
+    });
+    it('updates PR', async () => {
+      config.baseBranch = 'some-branch';
+      platform.getBranchPr.mockReturnValue({
+        title: 'Configure Renovate',
+        body: createPrBody,
+        canMerge: true,
       });
       await ensureOnboardingPr(config, [], branches);
       expect(platform.createPr.mock.calls).toHaveLength(0);
