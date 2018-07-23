@@ -96,7 +96,7 @@ describe('platform/gh-got-wrapper', () => {
         statusCode: 401,
         message: 'Bad credentials. (401)',
         headers: {
-          'x-ratelimit-limit': 60,
+          'x-ratelimit-limit': '60',
         },
       })
     );
