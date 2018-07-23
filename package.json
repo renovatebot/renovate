@@ -70,7 +70,7 @@
     "detect-indent": "5.0.0",
     "email-addresses": "3.0.1",
     "fast-clone": "1.5.3",
-    "fast-xml-parser": "3.11.1",
+    "fast-xml-parser": "3.11.2",
     "fs-extra": "7.0.0",
     "get-installed-path": "4.0.8",
     "gh-got": "7.0.0",

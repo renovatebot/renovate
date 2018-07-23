@@ -1960,9 +1960,9 @@ fast-levenshtein@~2.0.4:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
 
-fast-xml-parser@3.11.1:
-  version "3.11.1"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-3.11.1.tgz#cdb64d4b553354bca50712f2dccb34787e3923ab"
+fast-xml-parser@3.11.2:
+  version "3.11.2"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-3.11.2.tgz#52de7bea3e94eec2d7e9699ccc3ec04ffbee62ce"
   dependencies:
     nimnjs "^1.3.2"
 
