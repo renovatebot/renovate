@@ -1840,12 +1840,5 @@ describe('platform/github', () => {
       const res = await github.getCommitMessages();
       expect(res).toMatchSnapshot();
     });
-    it('swallows errors', async () => {
-      get.mockImplementationOnce(() => {
-        throw new Error('some-error');
-      });
-      const res = await github.getCommitMessages();
-      expect(res).toHaveLength(0);
-    });
   });
 });
