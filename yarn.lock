@@ -5188,9 +5188,9 @@ pn@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
 
-pnpm@2.11.3:
-  version "2.11.3"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.11.3.tgz#be5e5b091829ad5ce0d86522e4b5011ea50cea3c"
+pnpm@2.12.2:
+  version "2.12.2"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.12.2.tgz#1b575512ae27d767f4aaec14e94b18e0c70bcc7b"
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
