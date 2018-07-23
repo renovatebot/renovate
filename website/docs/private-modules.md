@@ -11,9 +11,9 @@ Private npm modules are used at two times during Renovate's process.
 
 #### 1. Module lookup
 
-If a private npm module is listed as a dependency in a `package.json`, then Renovate will attempt to keep it up-to-date like all other modules by querying the npm registry like it would for any other package. Hence, by default a private package lookup will fail, because of lack of credentials. This means it won't be "renovated" and its version will remain as it is, unless you update it manually. All other modules can be looked up independently of this and Renovate can detect if they need updating.
+If a private npm module is listed as a dependency in a `package.json`, then Renovate will attempt to keep it up-to-date by querying the npm registry like it would for any other package. Hence, by default a private package lookup will fail, because of lack of credentials. This means it won't be "renovated" and its version will remain unchanged, unless you update it manually. These failures don't affect Renovate's ability to look up *other* modules in the same package file.
 
-Assuming the lookup succeeds (solutions for that are described later in this document) then private module versions will be kept up-to-date like public modules are.
+Assuming the private module lookup succeeds (solutions for that are described later in this document) then private module versions will be kept up-to-date like public modules are.
 
 #### 2. Lock file generation
 
@@ -25,9 +25,11 @@ To do this, Renovate will run `npm install` or `yarn install` and save the resul
 
 The recommended approaches for private module authentication are:
 
-**If you are running your own Renovate bot**: copy a `.npmrc` file to the home dir of the bot
+**If you are running your own Renovate bot**: copy an `.npmrc` file to the home dir of the bot
+
 **If you are using private modules with npmjs.org**: Add an encrypted `npmToken` to your Renovate config
-**If you are using a private registry**: Add an unencrypted `.npmrc` in config (with `${NPM_TOKEN}`) plus an encrypted `npmToken` in config
+
+**If you are using a private registry**: Add an unencrypted `npmrc` plus an encrypted `npmToken` in config
 
 #### Add/authenticate the "renovate" npm user to your private npm modules
 
