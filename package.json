@@ -107,6 +107,7 @@
     "upath": "1.1.0",
     "validator": "10.4.0",
     "vso-node-api": "6.5.0",
+    "www-authenticate": "^0.6.2",
     "yarn": "1.7.0"
   },
   "devDependencies": {
