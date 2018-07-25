@@ -756,6 +756,16 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+    it('supports majorgte updates', async () => {
+      config.rangeStrategy = 'bump';
+      config.currentValue = '>=0.9.0';
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
     it('rejects in-range unsupported operator', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>1.0.0';

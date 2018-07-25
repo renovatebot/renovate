@@ -819,6 +819,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
+    "isBump": true,
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
@@ -826,7 +827,7 @@ Array [
     "newValue": "^1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "updateType": "bump",
+    "updateType": "minor",
   },
 ]
 `;
@@ -836,6 +837,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
+    "isBump": true,
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
@@ -843,7 +845,7 @@ Array [
     "newValue": ">=1.4.1",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
-    "updateType": "bump",
+    "updateType": "minor",
   },
 ]
 `;
@@ -853,6 +855,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "1.0.0",
+    "isBump": true,
     "isRange": true,
     "isSingleVersion": false,
     "newMajor": 1,
@@ -860,7 +863,7 @@ Array [
     "newValue": "~1.0.1",
     "releaseTimestamp": "2014-03-11T18:47:17.560Z",
     "toVersion": "1.0.1",
-    "updateType": "bump",
+    "updateType": "patch",
   },
   Object {
     "canBeUnpublished": false,
@@ -873,6 +876,24 @@ Array [
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
     "updateType": "minor",
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() supports majorgte updates 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.9.0",
+    "isBump": true,
+    "isRange": true,
+    "isSingleVersion": false,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": ">=1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "toVersion": "1.4.1",
+    "updateType": "major",
   },
 ]
 `;
