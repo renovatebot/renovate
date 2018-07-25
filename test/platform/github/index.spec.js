@@ -1487,6 +1487,14 @@ describe('platform/github', () => {
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(github.getPrBody(input)).toMatchSnapshot();
     });
+    it('returns not-updated pr body for GHE', () => {
+      const endpoint = process.env.GITHUB_ENDPOINT;
+      process.env.GITHUB_ENDPOINT = 'https://github.mycompany.com';
+      const input =
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(github.getPrBody(input)).toEqual(input);
+      process.env.GITHUB_ENDPOINT = endpoint;
+    });
   });
   describe('mergePr(prNo) - autodetection', () => {
     beforeEach(async () => {
