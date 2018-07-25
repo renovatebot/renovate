@@ -1,3 +1,4 @@
+const composer = require('../../../lib/manager/composer');
 const npm = require('../../../lib/manager/npm');
 const {
   getUpdatedPackageFiles,
@@ -12,6 +13,8 @@ describe('workers/branch/get-updated', () => {
         ...defaultConfig,
         upgrades: [],
       };
+      composer.updateDependency = jest.fn();
+      composer.getLockFile = jest.fn();
       npm.updateDependency = jest.fn();
     });
     it('handles empty', async () => {
@@ -37,6 +40,19 @@ describe('workers/branch/get-updated', () => {
         manager: 'npm',
       });
       npm.updateDependency.mockReturnValue('some new content');
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles lock files', async () => {
+      config.parentBranch = 'some-branch';
+      config.upgrades.push({
+        manager: 'composer',
+      });
+      composer.updateDependency.mockReturnValue('some new content');
+      composer.getLockFile.mockReturnValue({
+        name: 'composer.json',
+        contents: 'some contents',
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });

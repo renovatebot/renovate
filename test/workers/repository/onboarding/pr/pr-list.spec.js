@@ -68,6 +68,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           ],
         },
       ];
+      config.prHourlyLimit = 1;
       const res = getPrList(config, branches);
       expect(res).toMatchSnapshot();
     });

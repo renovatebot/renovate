@@ -7,6 +7,9 @@ const webpackJson = require('../../../../_fixtures/npm/webpack.json');
 const nextJson = require('../../../../_fixtures/npm/next.json');
 const vueJson = require('../../../../_fixtures/npm/vue.json');
 const typescriptJson = require('../../../../_fixtures/npm/typescript.json');
+const docker = require('../../../../../lib/datasource/docker');
+
+jest.mock('../../../../../lib/datasource/docker');
 
 qJson.latestVersion = '1.4.1';
 
@@ -753,6 +756,16 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+    it('supports majorgte updates', async () => {
+      config.rangeStrategy = 'bump';
+      config.currentValue = '>=0.9.0';
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
     it('rejects in-range unsupported operator', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>1.0.0';
@@ -872,6 +885,127 @@ describe('manager/npm/lookup', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
       expect(res.updates[0].toVersion).toEqual('1.4.0');
+    });
+    it('skips unsupported values', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('skips undefined values', async () => {
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest pin', async () => {
+      config.currentValue = '8.0.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest pin for non-version', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+          {
+            version: 'alpine',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest lookup failure', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+          {
+            version: 'alpine',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce(null);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(0);
+    });
+    it('handles digest update', async () => {
+      config.currentValue = '8.0.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest update for non-version', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
+      config.pinDigests = true;
+      docker.getDependency.mockReturnValueOnce({
+        releases: [
+          {
+            version: 'alpine',
+          },
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
     });
   });
 });

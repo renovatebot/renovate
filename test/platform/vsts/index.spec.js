@@ -691,7 +691,13 @@ describe('platform/vsts', () => {
       expect(vstsApi.gitApi.mock.calls.length).toBe(3);
     });
   });
-
+  describe('getPrBody(input)', () => {
+    it('returns updated pr body', () => {
+      const input =
+        '<details>https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(vsts.getPrBody(input)).toMatchSnapshot();
+    });
+  });
   describe('Not supported by VSTS (yet!)', () => {
     it('setBranchStatus', () => {
       const res = vsts.setBranchStatus();

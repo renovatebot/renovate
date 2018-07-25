@@ -47,5 +47,14 @@ describe('workers/repository/extract/file-match', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
+    it('deduplicates', () => {
+      fileList.push('Dockerfile');
+      const res = fileMatch.getMatchingFiles(fileList, 'npm', [
+        '(^|/)package.json$',
+        'package.json',
+      ]);
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
+    });
   });
 });

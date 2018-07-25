@@ -19,7 +19,7 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 
 {{#each releases as |release|}}
 {{#if release.releaseNotes}}
-### [`v{{{release.version}}}`]({{{release.releaseNotes.url}}})
+### [{{#if release.releaseNotes.name}}{{{release.releaseNotes.name}}}{{else}}`v{{{release.version}}}`{{/if}}]({{{release.releaseNotes.url}}})
 {{#if release.compare.url}}
 [Compare Source]({{release.compare.url}})
 {{/if}}

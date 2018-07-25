@@ -144,6 +144,8 @@ Add to this object if you wish to define rules that apply only to PRs that pin D
 
 ## docker-compose
 
+## dockerfile
+
 ## enabled
 
 Renovate is enabled for all packages by default, but this setting allows you to disable Renovate for specific packages, dependency types, package files, or even for the whole repository.
@@ -197,6 +199,10 @@ See https://renovatebot.com/docs/configuration-reference/config-presets for deta
 
 ## fileMatch
 
+## gitlabci
+
+Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
+
 ## group
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to _add_ settings to any group by defining your own `group` configuration object.
@@ -247,6 +253,10 @@ By default, Renovate won't update any packages to unstable versions (e.g. `4.0.0
 If you wish for Renovate to process only select paths in the repository, use `includePaths`.
 If instead you need to just exclude/ignore certain paths then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
+
+## js
+
+Use this configuration option for shared config across npm/yarn/pnpm and meteor package managers.
 
 ## labels
 
@@ -440,7 +450,7 @@ The above will set `rangeStrategy` to `replace` for any package starting with `a
 
 ### updateTypes
 
-USe this field to match rules against types of updates. For example to apply a special label for Major updates:
+Use this field to match rules against types of updates. For example to apply a special label for Major updates:
 
 ```
   "packageRules: [{
@@ -578,6 +588,10 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 ## reviewers
 
 Must be valid usernames. Note: does not currently work with the GitHub App due to an outstanding GitHub API bug.
+
+## rollbackPrs
+
+Set this to false either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
 
 ## schedule
 

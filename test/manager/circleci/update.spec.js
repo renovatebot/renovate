@@ -8,16 +8,18 @@ describe('manager/circleci/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         lineNumber: 65,
-        newFrom: 'node:8.10.0@sha256:abcdefghijklmnop',
+        depName: 'node',
+        newValue: '8.10.0',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(upgrade.newFrom)).toBe(true);
+      expect(res.includes(upgrade.newDigest)).toBe(true);
     });
     it('returns same', () => {
       const upgrade = {
         lineNumber: 12,
-        newFrom: 'node',
+        depName: 'node',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).toEqual(yamlFile);
@@ -25,7 +27,9 @@ describe('manager/circleci/update', () => {
     it('returns null if mismatch', () => {
       const upgrade = {
         lineNumber: 17,
-        newFrom: 'postgres:9.6.8@sha256:abcdefghijklmnop',
+        depName: 'postgres',
+        newValue: '9.6.8',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).toBe(null);
