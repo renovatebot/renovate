@@ -109,6 +109,22 @@ describe('platform/gh-got-wrapper', () => {
     expect(e).toBeDefined();
     expect(e.message).toEqual('platform-failure');
   });
+  it('should throw platform failure for 500', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        statusCode: 500,
+        message: 'Internal Server Error',
+      })
+    );
+    let e;
+    try {
+      await get('some-url', {}, 0);
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('platform-failure');
+  });
   it('should throw for blob size', async () => {
     ghGot.mockImplementationOnce(() =>
       Promise.reject({
