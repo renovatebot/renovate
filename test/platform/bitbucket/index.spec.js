@@ -1,5 +1,6 @@
 
 const { basename } = require('path');
+const URL = require('url');
 
 describe('platform/bitbucket', () => {
   let bitbucket;
@@ -21,24 +22,75 @@ describe('platform/bitbucket', () => {
     });
   });
 
+  const pr = {
+    id: 5,
+    source: { branch: { name: 'branch' } },
+    title: 'title',
+    summary: { raw: 'summary' },
+    state: 'OPEN',
+    created_on: '2018-07-02T07:02:25.275030+00:00',
+    links: {
+      commits: {
+        href: "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits"
+      },
+    },
+  };
+  const responses = {
+    "/2.0/repositories/some/repo": {
+      is_private: false,
+      full_name: "some/repo",
+      owner: { username: 'some' },
+      mainbranch: { name: 'master' },
+    },
+    '/2.0/repositories/some/repo/pullrequests': {
+      values: [pr]
+    },
+    '/2.0/repositories/some/repo/pullrequests/5': pr,
+    '/2.0/repositories/some/repo/pullrequests/5/diff': `
+      diff --git a/requirements.txt b/requirements.txt
+      index 7e08d70..f5283ca 100644
+      --- a/requirements.txt
+      +++ b/requirements.txt
+      @@ -7,7 +7,7 @@ docutils==0.12
+      enum34==1.1.6
+      futures==3.2.0
+      isort==4.3.4
+      -jedi==0.11.1
+      +jedi==0.12.1
+      lazy-object-proxy==1.3.1
+      lxml==3.6.0
+      mccabe==0.6.1
+    `.trim().replace(/^\s+/g, ''),
+    '/2.0/repositories/some/repo/pullrequests/5/commits': {
+      values: [{}]
+    },
+    '/2.0/repositories/some/repo/refs/branches/master': {
+      target: { hash: 'hash' }
+    },
+    '/2.0/repositories/some/repo/refs/branches/branch': {
+      target: { parents: [{ hash: 'hash' }] }
+    },
+  }
+
+  function mockedGet(path) {
+    const body = responses[URL.parse(path).pathname] || { values: [] };
+    return { body };
+  }
+
+  async function withMockedGet(fn) {
+    const oldGet = api.get;
+    try {
+      api.get = jest.fn().mockImplementation(mockedGet);
+      return await fn();
+    } finally {
+      api.get = oldGet;
+    }
+  }
+
   function initRepo() {
-    api.get.mockReturnValueOnce({
-      body: {
-        is_private: false,
-        full_name: "some/repo",
-        owner: { username: 'some' },
-        mainbranch: { name: 'master' },
-      }
-    });
-    api.get.mockReturnValueOnce({
-      body: { values: [] }
-    });
-    api.get.mockReturnValueOnce({
-      body: { values: [] }
-    });
-    return bitbucket.initRepo({
+    return withMockedGet(() => bitbucket.initRepo({
       repository: 'some/repo'
-    });
+    }));
   }
 
   describe('getRepos()', () => {
@@ -116,18 +168,21 @@ describe('platform/bitbucket', () => {
   describe('isBranchStale()', () => {
     it('returns false for same hash', async () => {
       await initRepo();
-      const branches = {
-        branch: { target: { parents: [{ hash: 'hash' }] } },
-        master: { target: { hash: 'hash' } },
-      };
-      api.get.mockImplementation(path => ({ body: branches[basename(path)] }));
-      expect(await bitbucket.isBranchStale('branch')).toBe(false);
+      const isStale = await withMockedGet(() => bitbucket.isBranchStale('branch'));
+      expect(isStale).toBe(false);
     });
   });
 
   describe('getBranchPr()', () => {
-    it('exists', () => {
-      expect(bitbucket.getBranchPr).toBeDefined();
+    it('bitbucket finds PR for branch', async () => {
+      await initRepo(responses);
+      const branch = await withMockedGet(() => bitbucket.getBranchPr('branch'));
+      expect(branch).toMatchSnapshot();
+    });
+    it('returns null if no PR for branch', async () => {
+      await initRepo();
+      const branch = await withMockedGet(() => bitbucket.getBranchPr('branch_without_pr'));
+      expect(branch).toBe(null);
     });
   });
 
