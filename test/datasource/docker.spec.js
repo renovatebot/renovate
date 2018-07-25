@@ -25,6 +25,9 @@ describe('api/docker', () => {
       expect(res).toBe(null);
     });
     it('returns digest', async () => {
+      got.mockReturnValueOnce({ 
+        headers: { 'www-authenticate': 'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "' } 
+      });
       got.mockReturnValueOnce({ body: { token: 'some-token' } });
       got.mockReturnValueOnce({
         headers: { 'docker-content-digest': 'some-digest' },
@@ -36,6 +39,9 @@ describe('api/docker', () => {
       expect(res).toBe('some-digest');
     });
     it('supports scoped names', async () => {
+      got.mockReturnValueOnce({ 
+        headers: { 'www-authenticate': 'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "' } 
+      });
       got.mockReturnValueOnce({ body: { token: 'some-token' } });
       got.mockReturnValueOnce({
         headers: { 'docker-content-digest': 'some-digest' },
@@ -58,6 +64,9 @@ describe('api/docker', () => {
     });
     it('returns tags with no suffix', async () => {
       const tags = ['a', 'b', '1.0.0', '1.1.0', '1.1.0-alpine'];
+      got.mockReturnValueOnce({ 
+        headers: { 'www-authenticate': 'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "' } 
+      });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
       const res = await docker.getDependency({
@@ -69,6 +78,9 @@ describe('api/docker', () => {
     });
     it('returns tags with suffix', async () => {
       const tags = ['a', 'b', '1.0.0', '1.1.0-alpine'];
+      got.mockReturnValueOnce({ 
+        headers: { 'www-authenticate': 'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "' } 
+      });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
       const res = await docker.getDependency({
