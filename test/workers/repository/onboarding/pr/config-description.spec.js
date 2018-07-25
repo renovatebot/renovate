@@ -21,7 +21,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     it('returns a full list', () => {
       const packageFiles = {
         npm: [],
-        docker: [],
+        dockerfile: [],
       };
       config.description = [
         'description 1',

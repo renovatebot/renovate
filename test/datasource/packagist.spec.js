@@ -5,6 +5,7 @@ const datasource = require('../../lib/datasource');
 jest.mock('got');
 
 const res1 = fs.readFileSync('test/_fixtures/packagist/uploader.json');
+const res2 = fs.readFileSync('test/_fixtures/packagist/mailchimp-api.json');
 
 describe('datasource/packagist', () => {
   describe('getDependency', () => {
@@ -38,6 +39,14 @@ describe('datasource/packagist', () => {
       });
       expect(
         await datasource.getDependency('pkg:packagist/cristianvuolo/uploader')
+      ).toMatchSnapshot();
+    });
+    it('processes real versioned data', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(res2),
+      });
+      expect(
+        await datasource.getDependency('pkg:packagist/drewm/mailchimp-api')
       ).toMatchSnapshot();
     });
   });

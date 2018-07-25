@@ -118,6 +118,7 @@ describe('workers/pr', () => {
       config.repositoryUrl = 'https://github.com/renovateapp/dummy';
       platform.createPr.mockReturnValue({ displayNumber: 'New Pull Request' });
       config.upgrades = [config];
+      platform.getPrBody = jest.fn(input => input);
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -144,26 +145,6 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][2];
-    });
-    it('should convert to HTML PR for gitlab', async () => {
-      platform.getBranchStatus.mockReturnValueOnce('success');
-      config.prCreation = 'status-success';
-      config.isGitLab = true;
-      const pr = await prWorker.ensurePr(config);
-      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      expect(
-        platform.createPr.mock.calls[0][2].indexOf('<p>This Merge Request')
-      ).not.toBe(-1);
-    });
-    it('should strip HTML PR for vsts', async () => {
-      platform.getBranchStatus.mockReturnValueOnce('success');
-      config.prCreation = 'status-success';
-      config.isVsts = true;
-      const pr = await prWorker.ensurePr(config);
-      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      expect(platform.createPr.mock.calls[0][2].indexOf('<details>')).toBe(-1);
     });
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');

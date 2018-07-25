@@ -11,16 +11,20 @@ describe('manager/docker-compose/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         lineNumber: 18,
-        newFrom: 'postgres:9.6.8@sha256:abcdefghijklmnop',
+        depName: 'postgres',
+        newValue: '9.6.8',
+        newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(upgrade.newFrom)).toBe(true);
+      expect(res.includes(upgrade.newDigest)).toBe(true);
     });
     it('returns same', () => {
       const upgrade = {
         lineNumber: 4,
-        newFrom: 'quay.io/something/redis:alpine',
+        dockerRegistry: 'quay.io',
+        depName: 'something/redis',
+        newValue: 'alpine',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).toEqual(yamlFile);

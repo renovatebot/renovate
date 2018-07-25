@@ -74,7 +74,7 @@ describe('platform/github', () => {
           },
           {
             type: 'blob',
-            path: 'backend/package-lock.json',
+            path: 'package-lock.json',
           },
         ],
       },
@@ -1481,6 +1481,13 @@ describe('platform/github', () => {
       expect(get.mock.calls).toHaveLength(3);
     });
   });
+  describe('getPrBody(input)', () => {
+    it('returns updated pr body', () => {
+      const input =
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(github.getPrBody(input)).toMatchSnapshot();
+    });
+  });
   describe('mergePr(prNo) - autodetection', () => {
     beforeEach(async () => {
       function guessInitRepo(...args) {
@@ -1644,7 +1651,7 @@ describe('platform/github', () => {
           content: Buffer.from('{"hello":"workd"}').toString('base64'),
         },
       }));
-      const content = await github.getFile('backend/package-lock.json');
+      const content = await github.getFile('package-lock.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
@@ -1663,7 +1670,7 @@ describe('platform/github', () => {
       }));
       let e;
       try {
-        await github.getFile('backend/package-lock.json');
+        await github.getFile('package-lock.json');
       } catch (err) {
         e = err;
       }
@@ -1832,13 +1839,6 @@ describe('platform/github', () => {
       });
       const res = await github.getCommitMessages();
       expect(res).toMatchSnapshot();
-    });
-    it('swallows errors', async () => {
-      get.mockImplementationOnce(() => {
-        throw new Error('some-error');
-      });
-      const res = await github.getCommitMessages();
-      expect(res).toHaveLength(0);
     });
   });
 });

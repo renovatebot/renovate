@@ -50,3 +50,89 @@ Object {
   "versions": Object {},
 }
 `;
+
+exports[`datasource/packagist getDependency processes real versioned data 1`] = `
+Object {
+  "homepage": "https://github.com/drewm/mailchimp-api",
+  "name": "drewm/mailchimp-api",
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0",
+      "releaseTimestamp": "2014-05-30T16:51:39+00:00",
+      "version": "1.0",
+    },
+    Object {
+      "gitRef": "v1.1",
+      "releaseTimestamp": "2015-07-07T15:38:25+00:00",
+      "version": "1.1",
+    },
+    Object {
+      "gitRef": "v2.0",
+      "releaseTimestamp": "2016-01-17T13:08:01+00:00",
+      "version": "2.0",
+    },
+    Object {
+      "gitRef": "v2.1",
+      "releaseTimestamp": "2016-01-30T16:12:54+00:00",
+      "version": "2.1",
+    },
+    Object {
+      "gitRef": "v2.1.1",
+      "releaseTimestamp": "2016-04-06T08:37:20+00:00",
+      "version": "2.1.1",
+    },
+    Object {
+      "gitRef": "v2.1.2",
+      "releaseTimestamp": "2016-04-06T12:41:37+00:00",
+      "version": "2.1.2",
+    },
+    Object {
+      "gitRef": "v2.1.3",
+      "releaseTimestamp": "2016-04-12T09:09:47+00:00",
+      "version": "2.1.3",
+    },
+    Object {
+      "gitRef": "v2.2",
+      "releaseTimestamp": "2016-04-23T12:43:28+00:00",
+      "version": "2.2",
+    },
+    Object {
+      "gitRef": "v2.2.1",
+      "releaseTimestamp": "2016-04-23T18:00:21+00:00",
+      "version": "2.2.1",
+    },
+    Object {
+      "gitRef": "v2.2.2",
+      "releaseTimestamp": "2016-07-01T09:58:24+00:00",
+      "version": "2.2.2",
+    },
+    Object {
+      "gitRef": "v2.2.3",
+      "releaseTimestamp": "2016-07-01T15:53:33+00:00",
+      "version": "2.2.3",
+    },
+    Object {
+      "gitRef": "v2.2.4",
+      "releaseTimestamp": "2016-07-01T15:53:33+00:00",
+      "version": "2.2.4",
+    },
+    Object {
+      "gitRef": "v2.3",
+      "releaseTimestamp": "2016-12-21T14:50:24+00:00",
+      "version": "2.3",
+    },
+    Object {
+      "gitRef": "v2.4",
+      "releaseTimestamp": "2017-02-16T13:24:20+00:00",
+      "version": "2.4",
+    },
+    Object {
+      "gitRef": "v2.5",
+      "releaseTimestamp": "2018-02-16T15:31:05+00:00",
+      "version": "2.5",
+    },
+  ],
+  "repositoryUrl": "https://github.com/drewm/mailchimp-api",
+  "versions": Object {},
+}
+`;

@@ -3,7 +3,7 @@ const manager = require('../../lib/manager');
 describe('manager', () => {
   describe('get()', () => {
     it('gets something', () => {
-      expect(manager.get('docker', 'extractDependencies')).not.toBe(null);
+      expect(manager.get('dockerfile', 'extractDependencies')).not.toBe(null);
     });
   });
   describe('getLanguageList()', () => {
@@ -18,7 +18,7 @@ describe('manager', () => {
   });
   describe('postExtract()', () => {
     it('returns null', () => {
-      expect(manager.postExtract('docker', [])).toBe(null);
+      expect(manager.postExtract('dockerfile', [])).toBe(null);
     });
     it('returns postExtract', () => {
       expect(manager.postExtract('npm', [])).not.toBe(null);

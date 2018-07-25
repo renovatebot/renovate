@@ -11,31 +11,39 @@ Private npm modules are used at two times during Renovate's process.
 
 #### 1. Module lookup
 
-If a private npm module is listed as a dependency in a `package.json`, then Renovate will attempt to keep it up-to-date like all other modules. By default - unless configured otherwise - Renovate will query the main npm registry like it would for a publicly scoped package. Hence, by default a private package lookup will fail, because without authentication npm will answer that the package doesn't exist. This means it won't be "renovated" and its version will remain as it is, unless you update it manually. All other modules can be looked up independently of this and Renovate can detect if they need updating.
+If a private npm module is listed as a dependency in a `package.json`, then Renovate will attempt to keep it up-to-date by querying the npm registry like it would for any other package. Hence, by default a private package lookup will fail, because of lack of credentials. This means it won't be "renovated" and its version will remain unchanged, unless you update it manually. These failures don't affect Renovate's ability to look up _other_ modules in the same package file.
 
-Assuming the lookup succeeds (solutions for that are described later in this document) then private modules will be kept up-to-date like public modules are.
+Assuming the private module lookup succeeds (solutions for that are described later in this document) then private module versions will be kept up-to-date like public modules are.
 
 #### 2. Lock file generation
 
-If you are using a lock file (yarn's `yarn.lock` or npm's `package-lock.json`) then Renovate needs to regenerate that lock file whenever _any_ npm module listed in your `package.json` is updated to a new version.
+If you are using a lock file (e.g. yarn's `yarn.lock` or npm's `package-lock.json`) then Renovate needs to update that lock file whenever _any_ npm module listed in your `package.json` is updated to a new version.
 
-To do this, Renovate will run `npm install` or `yarn install` and save the resulting lock file. The "problem" here is that for the install to succeed - and lock file to be generated - then all touched packages must be found in the registry, including possibly private ones. Therefore if a private module can't be found, and you're using lock files, then the private module install failure might then block _all_ modules from being renovated.
-
-Because lock files are quickly becoming "the new standard", we think it's essential that Renovate can access/install any private modules necessary.
+To do this, Renovate will run `npm install` or `yarn install` and save the resulting lock file. If a private module hasn't been updated, it _usually_ won't matter if npm/yarn can't find it, but it's possible that the install will fail if it attempts to look up a private module and fails, even when that private module is not the main one being updated.
 
 ## Supported npm authentication approaches
 
-#### Authenticate the "renovate" npm user to your private npm module
+The recommended approaches for private module authentication are:
 
-The Renovate app itself runs with credentials for the "renovate" user on npm. Therefore, a simple solution to enabling private modules is to treat Renovate as another account on your team and add the npm user "renovate" to the necessary projects that Renovate needs to access. Renovate will then use its own npm authentication if it finds none in your repository.
+**If you are running your own Renovate bot**: copy an `.npmrc` file to the home dir of the bot
 
-#### Commit .npmrc file into repository
+**If you are using private modules with npmjs.org**: Add an encrypted `npmToken` to your Renovate config
+
+**If you are using a private registry**: Add an unencrypted `npmrc` plus an encrypted `npmToken` in config
+
+All the various approaches are described below:
+
+### Add/authenticate the "renovate" npm user to your private npm modules
+
+The Renovate app itself runs with credentials for the "renovate" user on npm. Therefore, a simple solution to enabling private modules is to treat Renovate as another account on your team and add the npm user "renovate" to the necessary projects that Renovate needs to access. Renovate will then use its own npm authentication if it finds none configured in your repository.
+
+### Commit .npmrc file into repository
 
 One approach that many projects use for private repositories is to simply check in an authenticated `.npmrc` or `.yarnrc` into the repository that is then shared between all developers. Therefore anyone running `npm install` or `yarn install` from the project root will be automatically authenticated with npm without having to distribute npm logins to every developer and make sure they've run `npm login` first before installing.
 
 The good news is that this works for Renovate too. If Renovate detects a `.npmrc` or `.yarnrc` file then it will use it for its install.
 
-#### Add npmrc string to Renovate config
+### Add npmrc string to Renovate config
 
 The above solution maybe have a downside that all users of the repository (e.g. developers) will also use any `.npmrc` that is checked into the repository, instead of their own one in `~/.npmrc`. To avoid this, you can instead add your `.npmrc` authentication line to your Renovate config under the field `npmrc`. e.g. a `renovate.json` might look like this:
 
@@ -46,11 +54,9 @@ The above solution maybe have a downside that all users of the repository (e.g. 
 }
 ```
 
-If configured as such, Renovate will use this to authenticate with npm.
+If configured like this, Renovate will use this to authenticate with npm and will ignore any `.npmrc` files(s) it finds checked into the repository.
 
-Be careful how you do this however. If you simply copy the contents from an `~/.npmrc` on a developer machine and that developer ever logs out on that machine, then the token will be invalidated and Renovate will no longer be able to authenticate. Please generate the token using [npm token](https://docs.npmjs.com/cli/token) instead, and generate it using the option `--read-only`.
-
-#### Add npmToken to Renovate config
+### Add npmToken to Renovate config
 
 If you are using the main npmjs registry then you can configure just the npmToken instead:
 
@@ -60,22 +66,50 @@ If you are using the main npmjs registry then you can configure just the npmToke
 }
 ```
 
-It's recommended that you use the [npm token](https://docs.npmjs.com/cli/token) command to generate this token, and generate it using the option `--read-only`.
+### Add an encrypted npm token to Renovate config
 
-#### Add encrypted .npmrc file into repository
+If you don't wish for all users of the repository to be able to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
-Even if your repository is private itself, you may still prefer not to put an unencrypted `.npmrc` file into your renovate config. An alternative is to put an _encrypted_ version into the config, inside an `encrypted` configuration block.
-
-If you are using the hosted Renovate app service on GitHub, you can do this using the [renovate-encrypt](https://npmjs.com/package/renovate-encrypt) module. To get an encrypted value, use it like this:
+Use [renovate-encrypt](https://npmjs.com/package/renovate-encrypt) to encrypt it like so:
 
 ```sh
-$ renovate-encrypt < .npmrc
-WOTWu+jliBtXYz3CU2eI7dDyMIvSJKS2N5PEHZmLB3XKT3vLaaYTGCU6m92Q9FgdaM/q2wLYun2JrTP4GPaW8eGZ3iiG1cm7lgOR5xPnkCzz0DUmSf6Cc/6geeVeSFdJ0zqlEAhdNMyJ4pUW6iQxC3WJKgM/ADvFtme077Acvc0fhCXv0XvbNSbtUwHF/gD6OJ0r2qlIzUMGJk/eI254xo5SwWVctc1iZS9LW+L0/CKjqhWh4SbyglP3lKE5shg3q7mzWDZepa/nJmAnNmXdoVO2aPPeQCG3BKqCtCfvLUUU/0LvnJ2SbQ1obyzL7vhh2OF/VsATS5cxbHvoX/hxWQ==
+$ echo "abcdefghi-1234-jklmno-aac6-12345567889" | renovate-encrypt
+xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA==
 ```
 
-(if installed globally)
+The configure it inside an `encrypted` object like:
 
-or just run it without installing using `npx`:
+```json
+{
+  "encrypted": {
+    "npmToken":
+      "xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA=="
+  }
+}
+```
+
+If you have no `.npmrc` file then Renovate will create one for you, pointing to the default npmjs registry. If instead you use an alternative registry or need an `.npmrc` file for some other reason, you should configure it too and substitute the npm token with `${NPM_TOKEN}` for it to be replaced. e.g.
+
+```json
+{
+  "encrypted": {
+    "npmToken":
+      "xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA=="
+  },
+  "npmrc":
+    "registry=https://my.custom.registry/npm\n//my.custom.registry/npm:_authToken=${NPM_TOKEN}"
+}
+```
+
+Renovate will then use the following logic:
+
+1.  If no `npmrc` string is present in config then one will be created with the `_authToken` pointing to the default npmjs registry
+2.  If an `npmrc` string is present and contains `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
+3.  If an `npmrc` string is present but doesn't contain `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
+
+### Encrypted entire .npmrc file into config
+
+Example:
 
 ```
 $ npx renovate-encrypt < .npmrc
@@ -93,30 +127,4 @@ You will then get an encrypted string that you can substitute into your renovate
 }
 ```
 
-However be aware that if your `.npmrc` is too long to encrypt then the above command will fail. In that case, you should encrypt `npmToken` instead (see next section) and add replace the token with `${NPM_TOKEN}` in the (unencrypted) `npmrc` in your config.
-
-#### Add an encrypted npm token to repository
-
-Similar to the above, but using npm token. As described earlier, use [generate-npm-token](https://npmjs.com/package/generate-npm-token) to generate an npm token and then [renovate-encrypt](https://npmjs.com/package/renovate-encrypt) to encrypt it.
-
-```sh
-$ echo "abcdefghi-1234-jklmno-aac6-12345567889" | renovate-encrypt
-xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA==
-```
-
-The configure it like:
-
-```json
-{
-  "encrypted": {
-    "npmToken":
-      "xxT19RIdhAh09lkhdrK39HzKNBn3etoLZAwHdeJ25cX+5y52a9kAC7flXmdw5JrkciN08aQuRNqDaKxp53IVptB5AYOnQPrt8MCT+x0zHgp4A1zv1QOV84I6uugdWpFSjPUkmLGMgULudEZJMlY/dAn/IVwf/IImqwazY8eHyJAA4vyUqKkL9SXzHjvS+OBonQ/9/AHYYKmDJwT8vLSRCKrXxJCdUfH7ZnikZbFqjnURJ9nGUHP44rlYJ7PFl05RZ+X5WuZG/A27S5LuBvguyQGcw8A2AZilHSDta9S/4eG6kb22jX87jXTrT6orUkxh2WHI/xvNUEout0gxwWMDkA=="
-  }
-}
-```
-
-Renovate will then use the following logic:
-
-1.  If no `npmrc` string is present in config then one will be created with the `_authToken` pointing to the default npmjs registry
-2.  If an `npmrc` string is present and contains `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
-3.  If an `npmrc` string is present but doesn't contain `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
+However be aware that if your `.npmrc` is too long to encrypt then the above command will fail.
