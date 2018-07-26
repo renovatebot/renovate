@@ -80,6 +80,21 @@ describe('api/docker', () => {
         'sha256:b3d6068234f3a18ebeedd2dab81e67b6a192e81192a099df4112ecfc7c3be84f'
       );
     });
+    it('continues without token, when no header is present', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'content-type': 'text/plain',
+        },
+      });
+      got.mockReturnValueOnce({
+        headers: { 'docker-content-digest': 'some-digest' },
+      });
+      const res = await docker.getDigest(
+        { depName: 'some-dep' },
+        'some-new-value'
+      );
+      expect(res).toBe('some-digest');
+    });
     it('supports scoped names', async () => {
       got.mockReturnValueOnce({
         headers: {
