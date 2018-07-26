@@ -41,6 +41,45 @@ describe('api/docker', () => {
       );
       expect(res).toBe('some-digest');
     });
+    it('falls back to body for digest', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ body: { token: 'some-token' } });
+      got.mockReturnValueOnce({
+        headers: {
+          'content-type': 'text/plain',
+        },
+        body: `{
+          "signatures": [
+             {
+                "header": {
+                   "jwk": {
+                      "crv": "P-256",
+                      "kid": "DB2X:GSG2:72H3:AE3R:KCMI:Y77E:W7TF:ERHK:V5HR:JJ2Y:YMS6:HFGJ",
+                      "kty": "EC",
+                      "x": "jyr9-xZBorSC9fhqNsmfU_Ud31wbaZ-bVGz0HmySvbQ",
+                      "y": "vkE6qZCCvYRWjSUwgAOvibQx_s8FipYkAiHS0VnAFNs"
+                   },
+                   "alg": "ES256"
+                },
+                "signature": "yUXzEiPzg_SlQlqGW43H6oMgYuz30zSkj2qauQc_kbyI9RQHucYAKs_lBSFaQdDrtgW-1iDZSP9eExKP8ANSyA",
+                "protected": "eyJmb3JtYXRMZW5ndGgiOjgzMDAsImZvcm1hdFRhaWwiOiJDbjAiLCJ0aW1lIjoiMjAxOC0wMi0wNVQxNDoyMDoxOVoifQ"
+             }
+          ]
+       }`,
+      });
+      const res = await docker.getDigest(
+        { depName: 'some-dep' },
+        'some-new-value'
+      );
+      expect(res).toBe(
+        'sha256:b3d6068234f3a18ebeedd2dab81e67b6a192e81192a099df4112ecfc7c3be84f'
+      );
+    });
     it('supports scoped names', async () => {
       got.mockReturnValueOnce({
         headers: {
