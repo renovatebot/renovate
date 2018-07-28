@@ -702,4 +702,27 @@ When schedules are in use, it generally means "no updates". However there are ca
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
 
+## vulnerabilityAlerts
+
+Use this object to customise PRs that are raised when vulnerability alerts are detected (GitHub-only). For example, to set custom labels and assignees:
+
+```json
+{
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": ["@rarkins"]
+  }
+}
+```
+
+To disable vulnerability alerts completely, set like this:
+
+```json
+{
+  "vulnerabilityAlerts": {
+    "enabled": false
+  }
+}
+```
+
 ## yarnrc
