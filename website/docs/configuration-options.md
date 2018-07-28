@@ -120,6 +120,10 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "prefix" is usually an automatically applied semantic commit prefix, however it can also be statically configured.
 
+## commitMessageSuffix
+
+This is used to add a suffix to commit messages. Usually left empty except for internal use (multiple base branches, and vulnerability alerts).
+
 ## commitMessageTopic
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. "dependency react".

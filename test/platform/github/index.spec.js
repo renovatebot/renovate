@@ -1487,6 +1487,14 @@ describe('platform/github', () => {
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(github.getPrBody(input)).toMatchSnapshot();
     });
+    it('returns not-updated pr body for GHE', () => {
+      const endpoint = process.env.GITHUB_ENDPOINT;
+      process.env.GITHUB_ENDPOINT = 'https://github.mycompany.com';
+      const input =
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(github.getPrBody(input)).toEqual(input);
+      process.env.GITHUB_ENDPOINT = endpoint;
+    });
   });
   describe('mergePr(prNo) - autodetection', () => {
     beforeEach(async () => {
@@ -1839,6 +1847,33 @@ describe('platform/github', () => {
       });
       const res = await github.getCommitMessages();
       expect(res).toMatchSnapshot();
+    });
+  });
+  describe('getVulnerabilityAlerts()', () => {
+    it('returns empty if error', async () => {
+      get.mockReturnValueOnce({
+        body: {},
+      });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(0);
+    });
+    it('returns array if found', async () => {
+      // prettier-ignore
+      const body = "{\"data\":{\"repository\":{\"vulnerabilityAlerts\":{\"edges\":[{\"node\":{\"externalIdentifier\":\"CVE-2018-1000136\",\"externalReference\":\"https://nvd.nist.gov/vuln/detail/CVE-2018-1000136\",\"affectedRange\":\">= 1.8, < 1.8.3\",\"fixedIn\":\"1.8.3\",\"id\":\"MDI4OlJlcG9zaXRvcnlWdWxuZXJhYmlsaXR5QWxlcnQ1MzE3NDk4MQ==\",\"packageName\":\"electron\"}}]}}}}";
+      get.post.mockReturnValueOnce({
+        body,
+      });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(1);
+    });
+    it('returns empty if disabled', async () => {
+      // prettier-ignore
+      const body = "{\"data\":{\"repository\":{}}}";
+      get.post.mockReturnValueOnce({
+        body,
+      });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(0);
     });
   });
 });
