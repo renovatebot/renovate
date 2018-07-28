@@ -1,9 +1,11 @@
 const fs = require('fs');
-const { extractDependencies } = require('../../../lib/manager/docker/extract');
+const {
+  extractDependencies,
+} = require('../../../lib/manager/dockerfile/extract');
 
 const d1 = fs.readFileSync('test/_fixtures/docker/Dockerfile1', 'utf8');
 
-describe('lib/manager/docker/extract', () => {
+describe('lib/manager/dockerfile/extract', () => {
   describe('extractDependencies()', () => {
     let config;
     beforeEach(() => {
@@ -57,6 +59,14 @@ describe('lib/manager/docker/extract', () => {
     it('handles custom hosts', () => {
       const res = extractDependencies(
         'FROM registry2.something.info/node:8\n',
+        config
+      ).deps;
+      expect(res).toMatchSnapshot();
+      expect(res[0].dockerRegistry).toEqual('registry2.something.info');
+    });
+    it('handles custom hosts and suffix', () => {
+      const res = extractDependencies(
+        'FROM registry2.something.info/node:8-alpine\n',
         config
       ).deps;
       expect(res).toMatchSnapshot();

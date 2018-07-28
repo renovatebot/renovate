@@ -31,9 +31,11 @@ Array [
   "getPrFiles",
   "updatePr",
   "mergePr",
+  "getPrBody",
   "commitFilesToBranch",
   "getFile",
   "getCommitMessages",
+  "getVulnerabilityAlerts",
 ]
 `;
 
@@ -68,9 +70,11 @@ Array [
   "getPrFiles",
   "updatePr",
   "mergePr",
+  "getPrBody",
   "commitFilesToBranch",
   "getFile",
   "getCommitMessages",
+  "getVulnerabilityAlerts",
 ]
 `;
 
@@ -105,8 +109,10 @@ Array [
   "getPrFiles",
   "updatePr",
   "mergePr",
+  "getPrBody",
   "commitFilesToBranch",
   "getFile",
   "getCommitMessages",
+  "getVulnerabilityAlerts",
 ]
 `;

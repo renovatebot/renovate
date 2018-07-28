@@ -1,5 +1,3 @@
-const yarnHelper = require('../../../../lib/manager/npm/post-update/yarn');
-
 const { getInstalledPath } = require('get-installed-path');
 
 jest.mock('fs-extra');
@@ -10,6 +8,7 @@ getInstalledPath.mockImplementation(() => null);
 
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
+const yarnHelper = require('../../../../lib/manager/npm/post-update/yarn');
 
 describe('generateLockFile', () => {
   it('generates lock files', async () => {

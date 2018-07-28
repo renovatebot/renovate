@@ -101,6 +101,8 @@ describe('workers/pr', () => {
     const existingPr = {
       displayNumber: 'Existing PR',
       title: 'Update dependency dummy to v1.1.0',
+      body:
+        'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     };
     beforeEach(() => {
       config = {
@@ -116,6 +118,7 @@ describe('workers/pr', () => {
       config.repositoryUrl = 'https://github.com/renovateapp/dummy';
       platform.createPr.mockReturnValue({ displayNumber: 'New Pull Request' });
       config.upgrades = [config];
+      platform.getPrBody = jest.fn(input => input);
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -142,26 +145,6 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][2];
-    });
-    it('should convert to HTML PR for gitlab', async () => {
-      platform.getBranchStatus.mockReturnValueOnce('success');
-      config.prCreation = 'status-success';
-      config.isGitLab = true;
-      const pr = await prWorker.ensurePr(config);
-      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      expect(
-        platform.createPr.mock.calls[0][2].indexOf('<p>This Merge Request')
-      ).not.toBe(-1);
-    });
-    it('should strip HTML PR for vsts', async () => {
-      platform.getBranchStatus.mockReturnValueOnce('success');
-      config.prCreation = 'status-success';
-      config.isVsts = true;
-      const pr = await prWorker.ensurePr(config);
-      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      expect(platform.createPr.mock.calls[0][2].indexOf('<details>')).toBe(-1);
     });
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
@@ -297,7 +280,7 @@ describe('workers/pr', () => {
     });
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       config.branchAutomergeFailureMessage = 'branch status error';
       platform.getBranchStatus.mockReturnValueOnce('failure');
       const pr = await prWorker.ensurePr(config);
@@ -305,7 +288,7 @@ describe('workers/pr', () => {
     });
     it('should create PR if branch automerging failed', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       platform.getBranchStatus.mockReturnValueOnce('success');
       config.forcePr = true;
       const pr = await prWorker.ensurePr(config);
@@ -313,7 +296,7 @@ describe('workers/pr', () => {
     });
     it('should return null if branch automerging not failed', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       platform.getBranchStatus.mockReturnValueOnce('pending');
       platform.getBranchLastCommitTime.mockReturnValueOnce(new Date());
       const pr = await prWorker.ensurePr(config);
@@ -321,7 +304,7 @@ describe('workers/pr', () => {
     });
     it('should not return null if branch automerging taking too long', async () => {
       config.automerge = true;
-      config.automergeType = 'branch-push';
+      config.automergeType = 'branch';
       platform.getBranchStatus.mockReturnValueOnce('pending');
       platform.getBranchLastCommitTime.mockReturnValueOnce(
         new Date('2018-01-01')

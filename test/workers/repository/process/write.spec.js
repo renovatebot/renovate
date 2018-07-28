@@ -16,11 +16,11 @@ beforeEach(() => {
 describe('workers/repository/write', () => {
   describe('writeUpdates()', () => {
     const packageFiles = {};
-    it('runs pins first', async () => {
-      const branches = [{ type: 'pin' }, {}, {}];
+    it('skips branches blocked by pin', async () => {
+      const branches = [{ updateType: 'pin' }, { blockedByPin: true }, {}];
       const res = await writeUpdates(config, packageFiles, branches);
       expect(res).toEqual('done');
-      expect(branchWorker.processBranch.mock.calls).toHaveLength(1);
+      expect(branchWorker.processBranch.mock.calls).toHaveLength(2);
     });
     it('stops after automerge', async () => {
       const branches = [{}, {}, {}, {}];

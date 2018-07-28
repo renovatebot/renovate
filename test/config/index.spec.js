@@ -83,9 +83,18 @@ describe('config/index', () => {
       const env = {};
       await configParser.parseConfigs(env, defaultArgv);
     });
+    it('supports forceCli', async () => {
+      defaultArgv = defaultArgv.concat(['--force-cli=true']);
+      const env = { GITHUB_TOKEN: 'abc' };
+      await configParser.parseConfigs(env, defaultArgv);
+    });
     it('autodiscovers github platform', async () => {
       const env = {};
-      defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);
+      defaultArgv = defaultArgv.concat([
+        '--autodiscover',
+        '--token=abc',
+        '--pr-footer=custom',
+      ]);
       ghGot.mockImplementationOnce(() => ({
         headers: {},
         body: [
@@ -125,6 +134,7 @@ describe('config/index', () => {
       defaultArgv = defaultArgv.concat([
         '--autodiscover',
         '--platform=vsts',
+        '--endpoint=endpoint',
         '--token=abc',
       ]);
       vstsHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);
@@ -176,7 +186,7 @@ describe('config/index', () => {
         headers: {},
         body: [
           { full_name: 'bar/BAZ' },
-          { full_name: 'renovateapp/renovate' },
+          { full_name: 'renovatebot/renovate' },
           { full_name: 'not/configured' },
         ],
       }));

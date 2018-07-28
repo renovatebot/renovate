@@ -29,7 +29,7 @@ describe('workers/repository/updates/branchify', () => {
           branchName: 'foo-{{version}}',
           version: '1.1.0',
           prTitle: 'some-title',
-          type: 'minor',
+          updateType: 'minor',
         },
       ]);
       config.repoIsOnboarded = true;
@@ -113,33 +113,6 @@ describe('workers/repository/updates/branchify', () => {
       ]);
       const res = await branchifyUpgrades(config);
       expect(Object.keys(res.branches).length).toBe(2);
-    });
-    it('mixes errors and warnings', async () => {
-      flattenUpdates.mockReturnValueOnce([
-        {
-          type: 'error',
-        },
-        {
-          branchName: 'foo-{{version}}',
-          prTitle: 'some-title',
-          version: '1.1.0',
-        },
-        {
-          type: 'warning',
-          branchName: 'foo-{{version}}',
-          prTitle: 'some-title',
-          version: '2.0.0',
-        },
-        {
-          branchName: 'bar-{{version}}',
-          prTitle: 'some-title',
-          version: '1.1.0',
-        },
-      ]);
-      const res = await branchifyUpgrades(config);
-      expect(Object.keys(res.branches).length).toBe(2);
-      expect(res.errors).toHaveLength(1);
-      expect(res.warnings).toHaveLength(1);
     });
     it('enforces valid git branch name', async () => {
       const fixtures = [

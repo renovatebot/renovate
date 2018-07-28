@@ -4,22 +4,22 @@ const {
 
 describe('workers/repository/process/sort', () => {
   describe('sortBranches()', () => {
-    it('sorts based on type and prTitle', () => {
+    it('sorts based on updateType and prTitle', () => {
       const branches = [
         {
-          type: 'major',
+          updateType: 'major',
           prTitle: 'some major update',
         },
         {
-          type: 'pin',
+          updateType: 'pin',
           prTitle: 'some pin',
         },
         {
-          type: 'pin',
+          updateType: 'pin',
           prTitle: 'some other pin',
         },
         {
-          type: 'minor',
+          updateType: 'minor',
           prTitle: 'a minor update',
         },
       ];

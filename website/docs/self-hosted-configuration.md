@@ -15,9 +15,23 @@ Be cautious when using this option - it will run Renovate over _every_ repositor
 
 ## exposeEnv
 
+## force
+
+This object is used as a "force override" when you need to make sure certain configuration overrides whatever is configured in the repository. For example, forcing a null (no) schedule to make sure Renovate raises PRs on a run even if the repository itself or its preset defines a schedule that's currently in active.
+
+In practice, it is implemented by converting the `force` configuration into a `packageRule` that matches all packages.
+
+## forceCli
+
+This is set to true by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
+
 ## forkMode
 
 You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
+
+## gitAuthor
+
+RFC5322-compliant string if you wish to customise the git author for commits.
 
 ## gitPrivateKey
 

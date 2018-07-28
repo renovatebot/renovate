@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`api/docker getDependency returns tags with no suffix 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "1.0.0",
+    },
+    Object {
+      "version": "1.1.0-alpine",
+    },
+    Object {
+      "version": "1.1.0",
+    },
+  ],
+}
+`;
+
+exports[`api/docker getDependency returns tags with suffix 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "1.1.0",
+    },
+  ],
+}
+`;
