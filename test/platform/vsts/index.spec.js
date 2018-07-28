@@ -720,4 +720,10 @@ describe('platform/vsts', () => {
       expect(res.length).toBe(0);
     });
   });
+  describe('getVulnerabilityAlerts()', () => {
+    it('returns empty', async () => {
+      const res = await vsts.getVulnerabilityAlerts();
+      expect(res).toHaveLength(0);
+    });
+  });
 });

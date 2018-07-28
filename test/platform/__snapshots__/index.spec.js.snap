@@ -35,6 +35,7 @@ Array [
   "commitFilesToBranch",
   "getFile",
   "getCommitMessages",
+  "getVulnerabilityAlerts",
 ]
 `;
 
@@ -73,6 +74,7 @@ Array [
   "commitFilesToBranch",
   "getFile",
   "getCommitMessages",
+  "getVulnerabilityAlerts",
 ]
 `;
 
@@ -111,5 +113,6 @@ Array [
   "commitFilesToBranch",
   "getFile",
   "getCommitMessages",
+  "getVulnerabilityAlerts",
 ]
 `;

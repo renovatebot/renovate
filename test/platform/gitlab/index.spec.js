@@ -962,4 +962,10 @@ describe('platform/gitlab', () => {
       expect(res).toMatchSnapshot();
     });
   });
+  describe('getVulnerabilityAlerts()', () => {
+    it('returns empty', async () => {
+      const res = await gitlab.getVulnerabilityAlerts();
+      expect(res).toHaveLength(0);
+    });
+  });
 });
