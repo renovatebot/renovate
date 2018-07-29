@@ -34,7 +34,7 @@ describe('lib/manager/node/package', () => {
     it('detects pinning', async () => {
       config.currentValue = ['6.1.0', '8.4.0'];
       config.supportPolicy = ['lts'];
-      githubDatasource.getDependency.mockReturnValueOnce({
+      githubDatasource.getPkgReleases.mockReturnValueOnce({
         releases: [
           {
             version: '4.4.4',

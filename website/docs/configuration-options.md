@@ -120,6 +120,10 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "prefix" is usually an automatically applied semantic commit prefix, however it can also be statically configured.
 
+## commitMessageSuffix
+
+This is used to add a suffix to commit messages. Usually left empty except for internal use (multiple base branches, and vulnerability alerts).
+
 ## commitMessageTopic
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. "dependency react".
@@ -697,5 +701,28 @@ This field is currently used by some config prefixes.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
+
+## vulnerabilityAlerts
+
+Use this object to customise PRs that are raised when vulnerability alerts are detected (GitHub-only). For example, to set custom labels and assignees:
+
+```json
+{
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": ["@rarkins"]
+  }
+}
+```
+
+To disable vulnerability alerts completely, set like this:
+
+```json
+{
+  "vulnerabilityAlerts": {
+    "enabled": false
+  }
+}
+```
 
 ## yarnrc

@@ -40,6 +40,24 @@ describe('workers/pr/release-notes', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('gets release notes with body', async () => {
+      ghGot.mockReturnValueOnce({
+        body: [
+          { tag_name: 'v1.0.0' },
+          {
+            tag_name: 'v1.0.1',
+            body:
+              'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ],
+      });
+      const res = await getReleaseNotes(
+        'some/other-repository',
+        '1.0.1',
+        'https://github.com/'
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('getReleaseNotesMd()', () => {
     it('handles not found', async () => {

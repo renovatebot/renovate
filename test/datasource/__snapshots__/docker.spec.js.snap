@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`api/docker getDependency returns tags with no suffix 1`] = `
+exports[`api/docker getPkgReleases returns tags with no suffix 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -16,7 +16,7 @@ Object {
 }
 `;
 
-exports[`api/docker getDependency returns tags with suffix 1`] = `
+exports[`api/docker getPkgReleases returns tags with suffix 1`] = `
 Object {
   "releases": Array [
     Object {

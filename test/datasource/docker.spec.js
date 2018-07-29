@@ -25,6 +25,12 @@ describe('api/docker', () => {
       expect(res).toBe(null);
     });
     it('returns digest', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
       got.mockReturnValueOnce({ body: { token: 'some-token' } });
       got.mockReturnValueOnce({
         headers: { 'docker-content-digest': 'some-digest' },
@@ -36,6 +42,12 @@ describe('api/docker', () => {
       expect(res).toBe('some-digest');
     });
     it('supports scoped names', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
       got.mockReturnValueOnce({ body: { token: 'some-token' } });
       got.mockReturnValueOnce({
         headers: { 'docker-content-digest': 'some-digest' },
@@ -47,10 +59,10 @@ describe('api/docker', () => {
       expect(res).toBe('some-digest');
     });
   });
-  describe('getDependency', () => {
+  describe('getPkgReleases', () => {
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
-      const res = await docker.getDependency({
+      const res = await docker.getPkgReleases({
         fullname: 'node',
         qualifiers: {},
       });
@@ -58,9 +70,15 @@ describe('api/docker', () => {
     });
     it('returns tags with no suffix', async () => {
       const tags = ['a', 'b', '1.0.0', '1.1.0', '1.1.0-alpine'];
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getDependency({
+      const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: {},
       });
@@ -69,9 +87,15 @@ describe('api/docker', () => {
     });
     it('returns tags with suffix', async () => {
       const tags = ['a', 'b', '1.0.0', '1.1.0-alpine'];
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getDependency({
+      const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: { suffix: 'alpine' },
       });
@@ -80,7 +104,7 @@ describe('api/docker', () => {
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
-      const res = await docker.getDependency({
+      const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: {},
       });
