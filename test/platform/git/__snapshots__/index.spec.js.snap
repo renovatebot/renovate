@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/git getFileList() should return the correct files 1`] = `
+Array [
+  "future_file",
+  "master_file",
+  "past_file",
+]
+`;
+
+exports[`platform/git mergeBranch(branchName) should throw if branch merge throws 1`] = `
+[Error: fatal: 'origin/not_found' is not a commit and a branch 'not_found' cannot be created from it
+]
+`;
