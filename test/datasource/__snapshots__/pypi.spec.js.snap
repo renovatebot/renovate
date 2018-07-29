@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/pypi getDependency processes real data 1`] = `
+exports[`datasource/pypi getPkgReleases processes real data 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -96,14 +96,14 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getDependency returns non-github home_page 1`] = `
+exports[`datasource/pypi getPkgReleases returns non-github home_page 1`] = `
 Object {
   "homepage": "https://microsoft.com",
   "releases": Array [],
 }
 `;
 
-exports[`datasource/pypi getDependency supports custom datasource url 1`] = `
+exports[`datasource/pypi getPkgReleases supports custom datasource url 1`] = `
 Array [
   Array [
     "https://custom.pypi.net/azure-cli-monitor/json",
@@ -114,7 +114,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getDependency supports custom datasource url from environmental variable 1`] = `
+exports[`datasource/pypi getPkgReleases supports custom datasource url from environmental variable 1`] = `
 Array [
   Array [
     "https://my.pypi.python/pypi/azure-cli-monitor/json",

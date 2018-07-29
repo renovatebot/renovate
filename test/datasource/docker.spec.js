@@ -59,10 +59,10 @@ describe('api/docker', () => {
       expect(res).toBe('some-digest');
     });
   });
-  describe('getDependency', () => {
+  describe('getPkgReleases', () => {
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
-      const res = await docker.getDependency({
+      const res = await docker.getPkgReleases({
         fullname: 'node',
         qualifiers: {},
       });
@@ -78,7 +78,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getDependency({
+      const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: {},
       });
@@ -95,7 +95,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getDependency({
+      const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: { suffix: 'alpine' },
       });
@@ -104,7 +104,7 @@ describe('api/docker', () => {
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
-      const res = await docker.getDependency({
+      const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: {},
       });

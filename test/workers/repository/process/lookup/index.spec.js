@@ -904,7 +904,7 @@ describe('manager/npm/lookup', () => {
       config.depName = 'node';
       config.purl = 'pkg:docker/node';
       config.pinDigests = true;
-      docker.getDependency.mockReturnValueOnce({
+      docker.getPkgReleases.mockReturnValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -924,7 +924,7 @@ describe('manager/npm/lookup', () => {
       config.depName = 'node';
       config.purl = 'pkg:docker/node';
       config.pinDigests = true;
-      docker.getDependency.mockReturnValueOnce({
+      docker.getPkgReleases.mockReturnValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -946,7 +946,7 @@ describe('manager/npm/lookup', () => {
       config.depName = 'node';
       config.purl = 'pkg:docker/node';
       config.pinDigests = true;
-      docker.getDependency.mockReturnValueOnce({
+      docker.getPkgReleases.mockReturnValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -969,7 +969,7 @@ describe('manager/npm/lookup', () => {
       config.purl = 'pkg:docker/node';
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
-      docker.getDependency.mockReturnValueOnce({
+      docker.getPkgReleases.mockReturnValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -990,7 +990,7 @@ describe('manager/npm/lookup', () => {
       config.purl = 'pkg:docker/node';
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
-      docker.getDependency.mockReturnValueOnce({
+      docker.getPkgReleases.mockReturnValueOnce({
         releases: [
           {
             version: 'alpine',
