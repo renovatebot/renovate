@@ -63,6 +63,7 @@ Array [
     "updateNotScheduled": true,
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
+      "enabled": true,
       "groupName": null,
       "schedule": Array [],
     },
@@ -129,6 +130,7 @@ Array [
     "updateNotScheduled": true,
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
+      "enabled": true,
       "groupName": null,
       "schedule": Array [],
     },
@@ -209,6 +211,7 @@ Array [
     "updateType": "lockFileMaintenance",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
+      "enabled": true,
       "groupName": null,
       "schedule": Array [],
     },
@@ -276,6 +279,7 @@ Array [
     "updateNotScheduled": true,
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
+      "enabled": true,
       "groupName": null,
       "schedule": Array [],
     },
