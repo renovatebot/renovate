@@ -19,6 +19,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
@@ -43,6 +44,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
@@ -65,6 +67,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
@@ -113,6 +116,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
@@ -146,6 +150,7 @@ Marking the latest version of an npm package as deprecated results in the entire
       "version": "0.0.2",
     },
   ],
+  "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
@@ -184,6 +189,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
@@ -208,6 +214,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
@@ -232,6 +239,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
