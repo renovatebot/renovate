@@ -6,57 +6,43 @@ const presetGroup = require('../_fixtures/npm/renovate-config-group');
 const presetMonorepo = require('../_fixtures/npm/renovate-config-monorepo');
 const presetIkatyang = require('../_fixtures/npm/renovate-config-ikatyang');
 
-npm.getPreset = jest.fn(dep => {
+npm.getPreset = jest.fn((dep, presetName) => {
   if (dep === 'renovate-config-default') {
-    return {
-      'renovate-config':
-        presetDefaults.versions[presetDefaults['dist-tags'].latest][
-          'renovate-config'
-        ],
-    };
+    return presetDefaults.versions[presetDefaults['dist-tags'].latest][
+      'renovate-config'
+    ][presetName];
   }
   if (dep === 'renovate-config-packages') {
-    return {
-      'renovate-config':
-        presetPackages.versions[presetPackages['dist-tags'].latest][
-          'renovate-config'
-        ],
-    };
+    return presetPackages.versions[presetPackages['dist-tags'].latest][
+      'renovate-config'
+    ][presetName];
   }
   if (dep === 'renovate-config-group') {
-    return {
-      'renovate-config':
-        presetGroup.versions[presetGroup['dist-tags'].latest][
-          'renovate-config'
-        ],
-    };
+    return presetGroup.versions[presetGroup['dist-tags'].latest][
+      'renovate-config'
+    ][presetName];
   }
   if (dep === 'renovate-config-ikatyang') {
-    return {
-      'renovate-config':
-        presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
-          'renovate-config'
-        ],
-    };
+    return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
+      'renovate-config'
+    ][presetName];
   }
   if (dep === 'renovate-config-monorepo') {
-    return {
-      'renovate-config':
-        presetMonorepo.versions[presetMonorepo['dist-tags'].latest][
-          'renovate-config'
-        ],
-    };
+    return presetMonorepo.versions[presetMonorepo['dist-tags'].latest][
+      'renovate-config'
+    ][presetName];
+  }
+  if (dep === 'renovate-config-notfound') {
+    throw new Error('dep not found');
   }
   if (dep === 'renovate-config-noconfig') {
-    return {};
+    throw new Error('preset renovate-config not found');
   }
   if (dep === 'renovate-config-throw') {
     throw new Error('whoops');
   }
   if (dep === 'renovate-config-wrongpreset') {
-    return {
-      'renovate-config': {},
-    };
+    throw new Error('preset not found');
   }
   return null;
 });
@@ -76,7 +62,7 @@ describe('config/presets', () => {
     });
     it('throws if invalid preset file', async () => {
       config.foo = 1;
-      config.extends = ['notfoundaaaaaaaa'];
+      config.extends = ['notfound'];
       let e;
       try {
         await presets.resolveConfigPresets(config);
@@ -90,7 +76,7 @@ describe('config/presets', () => {
     });
     it('throws if invalid preset', async () => {
       config.foo = 1;
-      config.extends = [':invalid-preset'];
+      config.extends = ['wrongpreset:invalid-preset'];
       let e;
       try {
         await presets.resolveConfigPresets(config);
@@ -111,7 +97,7 @@ describe('config/presets', () => {
     });
     it('throws if valid and invalid', async () => {
       config.foo = 1;
-      config.extends = [':invalid-preset', ':pinVersions'];
+      config.extends = ['wrongpreset:invalid-preset', ':pinVersions'];
       let e;
       try {
         await presets.resolveConfigPresets(config);

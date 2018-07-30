@@ -166,7 +166,7 @@ Marking the latest version of an npm package as deprecated results in the entire
 
 exports[`api/npm should return preset 1`] = `
 Object {
-  "renovate-config": undefined,
+  "rangeStrategy": "auto",
 }
 `;
 
