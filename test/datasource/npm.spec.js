@@ -61,6 +61,37 @@ describe('api/npm', () => {
     expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
     expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(false);
   });
+  it('should return preset', async () => {
+    const presetPackage = {
+      name: 'foobar',
+      versions: {
+        '0.0.1': {
+          foo: 1,
+        },
+        '0.0.2': {
+          foo: 2,
+          deprecated: 'This is deprecated',
+        },
+      },
+      repository: {
+        type: 'git',
+        url: 'git://github.com/renovateapp/dummy.git',
+      },
+      'dist-tags': {
+        latest: '0.0.2',
+      },
+      time: {
+        '0.0.1': '2018-05-06T07:21:53+02:00',
+        '0.0.2': '2018-05-07T07:21:53+02:00',
+      },
+      'renovate-config': { foo: 1 },
+    };
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, presetPackage);
+    const res = await npm.getPreset('foobar');
+    expect(res).toMatchSnapshot();
+  });
   it('should return deprecated', async () => {
     const deprecatedPackage = {
       name: 'foobar',

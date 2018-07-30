@@ -6,7 +6,7 @@ const presetGroup = require('../_fixtures/npm/renovate-config-group');
 const presetMonorepo = require('../_fixtures/npm/renovate-config-monorepo');
 const presetIkatyang = require('../_fixtures/npm/renovate-config-ikatyang');
 
-npm.getPkgReleases = jest.fn(dep => {
+npm.getPreset = jest.fn(dep => {
   if (dep === 'renovate-config-default') {
     return {
       'renovate-config':
