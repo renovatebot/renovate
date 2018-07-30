@@ -92,7 +92,6 @@ Object {
       "version": "0.0.2",
     },
   ],
-  "renovate-config": undefined,
   "repositoryUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
@@ -163,6 +162,12 @@ exports[`api/npm should return deprecated 2`] = `
 \`This is deprecated\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake."
+`;
+
+exports[`api/npm should return preset 1`] = `
+Object {
+  "rangeStrategy": "auto",
+}
 `;
 
 exports[`api/npm should send an authorization header if provided 1`] = `

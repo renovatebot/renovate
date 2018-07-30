@@ -1849,4 +1849,31 @@ describe('platform/github', () => {
       expect(res).toMatchSnapshot();
     });
   });
+  describe('getVulnerabilityAlerts()', () => {
+    it('returns empty if error', async () => {
+      get.mockReturnValueOnce({
+        body: {},
+      });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(0);
+    });
+    it('returns array if found', async () => {
+      // prettier-ignore
+      const body = "{\"data\":{\"repository\":{\"vulnerabilityAlerts\":{\"edges\":[{\"node\":{\"externalIdentifier\":\"CVE-2018-1000136\",\"externalReference\":\"https://nvd.nist.gov/vuln/detail/CVE-2018-1000136\",\"affectedRange\":\">= 1.8, < 1.8.3\",\"fixedIn\":\"1.8.3\",\"id\":\"MDI4OlJlcG9zaXRvcnlWdWxuZXJhYmlsaXR5QWxlcnQ1MzE3NDk4MQ==\",\"packageName\":\"electron\"}}]}}}}";
+      get.post.mockReturnValueOnce({
+        body,
+      });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(1);
+    });
+    it('returns empty if disabled', async () => {
+      // prettier-ignore
+      const body = "{\"data\":{\"repository\":{}}}";
+      get.post.mockReturnValueOnce({
+        body,
+      });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(0);
+    });
+  });
 });

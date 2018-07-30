@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/github getDependency returns cleaned tags 1`] = `
+exports[`datasource/github getPkgReleases returns cleaned tags 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -16,7 +16,7 @@ Object {
 }
 `;
 
-exports[`datasource/github getDependency returns releases 1`] = `
+exports[`datasource/github getPkgReleases returns releases 1`] = `
 Object {
   "releases": Array [
     Object {
