@@ -41,6 +41,7 @@
     "Ayoub Kaanich <kayoub5@live.com>",
     "Dragomir Țurcanu <dragomirt22@gmail.com>",
     "Sam Neirinck <sam@samneirinck.com>",
+    "Nicolas Byl <nico@nicolas-byl.eu>",
     "Jean-Yves Couët <jycouet@gmail.com>"
   ],
   "license": "AGPL-3.0",
@@ -68,6 +69,7 @@
     "deepcopy": "1.0.0",
     "delay": "3.0.0",
     "detect-indent": "5.0.0",
+    "docker-registry-client": "3.3.0",
     "email-addresses": "3.0.1",
     "fast-clone": "1.5.3",
     "fast-xml-parser": "3.11.2",
@@ -126,7 +128,7 @@
     "mockdate": "2.0.2",
     "nock": "9.4.3",
     "prettier": "1.14.0",
-    "semantic-release": "15.9.1"
+    "semantic-release": "15.9.2"
   },
   "files": [
     "bin/config-validator.js",
