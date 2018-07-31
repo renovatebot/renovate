@@ -6200,9 +6200,9 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.9.2:
-  version "15.9.2"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.9.2.tgz#0c56c1fedbb7b99bc5aa06aac7b9edf92bdf8380"
+semantic-release@15.9.3:
+  version "15.9.3"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.9.3.tgz#16df893aaacfef038519e644e7902964acb01ede"
   dependencies:
     "@semantic-release/commit-analyzer" "^6.0.0"
     "@semantic-release/error" "^2.2.0"
