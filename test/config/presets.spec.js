@@ -207,6 +207,9 @@ describe('config/presets', () => {
     it('returns default package name', () => {
       expect(presets.parsePreset(':base')).toMatchSnapshot();
     });
+    it('parses github', () => {
+      expect(presets.parsePreset('github>some/repo')).toMatchSnapshot();
+    });
     it('returns default package name with params', () => {
       expect(
         presets.parsePreset(':group(packages/eslint, eslint)')
