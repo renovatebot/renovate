@@ -126,7 +126,7 @@
     "jest": "23.4.2",
     "jest-silent-reporter": "0.0.5",
     "mockdate": "2.0.2",
-    "nock": "9.4.3",
+    "nock": "9.4.4",
     "prettier": "1.14.0",
     "semantic-release": "15.9.3"
   },
