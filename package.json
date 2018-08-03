@@ -108,7 +108,7 @@
     "tmp-promise": "1.0.5",
     "traverse": "0.6.6",
     "upath": "1.1.0",
-    "validator": "10.4.0",
+    "validator": "10.5.0",
     "vso-node-api": "6.5.0",
     "www-authenticate": "0.6.2",
     "yarn": "1.9.2"
