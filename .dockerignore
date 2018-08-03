@@ -4,3 +4,4 @@
 !hooks
 !lib
 !bin/yarn*
+!qemu-*

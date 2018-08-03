@@ -1,0 +1,165 @@
+---
+version: 2
+
+build_jobs: &build_jobs
+  jobs:
+    - build-amd64
+    - build-arm64
+    # - build-armhf
+    - push-manifest:
+        requires:
+          - build-amd64
+          - build-arm64
+          # - build-armhf
+
+# ====================
+# WORKFLOW DECLARATION
+# ====================
+workflows:
+  version: 2
+  commit:
+    <<: *build_jobs
+  nightly:
+    <<: *build_jobs
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+
+shared: &shared
+  name: Build and push Docker image.
+  docker:
+    - image: docker:18-git
+  steps:
+    - checkout
+
+    - setup_remote_docker:
+        docker_layer_caching: true
+
+    - run: apk add --no-cache curl jq
+
+    - run:
+        name: Load env vars.
+        command: |
+          echo 'export IMAGE_ID="jessestuart/renovate"' >> $BASH_ENV
+          echo 'export GITHUB_REPO="renovatebot/renovate"' >> $BASH_ENV
+          echo 'export VERSION=$(curl -s https://api.github.com/repos/${GITHUB_REPO}/releases | jq -r "sort_by(.tag_name)[-1].tag_name")' >> $BASH_ENV
+          echo 'export QEMU_VERSION="v2.12.0"' >> $BASH_ENV
+
+          source $BASH_ENV
+
+    - run:
+        name: Clone source repo.
+        command: |
+          source $BASH_ENV
+          mkdir /repo
+          git clone https://github.com/${GITHUB_REPO} /repo
+          cp -f Dockerfile .dockerignore /repo/
+
+    - run:
+        name: Build Docker image.
+        command: |
+          source $BASH_ENV
+          cd /repo
+          if ! [ $GOARCH == 'amd64' ]; then
+            curl -sL "https://github.com/multiarch/qemu-user-static/releases/download/${QEMU_VERSION}/qemu-${QEMU_ARCH}-static.tar.gz" | tar xz
+            docker run --rm --privileged multiarch/qemu-user-static:register
+          fi
+          touch qemu-dummy-static
+
+          docker build \
+            -t "${IMAGE_ID}:${VERSION}-${GOARCH}" \
+            --build-arg version=$VERSION \
+            --build-arg target=$TARGET \
+            --build-arg goarch=$GOARCH .
+
+    - run:
+        name: Push image to Docker Hub.
+        command: |
+          export IMAGE_ID="jessestuart/renovate"
+          export GITHUB_REPO="renovatebot/renovate"
+          export VERSION=$(curl -s "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" | jq -r ".tag_name")
+
+          echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+          docker push "${IMAGE_ID}:${VERSION}-${GOARCH}"
+
+# ================
+# JOB DECLARATIONS
+# ================
+jobs:
+  build-amd64:
+    <<: *shared
+    environment:
+      GOARCH: amd64
+      QEMU_ARCH: amd64
+      TAG: amd64
+      TARGET: node:10-alpine
+  build-arm64:
+    <<: *shared
+    environment:
+      GOARCH: arm64
+      QEMU_ARCH: aarch64
+      TAG: arm64
+      TARGET: arm64v8/node:10-alpine
+  build-armhf:
+    <<: *shared
+    environment:
+      GOARCH: arm
+      QEMU_ARCH: arm
+      TAG: arm
+      TARGET: arm32v6/node:9-alpine
+
+  # ===================================
+  # ===================================
+  # ===================================
+
+  push-manifest:
+    docker:
+      - image: docker:18-git
+    environment:
+      GITHUB_REPO: renovatebot/renovate
+      IMAGE: jessestuart/renovate
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Determine repo version.
+          command: |
+            apk add --no-cache curl jq
+            echo 'export VERSION=$(curl -s https://api.github.com/repos/${GITHUB_REPO}/releases | jq -r "sort_by(.tag_name)[-1].tag_name")' >> $BASH_ENV
+
+      - run:
+          name: Install manifest-tool.
+          command: |
+            echo "Installing manifest-tool."
+            wget https://github.com/estesp/manifest-tool/releases/download/v0.7.0/manifest-tool-linux-amd64
+            mv manifest-tool-linux-amd64 /usr/bin/manifest-tool
+            chmod +x /usr/bin/manifest-tool
+            manifest-tool --version
+
+      - run:
+          name: Push Docker manifest.
+          command: |
+            source $BASH_ENV
+            export PLATFORMS="linux/amd64,linux/arm64"
+
+            echo "Authenticating with Docker hub."
+            echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+
+            echo "Pushing manifest for: $IMAGE"
+            if [ "${CIRCLE_BRANCH}" == 'master' ]; then
+              manifest-tool push from-args \
+                --platforms $PLATFORMS \
+                --template "$IMAGE:$VERSION-ARCH" \
+                --target "$IMAGE:latest"
+            fi
+
+            manifest-tool push from-args \
+              --platforms $PLATFORMS \
+              --template "$IMAGE:$VERSION-ARCH" \
+              --target "$IMAGE:$VERSION"
+
+            manifest-tool inspect "$IMAGE:$VERSION"
