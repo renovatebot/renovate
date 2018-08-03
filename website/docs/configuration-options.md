@@ -262,6 +262,10 @@ If you are more interested in including only certain package managers (e.g. `npm
 
 Use this configuration option for shared config across npm/yarn/pnpm and meteor package managers.
 
+## kubernetes
+
+Add to this configuration setting if you need to override any of the Kubernetes default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
+
 ## labels
 
 Add an array of 1 or more strings to `labels` and Renovate will apply these labels to any PR its created. Usually these will be a per-repository setting like "renovate", or "ready", or "dependencies", however you can configure them right down to per-package level.
