@@ -111,7 +111,7 @@
     "validator": "10.5.0",
     "vso-node-api": "6.5.0",
     "www-authenticate": "0.6.2",
-    "yarn": "1.9.2"
+    "yarn": "1.9.4"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
