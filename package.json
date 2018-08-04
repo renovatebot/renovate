@@ -62,7 +62,7 @@
     "changelog-filename-regex": "2.0.1",
     "child-process-promise": "2.2.1",
     "clean-git-ref": "1.0.3",
-    "commander": "2.16.0",
+    "commander": "2.17.0",
     "compare-versions": "3.3.0",
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
