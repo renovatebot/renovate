@@ -22,7 +22,9 @@ describe('lib/manager/kubernetes/extract', () => {
   describe('extractDependencies()', () => {
     let config;
     beforeEach(() => {
-      config = {};
+      config = {
+        fileMatch: ['(^|/)[^/]*\\.yaml$'],
+      };
     });
     it('returns null for empty', () => {
       expect(extractDependencies(kubernetesConfigMapFile, config)).toBe(null);
