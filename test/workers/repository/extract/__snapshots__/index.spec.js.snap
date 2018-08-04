@@ -23,6 +23,9 @@ Object {
   "gitlabci": Array [
     Object {},
   ],
+  "kubernetes": Array [
+    Object {},
+  ],
   "meteor": Array [
     Object {},
   ],
