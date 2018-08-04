@@ -111,14 +111,14 @@
     "validator": "10.5.0",
     "vso-node-api": "6.5.0",
     "www-authenticate": "0.6.2",
-    "yarn": "1.9.2"
+    "yarn": "1.9.4"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "codecov": "3.0.4",
     "cross-env": "5.2.0",
-    "eslint": "5.2.0",
+    "eslint": "5.3.0",
     "eslint-config-airbnb-base": "13.0.0",
     "eslint-config-prettier": "2.9.0",
     "eslint-plugin-import": "2.13.0",
