@@ -444,6 +444,12 @@ describe('platform/github', () => {
     });
   });
   describe('getFileList', () => {
+    beforeEach(async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+    });
     it('returns empty array if error', async () => {
       get.mockImplementationOnce(() => {
         throw new Error('some error');
@@ -1835,6 +1841,11 @@ describe('platform/github', () => {
   });
   describe('getCommitMessages()', () => {
     it('returns commits messages', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        gitAuthor: 'Renovate Bot <bot@renovatebot.com>',
+      });
       get.mockReturnValueOnce({
         body: [
           {
