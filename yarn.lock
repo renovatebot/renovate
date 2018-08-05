@@ -82,9 +82,9 @@
     parse-github-url "^1.0.1"
     url-join "^4.0.0"
 
-"@semantic-release/npm@^4.0.1":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@semantic-release/npm/-/npm-4.0.2.tgz#9964958f37a1a433d7e5230bc7b65af3839f55e8"
+"@semantic-release/npm@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@semantic-release/npm/-/npm-5.0.1.tgz#e3d49be08f50654e43284dfb582a309c722767d4"
   dependencies:
     "@semantic-release/error" "^2.2.0"
     aggregate-error "^1.0.0"
@@ -95,6 +95,7 @@
     lodash "^4.17.4"
     nerf-dart "^1.0.0"
     normalize-url "^3.0.0"
+    npm "^6.3.0"
     parse-json "^4.0.0"
     rc "^1.2.8"
     read-pkg "^4.0.0"
@@ -4928,7 +4929,7 @@ npm-user-validate@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.0.tgz#8ceca0f5cea04d4e93519ef72d0557a75122e951"
 
-npm@6.3.0:
+npm@6.3.0, npm@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/npm/-/npm-6.3.0.tgz#de7df51f6d1b05b088486097cf7993dbbcac752f"
   dependencies:
@@ -6250,14 +6251,14 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.9.3:
-  version "15.9.3"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.9.3.tgz#16df893aaacfef038519e644e7902964acb01ede"
+semantic-release@15.9.5:
+  version "15.9.5"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.9.5.tgz#8cb409e1dfbe37a4478ef2de2e3aa1d2b3cd0811"
   dependencies:
     "@semantic-release/commit-analyzer" "^6.0.0"
     "@semantic-release/error" "^2.2.0"
     "@semantic-release/github" "^5.0.0"
-    "@semantic-release/npm" "^4.0.1"
+    "@semantic-release/npm" "^5.0.1"
     "@semantic-release/release-notes-generator" "^7.0.0"
     aggregate-error "^1.0.0"
     cosmiconfig "^5.0.1"
