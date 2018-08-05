@@ -82,6 +82,13 @@ describe('config/env', () => {
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
+    it('supports docker username/password', () => {
+      const envParam = {
+        DOCKER_USERNAME: 'some-username',
+        DOCKER_PASSWORD: 'some-password',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
     it('supports Bitbucket', () => {
       const envParam = {
         RENOVATE_PLATFORM: 'bitbucket',

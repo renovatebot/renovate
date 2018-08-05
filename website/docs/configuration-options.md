@@ -193,6 +193,20 @@ Example:
 
 See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
 
+## endpoints
+
+Example for configuring `docker` auth:
+
+```json
+{
+  "endpoints": {
+    "platform": "docker",
+    "username": "<some-username>",
+    "password": "<some-password>"
+  }
+}
+```
+
 ## engines
 
 Extend this if you wish to configure rules specifically for `engines` definitions. Currently only `node` is supported.
@@ -261,6 +275,42 @@ If you are more interested in including only certain package managers (e.g. `npm
 ## js
 
 Use this configuration option for shared config across npm/yarn/pnpm and meteor package managers.
+
+## kubernetes
+
+Add to this configuration object if you need to override any of the Kubernetes default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
+
+It's important to note that the `kubernetes` manager by default has no `fileMatch` defined - i.e. so it will never match any files. This is because there is no commonly accepted file/directory naming convention for Kubernetes yaml files and we don't want to download every single `.yaml` file in repositories just in case one of them has Kubernetes definitions inside.
+
+If most `.yaml` files in your repository are Kubnernetes ones, then you could add this to your config:
+
+```json
+{
+  "kubernetes": {
+    "fileMatch": ["(^|/)[^/]*\\.yaml$"]
+  }
+}
+```
+
+If instead you have them all inside a `k8s/` directory, you would add this:
+
+```json
+{
+  "kubernetes": {
+    "fileMatch": ["k8s/.+\\.yaml$"]
+  }
+}
+```
+
+Or if it's just a single file then something like this:
+
+```json
+{
+  "kubernetes": {
+    "fileMatch": ["^config/k8s.yaml$"]
+  }
+}
+```
 
 ## labels
 
@@ -701,5 +751,28 @@ This field is currently used by some config prefixes.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
+
+## vulnerabilityAlerts
+
+Use this object to customise PRs that are raised when vulnerability alerts are detected (GitHub-only). For example, to set custom labels and assignees:
+
+```json
+{
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": ["@rarkins"]
+  }
+}
+```
+
+To disable vulnerability alerts completely, set like this:
+
+```json
+{
+  "vulnerabilityAlerts": {
+    "enabled": false
+  }
+}
+```
 
 ## yarnrc

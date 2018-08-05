@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/packagist getDependency processes real data 1`] = `
+exports[`datasource/packagist getPkgReleases processes real data 1`] = `
 Object {
   "homepage": "https://github.com/cristianvuolo/uploader",
   "name": "cristianvuolo/uploader",
@@ -51,7 +51,7 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getDependency processes real versioned data 1`] = `
+exports[`datasource/packagist getPkgReleases processes real versioned data 1`] = `
 Object {
   "homepage": "https://github.com/drewm/mailchimp-api",
   "name": "drewm/mailchimp-api",
