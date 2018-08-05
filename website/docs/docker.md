@@ -79,3 +79,21 @@ Add `"default:pinDigestsDisabled"` to your `extends` array.
 ##### Automerge digest updates
 
 Add `"default:automergeDigest"` to your `extends` array. Also add `"default:automergeBranchPush"` if you wish for these to be committed directly to your base branch without raising a PR first.
+
+##### Registry authentication
+
+If you are running your own Renovate bot, add this to your `config.js`:
+
+```js
+module.exports = {
+  endpoints: [
+    {
+      platform: 'docker',
+      username: '<your-username>',
+      password: '<your-password>',
+    },
+  ],
+};
+```
+
+Alternatively, configure `DOCKER_USERNAME` and `DOCKER_PASSWORD` in env to achieve the same.
