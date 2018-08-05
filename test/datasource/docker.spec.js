@@ -1,12 +1,18 @@
 const got = require('got');
 const docker = require('../../lib/datasource/docker');
+const endpoints = require('../../lib/util/endpoints');
 
 jest.mock('got');
+jest.mock('../../lib/util/endpoints');
 
 describe('api/docker', () => {
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      endpoints.find.mockReturnValue({
+        username: 'some-username',
+        password: 'some-password',
+      });
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
