@@ -95,3 +95,5 @@ module.exports = {
   ],
 };
 ```
+
+Alternatively, configure `DOCKER_USERNAME` and `DOCKER_PASSWORD` in env to achieve the same.
