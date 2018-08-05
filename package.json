@@ -105,7 +105,7 @@
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.2",
     "showdown": "1.8.6",
-    "slugify": "1.3.0",
+    "slugify": "1.3.1",
     "tmp-promise": "1.0.5",
     "traverse": "0.6.6",
     "upath": "1.1.0",
