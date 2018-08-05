@@ -42,6 +42,7 @@
     "Dragomir Țurcanu <dragomirt22@gmail.com>",
     "Sam Neirinck <sam@samneirinck.com>",
     "Nicolas Byl <nico@nicolas-byl.eu>",
+    "Maximilian Gaß <mxey@mxey.net>",
     "Jean-Yves Couët <jycouet@gmail.com>"
   ],
   "license": "AGPL-3.0",
@@ -62,7 +63,7 @@
     "changelog-filename-regex": "2.0.1",
     "child-process-promise": "2.2.1",
     "clean-git-ref": "1.0.3",
-    "commander": "2.16.0",
+    "commander": "2.17.0",
     "compare-versions": "3.3.0",
     "conventional-commits-detector": "0.1.1",
     "convert-hrtime": "2.0.0",
@@ -108,17 +109,17 @@
     "tmp-promise": "1.0.5",
     "traverse": "0.6.6",
     "upath": "1.1.0",
-    "validator": "10.4.0",
+    "validator": "10.5.0",
     "vso-node-api": "6.5.0",
     "www-authenticate": "0.6.2",
-    "yarn": "1.9.2"
+    "yarn": "1.9.4"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "chai": "4.1.2",
     "codecov": "3.0.4",
     "cross-env": "5.2.0",
-    "eslint": "5.2.0",
+    "eslint": "5.3.0",
     "eslint-config-airbnb-base": "13.0.0",
     "eslint-config-prettier": "2.9.0",
     "eslint-plugin-import": "2.13.0",
@@ -128,7 +129,7 @@
     "mockdate": "2.0.2",
     "nock": "9.4.4",
     "prettier": "1.14.0",
-    "semantic-release": "15.9.3"
+    "semantic-release": "15.9.5"
   },
   "files": [
     "bin/config-validator.js",
