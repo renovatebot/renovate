@@ -13,6 +13,8 @@ Be cautious when using this option - it will run Renovate over _every_ repositor
 
 ## endpoint
 
+## endpoints
+
 ## exposeEnv
 
 ## force
