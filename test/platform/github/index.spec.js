@@ -444,11 +444,17 @@ describe('platform/github', () => {
     });
   });
   describe('getFileList', () => {
+    beforeEach(async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+    });
     it('returns empty array if error', async () => {
       get.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      const files = await github.getFileList();
+      const files = await github.getFileList('error-branch');
       expect(files).toEqual([]);
     });
     it('warns if truncated result', async () => {
@@ -458,7 +464,7 @@ describe('platform/github', () => {
           tree: [],
         },
       }));
-      const files = await github.getFileList();
+      const files = await github.getFileList('truncated-branch');
       expect(files.length).toBe(0);
     });
     it('caches the result', async () => {
@@ -468,9 +474,9 @@ describe('platform/github', () => {
           tree: [],
         },
       }));
-      let files = await github.getFileList();
+      let files = await github.getFileList('cached-branch');
       expect(files.length).toBe(0);
-      files = await github.getFileList();
+      files = await github.getFileList('cached-branch');
       expect(files.length).toBe(0);
     });
     it('should return the files matching the fileName', async () => {
@@ -488,7 +494,7 @@ describe('platform/github', () => {
           ],
         },
       }));
-      const files = await github.getFileList();
+      const files = await github.getFileList('npm-branch');
       expect(files).toMatchSnapshot();
     });
   });
@@ -1835,6 +1841,11 @@ describe('platform/github', () => {
   });
   describe('getCommitMessages()', () => {
     it('returns commits messages', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        gitAuthor: 'Renovate Bot <bot@renovatebot.com>',
+      });
       get.mockReturnValueOnce({
         body: [
           {
