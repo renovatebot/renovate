@@ -4660,9 +4660,9 @@ nimnjs@^1.3.2:
     nimn-date-parser "^1.0.0"
     nimn_schema_builder "^1.0.0"
 
-nock@9.4.4:
-  version "9.4.4"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-9.4.4.tgz#d58a6d54ca26735d792aa776801cd0623789bdb6"
+nock@9.5.0:
+  version "9.5.0"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-9.5.0.tgz#ff778e9e6ad0556c25757d4e979f2191e58d2d74"
   dependencies:
     chai "^4.1.2"
     debug "^3.1.0"
