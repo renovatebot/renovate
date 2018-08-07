@@ -127,6 +127,26 @@ Object {
 }
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() handles digest pin for up to date version 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "8.1.0",
+    },
+  ],
+  "repositoryUrl": null,
+  "updates": Array [
+    Object {
+      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
+      "newDigestShort": "aaaaaa",
+      "newValue": "8.1.0",
+      "updateType": "pin",
+    },
+  ],
+  "warnings": Array [],
+}
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() handles digest update 1`] = `
 Object {
   "releases": Array [

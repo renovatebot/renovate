@@ -919,6 +919,25 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
+    it('handles digest pin for up to date version', async () => {
+      config.currentValue = '8.1.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getPkgReleases.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
     it('handles digest pin for non-version', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
