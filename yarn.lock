@@ -777,9 +777,9 @@ byte-size@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-4.0.3.tgz#b7c095efc68eadf82985fccd9a2df43a74fa2ccd"
 
-cacache@11.1.0, cacache@^11.1.0:
-  version "11.1.0"
-  resolved "https://registry.yarnpkg.com/cacache/-/cacache-11.1.0.tgz#3d76dbc2e9da413acaad2557051960a4dad3e1a4"
+cacache@11.2.0:
+  version "11.2.0"
+  resolved "https://registry.yarnpkg.com/cacache/-/cacache-11.2.0.tgz#617bdc0b02844af56310e411c0878941d5739965"
   dependencies:
     bluebird "^3.5.1"
     chownr "^1.0.1"
@@ -824,6 +824,25 @@ cacache@^11.0.1, cacache@^11.0.2:
     glob "^7.1.2"
     graceful-fs "^4.1.11"
     lru-cache "^4.1.2"
+    mississippi "^3.0.0"
+    mkdirp "^0.5.1"
+    move-concurrently "^1.0.1"
+    promise-inflight "^1.0.1"
+    rimraf "^2.6.2"
+    ssri "^6.0.0"
+    unique-filename "^1.1.0"
+    y18n "^4.0.0"
+
+cacache@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/cacache/-/cacache-11.1.0.tgz#3d76dbc2e9da413acaad2557051960a4dad3e1a4"
+  dependencies:
+    bluebird "^3.5.1"
+    chownr "^1.0.1"
+    figgy-pudding "^3.1.0"
+    glob "^7.1.2"
+    graceful-fs "^4.1.11"
+    lru-cache "^4.1.3"
     mississippi "^3.0.0"
     mkdirp "^0.5.1"
     move-concurrently "^1.0.1"

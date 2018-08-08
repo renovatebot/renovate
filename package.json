@@ -58,7 +58,7 @@
     "@sindresorhus/is": "0.11.0",
     "@yarnpkg/lockfile": "1.0.2",
     "bunyan": "1.8.12",
-    "cacache": "11.1.0",
+    "cacache": "11.2.0",
     "chalk": "2.4.1",
     "changelog-filename-regex": "2.0.1",
     "child-process-promise": "2.2.1",
