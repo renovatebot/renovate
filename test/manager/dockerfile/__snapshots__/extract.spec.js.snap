@@ -76,6 +76,27 @@ Array [
 ]
 `;
 
+exports[`lib/manager/dockerfile/extract extractDependencies() handles COPY --from 1`] = `
+Array [
+  Object {
+    "currentDepTag": "k8s-skaffold/skaffold:v0.11.0",
+    "currentDepTagDigest": "k8s-skaffold/skaffold:v0.11.0",
+    "currentDigest": undefined,
+    "currentFrom": "gcr.io/k8s-skaffold/skaffold:v0.11.0",
+    "currentTag": "v0.11.0",
+    "currentValue": "v0.11.0",
+    "depName": "k8s-skaffold/skaffold",
+    "dockerRegistry": "gcr.io",
+    "fromPrefix": "COPY --from=",
+    "fromSuffix": "/usr/bin/skaffold /usr/bin/skaffold",
+    "lineNumber": 1,
+    "purl": "pkg:docker/k8s-skaffold/skaffold?registry=gcr.io",
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
+  },
+]
+`;
+
 exports[`lib/manager/dockerfile/extract extractDependencies() handles abnoral spacing 1`] = `
 Array [
   Object {
@@ -354,6 +375,28 @@ Array [
     "dockerRegistry": undefined,
     "fromPrefix": "From",
     "fromSuffix": "",
+    "lineNumber": 0,
+    "purl": "pkg:docker/node",
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
+  },
+]
+`;
+
+exports[`lib/manager/dockerfile/extract extractDependencies() skips named multistage COPY --from tags 1`] = `
+Array [
+  Object {
+    "commitMessageTopic": "Node.js",
+    "currentDepTag": "node:6.12.3",
+    "currentDepTagDigest": "node:6.12.3",
+    "currentDigest": undefined,
+    "currentFrom": "node:6.12.3",
+    "currentTag": "6.12.3",
+    "currentValue": "6.12.3",
+    "depName": "node",
+    "dockerRegistry": undefined,
+    "fromPrefix": "FROM",
+    "fromSuffix": "as frontend",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,

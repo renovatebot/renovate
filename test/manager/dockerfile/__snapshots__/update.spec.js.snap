@@ -14,6 +14,12 @@ RUN something
 "
 `;
 
+exports[`manager/dockerfile/update updateDependency replaces COPY --from 1`] = `
+"FROM scratch
+COPY --from=gcr.io/k8s-skaffold/skaffold:v0.12.0 /usr/bin/skaffold /usr/bin/skaffold
+"
+`;
+
 exports[`manager/dockerfile/update updateDependency replaces existing value 1`] = `
 "# comment FROM node:8
 FROM node:8-alpine@sha256:abcdefghijklmnop
