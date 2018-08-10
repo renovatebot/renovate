@@ -2413,6 +2413,12 @@ get-stream@3.0.0, get-stream@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/get-stream/-/get-stream-3.0.0.tgz#8e943d1358dc37555054ecbe2edb05aa174ede14"
 
+get-stream@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/get-stream/-/get-stream-4.0.0.tgz#9e074cb898bd2b9ebabb445a1766d7f43576d977"
+  dependencies:
+    pump "^3.0.0"
+
 get-value@^2.0.3, get-value@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/get-value/-/get-value-2.0.6.tgz#dc15ca1c672387ca76bd37ac0a395ba2042a2c28"
@@ -6272,9 +6278,9 @@ sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
 
-semantic-release@15.9.6:
-  version "15.9.6"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.9.6.tgz#86f06dbad121dad360a0e60041bdbd12e36cd4b0"
+semantic-release@15.9.8:
+  version "15.9.8"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.9.8.tgz#cacd6a160f8155f1ef98eef5923af19979bc34e5"
   dependencies:
     "@semantic-release/commit-analyzer" "^6.0.0"
     "@semantic-release/error" "^2.2.0"
@@ -6288,7 +6294,7 @@ semantic-release@15.9.6:
     execa "^0.10.0"
     figures "^2.0.0"
     find-versions "^2.0.0"
-    get-stream "^3.0.0"
+    get-stream "^4.0.0"
     git-log-parser "^1.2.0"
     git-url-parse "^10.0.1"
     hook-std "^1.1.0"
