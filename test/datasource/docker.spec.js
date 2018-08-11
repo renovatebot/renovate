@@ -120,6 +120,9 @@ describe('api/docker', () => {
     });
   });
   describe('getPkgReleases', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
       const res = await docker.getPkgReleases({
@@ -161,6 +164,61 @@ describe('api/docker', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
+    });
+    it('adds library/ prefix for Docker Hub (implicit)', async () => {
+      const tags = ['1.0.0'];
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      const res = await docker.getPkgReleases({
+        fullname: 'node',
+        qualifiers: {},
+      });
+      expect(res.releases).toHaveLength(1);
+      expect(got).toMatchSnapshot();
+    });
+    it('adds library/ prefix for Docker Hub (explicit)', async () => {
+      const tags = ['1.0.0'];
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      const res = await docker.getPkgReleases({
+        fullname: 'node',
+        qualifiers: {
+          registry: 'docker.io',
+        },
+      });
+      expect(res.releases).toHaveLength(1);
+      expect(got).toMatchSnapshot();
+    });
+    it('adds no library/ prefix for other registries', async () => {
+      const tags = ['1.0.0'];
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://k8s.gcr.io/v2/token",service="k8s.gcr.io"',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      const res = await docker.getPkgReleases({
+        fullname: 'kubernetes-dashboard-amd64',
+        qualifiers: {
+          registry: 'k8s.gcr.io',
+        },
+      });
+      expect(res.releases).toHaveLength(1);
+      expect(got).toMatchSnapshot();
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});

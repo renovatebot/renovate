@@ -1,5 +1,197 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "https://index.docker.io/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
+    Array [
+      "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/node:pull",
+      Object {
+        "headers": Object {
+          "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+        },
+        "password": "some-password",
+        "username": "some-username",
+      },
+    ],
+    Array [
+      "https://index.docker.io/v2/library/node/tags/list?n=10000",
+      Object {
+        "headers": Object {
+          "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+          "Authorization": "Bearer some-token ",
+        },
+        "json": true,
+        "timeout": 10000,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "headers": Object {
+          "www-authenticate": "Bearer realm=\\"https://auth.docker.io/token\\",service=\\"registry.docker.io\\",scope=\\"repository:library/node:pull  \\"",
+        },
+      },
+    },
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "body": Object {
+          "token": "some-token ",
+        },
+        "headers": Object {},
+      },
+    },
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "body": Object {
+          "tags": Array [
+            "1.0.0",
+          ],
+        },
+        "headers": Object {},
+      },
+    },
+  ],
+}
+`;
+
+exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit) 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "https://index.docker.io/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
+    Array [
+      "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/node:pull",
+      Object {
+        "headers": Object {
+          "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+        },
+        "password": "some-password",
+        "username": "some-username",
+      },
+    ],
+    Array [
+      "https://index.docker.io/v2/library/node/tags/list?n=10000",
+      Object {
+        "headers": Object {
+          "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+          "Authorization": "Bearer some-token ",
+        },
+        "json": true,
+        "timeout": 10000,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "headers": Object {
+          "www-authenticate": "Bearer realm=\\"https://auth.docker.io/token\\",service=\\"registry.docker.io\\",scope=\\"repository:library/node:pull  \\"",
+        },
+      },
+    },
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "body": Object {
+          "token": "some-token ",
+        },
+        "headers": Object {},
+      },
+    },
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "body": Object {
+          "tags": Array [
+            "1.0.0",
+          ],
+        },
+        "headers": Object {},
+      },
+    },
+  ],
+}
+`;
+
+exports[`api/docker getPkgReleases adds no library/ prefix for other registries 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "https://k8s.gcr.io/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
+    Array [
+      "https://k8s.gcr.io/v2/token?service=k8s.gcr.io&scope=repository:kubernetes-dashboard-amd64:pull",
+      Object {
+        "headers": Object {
+          "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+        },
+        "password": "some-password",
+        "username": "some-username",
+      },
+    ],
+    Array [
+      "https://k8s.gcr.io/v2/kubernetes-dashboard-amd64/tags/list?n=10000",
+      Object {
+        "headers": Object {
+          "Accept": "application/vnd.docker.distribution.manifest.v2+json",
+          "Authorization": "Bearer some-token ",
+        },
+        "json": true,
+        "timeout": 10000,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "headers": Object {
+          "www-authenticate": "Bearer realm=\\"https://k8s.gcr.io/v2/token\\",service=\\"k8s.gcr.io\\"",
+        },
+      },
+    },
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "body": Object {
+          "token": "some-token ",
+        },
+        "headers": Object {},
+      },
+    },
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "body": Object {
+          "tags": Array [
+            "1.0.0",
+          ],
+        },
+        "headers": Object {},
+      },
+    },
+  ],
+}
+`;
+
 exports[`api/docker getPkgReleases returns tags with no suffix 1`] = `
 Object {
   "releases": Array [
