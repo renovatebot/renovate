@@ -108,5 +108,19 @@ describe('manager/dockerfile/update', () => {
       expect(res).toMatchSnapshot();
       expect(res.includes('as stage-1')).toBe(true);
     });
+    it('replaces COPY --from', () => {
+      const fileContent =
+        'FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n';
+      const upgrade = {
+        lineNumber: 1,
+        depName: 'k8s-skaffold/skaffold',
+        newValue: 'v0.12.0',
+        fromPrefix: 'COPY --from=',
+        fromSuffix: '/usr/bin/skaffold /usr/bin/skaffold',
+        dockerRegistry: 'gcr.io',
+      };
+      const res = dockerfile.updateDependency(fileContent, upgrade);
+      expect(res).toMatchSnapshot();
+    });
   });
 });
