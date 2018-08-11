@@ -38,7 +38,7 @@ You may configure more than one in the above.
 
 ### Support private npm modules
 
-See the dedicated [Private npm module support](/docs/private-modules/) page.
+See the dedicated [Private npm module support](private-modules/) page.
 
 ### Control renovate's schedule
 
