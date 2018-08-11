@@ -1,9 +1,10 @@
 const fs = require('fs-extra');
 const Git = require('simple-git/promise');
 const tmp = require('tmp-promise');
-const git = require('../../../lib/platform/git');
+const GitStorage = require('../../../lib/platform/git/storage');
 
-describe('platform/git', () => {
+describe('platform/git/storage', () => {
+  const git = new GitStorage();
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base;
