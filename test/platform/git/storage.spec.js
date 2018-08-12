@@ -4,6 +4,8 @@ const tmp = require('tmp-promise');
 const GitStorage = require('../../../lib/platform/git/storage');
 
 describe('platform/git/storage', () => {
+  jest.setTimeout(15000);
+
   const git = new GitStorage();
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -94,6 +96,23 @@ describe('platform/git/storage', () => {
     });
   });
 
+  describe('getBranchCommit(branchName)', () => {
+    it('should return same value for equal refs', async () => {
+      const hex = await git.getBranchCommit('renovate/past_branch');
+      expect(hex).toBe(await git.getBranchCommit('master~1'));
+      expect(hex).toHaveLength(40);
+    });
+  });
+
+  describe('createBranch(branchName, sha)', () => {
+    it('resets existing branch', async () => {
+      const hex = await git.getBranchCommit('renovate/past_branch');
+      expect(await git.getBranchCommit('renovate/future_branch')).not.toBe(hex);
+      await git.createBranch('renovate/future_branch', hex);
+      expect(await git.getBranchCommit('renovate/future_branch')).toBe(hex);
+    });
+  });
+
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
       await git.mergeBranch('renovate/future_branch');
@@ -173,6 +192,12 @@ describe('platform/git/storage', () => {
         files,
         'Update something'
       );
+    });
+  });
+
+  describe('getCommitMessages()', () => {
+    it('returns commit messages', async () => {
+      expect(await git.getCommitMessages()).toMatchSnapshot();
     });
   });
 });

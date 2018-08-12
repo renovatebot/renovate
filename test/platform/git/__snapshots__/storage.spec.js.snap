@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/git/storage getCommitMessages() returns commit messages 1`] = `
+Array [
+  "master message",
+  "past message",
+]
+`;
+
 exports[`platform/git/storage getFileList() should return the correct files 1`] = `
 Array [
   "future_file",
