@@ -2,6 +2,9 @@
 
 exports[`api/npm should fetch package info from custom registry 1`] = `
 Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": "foobar",
@@ -27,6 +30,9 @@ Object {
 
 exports[`api/npm should fetch package info from npm 1`] = `
 Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": "foobar",
@@ -52,6 +58,9 @@ Object {
 
 exports[`api/npm should handle no time 1`] = `
 Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": "foobar",
@@ -93,12 +102,18 @@ Object {
     },
   ],
   "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "tags": Object {
+    "latest": "0.0.1",
+  },
   "versions": Object {},
 }
 `;
 
 exports[`api/npm should replace any environment variable in npmrc 1`] = `
 Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": "foobar",
@@ -132,6 +147,9 @@ Object {
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "deprecationSource": "npm",
+  "dist-tags": Object {
+    "latest": "0.0.2",
+  },
   "homepage": undefined,
   "latestVersion": "0.0.2",
   "name": "foobar",
@@ -172,6 +190,9 @@ Object {
 
 exports[`api/npm should send an authorization header if provided 1`] = `
 Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": "foobar",
@@ -197,6 +218,9 @@ Object {
 
 exports[`api/npm should use NPM_TOKEN if provided 1`] = `
 Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": "foobar",
@@ -222,6 +246,9 @@ Object {
 
 exports[`api/npm should use default registry if missing from npmrc 1`] = `
 Object {
+  "dist-tags": Object {
+    "latest": "0.0.1",
+  },
   "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": "foobar",
