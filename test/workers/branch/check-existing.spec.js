@@ -26,6 +26,7 @@ describe('workers/branch/check-existing', () => {
     });
     it('returns true if first check hits', async () => {
       platform.findPr.mockReturnValueOnce({ number: 12 });
+      platform.getPr.mockReturnValueOnce({ number: 12, state: 'closed' });
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr.mock.calls.length).toBe(1);
     });
