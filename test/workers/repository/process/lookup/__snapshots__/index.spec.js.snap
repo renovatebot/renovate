@@ -78,6 +78,7 @@ Array [
 
 exports[`manager/npm/lookup .lookupUpdates() handles digest pin 1`] = `
 Object {
+  "homepage": undefined,
   "releases": Array [
     Object {
       "version": "8.0.0",
@@ -129,6 +130,7 @@ Object {
 
 exports[`manager/npm/lookup .lookupUpdates() handles digest pin for up to date version 1`] = `
 Object {
+  "homepage": undefined,
   "releases": Array [
     Object {
       "version": "8.1.0",
@@ -149,6 +151,7 @@ Object {
 
 exports[`manager/npm/lookup .lookupUpdates() handles digest update 1`] = `
 Object {
+  "homepage": undefined,
   "releases": Array [
     Object {
       "version": "8.0.0",
@@ -212,6 +215,7 @@ Object {
 \`true\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
+  "homepage": undefined,
   "releases": Array [
     Object {
       "canBeUnpublished": false,
@@ -373,6 +377,7 @@ Array [
 
 exports[`manager/npm/lookup .lookupUpdates() returns complex object 1`] = `
 Object {
+  "homepage": undefined,
   "releases": Array [
     Object {
       "canBeUnpublished": false,
