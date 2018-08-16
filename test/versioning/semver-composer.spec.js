@@ -1,5 +1,10 @@
 const semver = require('../../lib/versioning')('semverComposer');
 
+describe('semver.getPatch(input)', () => {
+  it('gets patch', () => {
+    expect(semver.getPatch('1.2.0')).toEqual(0);
+  });
+});
 describe('semver.equals(a, b)', () => {
   it('should pad short version', () => {
     expect(semver.equals('1.2.0', 'v1.2')).toBe(true);

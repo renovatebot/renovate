@@ -201,23 +201,6 @@ exports[`manager/npm/lookup .lookupUpdates() handles github 404 1`] = `Array []`
 
 exports[`manager/npm/lookup .lookupUpdates() handles packagist 1`] = `Array []`;
 
-exports[`manager/npm/lookup .lookupUpdates() handles prerelease jumps 1`] = `
-Array [
-  Object {
-    "canBeUnpublished": false,
-    "fromVersion": "2.9.0-rc",
-    "isRange": true,
-    "isSingleVersion": false,
-    "newMajor": 2,
-    "newMinor": 9,
-    "newValue": "^2.9.1-insiders",
-    "releaseTimestamp": "2018-05-16T23:16:36.911Z",
-    "toVersion": "2.9.1-insiders.20180516",
-    "updateType": "minor",
-  },
-]
-`;
-
 exports[`manager/npm/lookup .lookupUpdates() handles pypi 404 1`] = `Array []`;
 
 exports[`manager/npm/lookup .lookupUpdates() handles unknown purl 1`] = `Array []`;
@@ -679,13 +662,13 @@ exports[`manager/npm/lookup .lookupUpdates() should allow unstable versions if t
 Array [
   Object {
     "canBeUnpublished": false,
-    "fromVersion": "2.3.0-beta.1",
+    "fromVersion": "3.1.0-dev.20180731",
     "isSingleVersion": true,
-    "newMajor": 2,
-    "newMinor": 5,
-    "newValue": "2.5.17-beta.0",
-    "releaseTimestamp": "2018-03-23T23:29:13.819Z",
-    "toVersion": "2.5.17-beta.0",
+    "newMajor": 3,
+    "newMinor": 1,
+    "newValue": "3.1.0-dev.20180813",
+    "releaseTimestamp": "2018-08-13T19:05:14.347Z",
+    "toVersion": "3.1.0-dev.20180813",
     "updateType": "minor",
   },
 ]
@@ -717,6 +700,22 @@ Object {
   "semanticCommitType": "fix",
   "updateType": "rollback",
 }
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() should not jump unstable versions 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "3.0.1-insiders.20180726",
+    "isSingleVersion": true,
+    "newMajor": 3,
+    "newMinor": 0,
+    "newValue": "3.0.1",
+    "releaseTimestamp": "2018-07-30T16:21:13.150Z",
+    "toVersion": "3.0.1",
+    "updateType": "minor",
+  },
+]
 `;
 
 exports[`manager/npm/lookup .lookupUpdates() should treat zero zero caret ranges as pinned 1`] = `

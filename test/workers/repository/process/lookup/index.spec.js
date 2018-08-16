@@ -641,16 +641,28 @@ describe('manager/npm/lookup', () => {
       expect(res.updates[0].newValue).toEqual('2.5.17-beta.0');
     });
     it('should allow unstable versions if the current version is unstable', async () => {
-      config.currentValue = '2.3.0-beta.1';
-      config.depName = 'vue';
-      config.purl = 'pkg:npm/vue';
+      config.currentValue = '3.1.0-dev.20180731';
+      config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
       nock('https://registry.npmjs.org')
-        .get('/vue')
-        .reply(200, vueJson);
+        .get('/typescript')
+        .reply(200, typescriptJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toEqual('2.5.17-beta.0');
+      expect(res.updates[0].newValue).toEqual('3.1.0-dev.20180813');
+    });
+    it('should not jump unstable versions', async () => {
+      config.currentValue = '3.0.1-insiders.20180726';
+      config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
+      nock('https://registry.npmjs.org')
+        .get('/typescript')
+        .reply(200, typescriptJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newValue).toEqual('3.0.1');
     });
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
@@ -714,17 +726,6 @@ describe('manager/npm/lookup', () => {
         .reply(200, nextJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
-    });
-    it('handles prerelease jumps', async () => {
-      config.currentValue = '^2.9.0-rc';
-      config.rangeStrategy = 'replace';
-      config.depName = 'typescript';
-      config.purl = 'pkg:npm/typescript';
-      nock('https://registry.npmjs.org')
-        .get('/typescript')
-        .reply(200, typescriptJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot();
     });
     it('supports in-range caret updates', async () => {
       config.rangeStrategy = 'bump';
