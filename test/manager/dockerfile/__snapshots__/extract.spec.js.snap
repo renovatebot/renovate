@@ -119,6 +119,27 @@ Array [
 ]
 `;
 
+exports[`lib/manager/dockerfile/extract extractDependencies() handles calico/node 1`] = `
+Array [
+  Object {
+    "currentDepTag": "calico/node",
+    "currentDepTagDigest": "calico/node",
+    "currentDigest": undefined,
+    "currentFrom": "calico/node",
+    "currentTag": undefined,
+    "currentValue": undefined,
+    "depName": "calico/node",
+    "dockerRegistry": undefined,
+    "fromPrefix": "FROM",
+    "fromSuffix": "",
+    "lineNumber": 0,
+    "purl": "pkg:docker/calico/node",
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
+  },
+]
+`;
+
 exports[`lib/manager/dockerfile/extract extractDependencies() handles comments 1`] = `
 Array [
   Object {
