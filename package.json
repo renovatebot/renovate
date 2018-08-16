@@ -125,7 +125,7 @@
     "eslint-plugin-import": "2.14.0",
     "eslint-plugin-promise": "3.8.0",
     "jest": "23.5.0",
-    "jest-silent-reporter": "0.0.5",
+    "jest-silent-reporter": "0.1.0",
     "mockdate": "2.0.2",
     "nock": "9.6.1",
     "prettier": "1.14.2",
