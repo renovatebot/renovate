@@ -2,7 +2,7 @@
 
 exports[`util/endpoints find() allows overrides 1`] = `
 Object {
-  "endpoint": "endpoint",
+  "endpoint": "endpoint/",
   "name": "GitHub",
   "other": "data",
   "platform": "github",
