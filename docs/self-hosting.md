@@ -2,7 +2,7 @@
 
 ## Open Source vs Commercial versions
 
-Although Renovate is now best known as a "service" via the GitHub App, that service is actually running this same open source project, so you can get the same functionality if running it yourself. The version you see here in this repository can be cloned or `npm` installed in seconds and give you the exact core functionality as in the app.
+Although Renovate is now best known as a "service" via the GitHub App, that service is actually running this same open source project, so you can get the same functionality if running it yourself. The version you see here in this repository can be cloned or `npm` installed in seconds and give you the same core functionality as in the app.
 
 There is also a commercially-licensed "Professional Edition" of Renovate available for GitHub Enterprise, that includes a stateful priority job queue, background scheduler and webhook listener.
 For details and documentation on Renovate Pro, please visit [renovatebot.com/pro](https://renovatebot.com/pro).
@@ -40,7 +40,9 @@ You can find instructions for GitHub
 (select "repo" permissions)
 
 You can find instructions for GitLab
-[here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens). Note: GitLab APIv3 is no longer supported - please upgrade to GitLab APIv4 before testing Renovate.
+[here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens).
+
+Note: you should also configure a GitHub token even if your source host is GitLab, because Renovate will need to perform many queries to github.com in order to retrieve Release Notes.
 
 You can find instructions for VSTS
 [vsts](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
@@ -51,14 +53,51 @@ to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN` or `VSTS_TOKEN`.
 
 ## Usage
 
-Run `renovate --help` for usage details.
+The following example uses the Renovate CLI tool, which can be installed by running `npm i -g renovate`.
 
-Note: The first time you run `renovate` on a repository, it will not upgrade any
-dependencies. Instead, it will create a Pull Request (Merge Request if GitLab)
-called 'Configure Renovate' and commit a default `renovate.json` file to the
-repository. This PR can be closed as unmerged if the default settings are fine for
-you. Also, this behaviour can be disabled if you set the `onboarding`
-configuration option to `false` before running.
+If running your own Renovate bot then you will need a user account that Renovate will run as. It's recommended to use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance. Create and save a Personal Access Token for this account.
+
+Create a Renovate config file, e.g. here is an example:
+
+```js
+module.exports = {
+  endpoint: 'https://self-hosted.gitlab/api/v4/',
+  token: '**gitlab_token**',
+  platform: 'gitlab',
+  logFileLevel: 'warn',
+  logLevel: 'info',
+  logFile: '/home/user/renovate.log',
+  onboarding: true,
+  onboardingConfig: {
+    extends: ['config:base'],
+  },
+  repositories: ['username/repo', 'orgname/repo'],
+};
+```
+
+Here change the `logFile` and `repositories` to something appropriate. Also replace gitlab-token value with the one created during the previous step.
+
+If running against GitHub Enterprise, change the above gitlab values to the equivalent github ones.
+
+You can save this file as anything you want and then use `RENOVATE_CONFIG_FILE` env variable to tell Renovate where to find it.
+
+Most people will run Renovate via cron, e.g. once per hour. Here is an example bash script that you can point `cron` to:
+
+```sh
+#!/bin/bash
+
+export PATH="/home/user/.yarn/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+export RENOVATE_CONFIG_FILE="/home/user/renovate-config.js"
+export GITHUB_TOKEN="**github-token**" # Delete this if using GHE
+export GITHUB_COM_TOKEN="**github-token**" # Delete this if using GitLab
+
+# Renovate
+renovate
+```
+
+Note: the GitHub token in env is necessary in order to retrieve Release Notes that are hosted on github.com. Use `GITHUB_COM_TOKEN` if running against GitLab or `GITHUB_TOKEN` if running against GitLab. i.e. remove one of the lines as applicable.
+
+You should save and test out this script manually first, and add it to cron once you've verified it.
 
 ## Deployment
 
