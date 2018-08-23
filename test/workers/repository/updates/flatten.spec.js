@@ -41,6 +41,16 @@ describe('workers/repository/updates/flatten', () => {
               },
             ],
           },
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                depName: 'calico/node',
+                language: 'docker',
+                updates: [{ newValue: '3.2.0' }],
+              },
+            ],
+          },
         ],
       };
       const res = await flattenUpdates(config, packageFiles);

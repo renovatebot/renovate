@@ -30,7 +30,7 @@ exports[`workers/pr ensurePr should create PR if success 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from \`v1.0.0\` to \`v1.1.0\`
+  "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
 
 
@@ -54,7 +54,7 @@ exports[`workers/pr ensurePr should create privateRepo PR if success 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from \`v1.0.0\` to \`v1.1.0\`
+  "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
 
 
@@ -76,7 +76,7 @@ Array [
 
 exports[`workers/pr ensurePr should return modified existing PR 1`] = `
 Object {
-  "body": "This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from \`v1.0.0\` to \`v1.1.0\`
+  "body": "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
 
 
@@ -97,7 +97,7 @@ Object {
 
 exports[`workers/pr ensurePr should return modified existing PR title 1`] = `
 Object {
-  "body": "This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from \`v1.0.0\` to \`v1.1.0\`
+  "body": "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
 
 

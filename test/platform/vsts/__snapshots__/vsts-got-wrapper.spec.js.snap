@@ -25,12 +25,12 @@ WebApi {
       "userAgent": "vsts-node-api",
     },
   },
-  "serverUrl": "myEndpoint",
+  "serverUrl": "myEndpoint/",
   "vsoClient": VsoClient {
     "_initializationPromise": Promise {},
     "_locationsByAreaPromises": Object {},
-    "basePath": "myEndpoint",
-    "baseUrl": "myEndpoint",
+    "basePath": "myEndpoint/",
+    "baseUrl": "myEndpoint/",
     "restClient": RestClient {
       "client": HttpClient {
         "_certConfig": undefined,

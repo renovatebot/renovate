@@ -140,5 +140,9 @@ describe('lib/manager/dockerfile/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
+    it('handles calico/node', () => {
+      const res = extractDependencies('FROM calico/node\n', config).deps;
+      expect(res).toMatchSnapshot();
+    });
   });
 });
