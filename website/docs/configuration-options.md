@@ -142,13 +142,19 @@ The description field is used by config presets to describe what they do. They a
 
 ## digest
 
-Add to this object if you wish to define rules that apply only to PRs that pin Docker digests.
+Add to this object if you wish to define rules that apply only to PRs that update Docker digests.
 
 ## docker
 
+Add config here if you wish it to apply to all Docker package managers (Dockerfile, Docker Compose, CircleCI, etc).
+
 ## docker-compose
 
+Add configuration here if you want to enable or disable something in particular for Docker Compose files and override the default Docker settings.
+
 ## dockerfile
+
+Add configuration here if you want to enable or disable something in particular for `Dockerfile` files and override the default Docker settings.
 
 ## enabled
 
