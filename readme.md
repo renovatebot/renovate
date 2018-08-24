@@ -11,21 +11,22 @@ Automated dependency updates. Flexible, so you don't need to be.
 
 ## Why Use Renovate?
 
-- Receive automated Pull Requests whenever dependencies need updating. Or whenever you schedule it for.
-- Renovate discovers and processes all dependency files in a repository (e.g. supports
-  monorepo architecture such as lerna or yarn workspaces)
-- Extremely customisable behaviour via configuration files or within your `package.json`
+- Receive automated Pull Requests whenever dependencies need updating.
+- Define schedules to avoid unnecessary noise in projects (e.g. for weekends or outside of working hours, or weekly updates, etc)
+- Relevant package files are discovered automatically (e.g. supports
+  monorepo architecture such as lerna or yarn workspaces without further configuration)
+- Bot behaviour is extremely customisable via configuration files (config as code)
 - Use eslint-like shared config presets for ease of use and simplifying configuration
-- Update lock files natively in the same commit, including immediately resolving conflicts whenever PRs are merged
-- Supports GitHub, GitLab (APIv4) and VSTS. BitBucket is a WIP.
-- Open source (installable via npm/yarn) so can be self-hosted or used for free via GitHub App
+- Lock files are natively supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
+- Supports GitHub, GitLab and VSTS. BitBucket is a WIP.
+- Open source (installable via npm/yarn or Docker Hub) so can be self-hosted or used via GitHub App
 
 ## Who Uses Renovate?
 
 Renovate was released in 2017 and is now widely used in the developer community. Example users include the following GitHub organisations:
 
 [<img align="left" src="https://avatars1.githubusercontent.com/u/2034458?s=80&v=4" alt="algolia" title="algolia" hspace="10"/>](https://github.com/algolia)
-[<img align="left" src="https://avatars0.githubusercontent.com/u/139426?s=80&v=4" alt="angular" title="angular" hspace="10"/>](https://github.com/angular)
+[<img align="left" src="https://avatars0.githubusercontent.com/u/1342004?s=80&v=4" alt="google" title="google" hspace="10"/>](https://github.com/google)
 [<img align="left" src="https://avatars2.githubusercontent.com/u/131524?s=80&v=4" alt="mozilla" title="mozilla" hspace="10"/>](https://github.com/mozilla)
 [<img align="left" src="https://avatars2.githubusercontent.com/u/33676472?s=80&v=4" alt="uber-workflow" title="uber-workflow" hspace="10"/>](https://github.com/uber-workflow)
 [<img align="left" src="https://avatars1.githubusercontent.com/u/22247014?s=80&v=4" alt="yarnpkg" title="yarnpkg" hspace="10"/>](https://github.com/yarnpkg)
@@ -34,27 +35,30 @@ Renovate was released in 2017 and is now widely used in the developer community.
 
 ## The Renovate Approach
 
-- Everyone can benefit from automation, whether it's a little or a lot
-- Renovate should not cause you to change your workflow against your wishes - don't enforce opinions on users
-- All behaviour should be configurable, down to a ridiculous level if desired
+- We believe everyone can benefit from automation, whether it's a little or a lot
+- Renovate should not cause you to change your workflow against your wishes, instead it should be adaptable to your existing workflow
+- All behaviour should be configurable, down to a ridiculous level if necessary
 - Autodetect settings wherever possible (to minimise configuration) but always allow overrides
 
 ## Using Renovate
 
 The easiest way to use Renovate if you are on GitHub is to use the Renovate app. Go to
 [https://github.com/marketplace/renovate](https://github.com/marketplace/renovate) to install
-it now.
+it now. A paid plan is required for private repositories.
 
 ## Configuration
 
-Please see https://renovatebot.com/docs/ for documentation, and in particular https://renovatebot.com/docs/configuration-options/ for a list of configuration options.
+Visit https://renovatebot.com/docs/ for documentation, and in particular https://renovatebot.com/docs/configuration-options/ for a list of configuration options.
 
-You can also raise an issue in https://github.com/renovatebot/config-help if
-you'd like to get your config reviewed or ask any questions.
+You can also raise an issue in https://github.com/renovatebot/config-help if you'd like to get your config reviewed or ask any questions.
 
 ## Self-Hosting
 
-If you are not on GitHub or you prefer to run your own copy of Renovate, then you can easily run your own copy. Please see [docs/self-hosting.md](https://github.com/renovatebot/renovate/blob/master/docs/self-hosting.md) for instructions. There is also a commercially licensed [Renovate Pro Edition](https://renovatebot.com/pro) available for GitHub Enterprise.
+If you are not on GitHub or you prefer to run your own instance of Renovate then you have several options:
+
+- Install the `renovate` CLI tool from npmjs
+- Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool)
+- Use [Renovate Pro Edition](https://renovatebot.com/pro) available for GitHub Enterprise and soon GitLab too
 
 ## Contributing
 
