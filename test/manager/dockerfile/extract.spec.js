@@ -120,10 +120,29 @@ describe('lib/manager/dockerfile/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
+    it('handles COPY --from', () => {
+      const res = extractDependencies(
+        'FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n',
+        config
+      ).deps;
+      expect(res).toMatchSnapshot();
+    });
+    it('skips named multistage COPY --from tags', () => {
+      const res = extractDependencies(
+        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=frontend /usr/bin/node /usr/bin/node\n',
+        config
+      ).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
     it('extracts images on adjacent lines', () => {
       const res = extractDependencies(d1, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
+    });
+    it('handles calico/node', () => {
+      const res = extractDependencies('FROM calico/node\n', config).deps;
+      expect(res).toMatchSnapshot();
     });
   });
 });
