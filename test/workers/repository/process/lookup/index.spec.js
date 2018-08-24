@@ -52,7 +52,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
-    it('returns only one update if grouping', async () => {
+    it('returns two updates if grouping but separateMajorMinor=true', async () => {
       config.groupName = 'somegroup';
       config.currentValue = '^0.4.0';
       config.rangeStrategy = 'pin';
