@@ -40,6 +40,31 @@ Object {
 }
 `;
 
+exports[`platform/bitbucket getCommitMessages() works 1`] = `
+Array [
+  "Commit messsage 0",
+  "Commit messsage 1",
+  "Commit messsage 2",
+  "Commit messsage 3",
+  "Commit messsage 4",
+  "Commit messsage 5",
+  "Commit messsage 6",
+  "Commit messsage 7",
+  "Commit messsage 8",
+  "Commit messsage 9",
+  "Commit messsage 10",
+  "Commit messsage 11",
+  "Commit messsage 12",
+  "Commit messsage 13",
+  "Commit messsage 14",
+  "Commit messsage 15",
+  "Commit messsage 16",
+  "Commit messsage 17",
+  "Commit messsage 18",
+  "Commit messsage 19",
+]
+`;
+
 exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
   "isFork": false,
