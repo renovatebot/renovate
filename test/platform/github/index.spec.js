@@ -156,14 +156,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        // getPrList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
-        // getFileList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
         // getBranchCommit
         get.mockImplementationOnce(() => ({
           body: {
@@ -179,6 +171,14 @@ describe('platform/github', () => {
         // getBranchCommit
         get.post.mockImplementationOnce(() => ({
           body: {},
+        }));
+        // getPrList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getFileList
+        get.mockImplementationOnce(() => ({
+          body: [],
         }));
         return github.initRepo(...args);
       }
@@ -204,14 +204,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        // getPrList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
-        // getFileList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
         // getBranchCommit
         get.mockImplementationOnce(() => ({
           body: {
@@ -231,6 +223,14 @@ describe('platform/github', () => {
         // fork
         get.post.mockImplementationOnce(() => ({
           body: { full_name: 'forked_repo' },
+        }));
+        // getPrList
+        get.mockImplementationOnce(() => ({
+          body: [],
+        }));
+        // getFileList
+        get.mockImplementationOnce(() => ({
+          body: [],
         }));
         return github.initRepo(...args);
       }
