@@ -84,47 +84,44 @@ describe('platform/bitbucket', () => {
       ],
     },
     '/2.0/repositories/some/repo/refs/branches/master': {
-      name: "master",
+      name: 'master',
       target: { hash: 'master_hash' },
     },
     '/2.0/repositories/some/repo/refs/branches/branch': {
-      name: "branch",
+      name: 'branch',
       target: {
         hash: 'branch_hash',
-        parents: [{ hash: 'master_hash' }]
+        parents: [{ hash: 'master_hash' }],
       },
     },
-    "/!api/1.0/repositories/some/repo/directory/master_hash": {
-      values: [
-        'foo_folder/foo_file',
-        'bar_file',
-      ],
+    '/!api/1.0/repositories/some/repo/directory/master_hash': {
+      values: ['foo_folder/foo_file', 'bar_file'],
     },
-    "/!api/1.0/repositories/some/repo/directory/branch_hash": notFound,
+    '/!api/1.0/repositories/some/repo/directory/branch_hash': notFound,
     '/2.0/repositories/some/repo/src/branch_hash/': {
-      "values": [
+      values: [
         {
-          "path": "foo_folder",
-          "type": "commit_directory",
-          "links": {
-            "self": {
-              "href": "/2.0/repositories/some/repo/src/branch_hash/foo_folder/"
-            }
-          }
+          path: 'foo_folder',
+          type: 'commit_directory',
+          links: {
+            self: {
+              href: '/2.0/repositories/some/repo/src/branch_hash/foo_folder/',
+            },
+          },
         },
         {
-          "path": "bar_file",
-          "type": "commit_file",
-        }
-      ]
+          path: 'bar_file',
+          type: 'commit_file',
+        },
+      ],
     },
     '/2.0/repositories/some/repo/src/branch_hash/foo_folder/': {
-      "values": [
+      values: [
         {
-          "path": "foo_folder/foo_file",
-          "type": "commit_file",
-        }
-      ]
+          path: 'foo_folder/foo_file',
+          type: 'commit_file',
+        },
+      ],
     },
     '/2.0/repositories/some/repo/src/branch_hash/bar_file': 'bar_file content',
     '/2.0/repositories/some/repo/src/branch_hash/not_found': notFound,
@@ -132,13 +129,15 @@ describe('platform/bitbucket', () => {
       throw new Error('Server error');
     },
     '/2.0/repositories/some/repo/commits': {
-      values: [...Array(20).keys()].map(i => ({ message: 'Commit messsage ' + i }))
+      values: [...Array(20).keys()].map(i => ({
+        message: 'Commit messsage ' + i,
+      })),
     },
   };
 
   async function mockedGet(path) {
     let body = responses[URL.parse(path).pathname] || { values: [] };
-    if (typeof body === "function") {
+    if (typeof body === 'function') {
       body = await body();
     }
     return { body };
@@ -198,7 +197,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getFileList()', () => {
-    const getFileList = (br) => mocked(() => bitbucket.getFileList(br))
+    const getFileList = br => mocked(() => bitbucket.getFileList(br));
     it('works', async () => {
       await initRepo();
       expect(await getFileList('branch')).toEqual([
@@ -223,7 +222,6 @@ describe('platform/bitbucket', () => {
   });
 
   describe('branchExists()', () => {
-
     it('returns true if branch exist in repo', async () => {
       api.get.mockImplementationOnce(() => ({ body: { name: 'branch1' } }));
       const actual = await bitbucket.branchExists('branch1');
@@ -253,9 +251,7 @@ describe('platform/bitbucket', () => {
   describe('isBranchStale()', () => {
     it('returns false for same hash', async () => {
       await initRepo();
-      const isStale = await mocked(() =>
-        bitbucket.isBranchStale('branch')
-      );
+      const isStale = await mocked(() => bitbucket.isBranchStale('branch'));
       expect(isStale).toBe(false);
     });
   });
@@ -433,11 +429,10 @@ describe('platform/bitbucket', () => {
   describe('getAllRenovateBranches()', () => {
     it('exists', async () => {
       await initRepo();
-      const branches = await mocked(() => bitbucket.getAllRenovateBranches('renovate/'));
-      expect(branches).toEqual([
-        'renovate/branch',
-        'renovate/upgrade',
-      ]);
+      const branches = await mocked(() =>
+        bitbucket.getAllRenovateBranches('renovate/')
+      );
+      expect(branches).toEqual(['renovate/branch', 'renovate/upgrade']);
     });
   });
 
@@ -447,5 +442,4 @@ describe('platform/bitbucket', () => {
       expect(alerts).toEqual([]);
     });
   });
-
 });
