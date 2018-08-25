@@ -1,5 +1,3 @@
-
-const { basename } = require('path');
 const URL = require('url');
 
 describe('platform/bitbucket', () => {
@@ -31,19 +29,20 @@ describe('platform/bitbucket', () => {
     created_on: '2018-07-02T07:02:25.275030+00:00',
     links: {
       commits: {
-        href: "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits"
+        href:
+          'https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits',
       },
     },
   };
   const responses = {
-    "/2.0/repositories/some/repo": {
+    '/2.0/repositories/some/repo': {
       is_private: false,
-      full_name: "some/repo",
+      full_name: 'some/repo',
       owner: { username: 'some' },
       mainbranch: { name: 'master' },
     },
     '/2.0/repositories/some/repo/pullrequests': {
-      values: [pr]
+      values: [pr],
     },
     '/2.0/repositories/some/repo/pullrequests/5': pr,
     '/2.0/repositories/some/repo/pullrequests/5/diff': `
@@ -60,17 +59,19 @@ describe('platform/bitbucket', () => {
       lazy-object-proxy==1.3.1
       lxml==3.6.0
       mccabe==0.6.1
-    `.trim().replace(/^\s+/g, ''),
+    `
+      .trim()
+      .replace(/^\s+/g, ''),
     '/2.0/repositories/some/repo/pullrequests/5/commits': {
-      values: [{}]
+      values: [{}],
     },
     '/2.0/repositories/some/repo/refs/branches/master': {
-      target: { hash: 'hash' }
+      target: { hash: 'hash' },
     },
     '/2.0/repositories/some/repo/refs/branches/branch': {
-      target: { parents: [{ hash: 'hash' }] }
+      target: { parents: [{ hash: 'hash' }] },
     },
-  }
+  };
 
   function mockedGet(path) {
     const body = responses[URL.parse(path).pathname] || { values: [] };
@@ -88,9 +89,11 @@ describe('platform/bitbucket', () => {
   }
 
   function initRepo() {
-    return withMockedGet(() => bitbucket.initRepo({
-      repository: 'some/repo'
-    }));
+    return withMockedGet(() =>
+      bitbucket.initRepo({
+        repository: 'some/repo',
+      })
+    );
   }
 
   describe('getRepos()', () => {
@@ -168,7 +171,9 @@ describe('platform/bitbucket', () => {
   describe('isBranchStale()', () => {
     it('returns false for same hash', async () => {
       await initRepo();
-      const isStale = await withMockedGet(() => bitbucket.isBranchStale('branch'));
+      const isStale = await withMockedGet(() =>
+        bitbucket.isBranchStale('branch')
+      );
       expect(isStale).toBe(false);
     });
   });
@@ -181,7 +186,9 @@ describe('platform/bitbucket', () => {
     });
     it('returns null if no PR for branch', async () => {
       await initRepo();
-      const branch = await withMockedGet(() => bitbucket.getBranchPr('branch_without_pr'));
+      const branch = await withMockedGet(() =>
+        bitbucket.getBranchPr('branch_without_pr')
+      );
       expect(branch).toBe(null);
     });
   });
@@ -274,7 +281,7 @@ describe('platform/bitbucket', () => {
     it('posts PR', async () => {
       await initRepo();
       api.post.mockReturnValueOnce({
-        body: { id: 5 }
+        body: { id: 5 },
       });
       const { id } = await bitbucket.createPr('branch', 'title', 'body');
       expect(id).toBe(5);
