@@ -99,7 +99,7 @@
     "p-all": "1.0.0",
     "parse-diff": "0.4.2",
     "parse-link-header": "1.0.1",
-    "pnpm": "2.13.5",
+    "pnpm": "2.13.6",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "safe-regex": "1.1.0",
