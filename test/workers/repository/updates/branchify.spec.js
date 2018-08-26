@@ -38,7 +38,7 @@ describe('workers/repository/updates/branchify', () => {
       expect(res.branches[0].isMinor).toBe(true);
       expect(res.branches[0].upgrades[0].isMinor).toBe(true);
     });
-    it('uses major slug', async () => {
+    it('uses major/minor/patch slugs', async () => {
       flattenUpdates.mockReturnValueOnce([
         {
           depName: 'foo',
@@ -50,12 +50,40 @@ describe('workers/repository/updates/branchify', () => {
           group: {},
           separateMajorMinor: true,
         },
+        {
+          depName: 'foo',
+          branchName: 'foo-{{version}}',
+          version: '1.1.0',
+          prTitle: 'some-title',
+          updateType: 'minor',
+          groupName: 'some packages',
+          group: {},
+          separateMajorMinor: true,
+          separateMinorPatch: true,
+        },
+        {
+          depName: 'foo',
+          branchName: 'foo-{{version}}',
+          version: '1.0.1',
+          prTitle: 'some-title',
+          updateType: 'patch',
+          groupName: 'some packages',
+          group: {},
+          separateMajorMinor: true,
+          separateMinorPatch: true,
+        },
       ]);
       config.repoIsOnboarded = true;
       const res = await branchifyUpgrades(config);
-      expect(Object.keys(res.branches).length).toBe(1);
+      expect(Object.keys(res.branches).length).toBe(3);
       expect(res.branches[0].isMajor).toBe(true);
       expect(res.branches[0].groupSlug).toMatchSnapshot();
+      expect(Object.keys(res.branches).length).toBe(3);
+      expect(res.branches[1].isMinor).toBe(true);
+      expect(res.branches[1].groupSlug).toMatchSnapshot();
+      expect(Object.keys(res.branches).length).toBe(3);
+      expect(res.branches[2].isPatch).toBe(true);
+      expect(res.branches[2].groupSlug).toMatchSnapshot();
     });
     it('does not group if different compiled branch names', async () => {
       flattenUpdates.mockReturnValueOnce([
