@@ -1,5 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/bitbucket commitFilesToBranch() posts files 1`] = `
+Array [
+  "",
+  "
+Content-Disposition: form-data; name=\\"message\\"
+
+message
+",
+  "
+Content-Disposition: form-data; name=\\"parents\\"
+
+branch_hash
+",
+  "
+Content-Disposition: form-data; name=\\"branch\\"
+
+branch
+",
+  "
+Content-Disposition: form-data; name=\\"/package.json\\"
+
+hello world
+",
+  "--
+",
+]
+`;
+
 exports[`platform/bitbucket createPr() posts PR 1`] = `
 Array [
   Array [
@@ -65,6 +93,21 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket getPr() exists 1`] = `
+Object {
+  "body": "summary",
+  "branchName": "branch",
+  "canRebase": true,
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "displayNumber": "Pull Request #5",
+  "isStale": false,
+  "isUnmergeable": false,
+  "number": 5,
+  "state": "open",
+  "title": "title",
+}
+`;
+
 exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
   "isFork": false,
@@ -82,6 +125,42 @@ Array [
         "close_source_branch": true,
         "merge_strategy": "merge_commit",
         "message": "auto merged",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket setBaseBranch() updates file list 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/refs/branches/branch",
+  ],
+  Array [
+    "/!api/1.0/repositories/some/repo/directory/branch_hash",
+  ],
+  Array [
+    "/2.0/repositories/some/repo/src/branch_hash/?pagelen=100",
+    undefined,
+  ],
+  Array [
+    "/2.0/repositories/some/repo/src/branch_hash/foo_folder/?pagelen=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket setBranchStatus() posts status 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/commit/branch_hash/statuses/build",
+    Object {
+      "body": Object {
+        "description": "description",
+        "key": "context",
+        "name": "context",
+        "state": "FAILED",
+        "url": "targetUrl",
       },
     },
   ],

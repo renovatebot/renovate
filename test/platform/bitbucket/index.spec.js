@@ -1,4 +1,19 @@
 const URL = require('url');
+const responses = require('../../_fixtures/bitbucket/responses');
+
+function streamToString(stream) {
+  // eslint-disable-next-line promise/avoid-new
+  return new Promise((resolve) => {
+    const chunks = [];
+    stream.on('data', (chunk) => {
+      chunks.push(chunk.toString());
+    });
+    stream.on('end', () => {
+      resolve(chunks.join(''));
+    });
+    stream.resume();
+  });
+}
 
 describe('platform/bitbucket', () => {
   let bitbucket;
@@ -24,117 +39,6 @@ describe('platform/bitbucket', () => {
     bitbucket.cleanRepo();
   });
 
-  const pr = {
-    id: 5,
-    source: { branch: { name: 'branch' } },
-    title: 'title',
-    summary: { raw: 'summary' },
-    state: 'OPEN',
-    created_on: '2018-07-02T07:02:25.275030+00:00',
-    links: {
-      commits: {
-        href:
-          'https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits',
-      },
-    },
-  };
-  function notFound() {
-    const err = new Error('Not found');
-    err.statusCode = 404;
-    throw err;
-  }
-
-  const responses = {
-    '/2.0/repositories/some/repo': {
-      is_private: false,
-      full_name: 'some/repo',
-      owner: { username: 'some' },
-      mainbranch: { name: 'master' },
-    },
-    '/2.0/repositories/some/repo/pullrequests': {
-      values: [pr],
-    },
-    '/2.0/repositories/some/repo/pullrequests/5': pr,
-    '/2.0/repositories/some/repo/pullrequests/5/diff': `
-      diff --git a/requirements.txt b/requirements.txt
-      index 7e08d70..f5283ca 100644
-      --- a/requirements.txt
-      +++ b/requirements.txt
-      @@ -7,7 +7,7 @@ docutils==0.12
-      enum34==1.1.6
-      futures==3.2.0
-      isort==4.3.4
-      -jedi==0.11.1
-      +jedi==0.12.1
-      lazy-object-proxy==1.3.1
-      lxml==3.6.0
-      mccabe==0.6.1
-    `
-      .trim()
-      .replace(/^\s+/g, ''),
-    '/2.0/repositories/some/repo/pullrequests/5/commits': {
-      values: [{}],
-    },
-    '/2.0/repositories/some/repo/refs/branches': {
-      values: [
-        { name: 'master' },
-        { name: 'branch' },
-        { name: 'renovate/branch' },
-        { name: 'renovate/upgrade' },
-      ],
-    },
-    '/2.0/repositories/some/repo/refs/branches/master': {
-      name: 'master',
-      target: { hash: 'master_hash' },
-    },
-    '/2.0/repositories/some/repo/refs/branches/branch': {
-      name: 'branch',
-      target: {
-        hash: 'branch_hash',
-        parents: [{ hash: 'master_hash' }],
-      },
-    },
-    '/!api/1.0/repositories/some/repo/directory/master_hash': {
-      values: ['foo_folder/foo_file', 'bar_file'],
-    },
-    '/!api/1.0/repositories/some/repo/directory/branch_hash': notFound,
-    '/2.0/repositories/some/repo/src/branch_hash/': {
-      values: [
-        {
-          path: 'foo_folder',
-          type: 'commit_directory',
-          links: {
-            self: {
-              href: '/2.0/repositories/some/repo/src/branch_hash/foo_folder/',
-            },
-          },
-        },
-        {
-          path: 'bar_file',
-          type: 'commit_file',
-        },
-      ],
-    },
-    '/2.0/repositories/some/repo/src/branch_hash/foo_folder/': {
-      values: [
-        {
-          path: 'foo_folder/foo_file',
-          type: 'commit_file',
-        },
-      ],
-    },
-    '/2.0/repositories/some/repo/src/branch_hash/bar_file': 'bar_file content',
-    '/2.0/repositories/some/repo/src/branch_hash/not_found': notFound,
-    '/2.0/repositories/some/repo/src/branch_hash/error': () => {
-      throw new Error('Server error');
-    },
-    '/2.0/repositories/some/repo/commits': {
-      values: [...Array(20).keys()].map(i => ({
-        message: 'Commit messsage ' + i,
-      })),
-    },
-  };
-
   async function mockedGet(path) {
     let body = responses[URL.parse(path).pathname] || { values: [] };
     if (typeof body === 'function') {
@@ -151,6 +55,10 @@ describe('platform/bitbucket', () => {
     } finally {
       api.get = oldGet;
     }
+  }
+
+  function wrap(prop) {
+    return (...args) => mocked(() => bitbucket[prop](...args));
   }
 
   function initRepo() {
@@ -179,10 +87,6 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getRepoForceRebase()', () => {
-    it('exists', async () => {
-      expect(await bitbucket.getRepoForceRebase()).toBe(false);
-    });
-
     it('always return false, since bitbucket does not support force rebase', () => {
       const actual = bitbucket.getRepoForceRebase();
       const expected = false;
@@ -191,13 +95,17 @@ describe('platform/bitbucket', () => {
   });
 
   describe('setBaseBranch()', () => {
-    it('exists', () => {
-      expect(bitbucket.setBaseBranch).toBeDefined();
+    it('updates file list', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.setBaseBranch('branch');
+        expect(api.get.mock.calls).toMatchSnapshot();
+      });
     });
   });
 
   describe('getFileList()', () => {
-    const getFileList = br => mocked(() => bitbucket.getFileList(br));
+    const getFileList = wrap('getFileList');
     it('works', async () => {
       await initRepo();
       expect(await getFileList('branch')).toEqual([
@@ -249,43 +157,53 @@ describe('platform/bitbucket', () => {
   });
 
   describe('isBranchStale()', () => {
+    const isBranchStale = wrap('isBranchStale');
     it('returns false for same hash', async () => {
       await initRepo();
-      const isStale = await mocked(() => bitbucket.isBranchStale('branch'));
-      expect(isStale).toBe(false);
+      expect(await isBranchStale('branch')).toBe(false);
     });
   });
 
   describe('getBranchPr()', () => {
+    const getBranchPr = wrap('getBranchPr');
     it('bitbucket finds PR for branch', async () => {
       await initRepo(responses);
-      const branch = await mocked(() => bitbucket.getBranchPr('branch'));
-      expect(branch).toMatchSnapshot();
+      expect(await getBranchPr('branch')).toMatchSnapshot();
     });
     it('returns null if no PR for branch', async () => {
       await initRepo();
-      const branch = await mocked(() =>
-        bitbucket.getBranchPr('branch_without_pr')
-      );
-      expect(branch).toBe(null);
+      expect(await getBranchPr('branch_without_pr')).toBe(null);
     });
   });
 
   describe('getBranchStatus()', () => {
-    it('exists', () => {
-      expect(bitbucket.getBranchStatus).toBeDefined();
+    const getBranchStatus = wrap('getBranchStatus');
+    it('works', async () => {
+      await initRepo();
+      expect(await getBranchStatus('master', null)).toBe('success');
+      expect(await getBranchStatus('master', ['foo'])).toBe('failed');
+      expect(await getBranchStatus('master', true)).toBe('failed');
+      expect(await getBranchStatus('branch', true)).toBe('success');
     });
   });
 
   describe('getBranchStatusCheck()', () => {
-    it('exists', () => {
-      expect(bitbucket.getBranchStatusCheck).toBeDefined();
+    const getBranchStatusCheck = wrap('getBranchStatusCheck');
+    it('works', async () => {
+      await initRepo();
+      expect(await getBranchStatusCheck('master', null)).toBe(null);
+      expect(await getBranchStatusCheck('master', 'foo')).toBe('failed');
+      expect(await getBranchStatusCheck('master', 'bar')).toBe(null);
     });
   });
 
   describe('setBranchStatus()', () => {
-    it('exists', () => {
-      expect(bitbucket.setBranchStatus).toBeDefined();
+    it('posts status', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.setBranchStatus('branch', 'context', 'description', 'failed', 'targetUrl');
+        expect(api.post.mock.calls).toMatchSnapshot();
+      });
     });
   });
 
@@ -296,8 +214,8 @@ describe('platform/bitbucket', () => {
   });
 
   describe('mergeBranch()', () => {
-    it('exists', () => {
-      expect(bitbucket.mergeBranch).toBeDefined();
+    it('throws', async () => {
+      await expect(bitbucket.mergeBranch()).rejects.toBeDefined();
     });
   });
 
@@ -308,38 +226,38 @@ describe('platform/bitbucket', () => {
   });
 
   describe('ensureIssue()', () => {
-    it('exists', () => {
-      expect(bitbucket.ensureIssue).toBeDefined();
+    it('does not throw', async () => {
+      await bitbucket.ensureIssue('title', 'body');
     });
   });
 
   describe('ensureIssueClosing()', () => {
-    it('exists', () => {
-      expect(bitbucket.ensureIssueClosing).toBeDefined();
+    it('does not throw', async () => {
+      await bitbucket.ensureIssueClosing('title');
     });
   });
 
   describe('addAssignees()', () => {
-    it('exists', () => {
-      expect(bitbucket.addAssignees).toBeDefined();
+    it('does not throw', async () => {
+      await bitbucket.addAssignees(3, ['some']);
     });
   });
 
   describe('addReviewers', () => {
-    it('exists', () => {
-      expect(bitbucket.addReviewers).toBeDefined();
+    it('does not throw', async () => {
+      await bitbucket.addReviewers(5, ['some']);
     });
   });
 
   describe('ensureComment()', () => {
-    it('exists', () => {
-      expect(bitbucket.ensureComment).toBeDefined();
+    it('does not throw', async () => {
+      await bitbucket.ensureComment(3, 'topic', 'content');
     });
   });
 
   describe('ensureCommentRemoval()', () => {
-    it('exists', () => {
-      expect(bitbucket.ensureCommentRemoval).toBeDefined();
+    it('does not throw', async () => {
+      await bitbucket.ensureCommentRemoval(3, 'topic');
     });
   });
 
@@ -368,8 +286,10 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getPr()', () => {
-    it('exists', () => {
-      expect(bitbucket.getPr).toBeDefined();
+    const getPr = wrap('getPr');
+    it('exists', async() => {
+      await initRepo();
+      expect(await getPr(5)).toMatchSnapshot();
     });
   });
 
@@ -396,14 +316,31 @@ describe('platform/bitbucket', () => {
   });
 
   describe('commitFilesToBranch()', () => {
-    it('exists', () => {
-      expect(bitbucket.commitFilesToBranch).toBeDefined();
+    it('posts files', async () => {
+      await initRepo();
+      const files = [
+        {
+          name: 'package.json',
+          contents: 'hello world',
+        },
+      ];
+      await mocked(async () => {
+        await bitbucket.commitFilesToBranch(
+          'branch',
+          files,
+          'message'
+        );
+        expect(api.post.mock.calls).toHaveLength(1);
+        const { body } = api.post.mock.calls[0][1];
+        const content = (await streamToString(body)).split('--' + body.getBoundary());
+        expect(content).toMatchSnapshot();
+      });
     });
   });
 
   describe('getFile()', () => {
     beforeEach(initRepo);
-    const getFile = (...args) => mocked(() => bitbucket.getFile(...args));
+    const getFile = wrap('getFile');
     it('works', async () => {
       expect(await getFile('bar_file', 'branch')).toBe('bar_file content');
     });
@@ -419,27 +356,25 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getCommitMessages()', () => {
+    const getCommitMessages = wrap('getCommitMessages');
     it('works', async () => {
       await initRepo();
-      const messages = await mocked(() => bitbucket.getCommitMessages());
-      expect(messages).toMatchSnapshot();
+      expect(await getCommitMessages()).toMatchSnapshot();
     });
   });
 
   describe('getAllRenovateBranches()', () => {
-    it('exists', async () => {
+    const getAllRenovateBranches = wrap('getAllRenovateBranches');
+    it('retuns filtered branches', async () => {
       await initRepo();
-      const branches = await mocked(() =>
-        bitbucket.getAllRenovateBranches('renovate/')
-      );
-      expect(branches).toEqual(['renovate/branch', 'renovate/upgrade']);
+      expect(await getAllRenovateBranches('renovate/')).toEqual(['renovate/branch', 'renovate/upgrade']);
     });
   });
 
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty array', async () => {
-      const alerts = await bitbucket.getVulnerabilityAlerts();
-      expect(alerts).toEqual([]);
+      expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
     });
   });
+
 });
