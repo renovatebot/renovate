@@ -3,9 +3,9 @@ const responses = require('../../_fixtures/bitbucket/responses');
 
 function streamToString(stream) {
   // eslint-disable-next-line promise/avoid-new
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const chunks = [];
-    stream.on('data', (chunk) => {
+    stream.on('data', chunk => {
       chunks.push(chunk.toString());
     });
     stream.on('end', () => {
@@ -201,7 +201,13 @@ describe('platform/bitbucket', () => {
     it('posts status', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.setBranchStatus('branch', 'context', 'description', 'failed', 'targetUrl');
+        await bitbucket.setBranchStatus(
+          'branch',
+          'context',
+          'description',
+          'failed',
+          'targetUrl'
+        );
         expect(api.post.mock.calls).toMatchSnapshot();
       });
     });
@@ -287,7 +293,7 @@ describe('platform/bitbucket', () => {
 
   describe('getPr()', () => {
     const getPr = wrap('getPr');
-    it('exists', async() => {
+    it('exists', async () => {
       await initRepo();
       expect(await getPr(5)).toMatchSnapshot();
     });
@@ -325,14 +331,12 @@ describe('platform/bitbucket', () => {
         },
       ];
       await mocked(async () => {
-        await bitbucket.commitFilesToBranch(
-          'branch',
-          files,
-          'message'
-        );
+        await bitbucket.commitFilesToBranch('branch', files, 'message');
         expect(api.post.mock.calls).toHaveLength(1);
         const { body } = api.post.mock.calls[0][1];
-        const content = (await streamToString(body)).split('--' + body.getBoundary());
+        const content = (await streamToString(body)).split(
+          '--' + body.getBoundary()
+        );
         expect(content).toMatchSnapshot();
       });
     });
@@ -367,7 +371,10 @@ describe('platform/bitbucket', () => {
     const getAllRenovateBranches = wrap('getAllRenovateBranches');
     it('retuns filtered branches', async () => {
       await initRepo();
-      expect(await getAllRenovateBranches('renovate/')).toEqual(['renovate/branch', 'renovate/upgrade']);
+      expect(await getAllRenovateBranches('renovate/')).toEqual([
+        'renovate/branch',
+        'renovate/upgrade',
+      ]);
     });
   });
 
@@ -376,5 +383,4 @@ describe('platform/bitbucket', () => {
       expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
     });
   });
-
 });
