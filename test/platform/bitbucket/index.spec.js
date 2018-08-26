@@ -300,8 +300,10 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getPrFiles()', () => {
-    it('exists', () => {
-      expect(bitbucket.getPrFiles).toBeDefined();
+    const getPrFiles = wrap('getPrFiles');
+    it('returns diff files', async () => {
+      await initRepo();
+      expect(await getPrFiles(5)).toMatchSnapshot();
     });
   });
 

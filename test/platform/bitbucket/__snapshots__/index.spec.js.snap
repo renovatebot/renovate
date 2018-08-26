@@ -108,6 +108,12 @@ Object {
 }
 `;
 
+exports[`platform/bitbucket getPrFiles() returns diff files 1`] = `
+Array [
+  "requirements.txt",
+]
+`;
+
 exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
   "isFork": false,
