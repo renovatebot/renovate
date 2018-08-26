@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`workers/repository/updates/branchify branchifyUpgrades() uses major/minor/patch slugs 1`] = `"major-some-packages"`;
-
-exports[`workers/repository/updates/branchify branchifyUpgrades() uses major/minor/patch slugs 2`] = `"minor-some-packages"`;
-
-exports[`workers/repository/updates/branchify branchifyUpgrades() uses major/minor/patch slugs 3`] = `"patch-some-packages"`;
-
-exports[`workers/repository/updates/branchify branchifyUpgrades() uses major/minor/patch slugs 4`] = `"major-undefined-other-packages"`;
