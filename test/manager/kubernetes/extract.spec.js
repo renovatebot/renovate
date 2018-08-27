@@ -13,6 +13,11 @@ const kubernetesConfigMapFile = fs.readFileSync(
   'utf8'
 );
 
+const kubernetesArraySyntaxFile = fs.readFileSync(
+  'test/_fixtures/kubernetes/array-syntax.yaml',
+  'utf8'
+);
+
 const otherYamlFile = fs.readFileSync(
   'test/_fixtures/kubernetes/gitlab-ci.yaml',
   'utf8'
@@ -33,6 +38,11 @@ describe('lib/manager/kubernetes/extract', () => {
       const res = extractDependencies(kubernetesImagesFile, config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
+    });
+    it('extracts image line in a YAML array', () => {
+      const res = extractDependencies(kubernetesArraySyntaxFile, config);
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(1);
     });
     it('ignores non-Kubernetes YAML files', () => {
       expect(extractDependencies(otherYamlFile, config)).toBe(null);

@@ -340,6 +340,44 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() returns additional update if grouping but separateMinorPatch=true 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.0",
+    "isSingleVersion": true,
+    "newMajor": 0,
+    "newMinor": 4,
+    "newValue": "0.4.4",
+    "releaseTimestamp": "2011-06-10T17:20:04.719Z",
+    "toVersion": "0.4.4",
+    "updateType": "patch",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.0",
+    "isSingleVersion": true,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
+    "toVersion": "0.9.7",
+    "updateType": "minor",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.0",
+    "isSingleVersion": true,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "toVersion": "1.4.1",
+    "updateType": "major",
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() returns both updates if automerging minor 1`] = `
 Array [
   Object {
@@ -470,6 +508,49 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() returns multiple updates if grouping but separateMajorMinor=true 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.0",
+    "isSingleVersion": true,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "0.9.7",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
+    "toVersion": "0.9.7",
+    "updateType": "minor",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.0",
+    "isSingleVersion": true,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "toVersion": "1.4.1",
+    "updateType": "major",
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() returns one update if grouping and separateMajorMinor=false 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.0",
+    "isSingleVersion": true,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "toVersion": "1.4.1",
+    "updateType": "major",
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() returns only one update if automerging 1`] = `
 Array [
   Object {
@@ -487,29 +568,6 @@ Array [
 `;
 
 exports[`manager/npm/lookup .lookupUpdates() returns only one update if automerging major 1`] = `
-Array [
-  Object {
-    "isPin": true,
-    "newMajor": 0,
-    "newValue": "0.4.4",
-    "updateType": "pin",
-  },
-  Object {
-    "blockedByPin": true,
-    "canBeUnpublished": false,
-    "fromVersion": "0.4.4",
-    "isSingleVersion": true,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "toVersion": "1.4.1",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`manager/npm/lookup .lookupUpdates() returns only one update if grouping 1`] = `
 Array [
   Object {
     "isPin": true,
