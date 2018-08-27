@@ -1,5 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/kubernetes/extract extractDependencies() extracts image line in a YAML array 1`] = `
+Array [
+  Object {
+    "currentDepTag": "external_storage/local-volume-provisioner:v2.1.0",
+    "currentDepTagDigest": "external_storage/local-volume-provisioner:v2.1.0",
+    "currentDigest": undefined,
+    "currentFrom": "quay.io/external_storage/local-volume-provisioner:v2.1.0",
+    "currentTag": "v2.1.0",
+    "currentValue": "v2.1.0",
+    "depName": "external_storage/local-volume-provisioner",
+    "dockerRegistry": "quay.io",
+    "lineNumber": 14,
+    "purl": "pkg:docker/external_storage/local-volume-provisioner?registry=quay.io",
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
+  },
+]
+`;
+
 exports[`lib/manager/kubernetes/extract extractDependencies() extracts multiple image lines 1`] = `
 Array [
   Object {
