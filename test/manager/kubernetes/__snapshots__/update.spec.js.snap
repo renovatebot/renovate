@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/kubernetes/update updateDependency replaces image inside YAML array 1`] = `
+"apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: local-volume-provisioner
+  namespace: kube-system
+  labels:
+    app: local-volume-provisioner
+spec:
+  selector:
+    matchLabels:
+      app: local-volume-provisioner
+  template:
+    spec:
+      containers:
+      - image: \\"quay.io/external_storage/local-volume-provisioner:v2.2.0\\"
+        name: provisioner
+"
+`;

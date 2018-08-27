@@ -6,6 +6,11 @@ const yamlFile = fs.readFileSync(
   'utf8'
 );
 
+const arraySyntaxFile = fs.readFileSync(
+  'test/_fixtures/kubernetes/array-syntax.yaml',
+  'utf8'
+);
+
 describe('manager/kubernetes/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
@@ -40,6 +45,17 @@ describe('manager/kubernetes/update', () => {
     it('returns null if error', () => {
       const res = dcUpdate.updateDependency(null, null);
       expect(res).toBe(null);
+    });
+    it('replaces image inside YAML array', () => {
+      const upgrade = {
+        lineNumber: 14,
+        dockerRegistry: 'quay.io',
+        depName: 'external_storage/local-volume-provisioner',
+        newValue: 'v2.2.0',
+      };
+      const res = dcUpdate.updateDependency(arraySyntaxFile, upgrade);
+      expect(res).not.toEqual(arraySyntaxFile);
+      expect(res).toMatchSnapshot();
     });
   });
 });
