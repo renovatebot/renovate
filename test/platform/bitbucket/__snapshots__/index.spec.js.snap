@@ -11,7 +11,7 @@ message
   "
 Content-Disposition: form-data; name=\\"parents\\"
 
-branch_hash
+master_hash
 ",
   "
 Content-Disposition: form-data; name=\\"branch\\"
@@ -141,9 +141,6 @@ exports[`platform/bitbucket setBaseBranch() updates file list 1`] = `
 Array [
   Array [
     "/2.0/repositories/some/repo/refs/branches/branch",
-  ],
-  Array [
-    "/!api/1.0/repositories/some/repo/directory/branch_hash",
   ],
   Array [
     "/2.0/repositories/some/repo/src/branch_hash/?pagelen=100",

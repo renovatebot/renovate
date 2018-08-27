@@ -113,16 +113,9 @@ describe('platform/bitbucket', () => {
         'bar_file',
       ]);
     });
-    it('uses v1 when possible', async () => {
-      await initRepo();
-      expect(await getFileList('master')).toEqual([
-        'foo_folder/foo_file',
-        'bar_file',
-      ]);
-    });
     it('returns cached result', async () => {
       await initRepo();
-      expect(await bitbucket.getFileList('master')).toEqual([
+      expect(await getFileList('branch')).toEqual([
         'foo_folder/foo_file',
         'bar_file',
       ]);
