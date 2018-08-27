@@ -52,16 +52,46 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
-    it('returns only one update if grouping', async () => {
+    it('returns multiple updates if grouping but separateMajorMinor=true', async () => {
       config.groupName = 'somegroup';
-      config.currentValue = '^0.4.0';
+      config.currentValue = '0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(2);
+    });
+    it('returns additional update if grouping but separateMinorPatch=true', async () => {
+      config.groupName = 'somegroup';
+      config.currentValue = '0.4.0';
+      config.rangeStrategy = 'pin';
+      config.depName = 'q';
+      config.separateMinorPatch = true;
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(3);
+    });
+    it('returns one update if grouping and separateMajorMinor=false', async () => {
+      config.groupName = 'somegroup';
+      config.currentValue = '0.4.0';
+      config.rangeStrategy = 'pin';
+      config.separateMajorMinor = false;
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(1);
     });
     it('returns only one update if automerging', async () => {
       config.automerge = true;
