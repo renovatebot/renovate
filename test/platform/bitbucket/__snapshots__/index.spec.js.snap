@@ -108,6 +108,8 @@ Object {
 }
 `;
 
+exports[`platform/bitbucket getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+
 exports[`platform/bitbucket getPrFiles() returns diff files 1`] = `
 Array [
   "requirements.txt",

@@ -300,6 +300,16 @@ describe('platform/bitbucket', () => {
     });
   });
 
+  describe('getPrBody()', () => {
+    it('returns diff files', () => {
+      expect(
+        bitbucket.getPrBody(
+          '<details><summary>foo</summary>bar</details>text<details>'
+        )
+      ).toMatchSnapshot();
+    });
+  });
+
   describe('updatePr()', () => {
     it('puts PR', async () => {
       await initRepo();
@@ -370,6 +380,14 @@ describe('platform/bitbucket', () => {
         'renovate/branch',
         'renovate/upgrade',
       ]);
+    });
+  });
+
+  describe('getBranchLastCommitTime()', () => {
+    const getBranchLastCommitTime = wrap('getBranchLastCommitTime');
+    it('returns last commit time', async () => {
+      await initRepo();
+      expect(await getBranchLastCommitTime('renovate/foo')).toBeDefined();
     });
   });
 
