@@ -42,7 +42,7 @@ You can find instructions for GitHub
 You can find instructions for GitLab
 [here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens).
 
-You can find instructions for BitBucket AppPasswords [here](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html).
+You can find instructions for Bitbucket AppPasswords [here](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html).
 
 Note: you should also configure a GitHub token even if your source host is GitLab or Bitbucket, because Renovate will need to perform many queries to github.com in order to retrieve Release Notes.
 
