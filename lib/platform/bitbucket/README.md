@@ -1,37 +1,18 @@
 # Bitbucket platform
 
-## Credentials setup
+## Unsupported platform features/concepts
 
-### How to get
+- Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
 
-BITBUCKET_TOKEN for now is base64 encoded string of your `username:bbaAppPassword`.
+## Features requiring implementation
 
-Where `bbaAppPassword` is Bitbucket App password, which you can revoke. Read more here, how to create one https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html.
+- Bitbucket server not yet tested - only Bitbucket cloud
+- Creating issues not implemented yet, e.g. when there is a config error
+- Adding reviewers to PRs not implemented yet
+- Adding comments to PRs not implemented yet, e.g. when a PR has been edited or has a lockfile error
 
-to get it in node run this in repl:
+## Known limitations/problems
 
-```
-const btoa = str => Buffer.from(str, 'binary').toString('base64');
+Bitbucket API doesn't have any recursive file list retrieval support, so recursion to retrieve a full file list needs to be done manually via multiple API calls.
 
-btoa(`${user}:${bbaAppPassword}`)
-```
-
-to get it in browser, run this in console:
-
-```
-btoa(`${user}:${bbaAppPassword}`)
-```
-
-### How to expose
-
-Expose it temporarily, by running this in your shell:
-
-```
-$ export BITBUCKET_TOKEN='your-token-here-dont-show-it-to-anyone'
-```
-
-or add it to your `~/.bash_profile` to keep it permanent:
-
-```
-$ echo "export BITBUCKET_TOKEN='your-token-here-dont-show-it-to-anyone'" >> ~/.bash_profile
-```
+In some cases, this might add quite a lot of time and API calls to each repo. If you only require renovation of your root directory, you can set `RENOVATE_DISABLE_FILE_RECURSION=true` in env to disable recursion and speed up each run.
