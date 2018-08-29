@@ -88,6 +88,15 @@ describe('config/index', () => {
       const env = { GITHUB_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);
     });
+    it('supports Bitbucket username/passwod', async () => {
+      defaultArgv = defaultArgv.concat([
+        '--platform=bitbucket',
+        '--username=user',
+        '--password=pass',
+      ]);
+      const env = {};
+      await configParser.parseConfigs(env, defaultArgv);
+    });
     it('autodiscovers github platform', async () => {
       const env = {};
       defaultArgv = defaultArgv.concat([

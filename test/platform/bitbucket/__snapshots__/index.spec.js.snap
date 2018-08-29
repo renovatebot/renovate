@@ -1,0 +1,187 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/bitbucket commitFilesToBranch() posts files 1`] = `
+Array [
+  "",
+  "
+Content-Disposition: form-data; name=\\"message\\"
+
+message
+",
+  "
+Content-Disposition: form-data; name=\\"parents\\"
+
+master_hash
+",
+  "
+Content-Disposition: form-data; name=\\"branch\\"
+
+branch
+",
+  "
+Content-Disposition: form-data; name=\\"/package.json\\"
+
+hello world
+",
+  "--
+",
+]
+`;
+
+exports[`platform/bitbucket createPr() posts PR 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/pullrequests",
+    Object {
+      "body": Object {
+        "close_source_branch": true,
+        "description": "body",
+        "destination": Object {
+          "branch": Object {
+            "name": "master",
+          },
+        },
+        "source": Object {
+          "branch": Object {
+            "name": "branch",
+          },
+        },
+        "title": "title",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket getBranchPr() bitbucket finds PR for branch 1`] = `
+Object {
+  "body": "summary",
+  "branchName": "branch",
+  "canRebase": true,
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "displayNumber": "Pull Request #5",
+  "isStale": false,
+  "isUnmergeable": false,
+  "number": 5,
+  "state": "open",
+  "title": "title",
+}
+`;
+
+exports[`platform/bitbucket getCommitMessages() works 1`] = `
+Array [
+  "Commit messsage 0",
+  "Commit messsage 1",
+  "Commit messsage 2",
+  "Commit messsage 3",
+  "Commit messsage 4",
+  "Commit messsage 5",
+  "Commit messsage 6",
+  "Commit messsage 7",
+  "Commit messsage 8",
+  "Commit messsage 9",
+  "Commit messsage 10",
+  "Commit messsage 11",
+  "Commit messsage 12",
+  "Commit messsage 13",
+  "Commit messsage 14",
+  "Commit messsage 15",
+  "Commit messsage 16",
+  "Commit messsage 17",
+  "Commit messsage 18",
+  "Commit messsage 19",
+]
+`;
+
+exports[`platform/bitbucket getPr() exists 1`] = `
+Object {
+  "body": "summary",
+  "branchName": "branch",
+  "canRebase": true,
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "displayNumber": "Pull Request #5",
+  "isStale": false,
+  "isUnmergeable": false,
+  "number": 5,
+  "state": "open",
+  "title": "title",
+}
+`;
+
+exports[`platform/bitbucket getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`platform/bitbucket getPrFiles() returns diff files 1`] = `
+Array [
+  "requirements.txt",
+]
+`;
+
+exports[`platform/bitbucket initRepo() works 1`] = `
+Object {
+  "isFork": false,
+  "privateRepo": false,
+  "repoFullName": "some/repo",
+}
+`;
+
+exports[`platform/bitbucket mergePr() posts Merge 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/pullrequests/5/merge",
+    Object {
+      "body": Object {
+        "close_source_branch": true,
+        "merge_strategy": "merge_commit",
+        "message": "auto merged",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket setBaseBranch() updates file list 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/refs/branches/branch",
+  ],
+  Array [
+    "/2.0/repositories/some/repo/src/branch_hash/?pagelen=100",
+    undefined,
+  ],
+  Array [
+    "/2.0/repositories/some/repo/src/branch_hash/foo_folder/?pagelen=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket setBranchStatus() posts status 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/commit/branch_hash/statuses/build",
+    Object {
+      "body": Object {
+        "description": "description",
+        "key": "context",
+        "name": "context",
+        "state": "FAILED",
+        "url": "targetUrl",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket updatePr() puts PR 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/pullrequests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "title": "title",
+      },
+    },
+  ],
+]
+`;
