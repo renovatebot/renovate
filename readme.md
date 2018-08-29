@@ -18,7 +18,7 @@ Automated dependency updates. Flexible, so you don't need to be.
 - Bot behaviour is extremely customisable via configuration files (config as code)
 - Use eslint-like shared config presets for ease of use and simplifying configuration
 - Lock files are natively supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
-- Supports GitHub, GitLab and VSTS. BitBucket is a WIP.
+- Supports GitHub, GitLab, Bitbucket and VSTS.
 - Open source (installable via npm/yarn or Docker Hub) so can be self-hosted or used via GitHub App
 
 ## Who Uses Renovate?

@@ -42,14 +42,30 @@ You can find instructions for GitHub
 You can find instructions for GitLab
 [here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens).
 
-Note: you should also configure a GitHub token even if your source host is GitLab, because Renovate will need to perform many queries to github.com in order to retrieve Release Notes.
+You can find instructions for Bitbucket AppPasswords [here](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html).
+
+Note: you should also configure a GitHub token even if your source host is GitLab or Bitbucket, because Renovate will need to perform many queries to github.com in order to retrieve Release Notes.
 
 You can find instructions for VSTS
 [vsts](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
 
 This token needs to be configured via file, environment variable, or CLI. See
 [docs/configuration.md](configuration.md) for details. The simplest way is
-to expose it as `GITHUB_TOKEN` or `GITLAB_TOKEN` or `VSTS_TOKEN`.
+to expose it as `GITHUB_TOKEN`, `GITLAB_TOKEN` or `VSTS_TOKEN`.
+
+For Bitbucket, you can configure `BITBUCKET_USERNAME` and `BITBUCKET_PASSWORD`, or combine them together yourself into `BITBUCKET_TOKEN` using the node REPL:
+
+```
+const btoa = str => Buffer.from(str, 'binary').toString('base64');
+
+btoa(`${user}:${bbaAppPassword}`)
+```
+
+You must then expose either the token or username + password to your env, or provide them via the CLI. Example:
+
+```sh
+renovate --platform=bitbucket --username=rarkins --password=ABCDEFghijklmop123 rarkins/testrepo1
+```
 
 ## Usage
 
@@ -88,14 +104,15 @@ Most people will run Renovate via cron, e.g. once per hour. Here is an example b
 
 export PATH="/home/user/.yarn/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 export RENOVATE_CONFIG_FILE="/home/user/renovate-config.js"
-export GITHUB_TOKEN="**github-token**" # Delete this if using GHE
-export GITHUB_COM_TOKEN="**github-token**" # Delete this if using GitLab
+export GITHUB_TOKEN="**github-token**" # Delete this if using GitHub Enterprise
+export GITLAB_TOKEN="**github-token**" # Delete this if using GitHub
+export GITHUB_COM_TOKEN="**github-token**" # Delete this if using GitLab or github.com
 
 # Renovate
 renovate
 ```
 
-Note: the GitHub token in env is necessary in order to retrieve Release Notes that are hosted on github.com. Use `GITHUB_COM_TOKEN` if running against GitLab or `GITHUB_TOKEN` if running against GitLab. i.e. remove one of the lines as applicable.
+Note: the GitHub token in env is necessary in order to retrieve Release Notes that are hosted on github.com. Use `GITHUB_COM_TOKEN` if running against GitHub Enterprise or `GITHUB_TOKEN` if running against GitLab. i.e. remove one of the lines as applicable.
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 
