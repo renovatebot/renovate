@@ -131,11 +131,7 @@ Object {
 exports[`manager/npm/lookup .lookupUpdates() handles digest pin for up to date version 1`] = `
 Object {
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "version": "8.1.0",
-    },
-  ],
+  "releases": Array [],
   "repositoryUrl": null,
   "updates": Array [
     Object {
