@@ -16,6 +16,7 @@ describe('workers/branch/automerge', () => {
         updatedLockFiles: [],
       };
       jest.resetAllMocks();
+      platform.commitFilesToBranch.mockReturnValueOnce('created');
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);

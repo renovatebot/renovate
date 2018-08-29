@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/nuget getDependency processes real data 1`] = `
+exports[`datasource/nuget getPkgReleases processes real data 1`] = `
 Object {
   "name": "nunit",
   "releases": Array [

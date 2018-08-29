@@ -1,5 +1,5 @@
-const prettyStdout = require('../../lib/logger/pretty-stdout');
 const chalk = require('chalk');
+const prettyStdout = require('../../lib/logger/pretty-stdout');
 
 describe('logger/pretty-stdout', () => {
   describe('getMeta(rec)', () => {

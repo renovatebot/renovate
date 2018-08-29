@@ -1,8 +1,7 @@
+const { exec } = require('child-process-promise');
 const lernaHelper = require('../../../../lib/manager/npm/post-update/lerna');
 
 jest.mock('child-process-promise');
-
-const { exec } = require('child-process-promise');
 
 describe('generateLockFiles()', () => {
   it('returns if no lernaClient', async () => {
@@ -14,7 +13,27 @@ describe('generateLockFiles()', () => {
       JSON.stringify({ dependencies: { lerna: '2.0.0' } })
     );
     exec.mockReturnValueOnce({});
-    const res = await lernaHelper.generateLockFiles('npm', 'some-dir', {});
+    const skipInstalls = true;
+    const res = await lernaHelper.generateLockFiles(
+      'npm',
+      'some-dir',
+      {},
+      skipInstalls
+    );
+    expect(res.error).toBe(false);
+  });
+  it('performs full npm install', async () => {
+    platform.getFile.mockReturnValueOnce(
+      JSON.stringify({ dependencies: { lerna: '2.0.0' } })
+    );
+    exec.mockReturnValueOnce({});
+    const skipInstalls = false;
+    const res = await lernaHelper.generateLockFiles(
+      'npm',
+      'some-dir',
+      {},
+      skipInstalls
+    );
     expect(res.error).toBe(false);
   });
   it('generates yarn.lock files', async () => {

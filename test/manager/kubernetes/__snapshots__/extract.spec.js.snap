@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/kubernetes/extract extractDependencies() extracts image line in a YAML array 1`] = `
+Array [
+  Object {
+    "currentDepTag": "external_storage/local-volume-provisioner:v2.1.0",
+    "currentDepTagDigest": "external_storage/local-volume-provisioner:v2.1.0",
+    "currentDigest": undefined,
+    "currentFrom": "quay.io/external_storage/local-volume-provisioner:v2.1.0",
+    "currentTag": "v2.1.0",
+    "currentValue": "v2.1.0",
+    "depName": "external_storage/local-volume-provisioner",
+    "dockerRegistry": "quay.io",
+    "lineNumber": 14,
+    "purl": "pkg:docker/external_storage/local-volume-provisioner?registry=quay.io",
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
+  },
+]
+`;
+
+exports[`lib/manager/kubernetes/extract extractDependencies() extracts multiple image lines 1`] = `
+Array [
+  Object {
+    "currentDepTag": "nginx:1.7.9",
+    "currentDepTagDigest": "nginx:1.7.9",
+    "currentDigest": undefined,
+    "currentFrom": "nginx:1.7.9",
+    "currentTag": "1.7.9",
+    "currentValue": "1.7.9",
+    "depName": "nginx",
+    "dockerRegistry": undefined,
+    "lineNumber": 18,
+    "purl": "pkg:docker/nginx",
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
+  },
+  Object {
+    "currentDepTag": "kube-proxy-amd64:v1.11.1",
+    "currentDepTagDigest": "kube-proxy-amd64:v1.11.1",
+    "currentDigest": undefined,
+    "currentFrom": "k8s.gcr.io/kube-proxy-amd64:v1.11.1",
+    "currentTag": "v1.11.1",
+    "currentValue": "v1.11.1",
+    "depName": "kube-proxy-amd64",
+    "dockerRegistry": "k8s.gcr.io",
+    "lineNumber": 46,
+    "purl": "pkg:docker/kube-proxy-amd64?registry=k8s.gcr.io",
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
+  },
+]
+`;

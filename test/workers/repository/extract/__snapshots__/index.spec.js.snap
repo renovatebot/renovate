@@ -14,10 +14,16 @@ Object {
   "composer": Array [
     Object {},
   ],
-  "docker": Array [
+  "docker-compose": Array [
     Object {},
   ],
-  "docker-compose": Array [
+  "dockerfile": Array [
+    Object {},
+  ],
+  "gitlabci": Array [
+    Object {},
+  ],
+  "kubernetes": Array [
     Object {},
   ],
   "meteor": Array [

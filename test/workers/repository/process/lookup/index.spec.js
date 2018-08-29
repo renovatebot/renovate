@@ -7,6 +7,9 @@ const webpackJson = require('../../../../_fixtures/npm/webpack.json');
 const nextJson = require('../../../../_fixtures/npm/next.json');
 const vueJson = require('../../../../_fixtures/npm/vue.json');
 const typescriptJson = require('../../../../_fixtures/npm/typescript.json');
+const docker = require('../../../../../lib/datasource/docker');
+
+jest.mock('../../../../../lib/datasource/docker');
 
 qJson.latestVersion = '1.4.1';
 
@@ -49,16 +52,46 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
-    it('returns only one update if grouping', async () => {
+    it('returns multiple updates if grouping but separateMajorMinor=true', async () => {
       config.groupName = 'somegroup';
-      config.currentValue = '^0.4.0';
+      config.currentValue = '0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
-      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(2);
+    });
+    it('returns additional update if grouping but separateMinorPatch=true', async () => {
+      config.groupName = 'somegroup';
+      config.currentValue = '0.4.0';
+      config.rangeStrategy = 'pin';
+      config.depName = 'q';
+      config.separateMinorPatch = true;
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(3);
+    });
+    it('returns one update if grouping and separateMajorMinor=false', async () => {
+      config.groupName = 'somegroup';
+      config.currentValue = '0.4.0';
+      config.rangeStrategy = 'pin';
+      config.separateMajorMinor = false;
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(1);
     });
     it('returns only one update if automerging', async () => {
       config.automerge = true;
@@ -126,8 +159,8 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates.length).toBe(2);
-      expect(res.updates[0].type).not.toEqual('patch');
-      expect(res.updates[1].type).not.toEqual('patch');
+      expect(res.updates[0].updateType).not.toEqual('patch');
+      expect(res.updates[1].updateType).not.toEqual('patch');
     });
     it('returns patch update if automerging patch', async () => {
       config.patch = {
@@ -142,7 +175,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].type).toEqual('patch');
+      expect(res.updates[0].updateType).toEqual('patch');
     });
     it('returns minor update if automerging both patch and minor', async () => {
       config.patch = {
@@ -160,7 +193,7 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].type).toEqual('minor');
+      expect(res.updates[0].updateType).toEqual('minor');
     });
     it('returns patch update if separateMinorPatch', async () => {
       config.separateMinorPatch = true;
@@ -638,34 +671,46 @@ describe('manager/npm/lookup', () => {
       expect(res.updates[0].newValue).toEqual('2.5.17-beta.0');
     });
     it('should allow unstable versions if the current version is unstable', async () => {
-      config.currentValue = '2.3.0-beta.1';
-      config.depName = 'vue';
-      config.purl = 'pkg:npm/vue';
+      config.currentValue = '3.1.0-dev.20180731';
+      config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
       nock('https://registry.npmjs.org')
-        .get('/vue')
-        .reply(200, vueJson);
+        .get('/typescript')
+        .reply(200, typescriptJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
-      expect(res.updates[0].newValue).toEqual('2.5.17-beta.0');
+      expect(res.updates[0].newValue).toEqual('3.1.0-dev.20180813');
+    });
+    it('should not jump unstable versions', async () => {
+      config.currentValue = '3.0.1-insiders.20180726';
+      config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
+      nock('https://registry.npmjs.org')
+        .get('/typescript')
+        .reply(200, typescriptJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newValue).toEqual('3.0.1');
     });
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';
-      config.depName = 'helmet';
-      config.purl = 'pkg:npm/helmet';
+      config.depName = '@types/helmet';
+      config.purl = 'pkg:npm/%40types/helmet';
       nock('https://registry.npmjs.org')
-        .get('/helmet')
+        .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
       expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
     });
     it('should treat zero zero caret ranges as pinned', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^0.0.34';
-      config.depName = 'helmet';
-      config.purl = 'pkg:npm/helmet';
+      config.depName = '@types/helmet';
+      config.purl = 'pkg:npm/%40types/helmet';
       nock('https://registry.npmjs.org')
-        .get('/helmet')
+        .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
@@ -712,17 +757,6 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
     });
-    it('handles prerelease jumps', async () => {
-      config.currentValue = '^2.9.0-rc';
-      config.rangeStrategy = 'replace';
-      config.depName = 'typescript';
-      config.purl = 'pkg:npm/typescript';
-      nock('https://registry.npmjs.org')
-        .get('/typescript')
-        .reply(200, typescriptJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot();
-    });
     it('supports in-range caret updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '^1.0.0';
@@ -746,6 +780,16 @@ describe('manager/npm/lookup', () => {
     it('supports in-range gte updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>=1.0.0';
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
+    it('supports majorgte updates', async () => {
+      config.rangeStrategy = 'bump';
+      config.currentValue = '>=0.9.0';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
       nock('https://registry.npmjs.org')
@@ -857,6 +901,161 @@ describe('manager/npm/lookup', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
       expect(res.repositoryUrl).toBeDefined();
+    });
+    it('ignores deprecated', async () => {
+      config.currentValue = '1.3.0';
+      config.depName = 'q2';
+      config.purl = 'pkg:npm/q2';
+      const returnJson = JSON.parse(JSON.stringify(qJson));
+      returnJson.name = 'q2';
+      returnJson.versions['1.4.1'].deprecated = 'true';
+      nock('https://registry.npmjs.org')
+        .get('/q2')
+        .reply(200, returnJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+      expect(res.updates[0].toVersion).toEqual('1.4.0');
+    });
+    it('skips unsupported values', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('skips undefined values', async () => {
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest pin', async () => {
+      config.currentValue = '8.0.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getPkgReleases.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest pin for up to date version', async () => {
+      config.currentValue = '8.1.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getPkgReleases.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest pin for non-version', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getPkgReleases.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+          {
+            version: 'alpine',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest lookup failure', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.pinDigests = true;
+      docker.getPkgReleases.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+          {
+            version: 'alpine',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce(null);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(0);
+    });
+    it('handles digest update', async () => {
+      config.currentValue = '8.0.0';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
+      config.pinDigests = true;
+      docker.getPkgReleases.mockReturnValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles digest update for non-version', async () => {
+      config.currentValue = 'alpine';
+      config.depName = 'node';
+      config.purl = 'pkg:docker/node';
+      config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
+      config.pinDigests = true;
+      docker.getPkgReleases.mockReturnValueOnce({
+        releases: [
+          {
+            version: 'alpine',
+          },
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
     });
   });
 });

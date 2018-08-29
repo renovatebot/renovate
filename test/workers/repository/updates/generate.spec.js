@@ -18,6 +18,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           lazyGrouping: true,
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
           foo: 1,
           group: {
             foo: 2,
@@ -27,6 +28,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
+      expect(res.releaseTimestamp).toBeDefined();
     });
     it('groups single upgrade if not lazyGrouping', () => {
       const branch = [
@@ -90,6 +92,9 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          canBeUnpublished: false,
+          automerge: true,
         },
         {
           depName: 'some-other-dep',
@@ -104,11 +109,17 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
+          releaseTimestamp: '2017-02-06T20:01:41+00:00',
+          canBeUnpublished: true,
+          automerge: false,
         },
       ];
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
+      expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
+      expect(res.canBeUnpublished).toBe(true);
+      expect(res.automerge).toBe(false);
     });
     it('groups multiple upgrades different version', () => {
       const branch = [
@@ -125,6 +136,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
         },
         {
           depName: 'some-other-dep',
@@ -139,6 +151,7 @@ describe('workers/repository/updates/generate', () => {
           group: {
             foo: 2,
           },
+          releaseTimestamp: '2017-02-08T20:01:41+00:00',
         },
       ];
       const res = generateBranchConfig(branch);
@@ -146,6 +159,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.singleVersion).toBeUndefined();
       expect(res.recreateClosed).toBe(true);
       expect(res.groupName).toBeDefined();
+      expect(res.releaseTimestamp).toEqual('2017-02-08T20:01:41+00:00');
     });
     it('uses semantic commits', () => {
       const branch = [
@@ -157,6 +171,8 @@ describe('workers/repository/updates/generate', () => {
           semanticCommitScope: 'package',
           lazyGrouping: true,
           newValue: '1.2.0',
+          isSingleVersion: true,
+          toVersion: '1.2.0',
           foo: 1,
           group: {
             foo: 2,
@@ -175,6 +191,8 @@ describe('workers/repository/updates/generate', () => {
           depName: 'some-dep',
           commitBody: '[skip-ci]',
           newValue: '1.2.0',
+          isSingleVersion: true,
+          toVersion: '1.2.0',
         },
       ];
       const res = generateBranchConfig(branch);
@@ -217,6 +235,18 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
+    });
+    it('overrides schedule for pin PRs', () => {
+      const branch = [
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          schedule: 'before 3am',
+          updateType: 'pin',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.schedule).toEqual([]);
     });
   });
 });

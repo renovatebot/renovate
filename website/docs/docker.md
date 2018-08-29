@@ -5,18 +5,22 @@ description: Docker Package Manager Support in Renovate
 
 # Docker
 
-Renovate supports upgrading dependencies in Docker's `Dockerfile` files.
+Renovate supports upgrading dependencies in various types of Docker definition files:
+
+- Docker's `Dockerfile` files
+- Docker Compose files
+- CircleCI config files
+- Kubernetes manifests
 
 ## How It Works
 
-1.  Renovate will search each repository for any files named (exactly) `Dockerfile`
-2.  The first `FROM` line will parsed
-3.  If no [digest](https://docs.docker.com/engine/reference/commandline/images/) is already in use then Renovate will raise a PR to "pin" that dependency to a Docker digest
-4.  If the image tag in use "looks" like a semver (e.g. `node:8`, `node:8.9`, `node:8.9.0`, `node:8-onbuild`) then Renovate will look up the Docker registry to determine if any upgrades are available (e.g. `node:8.9.1`).
+1.  Renovate will search each repository for any files matching each manager's configured `fileMatch` pattern(s)
+2.  Files are downloaded and then checked to see if they contain any Docker image references (e.g. `FROM` lines in `Dockerfile`s)
+3.  If the image tag in use "looks" like a semver (e.g. `node:8`, `node:8.9`, `node:8.9.0`, `node:8-onbuild`) then Renovate will look up the Docker registry to determine if any upgrades are available (e.g. `node:8.9.1`).
 
 ## Digest Pinning
 
-Pinning your docker images to an exact digest is important for reasons of **immutability**. In short: so every time you `pull`, you get the same content.
+Pinning your docker images to an exact digest is recommended for reasons of **immutability**. In short: so every time you `pull`, you get the same content.
 
 If your experience with dependency versioning comes from a place like javascript/npm, you might be used to knowing that exact versions are immutable, e.g. if you specify a version like `2.0.1` then you and your colleagues will always get the exact same "code". What you may not expect is that Docker's tags are not immutable versions even if they look like a version. e.g. you probably expect that `node:8` and `node:8.9` will change over time, but you might incorrectly assume that `node:8.9.0` would never change. Although it probably _shouldn't_, the reality is that it _can_.
 
@@ -38,14 +42,24 @@ Renovate also supports _upgrading_ versions in Docker tags, e.g. from `node:8.9.
 
 Thanks to this, you may wish to change the way you tag your image dependencies to be more specific, e.g. change from `node:8` to `node:8.9.1` so that every Renovate PR will be more human friendly, e.g. you can know that you are getting a PR because `node` upgraded from `8.9.1` to `8.9.2` and not because `8.9.1` somehow changed.
 
-Currently, Renovate will upgrade minor/patch versions (e.g. from `8.8` to `8.9` or from `8.9.0` to `8.9.1`) by default, but not upgrade major versions. If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
+Currently, Renovate will upgrade minor/patch versions (e.g. from `8.9.0` to `8.9.1`) by default, but not upgrade major versions. If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
 
 Renovate has a some docker-specific intelligence when it comes to versions. For example:
 
 - It understands that tag suffixes are frequently used, such as `node:8.9-onbuild`. Renovate will only upgrade from/to the same suffix.
-- It understands that some dependencies (e.g. `node` and `ubuntu`) use even numbers for stable and odd for unstable. Renovate won't upgrade from stable unstable
+- It understands that some dependencies (e.g. `node` and `ubuntu`) use even numbers for stable and odd for unstable. Renovate won't upgrade from stable to unstable
 
 ## Configuring/Disabling
+
+If you with to make changes that apply to all Docker managers, then add them to the `docker` config object. If you wish to override Docker settings for one particular type of manager, use that manager's config object instead. For example. to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would add this:
+
+```json
+  "docker-compose": {
+    "digest": {
+      "enabled": false
+    }
+  }
+```
 
 The following configuration options are applicable to Docker:
 
@@ -57,10 +71,11 @@ Add `"docker:disable"` to your `extends` array.
 
 Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 
-```
+```json
+{
   "extends": ["config:base"],
-  ...
   "ignorePaths": ["docker/old-files/"]
+}
 ```
 
 ##### Enable Docker major updates
@@ -75,14 +90,20 @@ Add `"default:pinDigestsDisabled"` to your `extends` array.
 
 Add `"default:automergeDigest"` to your `extends` array. Also add `"default:automergeBranchPush"` if you wish for these to be committed directly to your base branch without raising a PR first.
 
-## Future Features
+##### Registry authentication
 
-The following features are planned but not supported today:
+If you are running your own Renovate bot, add this to your `config.js`:
 
-1.  Multiple `FROM` lines in `Dockerfile`s
-2.  `ARG` arguments in `Dockerfile` `FROM` lines
-3.  Custom `Dockerfile` filenames (e.g. `Dockerfile-dev`)
-4.  Custom Docker registries (only Docker Hub is currently supported)
-5.  Docker Compose file support
+```js
+module.exports = {
+  endpoints: [
+    {
+      platform: 'docker',
+      username: '<your-username>',
+      password: '<your-password>',
+    },
+  ],
+};
+```
 
-If any of these features are important to you, please add a comment or at least a `+1` in Renovate's [Issues Tracker](https://github.com/renovateapp/renovate/issues?q=is%3Aopen+is%3Aissue+label%3A%23docker).
+Alternatively, configure `DOCKER_USERNAME` and `DOCKER_PASSWORD` in env to achieve the same.

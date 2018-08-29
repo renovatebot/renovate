@@ -8,20 +8,25 @@ const requirements1 = fs.readFileSync(
   'utf8'
 );
 
-describe('lib/manager/pip_requirements/extract', () => {
+describe('lib/manager/composer/extract', () => {
   describe('extractDependencies()', () => {
-    let config;
+    let packageFile;
     beforeEach(() => {
-      config = {};
+      packageFile = 'composer.json';
     });
-    it('returns null for invalid json', () => {
-      expect(extractDependencies('nothing here', config)).toBe(null);
+    it('returns null for invalid json', async () => {
+      expect(await extractDependencies('nothing here', packageFile)).toBe(null);
     });
-    it('returns null for empty deps', () => {
-      expect(extractDependencies('{}', config)).toBe(null);
+    it('returns null for empty deps', async () => {
+      expect(await extractDependencies('{}', packageFile)).toBe(null);
     });
-    it('extracts dependencies', () => {
-      const res = extractDependencies(requirements1, config);
+    it('extracts dependencies with no lock file', async () => {
+      const res = await extractDependencies(requirements1, packageFile);
+      expect(res).toMatchSnapshot();
+    });
+    it('extracts dependencies with lock file', async () => {
+      platform.getFile.mockReturnValueOnce('some content');
+      const res = await extractDependencies(requirements1, packageFile);
       expect(res).toMatchSnapshot();
     });
   });

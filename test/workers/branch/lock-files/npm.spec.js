@@ -1,5 +1,3 @@
-const npmHelper = require('../../../../lib/manager/npm/post-update/npm');
-
 const { getInstalledPath } = require('get-installed-path');
 
 jest.mock('fs-extra');
@@ -10,6 +8,7 @@ getInstalledPath.mockImplementation(() => null);
 
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
+const npmHelper = require('../../../../lib/manager/npm/post-update/npm');
 
 describe('generateLockFile', () => {
   it('generates lock files', async () => {
@@ -19,10 +18,30 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
+    const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
-      'package-lock.json'
+      'package-lock.json',
+      skipInstalls
+    );
+    expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(res.error).not.toBeDefined();
+    expect(res.lockFile).toEqual('package-lock-contents');
+  });
+  it('performs full install', async () => {
+    getInstalledPath.mockReturnValueOnce('node_modules/npm');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'package-lock-contents');
+    const skipInstalls = false;
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      skipInstalls
     );
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.error).not.toBeDefined();

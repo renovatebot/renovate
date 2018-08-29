@@ -24,6 +24,13 @@ Array [
 ]
 `;
 
+exports[`workers/repository/extract/file-match getMatchingFiles() deduplicates 1`] = `
+Array [
+  "package.json",
+  "frontend/package.json",
+]
+`;
+
 exports[`workers/repository/extract/file-match getMatchingFiles() returns npm files 1`] = `
 Array [
   "package.json",

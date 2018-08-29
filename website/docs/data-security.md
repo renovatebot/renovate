@@ -7,7 +7,7 @@ description: Important information about how we handle and secure you data
 
 We consider it a great responsibility that you have trusted us with your GitHub repository/data, and we take it very seriously. Although installing an App may take just a few clicks, we think it's important that you know what happens to your repository data once you install the Renovate or Forking Renovate apps.
 
-The content in this document does not replace or override anything in our [Privacy Policy](/privacy). We provide it for your "peace of mind" and with the hope of receiving feedback that may enable us to improve security and data handling even further.
+The content in this document does not replace or override anything in our [Privacy Policy](https://renovatebot.com/privacy). We provide it for your "peace of mind" and with the hope of receiving feedback that may enable us to improve security and data handling even further.
 
 If you have any suggestions or questions about our security, please contact us at security@renovatebot.com immediately. Please do not disclose any security concerns in a public forum.
 
@@ -66,7 +66,7 @@ Renovate needs write access to code in order to create branches within the repos
 
 ## Renovate source code
 
-Although the Renovate App runs as a wrapper around the `renovate` open source code in order to schedule repositories and retrieve tokens, the entire logic of the application remains as open source, located at [https://github.com/renovateapp/renovate](https://github.com/renovateapp/renovate). In other words, you can always know what code/logic is running on your repository because we always run the open source code - there is no "fork" of the open source repository in use.
+Although the Renovate App runs as a wrapper around the `renovate` open source code in order to schedule repositories and retrieve tokens, the entire logic of the application remains as open source, located at [https://github.com/renovatebot/renovate](https://github.com/renovatebot/renovate). In other words, you can always know what code/logic is running on your repository because we always run the open source code - there is no "fork" of the open source repository in use.
 
 ## AWS Region
 

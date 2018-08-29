@@ -11,6 +11,7 @@ function readFixture(fixture) {
 
 const input01Content = readFixture('inputs/01.json');
 const workspacesContent = readFixture('inputs/workspaces.json');
+const vendorisedContent = readFixture('is-object.json');
 
 describe('manager/npm/extract', () => {
   describe('.extractDependencies()', () => {
@@ -20,6 +21,14 @@ describe('manager/npm/extract', () => {
     it('returns null if cannot parse', async () => {
       const res = await npmExtract.extractDependencies(
         'not json',
+        'package.json',
+        {}
+      );
+      expect(res).toBe(null);
+    });
+    it('ignores vendorised package.json', async () => {
+      const res = await npmExtract.extractDependencies(
+        vendorisedContent,
         'package.json',
         {}
       );

@@ -26,36 +26,17 @@ Array [
 ]
 `;
 
-exports[`workers/pr ensurePr should convert to HTML PR for gitlab 1`] = `
-Array [
-  "renovate/dummy-1.x",
-  "Update dependency dummy to v1.1.0",
-  "<p>This Merge Request updates dependency <a href=\\"https://github.com/renovateapp/dummy\\">dummy</a> from <code>v1.0.0</code> to <code>v1.1.0</code></p>
-<h1>Release Notes</h1>
-<h3 id=\\"v110httpsgithubcomrenovateappdummycomparev100v110\\"><a href=\\"https://github.com/renovateapp/dummy/compare/v1.0.0…v1.1.0\\"><code>v1.1.0</code></a></h3>
-<p><a href=\\"https://github.com/renovateapp/dummy/compare/v1.0.0…v1.1.0\\">Compare Source</a></p>
-<hr />
-<p></details></p>",
-  Array [],
-  false,
-  false,
-]
-`;
-
 exports[`workers/pr ensurePr should create PR if success 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from \`v1.0.0\` to \`v1.1.0\`
-
-
+  "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
 <details>
 <summary>Release Notes</summary>
 
 ### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 [Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
 
 ---
 
@@ -70,16 +51,13 @@ exports[`workers/pr ensurePr should create privateRepo PR if success 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from \`v1.0.0\` to \`v1.1.0\`
-
-
+  "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
 <details>
 <summary>Release Notes</summary>
 
 ### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 [Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
 
 ---
 
@@ -92,16 +70,13 @@ Array [
 
 exports[`workers/pr ensurePr should return modified existing PR 1`] = `
 Object {
-  "body": "This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from \`v1.0.0\` to \`v1.1.0\`
-
-
+  "body": "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
 <details>
 <summary>Release Notes</summary>
 
 ### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 [Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
 
 ---
 
@@ -113,16 +88,13 @@ Object {
 
 exports[`workers/pr ensurePr should return modified existing PR title 1`] = `
 Object {
-  "body": "This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from \`v1.0.0\` to \`v1.1.0\`
-
-
+  "body": "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
 <details>
 <summary>Release Notes</summary>
 
 ### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 [Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
 
 ---
 
@@ -133,27 +105,3 @@ Object {
 `;
 
 exports[`workers/pr ensurePr should return unmodified existing PR 1`] = `Array []`;
-
-exports[`workers/pr ensurePr should strip HTML PR for vsts 1`] = `
-Array [
-  "renovate/dummy-1.x",
-  "Update dependency dummy to v1.1.0",
-  "This Pull Request updates dependency [dummy](https://github.com/renovateapp/dummy) from \`v1.0.0\` to \`v1.1.0\`
-
-
-
-
-**Release Notes**
-
-### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-
-
----
-
-",
-  Array [],
-  false,
-  false,
-]
-`;

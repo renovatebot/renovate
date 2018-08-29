@@ -120,6 +120,10 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "prefix" is usually an automatically applied semantic commit prefix, however it can also be statically configured.
 
+## commitMessageSuffix
+
+This is used to add a suffix to commit messages. Usually left empty except for internal use (multiple base branches, and vulnerability alerts).
+
 ## commitMessageTopic
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. "dependency react".
@@ -138,11 +142,19 @@ The description field is used by config presets to describe what they do. They a
 
 ## digest
 
-Add to this object if you wish to define rules that apply only to PRs that pin Docker digests.
+Add to this object if you wish to define rules that apply only to PRs that update Docker digests.
 
 ## docker
 
+Add config here if you wish it to apply to all Docker package managers (Dockerfile, Docker Compose, CircleCI, etc).
+
 ## docker-compose
+
+Add configuration here if you want to enable or disable something in particular for Docker Compose files and override the default Docker settings.
+
+## dockerfile
+
+Add configuration here if you want to enable or disable something in particular for `Dockerfile` files and override the default Docker settings.
 
 ## enabled
 
@@ -185,7 +197,21 @@ Example:
 
 ## encrypted
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+
+## endpoints
+
+Example for configuring `docker` auth:
+
+```json
+{
+  "endpoints": {
+    "platform": "docker",
+    "username": "<some-username>",
+    "password": "<some-password>"
+  }
+}
+```
 
 ## engines
 
@@ -193,13 +219,13 @@ Extend this if you wish to configure rules specifically for `engines` definition
 
 ## extends
 
-See https://renovateapp.com/docs/configuration-reference/config-presets for details.
+See https://renovatebot.com/docs/configuration-reference/config-presets for details.
 
 ## fileMatch
 
-## gitAuthor
+## gitlabci
 
-RFC5322-compliant string if you wish to customise the git author for commits.
+Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
 
 ## group
 
@@ -219,6 +245,10 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```
 
 And then the branchName would be `renovate/eslint` instead.
+
+## ignoreDeprecated
+
+By default, Renovate won't update any packages to deprecated versions unless the package version was _already_ deprecated. The goal of this is to make sure you don't upgrade from a non-deprecated version to a deprecated one just because it's higher than the current version. If for some reason you wish to _force_ deprecated updates on Renovate, you can set `ignoreDeprecated` to `false`, but this is not recommended for most situations.
 
 ## ignoreDeps
 
@@ -247,6 +277,46 @@ By default, Renovate won't update any packages to unstable versions (e.g. `4.0.0
 If you wish for Renovate to process only select paths in the repository, use `includePaths`.
 If instead you need to just exclude/ignore certain paths then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
+
+## js
+
+Use this configuration option for shared config across npm/yarn/pnpm and meteor package managers.
+
+## kubernetes
+
+Add to this configuration object if you need to override any of the Kubernetes default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
+
+It's important to note that the `kubernetes` manager by default has no `fileMatch` defined - i.e. so it will never match any files. This is because there is no commonly accepted file/directory naming convention for Kubernetes yaml files and we don't want to download every single `.yaml` file in repositories just in case one of them has Kubernetes definitions inside.
+
+If most `.yaml` files in your repository are Kubnernetes ones, then you could add this to your config:
+
+```json
+{
+  "kubernetes": {
+    "fileMatch": ["(^|/)[^/]*\\.yaml$"]
+  }
+}
+```
+
+If instead you have them all inside a `k8s/` directory, you would add this:
+
+```json
+{
+  "kubernetes": {
+    "fileMatch": ["k8s/.+\\.yaml$"]
+  }
+}
+```
+
+Or if it's just a single file then something like this:
+
+```json
+{
+  "kubernetes": {
+    "fileMatch": ["^config/k8s.yaml$"]
+  }
+}
+```
 
 ## labels
 
@@ -292,17 +362,17 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovateapp.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
 ## npmToken
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovateapp.com/docs/deep-dives/private-modules for details on how this is used.
+See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used.
 
 ## nuget
 
@@ -438,11 +508,22 @@ Use this field if you want to have one or more package names patterns in your pa
 
 The above will set `rangeStrategy` to `replace` for any package starting with `angular`.
 
+### paths
+
+### updateTypes
+
+Use this field to match rules against types of updates. For example to apply a special label for Major updates:
+
+```
+  "packageRules: [{
+    "updateTypes": ["major"],
+    "labels": ["UPDATE-MAJOR"]
+  }]
+```
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates. See also `major` and `minor` configuration options.
-
-## paths
 
 ## php
 
@@ -458,9 +539,11 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 ## pip_requirements
 
+Add configuration here to specifically override settings for `pip` requirements files. Supports `requirements.txt` and `requirements.pip` files. The default file pattern is fairly flexible in an attempt to catch similarly named ones too but may be extended/changed.
+
 ## prBody
 
-Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovateapp/renovate/issues) and let us solve it for you and for everyone else too.
+Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovatebot/renovate/issues) and let us solve it for you and for everyone else too.
 
 ## prConcurrentLimit
 
@@ -498,6 +581,10 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 ## python
 
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
+
+## raiseDeprecationWarnings
+
 ## rangeStrategy
 
 Behaviour:
@@ -528,7 +615,7 @@ This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0
 
 This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
 
-If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch-push` automerge then Renovate will still rebase as necessary for that.
+If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch` automerge then Renovate will still rebase as necessary for that.
 
 ## recreateClosed
 
@@ -539,6 +626,10 @@ By default, Renovate will detect if it has proposed an update to a project befor
 - Lock file maintenance
 
 Typically you shouldn't need to modify this setting.
+
+## registryUrls
+
+This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forwards compatibility.
 
 ## renovateFork
 
@@ -557,6 +648,10 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 ## reviewers
 
 Must be valid usernames. Note: does not currently work with the GitHub App due to an outstanding GitHub API bug.
+
+## rollbackPrs
+
+Set this to false either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
 
 ## schedule
 
@@ -631,7 +726,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-- **Node.js** - [Read our Node.js documentation](https://renovateapp.com/docs/language-support/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/language-support/node#configuring-support-policy)
 
 ## timezone
 
@@ -662,5 +757,28 @@ This field is currently used by some config prefixes.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This is default true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
+
+## vulnerabilityAlerts
+
+Use this object to customise PRs that are raised when vulnerability alerts are detected (GitHub-only). For example, to set custom labels and assignees:
+
+```json
+{
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": ["@rarkins"]
+  }
+}
+```
+
+To disable vulnerability alerts completely, set like this:
+
+```json
+{
+  "vulnerabilityAlerts": {
+    "enabled": false
+  }
+}
+```
 
 ## yarnrc

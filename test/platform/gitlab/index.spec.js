@@ -1,10 +1,11 @@
+const endpoints = require('../../../lib/util/endpoints');
+
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
   beforeEach(() => {
-    // clean up env
-    delete process.env.GITLAB_TOKEN;
-    delete process.env.GITLAB_ENDPOINT;
+    // clean up endpoints
+    endpoints.clear();
 
     // reset module
     jest.resetModules();
@@ -96,7 +97,8 @@ describe('platform/gitlab', () => {
       [undefined, 'mytoken', undefined],
       [undefined, 'mytoken', 'https://my.custom.endpoint/'],
       ['myenvtoken', 'myenvtoken', undefined],
-    ].forEach(([envToken, token, endpoint], i) => {
+      [undefined, 'mytoken', undefined, 'Renovate Bot <bot@renovatebot.com>'],
+    ].forEach(([envToken, token, endpoint, gitAuthor], i) => {
       it(`should initialise the config for the repo - ${i}`, async () => {
         if (envToken !== undefined) {
           process.env.GITLAB_TOKEN = envToken;
@@ -106,11 +108,10 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           token,
           endpoint,
+          gitAuthor,
         });
         expect(get.mock.calls).toMatchSnapshot();
         expect(config).toMatchSnapshot();
-        expect(process.env.GITLAB_TOKEN).toBe(token);
-        expect(process.env.GITLAB_ENDPOINT).toBe(endpoint);
       });
     });
     it(`should escape all forward slashes in project names`, async () => {
@@ -451,6 +452,44 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toHaveLength(1);
     });
   });
+  describe('mergeBranch(branchName)', () => {
+    it('should perform a branch merge', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+
+      await gitlab.mergeBranch('thebranchname');
+
+      // deleteBranch
+      get.delete.mockImplementationOnce();
+
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+    it('should throw if branch merge throws', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      get.post.mockImplementationOnce(() => {
+        throw new Error('branch-push failed');
+      });
+      let e;
+      try {
+        await gitlab.mergeBranch('thebranchname');
+      } catch (err) {
+        e = err;
+      }
+
+      // deleteBranch
+      get.delete.mockImplementationOnce();
+
+      expect(e).toMatchSnapshot();
+      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+  });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       get.delete = jest.fn();
@@ -462,11 +501,6 @@ describe('platform/gitlab', () => {
       get.mockReturnValueOnce({ body: [] }); // getBranchPr
       await gitlab.deleteBranch('some-branch', true);
       expect(get.delete.mock.calls.length).toBe(1);
-    });
-  });
-  describe('mergeBranch()', () => {
-    it('exists', () => {
-      gitlab.mergeBranch();
     });
   });
   describe('getBranchLastCommitTime', () => {
@@ -808,6 +842,13 @@ describe('platform/gitlab', () => {
       expect(get.put.mock.calls.length).toEqual(1);
     });
   });
+  describe('getPrBody(input)', () => {
+    it('returns updated pr body', () => {
+      const input =
+        'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(gitlab.getPrBody(input)).toMatchSnapshot();
+    });
+  });
   describe('getFile(filePath, branchName)', () => {
     beforeEach(async () => {
       get.mockReturnValueOnce({ body: [{ type: 'blob', path: 'some-path' }] });
@@ -904,66 +945,6 @@ describe('platform/gitlab', () => {
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.post.mock.calls).toHaveLength(1);
     });
-    it('should parse valid gitAuthor', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-
-      await gitlab.commitFilesToBranch(
-        'renovate/something',
-        [file],
-        'Update something',
-        undefined,
-        'Renovate Bot <bot@renovateapp.com>'
-      );
-
-      expect(get.post.mock.calls[0][1].body.author_name).toEqual(
-        'Renovate Bot'
-      );
-      expect(get.post.mock.calls[0][1].body.author_email).toEqual(
-        'bot@renovateapp.com'
-      );
-    });
-    it('should skip invalid gitAuthor', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-
-      await gitlab.commitFilesToBranch(
-        'renovate/something',
-        [file],
-        'Update something',
-        undefined,
-        'Renovate Bot bot@renovateapp.com'
-      );
-
-      expect(get.post.mock.calls[0][1].body.author_name).toBeUndefined();
-      expect(get.post.mock.calls[0][1].body.author_email).toBeUndefined();
-    });
   });
   describe('getCommitMessages()', () => {
     it('returns commits messages', async () => {
@@ -980,11 +961,10 @@ describe('platform/gitlab', () => {
       const res = await gitlab.getCommitMessages();
       expect(res).toMatchSnapshot();
     });
-    it('swallows errors', async () => {
-      get.mockImplementationOnce(() => {
-        throw new Error('some-error');
-      });
-      const res = await gitlab.getCommitMessages();
+  });
+  describe('getVulnerabilityAlerts()', () => {
+    it('returns empty', async () => {
+      const res = await gitlab.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
     });
   });

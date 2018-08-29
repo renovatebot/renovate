@@ -1,17 +1,18 @@
 const fs = require('fs');
-const datasource = require('../../lib/datasource');
 const got = require('got');
+const datasource = require('../../lib/datasource');
 
 jest.mock('got');
 
 const res1 = fs.readFileSync('test/_fixtures/packagist/uploader.json');
+const res2 = fs.readFileSync('test/_fixtures/packagist/mailchimp-api.json');
 
 describe('datasource/packagist', () => {
-  describe('getDependency', () => {
+  describe('getPkgReleases', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
       expect(
-        await datasource.getDependency('pkg:packagist/something')
+        await datasource.getPkgReleases('pkg:packagist/something')
       ).toBeNull();
     });
     it('returns null for 404', async () => {
@@ -21,7 +22,7 @@ describe('datasource/packagist', () => {
         })
       );
       expect(
-        await datasource.getDependency('pkg:packagist/something')
+        await datasource.getPkgReleases('pkg:packagist/something')
       ).toBeNull();
     });
     it('returns null for unknown error', async () => {
@@ -29,7 +30,7 @@ describe('datasource/packagist', () => {
         throw new Error();
       });
       expect(
-        await datasource.getDependency('pkg:packagist/something')
+        await datasource.getPkgReleases('pkg:packagist/something')
       ).toBeNull();
     });
     it('processes real data', async () => {
@@ -37,7 +38,15 @@ describe('datasource/packagist', () => {
         body: JSON.parse(res1),
       });
       expect(
-        await datasource.getDependency('pkg:packagist/cristianvuolo/uploader')
+        await datasource.getPkgReleases('pkg:packagist/cristianvuolo/uploader')
+      ).toMatchSnapshot();
+    });
+    it('processes real versioned data', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(res2),
+      });
+      expect(
+        await datasource.getPkgReleases('pkg:packagist/drewm/mailchimp-api')
       ).toMatchSnapshot();
     });
   });

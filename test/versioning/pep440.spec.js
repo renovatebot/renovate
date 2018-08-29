@@ -16,10 +16,10 @@ describe('pep440.isValid(input)', () => {
     expect(!!pep440.isValid('>1.2.3')).toBe(true);
   });
   it('should reject github repositories', () => {
-    expect(!!pep440.isValid('renovateapp/renovate')).toBe(false);
-    expect(!!pep440.isValid('renovateapp/renovate#master')).toBe(false);
+    expect(!!pep440.isValid('renovatebot/renovate')).toBe(false);
+    expect(!!pep440.isValid('renovatebot/renovate#master')).toBe(false);
     expect(
-      !!pep440.isValid('https://github.com/renovateapp/renovate.git')
+      !!pep440.isValid('https://github.com/renovatebot/renovate.git')
     ).toBe(false);
   });
 });

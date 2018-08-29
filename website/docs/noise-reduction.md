@@ -13,7 +13,7 @@ Of course, please keep in mind that people's definitions of "noise" may differ. 
 
 To reduce noise, you can reduce the number of updates in total, and a good way to do that is via intelligent grouping of related packages.
 
-As an example, our default `":app"` and `":library"` [presets](/docs/config-presets/) include the rule `"group:monorepos"`, which means that "sibling" packages from known monorepos will always be grouped into the same branch/PR by renovate. For example, all `@angular/*` packages that are updated at the same time will be raised in a "Renovate angular monorepo packages" PR. And every package in the React monorepo will be grouped together in a React monorepo PR too.
+As an example, our default `":app"` and `":library"` [presets](config-presets/) include the rule `"group:monorepos"`, which means that "sibling" packages from known monorepos will always be grouped into the same branch/PR by renovate. For example, all `@angular/*` packages that are updated at the same time will be raised in a "Renovate angular monorepo packages" PR. And every package in the React monorepo will be grouped together in a React monorepo PR too.
 
 You may wish to take this further, for example you might want to group together all packages related to `eslint`, even if they come from separate repositories/authors. In that case you might add config like this:
 
@@ -86,7 +86,7 @@ For example, if you have `jest` or `mocha` as a dependency, and it has an upgrad
 
 #### Branch automerging
 
-Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged. For this reason we recommend you consider setting `automergeType=branch-push` which will mean:
+Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged. For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
 - Renovate first creates a branch and no PR
 - If tests pass, Renovate pushes a commit directly to `master` without PR
@@ -116,7 +116,7 @@ Remember our running `eslint` example? Let's automerge it if all the linting upd
       "groupName": "eslint",
       "schedule": ["before 2am on monday"],
       "automerge": true,
-      "automergeType": "branch-push"
+      "automergeType": "branch"
     }
   ]
 ```
@@ -133,7 +133,7 @@ As mentioned earlier. using lock files greatly increase the chance that merging 
 
 ## The Future of Noise Reduction
 
-First of all, if you every have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovateapp/renovate). Our philosophy is:
+First of all, if you every have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovatebot/renovate). Our philosophy is:
 
 1.  Nearly everyone should probably use Renovate-like dependency update automation
 2.  Over time, you should "see" Renovate less and less

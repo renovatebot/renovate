@@ -80,8 +80,18 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset parses github 1`] = `
+Object {
+  "datasource": "github",
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "default",
+}
+`;
+
 exports[`config/presets parsePreset returns default package name 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "renovate-config-default",
   "params": undefined,
   "presetName": "base",
@@ -90,6 +100,7 @@ Object {
 
 exports[`config/presets parsePreset returns default package name with params 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "renovate-config-default",
   "params": Array [
     "packages/eslint",
@@ -101,6 +112,7 @@ Object {
 
 exports[`config/presets parsePreset returns non-scoped default 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "renovate-config-somepackage",
   "params": undefined,
   "presetName": "default",
@@ -109,6 +121,7 @@ Object {
 
 exports[`config/presets parsePreset returns non-scoped package name 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "renovate-config-somepackage",
   "params": undefined,
   "presetName": "webapp",
@@ -117,6 +130,7 @@ Object {
 
 exports[`config/presets parsePreset returns non-scoped package name full 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "renovate-config-somepackage",
   "params": undefined,
   "presetName": "webapp",
@@ -125,6 +139,7 @@ Object {
 
 exports[`config/presets parsePreset returns non-scoped package name with params 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "renovate-config-somepackage",
   "params": Array [
     "param1",
@@ -135,6 +150,7 @@ Object {
 
 exports[`config/presets parsePreset returns scope with packageName and default 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "@somescope/somepackagename",
   "params": undefined,
   "presetName": "default",
@@ -143,6 +159,7 @@ Object {
 
 exports[`config/presets parsePreset returns scope with packageName and params and default 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "@somescope/somepackagename",
   "params": Array [
     "param1",
@@ -155,6 +172,7 @@ Object {
 
 exports[`config/presets parsePreset returns scope with packageName and presetName 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "@somescope/somepackagename",
   "params": undefined,
   "presetName": "somePresetName",
@@ -163,6 +181,7 @@ Object {
 
 exports[`config/presets parsePreset returns scope with packageName and presetName and params 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "@somescope/somepackagename",
   "params": Array [
     "param1",
@@ -174,6 +193,7 @@ Object {
 
 exports[`config/presets parsePreset returns scope with presetName 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "@somescope/renovate-config",
   "params": undefined,
   "presetName": "somePresetName",
@@ -182,6 +202,7 @@ Object {
 
 exports[`config/presets parsePreset returns scope with presetName and params 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "@somescope/renovate-config",
   "params": Array [
     "param1",
@@ -192,6 +213,7 @@ Object {
 
 exports[`config/presets parsePreset returns simple scope 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "@somescope/renovate-config",
   "params": undefined,
   "presetName": "default",
@@ -200,6 +222,7 @@ Object {
 
 exports[`config/presets parsePreset returns simple scope and params 1`] = `
 Object {
+  "datasource": "npm",
   "packageName": "@somescope/renovate-config",
   "params": Array [
     "param1",
@@ -648,19 +671,19 @@ Object {
 
 exports[`config/presets resolvePreset throws if invalid preset 1`] = `undefined`;
 
-exports[`config/presets resolvePreset throws if invalid preset 2`] = `"Preset name not found within published preset config (:invalid-preset)"`;
+exports[`config/presets resolvePreset throws if invalid preset 2`] = `"Preset name not found within published preset config (wrongpreset:invalid-preset)"`;
 
 exports[`config/presets resolvePreset throws if invalid preset 3`] = `undefined`;
 
 exports[`config/presets resolvePreset throws if invalid preset file 1`] = `undefined`;
 
-exports[`config/presets resolvePreset throws if invalid preset file 2`] = `"Cannot find preset's package (notfoundaaaaaaaa)"`;
+exports[`config/presets resolvePreset throws if invalid preset file 2`] = `"Cannot find preset's package (notfound)"`;
 
 exports[`config/presets resolvePreset throws if invalid preset file 3`] = `undefined`;
 
 exports[`config/presets resolvePreset throws if valid and invalid 1`] = `undefined`;
 
-exports[`config/presets resolvePreset throws if valid and invalid 2`] = `"Preset name not found within published preset config (:invalid-preset)"`;
+exports[`config/presets resolvePreset throws if valid and invalid 2`] = `"Preset name not found within published preset config (wrongpreset:invalid-preset)"`;
 
 exports[`config/presets resolvePreset throws if valid and invalid 3`] = `undefined`;
 

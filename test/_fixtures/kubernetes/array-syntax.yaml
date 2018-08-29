@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: local-volume-provisioner
+  namespace: kube-system
+  labels:
+    app: local-volume-provisioner
+spec:
+  selector:
+    matchLabels:
+      app: local-volume-provisioner
+  template:
+    spec:
+      containers:
+      - image: "quay.io/external_storage/local-volume-provisioner:v2.1.0"
+        name: provisioner

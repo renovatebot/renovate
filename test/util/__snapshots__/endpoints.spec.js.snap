@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`util/endpoints find() allows overrides 1`] = `
+Object {
+  "endpoint": "endpoint/",
+  "name": "GitHub",
+  "other": "data",
+  "platform": "github",
+  "token": "secret",
+}
+`;
+
+exports[`util/endpoints find() allows overrides 2`] = `
+Object {
+  "token": "secret",
+}
+`;
+
+exports[`util/endpoints find() allows overrides 3`] = `
+Object {
+  "token": "secret",
+}
+`;
+
+exports[`util/endpoints update() uses default endpoint 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "name": "GitHub",
+  "other": "data",
+  "platform": "github",
+  "token": "token",
+}
+`;
+
+exports[`util/endpoints update() uses default endpoint 2`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "name": "GitHub",
+  "other": "data",
+  "platform": "github",
+  "token": "token",
+}
+`;

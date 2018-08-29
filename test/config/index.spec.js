@@ -3,7 +3,7 @@ const defaultConfig = require('../../lib/config/defaults').getConfig();
 const npm = require('../../lib/datasource/npm');
 const presetDefaults = require('../_fixtures/npm/renovate-config-default');
 
-npm.getDependency = jest.fn(() => ({
+npm.getPkgReleases = jest.fn(() => ({
   'renovate-config':
     presetDefaults.versions[presetDefaults['dist-tags'].latest][
       'renovate-config'
@@ -88,9 +88,22 @@ describe('config/index', () => {
       const env = { GITHUB_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);
     });
+    it('supports Bitbucket username/passwod', async () => {
+      defaultArgv = defaultArgv.concat([
+        '--platform=bitbucket',
+        '--username=user',
+        '--password=pass',
+      ]);
+      const env = {};
+      await configParser.parseConfigs(env, defaultArgv);
+    });
     it('autodiscovers github platform', async () => {
       const env = {};
-      defaultArgv = defaultArgv.concat(['--autodiscover', '--token=abc']);
+      defaultArgv = defaultArgv.concat([
+        '--autodiscover',
+        '--token=abc',
+        '--pr-footer=custom',
+      ]);
       ghGot.mockImplementationOnce(() => ({
         headers: {},
         body: [
@@ -130,6 +143,7 @@ describe('config/index', () => {
       defaultArgv = defaultArgv.concat([
         '--autodiscover',
         '--platform=vsts',
+        '--endpoint=endpoint',
         '--token=abc',
       ]);
       vstsHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);
@@ -181,7 +195,7 @@ describe('config/index', () => {
         headers: {},
         body: [
           { full_name: 'bar/BAZ' },
-          { full_name: 'renovateapp/renovate' },
+          { full_name: 'renovatebot/renovate' },
           { full_name: 'not/configured' },
         ],
       }));

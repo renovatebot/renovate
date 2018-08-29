@@ -120,6 +120,23 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+  it('filters updateType', () => {
+    const config = {
+      packageRules: [
+        {
+          updateTypes: ['minor', 'patch'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
   it('filters naked depType', () => {
     const config = {
       packageRules: [
