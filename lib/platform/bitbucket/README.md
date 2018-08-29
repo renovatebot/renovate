@@ -1,5 +1,7 @@
 # Bitbucket platform
 
+Bitbucket support is considered in "beta" release status.
+
 ## Unsupported platform features/concepts
 
 - Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
