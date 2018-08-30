@@ -187,6 +187,10 @@
         {
           "type": "refactor",
           "release": "patch"
+        },
+        {
+          "type": "deps",
+          "release": "patch"
         }
       ]
     }

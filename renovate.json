@@ -12,8 +12,12 @@
   },
   "packageRules": [
     {
+      "depTypeList": ["dependencies"],
+      "semanticCommitType": "deps"
+    },
+    {
       "packageNames": ["semantic-release"],
-      "semanticCommitType": "fix"
+      "semanticCommitType": "deps"
     },
     {
       "packageNames": ["got", "gh-got", "gl-got"],
