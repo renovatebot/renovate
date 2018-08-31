@@ -65,5 +65,20 @@ describe('config/cli', () => {
       argv.push('bar');
       cli.getConfig(argv).should.eql({ repositories: ['foo', 'bar'] });
     });
+    it('parses --endpoints json correctly', () => {
+      argv.push(
+        `--endpoints=[{"host":"docker.io","platform":"docker","username":"user","password":"password"}]`
+      );
+      cli.getConfig(argv).should.deep.equal({
+        endpoints: [
+          {
+            host: 'docker.io',
+            platform: 'docker',
+            username: 'user',
+            password: 'password',
+          },
+        ],
+      });
+    });
   });
 });
