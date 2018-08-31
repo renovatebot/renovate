@@ -189,7 +189,7 @@
           "release": "patch"
         },
         {
-          "type": "deps",
+          "type": "build",
           "release": "patch"
         }
       ]
