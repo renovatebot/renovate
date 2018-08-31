@@ -13,11 +13,13 @@
   "packageRules": [
     {
       "depTypeList": ["dependencies"],
-      "semanticCommitType": "deps"
+      "semanticCommitType": "build",
+      "semanticCommitScope": "deps"
     },
     {
       "packageNames": ["semantic-release"],
-      "semanticCommitType": "deps"
+      "semanticCommitType": "build",
+      "semanticCommitScope": "deps"
     },
     {
       "packageNames": ["got", "gh-got", "gl-got"],
