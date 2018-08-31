@@ -8,7 +8,7 @@
     ":assignee(rarkins)"
   ],
   "docker": {
-    "semanticCommitType": "fix"
+    "semanticCommitType": "build"
   },
   "packageRules": [
     {
