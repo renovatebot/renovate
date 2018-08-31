@@ -65,7 +65,7 @@ describe('config/cli', () => {
       argv.push('bar');
       cli.getConfig(argv).should.eql({ repositories: ['foo', 'bar'] });
     });
-    it('parses --endpoints json correctly', () => {
+    it('parses json lists correctly', () => {
       argv.push(
         `--endpoints=[{"host":"docker.io","platform":"docker","username":"user","password":"password"}]`
       );
