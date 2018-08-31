@@ -80,5 +80,17 @@ describe('config/cli', () => {
         ],
       });
     });
+    it('parses [] correctly as empty list of endpoints', () => {
+      argv.push(`--endpoints=[]`);
+      cli.getConfig(argv).should.eql({
+        endpoints: [],
+      });
+    });
+    it('parses an empty string correctly as empty list of endpoints', () => {
+      argv.push(`--endpoints=`);
+      cli.getConfig(argv).should.eql({
+        endpoints: [],
+      });
+    });
   });
 });
