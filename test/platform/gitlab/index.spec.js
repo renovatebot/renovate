@@ -142,6 +142,16 @@ describe('platform/gitlab', () => {
       }
       expect(err.message).toBe('always error');
     });
+    it('should throw an error if repository is archived', async () => {
+      get.mockReturnValue({ body: { archived: true } });
+      let err;
+      try {
+        await gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' });
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('archived');
+    });
   });
   describe('getRepoForceRebase', () => {
     it('should return false', () => {
