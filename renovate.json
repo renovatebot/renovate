@@ -7,19 +7,18 @@
     "group:linters",
     ":assignee(rarkins)"
   ],
+  "semanticCommitScope": "deps",
   "docker": {
     "semanticCommitType": "build"
   },
   "packageRules": [
     {
       "depTypeList": ["dependencies"],
-      "semanticCommitType": "build",
-      "semanticCommitScope": "deps"
+      "semanticCommitType": "build"
     },
     {
       "packageNames": ["semantic-release"],
-      "semanticCommitType": "build",
-      "semanticCommitScope": "deps"
+      "semanticCommitType": "build"
     },
     {
       "packageNames": ["got", "gh-got", "gl-got"],
@@ -27,6 +26,5 @@
         "groupName": "got packages"
       }
     }
-  ],
-  "semanticCommitScope": null
+  ]
 }
