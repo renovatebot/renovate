@@ -31,3 +31,19 @@ Object {
   "repositoryUrl": "https://github.com/some/dep",
 }
 `;
+
+exports[`datasource/github getPkgReleases returns releases from cache 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "1.0.0",
+      "version": "1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "version": "v1.1.0",
+    },
+  ],
+  "repositoryUrl": "https://github.com/some/dep",
+}
+`;

@@ -1,3 +1,5 @@
+const delay = require('delay');
+
 const datasource = require('../../lib/datasource');
 const github = require('../../lib/datasource/github');
 const ghGot = require('../../lib/platform/github/gh-got-wrapper');
@@ -37,6 +39,7 @@ describe('datasource/github', () => {
     });
   });
   describe('getPkgReleases', () => {
+    beforeAll(() => global.renovateCache.rmAll());
     it('returns cleaned tags', async () => {
       const body = [
         { name: 'a' },
@@ -62,6 +65,17 @@ describe('datasource/github', () => {
         { tag_name: 'v1.1.0' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
+      const res = await datasource.getPkgReleases(
+        'pkg:github/some/dep?ref=release'
+      );
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+      expect(
+        res.releases.find(release => release.version === 'v1.1.0')
+      ).toBeDefined();
+    });
+    it('returns releases from cache', async () => {
+      await delay(1000);
       const res = await datasource.getPkgReleases(
         'pkg:github/some/dep?ref=release'
       );

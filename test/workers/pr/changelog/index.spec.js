@@ -1,14 +1,14 @@
-jest.mock('../../../lib/platform/github/gh-got-wrapper');
-jest.mock('../../../lib/datasource/npm');
+jest.mock('../../../../lib/platform/github/gh-got-wrapper');
+jest.mock('../../../../lib/datasource/npm');
 jest.mock('got');
 
-const endpoints = require('../../../lib/util/endpoints');
-const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
+const endpoints = require('../../../../lib/util/endpoints');
+const ghGot = require('../../../../lib/platform/github/gh-got-wrapper');
 
-const { getChangeLogJSON } = require('../../../lib/workers/pr/changelog');
-const {
-  rmAllCache,
-} = require('../../../lib/workers/pr/changelog/source-cache');
+const { getChangeLogJSON } = require('../../../../lib/workers/pr/changelog');
+const releaseNotes = require('../../../../lib/workers/pr/changelog/release-notes');
+
+releaseNotes.addReleaseNotes = jest.fn(input => input);
 
 const upgrade = {
   depName: 'renovate',
@@ -39,7 +39,7 @@ describe('workers/pr/changelog', () => {
         platform: 'github',
         endpoint: 'https://api.github.com/',
       });
-      await rmAllCache();
+      await global.renovateCache.rmAll();
     });
     it('returns null if no fromVersion', async () => {
       expect(

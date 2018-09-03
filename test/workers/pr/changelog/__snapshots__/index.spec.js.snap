@@ -163,12 +163,14 @@ Object {
     Object {
       "changes": Array [],
       "compare": Object {},
+      "releaseNotes": undefined,
       "version": "2.5.2",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2017-12-24T03:20:46.238Z",
+      "releaseNotes": undefined,
       "version": "2.4.2",
     },
     Object {
