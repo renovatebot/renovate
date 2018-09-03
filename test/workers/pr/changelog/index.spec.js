@@ -103,22 +103,6 @@ describe('workers/pr/changelog', () => {
         })
       ).toMatchSnapshot();
     });
-    it('falls back to commit from release time', async () => {
-      // mock tags response
-      ghGot.mockReturnValueOnce(Promise.resolve());
-      // mock commit time response
-      ghGot.mockReturnValue(
-        Promise.resolve({
-          body: { sha: 'sha_from_time' },
-        })
-      );
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          depName: '@renovate/no',
-        })
-      ).toMatchSnapshot();
-    });
     it('returns cached JSON', async () => {
       const first = await getChangeLogJSON({ ...upgrade });
       const firstCalls = [...ghGot.mock.calls];
