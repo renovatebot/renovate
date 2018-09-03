@@ -1,5 +1,3 @@
-const delay = require('delay');
-
 const datasource = require('../../lib/datasource');
 const github = require('../../lib/datasource/github');
 const ghGot = require('../../lib/platform/github/gh-got-wrapper');
