@@ -8,6 +8,7 @@ jest.mock('../../lib/platform/github/gh-got-wrapper');
 jest.mock('got');
 
 describe('datasource/github', () => {
+  beforeEach(() => global.renovateCache.rmAll());
   describe('getPreset()', () => {
     it('throws if non-default', async () => {
       await expect(
@@ -75,15 +76,21 @@ describe('datasource/github', () => {
       ).toBeDefined();
     });
     it('returns releases from cache', async () => {
-      await delay(1000);
-      const res = await datasource.getPkgReleases(
-        'pkg:github/some/dep?ref=release'
+      const body = [
+        { tag_name: 'a' },
+        { tag_name: 'v' },
+        { tag_name: '1.0.0' },
+        { tag_name: 'v1.1.0' },
+      ];
+      ghGot.mockReturnValueOnce({ headers: {}, body });
+      const res1 = await datasource.getPkgReleases(
+        'pkg:github/some/dep-to-cache?ref=release'
       );
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
-      expect(
-        res.releases.find(release => release.version === 'v1.1.0')
-      ).toBeDefined();
+      expect(res1.releases).toHaveLength(2);
+      const res2 = await datasource.getPkgReleases(
+        'pkg:github/some/dep-to-cache?ref=release'
+      );
+      expect(res1).toEqual(res2);
     });
     it('returns null for invalid ref', async () => {
       expect(
