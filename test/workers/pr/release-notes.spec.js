@@ -3,7 +3,7 @@ const ghGot = require('gh-got');
 const {
   getReleaseNotes,
   getReleaseNotesMd,
-} = require('../../../lib/workers/pr/release-notes');
+} = require('../../../lib/workers/pr/changelog/release-notes');
 
 const angularJsChangelogMd = fs.readFileSync(
   'test/_fixtures/changelog-md/angular.js.md',
