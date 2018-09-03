@@ -41,11 +41,20 @@ describe('workers/pr/changelog', () => {
       });
       await global.renovateCache.rmAll();
     });
-    it('returns null if no fromVersion', async () => {
+    it('returns null if @types', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
           fromVersion: null,
+        })
+      ).toBe(null);
+      expect(ghGot.mock.calls).toHaveLength(0);
+    });
+    it('returns null if no fromVersion', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          repositoryUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         })
       ).toBe(null);
       expect(ghGot.mock.calls).toHaveLength(0);
