@@ -6,9 +6,6 @@ const endpoints = require('../../../lib/util/endpoints');
 const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
 
 const { getChangeLogJSON } = require('../../../lib/workers/pr/changelog');
-const {
-  rmAllCache,
-} = require('../../../lib/workers/pr/changelog/source-cache');
 
 const upgrade = {
   depName: 'renovate',
@@ -39,7 +36,7 @@ describe('workers/pr/changelog', () => {
         platform: 'github',
         endpoint: 'https://api.github.com/',
       });
-      await rmAllCache();
+      await global.renovateCache.rmAll();
     });
     it('returns null if no fromVersion', async () => {
       expect(

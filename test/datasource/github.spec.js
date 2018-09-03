@@ -39,7 +39,7 @@ describe('datasource/github', () => {
     });
   });
   describe('getPkgReleases', () => {
-    beforeAll(() => github.rmAllCache());
+    beforeAll(() => global.renovateCache.rmAll());
     it('returns cleaned tags', async () => {
       const body = [
         { name: 'a' },
