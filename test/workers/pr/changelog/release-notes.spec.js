@@ -1,9 +1,10 @@
 const fs = require('fs-extra');
 const ghGot = require('gh-got');
 const {
+  addReleaseNotes,
   getReleaseNotes,
   getReleaseNotesMd,
-} = require('../../../lib/workers/pr/changelog/release-notes');
+} = require('../../../../lib/workers/pr/changelog/release-notes');
 
 const angularJsChangelogMd = fs.readFileSync(
   'test/_fixtures/changelog-md/angular.js.md',
@@ -28,6 +29,12 @@ const contentsResponse = [
 jest.mock('gh-got');
 
 describe('workers/pr/release-notes', () => {
+  describe('addReleaseNotes()', () => {
+    it('returns input if invalid', async () => {
+      const input = { a: 1 };
+      expect(await addReleaseNotes(input)).toEqual(input);
+    });
+  });
   describe('getReleaseNotes()', () => {
     it('gets release notes', async () => {
       ghGot.mockReturnValueOnce({

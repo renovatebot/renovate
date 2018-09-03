@@ -1,11 +1,14 @@
-jest.mock('../../../lib/platform/github/gh-got-wrapper');
-jest.mock('../../../lib/datasource/npm');
+jest.mock('../../../../lib/platform/github/gh-got-wrapper');
+jest.mock('../../../../lib/datasource/npm');
 jest.mock('got');
 
-const endpoints = require('../../../lib/util/endpoints');
-const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
+const endpoints = require('../../../../lib/util/endpoints');
+const ghGot = require('../../../../lib/platform/github/gh-got-wrapper');
 
-const { getChangeLogJSON } = require('../../../lib/workers/pr/changelog');
+const { getChangeLogJSON } = require('../../../../lib/workers/pr/changelog');
+const releaseNotes = require('../../../../lib/workers/pr/changelog/release-notes');
+
+releaseNotes.addReleaseNotes = jest.fn(input => input);
 
 const upgrade = {
   depName: 'renovate',
