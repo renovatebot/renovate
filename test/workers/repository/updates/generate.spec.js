@@ -124,7 +124,7 @@ describe('workers/repository/updates/generate', () => {
     it('groups multiple upgrades different version', () => {
       const branch = [
         {
-          depName: 'some-dep',
+          depName: 'depB',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -139,7 +139,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
         },
         {
-          depName: 'some-other-dep',
+          depName: 'depA',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
