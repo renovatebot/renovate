@@ -60,25 +60,6 @@ describe('platform/github', () => {
         allow_merge_commit: true,
       },
     }));
-    // getPrList
-    get.mockImplementationOnce(() => ({
-      body: [],
-    }));
-    // getFileList
-    get.mockImplementationOnce(() => ({
-      body: {
-        tree: [
-          {
-            type: 'blob',
-            path: 'package.json',
-          },
-          {
-            type: 'blob',
-            path: 'package-lock.json',
-          },
-        ],
-      },
-    }));
     return github.initRepo(...args);
   }
 
@@ -126,14 +107,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        // getPrList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
-        // getFileList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
         return github.initRepo(...args);
       }
       const config = await squashInitRepo({
@@ -171,14 +144,6 @@ describe('platform/github', () => {
         // getBranchCommit
         get.post.mockImplementationOnce(() => ({
           body: {},
-        }));
-        // getPrList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
-        // getFileList
-        get.mockImplementationOnce(() => ({
-          body: [],
         }));
         return github.initRepo(...args);
       }
@@ -224,14 +189,6 @@ describe('platform/github', () => {
         get.post.mockImplementationOnce(() => ({
           body: { full_name: 'forked_repo' },
         }));
-        // getPrList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
-        // getFileList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
         return github.initRepo(...args);
       }
       const config = await forkInitRepo({
@@ -256,14 +213,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        // getPrList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
-        // getFileList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo({
@@ -286,14 +235,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        // getPrList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
-        // getFileList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
         return github.initRepo(...args);
       }
       const config = await mergeInitRepo({
@@ -312,14 +253,6 @@ describe('platform/github', () => {
             },
             default_branch: 'master',
           },
-        }));
-        // getPrList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
-        // getFileList
-        get.mockImplementationOnce(() => ({
-          body: [],
         }));
         return github.initRepo(...args);
       }
@@ -1465,7 +1398,7 @@ describe('platform/github', () => {
       expect(await github.mergePr(pr)).toBe(true);
       expect(get.put.mock.calls).toHaveLength(1);
       expect(get.delete.mock.calls).toHaveLength(1);
-      expect(get.mock.calls).toHaveLength(3);
+      expect(get.mock.calls).toHaveLength(1);
     });
     it('should handle merge error', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -1481,7 +1414,7 @@ describe('platform/github', () => {
       expect(await github.mergePr(pr)).toBe(false);
       expect(get.put.mock.calls).toHaveLength(1);
       expect(get.delete.mock.calls).toHaveLength(0);
-      expect(get.mock.calls).toHaveLength(3);
+      expect(get.mock.calls).toHaveLength(1);
     });
   });
   describe('getPrBody(input)', () => {
@@ -1510,14 +1443,6 @@ describe('platform/github', () => {
             },
             default_branch: 'master',
           },
-        }));
-        // getPrList
-        get.mockImplementationOnce(() => ({
-          body: [],
-        }));
-        // getFileList
-        get.mockImplementationOnce(() => ({
-          body: [],
         }));
         // getBranchCommit
         get.mockImplementationOnce(() => ({
@@ -1614,6 +1539,21 @@ describe('platform/github', () => {
   describe('getFile()', () => {
     it('should return the encoded file content', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
+      // getFileList
+      get.mockImplementationOnce(() => ({
+        body: {
+          tree: [
+            {
+              type: 'blob',
+              path: 'package.json',
+            },
+            {
+              type: 'blob',
+              path: 'package-lock.json',
+            },
+          ],
+        },
+      }));
       get.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('hello world').toString('base64'),
@@ -1625,11 +1565,41 @@ describe('platform/github', () => {
     });
     it('should return null if not in file list', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
+      // getFileList
+      get.mockImplementationOnce(() => ({
+        body: {
+          tree: [
+            {
+              type: 'blob',
+              path: 'package.json',
+            },
+            {
+              type: 'blob',
+              path: 'package-lock.json',
+            },
+          ],
+        },
+      }));
       const content = await github.getFile('.npmrc');
       expect(content).toBe(null);
     });
     it('should return null if GitHub returns a 404', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
+      // getFileList
+      get.mockImplementationOnce(() => ({
+        body: {
+          tree: [
+            {
+              type: 'blob',
+              path: 'package.json',
+            },
+            {
+              type: 'blob',
+              path: 'package-lock.json',
+            },
+          ],
+        },
+      }));
       get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
@@ -1641,6 +1611,21 @@ describe('platform/github', () => {
     });
     it('should return large file via git API', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
+      // getFileList
+      get.mockImplementationOnce(() => ({
+        body: {
+          tree: [
+            {
+              type: 'blob',
+              path: 'package.json',
+            },
+            {
+              type: 'blob',
+              path: 'package-lock.json',
+            },
+          ],
+        },
+      }));
       get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 403,
@@ -1668,6 +1653,21 @@ describe('platform/github', () => {
     });
     it('should throw if cannot find large file via git API', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
+      // getFileList
+      get.mockImplementationOnce(() => ({
+        body: {
+          tree: [
+            {
+              type: 'blob',
+              path: 'package.json',
+            },
+            {
+              type: 'blob',
+              path: 'package-lock.json',
+            },
+          ],
+        },
+      }));
       get.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 403,
@@ -1689,6 +1689,21 @@ describe('platform/github', () => {
     });
     it('should return null if getFile returns nothing', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
+      // getFileList
+      get.mockImplementationOnce(() => ({
+        body: {
+          tree: [
+            {
+              type: 'blob',
+              path: 'package.json',
+            },
+            {
+              type: 'blob',
+              path: 'package-lock.json',
+            },
+          ],
+        },
+      }));
       get.mockImplementationOnce(() => ({
         body: {},
       }));
@@ -1698,6 +1713,21 @@ describe('platform/github', () => {
     });
     it('should return propagate unknown errors', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
+      // getFileList
+      get.mockImplementationOnce(() => ({
+        body: {
+          tree: [
+            {
+              type: 'blob',
+              path: 'package.json',
+            },
+            {
+              type: 'blob',
+              path: 'package-lock.json',
+            },
+          ],
+        },
+      }));
       get.mockImplementationOnce(() => {
         throw new Error('Something went wrong');
       });

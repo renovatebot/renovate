@@ -38,15 +38,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
@@ -65,15 +56,6 @@ exports[`platform/github commitFilesToBranch(branchName, files, message, parentB
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -203,9 +185,6 @@ Array [
       "paginate": true,
     },
   ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
 ]
 `;
 
@@ -222,12 +201,6 @@ exports[`platform/github getFile() should return large file via git API 1`] = `
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
   ],
   Array [
     "repos/some/repo/git/trees/master?recursive=true",
@@ -252,12 +225,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
     "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
@@ -272,12 +239,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
     "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
@@ -290,12 +251,6 @@ exports[`platform/github getFile() should return the encoded file content 1`] = 
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
   ],
   Array [
     "repos/some/repo/git/trees/master?recursive=true",
@@ -503,15 +458,6 @@ Array [
   Array [
     "repos/some/repo",
   ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
 ]
 `;
 
@@ -527,15 +473,6 @@ Array [
   Array [
     "repos/some/repo",
   ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
 ]
 `;
 
@@ -550,15 +487,6 @@ exports[`platform/github initRepo should initialise the config for the repo - 2 
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
   ],
 ]
 `;
@@ -611,15 +539,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -659,15 +578,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -696,15 +606,6 @@ exports[`platform/github setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/trees/some-branch?recursive=true",
