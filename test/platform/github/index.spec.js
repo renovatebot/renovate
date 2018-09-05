@@ -524,21 +524,18 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => ({
         body: [
           {
-            ref: 'refs/heads/renovate/a',
+            name: 'thebranchname',
           },
           {
-            ref: 'refs/heads/master',
+            name: 'renovate',
           },
           {
-            ref: 'refs/heads/renovate',
-          },
-          {
-            ref: 'refs/heads/renovate/b',
+            name: 'renovate/abc-1.x',
           },
         ],
       }));
       const res = await github.getAllRenovateBranches('renovate/');
-      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
     });
   });
   describe('isBranchStale(branchName)', () => {

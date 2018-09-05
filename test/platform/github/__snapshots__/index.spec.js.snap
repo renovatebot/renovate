@@ -190,14 +190,6 @@ content",
 ]
 `;
 
-exports[`platform/github getAllRenovateBranches() should return all renovate branches 1`] = `
-Array [
-  "renovate/a",
-  "renovate",
-  "renovate/b",
-]
-`;
-
 exports[`platform/github getBranchLastCommitTime should return a Date 1`] = `2011-04-14T16:00:49.000Z`;
 
 exports[`platform/github getBranchPr(branchName) should return the PR object 1`] = `
