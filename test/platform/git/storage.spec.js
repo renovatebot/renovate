@@ -41,6 +41,8 @@ describe('platform/git/storage', () => {
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
     await git.initRepo({
+      platform: 'github',
+      repository: 'owner/repo-name',
       url: origin.path,
       gitAuthor: {
         name: 'test',
