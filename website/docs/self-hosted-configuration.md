@@ -33,6 +33,10 @@ You probably have no need for this option - it is an experimental setting for th
 
 RFC5322-compliant string if you wish to customise the git author for commits.
 
+## gitFs
+
+This setting is experimental, and works for GitHub repositories only. If enabled, Renovate will `git clone` repos and use `git` for file operations such as creating branches and committing files.
+
 ## gitPrivateKey
 
 ## logFile
