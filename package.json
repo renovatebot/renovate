@@ -129,7 +129,7 @@
     "eslint-config-airbnb-base": "13.1.0",
     "eslint-config-prettier": "3.0.1",
     "eslint-plugin-import": "2.14.0",
-    "eslint-plugin-promise": "4.0.0",
+    "eslint-plugin-promise": "4.0.1",
     "jest": "23.5.0",
     "jest-silent-reporter": "0.1.1",
     "mockdate": "2.0.2",
