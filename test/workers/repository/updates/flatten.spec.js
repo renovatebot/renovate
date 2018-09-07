@@ -23,7 +23,7 @@ describe('workers/repository/updates/flatten', () => {
       const packageFiles = {
         npm: [
           {
-            packageFile: 'package.json ',
+            packageFile: 'package.json',
             deps: [
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
               { updates: [{ newValue: '2.0.0' }] },
