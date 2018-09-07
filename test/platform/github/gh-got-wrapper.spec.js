@@ -9,11 +9,12 @@ describe('platform/gh-got-wrapper', () => {
   const body = ['a', 'b'];
   beforeEach(() => {
     jest.resetAllMocks();
-    get.setAppMode(false);
+    get.reset();
+    delete global.appMode;
     delay.mockImplementation(() => Promise.resolve());
   });
   it('supports app mode', async () => {
-    get.setAppMode(true);
+    global.appMode = true;
     await get('some-url', { headers: { accept: 'some-accept' } });
     expect(ghGot.mock.calls[0][1].headers.accept).toBe(
       'application/vnd.github.machine-man-preview+json, some-accept'
