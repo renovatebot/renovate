@@ -25,6 +25,7 @@ describe('workers/repository/error', () => {
       'forbidden',
       'rate-limit-exceeded',
       'lockfile-error',
+      'disk-space',
       'platform-failure',
       'no-vulnerability-alerts',
     ];
