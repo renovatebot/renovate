@@ -167,7 +167,6 @@ describe('manager/npm/post-update', () => {
     });
     it('writes package.json of local lib', async () => {
       const renoPath = upath.join(__dirname, '../../../');
-      config.copyLocalLibs = true;
       config.tmpDir = { path: renoPath };
       const packageFiles = {
         npm: [
@@ -192,7 +191,6 @@ describe('manager/npm/post-update', () => {
     });
     it('Try to write package.json of local lib, but file not found', async () => {
       const renoPath = upath.join(__dirname, '../../../');
-      config.copyLocalLibs = true;
       config.tmpDir = { path: renoPath };
       const packageFiles = {
         npm: [
@@ -217,7 +215,6 @@ describe('manager/npm/post-update', () => {
     });
     it('detect malicious intent (error config in package.json) local lib is not in the repo', async () => {
       const renoPath = upath.join(__dirname, '../../../');
-      config.copyLocalLibs = true;
       config.tmpDir = { path: renoPath };
       const packageFiles = {
         npm: [

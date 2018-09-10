@@ -132,10 +132,6 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
-## copyLocalLibs
-
-Set to true if repository package.json files contain any local (file) dependencies + lock files. The `package.json` files from each will be copied to disk before lock file generation, even if they are within ignored directories.
-
 ## description
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
