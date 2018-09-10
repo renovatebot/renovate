@@ -44,7 +44,7 @@ Example use:
 
 ```json
 {
-  "automerge": enabled,
+  "automerge": true,
   "automergeType": "pr-comment",
   "automergeComment": "@bors: r+"
 }
@@ -362,7 +362,7 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovatebot.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
@@ -726,7 +726,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/language-support/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/node#configuring-support-policy)
 
 ## timezone
 
