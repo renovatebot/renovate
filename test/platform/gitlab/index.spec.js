@@ -61,6 +61,11 @@ describe('platform/gitlab', () => {
       expect(repos).toMatchSnapshot();
     });
   });
+  describe('getRepoStatus()', () => {
+    it('exists', async () => {
+      expect(await gitlab.getRepoStatus()).toEqual({});
+    });
+  });
   describe('cleanRepo()', () => {
     it('exists', () => {
       gitlab.cleanRepo();

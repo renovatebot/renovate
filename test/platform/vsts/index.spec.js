@@ -47,6 +47,11 @@ describe('platform/vsts', () => {
       expect(repos).toMatchSnapshot();
     });
   });
+  describe('getRepoStatus()', () => {
+    it('exists', async () => {
+      expect(await vsts.getRepoStatus()).toEqual({});
+    });
+  });
   describe('cleanRepo()', () => {
     it('exists', () => {
       vsts.cleanRepo();

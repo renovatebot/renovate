@@ -206,6 +206,12 @@ describe('platform/bitbucket', () => {
     });
   });
 
+  describe('getRepoStatus()', () => {
+    it('exists', async () => {
+      expect(await bitbucket.getRepoStatus()).toEqual({});
+    });
+  });
+
   describe('deleteBranch()', () => {
     it('exists', () => {
       expect(bitbucket.deleteBranch).toBeDefined();
