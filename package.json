@@ -59,7 +59,7 @@
   "dependencies": {
     "@renovate/pep440": "0.4.0",
     "@sindresorhus/is": "0.11.0",
-    "@yarnpkg/lockfile": "1.0.2",
+    "@yarnpkg/lockfile": "1.1.0",
     "bunyan": "1.8.12",
     "cacache": "11.2.0",
     "chalk": "2.4.1",
