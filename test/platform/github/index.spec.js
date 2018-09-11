@@ -1,3 +1,5 @@
+const fs = require('fs-extra');
+
 describe('platform/github', () => {
   let github;
   let get;
@@ -1123,6 +1125,31 @@ describe('platform/github', () => {
     it('should return null if no prNo is passed', async () => {
       const pr = await github.getPr(null);
       expect(pr).toBe(null);
+    });
+    it('should return PR from graphql result', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        gitAuthor: 'bot@renovateapp.com',
+      });
+      const res1 = fs.readFileSync(
+        'test/_fixtures/github/graphql/pullrequest-1.json',
+        'utf8'
+      );
+      get.post.mockImplementationOnce(() => ({
+        body: res1,
+      }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1234123412341234123412341234123412341234',
+          },
+        },
+      }));
+      const pr = await github.getPr(2500);
+      expect(pr).toBeDefined();
+      expect(pr).toMatchSnapshot();
     });
     it('should return null if no PR is returned from GitHub', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });

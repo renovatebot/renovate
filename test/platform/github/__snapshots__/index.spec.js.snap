@@ -270,6 +270,20 @@ Array [
 ]
 `;
 
+exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `
+Object {
+  "branchName": "renovate/jest-monorepo",
+  "canMerge": false,
+  "canRebase": true,
+  "displayNumber": "Pull Request #2500",
+  "isStale": true,
+  "isUnmergeable": true,
+  "number": 2500,
+  "state": "open",
+  "title": "chore(deps): update dependency jest to v23.6.0",
+}
+`;
+
 exports[`platform/github getPr(prNo) should return a PR object - 0 1`] = `
 Object {
   "base": Object {
