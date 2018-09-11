@@ -13,6 +13,7 @@ describe('api/docker', () => {
         username: 'some-username',
         password: 'some-password',
       });
+      return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
@@ -46,6 +47,28 @@ describe('api/docker', () => {
         'some-new-value'
       );
       expect(res).toBe('some-digest');
+    });
+    it('returns from cache', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ body: { token: 'some-token' } });
+      got.mockReturnValueOnce({
+        headers: { 'docker-content-digest': 'some-digest' },
+      });
+      const res = await docker.getDigest(
+        { depName: 'some-dep-to-cache' },
+        'some-newer-value'
+      );
+      expect(res).toBe('some-digest');
+      const res2 = await docker.getDigest(
+        { depName: 'some-dep-to-cache' },
+        'some-newer-value'
+      );
+      expect(res2).toBe('some-digest');
     });
     it('falls back to body for digest', async () => {
       got.mockReturnValueOnce({
