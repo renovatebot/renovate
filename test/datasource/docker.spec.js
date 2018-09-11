@@ -145,6 +145,7 @@ describe('api/docker', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
@@ -187,6 +188,27 @@ describe('api/docker', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
+    });
+    it('returns cached tags', async () => {
+      const tags = ['a', 'b', '1.0.0', '1.1.0-alpine'];
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      const res = await docker.getPkgReleases({
+        fullname: 'my/node',
+        qualifiers: { suffix: 'alpine' },
+      });
+      expect(res.releases).toHaveLength(1);
+      const res2 = await docker.getPkgReleases({
+        fullname: 'my/node',
+        qualifiers: { suffix: 'alpine' },
+      });
+      expect(res2.releases).toHaveLength(1);
     });
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
       const tags = ['1.0.0'];
