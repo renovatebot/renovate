@@ -142,17 +142,15 @@ Array [
 
 exports[`platform/github ensureComment add comment if not found 1`] = `
 Array [
-  Array [
-    "repos/some/repo/issues/42/comments",
-    Object {
-      "body": Object {
-        "body": "### some-subject
+  "repos/some/repo/issues/42/comments",
+  Object {
+    "body": Object {
+      "body": "### some-subject
 
 some
 content",
-      },
     },
-  ],
+  },
 ]
 `;
 
@@ -268,6 +266,29 @@ Array [
   "src/app/package.json",
   "src/otherapp/package.json",
 ]
+`;
+
+exports[`platform/github getPr(prNo) should return PR from closed graphql result 1`] = `
+Object {
+  "body": "dummy body",
+  "branchName": "renovate/delay-4.x",
+  "comments": Array [
+    Object {
+      "body": ":tada: This PR is included in version 13.63.5 :tada:
+
+The release is available on:
+- [npm package (@latest dist-tag)](https://www.npmjs.com/package/renovate)
+- [GitHub release](https://github.com/renovatebot/renovate/releases/tag/13.63.5)
+
+Your **[semantic-release](https://github.com/semantic-release/semantic-release)** bot :package::rocket:",
+      "id": 420006957,
+    },
+  ],
+  "displayNumber": "Pull Request #2499",
+  "number": 2499,
+  "state": "merged",
+  "title": "build(deps): update dependency delay to v4.0.1",
+}
 `;
 
 exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `

@@ -12,6 +12,15 @@ describe('platform/github', () => {
     github = require('../../../lib/platform/github');
   });
 
+  const graphqlOpenPullRequests = fs.readFileSync(
+    'test/_fixtures/github/graphql/pullrequest-1.json',
+    'utf8'
+  );
+  const graphqlClosedPullrequests = fs.readFileSync(
+    'test/_fixtures/github/graphql/pullrequests-closed.json',
+    'utf8'
+  );
+
   function getRepos(...args) {
     // repo info
     get.mockImplementationOnce(() => ({
@@ -969,8 +978,20 @@ describe('platform/github', () => {
       });
       get.mockReturnValueOnce({ body: [] });
       await github.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(1);
-      expect(get.post.mock.calls).toMatchSnapshot();
+      expect(get.post.mock.calls).toHaveLength(2);
+      expect(get.post.mock.calls[1]).toMatchSnapshot();
+    });
+    it('adds comment if found in closed PR list', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      get.post.mockImplementationOnce(() => ({
+        body: graphqlClosedPullrequests,
+      }));
+      await github.ensureComment(2499, 'some-subject', 'some\ncontent');
+      expect(get.post.mock.calls).toHaveLength(2);
+      expect(get.patch.mock.calls).toHaveLength(0);
     });
     it('add updates comment if necessary', async () => {
       await initRepo({
@@ -981,7 +1002,7 @@ describe('platform/github', () => {
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       });
       await github.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.post.mock.calls).toHaveLength(1);
       expect(get.patch.mock.calls).toHaveLength(1);
       expect(get.patch.mock.calls).toMatchSnapshot();
     });
@@ -994,7 +1015,7 @@ describe('platform/github', () => {
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
       });
       await github.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.post.mock.calls).toHaveLength(1);
       expect(get.patch.mock.calls).toHaveLength(0);
     });
     it('handles comment with no description', async () => {
@@ -1004,7 +1025,7 @@ describe('platform/github', () => {
       });
       get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
       await github.ensureComment(42, null, '!merge');
-      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.post.mock.calls).toHaveLength(1);
       expect(get.patch.mock.calls).toHaveLength(0);
     });
   });
@@ -1132,12 +1153,8 @@ describe('platform/github', () => {
         token: 'token',
         gitAuthor: 'bot@renovateapp.com',
       });
-      const res1 = fs.readFileSync(
-        'test/_fixtures/github/graphql/pullrequest-1.json',
-        'utf8'
-      );
       get.post.mockImplementationOnce(() => ({
-        body: res1,
+        body: graphqlOpenPullRequests,
       }));
       // getBranchCommit
       get.mockImplementationOnce(() => ({
@@ -1148,6 +1165,21 @@ describe('platform/github', () => {
         },
       }));
       const pr = await github.getPr(2500);
+      expect(pr).toBeDefined();
+      expect(pr).toMatchSnapshot();
+    });
+    it('should return PR from closed graphql result', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      get.post.mockImplementationOnce(() => ({
+        body: graphqlOpenPullRequests,
+      }));
+      get.post.mockImplementationOnce(() => ({
+        body: graphqlClosedPullrequests,
+      }));
+      const pr = await github.getPr(2499);
       expect(pr).toBeDefined();
       expect(pr).toMatchSnapshot();
     });
