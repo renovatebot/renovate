@@ -1,11 +1,11 @@
-const endpoints = require('../../../lib/util/endpoints');
+const hostRules = require('../../../lib/util/host-rules');
 
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
   beforeEach(() => {
-    // clean up endpoints
-    endpoints.clear();
+    // clean up hostRules
+    hostRules.clear();
 
     // reset module
     jest.resetModules();

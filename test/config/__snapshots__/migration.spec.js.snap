@@ -20,6 +20,9 @@ Object {
     "config:js-app",
     "config:js-lib",
   ],
+  "hostRules": Array [
+    Object {},
+  ],
   "ignorePaths": Array [
     "node_modules/",
   ],

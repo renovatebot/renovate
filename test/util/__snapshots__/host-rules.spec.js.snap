@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`util/endpoints find() allows overrides 1`] = `
+exports[`util/host-rules find() allows overrides 1`] = `
 Object {
   "endpoint": "endpoint/",
   "name": "GitHub",
@@ -10,19 +10,19 @@ Object {
 }
 `;
 
-exports[`util/endpoints find() allows overrides 2`] = `
+exports[`util/host-rules find() allows overrides 2`] = `
 Object {
   "token": "secret",
 }
 `;
 
-exports[`util/endpoints find() allows overrides 3`] = `
+exports[`util/host-rules find() allows overrides 3`] = `
 Object {
   "token": "secret",
 }
 `;
 
-exports[`util/endpoints update() uses default endpoint 1`] = `
+exports[`util/host-rules update() uses default endpoint 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
   "name": "GitHub",
@@ -32,7 +32,7 @@ Object {
 }
 `;
 
-exports[`util/endpoints update() uses default endpoint 2`] = `
+exports[`util/host-rules update() uses default endpoint 2`] = `
 Object {
   "endpoint": "https://api.github.com/",
   "name": "GitHub",

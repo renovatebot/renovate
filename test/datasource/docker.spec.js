@@ -1,15 +1,15 @@
 const got = require('got');
 const docker = require('../../lib/datasource/docker');
-const endpoints = require('../../lib/util/endpoints');
+const hostRules = require('../../lib/util/host-rules');
 
 jest.mock('got');
-jest.mock('../../lib/util/endpoints');
+jest.mock('../../lib/util/host-rules');
 
 describe('api/docker', () => {
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      endpoints.find.mockReturnValue({
+      hostRules.find.mockReturnValue({
         username: 'some-username',
         password: 'some-password',
       });

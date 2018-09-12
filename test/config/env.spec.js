@@ -3,7 +3,7 @@ const env = require('../../lib/config/env.js');
 describe('config/env', () => {
   describe('.getConfig(env)', () => {
     it('returns empty env', () => {
-      expect(env.getConfig({})).toEqual({ endpoints: [] });
+      expect(env.getConfig({})).toEqual({ hostRules: [] });
     });
     it('supports boolean true', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'true' };

@@ -195,20 +195,6 @@ Example:
 
 See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
 
-## endpoints
-
-Example for configuring `docker` auth:
-
-```json
-{
-  "endpoints": {
-    "platform": "docker",
-    "username": "<some-username>",
-    "password": "<some-password>"
-  }
-}
-```
-
 ## engines
 
 Extend this if you wish to configure rules specifically for `engines` definitions. Currently only `node` is supported.
@@ -241,6 +227,20 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```
 
 And then the branchName would be `renovate/eslint` instead.
+
+## hostRules
+
+Example for configuring `docker` auth:
+
+```json
+{
+  "hostRules": {
+    "platform": "docker",
+    "username": "<some-username>",
+    "password": "<some-password>"
+  }
+}
+```
 
 ## ignoreDeprecated
 

@@ -5,6 +5,7 @@ describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('it migrates config', () => {
       const config = {
+        endpoints: [{}],
         enabled: true,
         extends: [':js-app', 'config:library'],
         maintainYarnLock: true,

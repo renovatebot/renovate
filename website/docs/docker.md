@@ -96,7 +96,7 @@ If you are running your own Renovate bot, add this to your `config.js`:
 
 ```js
 module.exports = {
-  endpoints: [
+  hostRules: [
     {
       platform: 'docker',
       username: '<your-username>',

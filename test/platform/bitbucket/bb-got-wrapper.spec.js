@@ -1,18 +1,18 @@
 describe('platform/gl-got-wrapper', () => {
   let get;
   let got;
-  let endpoints;
+  let hostRules;
   beforeEach(() => {
     // reset module
     jest.resetAllMocks();
     jest.mock('got');
     got = require('got');
-    endpoints = require('../../../lib/util/endpoints');
+    hostRules = require('../../../lib/util/host-rules');
     get = require('../../../lib/platform/bitbucket/bb-got-wrapper');
 
-    // clean up endpoints
-    endpoints.clear();
-    endpoints.update({
+    // clean up hostRules
+    hostRules.clear();
+    hostRules.update({
       platform: 'bitbucket',
       token: 'token',
     });
