@@ -9,6 +9,7 @@
   ],
   "semanticCommitScope": "deps",
   "docker": {
+    "pinDigests": true,
     "semanticCommitType": "build"
   },
   "packageRules": [
