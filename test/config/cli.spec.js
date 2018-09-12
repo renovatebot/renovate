@@ -67,10 +67,10 @@ describe('config/cli', () => {
     });
     it('parses json lists correctly', () => {
       argv.push(
-        `--endpoints=[{"host":"docker.io","platform":"docker","username":"user","password":"password"}]`
+        `--host-rules=[{"host":"docker.io","platform":"docker","username":"user","password":"password"}]`
       );
       cli.getConfig(argv).should.deep.equal({
-        endpoints: [
+        hostRules: [
           {
             host: 'docker.io',
             platform: 'docker',
@@ -80,16 +80,22 @@ describe('config/cli', () => {
         ],
       });
     });
-    it('parses [] correctly as empty list of endpoints', () => {
-      argv.push(`--endpoints=[]`);
+    it('parses [] correctly as empty list of hostRules', () => {
+      argv.push(`--host-rules=[]`);
       cli.getConfig(argv).should.eql({
-        endpoints: [],
+        hostRules: [],
       });
     });
-    it('parses an empty string correctly as empty list of endpoints', () => {
+    it('parses an empty string correctly as empty list of hostRules', () => {
+      argv.push(`--host-rules=`);
+      cli.getConfig(argv).should.eql({
+        hostRules: [],
+      });
+    });
+    it('migrates --endpoints', () => {
       argv.push(`--endpoints=`);
       cli.getConfig(argv).should.eql({
-        endpoints: [],
+        hostRules: [],
       });
     });
   });

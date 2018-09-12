@@ -1,12 +1,12 @@
-const endpoints = require('../../../lib/util/host-rules');
+const hostRules = require('../../../lib/util/host-rules');
 
 describe('platform/vsts', () => {
   let vsts;
   let vstsApi;
   let vstsHelper;
   beforeEach(() => {
-    // clean up endpoints
-    endpoints.clear();
+    // clean up hostRules
+    hostRules.clear();
 
     // reset module
     jest.resetModules();

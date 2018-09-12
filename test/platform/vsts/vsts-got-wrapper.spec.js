@@ -1,10 +1,10 @@
 describe('platform/vsts/vsts-got-wrapper', () => {
-  let endpoints;
+  let hostRules;
   let vsts;
   beforeEach(() => {
     // reset module
     jest.resetModules();
-    endpoints = require('../../../lib/util/host-rules');
+    hostRules = require('../../../lib/util/host-rules');
     vsts = require('../../../lib/platform/vsts/vsts-got-wrapper');
   });
 
@@ -14,7 +14,7 @@ describe('platform/vsts/vsts-got-wrapper', () => {
       expect(vsts.getCoreApi).toThrow('No token found for vsts');
     });
     it('should set token and endpoint', async () => {
-      endpoints.update({
+      hostRules.update({
         platform: 'vsts',
         token: 'myToken',
         endpoint: 'myEndpoint',
