@@ -20,6 +20,18 @@ describe('platform/gh-got-wrapper', () => {
       'application/vnd.github.machine-man-preview+json, some-accept'
     );
   });
+  it('strips v3 for graphql', async () => {
+    ghGot.mockImplementationOnce(() => ({
+      body: '{"data":{',
+    }));
+    await get.post('graphql', {
+      endpoint: 'https://ghe.mycompany.com/api/v3/',
+      body: 'abc',
+    });
+    expect(ghGot.mock.calls[0][1].endpoint).toEqual(
+      'https://ghe.mycompany.com/api/'
+    );
+  });
   it('paginates', async () => {
     ghGot.mockReturnValueOnce({
       headers: {
