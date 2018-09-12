@@ -23,7 +23,7 @@ describe('platform/bitbucket', () => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
-    endpoints = require('../../../lib/util/endpoints');
+    endpoints = require('../../../lib/util/host-rules');
     api = require('../../../lib/platform/bitbucket/bb-got-wrapper');
     bitbucket = require('../../../lib/platform/bitbucket');
 

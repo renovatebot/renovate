@@ -1,4 +1,4 @@
-const endpoints = require('../../../lib/util/endpoints');
+const endpoints = require('../../../lib/util/host-rules');
 
 describe('platform/gitlab', () => {
   let gitlab;

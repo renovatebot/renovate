@@ -2,7 +2,7 @@ jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 jest.mock('got');
 
-const endpoints = require('../../../../lib/util/endpoints');
+const endpoints = require('../../../../lib/util/host-rules');
 const ghGot = require('../../../../lib/platform/github/gh-got-wrapper');
 
 const { getChangeLogJSON } = require('../../../../lib/workers/pr/changelog');

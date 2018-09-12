@@ -7,7 +7,7 @@ describe('platform/gl-got-wrapper', () => {
     jest.resetAllMocks();
     jest.mock('got');
     got = require('got');
-    endpoints = require('../../../lib/util/endpoints');
+    endpoints = require('../../../lib/util/host-rules');
     get = require('../../../lib/platform/bitbucket/bb-got-wrapper');
 
     // clean up endpoints

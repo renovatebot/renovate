@@ -4,7 +4,7 @@ describe('platform/vsts/vsts-got-wrapper', () => {
   beforeEach(() => {
     // reset module
     jest.resetModules();
-    endpoints = require('../../../lib/util/endpoints');
+    endpoints = require('../../../lib/util/host-rules');
     vsts = require('../../../lib/platform/vsts/vsts-got-wrapper');
   });
 
