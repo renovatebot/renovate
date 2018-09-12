@@ -2,7 +2,7 @@ jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 jest.mock('got');
 
-const endpoints = require('../../../../lib/util/host-rules');
+const hostRules = require('../../../../lib/util/host-rules');
 const ghGot = require('../../../../lib/platform/github/gh-got-wrapper');
 
 const { getChangeLogJSON } = require('../../../../lib/workers/pr/changelog');
@@ -34,8 +34,8 @@ describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(async () => {
       ghGot.mockClear();
-      endpoints.clear();
-      endpoints.update({
+      hostRules.clear();
+      hostRules.update({
         platform: 'github',
         endpoint: 'https://api.github.com/',
       });
@@ -164,7 +164,7 @@ describe('workers/pr/changelog', () => {
       ).toBe(null);
     });
     it('supports github enterprise and github.com changelog', async () => {
-      endpoints.update({
+      hostRules.update({
         platform: 'github',
         token: 'super_secret',
         endpoint: 'https://github-enterprise.example.com/',
@@ -176,7 +176,7 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('supports github enterprise and github enterprise changelog', async () => {
-      endpoints.update({
+      hostRules.update({
         platform: 'github',
         endpoint: 'https://github-enterprise.example.com/',
       });
@@ -190,7 +190,7 @@ describe('workers/pr/changelog', () => {
     });
 
     it('supports github enterprise alwo when retrieving data from cache', async () => {
-      endpoints.update({
+      hostRules.update({
         platform: 'github',
         endpoint: 'https://github-enterprise.example.com/',
       });
