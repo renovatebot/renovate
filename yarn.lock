@@ -2186,9 +2186,9 @@ fast-safe-stringify@^1.1.3:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-1.2.3.tgz#9fe22c37fb2f7f86f06b8f004377dbf8f1ee7bc1"
 
-fast-xml-parser@3.12.0:
-  version "3.12.0"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-3.12.0.tgz#84ddcd98ca005f94e99af3ac387adc32ffb239d8"
+fast-xml-parser@3.12.5:
+  version "3.12.5"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-3.12.5.tgz#756e4da382f403f88990a62344add00948820fe0"
   dependencies:
     nimnjs "^1.3.2"
 
