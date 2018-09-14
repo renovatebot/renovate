@@ -78,6 +78,7 @@ Array [
 
 exports[`manager/npm/lookup .lookupUpdates() handles digest pin 1`] = `
 Object {
+  "changelogUrl": undefined,
   "homepage": undefined,
   "releases": Array [
     Object {
@@ -130,6 +131,7 @@ Object {
 
 exports[`manager/npm/lookup .lookupUpdates() handles digest pin for up to date version 1`] = `
 Object {
+  "changelogUrl": undefined,
   "homepage": undefined,
   "releases": Array [],
   "repositoryUrl": null,
@@ -147,6 +149,7 @@ Object {
 
 exports[`manager/npm/lookup .lookupUpdates() handles digest update 1`] = `
 Object {
+  "changelogUrl": undefined,
   "homepage": undefined,
   "releases": Array [
     Object {
@@ -206,6 +209,7 @@ exports[`manager/npm/lookup .lookupUpdates() handles unknown purl 1`] = `Array [
 
 exports[`manager/npm/lookup .lookupUpdates() ignores deprecated 1`] = `
 Object {
+  "changelogUrl": undefined,
   "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v1.4.1) of dependency \`q2\` has the following deprecation notice:
 
 \`true\`
@@ -411,6 +415,7 @@ Array [
 
 exports[`manager/npm/lookup .lookupUpdates() returns complex object 1`] = `
 Object {
+  "changelogUrl": undefined,
   "homepage": undefined,
   "releases": Array [
     Object {
