@@ -6,6 +6,7 @@ describe('workers/branch/parent', () => {
     beforeEach(() => {
       config = {
         branchName: 'renovate/some-branch',
+        rebaseLabel: 'rebase',
       };
     });
     afterEach(() => {
@@ -38,6 +39,16 @@ describe('workers/branch/parent', () => {
       });
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBe(config.branchName);
+    });
+    it('returns undefined if manual rebase by label', async () => {
+      platform.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockReturnValue({
+        isUnmergeable: true,
+        canRebase: false,
+        labels: ['rebase'],
+      });
+      const res = await getParentBranch(config);
+      expect(res.parentBranch).toBe(undefined);
     });
     it('returns undefined if unmergeable and can rebase', async () => {
       platform.branchExists.mockReturnValue(true);
