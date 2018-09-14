@@ -37,11 +37,13 @@ describe('generateLockFile', () => {
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
     const skipInstalls = false;
+    const binarySource = 'global';
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
       'package-lock.json',
-      skipInstalls
+      skipInstalls,
+      binarySource
     );
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.error).not.toBeDefined();
