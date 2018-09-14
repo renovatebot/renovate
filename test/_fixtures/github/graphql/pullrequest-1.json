@@ -9,6 +9,13 @@
             "title": "build(deps): update got packages (major)",
             "mergeable": "MERGEABLE",
             "mergeStateStatus": "CLEAN",
+            "labels": {
+              "nodes": [
+                {
+                  "name": "blocked"
+                }
+              ]
+            },
             "commits": {
               "nodes": [
                 {

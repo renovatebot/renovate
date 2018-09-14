@@ -607,6 +607,10 @@ For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0`
 
 This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`.
 
+## rebaseLabel
+
+On GitHub it is possible to add a label to a PR to manually request Renovate to recreate/rebase it. By default this label is "rebase" however you can configure it to anything you want by changing this `rebaseLabel` field.
+
 ## rebaseStalePrs
 
 This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.

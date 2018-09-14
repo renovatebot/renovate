@@ -32,3 +32,13 @@ If an existing PR is open to upgrade dependency "foo" to v1.1.0 and then v1.1.1 
 
 - Each Renovate branch will always have 1 and only 1 commit
 - The newest version will be based off the latest base branch commit at the time
+
+## Manual rebasing
+
+In GitHub, it is possible to manually request that Renovate rebase a PR by adding the label "rebase" to it. This label name is also configurable via the `rebaseLabel` config option too.
+
+If you apply this label then Renovate will regenerate its commit for the branch, even if the branch has been modified. Therefore it is useful in situations such as:
+
+- If a branch is stale but you don't have `rebaseStalePrs` enabled
+- If a branch has been edited and you wish to discard the edits and have Renovate create it again
+- If a branch was created with an error (e.g. lockfile generation) and you wish to have it retried.

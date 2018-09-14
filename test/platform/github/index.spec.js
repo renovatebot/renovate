@@ -949,6 +949,16 @@ describe('platform/github', () => {
       await github.ensureIssueClosing('title-2');
     });
   });
+  describe('deleteLabel(issueNo, label)', () => {
+    it('should delete the label', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      await github.deleteLabel(42, 'rebase');
+      expect(get.delete.mock.calls).toMatchSnapshot();
+    });
+  });
   describe('addAssignees(issueNo, assignees)', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo({
