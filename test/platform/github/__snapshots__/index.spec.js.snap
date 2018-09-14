@@ -140,6 +140,14 @@ Array [
 ]
 `;
 
+exports[`platform/github deleteLabel(issueNo, label) should delete the label 1`] = `
+Array [
+  Array [
+    "repos/some/repo/issues/42/labels/rebase",
+  ],
+]
+`;
+
 exports[`platform/github ensureComment add comment if not found 1`] = `
 Array [
   "repos/some/repo/issues/42/comments",
