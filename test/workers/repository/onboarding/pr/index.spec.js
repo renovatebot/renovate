@@ -47,7 +47,7 @@ describe('workers/repository/onboarding/pr', () => {
       platform.getBranchPr.mockReturnValue({
         title: 'Configure Renovate',
         body: createPrBody,
-        isUnmergeable: true,
+        isConflicted: true,
       });
       await ensureOnboardingPr(config, [], branches);
       expect(platform.createPr.mock.calls).toHaveLength(0);

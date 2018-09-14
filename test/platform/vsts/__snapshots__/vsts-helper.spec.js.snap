@@ -88,11 +88,11 @@ Object {
 }
 `;
 
-exports[`platform/vsts/helpers getRenovatePRFormat should be formated (isUnmergeable) 1`] = `
+exports[`platform/vsts/helpers getRenovatePRFormat should be formated (isConflicted) 1`] = `
 Object {
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
-  "isUnmergeable": true,
+  "isConflicted": true,
   "mergeStatus": 2,
   "number": undefined,
   "status": "open",

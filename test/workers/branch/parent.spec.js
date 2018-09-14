@@ -26,7 +26,7 @@ describe('workers/branch/parent', () => {
     it('returns branchName if does not need rebaseing', async () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
-        isUnmergeable: false,
+        isConflicted: false,
       });
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBe(config.branchName);
@@ -34,7 +34,7 @@ describe('workers/branch/parent', () => {
     it('returns branchName if unmergeable and cannot rebase', async () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
-        isUnmergeable: true,
+        isConflicted: true,
         canRebase: false,
       });
       const res = await getParentBranch(config);
@@ -43,7 +43,7 @@ describe('workers/branch/parent', () => {
     it('returns undefined if manual rebase by label', async () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
-        isUnmergeable: true,
+        isConflicted: true,
         canRebase: false,
         labels: ['rebase'],
       });
@@ -53,7 +53,7 @@ describe('workers/branch/parent', () => {
     it('returns undefined if unmergeable and can rebase', async () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
-        isUnmergeable: true,
+        isConflicted: true,
         canRebase: true,
       });
       const res = await getParentBranch(config);
@@ -63,7 +63,7 @@ describe('workers/branch/parent', () => {
       config.isGitLab = true;
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
-        isUnmergeable: true,
+        isConflicted: true,
         canRebase: true,
       });
       const res = await getParentBranch(config);
@@ -90,7 +90,7 @@ describe('workers/branch/parent', () => {
       platform.branchExists.mockReturnValue(true);
       platform.isBranchStale.mockReturnValueOnce(true);
       platform.getBranchPr.mockReturnValue({
-        isUnmergeable: true,
+        isConflicted: true,
         canRebase: false,
       });
       const res = await getParentBranch(config);

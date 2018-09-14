@@ -271,7 +271,7 @@ describe('platform/vsts/helpers', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('should be formated (isUnmergeable)', () => {
+    it('should be formated (isConflicted)', () => {
       const res = vstsHelper.getRenovatePRFormat({ mergeStatus: 2 });
       expect(res).toMatchSnapshot();
     });

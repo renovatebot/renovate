@@ -44,7 +44,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.getAllRenovateBranches.mockReturnValueOnce([
         'renovate/lock-file-maintenance',
       ]);
-      platform.getBranchPr = jest.fn(() => ({ isUnmergeable: true }));
+      platform.getBranchPr = jest.fn(() => ({ isConflicted: true }));
       await cleanup.pruneStaleBranches(config, [
         'renovate/lock-file-maintenance',
       ]);

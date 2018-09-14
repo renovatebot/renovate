@@ -91,7 +91,7 @@ describe('workers/pr', () => {
     });
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
-      pr.isUnmergeable = true;
+      pr.isConflicted = true;
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(0);
     });
