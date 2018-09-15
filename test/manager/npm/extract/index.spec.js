@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const npmExtract = require('../../../../lib/manager/npm/extract');
+const defaultConfig = require('../../../../lib/config/defaults').getConfig();
 
 function readFixture(fixture) {
   return fs.readFileSync(
@@ -22,7 +23,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         'not json',
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toBe(null);
     });
@@ -30,7 +31,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         vendorisedContent,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toBe(null);
     });
@@ -40,7 +41,7 @@ describe('manager/npm/extract', () => {
         await npmExtract.extractDependencies(
           '{ "renovate": {} }',
           'backend/package.json',
-          {}
+          defaultConfig
         );
       } catch (err) {
         e = err;
@@ -51,7 +52,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         '{ "renovate": {} }',
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toBe(null);
     });
@@ -59,7 +60,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         '{"dependencies": true, "devDependencies": []}',
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toBe(null);
     });
@@ -67,7 +68,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         input01Content,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -81,7 +82,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         input01Content,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -124,7 +125,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         input01Content,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -138,7 +139,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         workspacesContent,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -165,7 +166,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         pJsonStr,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -188,7 +189,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         pJsonStr,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
