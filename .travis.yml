@@ -39,7 +39,7 @@ after_success:
 
 deploy:
   provider: script
-  script: curl -X POST -d '{}' $NETLIFY_DEPLOY_WEBHOOK && yarn semantic-release
+  script: yarn semantic-release
   skip_cleanup: true
   on:
-    branch: master
+    branch: stable
