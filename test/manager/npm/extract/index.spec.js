@@ -179,6 +179,9 @@ describe('manager/npm/extract', () => {
           e: 'github:owner/e#49b5aca613b33c5b626ae68c03a385f25c142f55',
           f: 'owner/f#v2.0.0',
           g: 'gitlab:owner/g#v1.0.0',
+          h: 'github:-hello/world#v1.0.0',
+          i: '@foo/bar#v2.0.0',
+          j: 'github:frank#v0.0.1',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
