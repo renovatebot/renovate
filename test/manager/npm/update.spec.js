@@ -24,6 +24,22 @@ describe('workers/branch/package-json', () => {
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       testContent.should.equal(outputContent);
     });
+    it('replaces a github dependency value', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'gulp',
+        currentValue: 'v4.0.0-alpha.2',
+        currentRawValue: 'gulpjs/gulp#v4.0.0-alpha.2',
+        newValue: 'v4.0.0',
+      };
+      const input = JSON.stringify({
+        dependencies: {
+          gulp: 'gulpjs/gulp#v4.0.0-alpha.2',
+        },
+      });
+      const res = npmUpdater.updateDependency(input, upgrade);
+      expect(res).toMatchSnapshot();
+    });
     it('updates resolutions too', () => {
       const upgrade = {
         depType: 'dependencies',

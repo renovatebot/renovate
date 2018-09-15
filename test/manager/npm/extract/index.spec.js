@@ -169,6 +169,26 @@ describe('manager/npm/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('extracts non-npmjs', async () => {
+      const pJson = {
+        dependencies: {
+          a: 'github:owner/a',
+          b: 'github:owner/b#master',
+          c: 'github:owner/c#v1.1.0',
+          d: 'github:owner/d#a7g3eaf',
+          e: 'github:owner/e#49b5aca613b33c5b626ae68c03a385f25c142f55',
+          f: 'owner/f#v2.0.0',
+          g: 'gitlab:owner/g#v1.0.0',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractDependencies(
+        pJsonStr,
+        'package.json',
+        {}
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('.postExtract()', () => {
     it('runs', async () => {

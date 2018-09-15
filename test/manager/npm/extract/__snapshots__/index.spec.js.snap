@@ -109,6 +109,84 @@ Object {
 }
 `;
 
+exports[`manager/npm/extract .extractDependencies() extracts non-npmjs 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "github:owner/a",
+      "depName": "a",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+      "skipReason": "unknown-version",
+      "versionScheme": "semver",
+    },
+    Object {
+      "currentValue": "github:owner/b#master",
+      "depName": "b",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+      "skipReason": "unversioned-reference",
+      "versionScheme": "semver",
+    },
+    Object {
+      "currentRawValue": "github:owner/c#v1.1.0",
+      "currentValue": "v1.1.0",
+      "depName": "c",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+      "purl": "pkg:github/owner/c?ref=tags",
+      "versionScheme": "semver",
+    },
+    Object {
+      "currentValue": "github:owner/d#a7g3eaf",
+      "depName": "d",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+      "skipReason": "unversioned-reference",
+      "versionScheme": "semver",
+    },
+    Object {
+      "currentValue": "github:owner/e#49b5aca613b33c5b626ae68c03a385f25c142f55",
+      "depName": "e",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+      "skipReason": "unversioned-reference",
+      "versionScheme": "semver",
+    },
+    Object {
+      "currentRawValue": "owner/f#v2.0.0",
+      "currentValue": "v2.0.0",
+      "depName": "f",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+      "purl": "pkg:github/owner/f?ref=tags",
+      "versionScheme": "semver",
+    },
+    Object {
+      "currentValue": "gitlab:owner/g#v1.0.0",
+      "depName": "g",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+      "skipReason": "unknown-version",
+      "versionScheme": "semver",
+    },
+  ],
+  "lernaClient": undefined,
+  "lernaDir": undefined,
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": undefined,
+  "packageJsonType": "app",
+  "packageJsonVersion": undefined,
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
+}
+`;
+
 exports[`manager/npm/extract .extractDependencies() finds a lock file 1`] = `
 Object {
   "deps": Array [
