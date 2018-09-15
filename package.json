@@ -166,10 +166,10 @@
     "trailingComma": "es5"
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "stable"
   },
   "release": {
-    "branch": "master",
+    "branch": "stable",
     "tagFormat": "${version}",
     "analyzeCommits": {
       "preset": "angular",
