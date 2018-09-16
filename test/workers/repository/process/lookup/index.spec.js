@@ -945,8 +945,8 @@ describe('manager/npm/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
-      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockReturnValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
@@ -965,7 +965,7 @@ describe('manager/npm/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
@@ -987,7 +987,7 @@ describe('manager/npm/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
@@ -1029,8 +1029,8 @@ describe('manager/npm/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
-      docker.getDigest.mockReturnValueOnce('sha256:bbbbbbbbbbbbbbbb');
+      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockReturnValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
@@ -1053,7 +1053,7 @@ describe('manager/npm/lookup', () => {
           },
         ],
       });
-      docker.getDigest.mockReturnValueOnce('sha256:aaaaaaaaaaaaaaaa');
+      docker.getDigest.mockReturnValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });

@@ -95,8 +95,8 @@ Object {
       "canBeUnpublished": undefined,
       "fromVersion": "8.0.0",
       "isSingleVersion": true,
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
@@ -105,8 +105,8 @@ Object {
       "updateType": "minor",
     },
     Object {
-      "newDigest": "sha256:bbbbbbbbbbbbbbbb",
-      "newDigestShort": "bbbbbb",
+      "newDigest": "sha256:0123456789abcdef",
+      "newDigestShort": "0123456",
       "newValue": "8.0.0",
       "updateType": "pin",
     },
@@ -119,8 +119,8 @@ exports[`manager/npm/lookup .lookupUpdates() handles digest pin for non-version 
 Object {
   "updates": Array [
     Object {
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newValue": "alpine",
       "updateType": "pin",
     },
@@ -137,8 +137,8 @@ Object {
   "repositoryUrl": null,
   "updates": Array [
     Object {
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newValue": "8.1.0",
       "updateType": "pin",
     },
@@ -165,8 +165,8 @@ Object {
       "canBeUnpublished": undefined,
       "fromVersion": "8.0.0",
       "isSingleVersion": true,
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
@@ -175,8 +175,8 @@ Object {
       "updateType": "minor",
     },
     Object {
-      "newDigest": "sha256:bbbbbbbbbbbbbbbb",
-      "newDigestShort": "bbbbbb",
+      "newDigest": "sha256:0123456789abcdef",
+      "newDigestShort": "0123456",
       "newValue": "8.0.0",
       "updateType": "digest",
     },
@@ -189,8 +189,8 @@ exports[`manager/npm/lookup .lookupUpdates() handles digest update for non-versi
 Object {
   "updates": Array [
     Object {
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newValue": "alpine",
       "updateType": "digest",
     },
