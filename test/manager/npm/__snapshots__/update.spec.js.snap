@@ -5,3 +5,5 @@ exports[`workers/branch/package-json .bumpPackageVersion() increments 1`] = `"{\
 exports[`workers/branch/package-json .bumpPackageVersion() updates 1`] = `"{\\"name\\":\\"some-package\\",\\"version\\":\\"0.1.0\\"}"`;
 
 exports[`workers/branch/package-json .updateDependency(fileContent, depType, depName, newValue) replaces a github dependency value 1`] = `"{\\"dependencies\\":{\\"gulp\\":\\"gulpjs/gulp#v4.0.0\\"}}"`;
+
+exports[`workers/branch/package-json .updateDependency(fileContent, depType, depName, newValue) replaces a github short hash 1`] = `"{\\"dependencies\\":{\\"gulp\\":\\"gulpjs/gulp#0000000\\"}}"`;

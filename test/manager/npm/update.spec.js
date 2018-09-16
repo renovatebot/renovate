@@ -40,6 +40,22 @@ describe('workers/branch/package-json', () => {
       const res = npmUpdater.updateDependency(input, upgrade);
       expect(res).toMatchSnapshot();
     });
+    it('replaces a github short hash', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'gulp',
+        currentDigest: 'abcdef7',
+        currentRawValue: 'gulpjs/gulp#abcdef7',
+        newDigest: '0000000000111111111122222222223333333333',
+      };
+      const input = JSON.stringify({
+        dependencies: {
+          gulp: 'gulpjs/gulp#abcdef7',
+        },
+      });
+      const res = npmUpdater.updateDependency(input, upgrade);
+      expect(res).toMatchSnapshot();
+    });
     it('updates resolutions too', () => {
       const upgrade = {
         depType: 'dependencies',
