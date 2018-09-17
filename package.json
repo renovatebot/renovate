@@ -8,6 +8,7 @@
   },
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
+    "debug": "node --inspect-brk lib/renovate",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
