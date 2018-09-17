@@ -123,7 +123,24 @@ describe('workers/branch/package-json', () => {
     });
   });
   describe('.bumpPackageVersion()', () => {
-    const content = JSON.stringify({ name: 'some-package', version: '0.0.2' });
+    const content = JSON.stringify({
+      name: 'some-package',
+      version: '0.0.2',
+      dependencies: { chalk: '2.4.2' },
+    });
+    it('mirrors', () => {
+      const res = npmUpdater.bumpPackageVersion(
+        content,
+        '0.0.2',
+        'mirror:chalk'
+      );
+      expect(res).toMatchSnapshot();
+      expect(res).not.toEqual(content);
+    });
+    it('aborts mirror', () => {
+      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', 'mirror:a');
+      expect(res).toEqual(content);
+    });
     it('increments', () => {
       const res = npmUpdater.bumpPackageVersion(content, '0.0.2', 'patch');
       expect(res).toMatchSnapshot();

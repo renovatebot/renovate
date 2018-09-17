@@ -90,6 +90,8 @@ This field is combined with `branchPrefix` and `managerBranchPrefix` to form the
 
 Set this value to 'patch', 'minor' or 'major' to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, set this to `patch`.
 
+You can also set this field to `"mirror:x"` where `x` is the name of a package in the `package.json`. Doing so means that the `package.json` `version` field will mirror whatever is the version for `x` dependened on. Make sure that version is a pinned version of course, as otherwise it won't be valid.
+
 ## circleci
 
 ## commitBody
