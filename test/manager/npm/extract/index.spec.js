@@ -183,6 +183,10 @@ describe('manager/npm/extract', () => {
           h: 'github:-hello/world#v1.0.0',
           i: '@foo/bar#v2.0.0',
           j: 'github:frank#v0.0.1',
+          k: 'github:owner/k#49b5aca',
+          l: 'github:owner/l.git#abcdef0',
+          m: 'https://github.com/owner/m.git#v1.0.0',
+          n: 'git+https://github.com/owner/n#v2.0.0',
         },
       };
       const pJsonStr = JSON.stringify(pJson);
