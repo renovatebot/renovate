@@ -133,9 +133,11 @@ Object {
       "currentValue": "v1.1.0",
       "depName": "c",
       "depType": "dependencies",
+      "githubRepo": "owner/c",
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/c?ref=tags",
+      "repositoryUrl": "https://github.com/owner/c",
       "versionScheme": "semver",
     },
     Object {
@@ -163,9 +165,11 @@ Object {
       "currentValue": "v2.0.0",
       "depName": "f",
       "depType": "dependencies",
+      "githubRepo": "owner/f",
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/f?ref=tags",
+      "repositoryUrl": "https://github.com/owner/f",
       "versionScheme": "semver",
     },
     Object {
