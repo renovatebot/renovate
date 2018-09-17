@@ -8,6 +8,10 @@ const yarn = require('../../../../lib/manager/npm/post-update/yarn');
 const pnpm = require('../../../../lib/manager/npm/post-update/pnpm');
 const lerna = require('../../../../lib/manager/npm/post-update/lerna');
 
+const hostRules = require('../../../../lib/util/host-rules');
+
+hostRules.find = jest.fn(() => 'token-abc');
+
 const {
   // determineLockFileDirs,
   // writeExistingFiles,
@@ -275,6 +279,7 @@ describe('manager/npm/post-update', () => {
             '{ "name": "some-other-name", "engines": { "node": "^6.0.0" }}',
         },
       ];
+      config.upgrades = [];
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile.mock.calls).toHaveLength(2);
       expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
