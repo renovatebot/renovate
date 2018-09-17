@@ -56,22 +56,22 @@ describe('workers/branch/package-json', () => {
       const res = npmUpdater.updateDependency(input, upgrade);
       expect(res).toMatchSnapshot();
     });
-    it('replaces a github fully specified hash', () => {
+    it('replaces a github fully specified version', () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'n',
-        currentDigest: 'bbbbbbb',
-        currentRawValue: 'git+https://github.com/owner/n#bbbbbbb',
-        newDigest: 'ccccccc',
+        currentValue: 'v1.0.0',
+        currentRawValue: 'git+https://github.com/owner/n#v1.0.0',
+        newValue: 'v1.1.0',
       };
       const input = JSON.stringify({
         dependencies: {
-          n: 'git+https://github.com/owner/n#bbbbbbb',
+          n: 'git+https://github.com/owner/n#v1.0.0',
         },
       });
       const res = npmUpdater.updateDependency(input, upgrade);
       expect(res).toMatchSnapshot();
-      expect(res.includes('ccccccc')).toBe(true);
+      expect(res.includes('v1.1.0')).toBe(true);
     });
     it('updates resolutions too', () => {
       const upgrade = {
