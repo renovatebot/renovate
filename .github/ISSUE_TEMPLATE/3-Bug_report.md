@@ -9,6 +9,9 @@ Renovate CLI, Renovate GitHub App, or Renovate Pro?
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+**Did you see anything helpful in debug logs?**
+If you are using the Renovate App, log into https://renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created).
+
 **To Reproduce**
 Steps to reproduce the behavior:
 
