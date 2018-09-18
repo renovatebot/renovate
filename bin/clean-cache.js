@@ -2,5 +2,5 @@ const fs = require('fs-extra');
 const os = require('os');
 
 (async () => {
-  await fs.remove(os.tmpdir() + '/renovate-cache-v1');
+  await fs.remove(os.tmpdir() + '/renovate');
 })();
