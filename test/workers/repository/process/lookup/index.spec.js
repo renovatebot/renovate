@@ -694,6 +694,58 @@ describe('manager/npm/lookup', () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toEqual('3.0.1');
     });
+    it('should follow dist-tag even if newer version exists', async () => {
+      config.currentValue = '3.0.1-insiders.20180713';
+      config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
+      config.useTag = 'insiders';
+      nock('https://registry.npmjs.org')
+        .get('/typescript')
+        .reply(200, typescriptJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newValue).toEqual('3.0.1-insiders.20180726');
+    });
+    it('should roll back to dist-tag if current version is higher', async () => {
+      config.currentValue = '3.1.0-dev.20180813';
+      config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
+      config.useTag = 'insiders';
+      nock('https://registry.npmjs.org')
+        .get('/typescript')
+        .reply(200, typescriptJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newValue).toEqual('3.0.1-insiders.20180726');
+    });
+    it('should update nothing if current version is dist-tag', async () => {
+      config.currentValue = '3.0.1-insiders.20180726';
+      config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
+      config.useTag = 'insiders';
+      nock('https://registry.npmjs.org')
+        .get('/typescript')
+        .reply(200, typescriptJson);
+      debugger;
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(0);
+    });
+    it('should warn if no version matches dist-tag', async () => {
+      config.currentValue = '3.0.1-dev.20180726';
+      config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
+      config.useTag = 'foo';
+      nock('https://registry.npmjs.org')
+        .get('/typescript')
+        .reply(200, typescriptJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(0);
+      expect(res.warnings).toHaveLength(1);
+      expect(res.warnings[0].message).toEqual("Can't find version with tag foo for typescript");
+    });
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';

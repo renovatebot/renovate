@@ -157,7 +157,8 @@
     "coverageReporters": [
       "json",
       "lcov",
-      "text-summary"
+      "text-summary",
+      "html"
     ],
     "setupFiles": [
       "./test/globals.js"

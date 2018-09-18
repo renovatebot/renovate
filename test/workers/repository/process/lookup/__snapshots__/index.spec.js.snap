@@ -766,6 +766,22 @@ Object {
 }
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() should follow dist-tag even if newer version exists 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "3.0.1-insiders.20180713",
+    "isSingleVersion": true,
+    "newMajor": 3,
+    "newMinor": 0,
+    "newValue": "3.0.1-insiders.20180726",
+    "releaseTimestamp": "2018-07-26T18:20:51.679Z",
+    "toVersion": "3.0.1-insiders.20180726",
+    "updateType": "minor",
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() should not jump unstable versions 1`] = `
 Array [
   Object {
@@ -778,6 +794,20 @@ Array [
     "releaseTimestamp": "2018-07-30T16:21:13.150Z",
     "toVersion": "3.0.1",
     "updateType": "minor",
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() should roll back to dist-tag if current version is higher 1`] = `
+Array [
+  Object {
+    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
+    "commitMessageAction": "Roll back",
+    "isRollback": true,
+    "newMajor": 3,
+    "newValue": "3.0.1-insiders.20180726",
+    "semanticCommitType": "fix",
+    "updateType": "rollback",
   },
 ]
 `;
@@ -798,6 +828,8 @@ Array [
   },
 ]
 `;
+
+exports[`manager/npm/lookup .lookupUpdates() should warn if no version matches dist-tag 1`] = `Array []`;
 
 exports[`manager/npm/lookup .lookupUpdates() skips undefined values 1`] = `
 Object {
