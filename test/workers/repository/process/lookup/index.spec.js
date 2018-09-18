@@ -728,7 +728,6 @@ describe('manager/npm/lookup', () => {
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
-      debugger;
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
     });
@@ -744,7 +743,9 @@ describe('manager/npm/lookup', () => {
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(0);
       expect(res.warnings).toHaveLength(1);
-      expect(res.warnings[0].message).toEqual("Can't find version with tag foo for typescript");
+      expect(res.warnings[0].message).toEqual(
+        "Can't find version with tag foo for typescript"
+      );
     });
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
