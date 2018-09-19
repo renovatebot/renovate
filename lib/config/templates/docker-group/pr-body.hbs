@@ -1,5 +1,0 @@
-This Pull Request renovates the Docker image group "{{{groupName}}}".
-
-{{#each upgrades as |upgrade|}}
--   {{#if repositoryUrl}}[{{{upgrade.depName}}}]({{upgrade.repositoryUrl}}){{else}}`{{{depName}}}`{{/if}}{{#if depType}} (`{{{depType}}}`){{/if}}: from `{{{upgrade.currentTag}}}` to `{{{upgrade.newValue}}}{{#if tagSuffix}}-{{{upgrade.tagSuffix}}}{{/if}}{{#if newDigest}}:{{{upgrade.newDigest}}}{{/if}}`
-{{/each}}

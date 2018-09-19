@@ -21,7 +21,6 @@ describe('config/validation', () => {
             excludePackagePatterns: ['(x+x+)+y'],
           },
         ],
-        prBody: 'some-body',
         lockFileMaintenance: {
           bar: 2,
         },

@@ -30,7 +30,9 @@ exports[`workers/pr ensurePr should add note about Pin 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`1.0.0\` to \`v1.1.0\`
+  "| Package | Update | New value |References |
+|---|---|---|---|
+| \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
 :pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Update your config if you don't wish to pin dependencies.
 
@@ -64,7 +66,9 @@ exports[`workers/pr ensurePr should create PR if success 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
+  "| Package | Update | New value |References |
+|---|---|---|---|
+| \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
 ---
 
@@ -96,7 +100,9 @@ exports[`workers/pr ensurePr should create privateRepo PR if success 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
+  "| Package | Update | New value |References |
+|---|---|---|---|
+| \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
 ---
 
@@ -126,7 +132,9 @@ Array [
 
 exports[`workers/pr ensurePr should return modified existing PR 1`] = `
 Object {
-  "body": "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
+  "body": "| Package | Update | New value |References |
+|---|---|---|---|
+| \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
 ---
 
@@ -155,7 +163,9 @@ Object {
 
 exports[`workers/pr ensurePr should return modified existing PR title 1`] = `
 Object {
-  "body": "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
+  "body": "| Package | Update | New value |References |
+|---|---|---|---|
+| \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
 ---
 

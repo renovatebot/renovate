@@ -8,7 +8,6 @@ Object {
   "commitMessageTopic": null,
   "enabled": false,
   "groupName": null,
-  "prBody": "This Pull Request updates \`package.json\` lock files to use the latest dependency versions.",
   "rebaseStalePrs": true,
   "recreateClosed": true,
   "schedule": Array [
