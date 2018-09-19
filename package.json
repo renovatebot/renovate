@@ -158,8 +158,7 @@
       "html",
       "json",
       "lcov",
-      "text-summary",
-      "html"
+      "text-summary"
     ],
     "setupFiles": [
       "./test/globals.js"
