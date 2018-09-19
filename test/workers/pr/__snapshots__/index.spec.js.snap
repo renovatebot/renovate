@@ -32,13 +32,14 @@ Array [
   "Update dependency dummy to v1.1.0",
   "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
+### Release Notes
+
 <details>
-<summary>Release Notes</summary>
+<summary>renovateapp/dummy</summary>
 
 ### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
----
+[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
 </details>",
   Array [],
@@ -53,13 +54,14 @@ Array [
   "Update dependency dummy to v1.1.0",
   "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
+### Release Notes
+
 <details>
-<summary>Release Notes</summary>
+<summary>renovateapp/dummy</summary>
 
 ### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
----
+[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
 </details>",
   Array [],
@@ -72,13 +74,14 @@ exports[`workers/pr ensurePr should return modified existing PR 1`] = `
 Object {
   "body": "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
+### Release Notes
+
 <details>
-<summary>Release Notes</summary>
+<summary>renovateapp/dummy</summary>
 
 ### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
----
+[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
 </details>",
   "displayNumber": "Existing PR",
@@ -90,13 +93,14 @@ exports[`workers/pr ensurePr should return modified existing PR title 1`] = `
 Object {
   "body": "This Pull Request updates dependency \`dummy\` ([source](https://github.com/renovateapp/dummy)) from \`v1.0.0\` to \`v1.1.0\`
 
+### Release Notes
+
 <details>
-<summary>Release Notes</summary>
+<summary>renovateapp/dummy</summary>
 
 ### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
-[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
----
+[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
 </details>",
   "displayNumber": "Existing PR",
