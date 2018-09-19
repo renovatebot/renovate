@@ -698,7 +698,7 @@ describe('manager/npm/lookup', () => {
       config.currentValue = '3.0.1-insiders.20180713';
       config.depName = 'typescript';
       config.purl = 'pkg:npm/typescript';
-      config.useTag = 'insiders';
+      config.followTag = 'insiders';
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
@@ -711,7 +711,7 @@ describe('manager/npm/lookup', () => {
       config.currentValue = '3.1.0-dev.20180813';
       config.depName = 'typescript';
       config.purl = 'pkg:npm/typescript';
-      config.useTag = 'insiders';
+      config.followTag = 'insiders';
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
@@ -724,7 +724,7 @@ describe('manager/npm/lookup', () => {
       config.currentValue = '3.0.1-insiders.20180726';
       config.depName = 'typescript';
       config.purl = 'pkg:npm/typescript';
-      config.useTag = 'insiders';
+      config.followTag = 'insiders';
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
@@ -735,7 +735,7 @@ describe('manager/npm/lookup', () => {
       config.currentValue = '3.0.1-dev.20180726';
       config.depName = 'typescript';
       config.purl = 'pkg:npm/typescript';
-      config.useTag = 'foo';
+      config.followTag = 'foo';
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
