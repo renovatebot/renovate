@@ -217,3 +217,43 @@ Object {
   ],
 }
 `;
+
+exports[`api/docker getPkgReleases uses custom registry 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "https://https://registry.company.com/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
+    Array [
+      "https://https://registry.company.com/v2/library/node/tags/list?n=10000",
+      Object {
+        "headers": Object {},
+        "json": true,
+        "timeout": 10000,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "headers": Object {},
+      },
+    },
+    Object {
+      "isThrow": false,
+      "value": Object {
+        "body": Object {
+          "tags": Array [
+            "1.0.0",
+          ],
+        },
+        "headers": Object {},
+      },
+    },
+  ],
+}
+`;
