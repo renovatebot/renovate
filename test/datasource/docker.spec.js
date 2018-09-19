@@ -210,6 +210,25 @@ describe('api/docker', () => {
       });
       expect(res2.releases).toHaveLength(1);
     });
+    it('uses custom registry', async () => {
+      const tags = ['1.0.0'];
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      const config = {
+        registryUrls: ['https://registry.company.com'],
+      };
+      const res = await docker.getPkgReleases(
+        {
+          fullname: 'node',
+          qualifiers: {},
+        },
+        config
+      );
+      expect(res.releases).toHaveLength(1);
+      expect(got).toMatchSnapshot();
+    });
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
       const tags = ['1.0.0'];
       got.mockReturnValueOnce({
