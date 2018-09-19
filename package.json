@@ -155,6 +155,7 @@
       "lib/**/*.js"
     ],
     "coverageReporters": [
+      "html",
       "json",
       "lcov",
       "text-summary",
