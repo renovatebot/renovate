@@ -34,29 +34,3 @@ This PR also includes an upgrade to the corresponding [@types/{{{depName}}}](htt
 {{/if}}
 
 {{/if}}
-
-{{#if hasErrors}}
-
----
-
-# Errors
-
-Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
-
-{{#each errors as |error|}}
--   `{{error.depName}}`: {{error.message}}
-{{/each}}
-{{/if}}
-
-{{#if hasWarnings}}
-
----
-
-# Warnings
-
-Please make sure the following warnings are safe to ignore:
-
-{{#each warnings as |warning|}}
--   `{{warning.depName}}`: {{warning.message}}
-{{/each}}
-{{/if}}

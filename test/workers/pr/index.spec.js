@@ -181,12 +181,6 @@ describe('workers/pr', () => {
     it('should create new branch if none exists', async () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      expect(platform.createPr.mock.calls[0][2].indexOf('Errors</h3>')).toEqual(
-        -1
-      );
-      expect(
-        platform.createPr.mock.calls[0][2].indexOf('Warnings</h3>')
-      ).toEqual(-1);
     });
     it('should add assignees and reviewers to new PR', async () => {
       config.assignees = ['@foo', 'bar'];
@@ -219,18 +213,6 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.addAssignees.mock.calls.length).toBe(1);
       expect(platform.addReviewers.mock.calls.length).toBe(1);
-    });
-    it('should display errors and warnings', async () => {
-      config.errors = [{}];
-      config.warnings = [{}];
-      const pr = await prWorker.ensurePr(config);
-      expect(
-        platform.createPr.mock.calls[0][2].indexOf('# Errors')
-      ).not.toEqual(-1);
-      expect(
-        platform.createPr.mock.calls[0][2].indexOf('# Warnings')
-      ).not.toEqual(-1);
-      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
     it('should not add assignees and reviewers to new PR if automerging enabled', async () => {
       config.assignees = ['bar'];

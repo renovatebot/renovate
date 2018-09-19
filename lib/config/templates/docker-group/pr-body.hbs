@@ -7,29 +7,3 @@ This Pull Request renovates the Docker image group "{{{groupName}}}".
 {{#each upgrades as |upgrade|}}
 -   {{#if repositoryUrl}}[{{{upgrade.depName}}}]({{upgrade.repositoryUrl}}){{else}}`{{{depName}}}`{{/if}}{{#if depType}} (`{{{depType}}}`){{/if}}: from `{{{upgrade.currentTag}}}` to `{{{upgrade.newValue}}}{{#if tagSuffix}}-{{{upgrade.tagSuffix}}}{{/if}}{{#if newDigest}}:{{{upgrade.newDigest}}}{{/if}}`
 {{/each}}
-
-{{#if hasErrors}}
-
----
-
-# Errors
-
-Renovate encountered some errors when processing your repository, so you are being notified here even if they do not directly apply to this PR.
-
-{{#each errors as |error|}}
--   `{{error.depName}}`: {{error.message}}
-{{/each}}
-{{/if}}
-
-{{#if hasWarnings}}
-
----
-
-# Warnings
-
-Please make sure the following warnings are safe to ignore:
-
-{{#each warnings as |warning|}}
--   `{{warning.depName}}`: {{warning.message}}
-{{/each}}
-{{/if}}
