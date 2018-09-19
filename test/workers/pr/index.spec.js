@@ -141,6 +141,8 @@ describe('workers/pr', () => {
     it('should create PR if success', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       config.prCreation = 'status-success';
+      config.automerge = true;
+      config.schedule = 'before 5am';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
@@ -150,6 +152,8 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       config.prCreation = 'status-success';
       config.isPin = true;
+      config.schedule = 'before 5am';
+      config.timezone = 'some timezone';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
@@ -238,6 +242,7 @@ describe('workers/pr', () => {
       config.assignees = ['bar'];
       config.reviewers = ['baz'];
       config.automerge = true;
+      config.schedule = 'before 5am';
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       platform.getBranchStatus.mockReturnValueOnce('failure');
       config.semanticCommitScope = null;
@@ -251,6 +256,8 @@ describe('workers/pr', () => {
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       config.semanticCommitScope = null;
+      config.automerge = true;
+      config.schedule = 'before 5am';
       const pr = await prWorker.ensurePr(config);
       expect(platform.updatePr.mock.calls).toMatchSnapshot();
       expect(platform.updatePr.mock.calls).toHaveLength(0);
@@ -258,6 +265,8 @@ describe('workers/pr', () => {
     });
     it('should return modified existing PR', async () => {
       config.newValue = '1.2.0';
+      config.automerge = true;
+      config.schedule = 'before 5am';
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchSnapshot();

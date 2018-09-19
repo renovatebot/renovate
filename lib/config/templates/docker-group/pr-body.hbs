@@ -1,9 +1,5 @@
 This Pull Request renovates the Docker image group "{{{groupName}}}".
 
-{{#if schedule}}
-**Note**: This PR was created on a configured schedule ("{{{schedule}}}"{{#if timezone}} in timezone `{{{timezone}}}`{{/if}}) and will not receive updates outside those times.
-{{/if}}
-
 {{#each upgrades as |upgrade|}}
 -   {{#if repositoryUrl}}[{{{upgrade.depName}}}]({{upgrade.repositoryUrl}}){{else}}`{{{depName}}}`{{/if}}{{#if depType}} (`{{{depType}}}`){{/if}}: from `{{{upgrade.currentTag}}}` to `{{{upgrade.newValue}}}{{#if tagSuffix}}-{{{upgrade.tagSuffix}}}{{/if}}{{#if newDigest}}:{{{upgrade.newDigest}}}{{/if}}`
 {{/each}}

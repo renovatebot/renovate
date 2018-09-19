@@ -8,7 +8,7 @@ Object {
   "commitMessageTopic": null,
   "enabled": false,
   "groupName": null,
-  "prBody": "This Pull Request updates \`package.json\` lock files to use the latest dependency versions.\\n\\n{{#if schedule}}\\n**Note**: This PR was created on a configured schedule (\\"{{{schedule}}}\\"{{#if timezone}} in timezone \`{{{timezone}}}\`{{/if}}) and will not receive updates outside those times.\\n{{/if}}",
+  "prBody": "This Pull Request updates \`package.json\` lock files to use the latest dependency versions.",
   "rebaseStalePrs": true,
   "recreateClosed": true,
   "schedule": Array [

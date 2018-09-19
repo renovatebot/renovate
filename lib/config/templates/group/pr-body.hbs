@@ -1,9 +1,5 @@
 This Pull Request renovates the package group "{{{groupName}}}" with the following modifications:
 
-{{#if schedule}}
-**Note**: This PR was created on a configured schedule ("{{{schedule}}}"{{#if timezone}} in timezone `{{{timezone}}}`{{/if}}) and will not receive updates outside those times.
-{{/if}}
-
 {{#each upgrades as |upgrade|}}
 -   {{#if isPin}}Pins{{else}}Updates{{/if}} {{#if prettyDepType}}{{{prettyDepType}}}{{else}}dependency{{/if}} `{{{depName}}}` {{#if hasUrls}}({{#if homepage}}[homepage]({{{homepage}}}){{#if repositoryUrl}}, [source]({{{repositoryUrl}}}){{/if}}{{else}}[source]({{{repositoryUrl}}}){{/if}}{{#if changelogUrl}}, [changelog]({{{changelogUrl}}}){{/if}}){{/if}} from `{{#unless isRange}}{{#unless isPin}}v{{/unless}}{{/unless}}{{{currentValue}}}` to `{{#unless isRange}}v{{/unless}}{{{newValue}}}`
 {{/each}}

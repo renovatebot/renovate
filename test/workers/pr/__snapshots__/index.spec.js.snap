@@ -45,7 +45,15 @@ Array [
 
 [Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
-</details>",
+</details>
+
+---
+
+### Renovate configuration
+
+:calendar: **Schedule**: PR created on schedule \\"before 5am\\" in timezone some timezone
+
+:vertical_traffic_light: **Automerge**: disabled",
   Array [],
   false,
   false,
@@ -69,7 +77,15 @@ Array [
 
 [Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
-</details>",
+</details>
+
+---
+
+### Renovate configuration
+
+:calendar: **Schedule**: PR created on schedule \\"before 5am\\" (UTC)
+
+:vertical_traffic_light: **Automerge**: enabled",
   Array [],
   false,
   false,
@@ -93,7 +109,15 @@ Array [
 
 [Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
-</details>",
+</details>
+
+---
+
+### Renovate configuration
+
+:calendar: **Schedule**: No schedule defined.
+
+:vertical_traffic_light: **Automerge**: disabled",
   Array [],
   false,
   false,
@@ -115,7 +139,15 @@ Object {
 
 [Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
-</details>",
+</details>
+
+---
+
+### Renovate configuration
+
+:calendar: **Schedule**: PR created on schedule \\"before 5am\\" (UTC)
+
+:vertical_traffic_light: **Automerge**: enabled",
   "displayNumber": "Existing PR",
   "title": "Update dependency dummy to v1.1.0",
 }
@@ -136,7 +168,15 @@ Object {
 
 [Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)
 
-</details>",
+</details>
+
+---
+
+### Renovate configuration
+
+:calendar: **Schedule**: PR created on schedule \\"before 5am\\" (UTC)
+
+:vertical_traffic_light: **Automerge**: enabled",
   "displayNumber": "Existing PR",
   "title": "wrong",
 }
