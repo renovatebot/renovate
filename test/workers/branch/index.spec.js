@@ -66,6 +66,10 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
       platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockReturnValueOnce({
+        state: 'open',
+        canRebase: true,
+      });
       await branchWorker.processBranch(config);
     });
     it('skips branch if closed major PR found', async () => {
