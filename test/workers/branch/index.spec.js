@@ -125,6 +125,17 @@ describe('workers/branch', () => {
         /repository-changed/
       );
     });
+    it('does not skip branch if edited PR found with rebaseLabel', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockReturnValueOnce({
+        state: 'open',
+        canRebase: false,
+        labels: ['rebase'],
+      });
+      const res = await branchWorker.processBranch(config);
+      expect(res).not.toEqual('pr-edited');
+    });
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       platform.branchExists.mockReturnValueOnce(true);
