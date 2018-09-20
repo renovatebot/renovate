@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/pr ensurePr should add assignees and reviewers to existing PR 1`] = `Array []`;
-
 exports[`workers/pr ensurePr should add assignees and reviewers to new PR 1`] = `
 Array [
   Array [
@@ -30,11 +28,13 @@ exports[`workers/pr ensurePr should add note about Pin 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "| Package | Update | New value |References |
-|---|---|---|---|
+  "This PR contains the following updates:
+
+| Package | Update | New value | References |
+|--|--|--|--|
 | \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
-:pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Update your config if you don't wish to pin dependencies.
+:pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` your config if you instead don't wish to pin dependencies.
 
 ---
 
@@ -53,9 +53,13 @@ Array [
 
 ### Renovate configuration
 
-:calendar: **Schedule**: PR created on schedule \\"before 5am\\" in timezone some timezone
+:date: **Schedule**: PR created on schedule \\"before 5am\\" in timezone some timezone
 
-:vertical_traffic_light: **Automerge**: disabled",
+:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
+
+:recycle: **Rebasing**: Renovate will regenerate this PR any time it develops a merge conflict.
+
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
   Array [],
   false,
   false,
@@ -66,8 +70,10 @@ exports[`workers/pr ensurePr should create PR if success 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "| Package | Update | New value |References |
-|---|---|---|---|
+  "This PR contains the following updates:
+
+| Package | Update | New value | References |
+|--|--|--|--|
 | \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
 ---
@@ -87,9 +93,13 @@ Array [
 
 ### Renovate configuration
 
-:calendar: **Schedule**: PR created on schedule \\"before 5am\\" (UTC)
+:date: **Schedule**: PR created on schedule \\"before 5am\\" (UTC)
 
-:vertical_traffic_light: **Automerge**: enabled",
+:vertical_traffic_light: **Automerge**: Enabled.
+
+:recycle: **Rebasing**: Renovate will regenerate this PR any time it develops a merge conflict.
+
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
   Array [],
   false,
   false,
@@ -100,8 +110,10 @@ exports[`workers/pr ensurePr should create privateRepo PR if success 1`] = `
 Array [
   "renovate/dummy-1.x",
   "Update dependency dummy to v1.1.0",
-  "| Package | Update | New value |References |
-|---|---|---|---|
+  "This PR contains the following updates:
+
+| Package | Update | New value | References |
+|--|--|--|--|
 | \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
 ---
@@ -121,9 +133,13 @@ Array [
 
 ### Renovate configuration
 
-:calendar: **Schedule**: No schedule defined.
+:date: **Schedule**: No schedule defined.
 
-:vertical_traffic_light: **Automerge**: disabled",
+:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
+
+:recycle: **Rebasing**: Renovate will regenerate this PR any time it develops a merge conflict.
+
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
   Array [],
   false,
   false,
@@ -132,8 +148,10 @@ Array [
 
 exports[`workers/pr ensurePr should return modified existing PR 1`] = `
 Object {
-  "body": "| Package | Update | New value |References |
-|---|---|---|---|
+  "body": "This PR contains the following updates:
+
+| Package | Update | New value | References |
+|--|--|--|--|
 | \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
 ---
@@ -153,9 +171,14 @@ Object {
 
 ### Renovate configuration
 
-:calendar: **Schedule**: PR created on schedule \\"before 5am\\" (UTC)
+:date: **Schedule**: PR created on schedule \\"before 5am\\" (UTC)
 
-:vertical_traffic_light: **Automerge**: enabled",
+:vertical_traffic_light: **Automerge**: Enabled.
+
+:recycle: **Rebasing**: Renovate will regenerate this PR any time it develops a merge conflict.
+
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
+  "canRebase": true,
   "displayNumber": "Existing PR",
   "title": "Update dependency dummy to v1.1.0",
 }
@@ -163,8 +186,10 @@ Object {
 
 exports[`workers/pr ensurePr should return modified existing PR title 1`] = `
 Object {
-  "body": "| Package | Update | New value |References |
-|---|---|---|---|
+  "body": "This PR contains the following updates:
+
+| Package | Update | New value | References |
+|--|--|--|--|
 | \`dummy\` |  undefined | 1.1.0 |[source](https://github.com/renovateapp/dummy) |
 
 ---
@@ -184,9 +209,14 @@ Object {
 
 ### Renovate configuration
 
-:calendar: **Schedule**: PR created on schedule \\"before 5am\\" (UTC)
+:date: **Schedule**: PR created on schedule \\"before 5am\\" (UTC)
 
-:vertical_traffic_light: **Automerge**: enabled",
+:vertical_traffic_light: **Automerge**: Enabled.
+
+:recycle: **Rebasing**: Renovate will regenerate this PR any time it develops a merge conflict.
+
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
+  "canRebase": true,
   "displayNumber": "Existing PR",
   "title": "wrong",
 }

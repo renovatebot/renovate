@@ -103,6 +103,7 @@ describe('workers/pr', () => {
       title: 'Update dependency dummy to v1.1.0',
       body:
         'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
+      canRebase: true,
     };
     beforeEach(() => {
       config = {
@@ -237,21 +238,6 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.addAssignees.mock.calls.length).toBe(0);
       expect(platform.addReviewers.mock.calls.length).toBe(0);
-    });
-    it('should add assignees and reviewers to existing PR', async () => {
-      config.assignees = ['bar'];
-      config.reviewers = ['baz'];
-      config.automerge = true;
-      config.schedule = 'before 5am';
-      platform.getBranchPr.mockReturnValueOnce(existingPr);
-      platform.getBranchStatus.mockReturnValueOnce('failure');
-      config.semanticCommitScope = null;
-      const pr = await prWorker.ensurePr(config);
-      expect(platform.updatePr.mock.calls).toMatchSnapshot();
-      expect(platform.updatePr.mock.calls.length).toBe(0);
-      expect(platform.addAssignees.mock.calls.length).toBe(1);
-      expect(platform.addReviewers.mock.calls.length).toBe(1);
-      expect(pr).toMatchObject(existingPr);
     });
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockReturnValueOnce(existingPr);
