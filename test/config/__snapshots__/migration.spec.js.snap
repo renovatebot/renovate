@@ -15,6 +15,7 @@ Object {
     "next",
   ],
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
+  "commitMessageExtra": "{{currentValue}} something",
   "enabled": true,
   "extends": Array [
     "config:js-app",
@@ -116,7 +117,6 @@ Object {
   "patch": Object {
     "automerge": true,
   },
-  "prBody": "{{currentVersion}} something",
   "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title",
   "rangeStrategy": "bump",
   "schedule": "on the first day of the month",
