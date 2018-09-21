@@ -120,6 +120,10 @@ Array [
 | c |  |  |  |  |
 | d |  | lockFileMaintenance |  |  |
 
+note 1
+
+note 2
+
 :abcd: If you wish to disable git hash updates, add \`\\":disableDigestUpdates\\"\` to the extends array in your config.
 
 :wrench: This Pull Request updates \`package.json\` lock files to use the latest dependency versions.

@@ -158,6 +158,7 @@ describe('workers/pr', () => {
         {
           depName: 'a',
           newDigestShort: 'aaaaaaa',
+          prBodyNotes: ['note 1', 'note 2'],
         },
         {
           depName: 'b',
@@ -172,6 +173,7 @@ describe('workers/pr', () => {
         {
           depName: 'd',
           updateType: 'lockFileMaintenance',
+          prBodyNotes: ['{{#if foo}}'],
         },
       ]);
       config.updateType = 'lockFileMaintenance';

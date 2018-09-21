@@ -595,6 +595,18 @@ Here is an example of adding a custom "Sourcegraph" column definition:
 
 Note: Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
 
+## prBodyNotes
+
+Use this field to add custom content inside PR bodies, including conditionally.
+
+e.g. if you wish to add an extra Warning to major updates:
+
+```json
+{
+  "prBodyNotes": ["{{#if isMajor}}:warning: MAJOR MAJOR MAJOR :warning:{{/if}}"]
+}
+```
+
 ## prConcurrentLimit
 
 This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
