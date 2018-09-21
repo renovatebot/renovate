@@ -1766,9 +1766,9 @@ elliptic@^3.0.4:
     hash.js "^1.0.0"
     inherits "^2.0.1"
 
-email-addresses@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/email-addresses/-/email-addresses-3.0.1.tgz#c1fc20c189e7f96d4012d375db5feaccdd24391c"
+email-addresses@3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/email-addresses/-/email-addresses-3.0.2.tgz#a31280d19baf86669840a0aa45be1d7f6e7df315"
 
 encoding@^0.1.11:
   version "0.1.12"
