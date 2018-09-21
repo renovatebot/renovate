@@ -117,6 +117,7 @@ describe('workers/pr', () => {
       config.privateRepo = true;
       config.currentValue = '1.0.0';
       config.newValue = '1.1.0';
+      config.updateType = 'minor';
       config.homepage = 'https://dummy.com';
       config.repositoryUrl = 'https://github.com/renovateapp/dummy';
       config.changelogUrl = 'https://github.com/renovateapp/dummy/changelog.md';
@@ -183,6 +184,7 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       config.prCreation = 'status-success';
       config.isPin = true;
+      config.updateType = 'pin';
       config.schedule = 'before 5am';
       config.timezone = 'some timezone';
       config.rebaseStalePrs = true;
