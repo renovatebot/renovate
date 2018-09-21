@@ -31,7 +31,7 @@ Array [
   "This PR contains the following updates:
 
 | Package | Type | Update | New value | References |
-|--|--|--|--|--|
+|---|---|---|---|---|
 | dummy | devDependencies | pin | 1.1.0 | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 :pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` your config if you instead don't wish to pin dependencies.
@@ -73,7 +73,7 @@ Array [
   "This PR contains the following updates:
 
 | Package | Type | Update | New value | References |
-|--|--|--|--|--|
+|---|---|---|---|---|
 | dummy | devDependencies | minor | 1.1.0 | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 ---
@@ -113,7 +113,7 @@ Array [
   "This PR contains the following updates:
 
 | Package | Type | Update | New value | References |
-|--|--|--|--|--|
+|---|---|---|---|---|
 | dummy | devDependencies | lockFileMaintenance | 1.1.0 | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 | a |  |  | aaaaaaa |  |
 | b |  | pin |  |  |
@@ -170,7 +170,7 @@ Array [
   "This PR contains the following updates:
 
 | Package | Type | Update | New value | References |
-|--|--|--|--|--|
+|---|---|---|---|---|
 | dummy | devDependencies | minor | 1.1.0 | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 ---
@@ -208,7 +208,7 @@ Object {
   "body": "This PR contains the following updates:
 
 | Package | Type | Update | New value | References |
-|--|--|--|--|--|
+|---|---|---|---|---|
 | dummy | devDependencies | minor | 1.1.0 | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 ---
@@ -246,7 +246,7 @@ Object {
   "body": "This PR contains the following updates:
 
 | Package | Type | Update | New value | References |
-|--|--|--|--|--|
+|---|---|---|---|---|
 | dummy | devDependencies | minor | 1.1.0 | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 ---
