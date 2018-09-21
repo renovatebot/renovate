@@ -543,6 +543,58 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 Add configuration here to specifically override settings for `pip` requirements files. Supports `requirements.txt` and `requirements.pip` files. The default file pattern is fairly flexible in an attempt to catch similarly named ones too but may be extended/changed.
 
+## prBodyColumns
+
+Use this array to provide a list of column names you wish to include in the PR tables.
+
+For example, if you wish to add the package file name to the table, you would add this to your config:
+
+```json
+{
+  "prBodyColumns": [
+    "Package",
+    "Update",
+    "Type",
+    "New value",
+    "Package file",
+    "References"
+  ]
+}
+```
+
+Note: "Package file" is predefined in the default `prBodyDefinitions` object so does not require a definition before it can be used.
+
+## prBodyDefinitions
+
+You can configure this object if you with to either (a) modify the template for an existing table column in PR bodies, or (b) you wish to _add_ a definition for a new/additional column.
+
+Here is an example of modifying the default value for the "Package" column to put it inside a `<code></code>` block:
+
+```json
+  "prBodyDefinitions": {
+    "Package": "`{{{depName}}}`"
+  }
+```
+
+Here is an example of adding a custom "Sourcegraph" column definition:
+
+```json
+{
+  "prBodyDefinitions": {
+    "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
+  },
+  "prBodyColumns": [
+    "Package",
+    "Update",
+    "New value",
+    "References",
+    "Sourcegraph"
+  ]
+}
+```
+
+Note: Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+
 ## prConcurrentLimit
 
 This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
