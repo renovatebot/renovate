@@ -103,6 +103,7 @@ describe('workers/pr', () => {
       title: 'Update dependency dummy to v1.1.0',
       body:
         'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
+      canRebase: true,
     };
     beforeEach(() => {
       config = {
@@ -110,12 +111,15 @@ describe('workers/pr', () => {
       };
       config.branchName = 'renovate/dummy-1.x';
       config.prTitle = 'Update dependency dummy to v1.1.0';
+      config.depType = 'devDependencies';
       config.depName = 'dummy';
       config.isGitHub = true;
       config.privateRepo = true;
       config.currentValue = '1.0.0';
       config.newValue = '1.1.0';
+      config.homepage = 'https://dummy.com';
       config.repositoryUrl = 'https://github.com/renovateapp/dummy';
+      config.changelogUrl = 'https://github.com/renovateapp/dummy/changelog.md';
       platform.createPr.mockReturnValue({ displayNumber: 'New Pull Request' });
       config.upgrades = [config];
       platform.getPrBody = jest.fn(input => input);
@@ -141,10 +145,53 @@ describe('workers/pr', () => {
     it('should create PR if success', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       config.prCreation = 'status-success';
+      config.automerge = true;
+      config.schedule = 'before 5am';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][2];
+    });
+    it('should create group PR', async () => {
+      config.upgrades = config.upgrades.concat([
+        {
+          depName: 'a',
+          newDigestShort: 'aaaaaaa',
+        },
+        {
+          depName: 'b',
+          newDigestShort: 'bbbbbbb',
+          newValue: 'some_new_value',
+          updateType: 'pin',
+        },
+        {
+          depName: 'c',
+          gitRef: 'ccccccc',
+        },
+        {
+          depName: 'd',
+          updateType: 'lockFileMaintenance',
+        },
+      ]);
+      config.updateType = 'lockFileMaintenance';
+      config.recreateClosed = true;
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+    });
+    it('should add note about Pin', async () => {
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      config.prCreation = 'status-success';
+      config.isPin = true;
+      config.schedule = 'before 5am';
+      config.timezone = 'some timezone';
+      config.rebaseStalePrs = true;
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      expect(platform.createPr.mock.calls[0][2].includes('this Pin PR')).toBe(
+        true
+      );
     });
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
@@ -181,12 +228,6 @@ describe('workers/pr', () => {
     it('should create new branch if none exists', async () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-      expect(platform.createPr.mock.calls[0][2].indexOf('Errors</h3>')).toEqual(
-        -1
-      );
-      expect(
-        platform.createPr.mock.calls[0][2].indexOf('Warnings</h3>')
-      ).toEqual(-1);
     });
     it('should add assignees and reviewers to new PR', async () => {
       config.assignees = ['@foo', 'bar'];
@@ -220,18 +261,6 @@ describe('workers/pr', () => {
       expect(platform.addAssignees.mock.calls.length).toBe(1);
       expect(platform.addReviewers.mock.calls.length).toBe(1);
     });
-    it('should display errors and warnings', async () => {
-      config.errors = [{}];
-      config.warnings = [{}];
-      const pr = await prWorker.ensurePr(config);
-      expect(
-        platform.createPr.mock.calls[0][2].indexOf('# Errors')
-      ).not.toEqual(-1);
-      expect(
-        platform.createPr.mock.calls[0][2].indexOf('# Warnings')
-      ).not.toEqual(-1);
-      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
-    });
     it('should not add assignees and reviewers to new PR if automerging enabled', async () => {
       config.assignees = ['bar'];
       config.reviewers = ['baz'];
@@ -241,23 +270,11 @@ describe('workers/pr', () => {
       expect(platform.addAssignees.mock.calls.length).toBe(0);
       expect(platform.addReviewers.mock.calls.length).toBe(0);
     });
-    it('should add assignees and reviewers to existing PR', async () => {
-      config.assignees = ['bar'];
-      config.reviewers = ['baz'];
-      config.automerge = true;
-      platform.getBranchPr.mockReturnValueOnce(existingPr);
-      platform.getBranchStatus.mockReturnValueOnce('failure');
-      config.semanticCommitScope = null;
-      const pr = await prWorker.ensurePr(config);
-      expect(platform.updatePr.mock.calls).toMatchSnapshot();
-      expect(platform.updatePr.mock.calls.length).toBe(0);
-      expect(platform.addAssignees.mock.calls.length).toBe(1);
-      expect(platform.addReviewers.mock.calls.length).toBe(1);
-      expect(pr).toMatchObject(existingPr);
-    });
     it('should return unmodified existing PR', async () => {
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       config.semanticCommitScope = null;
+      config.automerge = true;
+      config.schedule = 'before 5am';
       const pr = await prWorker.ensurePr(config);
       expect(platform.updatePr.mock.calls).toMatchSnapshot();
       expect(platform.updatePr.mock.calls).toHaveLength(0);
@@ -265,6 +282,8 @@ describe('workers/pr', () => {
     });
     it('should return modified existing PR', async () => {
       config.newValue = '1.2.0';
+      config.automerge = true;
+      config.schedule = 'before 5am';
       platform.getBranchPr.mockReturnValueOnce(existingPr);
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchSnapshot();

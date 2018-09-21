@@ -543,10 +543,6 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 Add configuration here to specifically override settings for `pip` requirements files. Supports `requirements.txt` and `requirements.pip` files. The default file pattern is fairly flexible in an attempt to catch similarly named ones too but may be extended/changed.
 
-## prBody
-
-Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovatebot/renovate/issues) and let us solve it for you and for everyone else too.
-
 ## prConcurrentLimit
 
 This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
