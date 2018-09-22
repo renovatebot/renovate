@@ -444,7 +444,7 @@ Object {
 }
 `;
 
-exports[`platform/github getPrBody(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://renovatebot.com/gh/foo/bar/issues/5)"`;
+exports[`platform/github getPrBody(input) returns updated pr body 1`] = `"<p><a href=\\"https://renovatebot.com/gh/foo/bar/issues/5\\">https://github.com/foo/bar/issues/5</a> plus also <a href=\\"https://renovatebot.com/gh/foo/bar/issues/5\\">a link</a></p>"`;
 
 exports[`platform/github getPrFiles() returns files 1`] = `
 Array [
