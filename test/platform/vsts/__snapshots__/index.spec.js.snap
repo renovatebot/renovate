@@ -175,3 +175,11 @@ Array [
   Array [],
 ]
 `;
+
+exports[`platform/vsts updatePr(prNo, title, body) should update the PR without description 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
