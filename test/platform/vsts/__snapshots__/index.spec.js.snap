@@ -18,16 +18,6 @@ Object {
 }
 `;
 
-exports[`platform/vsts deleteBranch should delete the branch 1`] = `
-Array [
-  Object {
-    "name": "refs/head/testBranch",
-    "newObjectId": "0000000000000000000000000000000000000000",
-    "oldObjectId": "123456",
-  },
-]
-`;
-
 exports[`platform/vsts ensureComment add comment 1`] = `
 Array [
   Array [],
