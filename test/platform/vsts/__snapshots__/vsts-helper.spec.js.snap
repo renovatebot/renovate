@@ -75,7 +75,8 @@ Object {
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
-  "status": "merged",
+  "state": "merged",
+  "status": 3,
 }
 `;
 
@@ -84,7 +85,8 @@ Object {
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
-  "status": "closed",
+  "state": "closed",
+  "status": 2,
 }
 `;
 
@@ -95,7 +97,7 @@ Object {
   "isConflicted": true,
   "mergeStatus": 2,
   "number": undefined,
-  "status": "open",
+  "state": "open",
 }
 `;
 
@@ -104,7 +106,8 @@ Object {
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
-  "status": "open",
+  "state": "open",
+  "status": 1,
 }
 `;
 
