@@ -676,16 +676,6 @@ describe('platform/vsts', () => {
     });
   });
 
-  describe('abandonPr', () => {
-    it('should abandon the PR', async () => {
-      vstsApi.gitApi.mockImplementationOnce(() => ({
-        updatePullRequest: jest.fn(() => 'abandoned'),
-      }));
-      const res = await vsts.abandonPr();
-      expect(res).toMatchSnapshot();
-    });
-  });
-
   describe('Assignees', () => {
     it('addAssignees', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
