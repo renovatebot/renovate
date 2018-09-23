@@ -44,7 +44,7 @@ Example use:
 
 ```json
 {
-  "automerge": enabled,
+  "automerge": true,
   "automergeType": "pr-comment",
   "automergeComment": "@bors: r+"
 }
@@ -90,6 +90,8 @@ This field is combined with `branchPrefix` and `managerBranchPrefix` to form the
 
 Set this value to 'patch', 'minor' or 'major' to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, set this to `patch`.
 
+You can also set this field to `"mirror:x"` where `x` is the name of a package in the `package.json`. Doing so means that the `package.json` `version` field will mirror whatever is the version for `x` dependened on. Make sure that version is a pinned version of course, as otherwise it won't be valid.
+
 ## circleci
 
 ## commitBody
@@ -131,10 +133,6 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 ## composer
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
-
-## copyLocalLibs
-
-Set to true if repository package.json files contain any local (file) dependencies + lock files. The `package.json` files from each will be copied to disk before lock file generation, even if they are within ignored directories.
 
 ## description
 
@@ -199,20 +197,6 @@ Example:
 
 See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
 
-## endpoints
-
-Example for configuring `docker` auth:
-
-```json
-{
-  "endpoints": {
-    "platform": "docker",
-    "username": "<some-username>",
-    "password": "<some-password>"
-  }
-}
-```
-
 ## engines
 
 Extend this if you wish to configure rules specifically for `engines` definitions. Currently only `node` is supported.
@@ -222,6 +206,10 @@ Extend this if you wish to configure rules specifically for `engines` definition
 See https://renovatebot.com/docs/configuration-reference/config-presets for details.
 
 ## fileMatch
+
+## followTag
+
+The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
 
 ## gitlabci
 
@@ -245,6 +233,20 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```
 
 And then the branchName would be `renovate/eslint` instead.
+
+## hostRules
+
+Example for configuring `docker` auth:
+
+```json
+{
+  "hostRules": {
+    "platform": "docker",
+    "username": "<some-username>",
+    "password": "<some-password>"
+  }
+}
+```
 
 ## ignoreDeprecated
 
@@ -362,7 +364,7 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovatebot.com/docs/language-support/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehsneive explanation of how the `node` option can be used.
 
 ## npm
 
@@ -541,9 +543,69 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 Add configuration here to specifically override settings for `pip` requirements files. Supports `requirements.txt` and `requirements.pip` files. The default file pattern is fairly flexible in an attempt to catch similarly named ones too but may be extended/changed.
 
-## prBody
+## prBodyColumns
 
-Although the PR body can be customised by you, it might be quite challenging. If you think the Pull Request should include different information or could be formatted better, perhaps try raising an [Issue](https://github.com/renovatebot/renovate/issues) and let us solve it for you and for everyone else too.
+Use this array to provide a list of column names you wish to include in the PR tables.
+
+For example, if you wish to add the package file name to the table, you would add this to your config:
+
+```json
+{
+  "prBodyColumns": [
+    "Package",
+    "Update",
+    "Type",
+    "New value",
+    "Package file",
+    "References"
+  ]
+}
+```
+
+Note: "Package file" is predefined in the default `prBodyDefinitions` object so does not require a definition before it can be used.
+
+## prBodyDefinitions
+
+You can configure this object if you with to either (a) modify the template for an existing table column in PR bodies, or (b) you wish to _add_ a definition for a new/additional column.
+
+Here is an example of modifying the default value for the "Package" column to put it inside a `<code></code>` block:
+
+```json
+  "prBodyDefinitions": {
+    "Package": "`{{{depName}}}`"
+  }
+```
+
+Here is an example of adding a custom "Sourcegraph" column definition:
+
+```json
+{
+  "prBodyDefinitions": {
+    "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
+  },
+  "prBodyColumns": [
+    "Package",
+    "Update",
+    "New value",
+    "References",
+    "Sourcegraph"
+  ]
+}
+```
+
+Note: Columns must also be included in the `prBodyColumns` array in order to be used, so that's why it's included above in the example.
+
+## prBodyNotes
+
+Use this field to add custom content inside PR bodies, including conditionally.
+
+e.g. if you wish to add an extra Warning to major updates:
+
+```json
+{
+  "prBodyNotes": ["{{#if isMajor}}:warning: MAJOR MAJOR MAJOR :warning:{{/if}}"]
+}
+```
 
 ## prConcurrentLimit
 
@@ -610,6 +672,10 @@ By default, Renovate assumes that if you are using ranges then it's because you 
 For example, if your `package.json` specifies a value for `left-pad` of `^1.0.0` and the latest version on npmjs is `1.2.0`, then Renovate won't change anything because `1.2.0` satisfies the range. If instead you'd prefer to be updated to `^1.2.0` in cases like this, then set `rangeStrategy` to `bump` in your Renovate config.
 
 This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0.0` and `~1.0.0`.
+
+## rebaseLabel
+
+On GitHub it is possible to add a label to a PR to manually request Renovate to recreate/rebase it. By default this label is "rebase" however you can configure it to anything you want by changing this `rebaseLabel` field.
 
 ## rebaseStalePrs
 
@@ -726,7 +792,7 @@ This feature is added for people migrating from alternative services who are use
 
 Language support is limited to those listed below:
 
-- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/language-support/node#configuring-support-policy)
+- **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/node#configuring-support-policy)
 
 ## timezone
 

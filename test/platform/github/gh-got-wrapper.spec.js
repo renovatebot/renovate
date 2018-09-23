@@ -9,14 +9,27 @@ describe('platform/gh-got-wrapper', () => {
   const body = ['a', 'b'];
   beforeEach(() => {
     jest.resetAllMocks();
-    get.setAppMode(false);
+    get.reset();
+    delete global.appMode;
     delay.mockImplementation(() => Promise.resolve());
   });
   it('supports app mode', async () => {
-    get.setAppMode(true);
+    global.appMode = true;
     await get('some-url', { headers: { accept: 'some-accept' } });
     expect(ghGot.mock.calls[0][1].headers.accept).toBe(
       'application/vnd.github.machine-man-preview+json, some-accept'
+    );
+  });
+  it('strips v3 for graphql', async () => {
+    ghGot.mockImplementationOnce(() => ({
+      body: '{"data":{',
+    }));
+    await get.post('graphql', {
+      endpoint: 'https://ghe.mycompany.com/api/v3/',
+      body: 'abc',
+    });
+    expect(ghGot.mock.calls[0][1].endpoint).toEqual(
+      'https://ghe.mycompany.com/api/'
     );
   });
   it('paginates', async () => {
@@ -103,6 +116,22 @@ describe('platform/gh-got-wrapper', () => {
     let e;
     try {
       await get('some-url');
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('platform-failure');
+  });
+  it('should throw platform failure ENOTFOUND', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        name: 'RequestError',
+        code: 'ENOTFOUND',
+      })
+    );
+    let e;
+    try {
+      await get('some-url', {}, 0);
     } catch (err) {
       e = err;
     }

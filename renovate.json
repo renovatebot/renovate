@@ -7,13 +7,30 @@
     "group:linters",
     ":assignee(rarkins)"
   ],
+  "semanticCommitScope": "deps",
   "docker": {
-    "semanticCommitType": "fix"
+    "pinDigests": true,
+    "semanticCommitType": "build"
   },
+  "prBodyDefinitions": {
+    "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
+  },
+  "prBodyColumns": [
+    "Package",
+    "Update",
+    "Type",
+    "New value",
+    "References",
+    "Sourcegraph"
+  ],
   "packageRules": [
     {
+      "depTypeList": ["dependencies"],
+      "semanticCommitType": "build"
+    },
+    {
       "packageNames": ["semantic-release"],
-      "semanticCommitType": "fix"
+      "semanticCommitType": "build"
     },
     {
       "packageNames": ["got", "gh-got", "gl-got"],
@@ -21,6 +38,5 @@
         "groupName": "got packages"
       }
     }
-  ],
-  "semanticCommitScope": null
+  ]
 }

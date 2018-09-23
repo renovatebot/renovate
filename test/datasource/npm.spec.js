@@ -39,6 +39,7 @@ describe('api/npm', () => {
         '0.0.2': '2018-05-07T07:21:53+02:00',
       },
     };
+    return global.renovateCache.rmAll();
   });
   it('should return null for no versions', async () => {
     const missingVersions = { ...npmResponse };
@@ -358,6 +359,12 @@ describe('api/npm', () => {
     const res2 = await npm.getPkgReleases('foobar');
     expect(res1).not.toBe(null);
     expect(res1).toEqual(res2);
+  });
+  it('should use global cache', async () => {
+    const dummyValue = 'abc123';
+    await global.renovateCache.set('datasource-npm', 'foobar', dummyValue, 10);
+    const res = await npm.getPkgReleases('foobar');
+    expect(res).toEqual(dummyValue);
   });
   it('should fetch package info from custom registry', async () => {
     nock('https://npm.mycustomregistry.com')

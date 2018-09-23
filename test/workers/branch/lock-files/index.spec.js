@@ -8,6 +8,10 @@ const yarn = require('../../../../lib/manager/npm/post-update/yarn');
 const pnpm = require('../../../../lib/manager/npm/post-update/pnpm');
 const lerna = require('../../../../lib/manager/npm/post-update/lerna');
 
+const hostRules = require('../../../../lib/util/host-rules');
+
+hostRules.find = jest.fn(() => 'token-abc');
+
 const {
   // determineLockFileDirs,
   // writeExistingFiles,
@@ -128,7 +132,7 @@ describe('manager/npm/post-update', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        tmpDir: { path: 'some-tmp-dir' },
+        localDir: 'some-tmp-dir',
       };
       fs.outputFile = jest.fn();
       fs.remove = jest.fn();
@@ -167,8 +171,7 @@ describe('manager/npm/post-update', () => {
     });
     it('writes package.json of local lib', async () => {
       const renoPath = upath.join(__dirname, '../../../');
-      config.copyLocalLibs = true;
-      config.tmpDir = { path: renoPath };
+      config.localDir = renoPath;
       const packageFiles = {
         npm: [
           {
@@ -192,8 +195,7 @@ describe('manager/npm/post-update', () => {
     });
     it('Try to write package.json of local lib, but file not found', async () => {
       const renoPath = upath.join(__dirname, '../../../');
-      config.copyLocalLibs = true;
-      config.tmpDir = { path: renoPath };
+      config.localDir = renoPath;
       const packageFiles = {
         npm: [
           {
@@ -217,8 +219,7 @@ describe('manager/npm/post-update', () => {
     });
     it('detect malicious intent (error config in package.json) local lib is not in the repo', async () => {
       const renoPath = upath.join(__dirname, '../../../');
-      config.copyLocalLibs = true;
-      config.tmpDir = { path: renoPath };
+      config.localDir = renoPath;
       const packageFiles = {
         npm: [
           {
@@ -247,7 +248,7 @@ describe('manager/npm/post-update', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        tmpDir: { path: 'some-tmp-dir' },
+        localDir: 'some-tmp-dir',
       };
       fs.outputFile = jest.fn();
     });
@@ -278,6 +279,7 @@ describe('manager/npm/post-update', () => {
             '{ "name": "some-other-name", "engines": { "node": "^6.0.0" }}',
         },
       ];
+      config.upgrades = [];
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile.mock.calls).toHaveLength(2);
       expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
@@ -288,7 +290,7 @@ describe('manager/npm/post-update', () => {
     beforeEach(() => {
       config = {
         ...defaultConfig,
-        tmpDir: { path: 'some-tmp-dir' },
+        localDir: 'some-tmp-dir',
       };
       platform.getFile.mockReturnValue('some lock file contents');
       npm.generateLockFile = jest.fn();

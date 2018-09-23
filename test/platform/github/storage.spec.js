@@ -6,4 +6,7 @@ describe('platform/github/storage', () => {
     const gitMethods = Object.keys(new GitStorage()).sort();
     expect(githubMethods).toMatchObject(gitMethods);
   });
+  it('getRepoStatus exists', async () => {
+    expect((await new GithubStorage()).getRepoStatus()).toEqual({});
+  });
 });

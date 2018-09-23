@@ -18,18 +18,18 @@ function streamToString(stream) {
 describe('platform/bitbucket', () => {
   let bitbucket;
   let api;
-  let endpoints;
+  let hostRules;
   beforeEach(() => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
-    endpoints = require('../../../lib/util/endpoints');
+    hostRules = require('../../../lib/util/host-rules');
     api = require('../../../lib/platform/bitbucket/bb-got-wrapper');
     bitbucket = require('../../../lib/platform/bitbucket');
 
-    // clean up endpoints
-    endpoints.clear();
-    endpoints.update({
+    // clean up hostRules
+    hostRules.clear();
+    hostRules.update({
       platform: 'bitbucket',
       token: 'token',
     });
@@ -203,6 +203,12 @@ describe('platform/bitbucket', () => {
         );
         expect(api.post.mock.calls).toMatchSnapshot();
       });
+    });
+  });
+
+  describe('getRepoStatus()', () => {
+    it('exists', async () => {
+      expect(await bitbucket.getRepoStatus()).toEqual({});
     });
   });
 

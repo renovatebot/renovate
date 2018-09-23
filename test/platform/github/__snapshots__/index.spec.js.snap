@@ -38,15 +38,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/master",
   ],
   Array [
@@ -65,15 +56,6 @@ exports[`platform/github commitFilesToBranch(branchName, files, message, parentB
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/refs/heads/master",
@@ -158,19 +140,25 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureComment add comment if not found 1`] = `
+exports[`platform/github deleteLabel(issueNo, label) should delete the label 1`] = `
 Array [
   Array [
-    "repos/some/repo/issues/42/comments",
-    Object {
-      "body": Object {
-        "body": "### some-subject
+    "repos/some/repo/issues/42/labels/rebase",
+  ],
+]
+`;
+
+exports[`platform/github ensureComment add comment if not found 1`] = `
+Array [
+  "repos/some/repo/issues/42/comments",
+  Object {
+    "body": Object {
+      "body": "### some-subject
 
 some
 content",
-      },
     },
-  ],
+  },
 ]
 `;
 
@@ -190,14 +178,6 @@ content",
 ]
 `;
 
-exports[`platform/github getAllRenovateBranches() should return all renovate branches 1`] = `
-Array [
-  "renovate/a",
-  "renovate",
-  "renovate/b",
-]
-`;
-
 exports[`platform/github getBranchLastCommitTime should return a Date 1`] = `2011-04-14T16:00:49.000Z`;
 
 exports[`platform/github getBranchPr(branchName) should return the PR object 1`] = `
@@ -210,9 +190,6 @@ Array [
     Object {
       "paginate": true,
     },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
   ],
 ]
 `;
@@ -230,12 +207,6 @@ exports[`platform/github getFile() should return large file via git API 1`] = `
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
   ],
   Array [
     "repos/some/repo/git/trees/master?recursive=true",
@@ -260,12 +231,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
     "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
@@ -280,12 +245,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
     "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
@@ -298,12 +257,6 @@ exports[`platform/github getFile() should return the encoded file content 1`] = 
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
   ],
   Array [
     "repos/some/repo/git/trees/master?recursive=true",
@@ -321,6 +274,43 @@ Array [
   "src/app/package.json",
   "src/otherapp/package.json",
 ]
+`;
+
+exports[`platform/github getPr(prNo) should return PR from closed graphql result 1`] = `
+Object {
+  "body": "dummy body",
+  "branchName": "renovate/delay-4.x",
+  "comments": Array [
+    Object {
+      "body": ":tada: This PR is included in version 13.63.5 :tada:
+
+The release is available on:
+- [npm package (@latest dist-tag)](https://www.npmjs.com/package/renovate)
+- [GitHub release](https://github.com/renovatebot/renovate/releases/tag/13.63.5)
+
+Your **[semantic-release](https://github.com/semantic-release/semantic-release)** bot :package::rocket:",
+      "id": 420006957,
+    },
+  ],
+  "displayNumber": "Pull Request #2499",
+  "number": 2499,
+  "state": "merged",
+  "title": "build(deps): update dependency delay to v4.0.1",
+}
+`;
+
+exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `
+Object {
+  "branchName": "renovate/jest-monorepo",
+  "canMerge": false,
+  "canRebase": true,
+  "displayNumber": "Pull Request #2500",
+  "isConflicted": true,
+  "isStale": true,
+  "number": 2500,
+  "state": "open",
+  "title": "chore(deps): update dependency jest to v23.6.0",
+}
 `;
 
 exports[`platform/github getPr(prNo) should return a PR object - 0 1`] = `
@@ -344,7 +334,7 @@ Object {
   "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
-  "isUnmergeable": true,
+  "isConflicted": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -379,7 +369,7 @@ Object {
   "canRebase": false,
   "commits": 1,
   "displayNumber": "Pull Request #1",
-  "isUnmergeable": true,
+  "isConflicted": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -396,7 +386,7 @@ Object {
   "canRebase": true,
   "commits": 2,
   "displayNumber": "Pull Request #1",
-  "isUnmergeable": true,
+  "isConflicted": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -413,7 +403,7 @@ Object {
   "canRebase": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
-  "isUnmergeable": true,
+  "isConflicted": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -430,7 +420,7 @@ Object {
   "canRebase": true,
   "commits": 2,
   "displayNumber": "Pull Request #1",
-  "isUnmergeable": true,
+  "isConflicted": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -446,7 +436,7 @@ Object {
   "branchName": undefined,
   "commits": 2,
   "displayNumber": "Pull Request #1",
-  "isUnmergeable": true,
+  "isConflicted": true,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -454,7 +444,7 @@ Object {
 }
 `;
 
-exports[`platform/github getPrBody(input) returns updated pr body 1`] = `"<p><a href=\\"https://renovatebot.com/gh/foo/bar/issues/5\\">https://github.com/foo/bar/issues/5</a> plus also <a href=\\"https://renovatebot.com/gh/foo/bar/issues/5\\">a link</a></p>"`;
+exports[`platform/github getPrBody(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://renovatebot.com/gh/foo/bar/issues/5)"`;
 
 exports[`platform/github getPrFiles() returns files 1`] = `
 Array [
@@ -511,15 +501,6 @@ Array [
   Array [
     "repos/some/repo",
   ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
 ]
 `;
 
@@ -535,15 +516,6 @@ Array [
   Array [
     "repos/some/repo",
   ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
 ]
 `;
 
@@ -558,15 +530,6 @@ exports[`platform/github initRepo should initialise the config for the repo - 2 
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
   ],
 ]
 `;
@@ -619,15 +582,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -667,15 +621,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
     "repos/some/repo/git/refs/heads/thebranchname",
   ],
 ]
@@ -704,15 +649,6 @@ exports[`platform/github setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
     "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/pulls?per_page=100&state=all",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
   ],
   Array [
     "repos/some/repo/git/trees/some-branch?recursive=true",

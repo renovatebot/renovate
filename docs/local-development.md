@@ -27,12 +27,12 @@ FATAL: Renovate fatal error: You need to supply a GitHub token.
 
 ## Platform Account Setup
 
-Although it's possible to make small changes without testing against a real repository, in most cases it's important that you run a "real" test on a repository before you submit a feature or fix.
-It's possible to do this against GitHub or GitLab public hosts, and you can also use both.
+Although it's possible to make small source code improvements without testing against a real repository, in most cases it's important that you run a "real" test on a repository before you submit a feature or fix. It's possible to do this against GitHub or GitLab public hosts, and you can also use both.
 
 #### Register new account (optional)
 
 It's recommended that you set up a dedicated test account on GitHub or GitLab, so that you minimise the risk that you accidentally cause problems when testing out Renovate.
+
 e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing" for use with Renovate.
 
 #### Generate platform token
@@ -43,12 +43,13 @@ Once you have decided on your platform and account, log in and generate a "Perso
 
 Although you can specify a token to Renovate using `--token=`, it is annoying if you need to include this every time.
 You are better off to instead export an Environment Variable for this.
-If your platform of choice is GitHub, then export GITHUB_TOKEN, and if it's GitLab then export GITLAB_TOKEN.
+
+If your platform of choice is GitHub, then export `GITHUB_TOKEN`, and if it's GitLab then export `GITLAB_TOKEN`.
 It's also find to export both so that you can switch between platforms.
 
 ## Tests
 
-You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on TravisCI. `yarn test` runs an `eslint` check, a `prettier check`, and then all the unit tests using `jest`.
+You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on TravisCI. `yarn test` runs an `eslint` check, a `prettier` check, and then all the unit tests using `jest`.
 
 ## Jest
 
@@ -66,8 +67,7 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 #### Linting and formatting
 
-We use [Prettier](https://github.com/prettier/prettier) for code formatting. If
-your code fails `yarn test` due to a `prettier` rule then you should find that the offending file will be updated automatically and pass the second time you run `yarn test` because each time you run it, it includes the `--fix` command automatically. You usually shouldn't need to fix any prettier errors manually.
+We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then you should find that the offending file will be updated automatically and pass the second time you run `yarn test` because each time you run it, it includes the `--fix` command automatically. You usually shouldn't need to fix any prettier errors manually.
 
 ## Tips and tricks
 
@@ -99,3 +99,12 @@ the code configurable, so most new functionality should be controllable via
 configuration options.
 
 If you wish to add one, add it to `lib/config/definitions.js` and then add documentation to `website/docs/_posts/2017-10-05-configuration-options.md`.
+
+## Debugging
+
+It's really easy to debug Renovate using Chrome's inspect tool. Try like this:
+
+1. Open `chrome://inspect` in Chrome, then click on "Open dedicated DevTools for Node"
+2. Run `yarn debug ...` instead of `yarn start ...`
+3. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+4. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered

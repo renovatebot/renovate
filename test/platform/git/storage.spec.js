@@ -36,11 +36,17 @@ describe('platform/git/storage', () => {
     await repo.checkout('master');
   });
 
+  let tmpDir;
+
   beforeEach(async () => {
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
+    tmpDir = await tmp.dir({ unsafeCleanup: true });
     await git.initRepo({
+      localDir: tmpDir.path,
+      platform: 'github',
+      repository: 'owner/repo-name',
       url: origin.path,
       gitAuthor: {
         name: 'test',
@@ -50,6 +56,7 @@ describe('platform/git/storage', () => {
   });
 
   afterEach(() => {
+    tmpDir.cleanup();
     origin.cleanup();
     git.cleanRepo();
   });

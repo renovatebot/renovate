@@ -5,6 +5,7 @@ describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
     it('it migrates config', () => {
       const config = {
+        endpoints: [{}],
         enabled: true,
         extends: [':js-app', 'config:library'],
         maintainYarnLock: true,
@@ -29,7 +30,7 @@ describe('config/migration', () => {
         commitMessage: '{{semanticPrefix}}some commit message',
         prTitle: '{{semanticPrefix}}some pr title',
         semanticPrefix: 'fix(deps): ',
-        prBody: '{{currentVersion}} something',
+        commitMessageExtra: '{{currentVersion}} something',
         pathRules: [
           {
             paths: ['examples/**'],

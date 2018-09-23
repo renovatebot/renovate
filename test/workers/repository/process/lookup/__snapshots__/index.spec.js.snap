@@ -78,6 +78,7 @@ Array [
 
 exports[`manager/npm/lookup .lookupUpdates() handles digest pin 1`] = `
 Object {
+  "changelogUrl": undefined,
   "homepage": undefined,
   "releases": Array [
     Object {
@@ -94,8 +95,8 @@ Object {
       "canBeUnpublished": undefined,
       "fromVersion": "8.0.0",
       "isSingleVersion": true,
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
@@ -104,8 +105,8 @@ Object {
       "updateType": "minor",
     },
     Object {
-      "newDigest": "sha256:bbbbbbbbbbbbbbbb",
-      "newDigestShort": "bbbbbb",
+      "newDigest": "sha256:0123456789abcdef",
+      "newDigestShort": "0123456",
       "newValue": "8.0.0",
       "updateType": "pin",
     },
@@ -118,8 +119,8 @@ exports[`manager/npm/lookup .lookupUpdates() handles digest pin for non-version 
 Object {
   "updates": Array [
     Object {
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newValue": "alpine",
       "updateType": "pin",
     },
@@ -130,17 +131,14 @@ Object {
 
 exports[`manager/npm/lookup .lookupUpdates() handles digest pin for up to date version 1`] = `
 Object {
+  "changelogUrl": undefined,
   "homepage": undefined,
-  "releases": Array [
-    Object {
-      "version": "8.1.0",
-    },
-  ],
+  "releases": Array [],
   "repositoryUrl": null,
   "updates": Array [
     Object {
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newValue": "8.1.0",
       "updateType": "pin",
     },
@@ -151,6 +149,7 @@ Object {
 
 exports[`manager/npm/lookup .lookupUpdates() handles digest update 1`] = `
 Object {
+  "changelogUrl": undefined,
   "homepage": undefined,
   "releases": Array [
     Object {
@@ -166,8 +165,8 @@ Object {
       "canBeUnpublished": undefined,
       "fromVersion": "8.0.0",
       "isSingleVersion": true,
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
@@ -176,8 +175,8 @@ Object {
       "updateType": "minor",
     },
     Object {
-      "newDigest": "sha256:bbbbbbbbbbbbbbbb",
-      "newDigestShort": "bbbbbb",
+      "newDigest": "sha256:0123456789abcdef",
+      "newDigestShort": "0123456",
       "newValue": "8.0.0",
       "updateType": "digest",
     },
@@ -190,8 +189,8 @@ exports[`manager/npm/lookup .lookupUpdates() handles digest update for non-versi
 Object {
   "updates": Array [
     Object {
-      "newDigest": "sha256:aaaaaaaaaaaaaaaa",
-      "newDigestShort": "aaaaaa",
+      "newDigest": "sha256:abcdef1234567890",
+      "newDigestShort": "abcdef1",
       "newValue": "alpine",
       "updateType": "digest",
     },
@@ -210,6 +209,7 @@ exports[`manager/npm/lookup .lookupUpdates() handles unknown purl 1`] = `Array [
 
 exports[`manager/npm/lookup .lookupUpdates() ignores deprecated 1`] = `
 Object {
+  "changelogUrl": undefined,
   "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v1.4.1) of dependency \`q2\` has the following deprecation notice:
 
 \`true\`
@@ -415,6 +415,7 @@ Array [
 
 exports[`manager/npm/lookup .lookupUpdates() returns complex object 1`] = `
 Object {
+  "changelogUrl": undefined,
   "homepage": undefined,
   "releases": Array [
     Object {
@@ -765,6 +766,22 @@ Object {
 }
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() should follow dist-tag even if newer version exists 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "3.0.1-insiders.20180713",
+    "isSingleVersion": true,
+    "newMajor": 3,
+    "newMinor": 0,
+    "newValue": "3.0.1-insiders.20180726",
+    "releaseTimestamp": "2018-07-26T18:20:51.679Z",
+    "toVersion": "3.0.1-insiders.20180726",
+    "updateType": "minor",
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() should not jump unstable versions 1`] = `
 Array [
   Object {
@@ -777,6 +794,20 @@ Array [
     "releaseTimestamp": "2018-07-30T16:21:13.150Z",
     "toVersion": "3.0.1",
     "updateType": "minor",
+  },
+]
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() should roll back to dist-tag if current version is higher 1`] = `
+Array [
+  Object {
+    "branchName": "{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x",
+    "commitMessageAction": "Roll back",
+    "isRollback": true,
+    "newMajor": 3,
+    "newValue": "3.0.1-insiders.20180726",
+    "semanticCommitType": "fix",
+    "updateType": "rollback",
   },
 ]
 `;
@@ -797,6 +828,8 @@ Array [
   },
 ]
 `;
+
+exports[`manager/npm/lookup .lookupUpdates() should warn if no version matches dist-tag 1`] = `Array []`;
 
 exports[`manager/npm/lookup .lookupUpdates() skips undefined values 1`] = `
 Object {

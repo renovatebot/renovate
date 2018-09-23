@@ -28,11 +28,13 @@ describe('generateLockFiles()', () => {
     );
     exec.mockReturnValueOnce({});
     const skipInstalls = false;
+    const binarySource = 'global';
     const res = await lernaHelper.generateLockFiles(
       'npm',
       'some-dir',
       {},
-      skipInstalls
+      skipInstalls,
+      binarySource
     );
     expect(res.error).toBe(false);
   });

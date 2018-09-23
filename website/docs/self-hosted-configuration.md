@@ -11,6 +11,10 @@ The below configuration options are applicable only if you are running your own 
 
 Be cautious when using this option - it will run Renovate over _every_ repository that the bot account has access to.
 
+## binarySource
+
+Set this to 'global' if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
+
 ## endpoint
 
 ## exposeEnv
@@ -32,6 +36,10 @@ You probably have no need for this option - it is an experimental setting for th
 ## gitAuthor
 
 RFC5322-compliant string if you wish to customise the git author for commits.
+
+## gitFs
+
+This setting is experimental, and works for GitHub repositories only. If enabled, Renovate will `git clone` repos and use `git` for file operations such as creating branches and committing files.
 
 ## gitPrivateKey
 

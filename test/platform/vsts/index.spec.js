@@ -1,12 +1,12 @@
-const endpoints = require('../../../lib/util/endpoints');
+const hostRules = require('../../../lib/util/host-rules');
 
 describe('platform/vsts', () => {
   let vsts;
   let vstsApi;
   let vstsHelper;
   beforeEach(() => {
-    // clean up endpoints
-    endpoints.clear();
+    // clean up hostRules
+    hostRules.clear();
 
     // reset module
     jest.resetModules();
@@ -45,6 +45,11 @@ describe('platform/vsts', () => {
       );
       expect(vstsApi.gitApi.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
+    });
+  });
+  describe('getRepoStatus()', () => {
+    it('exists', async () => {
+      expect(await vsts.getRepoStatus()).toEqual({});
     });
   });
   describe('cleanRepo()', () => {

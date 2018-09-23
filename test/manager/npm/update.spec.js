@@ -24,6 +24,55 @@ describe('workers/branch/package-json', () => {
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       testContent.should.equal(outputContent);
     });
+    it('replaces a github dependency value', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'gulp',
+        currentValue: 'v4.0.0-alpha.2',
+        currentRawValue: 'gulpjs/gulp#v4.0.0-alpha.2',
+        newValue: 'v4.0.0',
+      };
+      const input = JSON.stringify({
+        dependencies: {
+          gulp: 'gulpjs/gulp#v4.0.0-alpha.2',
+        },
+      });
+      const res = npmUpdater.updateDependency(input, upgrade);
+      expect(res).toMatchSnapshot();
+    });
+    it('replaces a github short hash', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'gulp',
+        currentDigest: 'abcdef7',
+        currentRawValue: 'gulpjs/gulp#abcdef7',
+        newDigest: '0000000000111111111122222222223333333333',
+      };
+      const input = JSON.stringify({
+        dependencies: {
+          gulp: 'gulpjs/gulp#abcdef7',
+        },
+      });
+      const res = npmUpdater.updateDependency(input, upgrade);
+      expect(res).toMatchSnapshot();
+    });
+    it('replaces a github fully specified version', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'n',
+        currentValue: 'v1.0.0',
+        currentRawValue: 'git+https://github.com/owner/n#v1.0.0',
+        newValue: 'v1.1.0',
+      };
+      const input = JSON.stringify({
+        dependencies: {
+          n: 'git+https://github.com/owner/n#v1.0.0',
+        },
+      });
+      const res = npmUpdater.updateDependency(input, upgrade);
+      expect(res).toMatchSnapshot();
+      expect(res.includes('v1.1.0')).toBe(true);
+    });
     it('updates resolutions too', () => {
       const upgrade = {
         depType: 'dependencies',
@@ -74,7 +123,24 @@ describe('workers/branch/package-json', () => {
     });
   });
   describe('.bumpPackageVersion()', () => {
-    const content = JSON.stringify({ name: 'some-package', version: '0.0.2' });
+    const content = JSON.stringify({
+      name: 'some-package',
+      version: '0.0.2',
+      dependencies: { chalk: '2.4.2' },
+    });
+    it('mirrors', () => {
+      const res = npmUpdater.bumpPackageVersion(
+        content,
+        '0.0.2',
+        'mirror:chalk'
+      );
+      expect(res).toMatchSnapshot();
+      expect(res).not.toEqual(content);
+    });
+    it('aborts mirror', () => {
+      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', 'mirror:a');
+      expect(res).toEqual(content);
+    });
     it('increments', () => {
       const res = npmUpdater.bumpPackageVersion(content, '0.0.2', 'patch');
       expect(res).toMatchSnapshot();

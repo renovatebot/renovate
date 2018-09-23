@@ -6,6 +6,41 @@ jest.mock('../../lib/platform/github/gh-got-wrapper');
 jest.mock('got');
 
 describe('datasource/github', () => {
+  beforeEach(() => global.renovateCache.rmAll());
+  describe('getDigest', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+      return global.renovateCache.rmAll();
+    });
+    it('returns null if no token', async () => {
+      ghGot.mockReturnValueOnce({ body: [] });
+      const res = await github.getDigest(
+        { depName: 'some-dep', githubRepo: 'some/dep' },
+        null
+      );
+      expect(res).toBe(null);
+    });
+    it('returns digest', async () => {
+      ghGot.mockReturnValueOnce({ body: [{ sha: 'abcdef' }] });
+      const res = await github.getDigest(
+        { depName: 'some-dep', githubRepo: 'some/dep' },
+        null
+      );
+      expect(res).toBe('abcdef');
+    });
+    it('returns cached digest', async () => {
+      ghGot.mockReturnValueOnce({ body: [{ sha: '12345' }] });
+      await github.getDigest(
+        { depName: 'some-dep', githubRepo: 'some/dep' },
+        null
+      );
+      const res = await github.getDigest(
+        { depName: 'some-dep', githubRepo: 'some/dep' },
+        null
+      );
+      expect(res).toBe('12345');
+    });
+  });
   describe('getPreset()', () => {
     it('throws if non-default', async () => {
       await expect(
@@ -37,6 +72,7 @@ describe('datasource/github', () => {
     });
   });
   describe('getPkgReleases', () => {
+    beforeAll(() => global.renovateCache.rmAll());
     it('returns cleaned tags', async () => {
       const body = [
         { name: 'a' },
@@ -70,6 +106,23 @@ describe('datasource/github', () => {
       expect(
         res.releases.find(release => release.version === 'v1.1.0')
       ).toBeDefined();
+    });
+    it('returns releases from cache', async () => {
+      const body = [
+        { tag_name: 'a' },
+        { tag_name: 'v' },
+        { tag_name: '1.0.0' },
+        { tag_name: 'v1.1.0' },
+      ];
+      ghGot.mockReturnValueOnce({ headers: {}, body });
+      const res1 = await datasource.getPkgReleases(
+        'pkg:github/some/dep-to-cache?ref=release'
+      );
+      expect(res1.releases).toHaveLength(2);
+      const res2 = await datasource.getPkgReleases(
+        'pkg:github/some/dep-to-cache?ref=release'
+      );
+      expect(res1).toEqual(res2);
     });
     it('returns null for invalid ref', async () => {
       expect(

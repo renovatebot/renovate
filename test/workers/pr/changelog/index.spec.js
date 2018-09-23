@@ -1,14 +1,14 @@
-jest.mock('../../../lib/platform/github/gh-got-wrapper');
-jest.mock('../../../lib/datasource/npm');
+jest.mock('../../../../lib/platform/github/gh-got-wrapper');
+jest.mock('../../../../lib/datasource/npm');
 jest.mock('got');
 
-const endpoints = require('../../../lib/util/endpoints');
-const ghGot = require('../../../lib/platform/github/gh-got-wrapper');
+const hostRules = require('../../../../lib/util/host-rules');
+const ghGot = require('../../../../lib/platform/github/gh-got-wrapper');
 
-const { getChangeLogJSON } = require('../../../lib/workers/pr/changelog');
-const {
-  rmAllCache,
-} = require('../../../lib/workers/pr/changelog/source-cache');
+const { getChangeLogJSON } = require('../../../../lib/workers/pr/changelog');
+const releaseNotes = require('../../../../lib/workers/pr/changelog/release-notes');
+
+releaseNotes.addReleaseNotes = jest.fn(input => input);
 
 const upgrade = {
   depName: 'renovate',
@@ -34,18 +34,27 @@ describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(async () => {
       ghGot.mockClear();
-      endpoints.clear();
-      endpoints.update({
+      hostRules.clear();
+      hostRules.update({
         platform: 'github',
         endpoint: 'https://api.github.com/',
       });
-      await rmAllCache();
+      await global.renovateCache.rmAll();
+    });
+    it('returns null if @types', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          fromVersion: null,
+        })
+      ).toBe(null);
+      expect(ghGot.mock.calls).toHaveLength(0);
     });
     it('returns null if no fromVersion', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          fromVersion: null,
+          repositoryUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         })
       ).toBe(null);
       expect(ghGot.mock.calls).toHaveLength(0);
@@ -91,22 +100,6 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
-      ).toMatchSnapshot();
-    });
-    it('falls back to commit from release time', async () => {
-      // mock tags response
-      ghGot.mockReturnValueOnce(Promise.resolve());
-      // mock commit time response
-      ghGot.mockReturnValue(
-        Promise.resolve({
-          body: { sha: 'sha_from_time' },
-        })
-      );
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          depName: '@renovate/no',
         })
       ).toMatchSnapshot();
     });
@@ -171,7 +164,7 @@ describe('workers/pr/changelog', () => {
       ).toBe(null);
     });
     it('supports github enterprise and github.com changelog', async () => {
-      endpoints.update({
+      hostRules.update({
         platform: 'github',
         token: 'super_secret',
         endpoint: 'https://github-enterprise.example.com/',
@@ -183,7 +176,7 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('supports github enterprise and github enterprise changelog', async () => {
-      endpoints.update({
+      hostRules.update({
         platform: 'github',
         endpoint: 'https://github-enterprise.example.com/',
       });
@@ -197,7 +190,7 @@ describe('workers/pr/changelog', () => {
     });
 
     it('supports github enterprise alwo when retrieving data from cache', async () => {
-      endpoints.update({
+      hostRules.update({
         platform: 'github',
         endpoint: 'https://github-enterprise.example.com/',
       });

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const npmExtract = require('../../../../lib/manager/npm/extract');
+const defaultConfig = require('../../../../lib/config/defaults').getConfig();
 
 function readFixture(fixture) {
   return fs.readFileSync(
@@ -22,7 +23,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         'not json',
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toBe(null);
     });
@@ -30,7 +31,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         vendorisedContent,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toBe(null);
     });
@@ -40,7 +41,7 @@ describe('manager/npm/extract', () => {
         await npmExtract.extractDependencies(
           '{ "renovate": {} }',
           'backend/package.json',
-          {}
+          defaultConfig
         );
       } catch (err) {
         e = err;
@@ -51,7 +52,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         '{ "renovate": {} }',
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toBe(null);
     });
@@ -59,7 +60,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         '{"dependencies": true, "devDependencies": []}',
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toBe(null);
     });
@@ -67,7 +68,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         input01Content,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -81,7 +82,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         input01Content,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -124,7 +125,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         input01Content,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -138,7 +139,7 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         workspacesContent,
         'package.json',
-        {}
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -165,7 +166,34 @@ describe('manager/npm/extract', () => {
       const res = await npmExtract.extractDependencies(
         pJsonStr,
         'package.json',
-        {}
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('extracts non-npmjs', async () => {
+      const pJson = {
+        dependencies: {
+          a: 'github:owner/a',
+          b: 'github:owner/b#master',
+          c: 'github:owner/c#v1.1.0',
+          d: 'github:owner/d#a7g3eaf',
+          e: 'github:owner/e#49b5aca613b33c5b626ae68c03a385f25c142f55',
+          f: 'owner/f#v2.0.0',
+          g: 'gitlab:owner/g#v1.0.0',
+          h: 'github:-hello/world#v1.0.0',
+          i: '@foo/bar#v2.0.0',
+          j: 'github:frank#v0.0.1',
+          k: 'github:owner/k#49b5aca',
+          l: 'github:owner/l.git#abcdef0',
+          m: 'https://github.com/owner/m.git#v1.0.0',
+          n: 'git+https://github.com/owner/n#v2.0.0',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractDependencies(
+        pJsonStr,
+        'package.json',
+        defaultConfig
       );
       expect(res).toMatchSnapshot();
     });

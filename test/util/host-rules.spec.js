@@ -1,6 +1,6 @@
-const { update, find, clear } = require('../../lib/util/endpoints');
+const { update, find, clear } = require('../../lib/util/host-rules');
 
-describe('util/endpoints', () => {
+describe('util/host-rules', () => {
   beforeEach(() => {
     clear();
   });

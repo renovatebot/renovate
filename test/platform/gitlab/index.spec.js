@@ -1,11 +1,11 @@
-const endpoints = require('../../../lib/util/endpoints');
+const hostRules = require('../../../lib/util/host-rules');
 
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
   beforeEach(() => {
-    // clean up endpoints
-    endpoints.clear();
+    // clean up hostRules
+    hostRules.clear();
 
     // reset module
     jest.resetModules();
@@ -59,6 +59,11 @@ describe('platform/gitlab', () => {
       const repos = await getRepos('sometoken', 'someendpoint');
       expect(get.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
+    });
+  });
+  describe('getRepoStatus()', () => {
+    it('exists', async () => {
+      expect(await gitlab.getRepoStatus()).toEqual({});
     });
   });
   describe('cleanRepo()', () => {
@@ -141,6 +146,16 @@ describe('platform/gitlab', () => {
         err = e;
       }
       expect(err.message).toBe('always error');
+    });
+    it('should throw an error if repository is archived', async () => {
+      get.mockReturnValue({ body: { archived: true } });
+      let err;
+      try {
+        await gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' });
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('archived');
     });
   });
   describe('getRepoForceRebase', () => {

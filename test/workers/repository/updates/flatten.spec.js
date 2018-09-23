@@ -19,15 +19,29 @@ describe('workers/repository/updates/flatten', () => {
           updateTypes: ['minor'],
           automerge: true,
         },
+        {
+          paths: ['frontend/package.json'],
+          lockFileMaintenance: {
+            enabled: false,
+          },
+        },
       ];
       const packageFiles = {
         npm: [
           {
-            packageFile: 'package.json ',
+            packageFile: 'package.json',
             deps: [
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
-              { updates: [{ newValue: '2.0.0' }] },
+              { depName: 'foo', updates: [{ newValue: '2.0.0' }] },
             ],
+          },
+          {
+            packageFile: 'backend/package.json',
+            deps: [{ depName: 'bar', updates: [{ newValue: '3.0.0' }] }],
+          },
+          {
+            packageFile: 'frontend/package.json',
+            deps: [{ depName: 'baz', updates: [{ newValue: '3.0.1' }] }],
           },
         ],
         dockerfile: [
@@ -55,6 +69,10 @@ describe('workers/repository/updates/flatten', () => {
       };
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(8);
+      expect(
+        res.filter(r => r.updateType === 'lockFileMaintenance')
+      ).toHaveLength(2);
     });
   });
 });

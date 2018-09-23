@@ -65,5 +65,38 @@ describe('config/cli', () => {
       argv.push('bar');
       cli.getConfig(argv).should.eql({ repositories: ['foo', 'bar'] });
     });
+    it('parses json lists correctly', () => {
+      argv.push(
+        `--host-rules=[{"host":"docker.io","platform":"docker","username":"user","password":"password"}]`
+      );
+      cli.getConfig(argv).should.deep.equal({
+        hostRules: [
+          {
+            host: 'docker.io',
+            platform: 'docker',
+            username: 'user',
+            password: 'password',
+          },
+        ],
+      });
+    });
+    it('parses [] correctly as empty list of hostRules', () => {
+      argv.push(`--host-rules=[]`);
+      cli.getConfig(argv).should.eql({
+        hostRules: [],
+      });
+    });
+    it('parses an empty string correctly as empty list of hostRules', () => {
+      argv.push(`--host-rules=`);
+      cli.getConfig(argv).should.eql({
+        hostRules: [],
+      });
+    });
+    it('migrates --endpoints', () => {
+      argv.push(`--endpoints=`);
+      cli.getConfig(argv).should.eql({
+        hostRules: [],
+      });
+    });
   });
 });
