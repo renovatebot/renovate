@@ -660,7 +660,7 @@ describe('platform/vsts', () => {
     });
   });
 
-  describe('deleteBranch', () => {
+  describe('deleteBranch and abandon PR', () => {
     it('should delete the branch', async () => {
       vstsHelper.getRefs.mockImplementation(() => [{ objectId: '123' }]);
       vstsApi.gitApi.mockImplementationOnce(() => ({
@@ -672,8 +672,7 @@ describe('platform/vsts', () => {
           },
         ]),
       }));
-      const res = await vsts.deleteBranch();
-      expect(res).toMatchSnapshot();
+      await vsts.deleteBranch();
     });
   });
 
