@@ -40,6 +40,20 @@ describe('.getLockFile()', () => {
       await composer.getLockFile('composer.json', [], '{}', config)
     ).not.toBeNull();
   });
+  it('supports docker mode', async () => {
+    platform.getFile.mockReturnValueOnce('Current composer.lock');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'New composer.lock');
+    expect(
+      await composer.getLockFile('composer.json', [], '{}', {
+        ...config,
+        binarySource: 'docker',
+      })
+    ).not.toBeNull();
+  });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');
     fs.outputFile = jest.fn(() => {
