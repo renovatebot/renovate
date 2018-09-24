@@ -58,7 +58,7 @@ You can run just the Jest unit tests by running `yarn jest`. You can also run ju
 #### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
-Using `// instanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
+Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/lcov-report/index.html` in your browser.
 
