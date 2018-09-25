@@ -32,12 +32,4 @@ describe('lib/workers/global', () => {
     expect(configParser.parseConfigs.mock.calls.length).toBe(1);
     expect(repositoryWorker.renovateRepository.mock.calls.length).toBe(2);
   });
-  it('catches errors', async () => {
-    configParser.parseConfigs.mockImplementationOnce(() => {
-      throw new Error(
-        'This fatal error is thrown for testing purposes and can be ignored'
-      );
-    });
-    await globalWorker.start();
-  });
 });
