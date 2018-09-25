@@ -12,6 +12,7 @@ describe('workers/repository/error', () => {
   describe('handleError()', () => {
     const errors = [
       'uninitiated',
+      'empty',
       'disabled',
       'repository-changed',
       'fork',
