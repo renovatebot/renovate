@@ -124,7 +124,7 @@
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
-    "chai": "4.1.2",
+    "chai": "4.2.0",
     "codecov": "3.1.0",
     "cross-env": "5.2.0",
     "eslint": "5.6.0",
