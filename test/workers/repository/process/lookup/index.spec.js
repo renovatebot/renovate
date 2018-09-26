@@ -720,6 +720,19 @@ describe('manager/npm/lookup', () => {
       expect(res.updates).toHaveLength(1);
       expect(res.updates[0].newValue).toEqual('3.0.1-insiders.20180726');
     });
+    it('should jump unstable versions if followTag', async () => {
+      config.currentValue = '3.0.0-insiders.20180706';
+      config.depName = 'typescript';
+      config.purl = 'pkg:npm/typescript';
+      config.followTag = 'insiders';
+      nock('https://registry.npmjs.org')
+        .get('/typescript')
+        .reply(200, typescriptJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toMatchSnapshot();
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newValue).toEqual('3.0.1-insiders.20180726');
+    });
     it('should update nothing if current version is dist-tag', async () => {
       config.currentValue = '3.0.1-insiders.20180726';
       config.depName = 'typescript';

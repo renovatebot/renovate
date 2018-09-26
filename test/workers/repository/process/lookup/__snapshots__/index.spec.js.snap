@@ -782,6 +782,22 @@ Array [
 ]
 `;
 
+exports[`manager/npm/lookup .lookupUpdates() should jump unstable versions if followTag 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "3.0.0-insiders.20180706",
+    "isSingleVersion": true,
+    "newMajor": 3,
+    "newMinor": 0,
+    "newValue": "3.0.1-insiders.20180726",
+    "releaseTimestamp": "2018-07-26T18:20:51.679Z",
+    "toVersion": "3.0.1-insiders.20180726",
+    "updateType": "minor",
+  },
+]
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() should not jump unstable versions 1`] = `
 Array [
   Object {
