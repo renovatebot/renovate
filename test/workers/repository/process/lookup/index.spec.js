@@ -843,6 +843,17 @@ describe('manager/npm/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+    it('supports in-range tilde patch updates', async () => {
+      config.rangeStrategy = 'bump';
+      config.currentValue = '~1.0.0';
+      config.depName = 'q';
+      config.separateMinorPatch = true;
+      config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
     it('supports in-range gte updates', async () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>=1.0.0';
