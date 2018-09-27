@@ -40,10 +40,17 @@ describe('workers/branch/parent', () => {
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBe(config.branchName);
     });
+    it('returns undefined if PR title rebase!', async () => {
+      platform.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockReturnValue({
+        title: 'rebase!Update foo to v4',
+      });
+      const res = await getParentBranch(config);
+      expect(res.parentBranch).toBe(undefined);
+    });
     it('returns undefined if manual rebase by label', async () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({
-        isConflicted: true,
         canRebase: false,
         labels: ['rebase'],
       });

@@ -57,7 +57,7 @@ Array [
 
 :vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
 
-:recycle: **Rebasing**: Whenever PR is stale, or if you add the label \`rebase\` to trigger it manually.
+:recycle: **Rebasing**: Whenever PR is stale, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
 :no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
   Array [],
@@ -97,7 +97,7 @@ Array [
 
 :vertical_traffic_light: **Automerge**: Enabled.
 
-:recycle: **Rebasing**: Whenever PR is conflicted, or if you add the label \`rebase\` to trigger it manually.
+:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
 :no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
   Array [],
@@ -154,7 +154,7 @@ note 2
 
 :vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
 
-:recycle: **Rebasing**: Whenever PR is conflicted, or if you add the label \`rebase\` to trigger it manually.
+:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
 :ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/config-help/issues) if that's undesired.",
   Array [],
@@ -194,7 +194,7 @@ Array [
 
 :vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
 
-:recycle: **Rebasing**: Whenever PR is conflicted, or if you add the label \`rebase\` to trigger it manually.
+:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
 :no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
   Array [],
@@ -232,7 +232,7 @@ Object {
 
 :vertical_traffic_light: **Automerge**: Enabled.
 
-:recycle: **Rebasing**: Whenever PR is conflicted, or if you add the label \`rebase\` to trigger it manually.
+:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
 :no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
   "canRebase": true,
@@ -270,7 +270,7 @@ Object {
 
 :vertical_traffic_light: **Automerge**: Enabled.
 
-:recycle: **Rebasing**: Whenever PR is conflicted, or if you add the label \`rebase\` to trigger it manually.
+:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
 :no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
   "canRebase": true,
