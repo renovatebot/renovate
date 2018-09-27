@@ -25,6 +25,10 @@
   ],
   "packageRules": [
     {
+      "packageNames": ["npm", "yarn"],
+      "automerge": false
+    },
+    {
       "depTypeList": ["dependencies"],
       "semanticCommitType": "build"
     },
