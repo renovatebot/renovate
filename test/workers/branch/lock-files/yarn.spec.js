@@ -87,11 +87,9 @@ describe('generateLockFile', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const res = await yarnHelper.generateLockFile(
-      'some-dir',
-      undefined,
-      'global'
-    );
+    const res = await yarnHelper.generateLockFile('some-dir', undefined, {
+      binarySource: 'global',
+    });
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
