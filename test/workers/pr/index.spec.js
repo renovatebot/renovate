@@ -354,6 +354,7 @@ describe('workers/pr', () => {
       platform.getBranchLastCommitTime.mockImplementationOnce(() => new Date());
       config.prCreation = 'not-pending';
       config.lockFileErrors = [{}];
+      config.platform = 'gitlab';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
     });
