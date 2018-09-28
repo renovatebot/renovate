@@ -1,6 +1,5 @@
 jest.mock('fs-extra');
 jest.mock('child-process-promise');
-jest.mock('dockerode');
 
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
@@ -43,6 +42,10 @@ describe('.getLockFile()', () => {
   });
   it('supports docker mode', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
     fs.readFile = jest.fn(() => 'New composer.lock');
     expect(
       await composer.getLockFile('composer.json', [], '{}', {
