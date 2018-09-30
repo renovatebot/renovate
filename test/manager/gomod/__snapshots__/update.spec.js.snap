@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/gomod/update updateDependency replaces two values in one file 1`] = `
+"module github.com/renovate-tests/gomod1
+
+require github.com/pkg/errors v0.8.0
+require github.com/aws/aws-sdk-go v1.15.36
+require github.com/davecgh/go-spew v1.0.0
+require golang.org/x/foo v1.0.0
+require github.com/rarkins/foo abcdef1
+"
+`;

@@ -23,6 +23,9 @@ Object {
   "gitlabci": Array [
     Object {},
   ],
+  "gomod": Array [
+    Object {},
+  ],
   "kubernetes": Array [
     Object {},
   ],
