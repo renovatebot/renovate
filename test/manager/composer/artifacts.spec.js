@@ -3,19 +3,19 @@ jest.mock('child-process-promise');
 
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
-const composer = require('../../../lib/manager/composer/lock-file');
+const composer = require('../../../lib/manager/composer/artifacts');
 
 const config = {
   localDir: '/tmp/github/some/repo',
 };
 
-describe('.getLockFile()', () => {
+describe('.getArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
   it('returns if no composer.lock found', async () => {
     expect(
-      await composer.getLockFile('composer.json', [], '{}', config)
+      await composer.getArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
@@ -26,7 +26,7 @@ describe('.getLockFile()', () => {
     });
     fs.readFile = jest.fn(() => 'Current composer.lock');
     expect(
-      await composer.getLockFile('composer.json', [], '{}', config)
+      await composer.getArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
   });
   it('returns updated composer.lock', async () => {
@@ -37,7 +37,7 @@ describe('.getLockFile()', () => {
     });
     fs.readFile = jest.fn(() => 'New composer.lock');
     expect(
-      await composer.getLockFile('composer.json', [], '{}', config)
+      await composer.getArtifacts('composer.json', [], '{}', config)
     ).not.toBeNull();
   });
   it('supports docker mode', async () => {
@@ -48,7 +48,7 @@ describe('.getLockFile()', () => {
     });
     fs.readFile = jest.fn(() => 'New composer.lock');
     expect(
-      await composer.getLockFile('composer.json', [], '{}', {
+      await composer.getArtifacts('composer.json', [], '{}', {
         ...config,
         binarySource: 'docker',
       })
@@ -60,7 +60,7 @@ describe('.getLockFile()', () => {
       throw new Error('not found');
     });
     expect(
-      await composer.getLockFile('composer.json', [], '{}', config)
+      await composer.getArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
   });
 });

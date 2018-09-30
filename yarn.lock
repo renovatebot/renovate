@@ -7743,10 +7743,10 @@ signale@^1.2.1:
     figures "^2.0.0"
     pkg-conf "^2.1.0"
 
-simple-git@1.102.0:
-  version "1.102.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-1.102.0.tgz#5e159a15fcfcb1eca212a4fdceb4384166c71e7d"
-  integrity sha512-ox/EDIYtyxG9pFBuboxnmR1FFFS2vsrJejuble9d2W0EWvvMB02/ruMUHp1ROPS0OH5Nzr9+/W7JkRRRXDMs8Q==
+simple-git@1.103.0:
+  version "1.103.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-1.103.0.tgz#491d2f11f7c7f90eae33772a9b7c48bba37d811d"
+  integrity sha512-5QKrOtoXLTA3CdFG//8ZIGIVIVRRMBfSyMXDn1t3y+TOf+Kg39mfzfU4t0CRJBcxBGynjNWVwsx6W04+biIUmg==
   dependencies:
     debug "^4.0.1"
 
