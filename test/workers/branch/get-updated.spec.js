@@ -50,8 +50,10 @@ describe('workers/branch/get-updated', () => {
       });
       composer.updateDependency.mockReturnValue('some new content');
       composer.getArtifacts.mockReturnValue({
-        name: 'composer.json',
-        contents: 'some contents',
+        file: {
+          name: 'composer.json',
+          contents: 'some contents',
+        },
       });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
