@@ -215,7 +215,7 @@ The primary use case for this option is if you are following a pre-release tag o
 
 Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
 
-## go
+## golang
 
 Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (`go mod`).
 
