@@ -215,6 +215,14 @@ The primary use case for this option is if you are following a pre-release tag o
 
 Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
 
+## go
+
+Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (`go mod`).
+
+## gomod
+
+Configuration for Go Modules (`go mod`). Supercedes anything in the `go` config object.
+
 ## group
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to _add_ settings to any group by defining your own `group` configuration object.

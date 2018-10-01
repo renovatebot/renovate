@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/go getPkgReleases processes real data 1`] = `
+Object {
+  "releases": Array [
+    1,
+    2,
+  ],
+}
+`;
