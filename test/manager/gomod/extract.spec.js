@@ -17,13 +17,13 @@ describe('lib/manager/gomod/extract', () => {
       const res = extractDependencies(gomod1, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
-      expect(res.filter(e => e.skipReason).length).toBe(2);
+      expect(res.filter(e => e.skipReason).length).toBe(1);
     });
     it('extracts multi-line requires', () => {
       const res = extractDependencies(gomod2, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(58);
-      expect(res.filter(e => e.skipReason).length).toBe(4);
+      expect(res.filter(e => e.skipReason).length).toBe(0);
     });
   });
 });
