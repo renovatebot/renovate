@@ -63,4 +63,15 @@ describe('.getArtifacts()', () => {
       await composer.getArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
   });
+  it('throws unmet-requirements', async () => {
+    platform.getFile.mockReturnValueOnce('Current composer.lock');
+    fs.outputFile = jest.fn(() => {
+      throw new Error(
+        'fooYour requirements could not be resolved to an installable set of packages.bar'
+      );
+    });
+    await expect(
+      composer.getArtifacts('composer.json', [], '{}', config)
+    ).rejects.toThrow();
+  });
 });
