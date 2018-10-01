@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`.getArtifacts() catches errors 1`] = `
+Object {
+  "lockFileError": Object {
+    "lockFile": "composer.lock",
+    "stderr": "not found",
+  },
+}
+`;
+
+exports[`.getArtifacts() catches unmet requirements errors 1`] = `
+Object {
+  "lockFileError": Object {
+    "lockFile": "composer.lock",
+    "stderr": "fooYour requirements could not be resolved to an installable set of packages.bar",
+  },
+}
+`;

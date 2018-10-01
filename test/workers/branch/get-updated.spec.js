@@ -58,5 +58,20 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
+    it('handles lock file errors', async () => {
+      config.parentBranch = 'some-branch';
+      config.upgrades.push({
+        manager: 'composer',
+      });
+      composer.updateDependency.mockReturnValue('some new content');
+      composer.getArtifacts.mockReturnValue({
+        lockFileError: {
+          name: 'composer.lock',
+          stderr: 'some error',
+        },
+      });
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
   });
 });
