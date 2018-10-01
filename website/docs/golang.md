@@ -3,7 +3,7 @@ title: Go Modules
 description: Go modules support in Renovate
 ---
 
-# Dependency Update Automation for Go Modules
+# Automated Dependency Updates for Go Modules
 
 Renovate supports upgrading dependencies in `go.mod` files and their accompanying `go.sum` checksums.
 
@@ -13,6 +13,10 @@ Renovate supports upgrading dependencies in `go.mod` files and their accompanyin
 2.  Existing dependencies will be extracted from `require` statements
 3.  Renovate will resolve the dependency's source repository and check for semver tags if found (GitHub-only currently)
 4.  If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
+
+## Enabling
+
+Install the [Renovate App](https://github.com/marketplace/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) or [Renovate Pro](https://renovatebot.com/pro) for self-hosted options.
 
 ## Limitations / Future work
 
