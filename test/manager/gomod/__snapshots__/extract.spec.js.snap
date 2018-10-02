@@ -465,13 +465,13 @@ Array [
     "versionScheme": "semver",
   },
   Object {
-    "currentValue": "v1.3.0",
-    "depName": "github.com/src-d/gcfg",
-    "depNameShort": "src-d/gcfg",
+    "currentValue": "v2.3.0",
+    "depName": "github.com/src-d/gcfg/v2",
+    "depNameShort": "src-d/gcfg/v2",
     "depType": "require",
     "lineNumber": 47,
     "multiLine": true,
-    "purl": "pkg:github/src-d/gcfg",
+    "purl": "pkg:github/src-d/gcfg/v2",
     "versionScheme": "semver",
   },
   Object {
@@ -655,6 +655,15 @@ Array [
     "depType": "require",
     "lineNumber": 6,
     "skipReason": "unsupported-version",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "v1.0.0",
+    "depName": "gopkg.in/russross/blackfriday.v1",
+    "depNameShort": "russross/blackfriday",
+    "depType": "require",
+    "lineNumber": 7,
+    "purl": "pkg:github/russross/blackfriday",
     "versionScheme": "semver",
   },
 ]
