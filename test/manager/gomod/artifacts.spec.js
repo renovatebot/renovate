@@ -53,8 +53,10 @@ describe('.getArtifacts()', () => {
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current go.sum');
     fs.outputFile = jest.fn(() => {
-      throw new Error('not found');
+      throw new Error('This update totally doesnt work');
     });
-    expect(await gomod.getArtifacts('gomod.json', [], '{}', config)).toBeNull();
+    expect(
+      await gomod.getArtifacts('go.mod', [], '{}', config)
+    ).toMatchSnapshot();
   });
 });

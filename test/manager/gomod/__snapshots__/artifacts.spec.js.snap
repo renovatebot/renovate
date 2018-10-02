@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`.getArtifacts() catches errors 1`] = `
+Object {
+  "lockFileError": Object {
+    "lockFile": "go.sum",
+    "stderr": "This update totally doesnt work",
+  },
+}
+`;
