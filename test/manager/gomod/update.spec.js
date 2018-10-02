@@ -43,16 +43,35 @@ describe('manager/gomod/update', () => {
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).toEqual(gomod1);
     });
-    it('skips major updates > 1', () => {
+    it('replaces major updates > 1', () => {
       const upgrade = {
         depName: 'github.com/pkg/errors',
         lineNumber: 2,
         newMajor: 2,
         updateType: 'major',
+        currentValue: 'v0.7.0',
         newValue: 'v2.0.0',
       };
       const res = goUpdate.updateDependency(gomod1, upgrade);
-      expect(res).toEqual(gomod1);
+      expect(res).not.toEqual(gomod2);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes('github.com/pkg/errors/v2')).toBe(true);
+    });
+    it('replaces major gopkg.in updates', () => {
+      const upgrade = {
+        depName: 'gopkg.in/russross/blackfriday.v1',
+        lineNumber: 7,
+        newMajor: 2,
+        updateType: 'major',
+        currentValue: 'v1.0.0',
+        newValue: 'v2.0.0',
+      };
+      const res = goUpdate.updateDependency(gomod1, upgrade);
+      expect(res).toMatchSnapshot();
+      expect(res).not.toEqual(gomod2);
+      expect(res.includes('gopkg.in/russross/blackfriday.v2 v2.0.0')).toBe(
+        true
+      );
     });
     it('returns null if mismatch', () => {
       const upgrade = {
@@ -77,6 +96,36 @@ describe('manager/gomod/update', () => {
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
       expect(res.includes(upgrade.newValue)).toBe(true);
+    });
+    it('replaces major multiline', () => {
+      const upgrade = {
+        depName: 'github.com/emirpasic/gods',
+        lineNumber: 7,
+        multiLine: true,
+        currentValue: 'v1.9.0',
+        newValue: 'v2.0.0',
+        newMajor: 2,
+        updateType: 'major',
+      };
+      const res = goUpdate.updateDependency(gomod2, upgrade);
+      expect(res).not.toEqual(gomod2);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes('github.com/emirpasic/gods/v2')).toBe(true);
+    });
+    it('bumps major multiline', () => {
+      const upgrade = {
+        depName: 'github.com/src-d/gcfg',
+        lineNumber: 47,
+        multiLine: true,
+        currentValue: 'v2.3.0',
+        newValue: 'v3.0.0',
+        newMajor: 3,
+        updateType: 'major',
+      };
+      const res = goUpdate.updateDependency(gomod2, upgrade);
+      expect(res).not.toEqual(gomod2);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes('github.com/src-d/gcfg/v3')).toBe(true);
     });
     it('update multiline digest', () => {
       const upgrade = {

@@ -45,7 +45,7 @@ require (
 	github.com/spf13/pflag v1.0.2
 	github.com/spf13/viper v1.1.0
 	github.com/spkg/bom v0.0.0-20160624110644-59b7046e48ad
-	github.com/src-d/gcfg v1.3.0
+	github.com/src-d/gcfg/v2 v2.3.0
 	github.com/stretchr/testify v1.2.2
 	github.com/stvp/roll v0.0.0-20170522205222-3627a5cbeaea
 	github.com/tcnksm/go-gitconfig v0.1.2

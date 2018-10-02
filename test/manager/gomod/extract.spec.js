@@ -16,7 +16,7 @@ describe('lib/manager/gomod/extract', () => {
     it('extracts single-line requires', () => {
       const res = extractDependencies(gomod1, config).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(5);
+      expect(res).toHaveLength(6);
       expect(res.filter(e => e.skipReason).length).toBe(1);
     });
     it('extracts multi-line requires', () => {
