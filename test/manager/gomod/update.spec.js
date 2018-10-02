@@ -97,6 +97,18 @@ describe('manager/gomod/update', () => {
       expect(res).not.toEqual(gomod2);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
+    it('replaces quoted multiline', () => {
+      const upgrade = {
+        depName: 'gopkg.in/src-d/go-billy.v4',
+        lineNumber: 57,
+        multiLine: true,
+        newValue: 'v4.8.0',
+      };
+      const res = goUpdate.updateDependency(gomod2, upgrade);
+      expect(res).toMatchSnapshot();
+      expect(res).not.toEqual(gomod2);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+    });
     it('replaces major multiline', () => {
       const upgrade = {
         depName: 'github.com/emirpasic/gods',
