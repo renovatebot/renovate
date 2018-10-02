@@ -13,6 +13,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "9fd32a8b3d3d",
     "currentValue": "v0.0.0-20140422174119-9fd32a8b3d3d",
     "depName": "github.com/bgentry/go-netrc",
     "depNameShort": "bgentry/go-netrc",
@@ -23,6 +24,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "bcc4c8345a21",
     "currentValue": "v0.0.0-20151120183258-bcc4c8345a21",
     "depName": "github.com/cloudfoundry/jibber_jabber",
     "depNameShort": "cloudfoundry/jibber_jabber",
@@ -83,6 +85,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "604e922904d3",
     "currentValue": "v0.0.0-20130729185459-604e922904d3",
     "depName": "github.com/golang-collections/collections",
     "depNameShort": "golang-collections/collections",
@@ -93,6 +96,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "d5fe4b57a186",
     "currentValue": "v0.0.0-20171218145408-d5fe4b57a186",
     "depName": "github.com/hashicorp/go-cleanhttp",
     "depNameShort": "hashicorp/go-cleanhttp",
@@ -103,6 +107,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "4bda8fa99001",
     "currentValue": "v0.0.0-20180809191950-4bda8fa99001",
     "depName": "github.com/hashicorp/go-getter",
     "depNameShort": "hashicorp/go-getter",
@@ -113,6 +118,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "b1a1dbde6fdc",
     "currentValue": "v0.0.0-20180326211150-b1a1dbde6fdc",
     "depName": "github.com/hashicorp/go-safetemp",
     "depNameShort": "hashicorp/go-safetemp",
@@ -133,6 +139,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "ef8a98b0bbce",
     "currentValue": "v0.0.0-20180404174102-ef8a98b0bbce",
     "depName": "github.com/hashicorp/hcl",
     "depNameShort": "hashicorp/hcl",
@@ -143,6 +150,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "fc0cef2ff331",
     "currentValue": "v0.0.0-20180515183152-fc0cef2ff331",
     "depName": "github.com/heroku/rollrus",
     "depNameShort": "heroku/rollrus",
@@ -153,6 +161,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "d14ea06fba99",
     "currentValue": "v0.0.0-20150711004518-d14ea06fba99",
     "depName": "github.com/jbenet/go-context",
     "depNameShort": "jbenet/go-context",
@@ -163,6 +172,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "906e15686e63",
     "currentValue": "v0.0.0-20180822080847-906e15686e63",
     "depName": "github.com/jesseduffield/go-getter",
     "depNameShort": "jesseduffield/go-getter",
@@ -173,6 +183,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "03e26ff3f1de",
     "currentValue": "v0.0.0-20180921065632-03e26ff3f1de",
     "depName": "github.com/jesseduffield/gocui",
     "depNameShort": "jesseduffield/gocui",
@@ -183,6 +194,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "1e272ff78dcb",
     "currentValue": "v0.0.0-20180919093808-1e272ff78dcb",
     "depName": "github.com/jesseduffield/termbox-go",
     "depNameShort": "jesseduffield/termbox-go",
@@ -193,6 +205,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "0b12d6b521d8",
     "currentValue": "v0.0.0-20160202185014-0b12d6b521d8",
     "depName": "github.com/jmespath/go-jmespath",
     "depNameShort": "jmespath/go-jmespath",
@@ -203,6 +216,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "ae77be60afb1",
     "currentValue": "v0.0.0-20170510131534-ae77be60afb1",
     "depName": "github.com/kardianos/osext",
     "depNameShort": "kardianos/osext",
@@ -213,6 +227,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "9fc7bb800b55",
     "currentValue": "v0.0.0-20180317175531-9fc7bb800b55",
     "depName": "github.com/kevinburke/ssh_config",
     "depNameShort": "kevinburke/ssh_config",
@@ -273,6 +288,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "58046073cbff",
     "currentValue": "v0.0.0-20180801233206-58046073cbff",
     "depName": "github.com/mitchellh/go-homedir",
     "depNameShort": "mitchellh/go-homedir",
@@ -283,6 +299,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "a61a99592b77",
     "currentValue": "v0.0.0-20171004221916-a61a99592b77",
     "depName": "github.com/mitchellh/go-testing-interface",
     "depNameShort": "mitchellh/go-testing-interface",
@@ -293,6 +310,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "f15292f7a699",
     "currentValue": "v0.0.0-20180715050151-f15292f7a699",
     "depName": "github.com/mitchellh/mapstructure",
     "depNameShort": "mitchellh/mapstructure",
@@ -303,6 +321,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "a16b91a3ba80",
     "currentValue": "v0.0.0-20180803040939-a16b91a3ba80",
     "depName": "github.com/nicksnyder/go-i18n",
     "depNameShort": "nicksnyder/go-i18n",
@@ -363,6 +382,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "e180dbdc8da0",
     "currentValue": "v0.0.0-20170330084843-e180dbdc8da0",
     "depName": "github.com/shibukawa/configdir",
     "depNameShort": "shibukawa/configdir",
@@ -403,6 +423,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "14d3d4c51834",
     "currentValue": "v0.0.0-20180814060501-14d3d4c51834",
     "depName": "github.com/spf13/jwalterweatherman",
     "depNameShort": "spf13/jwalterweatherman",
@@ -433,6 +454,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "59b7046e48ad",
     "currentValue": "v0.0.0-20160624110644-59b7046e48ad",
     "depName": "github.com/spkg/bom",
     "depNameShort": "spkg/bom",
@@ -463,6 +485,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "3627a5cbeaea",
     "currentValue": "v0.0.0-20170522205222-3627a5cbeaea",
     "depName": "github.com/stvp/roll",
     "depNameShort": "stvp/roll",
@@ -503,6 +526,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "de0752318171",
     "currentValue": "v0.0.0-20180808211826-de0752318171",
     "depName": "golang.org/x/crypto",
     "depNameShort": "golang.org/x/crypto",
@@ -513,6 +537,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "c39426892332",
     "currentValue": "v0.0.0-20180811021610-c39426892332",
     "depName": "golang.org/x/net",
     "depNameShort": "golang.org/x/net",
@@ -523,6 +548,7 @@ Array [
     "versionScheme": "semver",
   },
   Object {
+    "currentDigest": "98c5dad5d1a0",
     "currentValue": "v0.0.0-20180810173357-98c5dad5d1a0",
     "depName": "golang.org/x/sys",
     "depNameShort": "golang.org/x/sys",

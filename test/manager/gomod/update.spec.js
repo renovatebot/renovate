@@ -78,6 +78,34 @@ describe('manager/gomod/update', () => {
       expect(res).not.toEqual(gomod2);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
+    it('update multiline digest', () => {
+      const upgrade = {
+        depName: 'github.com/spf13/jwalterweatherman',
+        lineNumber: 43,
+        multiLine: true,
+        currentVersion: 'v0.0.0',
+        updateType: 'digest',
+        currentDigest: '14d3d4c51834',
+        newDigest: '123456123456abcdef',
+      };
+      const res = goUpdate.updateDependency(gomod2, upgrade);
+      expect(res).not.toEqual(gomod2);
+      expect(res.includes(upgrade.newDigest)).toBe(false);
+      expect(res.includes(upgrade.newDigest.substring(0, 12))).toBe(true);
+    });
+    it('skips already-updated multiline digest', () => {
+      const upgrade = {
+        depName: 'github.com/spf13/jwalterweatherman',
+        lineNumber: 43,
+        multiLine: true,
+        currentVersion: 'v0.0.0',
+        updateType: 'digest',
+        currentDigest: 'abcdefabcdef',
+        newDigest: '14d3d4c51834000000',
+      };
+      const res = goUpdate.updateDependency(gomod2, upgrade);
+      expect(res).toEqual(gomod2);
+    });
     it('handles multiline mismatch', () => {
       const upgrade = {
         depName: 'github.com/fatih/color',
