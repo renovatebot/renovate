@@ -155,8 +155,7 @@ describe('workers/branch', () => {
         updatedLockFiles: [],
       });
       platform.branchExists.mockReturnValue(false);
-      config.prHourlyLimitReached = true;
-      expect(await branchWorker.processBranch(config)).toEqual(
+      expect(await branchWorker.processBranch(config, true)).toEqual(
         'pr-hourly-limit-reached'
       );
     });
