@@ -561,16 +561,51 @@ describe('platform/gitlab', () => {
       expect(res).toBeDefined();
     });
   });
+  describe('findIssue()', () => {
+    it('returns null if no issue', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            iid: 1,
+            title: 'title-1',
+          },
+          {
+            iid: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      const res = await gitlab.findIssue('title-3');
+      expect(res).toBeNull();
+    });
+    it('finds issue', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            iid: 1,
+            title: 'title-1',
+          },
+          {
+            iid: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'new-content' } });
+      const res = await gitlab.findIssue('title-2');
+      expect(res).not.toBeNull();
+    });
+  });
   describe('ensureIssue()', () => {
     it('creates issue', async () => {
       get.mockImplementationOnce(() => ({
         body: [
           {
-            number: 1,
+            iid: 1,
             title: 'title-1',
           },
           {
-            number: 2,
+            iid: 2,
             title: 'title-2',
           },
         ],
@@ -582,11 +617,11 @@ describe('platform/gitlab', () => {
       get.mockReturnValueOnce({
         body: [
           {
-            number: 1,
+            iid: 1,
             title: 'title-1',
           },
           {
-            number: 2,
+            iid: 2,
             title: 'title-2',
           },
         ],

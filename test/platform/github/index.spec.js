@@ -863,6 +863,41 @@ describe('platform/github', () => {
       expect(res).toBeDefined();
     });
   });
+  describe('findIssue()', () => {
+    it('returns null if no issue', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      const res = await github.findIssue('title-3');
+      expect(res).toBeNull();
+    });
+    it('finds issue', async () => {
+      get.mockReturnValueOnce({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+          },
+        ],
+      });
+      get.mockReturnValueOnce({ body: { body: 'new-content' } });
+      const res = await github.findIssue('title-2');
+      expect(res).not.toBeNull();
+    });
+  });
   describe('ensureIssue()', () => {
     it('creates issue', async () => {
       get.mockImplementationOnce(() => ({

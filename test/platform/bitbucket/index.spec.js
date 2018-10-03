@@ -230,6 +230,11 @@ describe('platform/bitbucket', () => {
     });
   });
 
+  describe('findIssue()', () => {
+    it('does not throw', async () => {
+      await bitbucket.findIssue('title');
+    });
+  });
   describe('ensureIssue()', () => {
     it('does not throw', async () => {
       await bitbucket.ensureIssue('title', 'body');
