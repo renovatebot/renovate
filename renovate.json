@@ -7,6 +7,7 @@
     "group:linters",
     ":assignee(rarkins)"
   ],
+  "masterIssueApproval": true,
   "semanticCommitScope": "deps",
   "docker": {
     "pinDigests": true,
