@@ -5,9 +5,9 @@
     ":automergeMinor",
     ":label(ready)",
     "group:linters",
+    ":masterIssueApproval",
     ":assignee(rarkins)"
   ],
-  "masterIssueApproval": true,
   "semanticCommitScope": "deps",
   "docker": {
     "pinDigests": true,
