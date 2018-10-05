@@ -17,6 +17,9 @@ describe('workers/branch/schedule', () => {
     it('returns true for null', () => {
       expect(schedule.hasValidSchedule(null)[0]).toBe(true);
     });
+    it('returns true for at any time', () => {
+      expect(schedule.hasValidSchedule('at any time')[0]).toBe(true);
+    });
     it('returns false for invalid schedule', () => {
       expect(schedule.hasValidSchedule(['foo'])[0]).toBe(false);
     });
@@ -94,6 +97,16 @@ describe('workers/branch/schedule', () => {
       config = {};
     });
     it('returns true if no schedule', () => {
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('returns true if at any time', () => {
+      config.schedule = 'at any time';
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('returns true if at any time array', () => {
+      config.schedule = ['at any time'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });

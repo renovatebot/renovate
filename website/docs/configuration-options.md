@@ -729,11 +729,13 @@ Set this to false either globally, per-language, or per-package if you want to d
 
 ## schedule
 
-The `schedule` option allows you to define 1 or more times of week for Renovate updates. Running Renovate around the clock may seem too "noisy" for some projects and therefore `schedule` is a good way to reduce the noise by reducing the timeframe in which Renovate will operate on your repository.
+The `schedule` option allows you to define times of week or month for Renovate updates. Running Renovate around the clock may seem too "noisy" for some projects and therefore `schedule` is a good way to reduce the noise by reducing the timeframe in which Renovate will operate on your repository.
 
-For this we rely on text parsing of the library [later](http://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
+The default value for `schedule` is "at any time", which is functionally the same as declaring a `null` schedule. i.e. Renovate will run on the repository around the clock.
 
-Example scheduling:
+The easiest way to define a schedule is to use a preset if one of them fits your requirements. See [Schedule presets](https://renovatebot.com/docs/presets-schedule/) for details and feel free to request a new one in the source repository if you think others would benefit from it too.
+
+Otherwise, here are some text schedules that are known to work:
 
 ```
 every weekend
@@ -753,16 +755,18 @@ This would mean that Renovate can run for 7 hours each night plus all the time o
 
 This scheduling feature can also be particularly useful for "noisy" packages that are updated frequently, such as `aws-sdk`.
 
-To restrict `aws-sdk` to only weekly updates, you could add this package rule:
+To restrict `aws-sdk` to only monthly updates, you could add this package rule:
 
 ```json
   "packageRules": [
     {
       "packageNames": ["aws-sdk"],
-      "schedule": ["after 9pm on sunday"]
+      "extends": ["schedule:monthly"]
     }
   ]
 ```
+
+Technical details: We mostly rely on the text parsing of the library [later](http://bunkat.github.io/later/parsers.html#text) but only its concepts of "days", "time_before", and "time_after" (Renovate does not support scheduled minutes or "at an exact time" granularity).
 
 ## semanticCommitScope
 
