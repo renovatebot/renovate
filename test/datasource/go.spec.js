@@ -1,6 +1,7 @@
 const got = require('got');
 const datasource = require('../../lib/datasource');
 const github = require('../../lib/datasource/github');
+const go = require('../../lib/datasource/go');
 
 jest.mock('got');
 jest.mock('../../lib/datasource/github');
@@ -19,6 +20,24 @@ Nothing to see here; <a href="https://godoc.org/golang.org/x/text">move along</a
 </html>`;
 
 describe('datasource/go', () => {
+  describe('getPkgReleases', () => {
+    it('returns null for wrong name', async () => {
+      got.mockReturnValueOnce({
+        body: res1,
+      });
+      github.getDigest.mockReturnValueOnce('abcdefabcdefabcdefabcdef');
+      const res = await go.getDigest({ depName: 'golang.org/y/text' }, null);
+      expect(res).toBeNull();
+    });
+    it('returns digest', async () => {
+      got.mockReturnValueOnce({
+        body: res1,
+      });
+      github.getDigest.mockReturnValueOnce('abcdefabcdefabcdefabcdef');
+      const res = await go.getDigest({ depName: 'golang.org/x/text' }, null);
+      expect(res).toBe('abcdefabcdefabcdefabcdef');
+    });
+  });
   describe('getPkgReleases', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
