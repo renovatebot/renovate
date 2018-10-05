@@ -1,29 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`lib/manager/terraform/extract extractDependencies() extracts two per file 1`] = `
-Array [
-  Object {
-    "currentValue": "v1.0.0",
-    "depName": "foo",
-    "githubRepo": "hashicorp/example",
-    "lineNumber": 1,
-    "purl": "pkg:github/hashicorp/example",
-    "source": "github.com/hashicorp/example?ref=v1.0.0",
-  },
-  Object {
-    "currentValue": "next",
-    "depName": "bar",
-    "githubRepo": "hashicorp/example",
-    "lineNumber": 5,
-    "purl": "pkg:github/hashicorp/example",
-    "skipReason": "unsupported-version",
-    "source": "github.com/hashicorp/example?ref=next",
-  },
-  Object {
-    "currentValue": "0.1.0",
-    "depName": "consul",
-    "skipReason": "unsupported-version",
-    "source": "hashicorp/consul/aws",
-  },
-]
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v1.0.0",
+      "depName": "github.com/hashicorp/example",
+      "githubRepo": "hashicorp/example",
+      "lineNumber": 1,
+      "moduleName": "foo",
+      "purl": "pkg:github/hashicorp/example",
+      "source": "github.com/hashicorp/example?ref=v1.0.0",
+    },
+    Object {
+      "currentValue": "next",
+      "depName": "github.com/hashicorp/example",
+      "githubRepo": "hashicorp/example",
+      "lineNumber": 5,
+      "moduleName": "bar",
+      "purl": "pkg:github/hashicorp/example",
+      "skipReason": "unsupported-version",
+      "source": "github.com/hashicorp/example?ref=next",
+    },
+    Object {
+      "currentValue": "0.1.0",
+      "moduleName": "consul",
+      "skipReason": "unsupported-version",
+      "source": "hashicorp/consul/aws",
+    },
+    Object {
+      "currentValue": "v0.1.0",
+      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "githubRepo": "tieto-cem/terraform-aws-ecs-task-definition",
+      "lineNumber": 14,
+      "moduleName": "container_definition",
+      "purl": "pkg:github/tieto-cem/terraform-aws-ecs-task-definition",
+      "source": "github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0",
+    },
+    Object {
+      "currentValue": "v0.1.0",
+      "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "githubRepo": "tieto-cem/terraform-aws-ecs-task-definition",
+      "lineNumber": 25,
+      "moduleName": "task_definition",
+      "purl": "pkg:github/tieto-cem/terraform-aws-ecs-task-definition",
+      "source": "github.com/tieto-cem/terraform-aws-ecs-task-definition?ref=v0.1.0",
+    },
+  ],
+}
 `;
