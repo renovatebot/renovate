@@ -89,6 +89,7 @@ describe('workers/repository/updates/generate', () => {
           lazyGrouping: true,
           foo: 1,
           newValue: '5.1.2',
+          toVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -106,6 +107,7 @@ describe('workers/repository/updates/generate', () => {
           lazyGrouping: true,
           foo: 1,
           newValue: '5.1.2',
+          toVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -133,6 +135,7 @@ describe('workers/repository/updates/generate', () => {
           lazyGrouping: true,
           foo: 1,
           newValue: '5.1.2',
+          toVersion: '5.1.2',
           group: {
             foo: 2,
           },
@@ -148,6 +151,7 @@ describe('workers/repository/updates/generate', () => {
           lazyGrouping: true,
           foo: 1,
           newValue: '1.1.0',
+          toVersion: '1.1.0',
           group: {
             foo: 2,
           },
