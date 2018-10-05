@@ -9,6 +9,7 @@ module.exports = {
     'no-use-before-define': 0,
     'no-restricted-syntax': 0,
     'no-await-in-loop': 0,
+    'prefer-destructuring': 'off',
     'prefer-template': 'off',
     'promise/always-return': 'error',
     'promise/no-return-wrap': 'error',
