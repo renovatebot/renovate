@@ -14,6 +14,9 @@ describe('workers/branch/schedule', () => {
     beforeEach(() => {
       jest.resetAllMocks();
     });
+    it('returns true for null', () => {
+      expect(schedule.hasValidSchedule(null)[0]).toBe(true);
+    });
     it('returns false for invalid schedule', () => {
       expect(schedule.hasValidSchedule(['foo'])[0]).toBe(false);
     });

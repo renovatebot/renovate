@@ -98,7 +98,7 @@ Object {
       "minor": Object {
         "automerge": true,
       },
-      "schedule": Array [],
+      "schedule": null,
     },
     Object {
       "depTypeList": Array [
