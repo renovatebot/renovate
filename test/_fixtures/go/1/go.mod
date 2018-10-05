@@ -6,3 +6,5 @@ require github.com/davecgh/go-spew v1.0.0
 require golang.org/x/foo v1.0.0
 require github.com/rarkins/foo abcdef1
 require gopkg.in/russross/blackfriday.v1 v1.0.0
+
+replace github.com/pkg/errors => ../errors
