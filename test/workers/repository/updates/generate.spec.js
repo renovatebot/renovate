@@ -165,6 +165,45 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toEqual('2017-02-08T20:01:41+00:00');
     });
+    it('fixes different messages', () => {
+      const branch = [
+        {
+          depName: 'depA',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          lazyGrouping: true,
+          foo: 1,
+          newValue: '>= 5.1.2',
+          toVersion: '5.1.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+        },
+        {
+          depName: 'depA',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          lazyGrouping: true,
+          foo: 1,
+          newValue: '^5,1,2',
+          toVersion: '5.1.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.foo).toBe(1);
+      expect(res.groupName).toBeUndefined();
+    });
     it('uses semantic commits', () => {
       const branch = [
         {
