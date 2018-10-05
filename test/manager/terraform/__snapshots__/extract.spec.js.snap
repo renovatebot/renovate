@@ -6,6 +6,7 @@ Object {
     Object {
       "currentValue": "v1.0.0",
       "depName": "github.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
       "githubRepo": "hashicorp/example",
       "lineNumber": 1,
       "moduleName": "foo",
@@ -15,6 +16,7 @@ Object {
     Object {
       "currentValue": "next",
       "depName": "github.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
       "githubRepo": "hashicorp/example",
       "lineNumber": 5,
       "moduleName": "bar",
@@ -31,6 +33,7 @@ Object {
     Object {
       "currentValue": "v0.1.0",
       "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "depNameShort": "tieto-cem/terraform-aws-ecs-task-definition",
       "githubRepo": "tieto-cem/terraform-aws-ecs-task-definition",
       "lineNumber": 14,
       "moduleName": "container_definition",
@@ -40,6 +43,7 @@ Object {
     Object {
       "currentValue": "v0.1.0",
       "depName": "github.com/tieto-cem/terraform-aws-ecs-task-definition",
+      "depNameShort": "tieto-cem/terraform-aws-ecs-task-definition",
       "githubRepo": "tieto-cem/terraform-aws-ecs-task-definition",
       "lineNumber": 25,
       "moduleName": "task_definition",
