@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/terraform/update updateDependency replaces existing value 1`] = `
+"module \\"foo\\" {
+  source  = \\"github.com/hashicorp/example?ref=v1.0.1\\"
+}
+
+module \\"bar\\" {
+  source  = \\"github.com/hashicorp/example?ref=next\\"
+}
+
+module \\"consul\\" {
+  source = \\"hashicorp/consul/aws\\"
+  version = \\"0.1.0\\"
+}
+"
+`;

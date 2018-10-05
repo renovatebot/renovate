@@ -806,6 +806,10 @@ Language support is limited to those listed below:
 
 - **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/node#configuring-support-policy)
 
+## terraform
+
+Currently terraform support is limited to github sources with semver refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.
+
 ## timezone
 
 It is only recommended to set this field if you wish to use the `schedules` feature and want to write them in your local timezone. Please see the above link for valid timezone names.
