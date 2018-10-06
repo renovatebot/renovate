@@ -137,6 +137,11 @@ Object {
       "source": "hashicorp/consul/aws",
       "versionScheme": "semverHashicorp",
     },
+    Object {
+      "moduleName": "relative",
+      "skipReason": "local",
+      "source": "../../modules/fe",
+    },
   ],
 }
 `;

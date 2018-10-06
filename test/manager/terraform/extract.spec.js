@@ -17,8 +17,8 @@ describe('lib/manager/terraform/extract', () => {
     it('extracts', () => {
       const res = extractDependencies(tf1);
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(12);
-      expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(3);
+      expect(res.deps).toHaveLength(13);
+      expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(4);
     });
   });
 });

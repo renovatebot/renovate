@@ -86,3 +86,7 @@ module "consul3" {
   source = "hashicorp/consul/aws"
   version = ">= 1.0.0, <= 2.0.0"
 }
+
+module "relative" {
+  source = "../../modules/fe"
+}
