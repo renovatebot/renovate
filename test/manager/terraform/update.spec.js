@@ -13,7 +13,6 @@ describe('manager/terraform/update', () => {
         newValue: 'v1.0.1',
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
-      expect(res).toMatchSnapshot();
       expect(res).not.toEqual(tf1);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
@@ -50,7 +49,6 @@ describe('manager/terraform/update', () => {
           'github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0',
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
-      expect(res).toMatchSnapshot();
       expect(res).not.toEqual(tf1);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
