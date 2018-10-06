@@ -126,6 +126,17 @@ Object {
       "skipReason": "unsupported-version",
       "source": "app.terraform.io/example-corp/k8s-cluster/azurerm",
     },
+    Object {
+      "currentValue": ">= 1.0.0, <= 2.0.0",
+      "depName": "hashicorp/consul/aws",
+      "depNameShort": "hashicorp/consul/aws",
+      "depType": "terraform",
+      "lineNumber": 86,
+      "moduleName": "consul3",
+      "purl": "pkg:terraform/hashicorp/consul/aws",
+      "source": "hashicorp/consul/aws",
+      "versionScheme": "semverHashicorp",
+    },
   ],
 }
 `;

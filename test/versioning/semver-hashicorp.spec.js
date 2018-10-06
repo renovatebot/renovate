@@ -22,6 +22,17 @@ describe('semver.maxSatisfyingVersion()', () => {
     ).toBe('4.0.0');
   });
 });
+describe('semver.isValid()', () => {
+  it('handles comma', () => {
+    expect(semver.isValid('>= 1.0.0, <= 2.0.0')).toBeTruthy();
+  });
+});
+describe('semver.isLessThanRange()', () => {
+  it('handles comma', () => {
+    expect(semver.isLessThanRange('0.9.0', '>= 1.0.0, <= 2.0.0')).toBe(true);
+    expect(semver.isLessThanRange('1.9.0', '>= 1.0.0, <= 2.0.0')).toBe(false);
+  });
+});
 describe('semver.minSatisfyingVersion()', () => {
   it('handles tilde greater than', () => {
     expect(
@@ -46,5 +57,10 @@ describe('semver.getNewValue()', () => {
     expect(semver.getNewValue('~> 1.2.0', 'replace', '1.2.3', '2.0.7')).toEqual(
       '~> 2.0.0'
     );
+  });
+  it('handles comma dividers', () => {
+    expect(
+      semver.getNewValue('>= 1.0.0, <= 2.0.0', 'widen', '1.2.3', '2.0.7')
+    ).toEqual('>= 1.0.0, <= 2.0.7');
   });
 });

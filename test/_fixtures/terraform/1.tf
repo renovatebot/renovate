@@ -81,3 +81,8 @@ module "consul3" {
   source = "app.terraform.io/example-corp/k8s-cluster/azurerm"
   version = "~~ 1.1"
 }
+
+module "consul3" {
+  source = "hashicorp/consul/aws"
+  version = ">= 1.0.0, <= 2.0.0"
+}
