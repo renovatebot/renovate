@@ -104,13 +104,13 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('returns cached JSON', async () => {
-      const first = await getChangeLogJSON({ ...upgrade });
-      const firstCalls = [...ghGot.mock.calls];
       ghGot.mockClear();
+      const first = await getChangeLogJSON({ ...upgrade });
+      const firstCallsCount = ghGot.mock.calls.length;
       const second = await getChangeLogJSON({ ...upgrade });
-      const secondCalls = [...ghGot.mock.calls];
+      const secondCallsCount = ghGot.mock.calls.length - firstCallsCount;
       expect(first).toEqual(second);
-      expect(firstCalls.length).toBeGreaterThan(secondCalls.length);
+      expect(firstCallsCount).toBeGreaterThan(secondCallsCount);
     });
     it('filters unnecessary warns', async () => {
       ghGot.mockImplementation(() => {

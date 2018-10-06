@@ -60,6 +60,11 @@ describe('semver.getNewValue()', () => {
       '^1.0.7'
     );
   });
+  it('supports tilde greater than', () => {
+    expect(semver.getNewValue('~> 1.0.0', 'replace', '1.0.0', '1.1.7')).toEqual(
+      '~> 1.1.0'
+    );
+  });
   it('bumps short caret to new', () => {
     expect(semver.getNewValue('^1.0', 'bump', '1.0.0', '1.1.7')).toEqual(
       '^1.1'
