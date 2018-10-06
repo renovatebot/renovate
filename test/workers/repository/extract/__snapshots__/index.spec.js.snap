@@ -44,6 +44,9 @@ Object {
   "pip_requirements": Array [
     Object {},
   ],
+  "terraform": Array [
+    Object {},
+  ],
   "travis": Array [
     Object {},
   ],
