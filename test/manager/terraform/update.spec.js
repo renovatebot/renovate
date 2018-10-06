@@ -39,7 +39,7 @@ describe('manager/terraform/update', () => {
       const res = tfUpdate.updateDependency(tf1, upgrade);
       expect(res).toBeNull();
     });
-    it('replaces major updates > 1', () => {
+    it('updates github versions', () => {
       const upgrade = {
         depType: 'github',
         currentValue: 'v0.1.0',
@@ -51,6 +51,37 @@ describe('manager/terraform/update', () => {
         purl: 'pkg:github/tieto-cem/terraform-aws-ecs-task-definition',
         source:
           'github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0',
+      };
+      const res = tfUpdate.updateDependency(tf1, upgrade);
+      expect(res).not.toEqual(tf1);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+    });
+    it('skips terraform versions wrong line', () => {
+      const upgrade = {
+        currentValue: '0.1.0',
+        depName: 'hashicorp/consul/aws',
+        depNameShort: 'hashicorp/consul/aws',
+        depType: 'terraform',
+        lineNumber: 11,
+        moduleName: 'consul',
+        purl: 'pkg:terraform/hashicorp/consul/aws',
+        source: 'hashicorp/consul/aws',
+        newValue: '0.4.0',
+      };
+      const res = tfUpdate.updateDependency(tf1, upgrade);
+      expect(res).toBeNull();
+    });
+    it('updates terraform versions', () => {
+      const upgrade = {
+        currentValue: '0.1.0',
+        depName: 'hashicorp/consul/aws',
+        depNameShort: 'hashicorp/consul/aws',
+        depType: 'terraform',
+        lineNumber: 10,
+        moduleName: 'consul',
+        purl: 'pkg:terraform/hashicorp/consul/aws',
+        source: 'hashicorp/consul/aws',
+        newValue: '0.4.0',
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
       expect(res).not.toEqual(tf1);
