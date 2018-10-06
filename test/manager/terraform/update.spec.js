@@ -7,9 +7,10 @@ describe('manager/terraform/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
+        depType: 'github',
         depName: 'foo',
         lineNumber: 1,
-        githubRepo: 'hashicorp/example',
+        depNameShort: 'hashicorp/example',
         newValue: 'v1.0.1',
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
@@ -18,9 +19,10 @@ describe('manager/terraform/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
+        depType: 'github',
         depName: 'foo',
         lineNumber: 1,
-        githubRepo: 'hashicorp/example',
+        depNameShort: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
@@ -28,9 +30,10 @@ describe('manager/terraform/update', () => {
     });
     it('returns null if wrong line', () => {
       const upgrade = {
+        depType: 'github',
         depName: 'foo',
         lineNumber: 2,
-        githubRepo: 'hashicorp/example',
+        depNameShort: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
@@ -38,10 +41,11 @@ describe('manager/terraform/update', () => {
     });
     it('replaces major updates > 1', () => {
       const upgrade = {
+        depType: 'github',
         currentValue: 'v0.1.0',
         newValue: 'v0.1.3',
         depName: 'github.com/tieto-cem/terraform-aws-ecs-task-definition',
-        githubRepo: 'tieto-cem/terraform-aws-ecs-task-definition',
+        depNameShort: 'tieto-cem/terraform-aws-ecs-task-definition',
         lineNumber: 14,
         moduleName: 'container_definition',
         purl: 'pkg:github/tieto-cem/terraform-aws-ecs-task-definition',
