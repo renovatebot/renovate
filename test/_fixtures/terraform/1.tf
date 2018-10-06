@@ -66,3 +66,8 @@ module "vote_service_sg" {
     },
   ]
 }
+
+module "consul" {
+  source = "app.terraform.io/example-corp/k8s-cluster/azurerm"
+  version = "1.1.0"
+}

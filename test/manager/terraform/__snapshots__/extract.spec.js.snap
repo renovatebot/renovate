@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/terraform/extract extractDependencies() extracts two per file 1`] = `
+exports[`lib/manager/terraform/extract extractDependencies() extracts 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -88,6 +88,18 @@ Object {
       "moduleName": "vote_service_sg",
       "purl": "pkg:terraform/terraform-aws-modules/security-group/aws",
       "source": "terraform-aws-modules/security-group/aws",
+      "versionScheme": "semver",
+    },
+    Object {
+      "currentValue": "1.1.0",
+      "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
+      "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
+      "depType": "terraform",
+      "lineNumber": 71,
+      "moduleName": "consul",
+      "purl": "pkg:terraform/app.terraform.io/example-corp/k8s-cluster/azurerm?registry=4",
+      "registry": 4,
+      "source": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "versionScheme": "semver",
     },
   ],

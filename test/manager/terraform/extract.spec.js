@@ -14,10 +14,10 @@ describe('lib/manager/terraform/extract', () => {
     it('returns null for empty', () => {
       expect(extractDependencies('nothing here', config)).toBe(null);
     });
-    it('extracts two per file', () => {
+    it('extracts', () => {
       const res = extractDependencies(tf1);
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(8);
+      expect(res.deps).toHaveLength(9);
       expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(2);
     });
   });
