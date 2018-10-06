@@ -44,7 +44,7 @@ module "web_server_sg" {
 
 module "vote_service_sg" {
   source = "terraform-aws-modules/security-group/aws"
-  version = "2.4.0"
+  version = "<= 2.4.0"
 
   name        = "user-service"
   description = "Security group for user-service with custom ports open within VPC, and PostgreSQL publicly open"
@@ -69,5 +69,15 @@ module "vote_service_sg" {
 
 module "consul" {
   source = "app.terraform.io/example-corp/k8s-cluster/azurerm"
-  version = "1.1.0"
+  version = "~> 1.1.0"
+}
+
+module "consul2" {
+  source = "app.terraform.io/example-corp/k8s-cluster/azurerm"
+  version = "~> 1.1"
+}
+
+module "consul3" {
+  source = "app.terraform.io/example-corp/k8s-cluster/azurerm"
+  version = "~~ 1.1"
 }
