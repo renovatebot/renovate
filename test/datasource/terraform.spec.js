@@ -4,10 +4,16 @@ const datasource = require('../../lib/datasource');
 
 jest.mock('got');
 
-const res1 = fs.readFileSync('test/_fixtures/terraform/registry-consul.json');
+const consulData = fs.readFileSync(
+  'test/_fixtures/terraform/registry-consul.json'
+);
 
 describe('datasource/terraform', () => {
   describe('getPkgReleases', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      return global.renovateCache.rmAll();
+    });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
@@ -34,7 +40,7 @@ describe('datasource/terraform', () => {
     });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
-        body: JSON.parse(res1),
+        body: JSON.parse(consulData),
       });
       const res = await datasource.getPkgReleases(
         'pkg:terraform/hashicorp/consul/aws'
@@ -42,9 +48,21 @@ describe('datasource/terraform', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+    it('returns from cache', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(consulData),
+      });
+      const res1 = await datasource.getPkgReleases(
+        'pkg:terraform/hashicorp/consul/aws'
+      );
+      const res2 = await datasource.getPkgReleases(
+        'pkg:terraform/hashicorp/consul/aws'
+      );
+      expect(res1).toEqual(res2);
+    });
     it('rejects mismatch', async () => {
       got.mockReturnValueOnce({
-        body: JSON.parse(res1),
+        body: JSON.parse(consulData),
       });
       const res = await datasource.getPkgReleases(
         'pkg:terraform/consul/foo?registry=hashicorp'
