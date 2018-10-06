@@ -31,6 +31,9 @@ module \\"task_definition\\" {
   container_definitions = [
     \\"\${module.container_definition.json}\\"]
 }
+module \\"consul\\" {
+  source = \\"git@github.com:hashicorp/example.git?ref=v2.0.0\\"
+}
 "
 `;
 
@@ -64,6 +67,9 @@ module \\"task_definition\\" {
   name                  = \\"mytask\\"
   container_definitions = [
     \\"\${module.container_definition.json}\\"]
+}
+module \\"consul\\" {
+  source = \\"git@github.com:hashicorp/example.git?ref=v2.0.0\\"
 }
 "
 `;

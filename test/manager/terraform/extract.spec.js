@@ -17,7 +17,7 @@ describe('lib/manager/terraform/extract', () => {
     it('extracts two per file', () => {
       const res = extractDependencies(tf1);
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(5);
+      expect(res.deps).toHaveLength(6);
     });
   });
 });

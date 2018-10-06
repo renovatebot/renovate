@@ -28,3 +28,6 @@ module "task_definition" {
   container_definitions = [
     "${module.container_definition.json}"]
 }
+module "consul" {
+  source = "git@github.com:hashicorp/example.git?ref=v2.0.0"
+}
