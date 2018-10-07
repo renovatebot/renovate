@@ -90,3 +90,7 @@ module "consul3" {
 module "relative" {
   source = "../../modules/fe"
 }
+
+module "nosauce" {
+  foo = "bar"
+}

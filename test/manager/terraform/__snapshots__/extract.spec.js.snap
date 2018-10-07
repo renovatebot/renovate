@@ -142,6 +142,10 @@ Object {
       "skipReason": "local",
       "source": "../../modules/fe",
     },
+    Object {
+      "moduleName": "nosauce",
+      "skipReason": "no-source",
+    },
   ],
 }
 `;

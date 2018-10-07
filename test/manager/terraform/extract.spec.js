@@ -21,8 +21,8 @@ describe('lib/manager/terraform/extract', () => {
     it('extracts', () => {
       const res = extractDependencies(tf1);
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(13);
-      expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(4);
+      expect(res.deps).toHaveLength(14);
+      expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(5);
     });
     it('returns null if only local deps', () => {
       expect(extractDependencies(tf2, config)).toBe(null);
