@@ -16,6 +16,8 @@ COPY lib lib
 COPY --from=golang /usr/local/go/bin/go /bin/go
 RUN mkdir -p /usr/local/go
 
+COPY bin bin
+
 USER node
 
 ENTRYPOINT ["node", "/usr/src/app/lib/renovate.js"]
