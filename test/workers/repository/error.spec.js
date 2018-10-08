@@ -29,6 +29,7 @@ describe('workers/repository/error', () => {
       'disk-space',
       'platform-failure',
       'no-vulnerability-alerts',
+      'cannot-fork',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {
