@@ -7,7 +7,7 @@ LABEL name="renovate"
 
 WORKDIR /usr/src/app/
 
-RUN apk add --quiet --no-cache git openssh-client
+RUN apk add --quiet --no-cache git openssh-client ca-certificates php php-mbstring php-openssl php-zip php-zlib composer
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
