@@ -574,7 +574,7 @@ Note: "Package file" is predefined in the default `prBodyDefinitions` object so 
 
 ## prBodyDefinitions
 
-You can configure this object if you with to either (a) modify the template for an existing table column in PR bodies, or (b) you wish to _add_ a definition for a new/additional column.
+You can configure this object to either (a) modify the template for an existing table column in PR bodies, or (b) you wish to _add_ a definition for a new/additional column.
 
 Here is an example of modifying the default value for the "Package" column to put it inside a `<code></code>` block:
 
