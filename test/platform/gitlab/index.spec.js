@@ -591,7 +591,7 @@ describe('platform/gitlab', () => {
           },
         ],
       });
-      get.mockReturnValueOnce({ body: { body: 'new-content' } });
+      get.mockReturnValueOnce({ body: { description: 'new-content' } });
       const res = await gitlab.findIssue('title-2');
       expect(res).not.toBeNull();
     });
@@ -626,7 +626,7 @@ describe('platform/gitlab', () => {
           },
         ],
       });
-      get.mockReturnValueOnce({ body: { body: 'new-content' } });
+      get.mockReturnValueOnce({ body: { description: 'new-content' } });
       const res = await gitlab.ensureIssue('title-2', 'newer-content');
       expect(res).toEqual('updated');
     });
@@ -643,7 +643,7 @@ describe('platform/gitlab', () => {
           },
         ],
       });
-      get.mockReturnValueOnce({ body: { body: 'newer-content' } });
+      get.mockReturnValueOnce({ body: { description: 'newer-content' } });
       const res = await gitlab.ensureIssue('title-2', 'newer-content');
       expect(res).toBe(null);
     });
