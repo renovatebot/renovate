@@ -7632,10 +7632,10 @@ semver-stable@2.0.4:
   dependencies:
     semver "^5.0.1"
 
-semver-utils@1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/semver-utils/-/semver-utils-1.1.3.tgz#9085f52788c2292edab68719015c5c260420864a"
-  integrity sha512-6OTdn515fuKgvkxVLUKiWsVa3AOQ63RPR0kXQeVVXjX2ILLDTHwYPVb2TI7sxbjZ9RZsOsbUHjbwMgpB+kqIfg==
+semver-utils@1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/semver-utils/-/semver-utils-1.1.4.tgz#cf0405e669a57488913909fc1c3f29bf2a4871e2"
+  integrity sha512-EjnoLE5OGmDAVV/8YDoN5KiajNadjzIp9BAHOhYeQHt7j0UWxjmgsx4YD48wp4Ue1Qogq38F1GNUJNqF1kKKxA==
 
 "semver@2 >=2.2.1 || 3.x || 4 || 5", "semver@2 || 3 || 4 || 5", "semver@2.x || 3.x || 4 || 5", "semver@^2.3.0 || 3.x || 4 || 5", semver@^5.0.1, semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1, semver@^5.5.0:
   version "5.5.0"
