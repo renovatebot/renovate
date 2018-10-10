@@ -83,6 +83,26 @@ Note: if you prefer to publish using the namespace `@fastcore/renovate-config` t
   "extends": ["@fastcore"]
 ```
 
+## GitHub-hosted Presets
+
+It is also possible to host your preset config using just a regular GitHub repository and without needing to publish it to npmjs. In such cases Renovate will simply look for a renovate.json file in the default branch, e.g. master.
+
+To host your preset config on GitHub:
+
+- Create a new repository. Normally you'd call it renovate-config but it can be named anything
+- Add a renovate.json to this new repo containing the preset config. No other files are necessary.
+- In other repos, reference it in an extends array like "github>owner/name", e.g. "github>rarkins/renovate-config"
+
+From then on Renovate will use the renovate config from the preset repo's default branch. You do not need to add it as a devDependency or add any other files to the preset repo.
+
+Note: Unlike npmjs-hosted presets, GitHub-hosted ones can contain only one config.
+
+## Presets and Private Modules
+
+Using your own preset config along with private npm modules can present a chicken and egg problem. You want to configure the encrypted token just once, which means in the preset. But you also probably want the preset to be private too, so how can the other repos reference it?
+
+The answer is to host your preset using GitHub not npmjs, and make sure you have added the preset's repo to Renovate too. GitHub will then permit Renovate to access the preset repo whenever it is processing any other repos within the same account/org.
+
 ## Contributing to presets
 
-Have you configured a rule that you think others might benefit from? Please consider contributing it to the [renovate-config](https://github.com/singapore/renovate-config) repository so that it gains higher visibility and saves others from reinventing the same thing.
+Have you configured a rule that you think others might benefit from? Please consider contributing it to the [presets](https://github.com/renovatebot/presets) repository so that it gains higher visibility and saves others from reinventing the same thing.
