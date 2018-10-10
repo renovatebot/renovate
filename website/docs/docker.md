@@ -51,7 +51,7 @@ Renovate has a some docker-specific intelligence when it comes to versions. For 
 
 ## Configuring/Disabling
 
-If you with to make changes that apply to all Docker managers, then add them to the `docker` config object. If you wish to override Docker settings for one particular type of manager, use that manager's config object instead. For example. to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would add this:
+If you wish to make changes that apply to all Docker managers, then add them to the `docker` config object. If you wish to override Docker settings for one particular type of manager, use that manager's config object instead. For example. to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would add this:
 
 ```json
   "docker-compose": {
