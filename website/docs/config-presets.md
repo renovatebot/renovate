@@ -48,6 +48,38 @@ Let's say you wish to modify that default behaviour, such as to schedule Renovat
 
 This makes use of the [schedules](https://github.com/singapore/renovate-config/blob/master/packages/renovate-config-schedule/package.json) presets. To see all presets published by the Renovate team then browse [https://github.com/singapore/renovate-config/tree/master/packages](https://github.com/singapore/renovate-config/tree/master/packages)
 
+## Preset Parameters
+
+If you browse the "default" presets, you will see some that contain parameters, example:
+
+```json
+    "labels": {
+      "description": "Apply labels <code>{{arg0}}</code> and <code>{{arg1}}</code> to PRs",
+      "labels": [
+        "{{arg0}}",
+        "{{arg1}}"
+      ]
+    },
+    "assignee": {
+      "description": "Assign PRs to <code>{{arg0}}</code>",
+      "assignees": [
+        "{{arg0}}"
+      ]
+    },
+```
+
+Here is how you would use these in your Renovate config:
+
+```json
+  "extends": [
+    ":labels(depedendencies,devops)",
+    ":assignee(rarkins)"
+  ]
+```
+In short, the number of `{{argx}}` params in the definition is how many parameters you need to provide. Parameters must be strings, non-quoted, and separated by commas if there are more than one. 
+
+If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself, or if you think your preset would be valuable for others, please contribute a PR to the `renovatebot/presets` repository.
+
 ## How to Publish Preset Configs
 
 If you manage multiple repositories (e.g. you're a GitHub org or an active private developer) and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository. That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
