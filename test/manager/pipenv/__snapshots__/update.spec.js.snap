@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/pipenv/update updateDependency replaces existing value 1`] = `
+"[[source]]
+url = \\"https://pypi.org/simple\\"
+verify_ssl = true
+name = \\"pypi\\"
+
+[[source]]
+url = \\"http://example.com/private-pypi/\\"
+verify_ssl = false
+name = \\"private-pypi\\"
+
+[packages]
+some-package = \\"==0.3.1\\"
+some-other-package = \\"==1.0.0\\"
+url = \\"1.0.1\\"
+
+[dev-packages]
+
+[requires]
+python_version = \\"3.6\\"
+"
+`;
