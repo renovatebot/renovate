@@ -53,6 +53,10 @@ This setting is experimental, and works for GitHub repositories only. If enabled
 
 You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
 
+## oauth
+
+Set this to true only if using an OAuth2 token from GitLab.
+
 ## onboarding
 
 Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
