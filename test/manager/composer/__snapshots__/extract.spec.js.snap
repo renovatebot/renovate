@@ -499,3 +499,48 @@ Object {
   ],
 }
 `;
+
+exports[`lib/manager/composer/extract extractDependencies() extracts registryUrls 1`] = `
+Object {
+  "composerLock": false,
+  "deps": Array [
+    Object {
+      "currentValue": "*",
+      "depName": "aws/aws-sdk-php",
+      "depType": "require",
+      "purl": "pkg:packagist/aws/aws-sdk-php",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "dev-trunk",
+      "depName": "wpackagist-plugin/akismet",
+      "depType": "require",
+      "purl": "pkg:packagist/wpackagist-plugin/akismet",
+      "skipReason": "unsupported-constraint",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": ">=7.0.2",
+      "depName": "wpackagist-plugin/wordpress-seo",
+      "depType": "require",
+      "purl": "pkg:packagist/wpackagist-plugin/wordpress-seo",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "wpackagist-theme/hueman",
+      "depType": "require",
+      "purl": "pkg:packagist/wpackagist-theme/hueman",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+  ],
+  "registryUrls": Array [
+    Object {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+    },
+  ],
+}
+`;
