@@ -11,6 +11,8 @@ name = "private-pypi"
 [packages]
 some-package = "==0.3.1"
 some-other-package = "==1.0.0"
+"_invalid-package" = "==1.0.0"
+invalid-version = "==0 0"
 
 [dev-packages]
 

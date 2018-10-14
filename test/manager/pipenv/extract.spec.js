@@ -23,5 +23,15 @@ describe('lib/manager/pipenv/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
+    it('ignores invalid package names', () => {
+      const content = '[packages]\r\nfoo = "==1.0.0"\r\n_invalid-package = "==1.0.0"';
+      const res = extractDependencies(content, config).deps;
+      expect(res).toHaveLength(1);
+    });
+    it('ignores invalid versions', () => {
+      const content = '[packages]\r\nfoo = "==1.0.0"\r\nsome-package = "==0 0"';
+      const res = extractDependencies(content, config).deps;
+      expect(res).toHaveLength(1);
+    });
   });
 });

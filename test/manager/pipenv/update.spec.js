@@ -7,8 +7,8 @@ describe('manager/pipenv/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        depName: 'url',
-        newValue: '1.0.1',
+        depName: 'some-package',
+        newValue: '==1.0.1',
       };
       const res = updateDependency(pipfile, upgrade);
       expect(res).not.toEqual(pipfile);
