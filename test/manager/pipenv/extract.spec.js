@@ -27,7 +27,7 @@ describe('lib/manager/pipenv/extract', () => {
       expect(res).toHaveLength(5);
     });
     it('ignores invalid package names', () => {
-      const content = '[packages]\r\nfoo = "==1.0.0"\r\n_invalid-package = "==1.0.0"';
+      const content = '[packages]\r\nfoo = "==1.0.0"\r\n_invalid = "==1.0.0"';
       const res = extractDependencies(content, config).deps;
       expect(res).toHaveLength(1);
     });
