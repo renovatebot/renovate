@@ -15,6 +15,7 @@ some-other-package = "==1.0.0"
 invalid-version = "==0 0"
 
 [dev-packages]
+dev-package = "==0.1.0"
 
 [requires]
 python_version = "3.6"
