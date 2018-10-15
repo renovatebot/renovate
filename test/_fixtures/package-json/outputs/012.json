@@ -18,6 +18,7 @@
     "config": "1.21.0"
   },
   "devDependencies": {
+    "enabled": false,
     "angular": "^1.5.8",
     "angular-touch": "1.6.1",
     "angular-sanitize":  "1.5.8",

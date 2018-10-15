@@ -328,6 +328,13 @@ Object {
       "versionScheme": "semver",
     },
     Object {
+      "depName": "enabled",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+      "skipReason": "invalid-value",
+      "versionScheme": "semver",
+    },
+    Object {
       "currentValue": "^1.5.8",
       "depName": "angular",
       "depType": "devDependencies",
@@ -449,6 +456,13 @@ Object {
       "versionScheme": "semver",
     },
     Object {
+      "depName": "enabled",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+      "skipReason": "invalid-value",
+      "versionScheme": "semver",
+    },
+    Object {
       "currentValue": "^1.5.8",
       "depName": "angular",
       "depType": "devDependencies",
@@ -546,6 +560,13 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/config",
+      "versionScheme": "semver",
+    },
+    Object {
+      "depName": "enabled",
+      "depType": "devDependencies",
+      "prettyDepType": "devDependency",
+      "skipReason": "invalid-value",
       "versionScheme": "semver",
     },
     Object {
