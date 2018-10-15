@@ -22,6 +22,14 @@ Object {
 }
 `;
 
+exports[`util/host-rules update() supports endpoint-only 1`] = `
+Object {
+  "endpoint": "https://some.endpoint",
+  "password": "pass1",
+  "username": "user1",
+}
+`;
+
 exports[`util/host-rules update() uses default endpoint 1`] = `
 Object {
   "endpoint": "https://api.github.com/",

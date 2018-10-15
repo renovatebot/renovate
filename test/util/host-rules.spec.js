@@ -7,7 +7,7 @@ describe('util/host-rules', () => {
   describe('update()', () => {
     it('throws if no platform ', () => {
       expect(() => update({})).toThrow(
-        'Failed to set configuration: no platform specified'
+        'Failed to set configuration: no platform or endpoint specified'
       );
     });
     it('throws if no endpoint ', () => {
@@ -23,7 +23,14 @@ describe('util/host-rules', () => {
         `Failed to configure platform 'vsts': no host for endpoint '/some/path'`
       );
     });
-
+    it('supports endpoint-only', () => {
+      update({
+        endpoint: 'https://some.endpoint',
+        username: 'user1',
+        password: 'pass1',
+      });
+      expect(find({ host: 'some.endpoint' })).toMatchSnapshot();
+    });
     it('uses default endpoint', () => {
       update({
         platform: 'github',
