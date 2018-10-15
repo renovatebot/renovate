@@ -1,9 +1,11 @@
 jest.mock('fs-extra');
 jest.mock('child-process-promise');
+jest.mock('../../../lib/util/host-rules');
 
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
 const composer = require('../../../lib/manager/composer/artifacts');
+const hostRules = require('../../../lib/util/host-rules');
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -27,6 +29,29 @@ describe('.getArtifacts()', () => {
     fs.readFile = jest.fn(() => 'Current composer.lock');
     expect(
       await composer.getArtifacts('composer.json', [], '{}', config)
+    ).toBeNull();
+  });
+  it('uses hostRules to write auth.json', async () => {
+    platform.getFile.mockReturnValueOnce('Current composer.lock');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'Current composer.lock');
+    const authConfig = {
+      localDir: '/tmp/github/some/repo',
+      registryUrls: [
+        {
+          url: 'https://packagist.renovatebot.com',
+        },
+      ],
+    };
+    hostRules.find.mockReturnValue({
+      username: 'some-username',
+      password: 'some-password',
+    });
+    expect(
+      await composer.getArtifacts('composer.json', [], '{}', authConfig)
     ).toBeNull();
   });
   it('returns updated composer.lock', async () => {
