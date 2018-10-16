@@ -149,4 +149,9 @@ describe('semver.getNewValue()', () => {
       '^v1.1'
     );
   });
+  it('handles differing lengths', () => {
+    expect(semver.getNewValue('3.6.*', 'replace', '3.6.0', '3.7')).toEqual(
+      '3.7.*'
+    );
+  });
 });
