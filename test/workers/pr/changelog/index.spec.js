@@ -1,5 +1,3 @@
-const delay = require('delay');
-
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 jest.mock('got');
@@ -183,26 +181,6 @@ describe('workers/pr/changelog', () => {
         endpoint: 'https://github-enterprise.example.com/',
       });
       process.env.GITHUB_ENDPOINT = '';
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
-        })
-      ).toMatchSnapshot();
-    });
-
-    it('supports github enterprise alwo when retrieving data from cache', async () => {
-      hostRules.update({
-        platform: 'github',
-        endpoint: 'https://github-enterprise.example.com/',
-      });
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
-        })
-      ).toMatchSnapshot();
-      await delay(200);
       expect(
         await getChangeLogJSON({
           ...upgrade,
