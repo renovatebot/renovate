@@ -941,7 +941,7 @@ describe('manager/npm/lookup', () => {
       config.packageFile = 'composer.json';
       config.currentValue = '1.0.0';
       nock('https://packagist.org')
-        .get('/packages/foo/bar.json')
+        .get('/packages.json')
         .reply(404);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
