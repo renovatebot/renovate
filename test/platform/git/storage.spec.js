@@ -167,8 +167,13 @@ describe('platform/git/storage', () => {
       expect(res).toBe(null);
     });
     it('returns null for 404', async () => {
-      const res = await git.getFile('some-path', 'some-branch');
-      expect(res).toBe(null);
+      let e;
+      try {
+        await git.getFile('some-path', 'some-branch');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
