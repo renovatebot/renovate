@@ -584,8 +584,8 @@ describe('platform/github', () => {
       expect(pr).toMatchSnapshot();
     });
   });
-  describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
-    it('returne success if requiredStatusChecks null', async () => {
+  describe('getBranchStatus()', () => {
+    it('returns success if requiredStatusChecks null', async () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
@@ -626,6 +626,104 @@ describe('platform/github', () => {
       }));
       const res = await github.getBranchStatus('somebranch', []);
       expect(res).toEqual('failed');
+    });
+    it('should fail if a check run has failed', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      get.mockImplementationOnce(() => ({
+        body: {
+          state: 'pending',
+          statuses: [],
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: {
+          total_count: 2,
+          check_runs: [
+            {
+              id: 23950198,
+              status: 'completed',
+              conclusion: 'success',
+              name: 'Travis CI - Pull Request',
+            },
+            {
+              id: 23950195,
+              status: 'completed',
+              conclusion: 'failed',
+              name: 'Travis CI - Branch',
+            },
+          ],
+        },
+      }));
+      const res = await github.getBranchStatus('somebranch', []);
+      expect(res).toEqual('failed');
+    });
+    it('should suceed if no status and all passed check runs', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      get.mockImplementationOnce(() => ({
+        body: {
+          state: 'pending',
+          statuses: [],
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: {
+          total_count: 2,
+          check_runs: [
+            {
+              id: 23950198,
+              status: 'completed',
+              conclusion: 'success',
+              name: 'Travis CI - Pull Request',
+            },
+            {
+              id: 23950195,
+              status: 'completed',
+              conclusion: 'success',
+              name: 'Travis CI - Branch',
+            },
+          ],
+        },
+      }));
+      const res = await github.getBranchStatus('somebranch', []);
+      expect(res).toEqual('success');
+    });
+    it('should fail if a check run has failed', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      });
+      get.mockImplementationOnce(() => ({
+        body: {
+          state: 'pending',
+          statuses: [],
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: {
+          total_count: 2,
+          check_runs: [
+            {
+              id: 23950198,
+              status: 'completed',
+              conclusion: 'success',
+              name: 'Travis CI - Pull Request',
+            },
+            {
+              id: 23950195,
+              status: 'pending',
+              name: 'Travis CI - Branch',
+            },
+          ],
+        },
+      }));
+      const res = await github.getBranchStatus('somebranch', []);
+      expect(res).toEqual('pending');
     });
   });
   describe('getBranchStatusCheck', () => {
