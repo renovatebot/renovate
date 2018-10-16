@@ -500,6 +500,145 @@ Object {
 }
 `;
 
+exports[`lib/manager/composer/extract extractDependencies() extracts object registryUrls 1`] = `
+Object {
+  "composerLock": false,
+  "deps": Array [
+    Object {
+      "currentValue": ">=5.5",
+      "depName": "php",
+      "depType": "require",
+      "purl": "pkg:packagist/php",
+      "skipReason": "unsupported",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "~1.0.12",
+      "depName": "composer/installers",
+      "depType": "require",
+      "purl": "pkg:packagist/composer/installers",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "johnpbloch/wordpress",
+      "depType": "require",
+      "purl": "pkg:packagist/johnpbloch/wordpress",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "^2.0.1",
+      "depName": "vlucas/phpdotenv",
+      "depType": "require",
+      "purl": "pkg:packagist/vlucas/phpdotenv",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "^1.0",
+      "depName": "oscarotero/env",
+      "depType": "require",
+      "purl": "pkg:packagist/oscarotero/env",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "wpackagist-plugin/tinymce-advanced",
+      "depType": "require",
+      "purl": "pkg:packagist/wpackagist-plugin/tinymce-advanced",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "wpackagist-plugin/acf-content-analysis-for-yoast-seo",
+      "depType": "require",
+      "purl": "pkg:packagist/wpackagist-plugin/acf-content-analysis-for-yoast-seo",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "wpackagist-plugin/duplicate-post",
+      "depType": "require",
+      "purl": "pkg:packagist/wpackagist-plugin/duplicate-post",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "wpackagist-plugin/simple-image-sizes",
+      "depType": "require",
+      "purl": "pkg:packagist/wpackagist-plugin/simple-image-sizes",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "wpackagist-plugin/wordpress-seo",
+      "depType": "require",
+      "purl": "pkg:packagist/wpackagist-plugin/wordpress-seo",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "wpackagist-plugin/timber-library",
+      "depType": "require",
+      "purl": "pkg:packagist/wpackagist-plugin/timber-library",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "wp-sync-db/wp-sync-db",
+      "depType": "require",
+      "purl": "pkg:packagist/wp-sync-db/wp-sync-db",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "asha23/wp-seed-timber",
+      "depType": "require",
+      "purl": "pkg:packagist/asha23/wp-seed-timber",
+      "skipReason": "any-version",
+      "versionScheme": "semverComposer",
+    },
+  ],
+  "registryUrls": Array [
+    Object {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+    },
+    Object {
+      "package": Object {
+        "dist": Object {
+          "type": "zip",
+          "url": "https://github.com/asha23/wp-seed-timber/archive/v1.2.6.zip",
+        },
+        "name": "asha23/wp-seed-timber",
+        "type": "wordpress-theme",
+        "version": "1.2.6",
+      },
+      "type": "package",
+    },
+    Object {
+      "package": Object {
+        "dist": Object {
+          "type": "zip",
+          "url": "https://github.com/corysimmons/wp-sync-db/archive/1.6.zip",
+        },
+        "name": "wp-sync-db/wp-sync-db",
+        "type": "wordpress-plugin",
+        "version": "1.5",
+      },
+      "type": "package",
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/composer/extract extractDependencies() extracts registryUrls 1`] = `
 Object {
   "composerLock": false,

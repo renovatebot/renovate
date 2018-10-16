@@ -30,6 +30,18 @@ describe('datasource/packagist', () => {
             type: 'unknown',
           },
           {
+            type: 'package',
+            package: {
+              name: 'abc/def',
+              type: 'wordpress-theme',
+              version: '1.2.6',
+              dist: {
+                type: 'zip',
+                url: 'https://github.com/abc/def/archive/v1.2.6.zip',
+              },
+            },
+          },
+          {
             'packagist.org': false,
           },
         ],
