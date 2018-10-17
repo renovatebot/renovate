@@ -7,8 +7,8 @@ module "bar" {
 }
 
 module "consul" {
-  source = "hashicorp/consul/aws"
-  version = "0.1.0"
+  source    = "hashicorp/consul/aws"
+  version   = "0.1.0"
 }
 
 module "container_definition" {
