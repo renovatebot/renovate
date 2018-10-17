@@ -47,7 +47,7 @@ shared: &shared
           echo 'export IMAGE_ID="jessestuart/renovate"' >> $BASH_ENV
           echo 'export GITHUB_REPO="renovatebot/renovate"' >> $BASH_ENV
           echo 'export VERSION=$(curl -s https://api.github.com/repos/${GITHUB_REPO}/releases | jq -r "sort_by(.tag_name)[-1].tag_name")' >> $BASH_ENV
-          echo 'export QEMU_VERSION="v2.12.0"' >> $BASH_ENV
+          echo 'export QEMU_VERSION="v3.0.0"' >> $BASH_ENV
 
           source $BASH_ENV
 
@@ -73,18 +73,19 @@ shared: &shared
           docker build \
             -t "${IMAGE_ID}:${VERSION}-${GOARCH}" \
             --build-arg version=$VERSION \
-            --build-arg target=$TARGET \
-            --build-arg goarch=$GOARCH .
-
-    - run:
-        name: Push image to Docker Hub.
-        command: |
-          export IMAGE_ID="jessestuart/renovate"
-          export GITHUB_REPO="renovatebot/renovate"
-          export VERSION=$(curl -s "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" | jq -r ".tag_name")
+            --build-arg target=$TARGET .
 
           echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
           docker push "${IMAGE_ID}:${VERSION}-${GOARCH}"
+
+    # - run:
+    #     name: Push image to Docker Hub.
+    #     command: |
+    #       export IMAGE_ID="jessestuart/renovate"
+    #       export GITHUB_REPO="renovatebot/renovate"
+    #       export VERSION=$(curl -s "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" | jq -r ".tag_name")
+    #       echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+    #       docker push "${IMAGE_ID}:${VERSION}-${GOARCH}"
 
 # ================
 # JOB DECLARATIONS
