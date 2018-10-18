@@ -13,10 +13,7 @@ describe('datasource/packagist', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      hostRules.find.mockReturnValue({
-        username: 'some-username',
-        password: 'some-password',
-      });
+      hostRules.find = jest.fn(input => input);
       global.repoCache = {};
       return global.renovateCache.rmAll();
     });
@@ -99,6 +96,10 @@ describe('datasource/packagist', () => {
       expect(res).toBeNull();
     });
     it('supports includes packages', async () => {
+      hostRules.find = jest.fn(() => ({
+        username: 'some-username',
+        password: 'some-password',
+      }));
       const packagesJson = {
         packages: [],
         includes: {
