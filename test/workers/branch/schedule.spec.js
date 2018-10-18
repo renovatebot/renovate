@@ -75,6 +75,14 @@ describe('workers/branch/schedule', () => {
         ])[0]
       ).toBe(true);
     });
+    it('massages schedules', () => {
+      expect(
+        schedule.hasValidSchedule([
+          'before 3am on the first day of the month',
+        ])[0]
+      ).toBe(true);
+      expect(schedule.hasValidSchedule(['every month'])[0]).toBe(true);
+    });
     it('supports hours shorthand', () => {
       const [res] = schedule.hasValidSchedule([
         'after 11pm and before 6am every weekend',
