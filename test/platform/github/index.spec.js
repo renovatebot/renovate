@@ -1908,9 +1908,7 @@ describe('platform/github', () => {
           ],
         },
       }));
-      get.mockImplementationOnce(() => ({
-        body: {},
-      }));
+      get.mockImplementationOnce(() => ({}));
       const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
       expect(content).toBe(null);
