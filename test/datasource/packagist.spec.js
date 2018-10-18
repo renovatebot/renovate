@@ -84,6 +84,19 @@ describe('datasource/packagist', () => {
       );
       expect(res).toBeNull();
     });
+    it('handles not found registries', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+          url: 'https://some.registry/packages.json',
+        })
+      );
+      const res = await datasource.getPkgReleases(
+        'pkg:packagist/vendor/package-name',
+        {}
+      );
+      expect(res).toBeNull();
+    });
     it('supports includes packages', async () => {
       const packagesJson = {
         packages: [],
