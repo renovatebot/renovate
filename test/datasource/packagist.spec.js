@@ -17,6 +17,7 @@ describe('datasource/packagist', () => {
         username: 'some-username',
         password: 'some-password',
       });
+      global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('supports custom registries', async () => {
