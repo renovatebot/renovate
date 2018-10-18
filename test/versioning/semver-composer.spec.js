@@ -127,12 +127,18 @@ describe('semver.getNewValue()', () => {
     expect(semver.getNewValue('~4', 'replace', '4.0.0', '5.1.0')).toEqual('~5');
   });
   it('handles tilde minor', () => {
-    expect(semver.getNewValue('~4.0', 'replace', '4.0.0', '4.2.0')).toEqual(
-      '~4.2'
-    );
     expect(semver.getNewValue('~4.0', 'replace', '4.0.0', '5.1.0')).toEqual(
-      '~5.1'
+      '~5.0'
     );
+    expect(semver.getNewValue('~4.0', 'replace', '4.0.0', '4.1.0')).toEqual(
+      '~4.1'
+    );
+    expect(
+      semver.getNewValue('~1.2 || ~2.0', 'replace', '2.0.0', '3.1.0')
+    ).toEqual('~3.0');
+    expect(
+      semver.getNewValue('~1.2 || ~2.0', 'widen', '2.0.0', '3.1.0')
+    ).toEqual('~1.2 || ~2.0 || ~3.0');
   });
   it('returns toVersion if unsupported', () => {
     expect(semver.getNewValue('+4.0.0', 'replace', '4.0.0', '4.2.0')).toEqual(
