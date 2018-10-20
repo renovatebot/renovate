@@ -7,6 +7,10 @@ Array [
     "depName": "some-package",
     "pipfileSection": "packages",
     "purl": "pkg:pypi/some-package",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+      "http://example.com/private-pypi/",
+    ],
     "versionScheme": "pep440",
   },
   Object {
@@ -14,6 +18,10 @@ Array [
     "depName": "some-other-package",
     "pipfileSection": "packages",
     "purl": "pkg:pypi/some-other-package",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+      "http://example.com/private-pypi/",
+    ],
     "versionScheme": "pep440",
   },
   Object {
@@ -21,6 +29,10 @@ Array [
     "depName": "dev-package",
     "pipfileSection": "dev-packages",
     "purl": "pkg:pypi/dev-package",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+      "http://example.com/private-pypi/",
+    ],
     "versionScheme": "pep440",
   },
 ]
@@ -33,6 +45,9 @@ Array [
     "depName": "Django",
     "pipfileSection": "packages",
     "purl": "pkg:pypi/Django",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
     "versionScheme": "pep440",
   },
   Object {
@@ -40,6 +55,9 @@ Array [
     "depName": "distribute",
     "pipfileSection": "packages",
     "purl": "pkg:pypi/distribute",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
     "versionScheme": "pep440",
   },
   Object {
@@ -47,6 +65,9 @@ Array [
     "depName": "dj-database-url",
     "pipfileSection": "packages",
     "purl": "pkg:pypi/dj-database-url",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
     "versionScheme": "pep440",
   },
   Object {
@@ -54,6 +75,9 @@ Array [
     "depName": "psycopg2",
     "pipfileSection": "packages",
     "purl": "pkg:pypi/psycopg2",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
     "versionScheme": "pep440",
   },
   Object {
@@ -61,6 +85,9 @@ Array [
     "depName": "wsgiref",
     "pipfileSection": "packages",
     "purl": "pkg:pypi/wsgiref",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
     "versionScheme": "pep440",
   },
 ]
