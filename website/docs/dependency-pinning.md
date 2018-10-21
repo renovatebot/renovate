@@ -33,7 +33,7 @@ For example, you might have pinned `foobar` to version `1.1.0` and another autho
 
 ## Why pin dependencies?
 
-You mainly pin versions for certainty, an visibility. When you have a pinned version of each dependency in your `package.json`, you know exactly which version of each dependency is installed at any time. This benefits when upgrading versions as well as when rolling back in case of problems. Note: we'll cover lock files later, don't worry.
+You mainly pin versions for certainty, and visibility. When you have a pinned version of each dependency in your `package.json`, you know exactly which version of each dependency is installed at any time. This benefits when upgrading versions as well as when rolling back in case of problems. Note: we'll cover lock files later, don't worry.
 
 #### Upgrading pinned versions
 
