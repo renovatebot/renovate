@@ -44,5 +44,16 @@ describe('lib/manager/pipenv/extract', () => {
       const res = extractDependencies(content, config).deps;
       expect(res[0].registryUrls).toEqual(['source-url', 'other-source-url']);
     });
+    it('converts simple-API URLs to JSON-API URLs', () => {
+      const content =
+        '[[source]]\r\nurl = "https://my-pypi/foo/simple/"\r\n' +
+        '[[source]]\r\nurl = "https://other-pypi/foo/simple"\r\n' +
+        '[packages]\r\nfoo = "==1.0.0"\r\n';
+      const res = extractDependencies(content, config).deps;
+      expect(res[0].registryUrls).toEqual([
+        'https://my-pypi/foo/pypi/',
+        'https://other-pypi/foo/pypi/',
+      ]);
+    });
   });
 });
