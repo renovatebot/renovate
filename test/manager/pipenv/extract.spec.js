@@ -36,5 +36,12 @@ describe('lib/manager/pipenv/extract', () => {
       const res = extractDependencies(content, config).deps;
       expect(res).toHaveLength(1);
     });
+    it('extracts all sources', () => {
+      const content = '[[source]]\r\nurl = "source-url"\r\n' +
+        '[[source]]\r\nurl = "other-source-url"\r\n' +
+        '[packages]\r\nfoo = "==1.0.0"\r\n';
+      const res = extractDependencies(content, config).deps;
+      expect(res[0].registryUrls).toEqual(['source-url', 'other-source-url']);
+    });
   });
 });
