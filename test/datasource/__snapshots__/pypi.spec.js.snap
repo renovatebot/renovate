@@ -145,3 +145,20 @@ Array [
   ],
 ]
 `;
+
+exports[`datasource/pypi getPkgReleases supports multiple custom datasource urls 1`] = `
+Array [
+  Array [
+    "https://custom.pypi.net/azure-cli-monitor/json",
+    Object {
+      "json": true,
+    },
+  ],
+  Array [
+    "https://second-index/azure-cli-monitor/json",
+    Object {
+      "json": true,
+    },
+  ],
+]
+`;
