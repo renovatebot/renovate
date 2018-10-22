@@ -11,6 +11,7 @@ function readFixture(fixture) {
 }
 
 const input01Content = readFixture('inputs/01.json');
+const input01GlobContent = readFixture('inputs/01-glob.json');
 
 describe('workers/branch/package-json', () => {
   describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
@@ -82,6 +83,21 @@ describe('workers/branch/package-json', () => {
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
       expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
       expect(JSON.parse(testContent).resolutions.config).toEqual('1.22.0');
+    });
+    it('updates glob resolutions', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'config',
+        newValue: '1.22.0',
+      };
+      const testContent = npmUpdater.updateDependency(
+        input01GlobContent,
+        upgrade
+      );
+      expect(JSON.parse(testContent).dependencies.config).toEqual('1.22.0');
+      expect(JSON.parse(testContent).resolutions['**/config']).toEqual(
+        '1.22.0'
+      );
     });
     it('replaces only the first instance of a value', () => {
       const upgrade = {
