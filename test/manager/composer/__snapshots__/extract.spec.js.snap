@@ -502,6 +502,7 @@ Object {
 
 exports[`lib/manager/composer/extract extractDependencies() extracts object registryUrls 1`] = `
 Object {
+  "composerJsonType": "project",
   "composerLock": false,
   "deps": Array [
     Object {

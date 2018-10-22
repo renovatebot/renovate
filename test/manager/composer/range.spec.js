@@ -9,6 +9,14 @@ describe('getRangeStrategy', () => {
     const config = { rangeStrategy: 'auto', depType: 'require-dev' };
     expect(getRangeStrategy(config)).toEqual('pin');
   });
+  it('pins project require', () => {
+    const config = {
+      rangeStrategy: 'auto',
+      composerJsonType: 'project',
+      depType: 'require',
+    };
+    expect(getRangeStrategy(config)).toEqual('pin');
+  });
   it('widens complex ranges', () => {
     const config = {
       rangeStrategy: 'auto',
