@@ -116,7 +116,7 @@ Array [
 |---|---|---|---|---|
 | dummy | devDependencies | lockFileMaintenance | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 | a |  |  | \`aaaaaaa\` |  |
-| b |  | pin |  |  |
+| b |  | pin | \`some_new_value@bbbbbbb\` |  |
 | c |  |  |  |  |
 | d |  | lockFileMaintenance |  |  |
 
