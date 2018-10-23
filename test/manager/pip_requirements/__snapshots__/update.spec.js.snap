@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/pip_requirements/update updateDependency replaces existing value 1`] = `
+"--index-url http://example.com/private-pypi/
+# simple comment
+url==1.0.1
+some-other-package==1.0.0
+not_semver==1.9
+
+"
+`;
+
+exports[`manager/pip_requirements/update updateDependency replaces existing value with comment 1`] = `
+"Django==1 # renovate
+distribute==0.6.27 # renovate: ignore
+dj-database-url==0.2 # pyup: nothing
+psycopg2==2.4.6 # renovate:
+wsgiref==0.1.2 # something else
+"
+`;
