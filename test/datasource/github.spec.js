@@ -23,7 +23,7 @@ describe('datasource/github', () => {
     it('returns digest', async () => {
       ghGot.mockReturnValueOnce({ body: [{ sha: 'abcdef' }] });
       const res = await github.getDigest(
-        { depName: 'some-dep', githubRepo: 'some/dep' },
+        { depName: 'some-dep', purl: 'pkg:github/some/dep?foo=1' },
         null
       );
       expect(res).toBe('abcdef');
