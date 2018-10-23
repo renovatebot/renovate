@@ -78,7 +78,7 @@ Array [
 exports[`lib/manager/pip_requirements/extract extractDependencies() handles comments and commands 1`] = `
 Array [
   Object {
-    "currentValue": "==1",
+    "currentValue": "==1.2.7",
     "depName": "Django",
     "lineNumber": 0,
     "purl": "pkg:pypi/Django",
