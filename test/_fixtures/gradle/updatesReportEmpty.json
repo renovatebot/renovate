@@ -1,0 +1,23 @@
+{
+  "current": {
+    "dependencies": [
+    ],
+    "count": 0
+  },
+  "exceeded": {
+    "dependencies": [
+    ],
+    "count": 0
+  },
+  "outdated": {
+    "dependencies": [
+    ],
+    "count": 0
+  },
+  "unresolved": {
+    "dependencies": [
+    ],
+    "count": 0
+  },
+  "count": 0
+}
