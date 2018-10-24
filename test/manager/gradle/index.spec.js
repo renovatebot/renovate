@@ -74,8 +74,8 @@ describe('manager/gradle', () => {
         'gradle --init-script init.gradle dependencyUpdates -Drevision=release'
       );
       expect(exec.mock.calls[0][1]).toMatchObject({
-        "cwd": "localDir",
-        "timeout": 20000,
+        cwd: 'localDir',
+        timeout: 20000,
       });
     });
 
@@ -83,16 +83,20 @@ describe('manager/gradle', () => {
       await manager.preExtract(config, {
         'build.gradle': 'content root file',
         'subproject1/build.gradle': 'content subproject1',
-        'subproject1/subproject2/build.gradle': 'content subproject2'
+        'subproject1/subproject2/build.gradle': 'content subproject2',
       });
 
       expect(fs.writeFile.mock.calls[0][0]).toBe('localDir/build.gradle');
       expect(fs.writeFile.mock.calls[0][1]).toBe('content root file');
 
-      expect(fs.writeFile.mock.calls[1][0]).toBe('localDir/subproject1/build.gradle');
+      expect(fs.writeFile.mock.calls[1][0]).toBe(
+        'localDir/subproject1/build.gradle'
+      );
       expect(fs.writeFile.mock.calls[1][1]).toBe('content subproject1');
 
-      expect(fs.writeFile.mock.calls[2][0]).toBe('localDir/subproject1/subproject2/build.gradle');
+      expect(fs.writeFile.mock.calls[2][0]).toBe(
+        'localDir/subproject1/subproject2/build.gradle'
+      );
       expect(fs.writeFile.mock.calls[2][1]).toBe('content subproject2');
     });
 
@@ -107,23 +111,25 @@ describe('manager/gradle', () => {
     it('should return the new version if it is available', async () => {
       const newVersion = {
         ...config,
-        depName: "cglib:cglib-nodep",
+        depName: 'cglib:cglib-nodep',
         available: {
-          release: "3.2.8"
-        }
+          release: '3.2.8',
+        },
       };
       const outdatedDependencies = await manager.getPackageUpdates(newVersion);
 
-      expect(outdatedDependencies).toMatchObject([{
-        depName: 'cglib:cglib-nodep',
-        newValue: "3.2.8"
-      }]);
+      expect(outdatedDependencies).toMatchObject([
+        {
+          depName: 'cglib:cglib-nodep',
+          newValue: '3.2.8',
+        },
+      ]);
     });
 
     it('should return empty if there is no new version', async () => {
       const newVersion = {
         ...config,
-        depName: "cglib:cglib-nodep",
+        depName: 'cglib:cglib-nodep',
       };
       const outdatedDependencies = await manager.getPackageUpdates(newVersion);
 
