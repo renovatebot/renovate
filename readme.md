@@ -2,7 +2,7 @@
 
 # Renovate
 
-Automated dependency updates. Flexible, so you don't need to be.
+Automated dependency updates. Multi-platform and multi-language.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/master/license)
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
@@ -42,8 +42,8 @@ Renovate was released in 2017 and is now widely used in the developer community.
 ## Using Renovate
 
 The easiest way to use Renovate if you are on GitHub is to use the Renovate app. Go to
-[https://github.com/marketplace/renovate](https://github.com/marketplace/renovate) to install
-it now. A paid plan is required for private repositories.
+[https://github.com/apps/renovate](https://github.com/apps/renovate) to install
+it now. A GitHub Marketplace plan is required only for private repositories.
 
 ## Configuration
 
