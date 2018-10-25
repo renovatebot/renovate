@@ -24,6 +24,7 @@ describe('manager/gradle', () => {
     jest.resetAllMocks();
     fs.readFile.mockReturnValue(updatesDependenciesReport);
     fs.mkdir.mockReturnValue(true);
+    fs.exists.mockReturnValue(true);
     exec.mockReturnValue({ stdout: 'gradle output', stderr: '' });
   });
 
@@ -58,6 +59,22 @@ describe('manager/gradle', () => {
       exec.mockImplementation(() => {
         throw new Error();
       });
+
+      const dependencies = await manager.extractDependencies(
+        'content',
+        'build.gradle',
+        config
+      );
+
+      expect(dependencies).toEqual(null);
+    });
+
+    it('should return empty if there is no dependency report', async () => {
+      fs.readFile.mockImplementation(() => {
+        throw new Error();
+      });
+      fs.exists.mockReturnValue(false);
+
       const dependencies = await manager.extractDependencies(
         'content',
         'build.gradle',
