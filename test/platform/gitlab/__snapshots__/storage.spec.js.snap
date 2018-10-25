@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/gitlab/storage createBranch() creates the branch 1`] = `
+Array [
+  Array [
+    "projects/undefined/repository/branches?branch=renovate%2Fsome-branch&ref=commit",
+  ],
+]
+`;
