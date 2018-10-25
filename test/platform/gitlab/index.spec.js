@@ -706,8 +706,8 @@ describe('platform/gitlab', () => {
       });
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
       expect(get.post.mock.calls).toHaveLength(0);
-      expect(get.patch.mock.calls).toHaveLength(1);
-      expect(get.patch.mock.calls).toMatchSnapshot();
+      expect(get.put.mock.calls).toHaveLength(1);
+      expect(get.put.mock.calls).toMatchSnapshot();
     });
     it('skips comment', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -716,14 +716,14 @@ describe('platform/gitlab', () => {
       });
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
       expect(get.post.mock.calls).toHaveLength(0);
-      expect(get.patch.mock.calls).toHaveLength(0);
+      expect(get.put.mock.calls).toHaveLength(0);
     });
     it('handles comment with no description', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
       await gitlab.ensureComment(42, null, '!merge');
       expect(get.post.mock.calls).toHaveLength(0);
-      expect(get.patch.mock.calls).toHaveLength(0);
+      expect(get.put.mock.calls).toHaveLength(0);
     });
   });
   describe('ensureCommentRemoval', () => {
