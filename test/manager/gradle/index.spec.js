@@ -122,6 +122,22 @@ describe('manager/gradle', () => {
 
       expect(fs.writeFile.mock.calls[0][0]).toBe('localDir/init.gradle');
     });
+
+    it('should use docker if required', async () => {
+      const configWithDocker = {
+        binarySource: 'docker',
+        ...config,
+      };
+      await manager.extractDependencies(
+        'content',
+        'build.gradle',
+        configWithDocker
+      );
+
+      expect(exec.mock.calls[0][0]).toBe(
+        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script init.gradle dependencyUpdates -Drevision=release'
+      );
+    });
   });
 
   describe('getPackageUpdates', () => {
