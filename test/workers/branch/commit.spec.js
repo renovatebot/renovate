@@ -31,5 +31,14 @@ describe('workers/branch/automerge', () => {
       expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
       expect(platform.commitFilesToBranch.mock.calls).toMatchSnapshot();
     });
+    it('dry runs', async () => {
+      config.dryRun = true;
+      config.updatedPackageFiles.push({
+        name: 'package.json',
+        contents: 'some contents',
+      });
+      await commitFilesToBranch(config);
+      expect(platform.commitFilesToBranch.mock.calls.length).toBe(0);
+    });
   });
 });
