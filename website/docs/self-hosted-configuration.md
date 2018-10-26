@@ -15,6 +15,8 @@ Be cautious when using this option - it will run Renovate over _every_ repositor
 
 Set this to 'global' if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
 
+## dryRun
+
 ## endpoint
 
 ## exposeEnv
