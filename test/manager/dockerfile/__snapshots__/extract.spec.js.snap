@@ -404,6 +404,28 @@ Array [
 ]
 `;
 
+exports[`lib/manager/dockerfile/extract extractDependencies() skips index reference COPY --from tags 1`] = `
+Array [
+  Object {
+    "commitMessageTopic": "Node.js",
+    "currentDepTag": "node:6.12.3",
+    "currentDepTagDigest": "node:6.12.3",
+    "currentDigest": undefined,
+    "currentFrom": "node:6.12.3",
+    "currentTag": "6.12.3",
+    "currentValue": "6.12.3",
+    "depName": "node",
+    "dockerRegistry": undefined,
+    "fromPrefix": "FROM",
+    "fromSuffix": "as frontend",
+    "lineNumber": 0,
+    "purl": "pkg:docker/node",
+    "tagSuffix": undefined,
+    "versionScheme": "docker",
+  },
+]
+`;
+
 exports[`lib/manager/dockerfile/extract extractDependencies() skips named multistage COPY --from tags 1`] = `
 Array [
   Object {

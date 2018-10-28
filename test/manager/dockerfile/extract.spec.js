@@ -135,6 +135,14 @@ describe('lib/manager/dockerfile/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
+    it('skips index reference COPY --from tags', () => {
+      const res = extractDependencies(
+        'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=0 /usr/bin/node /usr/bin/node\n',
+        config
+      ).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(1);
+    });
     it('extracts images on adjacent lines', () => {
       const res = extractDependencies(d1, config).deps;
       expect(res).toMatchSnapshot();
