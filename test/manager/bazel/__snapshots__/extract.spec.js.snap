@@ -58,5 +58,23 @@ Array [
     "repo": "bazelbuild/rules_go",
     "versionScheme": "semver",
   },
+  Object {
+    "currentValue": "0.5.0",
+    "def": "http_archive(
+    name = \\"bazel_skylib\\",
+    sha256 = \\"b5f6abe419da897b7901f90cbab08af958b97a8f3575b0d3dd062ac7ce78541f\\",
+    strip_prefix = \\"bazel-skylib-0.5.0\\",
+    urls = [
+        \\"https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz\\",
+        \\"https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz\\",
+    ],
+)
+",
+    "depName": "bazel_skylib",
+    "depType": "http_archive",
+    "purl": "pkg:github/bazelbuild/bazel-skylib?ref=release",
+    "repo": "bazelbuild/bazel-skylib",
+    "versionScheme": "semver",
+  },
 ]
 `;
