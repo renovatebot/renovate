@@ -124,6 +124,8 @@ describe('workers/pr', () => {
       platform.createPr.mockReturnValue({ displayNumber: 'New Pull Request' });
       config.upgrades = [config];
       platform.getPrBody = jest.fn(input => input);
+      platform.getBranchPr = jest.fn();
+      platform.getBranchStatus = jest.fn();
     });
     afterEach(() => {
       jest.clearAllMocks();
