@@ -13,6 +13,18 @@ const pr = {
     },
   },
 };
+const issue = {
+  id: 25,
+  title: 'title',
+  content: { raw: 'content' },
+};
+
+const repo = {
+  is_private: false,
+  full_name: 'some/repo',
+  owner: { username: 'some' },
+  mainbranch: { name: 'master' },
+};
 function notFound() {
   const err = new Error('Not found');
   err.statusCode = 404;
@@ -20,11 +32,16 @@ function notFound() {
 }
 
 module.exports = {
-  '/2.0/repositories/some/repo': {
-    is_private: false,
-    full_name: 'some/repo',
-    owner: { username: 'some' },
-    mainbranch: { name: 'master' },
+  '/2.0/user': {
+    username: 'nobody',
+  },
+  '/2.0/repositories/some/repo': repo,
+  '/2.0/repositories/some/empty': {...repo, full_name : 'some/empty'},
+  '/2.0/repositories/some/empty/issues': {
+    values: [],
+  },
+  '/2.0/repositories/some/repo/issues': {
+    values: [issue, {...issue, id:26}],
   },
   '/2.0/repositories/some/repo/pullrequests': {
     values: [pr],
