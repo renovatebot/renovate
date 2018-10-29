@@ -53,6 +53,103 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket ensureIssue() creates new issue 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/empty",
+  ],
+  Array [
+    "/2.0/repositories/some/empty/pullrequests?state=OPEN&pagelen=50",
+    undefined,
+  ],
+  Array [
+    "/2.0/repositories/some/empty/refs/branches/master",
+  ],
+  Array [
+    "/2.0/repositories/some/empty/src/null/?pagelen=100",
+    undefined,
+  ],
+  Array [
+    "/2.0/user",
+  ],
+  Array [
+    "/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+  ],
+]
+`;
+
+exports[`platform/bitbucket ensureIssue() creates new issue 2`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/empty/issues",
+    Object {
+      "body": Object {
+        "content": Object {
+          "markup": "markdown",
+          "raw": "body",
+        },
+        "title": "title",
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket ensureIssue() noop for existing issue 1`] = `
+Array [
+  Array [
+    "/2.0/user",
+  ],
+  Array [
+    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+  ],
+]
+`;
+
+exports[`platform/bitbucket ensureIssue() updates existing issues 1`] = `
+Array [
+  Array [
+    "/2.0/user",
+  ],
+  Array [
+    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+  ],
+]
+`;
+
+exports[`platform/bitbucket ensureIssue() updates existing issues 2`] = `Array []`;
+
+exports[`platform/bitbucket ensureIssueClosing() does not throw 1`] = `
+Array [
+  Array [
+    "/2.0/user",
+  ],
+  Array [
+    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+  ],
+]
+`;
+
+exports[`platform/bitbucket ensureIssueClosing() does not throw 2`] = `Array []`;
+
+exports[`platform/bitbucket findIssue() does not throw 1`] = `
+Object {
+  "body": "content",
+  "number": 25,
+}
+`;
+
+exports[`platform/bitbucket findIssue() does not throw 2`] = `
+Array [
+  Array [
+    "/2.0/user",
+  ],
+  Array [
+    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+  ],
+]
+`;
+
 exports[`platform/bitbucket getBranchPr() bitbucket finds PR for branch 1`] = `
 Object {
   "body": "summary",

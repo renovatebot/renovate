@@ -232,18 +232,58 @@ describe('platform/bitbucket', () => {
 
   describe('findIssue()', () => {
     it('does not throw', async () => {
-      await bitbucket.findIssue('title');
+      await initRepo();
+      await mocked(async () => {
+        expect(await bitbucket.findIssue('title')).toMatchSnapshot();
+        expect(api.get.mock.calls).toMatchSnapshot();
+      });
+    });
+    it('returns null if no issues', async () => {
+      await mocked(async () => {
+        await bitbucket.initRepo({
+          repository: 'some/empty',
+        });
+        expect(await bitbucket.findIssue('title')).toBeNull();
+      });
     });
   });
   describe('ensureIssue()', () => {
-    it('does not throw', async () => {
-      await bitbucket.ensureIssue('title', 'body');
+    it('updates existing issues', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.ensureIssue('title', 'body');
+        expect(api.get.mock.calls).toMatchSnapshot();
+        expect(api.post.mock.calls).toMatchSnapshot();
+      });
+    });
+    it('creates new issue', async () => {
+      await mocked(async () => {
+        await bitbucket.initRepo({
+          repository: 'some/empty',
+        });
+        await bitbucket.ensureIssue('title', 'body');
+        expect(api.get.mock.calls).toMatchSnapshot();
+        expect(api.post.mock.calls).toMatchSnapshot();
+      });
+    });
+    it('noop for existing issue', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.ensureIssue('title', 'content\n');
+        expect(api.get.mock.calls).toMatchSnapshot();
+        expect(api.post.mock.calls).toHaveLength(0);
+      });
     });
   });
 
   describe('ensureIssueClosing()', () => {
     it('does not throw', async () => {
-      await bitbucket.ensureIssueClosing('title');
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.ensureIssueClosing('title');
+        expect(api.get.mock.calls).toMatchSnapshot();
+        expect(api.delete.mock.calls).toMatchSnapshot();
+      });
     });
   });
 
