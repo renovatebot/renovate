@@ -26,6 +26,9 @@ Object {
   "gomod": Array [
     Object {},
   ],
+  "gradle": Array [
+    Object {},
+  ],
   "kubernetes": Array [
     Object {},
   ],
