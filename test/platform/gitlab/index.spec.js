@@ -830,6 +830,7 @@ describe('platform/gitlab', () => {
           description: 'a merge request',
           state: 'merged',
           merge_status: 'cannot_be_merged',
+          diverged_commits_count: 5,
           source_branch: 'some-branch',
         },
       });
@@ -849,6 +850,7 @@ describe('platform/gitlab', () => {
           description: 'a merge request',
           state: 'open',
           merge_status: 'cannot_be_merged',
+          diverged_commits_count: 2,
           source_branch: 'some-branch',
         },
       }));
