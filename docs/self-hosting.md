@@ -21,10 +21,12 @@ Renovate is available for Docker via an automated build [renovate/renovate](http
 
 ```
 $ docker run renovate/renovate
-$ docker run renovate/renovate:12.1.1
-$ docker run renovate/renovate:12.1
-$ docker run renovate/renovate:12
+$ docker run renovate/renovate:13.1.1
+$ docker run renovate/renovate:13.1
+$ docker run renovate/renovate:13
 ```
+
+(Please look up what the latest actual tags are though, do not use the above literally).
 
 If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 
