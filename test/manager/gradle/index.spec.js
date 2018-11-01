@@ -1,6 +1,7 @@
 jest.mock('fs-extra');
 jest.mock('child-process-promise');
 
+const { toUnix } = require('upath');
 const fs = require('fs-extra');
 const fsReal = require('fs');
 const { exec } = require('child-process-promise');
@@ -103,15 +104,17 @@ describe('manager/gradle', () => {
         'subproject1/subproject2/build.gradle': 'content subproject2',
       });
 
-      expect(fs.writeFile.mock.calls[0][0]).toBe('localDir/build.gradle');
+      expect(toUnix(fs.writeFile.mock.calls[0][0])).toBe(
+        'localDir/build.gradle'
+      );
       expect(fs.writeFile.mock.calls[0][1]).toBe('content root file');
 
-      expect(fs.writeFile.mock.calls[1][0]).toBe(
+      expect(toUnix(fs.writeFile.mock.calls[1][0])).toBe(
         'localDir/subproject1/build.gradle'
       );
       expect(fs.writeFile.mock.calls[1][1]).toBe('content subproject1');
 
-      expect(fs.writeFile.mock.calls[2][0]).toBe(
+      expect(toUnix(fs.writeFile.mock.calls[2][0])).toBe(
         'localDir/subproject1/subproject2/build.gradle'
       );
       expect(fs.writeFile.mock.calls[2][1]).toBe('content subproject2');
@@ -120,7 +123,9 @@ describe('manager/gradle', () => {
     it('should configure the useLatestVersion plugin', async () => {
       await manager.extractDependencies('content', 'build.gradle', config);
 
-      expect(fs.writeFile.mock.calls[0][0]).toBe('localDir/init.gradle');
+      expect(toUnix(fs.writeFile.mock.calls[0][0])).toBe(
+        'localDir/init.gradle'
+      );
     });
 
     it('should use docker if required', async () => {
