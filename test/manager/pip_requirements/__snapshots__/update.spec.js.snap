@@ -18,3 +18,10 @@ psycopg2==2.4.6 # renovate:
 wsgiref==0.1.2 # something else
 "
 `;
+
+exports[`manager/pip_requirements/update updateDependency replaces existing value with extras 1`] = `
+"Django[argon2]==2.0.8
+celery [redis]==4.1.1
+celery==4.1.2 [bar] == 3.2.1 # handles extra white space
+"
+`;

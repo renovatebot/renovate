@@ -13,6 +13,11 @@ const requirements3 = fs.readFileSync(
   'utf8'
 );
 
+const requirements4 = fs.readFileSync(
+  'test/_fixtures/pip_requirements/requirements4.txt',
+  'utf8'
+);
+
 describe('manager/pip_requirements/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
@@ -39,6 +44,18 @@ describe('manager/pip_requirements/update', () => {
       const res = updateDependency(requirements3, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(requirements3);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+    });
+
+    it('replaces existing value with extras', () => {
+      const upgrade = {
+        depName: 'celery',
+        lineNumber: 2,
+        newValue: '==4.1.2',
+      };
+      const res = updateDependency(requirements4, upgrade);
+      expect(res).toMatchSnapshot();
+      expect(res).not.toEqual(requirements4);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
   });

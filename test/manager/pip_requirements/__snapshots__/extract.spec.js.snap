@@ -115,3 +115,29 @@ Array [
   },
 ]
 `;
+
+exports[`lib/manager/pip_requirements/extract extractDependencies() handles extras 1`] = `
+Array [
+  Object {
+    "currentValue": "==2.0.8",
+    "depName": "Django",
+    "lineNumber": 0,
+    "purl": "pkg:pypi/Django",
+    "versionScheme": "pep440",
+  },
+  Object {
+    "currentValue": "==4.1.1",
+    "depName": "celery",
+    "lineNumber": 1,
+    "purl": "pkg:pypi/celery",
+    "versionScheme": "pep440",
+  },
+  Object {
+    "currentValue": " == 3.2.1",
+    "depName": "foo",
+    "lineNumber": 2,
+    "purl": "pkg:pypi/foo",
+    "versionScheme": "pep440",
+  },
+]
+`;
