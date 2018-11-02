@@ -73,5 +73,29 @@ describe('datasource/pypi', () => {
       });
       expect(await datasource.getPkgReleases('pkg:pypi/something')).toBeNull();
     });
+
+    it('respects compatibilityRestriction', async () => {
+      got.mockReturnValueOnce({
+        body: {
+          info: {
+            name: 'doit',
+          },
+          releases: {
+            '0.30.3': [{ requires_python: null }],
+            '0.31.0': [
+              { requires_python: '>=3.4' },
+              { requires_python: '>=2.7' },
+            ],
+            '0.31.1': [{ requires_python: '>=3.4' }],
+            '0.4.0': [{ requires_python: '>=3.4' }, { requires_python: null }],
+          },
+        },
+      });
+      expect(
+        await datasource.getPkgReleases('pkg:pypi/doit', {
+          compatibilityRestriction: { python: '2.7' },
+        })
+      ).toMatchSnapshot();
+    });
   });
 });
