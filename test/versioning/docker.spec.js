@@ -102,7 +102,6 @@ describe('docker.isValid(input)', () => {
     });
   });
   describe('sortVersions(v1, v2)', () => {
-    const cmp = docker.sortVersions;
     it('behaves like semver.sortVersions', () => {
       [
         ['1.1.1', '1.2.3'],
@@ -110,8 +109,13 @@ describe('docker.isValid(input)', () => {
         ['2.0.1', '1.2.3'],
         ['1.2.3', '0.9.5'],
       ].forEach(pair => {
-        expect(cmp(...pair)).toBe(semver.sortVersions(...pair));
+        expect(docker.sortVersions(...pair)).toBe(semver.sortVersions(...pair));
       });
+    });
+  });
+  describe('getNewValue(', () => {
+    it('returns toVersion', () => {
+      expect(docker.getNewValue(null, null, null, '1.2.3')).toBe('1.2.3');
     });
   });
 });
