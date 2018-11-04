@@ -74,7 +74,7 @@ describe('datasource/pypi', () => {
       expect(await datasource.getPkgReleases('pkg:pypi/something')).toBeNull();
     });
 
-    it('respects compatibilityRestriction', async () => {
+    it('respects compatibility', async () => {
       got.mockReturnValueOnce({
         body: {
           info: {
@@ -93,7 +93,7 @@ describe('datasource/pypi', () => {
       });
       expect(
         await datasource.getPkgReleases('pkg:pypi/doit', {
-          compatibilityRestriction: { python: '2.7' },
+          compatibility: { python: '2.7' },
         })
       ).toMatchSnapshot();
     });

@@ -96,7 +96,7 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getPkgReleases respects compatibilityRestriction 1`] = `
+exports[`datasource/pypi getPkgReleases respects compatibility 1`] = `
 Object {
   "releases": Array [
     Object {
