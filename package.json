@@ -137,7 +137,7 @@
     "mockdate": "2.0.2",
     "nock": "10.0.1",
     "prettier": "1.14.3",
-    "semantic-release": "15.10.6",
+    "semantic-release": "15.10.7",
     "tmp-promise": "1.0.5"
   },
   "files": [
