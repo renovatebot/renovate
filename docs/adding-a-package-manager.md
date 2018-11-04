@@ -22,15 +22,15 @@ Each manager needs its own subdirectory under `lib/managers` and to be added to 
 The manager's `index.js` file supports the following values/functions:
 
 - extractPackageFile
+- extractAllPackageFiles
 - getRangeStrategy (optional)
 - language (optional)
-- postExtract (optional)
 - supportsLockFileMaintenance (optional)
 - updateDependency
 
-##### `extractPackageFile(content, packageFile, config)` (async, mandatory)
+##### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
 
-This function is mandatory. It takes a file content and optionally the packageFile name/config, and returns an array of detected/extracted dependencies, including:
+This function is mandatory unless you use `extractAllPackageFiles` instead. It takes as arguments the file's content and optionally the file's full file pathname and config, and returns an array of detected/extracted dependencies, including:
 
 - dependency name
 - dependency type (e.g. dependencies, devDependencies, etc)
@@ -45,6 +45,16 @@ As a general approach, we want to extract _all_ dependencies from each dependenc
 
 Also, if a file is passed to `extractPackageFile` that is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files. A common case for this is in Meteor, where its `package.js` file name is not unique and there many be many non-Meteor paojects using that filename.
 
+##### `extractAllPackageFiles(packageFiles)` (async, optional)
+
+You can use this function instead of `extractPackageFile` if the package manager cannot parse/extract all package files in parallel.
+
+For example, npm/yarn needs to correlate package files together for features such as Lerna and Workspaces, so it's necessary to iterate through them all together after initial parsing.
+
+As another example, gradle needs to write out all files and call a command via child process in order to extract dependencies, so that must be done first.
+
+This function takes an array of filenames as input and returns an array of filenames and dependencies as a result.
+
 #### `getRangeStrategy(config)` (optional)
 
 This optional function should be written if you wish the manager to support "auto" range strategies, e.g. pinning or not pinning depending on other values in the package file. `npm` uses this to pin `devDependencies` but not `dependencies` unless the package file is detected as an app.
@@ -54,14 +64,6 @@ If left undefined, then a default `getRangeStrategy` will be used that always re
 ##### `language` (optional)
 
 This is used when more than one package manager share settings from a common language. e.g. docker-compose, circleci and gitlabci all specify "docker" as their language and inherit all config settings from there.
-
-#### `postExtract(packageFiles)` (async, optional)
-
-This function takes an array of package files (extracted earlier using `extractPackageFile`) and is useful if some form of "correlation" is required between the files.
-
-For example, Yarn Workspaces and Lerna are tools for working with multiple package files at once, including generating a single lock file instead of one per package file. It is therefore necessary to have a "full view" of all package files to determine if such logic is necessary, because the `extractPackageFile` function only sees each package file in isolation.
-
-Currently `npm` is the only package manager using this function, because all other ones are able to extract enough data from package files in isolation.
 
 #### `supportsLockFileMaintenance` (optional)
 
