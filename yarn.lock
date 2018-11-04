@@ -4942,10 +4942,10 @@ lru-cache@^4.0.1, lru-cache@^4.1.1, lru-cache@^4.1.2, lru-cache@^4.1.3:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luxon@1.4.5:
-  version "1.4.5"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.4.5.tgz#88f6d4901f61bcff26cfbb66b54f464c9f759b82"
-  integrity sha512-l2zRBzQt47/OLD//V5odz5JFIvReS+7dmt0KtP6R+jMymki1XuU+hA8loyUvwLj6714HD79cokPtOF2TO8nl5w==
+luxon@1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.5.0.tgz#bbb20bc4d3a97f44798e2f0fe13bf5fc2b8784ab"
+  integrity sha512-9IfJ0a5jA3poJSQnamaoOdPG0ulYk1JUI5IYmEdUhUc8dto4t6TVTu+oIM7fpSYy01GwUAA8kGUZMVe7Qx9Y+Q==
 
 make-dir@^1.0.0:
   version "1.3.0"
