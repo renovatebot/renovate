@@ -22,17 +22,17 @@ describe('lib/manager/node/package', () => {
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
-      config.currentValue = ['8'];
+      config.currentValue = ['8', '10'];
       config.supportPolicy = ['lts_active'];
       expect(await node.getPackageUpdates(config)).toEqual([]);
     });
     it('returns result if needing updates', async () => {
-      config.currentValue = ['6', '8'];
+      config.currentValue = ['6', '8', '10'];
       config.supportPolicy = ['lts'];
       expect(await node.getPackageUpdates(config)).toMatchSnapshot();
     });
     it('detects pinning', async () => {
-      config.currentValue = ['6.1.0', '8.4.0'];
+      config.currentValue = ['6.1.0', '8.4.0', '10.0.0'];
       config.supportPolicy = ['lts'];
       githubDatasource.getPkgReleases.mockReturnValueOnce({
         releases: [
@@ -53,6 +53,9 @@ describe('lib/manager/node/package', () => {
           },
           {
             version: '9.5.0',
+          },
+          {
+            version: '10.0.1',
           },
         ],
       });

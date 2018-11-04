@@ -90,5 +90,21 @@ describe('datasource/go', () => {
       const res = await datasource.getPkgReleases('pkg:go/golang.org/x/text');
       expect(res).toBeNull();
     });
+    it('works for known servers', async () => {
+      got.mockClear();
+      github.getPkgReleases.mockClear();
+      const packages = [
+        'pkg:go/github.com/x/text',
+        'pkg:go/gopkg.in/x/text',
+        'pkg:go/gopkg.in/x',
+      ];
+      const githubRes = { releases: [1, 2] };
+      for (const pkg of packages) {
+        github.getPkgReleases.mockReturnValueOnce(githubRes);
+        expect(await datasource.getPkgReleases(pkg)).toEqual(githubRes);
+      }
+      expect(got.mock.calls).toHaveLength(0);
+      expect(github.getPkgReleases.mock.calls).toMatchSnapshot();
+    });
   });
 });

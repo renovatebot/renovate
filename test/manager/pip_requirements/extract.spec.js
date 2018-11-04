@@ -16,6 +16,11 @@ const requirements3 = fs.readFileSync(
   'utf8'
 );
 
+const requirements4 = fs.readFileSync(
+  'test/_fixtures/pip_requirements/requirements4.txt',
+  'utf8'
+);
+
 describe('lib/manager/pip_requirements/extract', () => {
   describe('extractDependencies()', () => {
     let config;
@@ -39,6 +44,11 @@ describe('lib/manager/pip_requirements/extract', () => {
       const res = extractDependencies(requirements3, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
+    });
+    it('handles extras', () => {
+      const res = extractDependencies(requirements4, config).deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(3);
     });
   });
 });

@@ -8,3 +8,29 @@ Object {
   ],
 }
 `;
+
+exports[`datasource/go getPkgReleases works for known servers 1`] = `
+Array [
+  Array [
+    Object {
+      "fullname": "x/text",
+      "qualifiers": Object {},
+    },
+    undefined,
+  ],
+  Array [
+    Object {
+      "fullname": "x/text",
+      "qualifiers": Object {},
+    },
+    undefined,
+  ],
+  Array [
+    Object {
+      "fullname": "go-x/x",
+      "qualifiers": Object {},
+    },
+    undefined,
+  ],
+]
+`;
