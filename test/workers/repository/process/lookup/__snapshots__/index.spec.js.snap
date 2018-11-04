@@ -847,6 +847,116 @@ Array [
 
 exports[`manager/npm/lookup .lookupUpdates() should warn if no version matches dist-tag 1`] = `Array []`;
 
+exports[`manager/npm/lookup .lookupUpdates() skips uncompatible versions for 8 1`] = `
+Object {
+  "changelogUrl": undefined,
+  "homepage": undefined,
+  "releases": Array [
+    Object {
+      "version": "8",
+    },
+    Object {
+      "version": "9",
+    },
+  ],
+  "repositoryUrl": null,
+  "updates": Array [
+    Object {
+      "canBeUnpublished": undefined,
+      "fromVersion": "8",
+      "isSingleVersion": true,
+      "newMajor": 9,
+      "newMinor": null,
+      "newValue": "9",
+      "releaseTimestamp": undefined,
+      "toVersion": "9",
+      "updateType": "major",
+    },
+  ],
+  "warnings": Array [],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() skips uncompatible versions for 8.1 1`] = `
+Object {
+  "changelogUrl": undefined,
+  "homepage": undefined,
+  "releases": Array [
+    Object {
+      "version": "8.1",
+    },
+    Object {
+      "version": "8.2",
+    },
+    Object {
+      "version": "9.0",
+    },
+  ],
+  "repositoryUrl": null,
+  "updates": Array [
+    Object {
+      "canBeUnpublished": undefined,
+      "fromVersion": "8.1",
+      "isSingleVersion": true,
+      "newMajor": 8,
+      "newMinor": 2,
+      "newValue": "8.2",
+      "releaseTimestamp": undefined,
+      "toVersion": "8.2",
+      "updateType": "minor",
+    },
+    Object {
+      "canBeUnpublished": undefined,
+      "fromVersion": "8.1",
+      "isSingleVersion": true,
+      "newMajor": 9,
+      "newMinor": 0,
+      "newValue": "9.0",
+      "releaseTimestamp": undefined,
+      "toVersion": "9.0",
+      "updateType": "major",
+    },
+  ],
+  "warnings": Array [],
+}
+`;
+
+exports[`manager/npm/lookup .lookupUpdates() skips uncompatible versions for 8.1.0 1`] = `
+Object {
+  "changelogUrl": undefined,
+  "homepage": undefined,
+  "releases": Array [
+    Object {
+      "version": "8.1.0",
+    },
+    Object {
+      "version": "8.1.5",
+    },
+    Object {
+      "version": "8.2.0",
+    },
+    Object {
+      "version": "8.2.5",
+    },
+  ],
+  "repositoryUrl": null,
+  "updates": Array [
+    Object {
+      "canBeUnpublished": undefined,
+      "fromVersion": "8.1.0",
+      "isSingleVersion": true,
+      "newMajor": 8,
+      "newMinor": 2,
+      "newValue": "8.2.5",
+      "releaseTimestamp": undefined,
+      "toVersion": "8.2.5",
+      "updateType": "minor",
+    },
+  ],
+  "warnings": Array [],
+}
+`;
+
 exports[`manager/npm/lookup .lookupUpdates() skips undefined values 1`] = `
 Object {
   "skipReason": "unsupported-value",
