@@ -1,6 +1,6 @@
 const fs = require('fs');
 const {
-  extractDependencies,
+  extractPackageFile,
 } = require('../../../lib/manager/buildkite/extract');
 
 const pipeline1 = fs.readFileSync(
@@ -17,26 +17,26 @@ const pipeline3 = fs.readFileSync(
 );
 
 describe('lib/manager/buildkite/extract', () => {
-  describe('extractDependencies()', () => {
+  describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractDependencies('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBe(null);
     });
     it('extracts simple single plugin', () => {
-      const res = extractDependencies(pipeline1, config).deps;
+      const res = extractPackageFile(pipeline1, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
     it('extracts multiple plugins in same file', () => {
-      const res = extractDependencies(pipeline2, config).deps;
+      const res = extractPackageFile(pipeline2, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
     it('adds skipReason', () => {
-      const res = extractDependencies(pipeline3, config).deps;
+      const res = extractPackageFile(pipeline3, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });

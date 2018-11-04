@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/kubernetes/extract extractDependencies() extracts image line in a YAML array 1`] = `
+exports[`lib/manager/kubernetes/extract extractPackageFile() extracts image line in a YAML array 1`] = `
 Array [
   Object {
     "currentDepTag": "external_storage/local-volume-provisioner:v2.1.0",
@@ -19,7 +19,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/kubernetes/extract extractDependencies() extracts multiple image lines 1`] = `
+exports[`lib/manager/kubernetes/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
     "currentDepTag": "nginx:1.7.9",

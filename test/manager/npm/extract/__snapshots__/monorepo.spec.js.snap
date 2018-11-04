@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/extract .extractDependencies() uses lerna package settings 1`] = `
+exports[`manager/npm/extract .extractPackageFile() uses lerna package settings 1`] = `
 Array [
   Object {
     "lernaDir": ".",
@@ -34,7 +34,7 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractDependencies() uses yarn workspaces package settings 1`] = `
+exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings 1`] = `
 Array [
   Object {
     "lernaClient": "yarn",

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/terraform/extract extractDependencies() extracts 1`] = `
+exports[`lib/manager/terraform/extract extractPackageFile() extracts 1`] = `
 Object {
   "deps": Array [
     Object {

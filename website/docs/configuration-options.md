@@ -130,6 +130,17 @@ This is used to add a suffix to commit messages. Usually left empty except for i
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. "dependency react".
 
+## compatibility
+
+This is used to restrict which versions are possible to upgrade to based on their language support.
+For now this only support `python`, other languages would be added in the future.
+
+```json
+"compatibility": {
+  "python": "2.7"
+}
+```
+
 ## composer
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.

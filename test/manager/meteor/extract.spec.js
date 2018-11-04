@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { extractDependencies } = require('../../../lib/manager/meteor/extract');
+const { extractPackageFile } = require('../../../lib/manager/meteor/extract');
 
 function readFixture(fixture) {
   return fs.readFileSync(
@@ -12,17 +12,17 @@ function readFixture(fixture) {
 const input01Content = readFixture('package-1.js');
 
 describe('lib/manager/meteor/extract', () => {
-  describe('extractDependencies()', () => {
+  describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
       config = {};
     });
     it('returns empty if fails to parse', () => {
-      const res = extractDependencies('blahhhhh:foo:@what\n', config);
+      const res = extractPackageFile('blahhhhh:foo:@what\n', config);
       expect(res).toBe(null);
     });
     it('returns results', () => {
-      const res = extractDependencies(input01Content, config);
+      const res = extractPackageFile(input01Content, config);
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
     });

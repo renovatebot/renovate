@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/docker-compose/extract extractDependencies() extracts multiple image lines 1`] = `
+exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
     "currentDepTag": "something/redis:alpine",

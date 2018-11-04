@@ -34,7 +34,7 @@ describe('workers/repository/extract/manager-files', () => {
       const managerConfig = { manager: 'npm', enabled: true };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
       platform.getFile.mockReturnValue('{}');
-      npm.extractDependencies = jest.fn(() => ({ some: 'result' }));
+      npm.extractPackageFile = jest.fn(() => ({ some: 'result' }));
       const res = await getManagerPackageFiles(config, managerConfig);
       expect(res).toMatchSnapshot();
     });
