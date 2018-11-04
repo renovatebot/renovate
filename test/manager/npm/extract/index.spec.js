@@ -15,12 +15,12 @@ const workspacesContent = readFixture('inputs/workspaces.json');
 const vendorisedContent = readFixture('is-object.json');
 
 describe('manager/npm/extract', () => {
-  describe('.extractDependencies()', () => {
+  describe('.extractPackageFile()', () => {
     beforeEach(() => {
       platform.getFile.mockReturnValue(null);
     });
     it('returns null if cannot parse', async () => {
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         'not json',
         'package.json',
         defaultConfig
@@ -28,7 +28,7 @@ describe('manager/npm/extract', () => {
       expect(res).toBe(null);
     });
     it('ignores vendorised package.json', async () => {
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         vendorisedContent,
         'package.json',
         defaultConfig
@@ -38,7 +38,7 @@ describe('manager/npm/extract', () => {
     it('throws error if non-root renovate config', async () => {
       let e;
       try {
-        await npmExtract.extractDependencies(
+        await npmExtract.extractPackageFile(
           '{ "renovate": {} }',
           'backend/package.json',
           defaultConfig
@@ -49,7 +49,7 @@ describe('manager/npm/extract', () => {
       expect(e).toBeDefined();
     });
     it('returns null if no deps', async () => {
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         '{ "renovate": {} }',
         'package.json',
         defaultConfig
@@ -57,7 +57,7 @@ describe('manager/npm/extract', () => {
       expect(res).toBe(null);
     });
     it('handles invalid', async () => {
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         '{"dependencies": true, "devDependencies": []}',
         'package.json',
         defaultConfig
@@ -65,7 +65,7 @@ describe('manager/npm/extract', () => {
       expect(res).toBe(null);
     });
     it('returns an array of dependencies', async () => {
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
         defaultConfig
@@ -79,7 +79,7 @@ describe('manager/npm/extract', () => {
         }
         return null;
       });
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
         defaultConfig
@@ -93,7 +93,7 @@ describe('manager/npm/extract', () => {
         }
         return null;
       });
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
         { global: {} }
@@ -108,7 +108,7 @@ describe('manager/npm/extract', () => {
         }
         return null;
       });
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
         { global: {} }
@@ -122,7 +122,7 @@ describe('manager/npm/extract', () => {
         }
         return null;
       });
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
         defaultConfig
@@ -136,7 +136,7 @@ describe('manager/npm/extract', () => {
         }
         return null;
       });
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         workspacesContent,
         'package.json',
         defaultConfig
@@ -163,7 +163,7 @@ describe('manager/npm/extract', () => {
         },
       };
       const pJsonStr = JSON.stringify(pJson);
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
         defaultConfig
@@ -190,7 +190,7 @@ describe('manager/npm/extract', () => {
         },
       };
       const pJsonStr = JSON.stringify(pJson);
-      const res = await npmExtract.extractDependencies(
+      const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
         defaultConfig

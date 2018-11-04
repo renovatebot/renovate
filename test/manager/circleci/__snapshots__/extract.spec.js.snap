@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/circleci/extract extractDependencies() extracts multiple image lines 1`] = `
+exports[`lib/manager/circleci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
     "commitMessageTopic": "Node.js",

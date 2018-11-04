@@ -3,7 +3,7 @@ const {
 } = require('../../../../lib/manager/npm/extract/monorepo');
 
 describe('manager/npm/extract', () => {
-  describe('.extractDependencies()', () => {
+  describe('.extractPackageFile()', () => {
     it('uses lerna package settings', async () => {
       const packageFiles = [
         {

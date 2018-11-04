@@ -21,14 +21,14 @@ Each manager needs its own subdirectory under `lib/managers` and to be added to 
 
 The manager's `index.js` file supports the following values/functions:
 
-- extractDependencies
+- extractPackageFile
 - getRangeStrategy (optional)
 - language (optional)
 - postExtract (optional)
 - supportsLockFileMaintenance (optional)
 - updateDependency
 
-##### `extractDependencies(content, packageFile, config)` (async, mandatory)
+##### `extractPackageFile(content, packageFile, config)` (async, mandatory)
 
 This function is mandatory. It takes a file content and optionally the packageFile name/config, and returns an array of detected/extracted dependencies, including:
 
@@ -41,9 +41,9 @@ The fields returned here can be customised to suit the package manager, e.g. Doc
 
 This function doesn't necessarily need to _understand_ the file or even syntax that it is passed, instead it just needs to understand enough to extract the list of dependencies.
 
-As a general approach, we want to extract _all_ dependencies from each dependency file, even if they contain values we don't support. For any that have unsupported values that we cannot renovate, this `extractDependencies` function should set a `skipReason` to a value that would be helpful to someone reading the logs.
+As a general approach, we want to extract _all_ dependencies from each dependency file, even if they contain values we don't support. For any that have unsupported values that we cannot renovate, this `extractPackageFile` function should set a `skipReason` to a value that would be helpful to someone reading the logs.
 
-Also, if a file is passed to `extractDependencies` that is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files. A common case for this is in Meteor, where its `package.js` file name is not unique and there many be many non-Meteor paojects using that filename.
+Also, if a file is passed to `extractPackageFile` that is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files. A common case for this is in Meteor, where its `package.js` file name is not unique and there many be many non-Meteor paojects using that filename.
 
 #### `getRangeStrategy(config)` (optional)
 
@@ -57,9 +57,9 @@ This is used when more than one package manager share settings from a common lan
 
 #### `postExtract(packageFiles)` (async, optional)
 
-This function takes an array of package files (extracted earlier using `extractDependencies`) and is useful if some form of "correlation" is required between the files.
+This function takes an array of package files (extracted earlier using `extractPackageFile`) and is useful if some form of "correlation" is required between the files.
 
-For example, Yarn Workspaces and Lerna are tools for working with multiple package files at once, including generating a single lock file instead of one per package file. It is therefore necessary to have a "full view" of all package files to determine if such logic is necessary, because the `extractDependencies` function only sees each package file in isolation.
+For example, Yarn Workspaces and Lerna are tools for working with multiple package files at once, including generating a single lock file instead of one per package file. It is therefore necessary to have a "full view" of all package files to determine if such logic is necessary, because the `extractPackageFile` function only sees each package file in isolation.
 
 Currently `npm` is the only package manager using this function, because all other ones are able to extract enough data from package files in isolation.
 

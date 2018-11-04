@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { extractDependencies } = require('../../../lib/manager/bazel/extract');
+const { extractPackageFile } = require('../../../lib/manager/bazel/extract');
 
 const workspaceFile = fs.readFileSync(
   'test/_fixtures/bazel/WORKSPACE1',
@@ -7,24 +7,21 @@ const workspaceFile = fs.readFileSync(
 );
 
 describe('lib/manager/bazel/extract', () => {
-  describe('extractDependencies()', () => {
+  describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
       config = {};
     });
     it('returns empty if fails to parse', () => {
-      const res = extractDependencies('blahhhhh:foo:@what\n', config);
+      const res = extractPackageFile('blahhhhh:foo:@what\n', config);
       expect(res).toBe(null);
     });
     it('returns empty if cannot parse dependency', () => {
-      const res = extractDependencies(
-        'git_repository(\n  nothing\n)\n',
-        config
-      );
+      const res = extractPackageFile('git_repository(\n  nothing\n)\n', config);
       expect(res).toBe(null);
     });
     it('extracts multiple types of dependencies', () => {
-      const res = extractDependencies(workspaceFile, config);
+      const res = extractPackageFile(workspaceFile, config);
       expect(res.deps).toMatchSnapshot();
     });
   });

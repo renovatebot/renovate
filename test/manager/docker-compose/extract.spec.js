@@ -1,6 +1,6 @@
 const fs = require('fs');
 const {
-  extractDependencies,
+  extractPackageFile,
 } = require('../../../lib/manager/docker-compose/extract');
 
 const yamlFile = fs.readFileSync(
@@ -9,16 +9,16 @@ const yamlFile = fs.readFileSync(
 );
 
 describe('lib/manager/docker-compose/extract', () => {
-  describe('extractDependencies()', () => {
+  describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractDependencies('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBe(null);
     });
     it('extracts multiple image lines', () => {
-      const res = extractDependencies(yamlFile, config);
+      const res = extractPackageFile(yamlFile, config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(7);
     });

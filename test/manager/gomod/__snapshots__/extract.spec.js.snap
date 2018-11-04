@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/gomod/extract extractDependencies() extracts multi-line requires 1`] = `
+exports[`lib/manager/gomod/extract extractPackageFile() extracts multi-line requires 1`] = `
 Array [
   Object {
     "currentValue": "v1.15.21",
@@ -637,7 +637,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/gomod/extract extractDependencies() extracts single-line requires 1`] = `
+exports[`lib/manager/gomod/extract extractPackageFile() extracts single-line requires 1`] = `
 Array [
   Object {
     "currentValue": "v0.7.0",
