@@ -96,6 +96,26 @@ Object {
 }
 `;
 
+exports[`datasource/pypi getPkgReleases respects compatibility 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "releaseTimestamp": undefined,
+      "version": "0.4.0",
+    },
+    Object {
+      "releaseTimestamp": undefined,
+      "version": "0.30.3",
+    },
+    Object {
+      "releaseTimestamp": undefined,
+      "version": "0.31.0",
+    },
+  ],
+  "repositoryUrl": undefined,
+}
+`;
+
 exports[`datasource/pypi getPkgReleases returns non-github home_page 1`] = `
 Object {
   "homepage": "https://microsoft.com",
