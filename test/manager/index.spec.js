@@ -16,12 +16,12 @@ describe('manager', () => {
       expect(manager.getManagerList()).not.toBe(null);
     });
   });
-  describe('postExtract()', () => {
+  describe('extractAllPackageFiles()', () => {
     it('returns null', () => {
-      expect(manager.postExtract('dockerfile', [])).toBe(null);
+      expect(manager.extractAllPackageFiles('dockerfile', [])).toBe(null);
     });
-    it('returns postExtract', () => {
-      expect(manager.postExtract('npm', [])).not.toBe(null);
+    it('returns non-null', () => {
+      expect(manager.extractAllPackageFiles('npm', [])).not.toBe(null);
     });
   });
 });
