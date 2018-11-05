@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/bazel/extract extractDependencies() extracts multiple types of dependencies 1`] = `
+exports[`lib/manager/bazel/extract extractPackageFile() extracts multiple types of dependencies 1`] = `
 Array [
   Object {
     "currentValue": "0.3.1",

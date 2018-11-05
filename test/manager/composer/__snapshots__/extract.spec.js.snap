@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/composer/extract extractDependencies() extracts dependencies with lock file 1`] = `
+exports[`lib/manager/composer/extract extractPackageFile() extracts dependencies with lock file 1`] = `
 Object {
   "composerLock": "composer.lock",
   "deps": Array [
@@ -250,7 +250,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/composer/extract extractDependencies() extracts dependencies with no lock file 1`] = `
+exports[`lib/manager/composer/extract extractPackageFile() extracts dependencies with no lock file 1`] = `
 Object {
   "composerLock": false,
   "deps": Array [
@@ -500,7 +500,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/composer/extract extractDependencies() extracts object registryUrls 1`] = `
+exports[`lib/manager/composer/extract extractPackageFile() extracts object registryUrls 1`] = `
 Object {
   "composerJsonType": "project",
   "composerLock": false,
@@ -640,7 +640,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/composer/extract extractDependencies() extracts registryUrls 1`] = `
+exports[`lib/manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
 Object {
   "composerLock": false,
   "deps": Array [

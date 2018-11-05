@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/npm/extract .extractDependencies() extracts engines 1`] = `
+exports[`manager/npm/extract .extractPackageFile() extracts engines 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -109,7 +109,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractDependencies() extracts non-npmjs 1`] = `
+exports[`manager/npm/extract .extractPackageFile() extracts non-npmjs 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -276,7 +276,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractDependencies() finds a lock file 1`] = `
+exports[`manager/npm/extract .extractPackageFile() finds a lock file 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -383,7 +383,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractDependencies() finds complex yarn workspaces 1`] = `
+exports[`manager/npm/extract .extractPackageFile() finds complex yarn workspaces 1`] = `
 Object {
   "deps": Array [],
   "lernaClient": "npm",
@@ -404,7 +404,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractDependencies() finds lerna 1`] = `
+exports[`manager/npm/extract .extractPackageFile() finds lerna 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -511,7 +511,7 @@ Object {
 }
 `;
 
-exports[`manager/npm/extract .extractDependencies() returns an array of dependencies 1`] = `
+exports[`manager/npm/extract .extractPackageFile() returns an array of dependencies 1`] = `
 Object {
   "deps": Array [
     Object {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/pip_requirements/extract extractDependencies() extracts dependencies 1`] = `
+exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
 Array [
   Object {
     "currentValue": "==0.3.1",
@@ -35,7 +35,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/pip_requirements/extract extractDependencies() extracts multiple dependencies 1`] = `
+exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts multiple dependencies 1`] = `
 Array [
   Object {
     "currentValue": "==1",
@@ -75,7 +75,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/pip_requirements/extract extractDependencies() handles comments and commands 1`] = `
+exports[`lib/manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
 Array [
   Object {
     "currentValue": "==1.2.7",
@@ -116,7 +116,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/pip_requirements/extract extractDependencies() handles extras 1`] = `
+exports[`lib/manager/pip_requirements/extract extractPackageFile() handles extras 1`] = `
 Array [
   Object {
     "currentValue": "==2.0.8",

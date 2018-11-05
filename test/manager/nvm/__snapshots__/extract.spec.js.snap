@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/nvm/extract extractDependencies() returns a result 1`] = `
+exports[`lib/manager/nvm/extract extractPackageFile() returns a result 1`] = `
 Array [
   Object {
     "currentValue": "8.4.0",
@@ -11,7 +11,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/nvm/extract extractDependencies() skips non-pinned 1`] = `
+exports[`lib/manager/nvm/extract extractPackageFile() skips non-pinned 1`] = `
 Array [
   Object {
     "currentValue": "8.4",
