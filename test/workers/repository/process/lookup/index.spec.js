@@ -1027,29 +1027,6 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
-    ['8.1.0', '8.1', '8'].forEach(currentValue => {
-      it('skips uncompatible versions for ' + currentValue, async () => {
-        config.currentValue = currentValue;
-        config.depName = 'node';
-        config.purl = 'pkg:docker/node';
-        config.versionScheme = 'docker';
-        docker.getPkgReleases.mockReturnValueOnce({
-          releases: [
-            { version: '8.1.0' },
-            { version: '8.1.5' },
-            { version: '8.1' },
-            { version: '8.2.0' },
-            { version: '8.2.5' },
-            { version: '8.2' },
-            { version: '8' },
-            { version: '9.0' },
-            { version: '9' },
-          ],
-        });
-        const res = await lookup.lookupUpdates(config);
-        expect(res).toMatchSnapshot();
-      });
-    });
     it('handles digest pin for up to date version', async () => {
       config.currentValue = '8.1.0';
       config.depName = 'node';
