@@ -4,6 +4,7 @@ const semver = require('../../lib/versioning')('semver');
 describe('docker.isValid(input)', () => {
   describe('isValid(version)', () => {
     it('should support all versions length', () => {
+      expect(docker.isValid(null)).toBe(null);
       expect(docker.isValid('1.2.3')).toBe('1.2.3');
       expect(docker.isValid('18.04')).toBe('18.04');
       expect(docker.isValid('10.1')).toBe('10.1');
@@ -11,7 +12,7 @@ describe('docker.isValid(input)', () => {
       expect(docker.isValid('foo')).toBe(null);
     });
   });
-  describe('isValid(version)', () => {
+  describe('getMajor(version)', () => {
     it('should support all versions length', () => {
       expect(docker.getMajor('1.2.3')).toBe(1);
       expect(docker.getMajor('18.04')).toBe(18);
