@@ -1,0 +1,60 @@
+{
+  "current": {
+    "dependencies": [
+      {
+        "group": "gradle.plugin.se.patrikerdes",
+        "version": "0.2.3",
+        "name": "gradle-use-latest-versions-plugin"
+      }
+    ],
+    "count": 1
+  },
+  "exceeded": {
+    "dependencies": [
+
+    ],
+    "count": 0
+  },
+  "outdated": {
+    "dependencies": [
+      {
+        "group": "com.github.ben-manes",
+        "available": {
+          "release": null,
+          "milestone": "0.20.0",
+          "integration": null
+        },
+        "version": "0.17.0",
+        "name": "gradle-versions-plugin"
+      },
+      {
+        "group": "org.codehaus.groovy",
+        "available": {
+          "release": null,
+          "milestone": "3.0.0-alpha-3",
+          "integration": null
+        },
+        "version": "2.4.10",
+        "name": "groovy"
+      },
+      {
+        "group": "org.spockframework",
+        "available": {
+          "release": null,
+          "milestone": "1.2-RC3-groovy-2.5",
+          "integration": null
+        },
+        "version": "1.0-groovy-2.4",
+        "name": "spock-core"
+      }
+    ],
+    "count": 3
+  },
+  "unresolved": {
+    "dependencies": [
+
+    ],
+    "count": 0
+  },
+  "count": 4
+}

@@ -1,0 +1,23 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.2.RELEASE'
+    }
+    repositories {
+        maven {
+           url "https://plugins.gradle.org/m2/"
+        }
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
+        classpath 'com.fkorotkov:gradle-libraries-plugin:0.1'
+        classpath "gradle.plugin.se.patrikerdes:gradle-use-latest-versions-plugin:0.2.3"
+    }
+}
+
+configurations {
+    integration
+    integrationCompile.extendsFrom testCompile
+    integrationRuntime.extendsFrom testRuntime

@@ -1,0 +1,12 @@
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+apply plugin: 'groovy'
+
+
+dependencies {
+    compile('cglib:cglib-nodep:3.1')
+}
