@@ -1,7 +1,7 @@
 const docker = require('../../lib/versioning')('docker');
 const semver = require('../../lib/versioning')('semver');
 
-describe('docker.isValid(input)', () => {
+describe('docker.', () => {
   describe('isValid(version)', () => {
     it('should support all versions length', () => {
       expect(docker.isValid(null)).toBe(null);
