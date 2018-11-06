@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/gradle extractDependencies should return gradle dependencies 1`] = `
+exports[`manager/gradle extractPackageFile should return gradle dependencies 1`] = `
 Object {
   "deps": Array [
     Object {

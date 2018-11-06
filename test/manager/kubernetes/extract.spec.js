@@ -1,6 +1,6 @@
 const fs = require('fs');
 const {
-  extractDependencies,
+  extractPackageFile,
 } = require('../../../lib/manager/kubernetes/extract');
 
 const kubernetesImagesFile = fs.readFileSync(
@@ -24,7 +24,7 @@ const otherYamlFile = fs.readFileSync(
 );
 
 describe('lib/manager/kubernetes/extract', () => {
-  describe('extractDependencies()', () => {
+  describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
       config = {
@@ -32,20 +32,20 @@ describe('lib/manager/kubernetes/extract', () => {
       };
     });
     it('returns null for empty', () => {
-      expect(extractDependencies(kubernetesConfigMapFile, config)).toBe(null);
+      expect(extractPackageFile(kubernetesConfigMapFile, config)).toBe(null);
     });
     it('extracts multiple image lines', () => {
-      const res = extractDependencies(kubernetesImagesFile, config);
+      const res = extractPackageFile(kubernetesImagesFile, config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });
     it('extracts image line in a YAML array', () => {
-      const res = extractDependencies(kubernetesArraySyntaxFile, config);
+      const res = extractPackageFile(kubernetesArraySyntaxFile, config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
     it('ignores non-Kubernetes YAML files', () => {
-      expect(extractDependencies(otherYamlFile, config)).toBe(null);
+      expect(extractPackageFile(otherYamlFile, config)).toBe(null);
     });
   });
 });

@@ -1,6 +1,6 @@
 const fs = require('fs');
 const {
-  extractDependencies,
+  extractPackageFile,
 } = require('../../../lib/manager/pip_requirements/extract');
 
 const requirements1 = fs.readFileSync(
@@ -22,31 +22,31 @@ const requirements4 = fs.readFileSync(
 );
 
 describe('lib/manager/pip_requirements/extract', () => {
-  describe('extractDependencies()', () => {
+  describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractDependencies('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBe(null);
     });
     it('extracts dependencies', () => {
-      const res = extractDependencies(requirements1, config).deps;
+      const res = extractPackageFile(requirements1, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });
     it('extracts multiple dependencies', () => {
-      const res = extractDependencies(requirements2, config).deps;
+      const res = extractPackageFile(requirements2, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
     it('handles comments and commands', () => {
-      const res = extractDependencies(requirements3, config).deps;
+      const res = extractPackageFile(requirements3, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
     it('handles extras', () => {
-      const res = extractDependencies(requirements4, config).deps;
+      const res = extractPackageFile(requirements4, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });

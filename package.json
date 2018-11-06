@@ -127,7 +127,7 @@
     "chai": "4.2.0",
     "codecov": "3.1.0",
     "cross-env": "5.2.0",
-    "eslint": "5.6.1",
+    "eslint": "5.8.0",
     "eslint-config-airbnb-base": "13.1.0",
     "eslint-config-prettier": "3.1.0",
     "eslint-plugin-import": "2.14.0",
@@ -135,7 +135,7 @@
     "jest": "23.6.0",
     "jest-silent-reporter": "0.1.1",
     "mockdate": "2.0.2",
-    "nock": "10.0.1",
+    "nock": "10.0.2",
     "prettier": "1.14.3",
     "semantic-release": "15.10.7",
     "tmp-promise": "1.0.5"

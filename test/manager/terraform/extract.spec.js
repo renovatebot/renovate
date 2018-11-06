@@ -1,6 +1,6 @@
 const fs = require('fs');
 const {
-  extractDependencies,
+  extractPackageFile,
 } = require('../../../lib/manager/terraform/extract');
 
 const tf1 = fs.readFileSync('test/_fixtures/terraform/1.tf', 'utf8');
@@ -10,22 +10,22 @@ const tf2 = `module "relative" {
 `;
 
 describe('lib/manager/terraform/extract', () => {
-  describe('extractDependencies()', () => {
+  describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractDependencies('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBe(null);
     });
     it('extracts', () => {
-      const res = extractDependencies(tf1);
+      const res = extractPackageFile(tf1);
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(14);
       expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(5);
     });
     it('returns null if only local deps', () => {
-      expect(extractDependencies(tf2, config)).toBe(null);
+      expect(extractPackageFile(tf2, config)).toBe(null);
     });
   });
 });

@@ -3,6 +3,7 @@ const {
 } = require('../../../../lib/workers/repository/extract/manager-files');
 const fileMatch = require('../../../../lib/workers/repository/extract/file-match');
 const npm = require('../../../../lib/manager/npm');
+const dockerfile = require('../../../../lib/manager/dockerfile');
 
 jest.mock('../../../../lib/workers/repository/extract/file-match');
 
@@ -30,11 +31,19 @@ describe('workers/repository/extract/manager-files', () => {
       const res = await getManagerPackageFiles(config, managerConfig);
       expect(res).toHaveLength(0);
     });
-    it('returns files', async () => {
+    it('returns files with extractPackageFile', async () => {
+      const managerConfig = { manager: 'dockerfile', enabled: true };
+      fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
+      platform.getFile.mockReturnValue('some content');
+      dockerfile.extractPackageFile = jest.fn(() => ({ some: 'result' }));
+      const res = await getManagerPackageFiles(config, managerConfig);
+      expect(res).toMatchSnapshot();
+    });
+    it('returns files with extractAllPackageFiles', async () => {
       const managerConfig = { manager: 'npm', enabled: true };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
       platform.getFile.mockReturnValue('{}');
-      npm.extractDependencies = jest.fn(() => ({ some: 'result' }));
+      npm.extractPackageFile = jest.fn(() => ({ some: 'result' }));
       const res = await getManagerPackageFiles(config, managerConfig);
       expect(res).toMatchSnapshot();
     });
