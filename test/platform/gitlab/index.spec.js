@@ -870,10 +870,12 @@ describe('platform/gitlab', () => {
     });
     it('returns files', async () => {
       get.mockReturnValueOnce({
-        body: [
-          { filename: 'renovate.json' },
-          { filename: 'not renovate.json' },
-        ],
+        body: {
+          changes: [
+            { new_path: 'renovate.json' },
+            { new_path: 'not renovate.json' },
+          ],
+        },
       });
       const prFiles = await gitlab.getPrFiles(123);
       expect(prFiles).toMatchSnapshot();
