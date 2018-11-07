@@ -336,6 +336,8 @@ describe('platform/gitlab', () => {
           },
         },
       });
+      get.mockReturnValueOnce({ body: [] }); // get branch commit
+      get.mockReturnValueOnce({ body: [{ status: 'success' }] }); // get commit statuses
       get.mockReturnValueOnce({ body: 'foo' });
       const pr = await gitlab.getBranchPr('somebranch');
       expect(pr).toMatchSnapshot();
