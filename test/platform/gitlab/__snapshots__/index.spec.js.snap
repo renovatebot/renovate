@@ -124,6 +124,19 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab deleteLabel(issueNo, label) should delete the label 1`] = `
+Array [
+  Array [
+    "projects/undefined/merge_requests/42",
+    Object {
+      "body": Object {
+        "labels": "foo,renovate",
+      },
+    },
+  ],
+]
+`;
+
 exports[`platform/gitlab ensureComment add comment if not found 1`] = `
 Array [
   Array [
