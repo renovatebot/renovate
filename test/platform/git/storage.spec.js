@@ -218,7 +218,7 @@ describe('platform/git/storage', () => {
     it('returns https url', () => {
       expect(
         getUrl({
-          gitFsProtocol: 'https',
+          gitFs: 'https',
           auth: 'user:pass',
           hostname: 'host',
           repository: 'some/repo',
@@ -229,7 +229,7 @@ describe('platform/git/storage', () => {
     it('returns ssh url', () => {
       expect(
         getUrl({
-          gitFsProtocol: 'ssh',
+          gitFs: 'ssh',
           auth: 'user:pass',
           hostname: 'host',
           repository: 'some/repo',
