@@ -327,6 +327,7 @@ describe('platform/gitlab', () => {
       get.mockReturnValueOnce({
         body: {
           iid: 91,
+          state: 'opened',
           additions: 1,
           deletions: 1,
           commits: 1,

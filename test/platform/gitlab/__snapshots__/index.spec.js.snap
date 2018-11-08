@@ -194,7 +194,7 @@ Object {
   "isStale": false,
   "number": 91,
   "source_branch": "some-branch",
-  "state": undefined,
+  "state": "open",
 }
 `;
 
