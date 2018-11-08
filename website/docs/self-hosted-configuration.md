@@ -43,6 +43,8 @@ RFC5322-compliant string if you wish to customise the git author for commits.
 
 This setting is experimental, and works for GitHub repositories only. If enabled, Renovate will `git clone` repos and use `git` for file operations such as creating branches and committing files.
 
+## gitFsProtocol
+
 ## gitPrivateKey
 
 ## logFile

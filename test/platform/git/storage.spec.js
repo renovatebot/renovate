@@ -212,4 +212,29 @@ describe('platform/git/storage', () => {
       expect(await git.getCommitMessages()).toMatchSnapshot();
     });
   });
+
+  describe('Storage.getUrl()', () => {
+    const getUrl = GitStorage.getUrl;
+    it('returns https url', () => {
+      expect(
+        getUrl({
+          gitFsProtocol: 'https',
+          auth: 'user:pass',
+          hostname: 'host',
+          repository: 'some/repo',
+        })
+      ).toEqual('https://user:pass@host/some/repo.git');
+    });
+
+    it('returns ssh url', () => {
+      expect(
+        getUrl({
+          gitFsProtocol: 'ssh',
+          auth: 'user:pass',
+          hostname: 'host',
+          repository: 'some/repo',
+        })
+      ).toEqual('git@host:some/repo.git');
+    });
+  });
 });
