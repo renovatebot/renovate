@@ -21,7 +21,10 @@ First, sign into the [Dashboard](https://renovatebot.com/dashboard) using GitLab
 
 The sidebar will load a list of any already-installed repositories that you have access to, if there are any. 
 
-Now click the "Settings" icon at the top of the side bar and it will soon load a list of all GitLab.com repositories that you have admin rights to.
+Now click the "Settings" icon ![Renovate Dashboard Settings icon](assets/images/dashboard-settings.png) at the top of the side bar and it will soon load a list of all GitLab.com repositories that you have admin rights to.
+
+![Renovate Dashboard Install Screen](assets/images/dashboard-install.png)
+
 On this screen, toggle the switch to install Renovate into a repo. Doing so will:
 - Add [@renovate-bot](https://gitlab.com/renovate-bot) as a Developer to the project
 - Add a webhook to the project to send events to the Renovate webhook handler
