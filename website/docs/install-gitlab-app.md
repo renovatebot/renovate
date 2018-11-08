@@ -59,7 +59,3 @@ Unlike on GitHub, it is not possible to have the option to install Renovate on "
 ##### Detecting new projects
 
 Currently there is no detection mechanism in the backend scheduler to determine when Renovate has been added to a new project, so the onboarding MR won't appear instantly. Instead, the new project should be picked up during hourly scheduled runs.
-
-##### Rebasing using labels
-
-The `deleteLabel()` function is not yet implemented for the gitlab platform so requests to rebase MRs using the "rebase" label will cause an error when Renovate attempts to delete the label. Please rebase using MR titles instead.
