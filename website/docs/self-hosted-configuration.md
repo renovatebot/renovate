@@ -42,6 +42,7 @@ RFC5322-compliant string if you wish to customise the git author for commits.
 ## gitFs
 
 This setting is experimental, and works for GitHub repositories only. If enabled, Renovate will `git clone` repos and use `git` for file operations such as creating branches and committing files.
+Set it to a string specifing the transport used by Git (`https`, `http` or `ssh`).
 
 ## gitPrivateKey
 
@@ -54,10 +55,6 @@ This setting is experimental, and works for GitHub repositories only. If enabled
 ## mirrorMode
 
 You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
-
-## oauth
-
-Set this to true only if using an OAuth2 token from GitLab.
 
 ## onboarding
 
