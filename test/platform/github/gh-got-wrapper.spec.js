@@ -28,7 +28,7 @@ describe('platform/gh-got-wrapper', () => {
       endpoint: 'https://ghe.mycompany.com/api/v3/',
       body: 'abc',
     });
-    expect(ghGot.mock.calls[0][1].endpoint).toEqual(
+    expect(ghGot.mock.calls[0][1].baseUrl).toEqual(
       'https://ghe.mycompany.com/api/'
     );
   });
