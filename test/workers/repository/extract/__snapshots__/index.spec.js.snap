@@ -8,6 +8,9 @@ Object {
   "buildkite": Array [
     Object {},
   ],
+  "cargo": Array [
+    Object {},
+  ],
   "circleci": Array [
     Object {},
   ],
