@@ -327,6 +327,7 @@ describe('platform/gitlab', () => {
       get.mockReturnValueOnce({
         body: {
           iid: 91,
+          state: 'opened',
           additions: 1,
           deletions: 1,
           commits: 1,
@@ -1030,6 +1031,29 @@ These updates have all been created already. Click a checkbox below to force a r
     it('returns empty', async () => {
       const res = await gitlab.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
+    });
+  });
+  describe('deleteLabel(issueNo, label)', () => {
+    it('should delete the label', async () => {
+      get.mockReturnValueOnce({
+        body: {
+          id: 1,
+          iid: 12345,
+          description: 'a merge request',
+          state: 'merged',
+          merge_status: 'cannot_be_merged',
+          diverged_commits_count: 5,
+          source_branch: 'some-branch',
+          labels: ['foo', 'renovate', 'rebase'],
+        },
+      });
+      get.mockReturnValueOnce({
+        body: {
+          commit: {},
+        },
+      });
+      await gitlab.deleteLabel(42, 'rebase');
+      expect(get.put.mock.calls).toMatchSnapshot();
     });
   });
 });
