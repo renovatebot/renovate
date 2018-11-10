@@ -157,6 +157,16 @@ describe('platform/gitlab', () => {
       }
       expect(err.message).toBe('archived');
     });
+    it('should throw an error if repository is empty', async () => {
+      get.mockReturnValue({ body: { default_branch: null } });
+      let err;
+      try {
+        await gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' });
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).toBe('empty');
+    });
   });
   describe('getRepoForceRebase', () => {
     it('should return false', () => {
