@@ -15,6 +15,7 @@ describe('docs', () => {
     .map(match => match.substring(4, match.length - 1));
   const expectedOptions = options
     .filter(option => option.stage !== 'global')
+    .filter(option => option.releaseStatus !== 'unpublished')
     .filter(option => !option.admin)
     .filter(option => !option.parent)
     .map(option => option.name)

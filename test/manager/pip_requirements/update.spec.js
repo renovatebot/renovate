@@ -22,7 +22,7 @@ describe('manager/pip_requirements/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        depName: 'url',
+        depName: 'some-package',
         lineNumber: 2,
         newValue: '==1.0.1',
       };
@@ -50,7 +50,7 @@ describe('manager/pip_requirements/update', () => {
     it('replaces existing value with extras', () => {
       const upgrade = {
         depName: 'celery',
-        lineNumber: 2,
+        lineNumber: 1,
         newValue: '==4.1.2',
       };
       const res = updateDependency(requirements4, upgrade);
