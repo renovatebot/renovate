@@ -41,7 +41,7 @@ Renovate was released in 2017 and is now widely used in the developer community.
 
 ## Using Renovate
 
-The easiest way to use Renovate if you are hosted on GitHub.com or GitLab.com is to install the hosted Renovate app. 
+The easiest way to use Renovate if you are hosted on GitHub.com or GitLab.com is to install the hosted Renovate app.
 
 For GitHub, go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to install
 it now. A GitHub Marketplace plan is required only for private repositories. [More details on the GitHub App installation](https://renovatebot.com/docs/install-github-app/).
