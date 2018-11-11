@@ -3089,10 +3089,10 @@ globby@^8.0.0:
     pify "^3.0.0"
     slash "^1.0.0"
 
-got@9.3.0, got@^9.1.0, got@^9.2.0:
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/got/-/got-9.3.0.tgz#9187472a6e7c642264d041b0e670fd8bb1eebb67"
-  integrity sha512-4WTeObCRe7hatjQmeCwmkviu+ibyfeF5v6De+FeZdfsLEIe/7d9rl3VOzrknXveeQV/Pq/+f+KbscBQsP8ZxUg==
+got@9.3.2:
+  version "9.3.2"
+  resolved "https://registry.yarnpkg.com/got/-/got-9.3.2.tgz#f6e3bd063aa8f461ccd924afa2ba2b61deab3989"
+  integrity sha512-OyKOUg71IKvwb8Uj0KP6EN3+qVVvXmYsFznU1fnwUnKtDbZnwSlAi7muNlu4HhBfN9dImtlgg9e7H0g5qVdaeQ==
   dependencies:
     "@sindresorhus/is" "^0.12.0"
     "@szmarczak/http-timer" "^1.1.0"
@@ -3122,6 +3122,23 @@ got@^6.7.1:
     timed-out "^4.0.0"
     unzip-response "^2.0.1"
     url-parse-lax "^1.0.0"
+
+got@^9.1.0, got@^9.2.0:
+  version "9.3.0"
+  resolved "https://registry.yarnpkg.com/got/-/got-9.3.0.tgz#9187472a6e7c642264d041b0e670fd8bb1eebb67"
+  integrity sha512-4WTeObCRe7hatjQmeCwmkviu+ibyfeF5v6De+FeZdfsLEIe/7d9rl3VOzrknXveeQV/Pq/+f+KbscBQsP8ZxUg==
+  dependencies:
+    "@sindresorhus/is" "^0.12.0"
+    "@szmarczak/http-timer" "^1.1.0"
+    cacheable-request "^5.1.0"
+    decompress-response "^3.3.0"
+    duplexer3 "^0.1.4"
+    get-stream "^4.1.0"
+    lowercase-keys "^1.0.1"
+    mimic-response "^1.0.1"
+    p-cancelable "^1.0.0"
+    to-readable-stream "^1.0.0"
+    url-parse-lax "^3.0.0"
 
 graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@~4.1.11:
   version "4.1.11"
