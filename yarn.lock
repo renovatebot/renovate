@@ -8603,10 +8603,10 @@ validate-npm-package-name@^3.0.0, validate-npm-package-name@~3.0.0:
   dependencies:
     builtins "^1.0.3"
 
-validator@10.8.0:
-  version "10.8.0"
-  resolved "https://registry.yarnpkg.com/validator/-/validator-10.8.0.tgz#8acb15a5c39411cbc8ef2be0c98c2514da4410a7"
-  integrity sha512-mXqMxfCh5NLsVgYVKl9WvnHNDPCcbNppHSPPowu0VjtSsGWVY+z8hJF44edLR1nbLNzi3jYoYsIl8KZpioIk6g==
+validator@10.9.0:
+  version "10.9.0"
+  resolved "https://registry.yarnpkg.com/validator/-/validator-10.9.0.tgz#d10c11673b5061fb7ccf4c1114412411b2bac2a8"
+  integrity sha512-hZJcZSWz9poXBlAkjjcsNAdrZ6JbjD3kWlNjq/+vE7RLLS/+8PAj3qVVwrwsOz/WL8jPmZ1hYkRvtlUeZAm4ug==
 
 "vasync@1.x >=1.6.1":
   version "1.6.4"
