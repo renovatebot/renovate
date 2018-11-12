@@ -14,21 +14,21 @@ const config = {
 
 describe('lib/manager/pip_setup/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns found deps', () => {
+    it('returns found deps', async () => {
       expect(
-        extractPackageFile(content, packageFile, config)
+        await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();
     });
     it('should return null for invalid file', async () => {
       const file = await tmp.file();
-      expect(extractPackageFile('raise Exception()', file.path, config)).toBe(
-        null
-      );
+      expect(
+        await extractPackageFile('raise Exception()', file.path, config)
+      ).toBe(null);
     });
     it('should return null for no deps file', async () => {
       const file = await tmp.file();
       expect(
-        extractPackageFile(
+        await extractPackageFile(
           'from setuptools import setup\nsetup()',
           file.path,
           config
@@ -37,8 +37,10 @@ describe('lib/manager/pip_setup/extract', () => {
     });
   });
   describe('extractSetupFile()', () => {
-    it('should return parsed setup() call', () => {
-      expect(extractSetupFile(content, packageFile, config)).toMatchSnapshot();
+    it('should return parsed setup() call', async () => {
+      expect(
+        await extractSetupFile(content, packageFile, config)
+      ).toMatchSnapshot();
     });
   });
 });
