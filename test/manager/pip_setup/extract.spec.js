@@ -42,5 +42,25 @@ describe('lib/manager/pip_setup/extract', () => {
         await extractSetupFile(content, packageFile, config)
       ).toMatchSnapshot();
     });
+    it('should support setuptools', async () => {
+      const file = await tmp.file();
+      expect(
+        await extractSetupFile(
+          'from setuptools import setup\nsetup(name="talisker")',
+          file.path,
+          config
+        )
+      ).toEqual({ name: 'talisker' });
+    });
+    it('should support distutils.core', async () => {
+      const file = await tmp.file();
+      expect(
+        await extractSetupFile(
+          'from distutils.core import setup\nsetup(name="talisker")',
+          file.path,
+          config
+        )
+      ).toEqual({ name: 'talisker' });
+    });
   });
 });
