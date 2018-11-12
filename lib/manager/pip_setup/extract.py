@@ -13,10 +13,10 @@ except ImportError:
       pass
 
 try:
-  import mock
+  from unittest import mock
 except ImportError:
   # for python3.3+
-  from unittest import mock
+  import mock
 
 @mock.patch.object(setuptools, 'setup')
 @mock.patch.object(distutils.core, 'setup')
