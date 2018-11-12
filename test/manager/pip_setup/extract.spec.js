@@ -46,7 +46,7 @@ describe('lib/manager/pip_setup/extract', () => {
       const file = await tmp.file();
       expect(
         await extractSetupFile(
-          'from setuptools import setup\nsetup(name="talisker")',
+          'from setuptools import setup\nsetup(name="talisker")\n',
           file.path,
           config
         )
@@ -56,7 +56,7 @@ describe('lib/manager/pip_setup/extract', () => {
       const file = await tmp.file();
       expect(
         await extractSetupFile(
-          'from distutils.core import setup\nsetup(name="talisker")',
+          'from distutils.core import setup\nsetup(name="talisker")\n',
           file.path,
           config
         )

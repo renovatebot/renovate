@@ -22,7 +22,7 @@ except ImportError:
 @mock.patch.object(distutils.core, 'setup')
 def invoke(mock1, mock2):
   # This is setup.py which calls setuptools.setup
-  imp.load_source('setup', sys.argv[-1])
+  imp.load_source('_target_setup_', sys.argv[-1])
   # called arguments are in `mock_setup.call_args`
   call_args = mock1.call_args or mock2.call_args
   args, kwargs = call_args
