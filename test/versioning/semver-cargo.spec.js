@@ -3,8 +3,9 @@ const semver = require('../../lib/versioning')('semverCargo');
 describe('semver.matches()', () => {
   it('handles comma', () => {
     expect(semver.matches('4.2.0', '2.0, >= 3.0 < 5.0.0')).toBe(true);
-    expect(semver.matches('4.2.0', '4.0.0, 3.0.0')).toBe(false);
-    expect(semver.matches('4.2.0', '4.0.0, 3.0.0, > 5.0.0 <= 6.0.0')).toBe(
+    expect(semver.matches('4.2.0', '4.0.0, 3.0.0')).toBe(true);
+    expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
+    expect(semver.matches('4.2.0', '4.3.0, 3.0.0, > 5.0.0 <= 6.0.0')).toBe(
       false
     );
   });
@@ -55,6 +56,12 @@ describe('semver.minSatisfyingVersion()', () => {
       semver.minSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
         '4.0.0, 3.*'
+      )
+    ).toBe('4.2.0');
+    expect(
+      semver.minSatisfyingVersion(
+        ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
+        '6.2.0, 3.*'
       )
     ).toBe(null);
   });
