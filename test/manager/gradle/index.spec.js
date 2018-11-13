@@ -32,10 +32,9 @@ describe('manager/gradle', () => {
   describe('extractPackageFile', () => {
     it('should return gradle dependencies', async () => {
       platform.getFile.mockReturnValue('some content');
-      const dependencies = await manager.extractAllPackageFiles(
-        config,
-        ['build.gradle']
-      );
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'build.gradle',
+      ]);
       expect(dependencies).toMatchSnapshot();
     });
 
@@ -47,10 +46,9 @@ describe('manager/gradle', () => {
         )
       );
       platform.getFile.mockReturnValue('some content');
-      const dependencies = await manager.extractAllPackageFiles(
-        config,
-        ['build.gradle'],
-      );
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'build.gradle',
+      ]);
 
       expect(dependencies).toEqual([]);
     });
@@ -60,10 +58,9 @@ describe('manager/gradle', () => {
         throw new Error();
       });
 
-      const dependencies = await manager.extractAllPackageFiles(
-        config,
-        ['build.gradle'],
-      );
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'build.gradle',
+      ]);
 
       expect(dependencies).toEqual(null);
     });
@@ -72,10 +69,9 @@ describe('manager/gradle', () => {
       fs.exists.mockReturnValue(false);
       platform.getFile.mockReturnValue('some content');
 
-      const dependencies = await manager.extractAllPackageFiles(
-        config,
-        ['build.gradle']
-      );
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'build.gradle',
+      ]);
 
       expect(dependencies).toEqual([]);
     });
@@ -103,7 +99,9 @@ describe('manager/gradle', () => {
 
     it('should return empty if not content', async () => {
       platform.getFile.mockReturnValue(null);
-      const res = await manager.extractAllPackageFiles(config, ['build.gradle']);
+      const res = await manager.extractAllPackageFiles(config, [
+        'build.gradle',
+      ]);
       expect(res).toEqual([]);
     });
 
@@ -127,10 +125,7 @@ describe('manager/gradle', () => {
         binarySource: 'docker',
         ...config,
       };
-      await manager.extractAllPackageFiles(
-        configWithDocker,
-        ['build.gradle'],
-      );
+      await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
         'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script init.gradle dependencyUpdates -Drevision=release'
