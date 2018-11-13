@@ -10,7 +10,6 @@ ARG version
 LABEL version="$version"
 
 WORKDIR /usr/src/app/
-
 RUN apk add --quiet --no-cache git openssh-client ca-certificates php php-mbstring php-openssl php-zip php-zlib composer
 COPY package.json yarn.lock ./
 RUN yarn --production -s --no-progress && yarn cache clean
@@ -24,3 +23,4 @@ COPY bin bin
 USER node
 
 ENTRYPOINT ["node", "/usr/src/app/lib/renovate.js"]
+CMD ["--help"]
