@@ -50,7 +50,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
   });
 
   it('should returns a file updated if the version defined in a variable as a string is found', () => {
-    const gradleFile = `String mysqlVersion = "6.0.5"
+    const gradleFile = `String mysqlVersion= "6.0.5"
     runtime (  'mysql:mysql-connector-java:$mysqlVersion'  )
     `;
     const updatedGradleFile = gradle.updateGradleVersion(
@@ -58,7 +58,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
     );
-    expect(updatedGradleFile).toEqual(`String mysqlVersion = "7.0.0"
+    expect(updatedGradleFile).toEqual(`String mysqlVersion= "7.0.0"
     runtime (  'mysql:mysql-connector-java:$mysqlVersion'  )
     `);
   });
