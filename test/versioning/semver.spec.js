@@ -53,7 +53,7 @@ describe('semver.getNewValue()', () => {
   it('bumps caret to prerelease', () => {
     expect(
       semver.getNewValue('^1', 'bump', '1.0.0', '1.0.7-prerelease.1')
-    ).toEqual('^1.0.7-prerelease');
+    ).toEqual('^1.0.7-prerelease.1');
   });
   it('replaces with newer', () => {
     expect(semver.getNewValue('^1.0.0', 'replace', '1.0.0', '1.0.7')).toEqual(
@@ -78,7 +78,7 @@ describe('semver.getNewValue()', () => {
   it('bumps tilde to prerelease', () => {
     expect(
       semver.getNewValue('~1.0', 'bump', '1.0.0', '1.0.7-prerelease.1')
-    ).toEqual('~1.0.7-prerelease');
+    ).toEqual('~1.0.7-prerelease.1');
   });
   it('updates naked caret', () => {
     expect(semver.getNewValue('^1', 'bump', '1.0.0', '2.1.7')).toEqual('^2');
