@@ -106,10 +106,29 @@ describe('manager/gradle', () => {
     });
 
     it('should write files before extracting', async () => {
-      const packageFiles = ['build.gradle'];
+      const packageFiles = ['build.gradle', 'foo/build.gradle'];
       platform.getFile.mockReturnValue('some content');
-      const res = await manager.extractAllPackageFiles(config, packageFiles);
-      expect(res).not.toBeNull();
+      await manager.extractAllPackageFiles(config, packageFiles);
+
+      expect(toUnix(fs.outputFile.mock.calls[0][0])).toBe(
+        'localDir/build.gradle'
+      );
+      expect(toUnix(fs.outputFile.mock.calls[1][0])).toBe(
+        'localDir/foo/build.gradle'
+      );
+    });
+
+    it('should not write files if gitFs is enabled', async () => {
+      const configWithgitFs = {
+        gitFs: true,
+        ...config,
+      };
+
+      const packageFiles = ['build.gradle', 'foo/build.gradle'];
+      platform.getFile.mockReturnValue('some content');
+      await manager.extractAllPackageFiles(configWithgitFs, packageFiles);
+
+      expect(fs.outputFile.mock.calls.length).toBe(0);
     });
 
     it('should configure the useLatestVersion plugin', async () => {
