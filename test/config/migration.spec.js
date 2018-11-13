@@ -11,6 +11,7 @@ describe('config/migration', () => {
         maintainYarnLock: true,
         onboarding: 'false',
         multipleMajorPrs: true,
+        gitFs: false,
         separateMajorReleases: true,
         separatePatchReleases: true,
         automerge: 'none',
@@ -57,6 +58,7 @@ describe('config/migration', () => {
           },
         ],
         lockFileMaintenance: {
+          gitFs: true,
           automerge: 'any',
           schedule: 'before 5am every day',
         },
