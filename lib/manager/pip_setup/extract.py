@@ -2,7 +2,6 @@ from __future__ import print_function
 import sys
 import imp
 import json
-import setuptools
 import distutils.core
 
 try:
