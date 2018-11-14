@@ -32,7 +32,7 @@ cache:
 script:
   - yarn prettier --list-different
   - yarn lint
-  - yarn jest --maxWorkers=4
+  - yarn jest --maxWorkers=1
 
 after_success:
   - yarn codecov
