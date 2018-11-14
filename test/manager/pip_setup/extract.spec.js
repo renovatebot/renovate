@@ -1,6 +1,6 @@
 const fs = require('fs');
 const tmp = require('tmp-promise');
-
+const { relative } = require('path');
 const {
   extractPackageFile,
   extractSetupFile,
@@ -12,6 +12,11 @@ const config = {
   localDir: '.',
 };
 
+async function tmpFile() {
+  const file = await tmp.file({ postfix: '.py' });
+  return relative('.', file.path);
+}
+
 describe('lib/manager/pip_setup/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns found deps', async () => {
@@ -20,17 +25,15 @@ describe('lib/manager/pip_setup/extract', () => {
       ).toMatchSnapshot();
     });
     it('should return null for invalid file', async () => {
-      const file = await tmp.file({ postfix: '.py' });
       expect(
-        await extractPackageFile('raise Exception()', file.path, config)
+        await extractPackageFile('raise Exception()', await tmpFile(), config)
       ).toBe(null);
     });
     it('should return null for no deps file', async () => {
-      const file = await tmp.file({ postfix: '.py' });
       expect(
         await extractPackageFile(
           'from setuptools import setup\nsetup()',
-          file.path,
+          await tmpFile(),
           config
         )
       ).toBe(null);
@@ -43,21 +46,19 @@ describe('lib/manager/pip_setup/extract', () => {
       ).toMatchSnapshot();
     });
     it('should support setuptools', async () => {
-      const file = await tmp.file({ postfix: '.py' });
       expect(
         await extractSetupFile(
           'from setuptools import setup\nsetup(name="talisker")\n',
-          file.path,
+          await tmpFile(),
           config
         )
       ).toEqual({ name: 'talisker' });
     });
     it('should support distutils.core', async () => {
-      const file = await tmp.file({ postfix: '.py' });
       expect(
         await extractSetupFile(
           'from distutils.core import setup\nsetup(name="talisker")\n',
-          file.path,
+          await tmpFile(),
           config
         )
       ).toEqual({ name: 'talisker' });
