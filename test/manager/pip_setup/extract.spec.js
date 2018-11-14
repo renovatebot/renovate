@@ -20,13 +20,13 @@ describe('lib/manager/pip_setup/extract', () => {
       ).toMatchSnapshot();
     });
     it('should return null for invalid file', async () => {
-      const file = await tmp.file();
+      const file = await tmp.file({ postfix: '.py' });
       expect(
         await extractPackageFile('raise Exception()', file.path, config)
       ).toBe(null);
     });
     it('should return null for no deps file', async () => {
-      const file = await tmp.file();
+      const file = await tmp.file({ postfix: '.py' });
       expect(
         await extractPackageFile(
           'from setuptools import setup\nsetup()',
@@ -43,7 +43,7 @@ describe('lib/manager/pip_setup/extract', () => {
       ).toMatchSnapshot();
     });
     it('should support setuptools', async () => {
-      const file = await tmp.file();
+      const file = await tmp.file({ postfix: '.py' });
       expect(
         await extractSetupFile(
           'from setuptools import setup\nsetup(name="talisker")\n',
@@ -53,7 +53,7 @@ describe('lib/manager/pip_setup/extract', () => {
       ).toEqual({ name: 'talisker' });
     });
     it('should support distutils.core', async () => {
-      const file = await tmp.file();
+      const file = await tmp.file({ postfix: '.py' });
       expect(
         await extractSetupFile(
           'from distutils.core import setup\nsetup(name="talisker")\n',
