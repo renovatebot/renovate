@@ -1,0 +1,27 @@
+[package]
+name = "inline-tables-example"
+version = "0.1.2"
+
+[dependencies.dep1]
+optional=true
+path="./foo/bar"
+default-features   = true
+version="1.2"
+
+
+
+
+[dependencies.dep2]
+                    optional=false
+         path="./foo/bar"
+default-features=    true
+version    ="3.4"
+[dependencies.dep3]
+version=     "~12.3.1"
+default-features=    true
+path    ="./foo/bar"
+
+[dependencies.dep4]
+version=     "INVALID 1.3.1 VERSION"
+default-features=    true
+path    ="./foo/bar"
