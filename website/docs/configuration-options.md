@@ -572,6 +572,10 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 
 Add configuration here to specifically override settings for `pip` requirements files. Supports `requirements.txt` and `requirements.pip` files. The default file pattern is fairly flexible in an attempt to catch similarly named ones too but may be extended/changed.
 
+## pip_setup
+
+Add configuration here to specifically override settings for `setup.py` files.
+
 ## prBodyColumns
 
 Use this array to provide a list of column names you wish to include in the PR tables.

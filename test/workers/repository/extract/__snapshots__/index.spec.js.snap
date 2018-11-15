@@ -50,6 +50,9 @@ Object {
   "pip_requirements": Array [
     Object {},
   ],
+  "pip_setup": Array [
+    Object {},
+  ],
   "terraform": Array [
     Object {},
   ],
