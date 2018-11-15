@@ -576,6 +576,8 @@ Add configuration here to specifically override settings for `pip` requirements 
 
 Add configuration here to specifically override settings for `setup.py` files.
 
+Warning: `setup.py` support is currently in beta, so is not enabled by default. You will need to configure `{ "pip_setup": { "enabled": true }}" to enable.
+
 ## prBodyColumns
 
 Use this array to provide a list of column names you wish to include in the PR tables.
