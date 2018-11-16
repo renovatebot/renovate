@@ -27,11 +27,11 @@ describe('manager/gradle', () => {
     fs.mkdir.mockReturnValue(true);
     fs.exists.mockReturnValue(true);
     exec.mockReturnValue({ stdout: 'gradle output', stderr: '' });
+    platform.getFile.mockReturnValue('some content');
   });
 
   describe('extractPackageFile', () => {
     it('should return gradle dependencies', async () => {
-      platform.getFile.mockReturnValue('some content');
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -45,7 +45,6 @@ describe('manager/gradle', () => {
           'utf8'
         )
       );
-      platform.getFile.mockReturnValue('some content');
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -61,14 +60,11 @@ describe('manager/gradle', () => {
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);
-
       expect(dependencies).toEqual(null);
     });
 
     it('should return empty if there is no dependency report', async () => {
       fs.exists.mockReturnValue(false);
-      platform.getFile.mockReturnValue('some content');
-
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -107,7 +103,6 @@ describe('manager/gradle', () => {
 
     it('should write files before extracting', async () => {
       const packageFiles = ['build.gradle', 'foo/build.gradle'];
-      platform.getFile.mockReturnValue('some content');
       await manager.extractAllPackageFiles(config, packageFiles);
 
       expect(toUnix(fs.outputFile.mock.calls[0][0])).toBe(
@@ -125,7 +120,6 @@ describe('manager/gradle', () => {
       };
 
       const packageFiles = ['build.gradle', 'foo/build.gradle'];
-      platform.getFile.mockReturnValue('some content');
       await manager.extractAllPackageFiles(configWithgitFs, packageFiles);
 
       expect(fs.outputFile.mock.calls.length).toBe(0);
