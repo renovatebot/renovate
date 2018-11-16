@@ -15,6 +15,6 @@ The only choice you need to make is whether to run Renovate on:
 
 ![Github App repositories](assets/images/github-app-choose-repos.png)
 
-Renovate will silently ignore any repositories that don't have a `package.json` file, however most people choose to select which repositories to include. Unfortunately GitHub doesn't yet offer the chance to "select all but exclude some" so instead you need to select all that you want. The form also requires you to start typing before it suggests to you repositories, which is a bit of a pain.
+Renovate will silently ignore any repositories that don't have known package files, as well as any forks, so it's OK to install for all, however most people choose to select which repositories to include. Unfortunately GitHub doesn't yet offer a "select all except X,Y,Z" so instead you need to individually select all that you want if you don't choose the install into all repositories option.
 
 Once you're done selecting repositories for Renovate to run on, click the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
