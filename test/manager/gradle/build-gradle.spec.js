@@ -1,7 +1,6 @@
 const gradle = require('../../../lib/manager/gradle/build-gradle');
 
 describe('lib/manager/gradle/updateGradleVersion', () => {
-
   beforeEach(() => {
     gradle.init();
   });
@@ -165,7 +164,8 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
   });
 
   it('should replace a external variable assigned to a interpolated dependency', () => {
-    const gradleFile = 'runtime (  "mysql:mysql-connector-java:$mysqlVersion"  )';
+    const gradleFile =
+      'runtime (  "mysql:mysql-connector-java:$mysqlVersion"  )';
     const mysqlDependency = {
       group: 'mysql',
       depGroup: 'mysql',
