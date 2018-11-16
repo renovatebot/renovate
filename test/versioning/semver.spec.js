@@ -53,7 +53,7 @@ describe('semver.getNewValue()', () => {
   it('bumps caret to prerelease', () => {
     expect(
       semver.getNewValue('^1', 'bump', '1.0.0', '1.0.7-prerelease.1')
-    ).toEqual('^1.0.7-prerelease');
+    ).toEqual('^1.0.7-prerelease.1');
   });
   it('replaces with newer', () => {
     expect(semver.getNewValue('^1.0.0', 'replace', '1.0.0', '1.0.7')).toEqual(
@@ -78,13 +78,22 @@ describe('semver.getNewValue()', () => {
   it('bumps tilde to prerelease', () => {
     expect(
       semver.getNewValue('~1.0', 'bump', '1.0.0', '1.0.7-prerelease.1')
-    ).toEqual('~1.0.7-prerelease');
+    ).toEqual('~1.0.7-prerelease.1');
   });
   it('updates naked caret', () => {
     expect(semver.getNewValue('^1', 'bump', '1.0.0', '2.1.7')).toEqual('^2');
   });
   it('bumps naked tilde', () => {
     expect(semver.getNewValue('~1', 'bump', '1.0.0', '1.1.7')).toEqual('~1');
+  });
+  it('bumps naked major', () => {
+    expect(semver.getNewValue('5', 'bump', '5.0.0', '5.1.7')).toEqual('5');
+    expect(semver.getNewValue('5', 'bump', '5.0.0', '6.1.7')).toEqual('6');
+  });
+  it('bumps naked minor', () => {
+    expect(semver.getNewValue('5.0', 'bump', '5.0.0', '5.0.7')).toEqual('5.0');
+    expect(semver.getNewValue('5.0', 'bump', '5.0.0', '5.1.7')).toEqual('5.1');
+    expect(semver.getNewValue('5.0', 'bump', '5.0.0', '6.1.7')).toEqual('6.1');
   });
   it('replaces equals', () => {
     expect(semver.getNewValue('=1.0.0', 'replace', '1.0.0', '1.1.0')).toEqual(

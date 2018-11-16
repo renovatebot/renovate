@@ -383,7 +383,7 @@ describe('api/npm', () => {
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
     // eslint-disable-next-line no-template-curly-in-string
-    npm.setNpmrc('registry=${REGISTRY}', true);
+    npm.setNpmrc('registry=${REGISTRY}', 'high');
     const res = await npm.getPkgReleases('foobar');
     expect(res).toMatchSnapshot();
   });
@@ -391,7 +391,7 @@ describe('api/npm', () => {
     let e;
     try {
       // eslint-disable-next-line no-template-curly-in-string
-      npm.setNpmrc('registry=${REGISTRY_MISSING}', true);
+      npm.setNpmrc('registry=${REGISTRY_MISSING}', 'high');
     } catch (err) {
       e = err;
     }

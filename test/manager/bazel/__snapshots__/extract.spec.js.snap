@@ -3,6 +3,47 @@
 exports[`lib/manager/bazel/extract extractPackageFile() extracts multiple types of dependencies 1`] = `
 Array [
   Object {
+    "currentValue": "v1.0.5",
+    "def": "go_repository(
+    name = \\"com_github_bitly_go-nsq\\",
+    importpath = \\"github.com/bitly/go-nsq\\",
+    tag = \\"v1.0.5\\"
+)
+",
+    "depName": "com_github_bitly_go-nsq",
+    "depType": "go_repository",
+    "purl": "pkg:go/github.com/bitly/go-nsq",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentDigest": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
+    "currentValue": "dec09d7",
+    "def": "go_repository(
+   name = \\"com_github_google_uuid\\",
+   importpath = \\"github.com/google/uuid\\",
+   commit = \\"dec09d789f3dba190787f8b4454c7d3c936fed9e\\"
+)
+",
+    "depName": "com_github_google_uuid",
+    "depType": "go_repository",
+    "digestOneAndOnly": true,
+    "purl": "pkg:go/github.com/google/uuid",
+    "versionScheme": "semver",
+  },
+  Object {
+    "currentValue": "v2",
+    "def": "go_repository(
+    name = \\"com_gopkgin_mgo_v2\\",
+    importpath = \\"gopkg.in/mgo.v2\\",
+    tag = \\"v2\\"
+)
+",
+    "depName": "com_gopkgin_mgo_v2",
+    "depType": "go_repository",
+    "purl": "pkg:go/gopkg.in/mgo.v2",
+    "versionScheme": "semver",
+  },
+  Object {
     "currentValue": "0.3.1",
     "def": "git_repository(
     name = \\"build_bazel_rules_nodejs\\",

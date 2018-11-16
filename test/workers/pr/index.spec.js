@@ -58,6 +58,7 @@ describe('workers/pr', () => {
       config.automerge = true;
       pr.canRebase = true;
       platform.getBranchStatus.mockReturnValueOnce('success');
+      platform.mergePr.mockReturnValueOnce(true);
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr.mock.calls.length).toBe(1);
     });
