@@ -5,7 +5,7 @@ Array [
   Object {
     "currentValue": "==0.3.1",
     "depName": "some-package",
-    "pipfileSection": "packages",
+    "depType": "packages",
     "purl": "pkg:pypi/some-package",
     "registryUrls": Array [
       "https://pypi.org/pypi/",
@@ -16,7 +16,7 @@ Array [
   Object {
     "currentValue": "==1.0.0",
     "depName": "some-other-package",
-    "pipfileSection": "packages",
+    "depType": "packages",
     "purl": "pkg:pypi/some-other-package",
     "registryUrls": Array [
       "https://pypi.org/pypi/",
@@ -27,7 +27,7 @@ Array [
   Object {
     "currentValue": "==0.1.0",
     "depName": "dev-package",
-    "pipfileSection": "dev-packages",
+    "depType": "dev-packages",
     "purl": "pkg:pypi/dev-package",
     "registryUrls": Array [
       "https://pypi.org/pypi/",
@@ -43,7 +43,7 @@ Array [
   Object {
     "currentValue": "==1",
     "depName": "Django",
-    "pipfileSection": "packages",
+    "depType": "packages",
     "purl": "pkg:pypi/Django",
     "registryUrls": Array [
       "https://pypi.org/pypi/",
@@ -53,7 +53,7 @@ Array [
   Object {
     "currentValue": "==0.6.27",
     "depName": "distribute",
-    "pipfileSection": "packages",
+    "depType": "packages",
     "purl": "pkg:pypi/distribute",
     "registryUrls": Array [
       "https://pypi.org/pypi/",
@@ -63,7 +63,7 @@ Array [
   Object {
     "currentValue": "==0.2",
     "depName": "dj-database-url",
-    "pipfileSection": "packages",
+    "depType": "packages",
     "purl": "pkg:pypi/dj-database-url",
     "registryUrls": Array [
       "https://pypi.org/pypi/",
@@ -73,7 +73,7 @@ Array [
   Object {
     "currentValue": "==2.4.5",
     "depName": "psycopg2",
-    "pipfileSection": "packages",
+    "depType": "packages",
     "purl": "pkg:pypi/psycopg2",
     "registryUrls": Array [
       "https://pypi.org/pypi/",
@@ -83,7 +83,7 @@ Array [
   Object {
     "currentValue": "==0.1.2",
     "depName": "wsgiref",
-    "pipfileSection": "packages",
+    "depType": "packages",
     "purl": "pkg:pypi/wsgiref",
     "registryUrls": Array [
       "https://pypi.org/pypi/",

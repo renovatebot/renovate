@@ -9,7 +9,7 @@ describe('manager/pipenv/update', () => {
       const upgrade = {
         depName: 'some-package',
         newValue: '==1.0.1',
-        pipfileSection: 'packages',
+        depType: 'packages',
       };
       const res = updateDependency(pipfile, upgrade);
       expect(res).not.toEqual(pipfile);
@@ -20,7 +20,7 @@ describe('manager/pipenv/update', () => {
       const upgrade = {
         depName: 'dev-package',
         newValue: '==0.2.0',
-        pipfileSection: 'dev-packages',
+        depType: 'dev-packages',
       };
       const res = updateDependency(pipfile, upgrade);
       expect(res).not.toEqual(pipfile);
