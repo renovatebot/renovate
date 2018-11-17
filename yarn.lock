@@ -4938,10 +4938,10 @@ lru-cache@^4.0.1, lru-cache@^4.1.1, lru-cache@^4.1.2, lru-cache@^4.1.3:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luxon@1.6.2:
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.6.2.tgz#1328a7eefd81def7f452a120ef49c97955fe056e"
-  integrity sha512-vZP3vVTK0aH3W6zleLYefctzpKaUaVtdF7G/WblRrf/lbEASMuV5ZlPR+2GBvaUEuD0TAf/r5NB98s3ER4shnQ==
+luxon@1.7.1:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.7.1.tgz#721e86f12c47526014a53c9f92f74f2da6dc9a4c"
+  integrity sha512-0fTd5a3UUVATblRdhD9ZXdhCdXp+ktqGERRu8q9seeMFfED0otQFeqrZwDw/2AoMH/cHjmswVJC8IUPeNBIPTA==
 
 make-dir@^1.0.0:
   version "1.3.0"
