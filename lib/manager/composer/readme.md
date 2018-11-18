@@ -18,9 +18,9 @@ No, everyone uses Composer
 
 ---
 
-*What type of package files does it use?* 
+*What type of package files and names does it use?* 
 
-`composer.json` is used in 99% of cases, but [Composer allows alternative `.json` file names](https://getcomposer.org/doc/03-cli.md#composer)
+`composer.json` is used in most cases, but [Composer allows alternative `.json` file names](https://getcomposer.org/doc/03-cli.md#composer).
 
 ---
 
