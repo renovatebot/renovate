@@ -131,6 +131,19 @@ Usually packages are located on [Packagist](https://packagist.org) but can also 
 
 ---
 
+*Describe which types of dependencies are supported and which will be implemented in future:*
+
+- Packagist.org dependencies: Supported
+- "composer" hosts with plain `packages.json`: Supported
+- "composer" hosts with [`provider-includes` and `providers-url`](https://getcomposer.org/doc/05-repositories.md#provider-includes-and-providers-url): Supported
+- Satis hosts: Supported
+- Repositories of type "path": Not supported yet
+- Repositories of type "package": Not supported yet
+- Repositories of type "vcs": Not supported yet
+- Dependencies with value `"*"`: Skipped
+
+---
+
 *Is a new datasource required? Provide details*
 
 Yes, a datasource called 'packagist' should be created.
