@@ -44,7 +44,7 @@ There are unlikely to be too many JSON files with "composer" in the name that ar
 
 *If a repository contains more than one package file, can they have dependencies on each other or is there any reason why they need to be read/parsed in serial instead of in parallel/independently?*
 
-If a repository has more than one Composer package file then they can be parsed independently.
+If a repository has more than one Composer package file then they can be parsed independently. However, one composer file may point to another using a relative path, so they should all be written to disk first before any are extracted.
 
 ---
 
@@ -63,12 +63,6 @@ Parse the file using `JSON.parse`.
 *Does the package file distinguish between different "types" of dependencies? e.g. production dependencies, dev dependencies, etc? Or are they normally split into different files?*
 
 Composer files split dependencies into `requires` and `requires-dev`.
-
----
-
-*What type of package URLs/datasources are likely to be extracted? e.g. custom registry, github URLs, etc?*
-
-Usually packages are located on [Packagist](https://packagist.org) but can also be on [packagist-compatible hosts](https://getcomposer.org/doc/05-repositories.md#hosting-your-own).
 
 ---
 
@@ -128,6 +122,20 @@ Dependencies with value `"*"` should be left as-is.
 Both. The `type` field is often included at the root of a composer file and can be used to infer which type, although it's not possible to always be 100% sure.
 
 The following types should be considered as library: 'library', 'metapackage', 'composer-plugin'.
+
+---
+
+*What type of package URLs/datasources are likely to be extracted? e.g. custom registry, github URLs, etc?*
+
+Usually packages are located on [Packagist](https://packagist.org) but can also be on [packagist-compatible hosts](https://getcomposer.org/doc/05-repositories.md#hosting-your-own).
+
+---
+
+*Is a new datasource required? Provide details*
+
+Yes, a datasource called 'packagist' should be created.
+
+Details: https://getcomposer.org/doc/05-repositories.md#hosting-your-own
 
 ---
 
