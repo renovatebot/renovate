@@ -20,14 +20,14 @@ N/A
 
 *What type of package files and names does it use?* 
 
-Filenames can be custom, but the rool automatically looks in:
-
-   - buildkite.yml
-   - buildkite.yaml
-   - buildkite.json
-   - .buildkite/pipeline.yml
-   - .buildkite/pipeline.yaml
-   - .buildkite/pipeline.json
+> Filenames can be custom, but the tool automatically looks in:
+>
+>   - buildkite.yml
+>   - buildkite.yaml
+>   - buildkite.json
+>   - .buildkite/pipeline.yml
+>   - .buildkite/pipeline.yaml
+>   - .buildkite/pipeline.json
 
 ---
 
