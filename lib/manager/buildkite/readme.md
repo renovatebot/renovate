@@ -1,4 +1,4 @@
-# Package Manager Description
+## Overview
 
 *Name of package manager*: 
 
@@ -16,7 +16,7 @@ N/A
 
 N/A
 
----
+## Package Files
 
 *What type of package files and names does it use?* 
 
@@ -53,7 +53,7 @@ Unlikely
 
 No
 
----
+## Parsing and Extraction
 
 *What format/syntax is the package file in? e.g. JSON, toml, custom?*
 
@@ -85,6 +85,25 @@ No
 
 ---
 
+*Are there any types of dependencies or types of versions that Renovate should ignore?*
+
+Those without versions.
+
+---
+
+*Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?*
+
+Everything can be thought of as an application and therefore can be pinned.
+
+---
+
+*Should Renovate default to pinning dependencies if it's of type "application"?*
+
+N/A because syntax doesn't support ranges.
+
+
+## Lookup
+
 *Do the package files contain references to which registries/hosts should be used for looking up package versions?*
 
 No
@@ -100,18 +119,6 @@ N/A
 *If the package files contain language or platform restrictions, are these used in the lookup of package versions?*
 
 N/A
-
----
-
-*Are there any types of dependencies or types of versions that Renovate should ignore?*
-
-Those without versions.
-
----
-
-*Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?*
-
-Everything can be thought of as an application and therefore can be pinned.
 
 ---
 
@@ -146,13 +153,7 @@ The two short forms of GitHub dependencies described above are supported, but fu
 
 No, it can use existing GitHub datasource (tags).
 
----
-
-*Should Renovate default to pinning dependencies if it's of type "application"?*
-
-N/A because syntax doesn't support ranges.
-
----
+## Artifacts
 
 *Are lock files or checksum files used? Mandatory?*
 
@@ -176,7 +177,7 @@ N/A
 
 N/A
 
----
+## Other
 
 *Is there anything else to know about this package manager?*
 
