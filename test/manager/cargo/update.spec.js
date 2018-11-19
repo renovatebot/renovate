@@ -14,11 +14,11 @@ describe('lib/manager/cargo/update', () => {
       expect(updateDependency('abc', config)).toEqual('abc');
     });
     it('updates dependency', () => {
-      upgrade = {
-        depName : 'libc',
-        lineNumber : 16,
-        depType : 'normal',
-        newValue : '0.3.0',
+      const upgrade = {
+        depName: 'libc',
+        lineNumber: 16,
+        depType: 'normal',
+        newValue: '0.3.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo5toml);
     });
