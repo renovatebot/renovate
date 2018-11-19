@@ -41,9 +41,12 @@ Renovate was released in 2017 and is now widely used in the developer community.
 
 ## Using Renovate
 
-The easiest way to use Renovate if you are on GitHub is to use the Renovate app. Go to
-[https://github.com/apps/renovate](https://github.com/apps/renovate) to install
-it now. A GitHub Marketplace plan is required only for private repositories.
+The easiest way to use Renovate if you are hosted on GitHub.com or GitLab.com is to install the hosted Renovate app.
+
+For GitHub, go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to install
+it now. A GitHub Marketplace plan is required only for private repositories. [More details on the GitHub App installation](https://renovatebot.com/docs/install-github-app/).
+
+For GitLab, log into [renovatebot.com/dashboard](https://renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project. Currently the GitLab app is free for both pubic and private repositories. [More details on the GitLab App installation](https://renovatebot.com/docs/install-gitlab-app/).
 
 ## Configuration
 
@@ -57,7 +60,7 @@ If you are not on GitHub or you prefer to run your own instance of Renovate then
 
 - Install the `renovate` CLI tool from npmjs
 - Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool)
-- Use [Renovate Pro Edition](https://renovatebot.com/pro) available for GitHub Enterprise and soon GitLab too
+- Use [Renovate Pro Edition](https://renovatebot.com/pro) available for GitHub Enterprise and GitLab
 
 ## Contributing
 

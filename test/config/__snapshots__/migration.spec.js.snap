@@ -21,6 +21,7 @@ Object {
     "config:js-app",
     "config:js-lib",
   ],
+  "gitFs": null,
   "hostRules": Array [
     Object {},
   ],
@@ -29,7 +30,9 @@ Object {
   ],
   "lockFileMaintenance": Object {
     "automerge": true,
+    "gitFs": "https",
     "schedule": "before 5am",
+    "trustLevel": "low",
   },
   "major": Object {
     "automerge": false,
@@ -128,6 +131,7 @@ Object {
   "travis": Object {
     "enabled": true,
   },
+  "trustLevel": "high",
 }
 `;
 
