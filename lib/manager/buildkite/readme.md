@@ -16,7 +16,7 @@ N/A
 
 N/A
 
-## Package Files
+## Package File Detection
 
 *What type of package files and names does it use?* 
 
@@ -39,7 +39,7 @@ N/A
 
 *Is it likely that many users would need to extend this pattern for custom file names?*
 
-It's quite likely that some users would need to add customer file matches.
+It's quite likely that some users would need to add custom file matches.
 
 ---
 
@@ -47,17 +47,17 @@ It's quite likely that some users would need to add customer file matches.
 
 Unlikely
 
----
+## Parsing and Extraction
 
 *If a repository contains more than one package file, can they have dependencies on each other or is there any reason why they need to be read/parsed in serial instead of in parallel/independently?*
 
 No
 
-## Parsing and Extraction
+---
 
-*What format/syntax is the package file in? e.g. JSON, toml, custom?*
+*What format/syntax is the package file in? e.g. JSON, TOML, custom?*
 
-YAML is recommended
+YAML is recommended, JSON is possible but won't be supported
 
 ---
 
@@ -97,28 +97,9 @@ Everything can be thought of as an application and therefore can be pinned.
 
 ---
 
-*Should Renovate default to pinning dependencies if it's of type "application"?*
+*If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?*
 
 N/A because syntax doesn't support ranges.
-
-
-## Lookup
-
-*Do the package files contain references to which registries/hosts should be used for looking up package versions?*
-
-No
-
----
-
-*Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc)?*
-
-N/A
-
----
-
-*If the package files contain language or platform restrictions, are these used in the lookup of package versions?*
-
-N/A
 
 ---
 
@@ -146,6 +127,18 @@ Branches, tags and commits are all valid after the #.
 *Describe which types of dependencies are supported and which will be implemented in future:*
 
 The two short forms of GitHub dependencies described above are supported, but fully qualified Git URLs are not.
+
+## Lookup
+
+*Do the package files contain references to which registries/hosts should be used for looking up package versions?*
+
+No
+
+---
+
+*Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?*
+
+N/A
 
 ---
 
