@@ -33,23 +33,25 @@ N/A
 
 *What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?* 
 
-`['\\.buildkite/.+\\.yml$']`
+`['buildkite\\.ya?ml', '\\.buildkite/.+\\.ya?ml$']`
 
 ---
 
 *Is it likely that many users would need to extend this pattern for custom file names?*
 
-It's quite likely that some users would need to add custom file matches.
+Only a small percentage of Buildkite users should need to add additional `fileMatch` patterns.
 
 ---
 
-*Is the fileMatch pattern likely to get many "false hits"?*
+*Is the fileMatch pattern likely to get many "false hits" for files that have nothing to do with package management?*
 
 Unlikely
 
 ## Parsing and Extraction
 
-*If a repository contains more than one package file, can they have dependencies on each other or is there any reason why they need to be read/parsed in serial instead of in parallel/independently?*
+*If a repository contains more than one package file*:
+- *Can they have links/dependencies with each other?
+- *Is there any reason why they need to be read/parsed together (in serial) instead of independently (in parallel)?*
 
 No
 
@@ -57,23 +59,23 @@ No
 
 *What format/syntax is the package file in? e.g. JSON, TOML, custom?*
 
-YAML is recommended, JSON is possible but won't be supported
+YAML is recommended. JSON is possible but won't be supported.
 
 ---
 
 *How do you suggest parsing the file? Using an off-the-shelf parser, using regex, or can it be custom-parsed line by line?*
 
-Parsing line-by-line.
+Parsing YAML line-by-line, looking only for the lines that interest us.
 
 ---
 
-*Does the package file distinguish between different "types" of dependencies? e.g. production dependencies, dev dependencies, etc? Or are they normally split into different files?*
+*Does the package file structure distinguish between different "types" of dependencies? e.g. production dependencies, dev dependencies, etc?*
 
 No
 
 ---
 
-*What type of package URLs/datasources are likely to be extracted? e.g. custom registry, github URLs, etc?*
+*List all the types/syntaxes of dependencies that can be extracted:*
 
 From https://buildkite.com/docs/pipelines/plugins#plugin-sources:
 
@@ -94,7 +96,7 @@ Branches, tags and commits are all valid after the #.
 
 ---
 
-*Describe which types of dependencies are supported and which will be implemented in future:*
+*Describe which types of dependencies above are supported and which will be implemented in future:*
 
 The two short forms of GitHub dependencies described above are supported, but fully qualified Git URLs are not.
 
@@ -124,21 +126,27 @@ N/A because syntax doesn't support ranges.
 
 ## Lookup
 
-*Do the package files contain references to which registries/hosts should be used for looking up package versions?*
+*Is a new datasource required? Provide details*
 
-No
+No, it can use existing GitHub datasource (tags).
+
+---
+
+*Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?*
+
+No.
 
 ---
 
 *Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?*
 
-N/A
+No
 
 ---
 
-*Is a new datasource required? Provide details*
+*Will users need the ability to configure language or other constraints using Renovate config?*
 
-No, it can use existing GitHub datasource (tags).
+No
 
 ## Artifacts
 
@@ -168,4 +176,4 @@ N/A
 
 *Is there anything else to know about this package manager?*
 
-Buildkite is a great service and they are active users of Renovate!
+Buildkite is a great service and the company uses Renovate!
