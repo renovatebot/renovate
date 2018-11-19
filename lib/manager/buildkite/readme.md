@@ -73,36 +73,6 @@ No
 
 ---
 
-*What versioning scheme do the package files use?*
-
-Semver
-
----
-
-*Does this versioning scheme support range constraints, e.g. `^1.0.0` or `1.x`?*
-
-No
-
----
-
-*Are there any types of dependencies or types of versions that Renovate should ignore?*
-
-Those without versions.
-
----
-
-*Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?*
-
-Everything can be thought of as an application and therefore can be pinned.
-
----
-
-*If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?*
-
-N/A because syntax doesn't support ranges.
-
----
-
 *What type of package URLs/datasources are likely to be extracted? e.g. custom registry, github URLs, etc?*
 
 From https://buildkite.com/docs/pipelines/plugins#plugin-sources:
@@ -127,6 +97,30 @@ Branches, tags and commits are all valid after the #.
 *Describe which types of dependencies are supported and which will be implemented in future:*
 
 The two short forms of GitHub dependencies described above are supported, but fully qualified Git URLs are not.
+
+## Versioning
+
+*What versioning scheme do the package files use?*
+
+Semver
+
+---
+
+*Does this versioning scheme support range constraints, e.g. `^1.0.0` or `1.x`?*
+
+No
+
+---
+
+*Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?*
+
+Everything can be thought of as an application.
+
+---
+
+*If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?*
+
+N/A because syntax doesn't support ranges.
 
 ## Lookup
 
