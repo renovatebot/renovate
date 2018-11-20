@@ -8,6 +8,9 @@ Object {
   "buildkite": Array [
     Object {},
   ],
+  "bundler": Array [
+    Object {},
+  ],
   "cargo": Array [
     Object {},
   ],
