@@ -28,7 +28,7 @@ describe('lib/manager/cargo/extract', () => {
     it('handles inline tables', () => {
       const res = extractPackageFile(cargo3toml, config);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(6);
+      expect(res.deps).toHaveLength(7);
     });
     it('handles standard tables', () => {
       const res = extractPackageFile(cargo4toml, config);

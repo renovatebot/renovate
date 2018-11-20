@@ -230,6 +230,12 @@ Array [
     "lineNumber": 10,
     "skipReason": "unknown-version",
   },
+  Object {
+    "currentValue": "3.2.1",
+    "depName": "dep5 ",
+    "depType": "inline-table",
+    "lineNumber": 11,
+  },
 ]
 `;
 
