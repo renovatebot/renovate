@@ -22,12 +22,12 @@ N/A
 
 > Filenames can be custom, but the tool automatically looks in:
 >
->   - buildkite.yml
->   - buildkite.yaml
->   - buildkite.json
->   - .buildkite/pipeline.yml
->   - .buildkite/pipeline.yaml
->   - .buildkite/pipeline.json
+> - buildkite.yml
+> - buildkite.yaml
+> - buildkite.json
+> - .buildkite/pipeline.yml
+> - .buildkite/pipeline.yaml
+> - .buildkite/pipeline.json
 
 ---
 
