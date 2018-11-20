@@ -92,6 +92,8 @@ Set this value to 'patch', 'minor' or 'major' to have Renovate update the versio
 
 You can also set this field to `"mirror:x"` where `x` is the name of a package in the `package.json`. Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on. Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
+## bundler
+
 ## circleci
 
 ## commitBody
@@ -753,6 +755,8 @@ Must be valid usernames. Note: does not currently work with the GitHub App due t
 ## rollbackPrs
 
 Set this to false either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
+
+## ruby
 
 ## schedule
 
