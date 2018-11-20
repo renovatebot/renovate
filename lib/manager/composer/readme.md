@@ -1,30 +1,30 @@
-# Package Manager Description
+## Overview
 
-*Name of package manager*: 
+*Name of package manager*:
 
 [Composer](https://getcomposer.org/)
 
 ---
 
-*What language does this support?* 
+*What language does this support?*
 
 PHP
 
 ---
 
-*Does that language have other (competing?) package managers?* 
+*Does that language have other (competing?) package managers?*
 
 No, everyone uses Composer
 
----
+## Package File Detection
 
-*What type of package files and names does it use?* 
+*What type of package files and names does it use?*
 
 `composer.json` is used in most cases, but [Composer allows alternative `.json` file names](https://getcomposer.org/doc/03-cli.md#composer).
 
 ---
 
-*What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?* 
+*What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?*
 
 `['(^|/)([\\w-]*)composer.json$']`
 
@@ -40,9 +40,11 @@ Unlikely - nearly everybody would include the string "composer" in the JSON file
 
 There are unlikely to be too many JSON files with "composer" in the name that aren't Composer package files.
 
----
+## Parsing and Extraction
 
-*If a repository contains more than one package file, can they have dependencies on each other or is there any reason why they need to be read/parsed in serial instead of in parallel/independently?*
+*If a repository contains more than one package file*:
+- *Can they have links/dependencies with each other?
+- *Is there any reason why they need to be read/parsed together (in serial) instead of independently (in parallel)?*
 
 If a repository has more than one Composer package file then they can be parsed independently. However, one composer file may point to another using a relative path, so they should all be written to disk first before any are extracted.
 
@@ -66,6 +68,25 @@ Composer files split dependencies into `requires` and `requires-dev`.
 
 ---
 
+*List all the sources/syntaxes of dependencies that can be extracted:*
+
+In Composer the syntax for dependencies is always `"scope/package"` regardless of its source. The lookup approach is then determined by the values in `repositories`, if present.
+
+---
+
+*Describe which types of dependencies above are supported and which will be implemented in future:*
+
+- Packagist.org dependencies: Supported
+- "composer" hosts with plain `packages.json`: Supported
+- "composer" hosts with [`provider-includes` and `providers-url`](https://getcomposer.org/doc/05-repositories.md#provider-includes-and-providers-url): Supported
+- Satis hosts: Supported
+- Repositories of type "path": Not supported yet
+- Repositories of type "package": Not supported yet
+- Repositories of type "vcs": Not supported yet
+- Dependencies with value `"*"`: Skipped
+
+## Versioning
+
 *What versioning scheme do the package files use?*
 
 Composer files use semver 2.0. ([details](https://getcomposer.org/doc/articles/versions.md))
@@ -80,13 +101,35 @@ Yes, it has support for many range types, documented in the link above.
 
 ---
 
-*Do the package files contain references to which registries/hosts should be used for looking up package versions?*
+*Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?*
 
-Yes. There is an optional [`repositories`](https://getcomposer.org/doc/05-repositories.md#repository) field allowed at the root of any composer file.
+Both. The `type` field is often included at the root of a composer file and can be used to infer which type, although it's not possible to always be 100% sure.
+
+The following types should be considered as library: 'library', 'metapackage', 'composer-plugin'.
 
 ---
 
-*Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc)?*
+*If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?*
+
+TODO
+
+## Lookup
+
+*Is a new datasource required? Provide details*
+
+Yes, for Packagist and composer-compatible lookups.
+
+Details: https://getcomposer.org/doc/05-repositories.md#hosting-your-own
+
+---
+
+*Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?*
+
+Yes. There is an optional [`repositories`](https://getcomposer.org/doc/05-repositories.md#repository) field allowed at the root of any composer file. There should usually be no need to override this by config.
+
+---
+
+*Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?*
 
 `require` and `require-dev` support references to specific PHP versions and PHP extensions a project needs to run successfully.
 
@@ -103,60 +146,15 @@ Example:
 
 [(ref)](https://getcomposer.org/doc/04-schema.md#package-links)
 
----
-
-*If the package files contain language or platform restrictions, are these used in the lookup of package versions?*
-
-Yes, they should be. Dependency packages on Packagist host can themselves include constraints on `php`.
+This `php` constraint needs to be compared against the `php` field (if present) in the package's metadata on Packagist/etc.
 
 ---
 
-*Are there any types of dependencies or types of versions that Renovate should ignore?*
+*Will users need the ability to configure language or other constraints using Renovate config?*
 
-Dependencies with value `"*"` should be left as-is.
+It should be a rare case.
 
----
-
-*Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?*
-
-Both. The `type` field is often included at the root of a composer file and can be used to infer which type, although it's not possible to always be 100% sure.
-
-The following types should be considered as library: 'library', 'metapackage', 'composer-plugin'.
-
----
-
-*What type of package URLs/datasources are likely to be extracted? e.g. custom registry, github URLs, etc?*
-
-Usually packages are located on [Packagist](https://packagist.org) but can also be on [packagist-compatible hosts](https://getcomposer.org/doc/05-repositories.md#hosting-your-own).
-
----
-
-*Describe which types of dependencies are supported and which will be implemented in future:*
-
-- Packagist.org dependencies: Supported
-- "composer" hosts with plain `packages.json`: Supported
-- "composer" hosts with [`provider-includes` and `providers-url`](https://getcomposer.org/doc/05-repositories.md#provider-includes-and-providers-url): Supported
-- Satis hosts: Supported
-- Repositories of type "path": Not supported yet
-- Repositories of type "package": Not supported yet
-- Repositories of type "vcs": Not supported yet
-- Dependencies with value `"*"`: Skipped
-
----
-
-*Is a new datasource required? Provide details*
-
-Yes, a datasource called 'packagist' should be created.
-
-Details: https://getcomposer.org/doc/05-repositories.md#hosting-your-own
-
----
-
-*Should Renovate default to pinning dependencies if it's of type "application"?*
-
-Yes
-
----
+## Artifacts
 
 *Are lock files or checksum files used? Mandatory?*
 
@@ -189,7 +187,7 @@ As described above, `composer update` will download all packages in the package 
 
 `composer install`
 
----
+## Other
 
 *Is there anything else to know about this package manager?*
 

@@ -1,6 +1,6 @@
 ## Overview
 
-*Name of package manager*: 
+*Name of package manager*:
 
 [Buildkite](https://buildkite.com/docs/pipelines/plugins)
 
@@ -12,13 +12,13 @@ N/A
 
 ---
 
-*Does that language have other (competing?) package managers?* 
+*Does that language have other (competing?) package managers?*
 
 N/A
 
 ## Package File Detection
 
-*What type of package files and names does it use?* 
+*What type of package files and names does it use?*
 
 > Filenames can be custom, but the tool automatically looks in:
 >
@@ -31,7 +31,7 @@ N/A
 
 ---
 
-*What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?* 
+*What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?*
 
 `['buildkite\\.ya?ml', '\\.buildkite/.+\\.ya?ml$']`
 
@@ -75,14 +75,14 @@ No
 
 ---
 
-*List all the types/syntaxes of dependencies that can be extracted:*
+*List all the sources/syntaxes of dependencies that can be extracted:*
 
 From https://buildkite.com/docs/pipelines/plugins#plugin-sources:
 
 > If you refer to a plugin just by name, it defaults to `https://github.com/buildkite-plugins/<name>-buildkite-plugin`. For example, a plugin name of `docker` would resolve to `https://github.com/buildkite-plugins/docker-buildkite-plugin`.
 >
 > To refer to a plugin in your own GitHub organization, prefix the name with the organization. For example, a plugin name of `my-org/docker` would resolve to `https://github.com/my-org/docker-buildkite-plugin`.
-> 
+>
 > The following are not supported and skipped over:
 
 > You can also use fully qualified Git URLs instead of names, to refer to plugins that aren’t on GitHub, or live in private Git repositories only accessible to your agents. For example:
