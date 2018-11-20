@@ -2,6 +2,8 @@ const fs = require('fs');
 const { updateDependency } = require('../../../lib/manager/cargo/update');
 
 const cargo1toml = fs.readFileSync('test/_fixtures/cargo/Cargo.1.toml', 'utf8');
+const cargo4toml = fs.readFileSync('test/_fixtures/cargo/Cargo.4.toml', 'utf8');
+
 const cargo5toml = fs.readFileSync('test/_fixtures/cargo/Cargo.5.toml', 'utf8');
 const cargo6toml = fs.readFileSync('test/_fixtures/cargo/Cargo.6.toml', 'utf8');
 const cargo7toml = fs.readFileSync('test/_fixtures/cargo/Cargo.7.toml', 'utf8');
@@ -42,6 +44,16 @@ describe('lib/manager/cargo/update', () => {
         newValue: '0.4.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo7toml);
+    });
+    it('handles invalid standard tables gracefully', () => {
+      const upgrade = {
+        depName: 'dep5',
+        lineNumber: 28,
+        versionLineNumber: 29,
+        depType: 'standardTable',
+        newValue: '2.0.0',
+      };
+      expect(updateDependency(cargo4toml, upgrade)).toEqual(cargo4toml);
     });
     it('does not update in case of error', () => {
       const upgrade = {
