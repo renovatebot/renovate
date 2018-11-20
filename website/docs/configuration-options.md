@@ -389,6 +389,10 @@ Set enabled to `true` to enable meteor package updating.
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
+## newlanguage
+
+## newmanager
+
 ## node
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
