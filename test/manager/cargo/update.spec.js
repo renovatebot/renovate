@@ -43,5 +43,14 @@ describe('lib/manager/cargo/update', () => {
       };
       expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo7toml);
     });
+    it('does not update in case of error', () => {
+      const upgrade = {
+        depName: 'libc',
+        lineNumber: 13, // Wrong lineNumber
+        depType: 'normal',
+        newValue: '0.3.0',
+      };
+      expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo1toml);
+    });
   });
 });
