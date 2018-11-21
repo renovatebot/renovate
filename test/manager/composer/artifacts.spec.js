@@ -20,6 +20,7 @@ describe('.getArtifacts()', () => {
       await composer.getArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
   });
+
   it('returns null if unchanged', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');
     exec.mockReturnValueOnce({
@@ -31,6 +32,7 @@ describe('.getArtifacts()', () => {
       await composer.getArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
   });
+
   it('uses hostRules to write auth.json', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');
     exec.mockReturnValueOnce({
@@ -54,6 +56,7 @@ describe('.getArtifacts()', () => {
       await composer.getArtifacts('composer.json', [], '{}', authConfig)
     ).toBeNull();
   });
+
   it('returns updated composer.lock', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');
     exec.mockReturnValueOnce({
