@@ -1,10 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`cargo.getArtifacts() catches errors 1`] = `
+exports[`cargo.getArtifacts() generates Cargo.lock 1`] = `
 Object {
-  "lockFileError": Object {
-    "lockFile": undefined,
-    "stderr": "Cannot read property 'replace' of undefined",
+  "file": Object {
+    "contents": "[[package]]
+name = \\"example_crate\\"
+version = \\"0.1.0\\"
+dependencies = [
+ \\"libc 0.2.44 (registry+https://github.com/rust-lang/crates.io-index)\\",
+]
+
+[[package]]
+name = \\"libc\\"
+version = \\"0.2.44\\"
+source = \\"registry+https://github.com/rust-lang/crates.io-index\\"
+
+[metadata]
+\\"checksum libc 0.2.44 (registry+https://github.com/rust-lang/crates.io-index)\\" = \\"10923947f84a519a45c8fefb7dd1b3e8c08747993381adee176d7a82b4195311\\"
+",
+    "name": "Cargo.lock",
   },
 }
 `;
