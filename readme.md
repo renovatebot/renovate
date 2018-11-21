@@ -50,11 +50,11 @@ You can also raise an issue in https://github.com/renovatebot/config-help if you
 
 ## Self-Hosting
 
-If you are not on GitHub or you prefer to run your own instance of Renovate then you have several options:
+If you are not on github.com or gitlab.com, or you prefer to run your own instance of Renovate then you have several options:
 
-- Install the `renovate` CLI tool from npmjs
-- Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool)
-- Use [Renovate Pro Edition](https://renovatebot.com/pro) available for GitHub Enterprise and GitLab
+- Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using cron)
+- Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
+- Use [Renovate Pro Edition](https://renovatebot.com/pro) available for GitHub Enterprise and GitLab, includes native scheduler
 
 ## Contributing
 
