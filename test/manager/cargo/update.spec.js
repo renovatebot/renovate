@@ -49,7 +49,7 @@ describe('lib/manager/cargo/update', () => {
         depType: 'standardTable',
         newValue: '2.0.0',
       };
-      expect(updateDependency(cargo4toml, upgrade)).toMatchSnapshot();
+      expect(updateDependency(cargo4toml, upgrade)).toEqual(cargo4toml);
     });
     it('does not update in case of error', () => {
       const upgrade = {
@@ -59,6 +59,16 @@ describe('lib/manager/cargo/update', () => {
         newValue: '0.3.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo1toml);
+    });
+    it('does not update commented out standard table dependencies', () => {
+      const upgrade = {
+        depName: 'dep6',
+        lineNumber: 33,
+        versionLineNumber: 34,
+        depType: 'standardTable',
+        newValue: '4.0.0',
+      };
+      expect(updateDependency(cargo4toml, upgrade)).toEqual(cargo4toml);
     });
   });
 });

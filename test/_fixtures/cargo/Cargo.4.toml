@@ -27,6 +27,11 @@ default-features=    true
 path    ="./foo/bar"
 
 [dependencies.dep5]
-vesion = "1.2.3" # Intentional type
+vesion = "1.2.3" # Intentional typo
 default-features = true
 path = "./foo/bar"
+
+# [dependencies.dep6]
+# version = "3.2.1"
+# default-features = true
+# path = "./foo/bar"
