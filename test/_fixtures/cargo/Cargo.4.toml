@@ -1,5 +1,5 @@
 [package]
-name = "inline-tables-example"
+name = "standard-tables-example"
 version = "0.1.2"
 
 [dependencies.dep1]

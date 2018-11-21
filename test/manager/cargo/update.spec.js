@@ -4,10 +4,6 @@ const { updateDependency } = require('../../../lib/manager/cargo/update');
 const cargo1toml = fs.readFileSync('test/_fixtures/cargo/Cargo.1.toml', 'utf8');
 const cargo4toml = fs.readFileSync('test/_fixtures/cargo/Cargo.4.toml', 'utf8');
 
-const cargo5toml = fs.readFileSync('test/_fixtures/cargo/Cargo.5.toml', 'utf8');
-const cargo6toml = fs.readFileSync('test/_fixtures/cargo/Cargo.6.toml', 'utf8');
-const cargo7toml = fs.readFileSync('test/_fixtures/cargo/Cargo.7.toml', 'utf8');
-
 describe('lib/manager/cargo/update', () => {
   describe('updateDependency()', () => {
     let config;
@@ -24,7 +20,7 @@ describe('lib/manager/cargo/update', () => {
         depType: 'normal',
         newValue: '0.3.0',
       };
-      expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo5toml);
+      expect(updateDependency(cargo1toml, upgrade)).toMatchSnapshot();
     });
     it('updates inline table dependency', () => {
       const upgrade = {
@@ -33,7 +29,7 @@ describe('lib/manager/cargo/update', () => {
         depType: 'inlineTable',
         newValue: '0.2.0',
       };
-      expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo6toml);
+      expect(updateDependency(cargo1toml, upgrade)).toMatchSnapshot();
     });
     it('updates standard table table dependency', () => {
       const upgrade = {
@@ -43,7 +39,7 @@ describe('lib/manager/cargo/update', () => {
         depType: 'standardTable',
         newValue: '0.4.0',
       };
-      expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo7toml);
+      expect(updateDependency(cargo1toml, upgrade)).toMatchSnapshot();
     });
     it('handles invalid standard tables gracefully', () => {
       const upgrade = {
@@ -53,7 +49,7 @@ describe('lib/manager/cargo/update', () => {
         depType: 'standardTable',
         newValue: '2.0.0',
       };
-      expect(updateDependency(cargo4toml, upgrade)).toEqual(cargo4toml);
+      expect(updateDependency(cargo4toml, upgrade)).toMatchSnapshot();
     });
     it('does not update in case of error', () => {
       const upgrade = {
