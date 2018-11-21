@@ -22,7 +22,7 @@ Automated dependency updates. Multi-platform and multi-language.
 
 ## Who Uses Renovate?
 
-Renovate was released in 2017 and is now widely used in the developer community, including by many of the world's most innovative software companies.
+Renovate was released in 2017 and already is widely used in the developer community, including:
 
 ![Renovate Matrix](https://renovatebot.com/images/matrix.png)
 
