@@ -5,7 +5,6 @@ jest.mock('../../../lib/util/host-rules');
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
 const pipenv = require('../../../lib/manager/pipenv/artifacts');
-const hostRules = require('../../../lib/util/host-rules');
 
 const config = {
   localDir: '/tmp/github/some/repo',
