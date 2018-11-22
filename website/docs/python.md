@@ -5,7 +5,11 @@ description: Python/pip dependencies support in Renovate
 
 # Python Package Manager Support
 
-Renovate supports upgrading dependencies in `pip` requirements (e.g. `requirements.txt`, `requirements.pip`) files.
+Renovate supports the following Python package managers:
+
+- `pip` (e.g. `requirements.txt`, `requirements.pip`) files
+- `pipenv` (e.g. `Pipfile`)
+- `setup.py`
 
 ## Versioning Support
 
@@ -13,14 +17,28 @@ The [PEP440](https://www.python.org/dev/peps/pep-0440/) versioning scheme has be
 
 ## How It Works
 
-1.  Renovate will search each repository for any requirements files it finds.
+1.  Renovate will search each repository for any package files it finds.
 2.  Existing dependencies will be extracted from the file(s)
 3.  Renovate will look up the latest version on [PyPI](https://pypi.org/) to determine if any upgrades are available
 4.  If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
 
+## Enabling Beta
+
+Both `pipenv` and `setup.py` are classified a "beta", so they are not enabled by default. To enable them, you need to add configuration like the following to your `renovate.json` file:
+
+```json
+{
+  "pipenv": {
+    "enabled": false
+  }
+}
+```
+
+Note: if you _only_ have these package files and no other package files (like `package.json`, `Dockerfile`, etc) then Renovate won't detect them and you won't get an onboarding PR. In that case you need to add Renovate configuration manually to skip the onboarding step.
+
 ## Alternative file names
 
-The default file matching regex for requirements.txt aims to pick up the most popular conventions for file naming, but it's possible that some get missed. If you have a specific file or file pattern you want to get found by Renovate, then you can do this by adding a new pattern under the `fileMatch` field of `pip_requirements`. e.g. you could add this to your config:
+The default file matching regex for `requirements.txt` aims to pick up the most popular conventions for file naming, but it's possible that some get missed. If you have a specific file or file pattern you want to get found by Renovate, then you can do this by adding a new pattern under the `fileMatch` field of `pip_requirements`. e.g. you could add this to your config:
 
 ```json
   "pip_requirements": {
@@ -41,6 +59,10 @@ The index URL can be specified in the first line of the file, For example:
 some-package==0.3.1
 some-other-package==1.0.0
 ```
+
+#### Sources in `Pipfile`
+
+Renovate will detect any custom-configured sources in `Pipfile` and use them.
 
 #### Specify URL in configuration
 
@@ -72,4 +94,4 @@ Alternatively, maybe you only want one package manager, such as `npm`. In that c
 
 ## Future work
 
-Feature requests are open for conda support, additional file types (e.g. `setup.cfg`), and of course `pipenv` support. You can locate these issues by filtering on the [#python](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%23python) hashtag in the repository. Please +1 and/or add a comment to each issue that would benefit you so that we can gauge the popularity/importance of each.
+Feature requests are open for conda support and additional file types (e.g. `setup.cfg`). You can locate these issues by filtering on the [#python](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%23python) hashtag in the repository. Please +1 and/or add a comment to each issue that would benefit you so that we can gauge the popularity/importance of each.

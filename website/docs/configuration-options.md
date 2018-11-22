@@ -580,7 +580,9 @@ Warning: `setup.py` support is currently in beta, so is not enabled by default. 
 
 ## pipenv
 
-Add configuration here to change the file pattern for pipenv so that you can use filenames other than Pipfile.
+Add configuration here to change pipenv settings, e.g. to change the file pattern for pipenv so that you can use filenames other than Pipfile.
+
+Warning: 'pipenv' support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}" to enable.
 
 ## prBodyColumns
 
