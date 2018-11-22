@@ -1,6 +1,6 @@
-const { getRangeStrategy } = require('../../../lib/manager/bundler');
+const { getRangeStrategy } = require('../../../lib/manager/newmanager');
 
-describe('lib/manager/bundler/range', () => {
+describe('lib/manager/newmanager/range', () => {
   describe('getRangeStrategy()', () => {
     let config;
     beforeEach(() => {

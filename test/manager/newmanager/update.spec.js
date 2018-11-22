@@ -1,6 +1,6 @@
-const { updateDependency } = require('../../../lib/manager/bundler/update');
+const { updateDependency } = require('../../../lib/manager/newmanager/update');
 
-describe('lib/manager/bundler/update', () => {
+describe('lib/manager/newmanager/update', () => {
   describe('updateDependency()', () => {
     let config;
     beforeEach(() => {

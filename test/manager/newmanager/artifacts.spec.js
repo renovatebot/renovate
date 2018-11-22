@@ -1,8 +1,8 @@
-const cargo = require('../../../lib/manager/bundler/artifacts');
+const cargo = require('../../../lib/manager/newmanager/artifacts');
 
 let config;
 
-describe('bundler.getArtifacts()', () => {
+describe('newmanager.getArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     config = {};

@@ -1,6 +1,8 @@
-const { extractPackageFile } = require('../../../lib/manager/bundler/extract');
+const {
+  extractPackageFile,
+} = require('../../../lib/manager/newmanager/extract');
 
-describe('lib/manager/bundler/extract', () => {
+describe('lib/manager/newmanager/extract', () => {
   describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
