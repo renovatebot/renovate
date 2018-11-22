@@ -19,7 +19,7 @@ describe('lib/manager/pipenv/extract', () => {
     it('extracts dependencies', () => {
       const res = extractPackageFile(pipfile1, config).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res).toHaveLength(4);
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(pipfile2, config).deps;

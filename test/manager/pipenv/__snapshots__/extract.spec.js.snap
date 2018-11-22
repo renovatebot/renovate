@@ -27,6 +27,18 @@ Array [
     "versionScheme": "pep440",
   },
   Object {
+    "currentValue": "==1.0.0",
+    "depName": "pytest-benchmark",
+    "depType": "packages",
+    "pipenvNestedVersion": true,
+    "purl": "pkg:pypi/pytest-benchmark",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+      "http://example.com/private-pypi/",
+    ],
+    "versionScheme": "pep440",
+  },
+  Object {
     "currentValue": "==0.1.0",
     "depName": "dev-package",
     "depType": "dev-packages",
