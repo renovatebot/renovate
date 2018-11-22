@@ -96,7 +96,7 @@
     "later": "1.2.0",
     "linkify-markdown": "1.0.0",
     "lodash": "4.17.11",
-    "luxon": "1.6.2",
+    "luxon": "1.7.1",
     "markdown-it": "8.4.2",
     "minimatch": "3.0.4",
     "moment": "2.22.2",
@@ -106,7 +106,7 @@
     "p-all": "1.0.0",
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
-    "pnpm": "2.18.2",
+    "pnpm": "2.19.2",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "safe-regex": "2.0.1",
@@ -139,7 +139,7 @@
     "mockdate": "2.0.2",
     "nock": "10.0.2",
     "prettier": "1.14.3",
-    "semantic-release": "15.10.8",
+    "semantic-release": "15.12.1",
     "tmp-promise": "1.0.5"
   },
   "files": [
