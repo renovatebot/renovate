@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/pipenv/update updateDependency replaces existing value 1`] = `
+"[[source]]
+url = \\"https://pypi.org/simple\\"
+verify_ssl = true
+name = \\"pypi\\"
+
+[[source]]
+url = \\"http://example.com/private-pypi/\\"
+verify_ssl = false
+name = \\"private-pypi\\"
+
+[packages]
+some-package = \\"==1.0.1\\"
+some-other-package = \\"==1.0.0\\"
+\\"_invalid-package\\" = \\"==1.0.0\\"
+invalid-version = \\"==0 0\\"
+pytest-benchmark = {version = \\"==1.0.0\\", extras = [\\"histogram\\"]}
+
+[dev-packages]
+dev-package = \\"==0.1.0\\"
+
+[requires]
+python_version = \\"3.6\\"
+"
+`;
+
+exports[`manager/pipenv/update updateDependency replaces nested value 1`] = `
+"[[source]]
+url = \\"https://pypi.org/simple\\"
+verify_ssl = true
+name = \\"pypi\\"
+
+[[source]]
+url = \\"http://example.com/private-pypi/\\"
+verify_ssl = false
+name = \\"private-pypi\\"
+
+[packages]
+some-package = \\"==0.3.1\\"
+some-other-package = \\"==1.0.0\\"
+\\"_invalid-package\\" = \\"==1.0.0\\"
+invalid-version = \\"==0 0\\"
+pytest-benchmark = {version = \\"==1.9.1\\", extras = [\\"histogram\\"]}
+
+[dev-packages]
+dev-package = \\"==0.1.0\\"
+
+[requires]
+python_version = \\"3.6\\"
+"
+`;
+
+exports[`manager/pipenv/update updateDependency upgrades dev packages 1`] = `
+"[[source]]
+url = \\"https://pypi.org/simple\\"
+verify_ssl = true
+name = \\"pypi\\"
+
+[[source]]
+url = \\"http://example.com/private-pypi/\\"
+verify_ssl = false
+name = \\"private-pypi\\"
+
+[packages]
+some-package = \\"==0.3.1\\"
+some-other-package = \\"==1.0.0\\"
+\\"_invalid-package\\" = \\"==1.0.0\\"
+invalid-version = \\"==0 0\\"
+pytest-benchmark = {version = \\"==1.0.0\\", extras = [\\"histogram\\"]}
+
+[dev-packages]
+dev-package = \\"==0.2.0\\"
+
+[requires]
+python_version = \\"3.6\\"
+"
+`;
