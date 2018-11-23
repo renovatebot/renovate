@@ -29,7 +29,7 @@ Both `pipenv` and `setup.py` are classified a "beta", so they are not enabled by
 ```json
 {
   "pipenv": {
-    "enabled": false
+    "enabled": true
   }
 }
 ```
