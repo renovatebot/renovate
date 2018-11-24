@@ -31,7 +31,7 @@ describe('lib/manager/cargo/update', () => {
       };
       expect(updateDependency(cargo1toml, upgrade)).toMatchSnapshot();
     });
-    it('updates standard table table dependency', () => {
+    it('updates standard table dependency', () => {
       const upgrade = {
         depName: 'winapi',
         lineNumber: 21,

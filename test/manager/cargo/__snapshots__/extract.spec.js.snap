@@ -3,7 +3,7 @@
 exports[`lib/manager/cargo/extract extractPackageFile() extracts multiple dependencies 1`] = `
 Array [
   Object {
-    "currentValue": "0.2.43",
+    "currentValue": "=0.2.43",
     "depName": "libc",
     "depType": "normal",
     "lineNumber": 16,
@@ -15,7 +15,7 @@ Array [
     "lineNumber": 17,
   },
   Object {
-    "currentValue": "0.1",
+    "currentValue": "=0.1",
     "depName": "pcap-sys",
     "depType": "inline-table",
     "lineNumber": 18,
@@ -27,11 +27,18 @@ Array [
     "lineNumber": 19,
   },
   Object {
-    "currentValue": "0.3.6",
+    "currentValue": "=0.3.6",
     "depName": "winapi",
     "depType": "standard-table",
     "lineNumber": 21,
     "versionLineNumber": 22,
+  },
+  Object {
+    "currentValue": "0.4.2",
+    "depName": "dep1",
+    "depType": "standard-table",
+    "lineNumber": 25,
+    "versionLineNumber": 26,
   },
 ]
 `;

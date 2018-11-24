@@ -18,7 +18,7 @@ describe('lib/manager/cargo/extract', () => {
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(cargo1toml, config);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(5);
+      expect(res.deps).toHaveLength(6);
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(cargo2toml, config);
