@@ -2558,10 +2558,10 @@ fast-safe-stringify@^1.1.3:
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-1.2.3.tgz#9fe22c37fb2f7f86f06b8f004377dbf8f1ee7bc1"
   integrity sha512-QJYT/i0QYoiZBQ71ivxdyTqkwKkQ0oxACXHYxH2zYHJEgzi2LsbjgvtzTbLi1SZcF190Db2YP7I7eTsU2egOlw==
 
-fast-xml-parser@3.12.7:
-  version "3.12.7"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-3.12.7.tgz#dc7c6c58e7b767f8033e112830db6fcde131f8bd"
-  integrity sha512-8mOpwbqsclo9qwemEcNMqGwvbQrNFFWaYS0iOTp4gKeJ/YEvwSEhILrlf1MTp/pqGUpPR4CKgcf8ZA/dEBahag==
+fast-xml-parser@3.12.9:
+  version "3.12.9"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-3.12.9.tgz#7d285baecc7105a544816b1609d5c46679b9416a"
+  integrity sha512-2/YYHpCmqq3K+loiQI/ohAnVPNDXJyL1U/bKDw7NM9hDonnqGjQ+fOzvleTwBLIssc9B2Og5u2H1hoWhH3ZSqg==
   dependencies:
     nimnjs "^1.3.2"
 
