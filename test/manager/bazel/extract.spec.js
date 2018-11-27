@@ -24,8 +24,8 @@ describe('lib/manager/bazel/extract', () => {
       const res = extractPackageFile(workspaceFile, config);
       expect(res.deps).toMatchSnapshot();
     });
-    it('check replace remote instead importpath', () => {
-      const res = extractPackageFile(
+    it('check remote option in go_repository', () => {
+      const successStory = extractPackageFile(
         `
 go_repository(
   name = "test_repository",
@@ -36,7 +36,20 @@ go_repository(
         `,
         config
       );
-      expect(res.deps[0].purl).toBe('pkg:go/github.com/test/uuid');
+      expect(successStory.deps[0].purl).toBe('pkg:go/github.com/test/uuid');
+
+      const badStory = extractPackageFile(
+        `
+go_repository(
+  name = "test_repository",
+  importpath = "github.com/google/uuid",
+  remote = "https://github.com/test/uuid.git#branch",
+  commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+)
+        `,
+        config
+      );
+      expect(badStory.deps[0].skipReason).toBe('unsupported-remote');
     });
   });
 });
