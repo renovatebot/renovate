@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`cargo.getArtifacts() catches errors 1`] = `
+Object {
+  "lockFileError": Object {
+    "lockFile": "Cargo.lock",
+    "stderr": "The \\"directory\\" argument must be of type string. Received type undefined",
+  },
+}
+`;
+
 exports[`cargo.getArtifacts() generates Cargo.lock 1`] = `
 Object {
   "file": Object {
