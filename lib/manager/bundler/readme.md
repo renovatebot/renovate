@@ -1,30 +1,46 @@
+# Work in Progress
+
 ## Overview
 
 #### Name of package manager
+
+[Bundler](https://bundler.io/)
 
 ---
 
 #### What language does this support?
 
+Ruby
+
 ---
 
 #### Does that language have other (competing?) package managers?
+
+No mainstream
 
 ## Package File Detection
 
 #### What type of package files and names does it use?
 
+"Gemfiles", usually named `Gemfile`.
+
 ---
 
 #### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
+
+`["(^|/)Gemfile$]`
 
 ---
 
 #### Is it likely that many users would need to extend this pattern for custom file names?
 
+It's possible, but not a common case.
+
 ---
 
 #### Is the fileMatch pattern likely to get many "false hits" for files that have nothing to do with package management?
+
+No
 
 ## Parsing and Extraction
 
