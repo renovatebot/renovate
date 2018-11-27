@@ -38,46 +38,88 @@ It uses exclusively `Cargo.toml` files.
 
 #### Can package files have "local" links to each other that need to be resolved?
 
+It is possible to have local dependencies, by specifying a file path.
+
+--- 
 #### Is there reason why package files need to be parsed together (in serial) instead of independently?
+
+No a single Cargo.toml file specifies a single package.
 
 ---
 
 #### What format/syntax is the package file in? e.g. JSON, TOML, custom?
 
----
+TOML
 
+---
 #### How do you suggest parsing the file? Using an off-the-shelf parser, using regex, or can it be custom-parsed line by line?
 
----
+Cargo.toml files are custom-parsed line by line.
 
+---
 #### Does the package file structure distinguish between different "types" of dependencies? e.g. production dependencies, dev dependencies, etc?
 
-No
+There are [build-dependencies], [dev-dependencies], and [dependencies] sections.
+Build dependencies are only required at compile time by the
+build script see [reference](https://doc.rust-lang.org/cargo/reference/build-scripts.html).
+Dev dependencies are only required by package's tests and examples
+see [reference](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#development-dependencies).
+All these dependency types are treated similarly.
 
 ---
 
 #### List all the sources/syntaxes of dependencies that can be extracted:
 
+Normal dependencies of the format:
+```toml
+[dependencies]
+dep1 = "1.2.3"
+dep2 = "=2.3.4"
+```
+
+Inline table dependencies:
+```toml
+[dependencies]
+dep1 = { version = "1.2.3", path = "./foo/bar/" }
+dep2 = { default-features = false, version = "=2.3.4" }
+```
+
+Standard table dependencies:
+```toml
+[dependencies.dep1]
+version = "5.2.8"
+default-features = false # Comment
+features = ["feat1", "feat2"]
+```
 ---
 
 #### Describe which types of dependencies above are supported and which will be implemented in future:
+
+All 3 possible syntaxes of dependencies are supported by the existing `extractPackageFile` function.
+Different types of dependencies [dev-dependencies], [build-dependencies], and [dependencies] are treated the same.
 
 ## Versioning
 
 #### What versioning scheme do the package files use?
 
+Semantic versioning.
+
 ---
 
 #### Does this versioning scheme support range constraints, e.g. `^1.0.0` or `1.x`?
+
+Yes.
 
 ---
 
 #### Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?
 
+Both. Libraries have a `lib.rs` file in `src` directory and no `main.rs`, binaries must have a `main.rs` file in `src`.
+
 ---
 
 #### If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?
-
+TODO:
 ## Lookup
 
 #### Is a new datasource required? Provide details
@@ -90,6 +132,8 @@ No
 
 #### Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?
 
+It is possible to have dependencies only for certain platforms, but it doesn't affect the lookup procedure.
+
 ---
 
 #### Will users need the ability to configure language or other constraints using Renovate config?
@@ -98,17 +142,31 @@ No
 
 #### Are lock files or checksum files used? Mandatory?
 
+Yes, lock files are used, and checksums are recorded in lock files.
+When a crate is built a `Cargo.lock` file is always generated.
+
 ---
 
 #### If so, what tool and exact commands should be used if updating 1 or more package versions in a dependency file?
+
+Update dep1:
+```sh
+cargo update -p dep1
+```
 
 ---
 
 #### If applicable, describe how the tool maintains a cache and if it can be controlled via CLI or env? Do you recommend the cache be kept or disabled/ignored?
 
+Cargo maintains a local index of packages, it can be updated with `cargo update`.
+
 ---
 
 #### If applicable, what command should be used to generate a lock file from scratch if you already have a package file? This will be used for "lock file maintenance".
+
+```sh
+cargo update
+```
 
 ## Other
 
