@@ -51,7 +51,7 @@ go_repository(
       );
       expect(badStory.deps[0].skipReason).toBe('unsupported-remote');
       
-      let gitlabRemote = extractPackageFile(
+      const gitlabRemote = extractPackageFile(
         `
 go_repository(
   name = "test_repository",
@@ -62,7 +62,7 @@ go_repository(
         `,
         config
       );
-      expect(badStory.deps[0].skipReason).toBe('unsupported-remote');
+      expect(gitlabRemote.deps[0].skipReason).toBe('unsupported-remote');
     });
   });
 });
