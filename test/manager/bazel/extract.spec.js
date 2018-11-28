@@ -50,6 +50,19 @@ go_repository(
         config
       );
       expect(badStory.deps[0].skipReason).toBe('unsupported-remote');
+      
+      let gitlabRemote = extractPackageFile(
+        `
+go_repository(
+  name = "test_repository",
+  importpath = "github.com/google/uuid",
+  remote = "https://gitlab.com/test/uuid",
+  commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+)
+        `,
+        config
+      );
+      expect(badStory.deps[0].skipReason).toBe('unsupported-remote');
     });
   });
 });
