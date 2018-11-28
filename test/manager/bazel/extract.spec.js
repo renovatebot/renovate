@@ -30,13 +30,13 @@ describe('lib/manager/bazel/extract', () => {
 go_repository(
   name = "test_repository",
   importpath = "github.com/google/uuid",
-  remote = "https://github.com/test/uuid",
+  remote = "https://github.com/test/uuid-fork",
   commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
 )
         `,
         config
       );
-      expect(successStory.deps[0].purl).toBe('pkg:go/github.com/test/uuid');
+      expect(successStory.deps[0].purl).toBe('pkg:go/github.com/test/uuid-fork');
 
       const badStory = extractPackageFile(
         `
