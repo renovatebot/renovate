@@ -50,7 +50,7 @@ go_repository(
         config
       );
       expect(badStory.deps[0].skipReason).toBe('unsupported-remote');
-      
+
       const gitlabRemote = extractPackageFile(
         `
 go_repository(
