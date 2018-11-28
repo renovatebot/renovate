@@ -53,6 +53,19 @@ go_repository(
       );
       expect(badStory.deps[0].skipReason).toBe('unsupported-remote');
 
+      const gheStory = extractPackageFile(
+        `
+go_repository(
+  name = "test_repository",
+  importpath = "github.com/google/uuid",
+  remote = "https://github.mycompany.com/test/uuid",
+  commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+)
+        `,
+        config
+      );
+      expect(gheStory.deps[0].skipReason).toBe('unsupported-remote');
+
       const gitlabRemote = extractPackageFile(
         `
 go_repository(
