@@ -19,8 +19,6 @@ Set this to 'global' if you wish Renovate to use globally-installed binaries (`n
 
 ## endpoint
 
-## exposeEnv
-
 ## force
 
 This object is used as a "force override" when you need to make sure certain configuration overrides whatever is configured in the repository. For example, forcing a null (no) schedule to make sure Renovate raises PRs on a run even if the repository itself or its preset defines a schedule that's currently in active.
@@ -79,5 +77,14 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot. If this is set to false, then a full install of modules will be done. This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
+
+## trustLevel
+
+Setting trustLevel to "high" can make sense in many self-hosted cases where the bot operator trusts the content in each repository.
+
+Setting trustLevel=high means:
+
+- Child processes are run with full access to `env`
+- `.npmrc` files can have environment variable substitution performed
 
 ## username

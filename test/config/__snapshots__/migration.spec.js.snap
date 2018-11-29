@@ -32,6 +32,7 @@ Object {
     "automerge": true,
     "gitFs": "https",
     "schedule": "before 5am",
+    "trustLevel": "low",
   },
   "major": Object {
     "automerge": false,
@@ -130,6 +131,7 @@ Object {
   "travis": Object {
     "enabled": true,
   },
+  "trustLevel": "high",
 }
 `;
 

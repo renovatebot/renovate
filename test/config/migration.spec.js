@@ -57,7 +57,9 @@ describe('config/migration', () => {
             enabled: false,
           },
         ],
+        exposeEnv: true,
         lockFileMaintenance: {
+          exposeEnv: false,
           gitFs: true,
           automerge: 'any',
           schedule: 'before 5am every day',

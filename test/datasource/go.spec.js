@@ -67,7 +67,9 @@ describe('datasource/go', () => {
       got.mockReturnValueOnce({
         body: res1,
       });
-      github.getPkgReleases.mockReturnValueOnce({ releases: [1, 2] });
+      github.getPkgReleases.mockReturnValueOnce({
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+      });
       const res = await datasource.getPkgReleases('pkg:go/golang.org/x/text');
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
