@@ -124,19 +124,32 @@ TODO:
 
 #### Is a new datasource required? Provide details
 
+New crate versions can be fetched from [crates.io](crates.io).
+
 ---
 
 #### Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?
+
+Cargo supports dependencies hosted as git repositories at custom URL, the url is specified like:
+```toml
+[dependencies]
+rand = { git = "https://github.com/rust-lang-nursery/rand" }
+```
+see [reference](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories)
 
 ---
 
 #### Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?
 
-It is possible to have dependencies only for certain platforms, but it doesn't affect the lookup procedure.
+It is possible to have platform specific dependencies, but it doesn't affect the lookup procedure.
+
+see [reference](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#platform-specific-dependencies)
 
 ---
 
 #### Will users need the ability to configure language or other constraints using Renovate config?
+
+Cargo only deals with Rust projects.
 
 ## Artifacts
 
@@ -145,6 +158,8 @@ It is possible to have dependencies only for certain platforms, but it doesn't a
 Yes, lock files are used, and checksums are recorded in lock files.
 When a crate is built a `Cargo.lock` file is always generated.
 
+see [reference](https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html)
+
 ---
 
 #### If so, what tool and exact commands should be used if updating 1 or more package versions in a dependency file?
@@ -152,6 +167,11 @@ When a crate is built a `Cargo.lock` file is always generated.
 Update dep1:
 ```sh
 cargo update -p dep1
+```
+
+Update all dependencies:
+```sh
+cargo update
 ```
 
 ---
