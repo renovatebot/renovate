@@ -127,7 +127,9 @@ Both. Libraries have a `lib.rs` file in `src` directory and no `main.rs`, binari
 
 #### If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?
 
-TODO:
+It isn't clear yet.
+NOTE: A `cargo` version like 1.3.4 is equivalent to npm version of ^1.3.4, so pinning to an exact version would require
+setting version to =1.3.4
 
 ## Lookup
 
@@ -204,3 +206,4 @@ cargo update
 ## Other
 
 #### Is there anything else to know about this package manager?
+`cargo update` or a `cargo update -p dep1` command updates Cargo.lock file in current crate inplace.
