@@ -193,7 +193,10 @@ cargo update
 
 #### If applicable, describe how the tool maintains a cache and if it can be controlled via CLI or env? Do you recommend the cache be kept or disabled/ignored?
 
-Cargo maintains a local index of packages, it can be updated with `cargo update`.
+Cargo shares build artifacts among all the packages of a single workspace.
+Today, Cargo does not share build results across different workspaces,
+but a similar result can be achieved by using a third party tool, [sccache](https://github.com/mozilla/sccache).
+see [reference](https://doc.rust-lang.org/cargo/guide/build-cache.html)
 
 ---
 
@@ -206,4 +209,5 @@ cargo update
 ## Other
 
 #### Is there anything else to know about this package manager?
+
 `cargo update` or a `cargo update -p dep1` command updates Cargo.lock file in current crate inplace.
