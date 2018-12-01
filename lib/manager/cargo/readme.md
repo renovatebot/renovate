@@ -40,7 +40,8 @@ It uses exclusively `Cargo.toml` files.
 
 It is possible to have local dependencies, by specifying a file path.
 
---- 
+---
+
 #### Is there reason why package files need to be parsed together (in serial) instead of independently?
 
 No a single Cargo.toml file specifies a single package.
@@ -52,11 +53,13 @@ No a single Cargo.toml file specifies a single package.
 TOML
 
 ---
+
 #### How do you suggest parsing the file? Using an off-the-shelf parser, using regex, or can it be custom-parsed line by line?
 
 Cargo.toml files are custom-parsed line by line.
 
 ---
+
 #### Does the package file structure distinguish between different "types" of dependencies? e.g. production dependencies, dev dependencies, etc?
 
 There are [build-dependencies], [dev-dependencies], and [dependencies] sections.
@@ -71,6 +74,7 @@ All these dependency types are treated similarly.
 #### List all the sources/syntaxes of dependencies that can be extracted:
 
 Normal dependencies of the format:
+
 ```toml
 [dependencies]
 dep1 = "1.2.3"
@@ -78,6 +82,7 @@ dep2 = "=2.3.4"
 ```
 
 Inline table dependencies:
+
 ```toml
 [dependencies]
 dep1 = { version = "1.2.3", path = "./foo/bar/" }
@@ -85,12 +90,14 @@ dep2 = { default-features = false, version = "=2.3.4" }
 ```
 
 Standard table dependencies:
+
 ```toml
 [dependencies.dep1]
 version = "5.2.8"
 default-features = false # Comment
 features = ["feat1", "feat2"]
 ```
+
 ---
 
 #### Describe which types of dependencies above are supported and which will be implemented in future:
@@ -119,7 +126,9 @@ Both. Libraries have a `lib.rs` file in `src` directory and no `main.rs`, binari
 ---
 
 #### If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?
+
 TODO:
+
 ## Lookup
 
 #### Is a new datasource required? Provide details
@@ -131,10 +140,12 @@ New crate versions can be fetched from [crates.io](crates.io).
 #### Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?
 
 Cargo supports dependencies hosted as git repositories at custom URL, the url is specified like:
+
 ```toml
 [dependencies]
 rand = { git = "https://github.com/rust-lang-nursery/rand" }
 ```
+
 see [reference](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories)
 
 ---
@@ -165,11 +176,13 @@ see [reference](https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.h
 #### If so, what tool and exact commands should be used if updating 1 or more package versions in a dependency file?
 
 Update dep1:
+
 ```sh
 cargo update -p dep1
 ```
 
 Update all dependencies:
+
 ```sh
 cargo update
 ```

@@ -1,7 +1,0 @@
-[package]
-name = "example_crate"
-version = "0.1.0"
-
-[dependencies]
-# libc = "0.2.43"
-libc = "0.2.0"
