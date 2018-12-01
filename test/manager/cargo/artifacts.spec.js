@@ -1,33 +1,79 @@
-// const fs = require('fs');
-// const upath = require('upath');
-// const cargo = require('../../../lib/manager/cargo/artifacts');
-// const { extractPackageFile } = require('../../../lib/manager/cargo/extract');
+jest.mock('fs-extra');
+jest.mock('child-process-promise');
 
-// const crateDir = 'test/_fixtures/cargo/example_crate';
-// const cargoTomlFilePath = upath.join(crateDir, 'Cargo.toml');
-// const cargoLockFilePath = upath.join(crateDir, 'Cargo.lock');
-// const cargoToml = fs.readFileSync(cargoTomlFilePath, 'utf8');
-// const cargoLock = fs.readFileSync(cargoLockFilePath, 'utf8');
+const fs = require('fs-extra');
+const { exec } = require('child-process-promise');
+const cargo = require('../../../lib/manager/cargo/artifacts');
 
-// const config = {
-//   localDir: '/tmp/github/some/repo',
-// };
+const config = {
+  localDir: '/tmp/github/some/repo',
+};
 
 describe('.getArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-  it('returns if no Cargo.lock found', async () => {
-    // expect(await cargo.getArtifacts('Cargo.toml', [], '', config)).toBeNull();
-    // stub
+  it('returns null if no Cargo.lock found', async () => {
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        currentValue: '1.2.3',
+      },
+    ];
+    expect(
+      await cargo.getArtifacts('Cargo.toml', updatedDeps, '', config)
+    ).toBeNull();
+  });
+  it('returns null if updatedDeps is empty', async () => {
+    expect(await cargo.getArtifacts('Cargo.toml', [], '', config)).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    // stub
+    platform.getFile.mockReturnValueOnce('Current Cargo.lock');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'Current Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        currentValue: '1.2.3',
+      },
+    ];
+    expect(
+      await cargo.getArtifacts('Cargo.toml', updatedDeps, '', config)
+    ).toBeNull();
   });
-  it('returns updated composer.lock', async () => {
-    // stub
+  it('returns updated Cargo.lock', async () => {
+    platform.getFile.mockReturnValueOnce('Old Cargo.lock');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        currentValue: '1.2.3',
+      },
+    ];
+    expect(
+      await cargo.getArtifacts('Cargo.toml', updatedDeps, '{}', config)
+    ).not.toBeNull();
   });
   it('catches errors', async () => {
-    // stub
+    platform.getFile.mockReturnValueOnce('Current Cargo.lock');
+    fs.outputFile = jest.fn(() => {
+      throw new Error('not found');
+    });
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        currentValue: '1.2.3',
+      },
+    ];
+    expect(
+      await cargo.getArtifacts('Cargo.toml', updatedDeps, '{}', config)
+    ).toMatchSnapshot();
   });
 });
