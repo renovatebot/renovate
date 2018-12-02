@@ -299,4 +299,19 @@ describe('platform/gh-got-wrapper', () => {
     const res2 = await get('repos/foo');
     expect(res1).toEqual(res2);
   });
+  it('should throw platform failure ParseError', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        name: 'ParseError',
+      })
+    );
+    let e;
+    try {
+      await get('some-url', {}, 0);
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('platform-failure');
+  });
 });
