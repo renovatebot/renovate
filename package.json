@@ -82,7 +82,7 @@
     "docker-registry-client": "3.3.0",
     "email-addresses": "3.0.3",
     "fast-clone": "1.5.3",
-    "fast-xml-parser": "3.12.9",
+    "fast-xml-parser": "3.12.10",
     "form-data": "2.3.3",
     "fs-extra": "7.0.1",
     "get-installed-path": "4.0.8",
