@@ -21,6 +21,7 @@ Array [
   "nvm",
   "pip_requirements",
   "pip_setup",
+  "pipenv",
   "terraform",
   "travis",
 ]

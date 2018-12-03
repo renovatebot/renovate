@@ -582,6 +582,12 @@ Add configuration here to specifically override settings for `setup.py` files.
 
 Warning: `setup.py` support is currently in beta, so is not enabled by default. You will need to configure `{ "pip_setup": { "enabled": true }}" to enable.
 
+## pipenv
+
+Add configuration here to change pipenv settings, e.g. to change the file pattern for pipenv so that you can use filenames other than Pipfile.
+
+Warning: 'pipenv' support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}" to enable.
+
 ## prBodyColumns
 
 Use this array to provide a list of column names you wish to include in the PR tables.

@@ -59,6 +59,9 @@ Object {
   "pip_setup": Array [
     Object {},
   ],
+  "pipenv": Array [
+    Object {},
+  ],
   "terraform": Array [
     Object {},
   ],
