@@ -80,7 +80,7 @@ By default, Renovate will use the most efficient approach to updating package fi
 
 ## trustLevel
 
-Setting trustLevel to "high" can make sense in may self-hosted cases where the bot operator trusts the content in each repository.
+Setting trustLevel to "high" can make sense in many self-hosted cases where the bot operator trusts the content in each repository.
 
 Setting trustLevel=high means:
 

@@ -2558,10 +2558,10 @@ fast-safe-stringify@^1.1.3:
   resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-1.2.3.tgz#9fe22c37fb2f7f86f06b8f004377dbf8f1ee7bc1"
   integrity sha512-QJYT/i0QYoiZBQ71ivxdyTqkwKkQ0oxACXHYxH2zYHJEgzi2LsbjgvtzTbLi1SZcF190Db2YP7I7eTsU2egOlw==
 
-fast-xml-parser@3.12.7:
-  version "3.12.7"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-3.12.7.tgz#dc7c6c58e7b767f8033e112830db6fcde131f8bd"
-  integrity sha512-8mOpwbqsclo9qwemEcNMqGwvbQrNFFWaYS0iOTp4gKeJ/YEvwSEhILrlf1MTp/pqGUpPR4CKgcf8ZA/dEBahag==
+fast-xml-parser@3.12.10:
+  version "3.12.10"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-3.12.10.tgz#356d7cf51d2e9e295dc0eac5635dedfad99ee019"
+  integrity sha512-pw26n3OTAAQ8/2E76XOYpI0Z2PcX/kqZR8s1NnSpU9iXbUj+hkgvC9Ag1Cxqr3GUzuArxlLLroS8FeSmumkdgg==
   dependencies:
     nimnjs "^1.3.2"
 
@@ -4938,10 +4938,10 @@ lru-cache@^4.0.1, lru-cache@^4.1.1, lru-cache@^4.1.2, lru-cache@^4.1.3:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luxon@1.7.1:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.7.1.tgz#721e86f12c47526014a53c9f92f74f2da6dc9a4c"
-  integrity sha512-0fTd5a3UUVATblRdhD9ZXdhCdXp+ktqGERRu8q9seeMFfED0otQFeqrZwDw/2AoMH/cHjmswVJC8IUPeNBIPTA==
+luxon@1.8.2:
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.8.2.tgz#32ca2be3b3f0fcddd607dc5584ff106107fecade"
+  integrity sha512-TPShotrkafGXEksxvEagZ1peYb9gE3ADppq8IPWG6wqYS/4k9ucRUXipBHy/PrMIfUPxy/llfsQXRvQmOXmVcA==
 
 make-dir@^1.0.0:
   version "1.3.0"
@@ -6582,10 +6582,10 @@ pn@^1.1.0:
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
   integrity sha512-2qHaIQr2VLRFoxe2nASzsV6ef4yOOH+Fi9FBOVH6cqeSgUnoyySPZkxzLuzd+RYOQTRpROA0ztTMqxROKSb/nA==
 
-pnpm@2.18.2:
-  version "2.18.2"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.18.2.tgz#b90b0f240c8f38645bd74ae1d4b50b938fb204b8"
-  integrity sha512-yJu5pCPFmzxD9xQtWay4nI7JdcrpIIom/VwwMmUvU6itN0wAbbyIaGKz57JCu1E+ZfbOvcaOzEmifbypHfFNXw==
+pnpm@2.19.4:
+  version "2.19.4"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.19.4.tgz#8c38c56e031377dced6bfbe4bc031665f9ee5304"
+  integrity sha512-oz8OVfSibLdFIBw/zK8nb3PtaS65P9Tge6a+WKGJONTmVVHyqL+YdwFx5kzw8SQ71/DQlvvfq/ni1mJdSdd3ng==
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
@@ -6617,10 +6617,10 @@ preserve@^0.2.0:
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
   integrity sha1-gV7R9uvGWSb4ZbMQwHE7yzMVzks=
 
-prettier@1.14.3:
-  version "1.14.3"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.14.3.tgz#90238dd4c0684b7edce5f83b0fb7328e48bd0895"
-  integrity sha512-qZDVnCrnpsRJJq5nSsiHCE3BYMED2OtsI+cmzIzF1QIfqm5ALf8tEJcO27zV1gKNKRPdhjO0dNWnrzssDQ1tFg==
+prettier@1.15.3:
+  version "1.15.3"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.15.3.tgz#1feaac5bdd181237b54dbe65d874e02a1472786a"
+  integrity sha512-gAU9AGAPMaKb3NNSUUuhhFAS7SCO4ALTN4nRIn6PJ075Qd28Yn2Ig2ahEJWdJwJmlEBTUfC7mMUSFy8MwsOCfg==
 
 pretty-format@^23.6.0:
   version "23.6.0"
@@ -7453,10 +7453,10 @@ sax@^1.2.4:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
-semantic-release@15.12.0:
-  version "15.12.0"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.12.0.tgz#061f390bbf999ae56ae52a71f0a986659bbe556d"
-  integrity sha512-s8JQ0twxSTat4aIKy8AVPm6gP+2OlkMyyTGeeWFopOXQVa3Bg0LPNjdhsUL90MHvh9aVy9k0/ym4DWmOcGxOMQ==
+semantic-release@15.12.2:
+  version "15.12.2"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.12.2.tgz#5e02f5281b4d3bb70b0421346cd6538921f583d6"
+  integrity sha512-kbUSNnK2py8AdL1scHSTgjz5HAQIcqrpwpWzFXXUpds2uotIj77p3qrKUB1pDsmMiUpMeGgu2cuqBF9Q2/4sUA==
   dependencies:
     "@semantic-release/commit-analyzer" "^6.1.0"
     "@semantic-release/error" "^2.2.0"
@@ -8218,6 +8218,16 @@ to-vfile@^2.2.0:
     is-buffer "^1.1.4"
     vfile "^2.0.0"
     x-is-function "^1.0.4"
+
+toml@2.3.3:
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/toml/-/toml-2.3.3.tgz#8d683d729577cb286231dfc7a8affe58d31728fb"
+  integrity sha512-O7L5hhSQHxuufWUdcTRPfuTh3phKfAZ/dqfxZFoxPCj2RYmpaSGLEIs016FCXItQwNr08yefUB5TSjzRYnajTA==
+
+tomlify-j0.4@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/tomlify-j0.4/-/tomlify-j0.4-3.0.0.tgz#99414d45268c3a3b8bf38be82145b7bba34b7473"
+  integrity sha512-2Ulkc8T7mXJ2l0W476YC/A209PR38Nw8PuaCNtk9uI3t1zzFdGQeWYGQvmj2PZkVvRC/Yoi4xQKMRnWc/N29tQ==
 
 tough-cookie@2.0.x:
   version "2.0.0"

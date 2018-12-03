@@ -8,6 +8,9 @@ Object {
   "buildkite": Array [
     Object {},
   ],
+  "bundler": Array [
+    Object {},
+  ],
   "cargo": Array [
     Object {},
   ],
@@ -51,6 +54,9 @@ Object {
     Object {},
   ],
   "pip_setup": Array [
+    Object {},
+  ],
+  "pipenv": Array [
     Object {},
   ],
   "terraform": Array [
