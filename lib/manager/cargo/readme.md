@@ -26,13 +26,19 @@ It uses exclusively `Cargo.toml` files.
 
 #### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
 
+Cargo.toml
+
 ---
 
 #### Is it likely that many users would need to extend this pattern for custom file names?
 
+No.
+
 ---
 
 #### Is the fileMatch pattern likely to get many "false hits" for files that have nothing to do with package management?
+
+No.
 
 ## Parsing and Extraction
 
