@@ -287,6 +287,20 @@ describe('workers/pr', () => {
       expect(platform.updatePr.mock.calls).toHaveLength(0);
       expect(pr).toMatchObject(existingPr);
     });
+    it('should return unmodified existing PR if only whitespace changes', async () => {
+      const modifiedPr = JSON.parse(
+        JSON.stringify(existingPr)
+          .replace(' ', '  ')
+          .replace('\n', '\r\n')
+      );
+      platform.getBranchPr.mockReturnValueOnce(modifiedPr);
+      config.semanticCommitScope = null;
+      config.automerge = true;
+      config.schedule = 'before 5am';
+      const pr = await prWorker.ensurePr(config);
+      expect(platform.updatePr.mock.calls).toHaveLength(0);
+      expect(pr).toMatchObject(modifiedPr);
+    });
     it('should return modified existing PR', async () => {
       config.newValue = '1.2.0';
       config.automerge = true;
