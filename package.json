@@ -139,7 +139,7 @@
     "jest": "23.6.0",
     "jest-silent-reporter": "0.1.1",
     "mockdate": "2.0.2",
-    "nock": "10.0.2",
+    "nock": "10.0.3",
     "prettier": "1.15.3",
     "semantic-release": "15.12.4",
     "tmp-promise": "1.0.5"
