@@ -59,7 +59,11 @@ Array [
 
 :recycle: **Rebasing**: Whenever PR is stale, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+
+---
+
+ - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box",
   Array [],
   false,
   false,
@@ -99,7 +103,11 @@ Array [
 
 :recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+
+---
+
+ - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box",
   Array [],
   false,
   false,
@@ -156,7 +164,11 @@ note 2
 
 :recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/config-help/issues) if that's undesired.",
+:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/config-help/issues) if that's undesired.
+
+---
+
+ - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box",
   Array [],
   false,
   false,
@@ -196,7 +208,11 @@ Array [
 
 :recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+
+---
+
+ - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box",
   Array [],
   false,
   false,
@@ -234,7 +250,11 @@ Object {
 
 :recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+
+---
+
+ - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box",
   "canRebase": true,
   "displayNumber": "Existing PR",
   "title": "Update dependency dummy to v1.1.0",
@@ -272,7 +292,11 @@ Object {
 
 :recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.",
+:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+
+---
+
+ - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box",
   "canRebase": true,
   "displayNumber": "Existing PR",
   "title": "wrong",
