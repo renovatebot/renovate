@@ -206,7 +206,7 @@ Example:
 
 ## encrypted
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+See https://renovatebot.com/docs/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -214,7 +214,7 @@ Extend this if you wish to configure rules specifically for `engines` definition
 
 ## extends
 
-See https://renovatebot.com/docs/configuration-reference/config-presets for details.
+See https://renovatebot.com/docs/config-presets for details.
 
 ## fileMatch
 
@@ -399,11 +399,11 @@ Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a c
 
 ## npmToken
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovatebot.com/docs/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used.
+See https://renovatebot.com/docs/private-modules for details on how this is used.
 
 ## nuget
 
