@@ -185,6 +185,15 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: {},
@@ -202,6 +211,15 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: { suffix: 'alpine' },
@@ -219,6 +237,24 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
+
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: { suffix: 'alpine' },
@@ -236,6 +272,10 @@ describe('api/docker', () => {
         headers: {},
       });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const config = {
         registryUrls: ['https://registry.company.com'],
       };
@@ -259,6 +299,15 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await docker.getPkgReleases({
         fullname: 'node',
         qualifiers: {},
@@ -276,6 +325,15 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await docker.getPkgReleases({
         fullname: 'node',
         qualifiers: {
@@ -295,6 +353,15 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate':
+            'Bearer realm="https://k8s.gcr.io/v2/token",service="k8s.gcr.io"',
+        },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await docker.getPkgReleases({
         fullname: 'kubernetes-dashboard-amd64',
         qualifiers: {
