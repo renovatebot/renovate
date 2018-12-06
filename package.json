@@ -109,6 +109,7 @@
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
     "pnpm": "2.19.4",
+    "proxy-agent": "3.0.3",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
     "safe-regex": "2.0.1",
