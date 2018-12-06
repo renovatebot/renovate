@@ -206,7 +206,7 @@ Example:
 
 ## encrypted
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+See https://renovatebot.com/docs/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -214,7 +214,7 @@ Extend this if you wish to configure rules specifically for `engines` definition
 
 ## extends
 
-See https://renovatebot.com/docs/configuration-reference/config-presets for details.
+See https://renovatebot.com/docs/config-presets for details.
 
 ## fileMatch
 
@@ -399,11 +399,11 @@ Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a c
 
 ## npmToken
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovatebot.com/docs/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used.
+See https://renovatebot.com/docs/private-modules for details on how this is used.
 
 ## nuget
 
@@ -571,6 +571,18 @@ By default, Renovate will add sha256 digests to Docker source images so that the
 ## pip_requirements
 
 Add configuration here to specifically override settings for `pip` requirements files. Supports `requirements.txt` and `requirements.pip` files. The default file pattern is fairly flexible in an attempt to catch similarly named ones too but may be extended/changed.
+
+## pip_setup
+
+Add configuration here to specifically override settings for `setup.py` files.
+
+Warning: `setup.py` support is currently in beta, so is not enabled by default. You will need to configure `{ "pip_setup": { "enabled": true }}" to enable.
+
+## pipenv
+
+Add configuration here to change pipenv settings, e.g. to change the file pattern for pipenv so that you can use filenames other than Pipfile.
+
+Warning: 'pipenv' support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}" to enable.
 
 ## prBodyColumns
 

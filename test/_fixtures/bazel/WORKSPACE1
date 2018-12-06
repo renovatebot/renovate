@@ -1,6 +1,24 @@
 
 workspace(name = "angular_bazel_example")
 
+go_repository(
+    name = "com_github_bitly_go-nsq",
+    importpath = "github.com/bitly/go-nsq",
+    tag = "v1.0.5"
+)
+
+go_repository(
+   name = "com_github_google_uuid",
+   importpath = "github.com/google/uuid",
+   commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+)
+
+go_repository(
+    name = "com_gopkgin_mgo_v2",
+    importpath = "gopkg.in/mgo.v2",
+    tag = "v2"
+)
+
 git_repository(
     name = "build_bazel_rules_nodejs",
     remote = "https://github.com/bazelbuild/rules_nodejs.git",

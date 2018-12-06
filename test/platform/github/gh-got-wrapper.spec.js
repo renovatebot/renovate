@@ -28,7 +28,7 @@ describe('platform/gh-got-wrapper', () => {
       endpoint: 'https://ghe.mycompany.com/api/v3/',
       body: 'abc',
     });
-    expect(ghGot.mock.calls[0][1].endpoint).toEqual(
+    expect(ghGot.mock.calls[0][1].baseUrl).toEqual(
       'https://ghe.mycompany.com/api/'
     );
   });
@@ -298,5 +298,36 @@ describe('platform/gh-got-wrapper', () => {
     const res1 = await get('repos/foo');
     const res2 = await get('repos/foo');
     expect(res1).toEqual(res2);
+  });
+  it('should throw platform failure ParseError', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        name: 'ParseError',
+      })
+    );
+    let e;
+    try {
+      await get('some-url', {}, 0);
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('platform-failure');
+  });
+  it('should throw for unauthorized integration', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        statusCode: 403,
+        message: 'Resource not accessible by integration (403)',
+      })
+    );
+    let e;
+    try {
+      await get('some-url', {}, 0);
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('integration-unauthorized');
   });
 });

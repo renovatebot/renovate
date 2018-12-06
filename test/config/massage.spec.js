@@ -20,5 +20,23 @@ describe('config/massage', () => {
       };
       expect(massage.massageConfig(config)).toMatchSnapshot();
     });
+    it('massages packageRules updateTypes', () => {
+      const config = {
+        packageRules: [
+          {
+            packageNames: ['foo'],
+            minor: {
+              semanticCommitType: 'feat',
+            },
+            patch: {
+              semanticCommitType: 'fix',
+            },
+          },
+        ],
+      };
+      const res = massage.massageConfig(config);
+      expect(res).toMatchSnapshot();
+      expect(res.packageRules).toHaveLength(3);
+    });
   });
 });

@@ -18,9 +18,11 @@ if: tag IS blank
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$HOME/.yarn/bin:$PATH"
+  - python --version
 
 install:
   - yarn install --frozen-lockfile
+  - pip install --user -r requirements.txt
 
 cache:
   yarn: true

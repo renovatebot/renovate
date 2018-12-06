@@ -1,6 +1,6 @@
 FROM amd64/golang:1.11.2-alpine@sha256:2169a7effa73e283ad0f290021eaf14fd812dae9767646b5afcb5bf097b17c0b AS golang
 
-FROM amd64/node:8.12.0-alpine@sha256:81abb8de1e5e8b6e55bca143b3c2ec1e2d167cb27fd2cd3191a0d222f7c5e710
+FROM amd64/node:8.14.0-alpine@sha256:f425bce573f1d8c91879bd42d7ee0d03b1154f8178a54538d75ce4722ea2a4cf
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"

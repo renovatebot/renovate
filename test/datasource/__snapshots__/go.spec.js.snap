@@ -3,8 +3,12 @@
 exports[`datasource/go getPkgReleases processes real data 1`] = `
 Object {
   "releases": Array [
-    1,
-    2,
+    Object {
+      "version": "v1.0.0",
+    },
+    Object {
+      "version": "v2.0.0",
+    },
   ],
 }
 `;

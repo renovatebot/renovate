@@ -928,6 +928,29 @@ describe('platform/github', () => {
       expect(get.put.mock.calls).toMatchSnapshot();
       expect(get.delete.mock.calls).toMatchSnapshot();
     });
+    it('should throw not ready', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        token: 'token',
+      }); // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1235',
+          },
+        },
+      }));
+      get.patch.mockImplementationOnce(() => {
+        throw new Error('3 of 3 required status checks are expected.');
+      });
+      let e;
+      try {
+        await github.mergeBranch('thebranchname', 'branch');
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toEqual('not ready');
+    });
   });
   describe('getBranchLastCommitTime', () => {
     it('should return a Date', async () => {

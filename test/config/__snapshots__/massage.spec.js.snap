@@ -7,4 +7,34 @@ Object {
 }
 `;
 
+exports[`config/massage massageConfig massages packageRules updateTypes 1`] = `
+Object {
+  "packageRules": Array [
+    Object {
+      "packageNames": Array [
+        "foo",
+      ],
+    },
+    Object {
+      "packageNames": Array [
+        "foo",
+      ],
+      "semanticCommitType": "feat",
+      "updateTypes": Array [
+        "minor",
+      ],
+    },
+    Object {
+      "packageNames": Array [
+        "foo",
+      ],
+      "semanticCommitType": "fix",
+      "updateTypes": Array [
+        "patch",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`config/massage massageConfig returns empty 1`] = `Object {}`;
