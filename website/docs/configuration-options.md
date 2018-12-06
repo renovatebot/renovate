@@ -839,6 +839,14 @@ Language support is limited to those listed below:
 
 - **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/node#configuring-support-policy)
 
+## suppressNotifications
+
+Use this field to suppress various types of warnings and other notifications from Renovate.
+"packageRules: [{
+"suppressNotifications": ["branchAutomergeFailure"]
+}]
+the following config will suppress the comment which is added to PR when branch automerge faild.
+
 ## terraform
 
 Currently Terraform support is limited to Terraform registry sources and github sources that include semver refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.
