@@ -13,7 +13,9 @@ describe('datasource/cargo', () => {
   describe('getPkgReleases', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
-      expect(await getPkgReleases('non_existent_crate')).toBeNull();
+      expect(
+        await getPkgReleases({ fullname: 'non_existent_crate' })
+      ).toBeNull();
     });
     it('returns null for 404', async () => {
       got.mockImplementationOnce(() =>
@@ -21,7 +23,7 @@ describe('datasource/cargo', () => {
           statusCode: 404,
         })
       );
-      expect(await getPkgReleases('some_crate')).toBeNull();
+      expect(await getPkgReleases({ fullname: 'some_crate' })).toBeNull();
     });
     it('returns null for unknown error', async () => {
       got.mockImplementationOnce(() => {
@@ -47,11 +49,11 @@ describe('datasource/cargo', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
-    it('skips wrong package', async () => {
+    it('skips wrong crate', async () => {
       got.mockReturnValueOnce({
         body: res1,
       });
-      const res = await getPkgReleases('wrong_crate');
+      const res = await getPkgReleases({ fullname: 'wrong_crate' });
       expect(res).toBeNull();
     });
   });
