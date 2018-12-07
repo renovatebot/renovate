@@ -4,6 +4,8 @@ const { getPkgReleases } = require('../../lib/datasource/cargo');
 
 let res1 = fs.readFileSync('test/_fixtures/cargo/libc.json', 'utf8');
 res1 = JSON.parse(res1);
+let res2 = fs.readFileSync('test/_fixtures/cargo/amethyst.json', 'utf8');
+res2 = JSON.parse(res2);
 
 jest.mock('got');
 
@@ -32,6 +34,15 @@ describe('datasource/cargo', () => {
         body: res1,
       });
       const res = await getPkgReleases({ fullname: 'libc' });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+    });
+    it('processes real data', async () => {
+      got.mockReturnValueOnce({
+        body: res2,
+      });
+      const res = await getPkgReleases({ fullname: 'amethyst' });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();

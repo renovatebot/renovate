@@ -8,3 +8,13 @@ Object {
   "repository": "https://github.com/rust-lang/libc",
 }
 `;
+
+exports[`datasource/cargo getPkgReleases processes real data 2`] = `
+Object {
+  "homepage": "https://www.amethyst.rs/",
+  "releases": Array [
+    "0.9.0",
+  ],
+  "repository": "https://github.com/amethyst/amethyst",
+}
+`;
