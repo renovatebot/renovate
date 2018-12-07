@@ -2,7 +2,8 @@ const got = require('got');
 const { getPkgReleases } = require('../../lib/datasource/cargo');
 const fs = require('fs');
 
-const res1 = fs.readFileSync('test/_fixtures/cargo/libc.json', 'utf8');
+let res1 = fs.readFileSync('test/_fixtures/cargo/libc.json', 'utf8');
+res1 = JSON.parse(res1);
 
 jest.mock('got');
 
@@ -15,19 +16,38 @@ describe('datasource/cargo', () => {
       ).toBeNull();
     });
     it('returns null for 404', async () => {
-      expect(null).toBeNull();
+      got.mockImplementationOnce(() =>
+                                 Promise.reject({
+                                   statusCode: 404,
+                                 })
+                                );
+      expect(
+        await getPkgReleases('some_crate')
+      ).toBeNull();
     });
     it('returns null for unknown error', async () => {
-      expect(null).toBeNull();
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      expect(
+        await getPkgReleases('some_crate')
+      ).toBeNull();
     });
     it('processes real data', async () => {
-      expect(null).toBeNull();
+      got.mockReturnValueOnce({
+        body: res1,
+      });
+      const res = await getPkgReleases({fullname: 'libc'});
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
     });
     it('skips wrong package', async () => {
-      expect(null).toBeNull();
-    });
-    it('skips unsupported platform', async () => {
-      expect(null).toBeNull();
+      got.mockReturnValueOnce({
+        body: res1,
+      });
+      const res = await getPkgReleases('wrong_crate');
+      expect(res).toBeNull();
     });
   });
 });

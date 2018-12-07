@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/cargo getPkgReleases processes real data 1`] = `
+Object {
+  "releases": Array [
+    "0.2.44",
+  ],
+  "repository": "https://github.com/rust-lang/libc",
+}
+`;
