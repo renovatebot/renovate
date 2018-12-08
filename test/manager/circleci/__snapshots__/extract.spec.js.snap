@@ -15,7 +15,6 @@ Array [
     "lineNumber": 12,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -30,7 +29,6 @@ Array [
     "lineNumber": 57,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -45,7 +43,6 @@ Array [
     "lineNumber": 61,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -60,7 +57,6 @@ Array [
     "lineNumber": 65,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;

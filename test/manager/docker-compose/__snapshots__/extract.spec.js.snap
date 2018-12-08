@@ -14,7 +14,6 @@ Array [
     "lineNumber": 4,
     "purl": "pkg:docker/something/redis?registry=quay.io",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -29,7 +28,6 @@ Array [
     "lineNumber": 18,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "postgres:9.4.0",
@@ -43,7 +41,6 @@ Array [
     "lineNumber": 21,
     "purl": "pkg:docker/postgres",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "dockersamples/examplevotingapp_vote:before",
@@ -57,7 +54,6 @@ Array [
     "lineNumber": 31,
     "purl": "pkg:docker/dockersamples/examplevotingapp_vote",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "dockersamples/examplevotingapp_result:before",
@@ -71,7 +67,6 @@ Array [
     "lineNumber": 46,
     "purl": "pkg:docker/dockersamples/examplevotingapp_result",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "dockersamples/examplevotingapp_worker",
@@ -85,7 +80,6 @@ Array [
     "lineNumber": 62,
     "purl": "pkg:docker/dockersamples/examplevotingapp_worker",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "dockersamples/visualizer:stable",
@@ -99,7 +93,6 @@ Array [
     "lineNumber": 79,
     "purl": "pkg:docker/dockersamples/visualizer",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;

@@ -14,7 +14,6 @@ Array [
     "lineNumber": 14,
     "purl": "pkg:docker/external_storage/local-volume-provisioner?registry=quay.io",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -33,7 +32,6 @@ Array [
     "lineNumber": 18,
     "purl": "pkg:docker/nginx",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "kube-proxy-amd64:v1.11.1",
@@ -47,7 +45,6 @@ Array [
     "lineNumber": 46,
     "purl": "pkg:docker/kube-proxy-amd64?registry=k8s.gcr.io",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;

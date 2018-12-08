@@ -17,7 +17,6 @@ Array [
     "lineNumber": 2,
     "purl": "pkg:docker/node?suffix=alpine",
     "tagSuffix": "alpine",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "buildkite/puppeteer:1.1.1",
@@ -33,7 +32,6 @@ Array [
     "lineNumber": 3,
     "purl": "pkg:docker/buildkite/puppeteer",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -55,7 +53,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "python:3.6-slim",
@@ -71,7 +68,6 @@ Array [
     "lineNumber": 4,
     "purl": "pkg:docker/python?suffix=slim",
     "tagSuffix": "slim",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -92,7 +88,6 @@ Array [
     "lineNumber": 1,
     "purl": "pkg:docker/k8s-skaffold/skaffold?registry=gcr.io",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -114,7 +109,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node?registry=registry.allmine.info:5005",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -135,7 +129,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/calico/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -157,7 +150,6 @@ Array [
     "lineNumber": 3,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -179,7 +171,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node?registry=registry2.something.info",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -201,7 +192,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node?registry=registry2.something.info&suffix=alpine",
     "tagSuffix": "alpine",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -223,7 +213,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/someaccount/node?registry=registry2.something.info",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -245,7 +234,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node?registry=registry2.something.info:5005",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -267,7 +255,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -289,7 +276,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node?suffix=alpine",
     "tagSuffix": "alpine",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -311,7 +297,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -333,7 +318,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/mynamespace/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -355,7 +339,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node?suffix=alpine",
     "tagSuffix": "alpine",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -377,7 +360,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -399,7 +381,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -421,7 +402,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -443,7 +423,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -465,7 +444,6 @@ Array [
     "lineNumber": 0,
     "purl": "pkg:docker/node",
     "tagSuffix": undefined,
-    "versionScheme": "docker",
   },
 ]
 `;
