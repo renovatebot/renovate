@@ -1,4 +1,4 @@
-const pep440 = require('../../lib/versioning')('pep440');
+const pep440 = require('../../lib/versioning/pep440');
 
 describe('pep440.isValid(input)', () => {
   it('should return null for irregular versions', () => {
