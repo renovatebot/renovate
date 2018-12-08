@@ -1,4 +1,4 @@
-const semver = require('../../lib/versioning')('semverHashicorp');
+const semver = require('../../lib/versioning/semver-hashicorp');
 
 describe('semver.matches()', () => {
   it('handles tilde greater than', () => {
