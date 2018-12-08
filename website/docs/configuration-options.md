@@ -841,11 +841,13 @@ Language support is limited to those listed below:
 
 ## suppressNotifications
 
-Use this field to suppress various types of warnings and other notifications from Renovate.
-"packageRules: [{
-"suppressNotifications": ["branchAutomergeFailure"]
-}]
-the following config will suppress the comment which is added to PR when branch automerge faild.
+Use this field to suppress various types of warnings and other notifications from Renovate. Example:
+
+```json
+"suppressNotifications": ["prIgnoreNotification"]
+```
+
+The above config will suppress the comment which is added to a PR whenever you close a PR unmerged.
 
 ## terraform
 
