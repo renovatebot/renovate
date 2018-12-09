@@ -6,7 +6,7 @@ describe('workers/repository/process/deprecated', () => {
   describe('raiseDeprecationWarnings()', () => {
     it('returns if disabled', async () => {
       const config = {
-        suppressNotifications: ['raiseDeprecationWarnings'],
+        suppressNotifications: ['deprecationWarningIssues'],
       };
       await raiseDeprecationWarnings(config, {});
     });
