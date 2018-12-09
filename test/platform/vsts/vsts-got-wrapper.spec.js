@@ -21,6 +21,9 @@ describe('platform/vsts/vsts-got-wrapper', () => {
       });
       const res = await vsts.vstsObj();
 
+      delete res.rest.client.userAgent;
+      delete res.vsoClient.restClient.client.userAgent;
+
       // We will track if the lib azure-devops-node-api change
       expect(res).toMatchSnapshot();
     });

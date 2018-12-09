@@ -27,7 +27,6 @@ WebApi {
       "requestOptions": Object {
         "ignoreSslError": false,
       },
-      "userAgent": "azure-devops-node-api/6.6.3 (darwin 18.0.0)",
     },
   },
   "serverUrl": "myEndpoint/",
@@ -54,7 +53,6 @@ WebApi {
         "requestOptions": Object {
           "ignoreSslError": false,
         },
-        "userAgent": "azure-devops-node-api/6.6.3 (darwin 18.0.0)",
       },
     },
   },
