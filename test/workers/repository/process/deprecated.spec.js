@@ -6,13 +6,13 @@ describe('workers/repository/process/deprecated', () => {
   describe('raiseDeprecationWarnings()', () => {
     it('returns if disabled', async () => {
       const config = {
-        raiseDeprecationWarnings: false,
+        suppressNotifications: ['deprecationWarningIssues'],
       };
       await raiseDeprecationWarnings(config, {});
     });
     it('raises deprecation warnings', async () => {
       const config = {
-        raiseDeprecationWarnings: true,
+        suppressNotifications: [],
       };
       const packageFiles = {
         npm: [
