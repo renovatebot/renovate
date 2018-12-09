@@ -21,7 +21,7 @@ describe('platform/vsts/vsts-got-wrapper', () => {
       });
       const res = await vsts.vstsObj();
 
-      // We will track if the lib vso-node-api change
+      // We will track if the lib azure-devops-node-api change
       expect(res).toMatchSnapshot();
     });
   });
