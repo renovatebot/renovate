@@ -85,6 +85,7 @@ describe('config/migration', () => {
             schedule: 'before 5am on Mondays',
           },
         ],
+        raiseDeprecationWarnings: false,
       };
       const parentConfig = { ...defaultConfig, semanticCommits: false };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
