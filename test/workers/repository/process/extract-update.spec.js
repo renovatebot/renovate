@@ -16,7 +16,6 @@ describe('workers/repository/process/extract-update', () => {
     it('runs', async () => {
       const config = {
         repoIsOnboarded: true,
-        suppressNotifications: ['deprecationWarningIssues']
       };
       await extractAndUpdate(config);
     });
