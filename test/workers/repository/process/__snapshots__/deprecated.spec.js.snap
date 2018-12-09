@@ -8,7 +8,15 @@ Array [
 
 Please take the actions necessary to rename or substitute this deprecated package and commit to your base branch. If you wish to ignore this deprecation warning and continue using \`foo\` as-is, please add it to your [ignoreDeps](https://renovatebot.com/docs/configuration-options/#ignoredeps) array in Renovate config before closing this issue, otherwise another issue will be recreated the next time Renovate runs.
 
-Affected package file(s): \`package.json\`, \`frontend/package.json\`",
+Affected package file(s): \`package.json\`, \`frontend/package.json\`
+
+ Would you like to disable Renovate's deprecation warning issues? Add the following to your config:
+
+\`\`\`
+\\"suppressNotifications\\": [\\"deprecationWarningIssues\\"]
+\`\`\`
+
+",
   ],
 ]
 `;
