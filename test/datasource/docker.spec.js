@@ -136,8 +136,8 @@ describe('api/docker', () => {
         headers: { 'docker-content-digest': 'some-digest' },
       });
       const res = await docker.getDigest(
-        { depName: 'some-dep', tagSuffix: 'alpine' },
-        '8.0.0'
+        { depName: 'some-dep' },
+        '8.0.0-alpine'
       );
       expect(res).toBe('some-digest');
     });
