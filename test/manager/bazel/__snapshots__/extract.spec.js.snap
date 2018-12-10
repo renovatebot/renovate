@@ -8,8 +8,7 @@ Array [
     name = \\"com_github_bitly_go-nsq\\",
     importpath = \\"github.com/bitly/go-nsq\\",
     tag = \\"v1.0.5\\"
-)
-",
+)",
     "depName": "com_github_bitly_go-nsq",
     "depType": "go_repository",
     "purl": "pkg:go/github.com/bitly/go-nsq",
@@ -23,8 +22,7 @@ Array [
    name = \\"com_github_google_uuid\\",
    importpath = \\"github.com/google/uuid\\",
    commit = \\"dec09d789f3dba190787f8b4454c7d3c936fed9e\\"
-)
-",
+)",
     "depName": "com_github_google_uuid",
     "depType": "go_repository",
     "digestOneAndOnly": true,
@@ -37,8 +35,7 @@ Array [
     name = \\"com_gopkgin_mgo_v2\\",
     importpath = \\"gopkg.in/mgo.v2\\",
     tag = \\"v2\\"
-)
-",
+)",
     "depName": "com_gopkgin_mgo_v2",
     "depType": "go_repository",
     "purl": "pkg:go/gopkg.in/mgo.v2",
@@ -50,8 +47,7 @@ Array [
     name = \\"build_bazel_rules_nodejs\\",
     remote = \\"https://github.com/bazelbuild/rules_nodejs.git\\",
     tag = \\"0.3.1\\",
-)
-",
+)",
     "depName": "build_bazel_rules_nodejs",
     "depType": "git_repository",
     "purl": "pkg:github/bazelbuild/rules_nodejs",
@@ -64,8 +60,7 @@ Array [
     name = \\"build_bazel_rules_typescript\\",
     remote = \\"https://github.com/bazelbuild/rules_typescript.git\\",
     tag = \\"0.6.1\\",
-)
-",
+)",
     "depName": "build_bazel_rules_typescript",
     "depType": "git_repository",
     "purl": "pkg:github/bazelbuild/rules_typescript",
@@ -78,8 +73,7 @@ Array [
     name = \\"io_bazel_rules_sass\\",
     remote = \\"https://github.com/bazelbuild/rules_sass.git\\",
     tag = \\"0.0.3\\",
-)
-",
+)",
     "depName": "io_bazel_rules_sass",
     "depType": "git_repository",
     "purl": "pkg:github/bazelbuild/rules_sass",
@@ -92,8 +86,7 @@ Array [
     name = \\"io_bazel_rules_go\\",
     url = \\"https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz\\",
     sha256 = \\"341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c\\",
-)
-",
+)",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
     "purl": "pkg:github/bazelbuild/rules_go?ref=release",
@@ -110,8 +103,7 @@ Array [
         \\"https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz\\",
         \\"https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz\\",
     ],
-)
-",
+)",
     "depName": "bazel_skylib",
     "depType": "http_archive",
     "purl": "pkg:github/bazelbuild/bazel-skylib?ref=release",

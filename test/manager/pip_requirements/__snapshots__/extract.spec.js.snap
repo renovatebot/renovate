@@ -8,7 +8,8 @@ Array [
     "lineNumber": 2,
     "purl": "pkg:pypi/some-package",
     "registryUrls": Array [
-      "http://example.com/private-pypi/",
+      "http://example.com/private-pypi/
+",
     ],
     "versionScheme": "pep440",
   },
@@ -18,7 +19,8 @@ Array [
     "lineNumber": 3,
     "purl": "pkg:pypi/some-other-package",
     "registryUrls": Array [
-      "http://example.com/private-pypi/",
+      "http://example.com/private-pypi/
+",
     ],
     "versionScheme": "pep440",
   },
@@ -28,7 +30,8 @@ Array [
     "lineNumber": 4,
     "purl": "pkg:pypi/not_semver",
     "registryUrls": Array [
-      "http://example.com/private-pypi/",
+      "http://example.com/private-pypi/
+",
     ],
     "versionScheme": "pep440",
   },

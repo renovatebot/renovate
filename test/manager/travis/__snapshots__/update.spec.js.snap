@@ -6,8 +6,9 @@ exports[`manager/travis/update updateDependency updates values 1`] = `
 "dist: trusty
 language: node_js
 node_js:
-  - '6'
   - '8'
+  - '6'
+  - '4'
 services:
   - redis-server
   - mongodb
