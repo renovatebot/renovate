@@ -574,6 +574,16 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.8.0.tgz#f0e003d9ca9e7f59c7a508945d7b2ef9a04a542f"
   integrity sha512-ReZxvNHIOv88FlT7rxcXIIC0fPt4KZqZbOlivyWtXLt8ESx84zd3kMC6iK5jVeS2qt+g7ftS7ye4fi06X5rtRQ==
 
+azure-devops-node-api@6.6.3:
+  version "6.6.3"
+  resolved "https://registry.yarnpkg.com/azure-devops-node-api/-/azure-devops-node-api-6.6.3.tgz#965d0fe5ca08944356b033f310ae0642c14ced8e"
+  integrity sha512-94wSu4O6CSSXoqYWg7Rzt2/IqbW2xVNu2qOtx6e7lnXxnDOcAu4eRzi8tgVNHsXTIGOVEsTqgMvGvFThKr9Pig==
+  dependencies:
+    os "0.1.1"
+    tunnel "0.0.4"
+    typed-rest-client "1.0.9"
+    underscore "1.8.3"
+
 babel-code-frame@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-code-frame/-/babel-code-frame-6.26.0.tgz#63fd43f7dc1e3bb7ce35947db8fe369a3f58c74b"
@@ -6325,6 +6335,11 @@ os-tmpdir@^1.0.0, os-tmpdir@^1.0.1, os-tmpdir@~1.0.2:
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
   integrity sha1-u+Z0BseaqFxc/sdm/lc0VV36EnQ=
 
+os@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/os/-/os-0.1.1.tgz#208845e89e193ad4d971474b93947736a56d13f3"
+  integrity sha1-IIhF6J4ZOtTZcUdLk5R3NqVtE/M=
+
 osenv@0, osenv@^0.1.4, osenv@^0.1.5:
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/osenv/-/osenv-0.1.5.tgz#85cdfafaeb28e8677f416e287592b5f3f49ea410"
@@ -8482,10 +8497,10 @@ type-detect@^4.0.0, type-detect@^4.0.5, type-detect@^4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-typed-rest-client@^0.12.0:
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/typed-rest-client/-/typed-rest-client-0.12.0.tgz#6376f5527f427da121dcafdfd7e41e1321e0720c"
-  integrity sha1-Y3b1Un9CfaEh3K/f1+QeEyHgcgw=
+typed-rest-client@1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/typed-rest-client/-/typed-rest-client-1.0.9.tgz#5317b607c9c8ee425b64260c9249d400d0a6bf1a"
+  integrity sha512-iOdwgmnP/tF6Qs+oY4iEtCf/3fnCDl7Gy9LGPJ4E3M4Wj3uaSko15FVwbsaBmnBqTJORnXBWVY5306D4HH8oiA==
   dependencies:
     tunnel "0.0.4"
     underscore "1.8.3"
@@ -8819,15 +8834,6 @@ vfile@^2.0.0:
     replace-ext "1.0.0"
     unist-util-stringify-position "^1.0.0"
     vfile-message "^1.0.0"
-
-vso-node-api@6.5.0:
-  version "6.5.0"
-  resolved "https://registry.yarnpkg.com/vso-node-api/-/vso-node-api-6.5.0.tgz#5f3453f27d211b0fd54423c4c73116c1e8fea0c6"
-  integrity sha512-hFjPLMJkq02zF8U+LhZ4airH0ivaiKzGdlNAQlYFB3lWuGH/UANUrl63DVPUQOyGw+7ZNQ+ufM44T6mWN92xyg==
-  dependencies:
-    tunnel "0.0.4"
-    typed-rest-client "^0.12.0"
-    underscore "1.8.3"
 
 w3c-hr-time@^1.0.1:
   version "1.0.1"
