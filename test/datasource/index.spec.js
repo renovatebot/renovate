@@ -20,4 +20,10 @@ describe('datasource/index', () => {
     expect(res.changelogUrl).toBeDefined();
     expect(res.sourceUrl).toBeDefined();
   });
+  it('adds sourceUrl', async () => {
+    npmDatasource.getPkgReleases.mockReturnValue({});
+    const res = await datasource.getPkgReleases('pkg:npm/node');
+    expect(res).toMatchSnapshot();
+    expect(res.sourceUrl).toBeDefined();
+  });
 });

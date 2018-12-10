@@ -6,3 +6,9 @@ Object {
   "sourceUrl": "https://github.com/react-native-community/react-native-releases",
 }
 `;
+
+exports[`datasource/index adds sourceUrl 1`] = `
+Object {
+  "sourceUrl": "https://github.com/nodejs/node",
+}
+`;

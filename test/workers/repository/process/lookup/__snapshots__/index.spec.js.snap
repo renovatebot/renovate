@@ -88,7 +88,7 @@ Object {
       "version": "8.1.0",
     },
   ],
-  "sourceUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "blockedByPin": true,
@@ -134,7 +134,7 @@ Object {
   "changelogUrl": undefined,
   "homepage": undefined,
   "releases": Array [],
-  "sourceUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "newDigest": "sha256:abcdef1234567890",
@@ -159,7 +159,7 @@ Object {
       "version": "8.1.0",
     },
   ],
-  "sourceUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "canBeUnpublished": undefined,
@@ -859,7 +859,7 @@ Object {
       "version": "9",
     },
   ],
-  "sourceUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "canBeUnpublished": undefined,
@@ -893,7 +893,7 @@ Object {
       "version": "9.0",
     },
   ],
-  "sourceUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "canBeUnpublished": undefined,
@@ -942,7 +942,7 @@ Object {
       "version": "8.2.5",
     },
   ],
-  "sourceUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "canBeUnpublished": undefined,
