@@ -112,7 +112,6 @@ Object {
       "version": "0.31.0",
     },
   ],
-  "sourceUrl": undefined,
 }
 `;
 
@@ -120,7 +119,6 @@ exports[`datasource/pypi getPkgReleases returns non-github home_page 1`] = `
 Object {
   "homepage": "https://microsoft.com",
   "releases": Array [],
-  "sourceUrl": undefined,
 }
 `;
 
