@@ -15,9 +15,7 @@ Object {
 
 exports[`workers/pr/release-notes getReleaseNotesMd() parses angular.js 1`] = `
 Object {
-  "body": "### 1.6.9 fiery-basilisk (2018-02-02)
-
-#### Bug Fixes
+  "body": "#### Bug Fixes
 
 -   **input:** add \`drop\` event support for IE
     ([5dc076](https://github.com/angular/angular.js/commit/5dc07667de00c5e85fd69c5b7b7fe4fb5fd65a77))
@@ -40,8 +38,6 @@ Object {
     [#15018](https://github.com/angular/angular.js/issues/15018),
     [#15085](https://github.com/angular/angular.js/issues/15085),
     [#15105](https://github.com/angular/angular.js/issues/15105))
-
-<a name=\\"1.6.8\\"></a>
 ",
   "url": "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#169-fiery-basilisk-2018-02-02",
 }
@@ -49,9 +45,7 @@ Object {
 
 exports[`workers/pr/release-notes getReleaseNotesMd() parses jest 1`] = `
 Object {
-  "body": "#### jest 22.0.0
-
-##### Fixes
+  "body": "##### Fixes
 
 -   \`[jest-resolve]\` Use \`module.builtinModules\` as \`BUILTIN_MODULES\` when it
     exists
@@ -243,9 +237,7 @@ Object {
 
 exports[`workers/pr/release-notes getReleaseNotesMd() parses js-yaml 1`] = `
 Object {
-  "body": "## 3.10.0 / 2017-09-10
-
--   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
+  "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
   "url": "https://github.com/nodeca/js-yaml/blob/master/CHANGELOG.md#3100--2017-09-10",
