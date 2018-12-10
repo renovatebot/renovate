@@ -120,7 +120,7 @@ describe('workers/pr', () => {
       config.newValue = '1.1.0';
       config.updateType = 'minor';
       config.homepage = 'https://dummy.com';
-      config.repositoryUrl = 'https://github.com/renovateapp/dummy';
+      config.sourceUrl = 'https://github.com/renovateapp/dummy';
       config.changelogUrl = 'https://github.com/renovateapp/dummy/changelog.md';
       platform.createPr.mockReturnValue({ displayNumber: 'New Pull Request' });
       config.upgrades = [config];

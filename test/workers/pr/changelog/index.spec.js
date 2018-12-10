@@ -15,7 +15,7 @@ const upgrade = {
   versionScheme: 'semver',
   fromVersion: '1.0.0',
   toVersion: '3.0.0',
-  repositoryUrl: 'https://github.com/chalk/chalk',
+  sourceUrl: 'https://github.com/chalk/chalk',
   releases: [
     { version: '0.9.0' },
     { version: '1.0.0', gitRef: 'npm_1.0.0' },
@@ -54,7 +54,7 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          repositoryUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
+          sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         })
       ).toBe(null);
       expect(ghGot.mock.calls).toHaveLength(0);
@@ -73,7 +73,7 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          repositoryUrl: 'https://github.com/about',
+          sourceUrl: 'https://github.com/about',
         })
       ).toBe(null);
     });
@@ -131,19 +131,19 @@ describe('workers/pr/changelog', () => {
         })
       ).toMatchSnapshot();
     });
-    it('handles no repositoryUrl', async () => {
+    it('handles no sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          repositoryUrl: undefined,
+          sourceUrl: undefined,
         })
       ).toBe(null);
     });
-    it('handles invalid repositoryUrl', async () => {
+    it('handles invalid sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          repositoryUrl: 'http://example.com',
+          sourceUrl: 'http://example.com',
         })
       ).toBe(null);
     });
@@ -184,7 +184,7 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          repositoryUrl: 'https://github-enterprise.example.com/chalk/chalk',
+          sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
         })
       ).toMatchSnapshot();
     });
