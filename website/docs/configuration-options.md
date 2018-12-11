@@ -541,6 +541,30 @@ The above will set `rangeStrategy` to `replace` for any package starting with `a
 
 ### paths
 
+### sourceUrlPrefixes
+
+Here's an example of where you use this to group together all packages from the Vue monorepo:
+
+```json
+{
+  "packageRules": [{
+    "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+    "groupName" "Vue monorepo packages"
+  }]
+}
+```
+
+Here's an example of where you use this to group together all packages from the `renovatebot` github org:
+
+```json
+{
+  "packageRules": [{
+    "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+    "groupName" "All renovate packages"
+  }]
+}
+```
+
 ### updateTypes
 
 Use this field to match rules against types of updates. For example to apply a special label for Major updates:

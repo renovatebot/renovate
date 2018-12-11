@@ -137,6 +137,68 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+  it('matches sourceUrlPrefixes', () => {
+    const config = {
+      packageRules: [
+        {
+          sourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch',
+      sourceUrl: 'https://github.com/renovatebot/presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('non-matches sourceUrlPrefixes', () => {
+    const config = {
+      packageRules: [
+        {
+          sourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch',
+      sourceUrl: 'https://github.com/vuejs/vue',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+  it('handles sourceUrlPrefixes when missing sourceUrl', () => {
+    const config = {
+      packageRules: [
+        {
+          sourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
   it('filters naked depType', () => {
     const config = {
       packageRules: [

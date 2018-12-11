@@ -44,7 +44,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "packageRules: Each packageRule must contain at least one selector (paths, depTypeList, packageNames, packagePatterns, excludePackageNames, excludePackagePatterns, updateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
+    "message": "packageRules: Each packageRule must contain at least one selector (paths, depTypeList, packageNames, packagePatterns, excludePackageNames, excludePackagePatterns, sourceUrlPrefixes, updateTypes). If you wish for configuration to apply to all packages, it is not necessary to place it inside a packageRule at all.",
   },
   Object {
     "depName": "Configuration Error",
