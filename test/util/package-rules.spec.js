@@ -158,6 +158,44 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+  it('filters languages with matching language', () => {
+    const config = {
+      packageRules: [
+        {
+          languages: ['js', 'node'],
+          packageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      language: 'js',
+      manager: 'meteor',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('filters languages with non-matching language', () => {
+    const config = {
+      packageRules: [
+        {
+          languages: ['docker'],
+          packageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      language: 'python',
+      manager: 'pipenv',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
   it('filters updateType', () => {
     const config = {
       packageRules: [

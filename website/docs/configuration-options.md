@@ -509,6 +509,18 @@ Use this field if you want to have one or more package name patterns excluded in
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### languages
+
+Use this field to restrict rules to a particular language. e.g.
+
+```
+  "packageRules": [{
+    "packageNames": ["request"],
+    "managers": ["python"],
+    "enabled": false
+  }]
+```
+
 ### managers
 
 Use this field to restrict rules to a particular package manager. e.g.
