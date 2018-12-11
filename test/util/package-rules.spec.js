@@ -120,6 +120,44 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+  it('filters managers with matching manager', () => {
+    const config = {
+      packageRules: [
+        {
+          managers: ['npm', 'meteor'],
+          packageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      language: 'js',
+      manager: 'meteor',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('filters managers with non-matching manager', () => {
+    const config = {
+      packageRules: [
+        {
+          managers: ['dockerfile', 'npm'],
+          packageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      language: 'python',
+      manager: 'pipenv',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
   it('filters updateType', () => {
     const config = {
       packageRules: [

@@ -509,6 +509,18 @@ Use this field if you want to have one or more package name patterns excluded in
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### managers
+
+Use this field to restrict rules to a particular package manager. e.g.
+
+```
+  "packageRules": [{
+    "packageNames": ["node"],
+    "managers": ["dockerfile"],
+    "enabled": false
+  }]
+```
+
 ### matchCurrentVersion
 
 `matchCurrentVersion` can be an exact semver version or a semver range.
