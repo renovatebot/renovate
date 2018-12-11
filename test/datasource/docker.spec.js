@@ -141,6 +141,26 @@ describe('api/docker', () => {
       );
       expect(res).toBe('some-digest');
     });
+    it('should throw error for 429', async () => {
+      got.mockRejectedValueOnce({statusCode: 429});
+      let e;
+      try {
+        await docker.getDigest({ depName: 'some-dep' }, 'latest');
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toBe('registry-failure');
+    });
+    it('should throw error for 5xx', async () => {
+      got.mockRejectedValueOnce({statusCode: 503});
+      let e;
+      try {
+        await docker.getDigest({ depName: 'some-dep' }, 'latest');
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toBe('registry-failure');
+    });
   });
   describe('getPkgReleases', () => {
     beforeEach(() => {
