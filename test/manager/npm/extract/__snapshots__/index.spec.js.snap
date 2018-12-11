@@ -138,7 +138,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/c?ref=tags",
-      "repositoryUrl": "https://github.com/owner/c",
+      "sourceUrl": "https://github.com/owner/c",
       "versionScheme": "semver",
     },
     Object {
@@ -159,7 +159,7 @@ Object {
       "githubRepo": "owner/e",
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/e",
-      "repositoryUrl": "https://github.com/owner/e",
+      "sourceUrl": "https://github.com/owner/e",
       "versionScheme": "semver",
     },
     Object {
@@ -172,7 +172,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/f?ref=tags",
-      "repositoryUrl": "https://github.com/owner/f",
+      "sourceUrl": "https://github.com/owner/f",
       "versionScheme": "semver",
     },
     Object {
@@ -217,7 +217,7 @@ Object {
       "githubRepo": "owner/k",
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/k",
-      "repositoryUrl": "https://github.com/owner/k",
+      "sourceUrl": "https://github.com/owner/k",
       "versionScheme": "semver",
     },
     Object {
@@ -230,7 +230,7 @@ Object {
       "githubRepo": "owner/l",
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/l",
-      "repositoryUrl": "https://github.com/owner/l",
+      "sourceUrl": "https://github.com/owner/l",
       "versionScheme": "semver",
     },
     Object {
@@ -243,7 +243,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/m?ref=tags",
-      "repositoryUrl": "https://github.com/owner/m",
+      "sourceUrl": "https://github.com/owner/m",
       "versionScheme": "semver",
     },
     Object {
@@ -256,7 +256,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/n?ref=tags",
-      "repositoryUrl": "https://github.com/owner/n",
+      "sourceUrl": "https://github.com/owner/n",
       "versionScheme": "semver",
     },
   ],

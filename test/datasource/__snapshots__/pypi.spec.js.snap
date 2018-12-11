@@ -92,7 +92,7 @@ Object {
       "version": "0.1.7",
     },
   ],
-  "repositoryUrl": "https://github.com/Azure/azure-cli",
+  "sourceUrl": "https://github.com/Azure/azure-cli",
 }
 `;
 
@@ -112,7 +112,6 @@ Object {
       "version": "0.31.0",
     },
   ],
-  "repositoryUrl": undefined,
 }
 `;
 
@@ -120,7 +119,6 @@ exports[`datasource/pypi getPkgReleases returns non-github home_page 1`] = `
 Object {
   "homepage": "https://microsoft.com",
   "releases": Array [],
-  "repositoryUrl": undefined,
 }
 `;
 

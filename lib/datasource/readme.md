@@ -17,9 +17,9 @@ In the simplest case, the datasource only needs to pay attention to `purl.fullna
 
 - `releases`: an array of strings of matched versions. This is the only mandatory field.
 - `deprecationMessage`: a string description of the package's deprecation notice, if applicable
-- `repositoryUrl`: a HTTP URL pointing to the source code (e.g. on GitHub)
-- `homepage`: a HTTP URL for the package's homepage. Ideally should be empty if the homepage and repositoryUrl are the same
-- `changelogUrl`: a URL pointing to the package's Changelog (could be a markdown file, for example). If not present then Renovate will search the `repositoryUrl` for a changelog file.
+- `sourceUrl`: a HTTP URL pointing to the source code (e.g. on GitHub)
+- `homepage`: a HTTP URL for the package's homepage. Ideally should be empty if the homepage and sourceUrl are the same
+- `changelogUrl`: a URL pointing to the package's Changelog (could be a markdown file, for example). If not present then Renovate will search the `sourceUrl` for a changelog file.
 - `tags`: an object mapping tag -> version, e.g. `tags: { latest: '3.0.0' }`. This is only used by the `followTags` function.
 
 ### getDigest

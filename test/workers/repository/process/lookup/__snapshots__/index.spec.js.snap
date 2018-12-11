@@ -88,7 +88,7 @@ Object {
       "version": "8.1.0",
     },
   ],
-  "repositoryUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "blockedByPin": true,
@@ -134,7 +134,7 @@ Object {
   "changelogUrl": undefined,
   "homepage": undefined,
   "releases": Array [],
-  "repositoryUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "newDigest": "sha256:abcdef1234567890",
@@ -159,7 +159,7 @@ Object {
       "version": "8.1.0",
     },
   ],
-  "repositoryUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "canBeUnpublished": undefined,
@@ -230,7 +230,7 @@ Marking the latest version of an npm package as deprecated results in the entire
       "version": "1.4.0",
     },
   ],
-  "repositoryUrl": "https://github.com/kriskowal/q",
+  "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
       "canBeUnpublished": false,
@@ -437,7 +437,7 @@ Object {
       "version": "1.4.1",
     },
   ],
-  "repositoryUrl": "https://github.com/kriskowal/q",
+  "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
       "canBeUnpublished": false,
@@ -859,7 +859,7 @@ Object {
       "version": "9",
     },
   ],
-  "repositoryUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "canBeUnpublished": undefined,
@@ -868,6 +868,7 @@ Object {
       "newMajor": 9,
       "newMinor": null,
       "newValue": "9",
+      "newVersion": "9",
       "releaseTimestamp": undefined,
       "toVersion": "9",
       "updateType": "major",
@@ -892,7 +893,7 @@ Object {
       "version": "9.0",
     },
   ],
-  "repositoryUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "canBeUnpublished": undefined,
@@ -901,6 +902,7 @@ Object {
       "newMajor": 8,
       "newMinor": 2,
       "newValue": "8.2",
+      "newVersion": "8.2",
       "releaseTimestamp": undefined,
       "toVersion": "8.2",
       "updateType": "minor",
@@ -912,6 +914,7 @@ Object {
       "newMajor": 9,
       "newMinor": 0,
       "newValue": "9.0",
+      "newVersion": "9.0",
       "releaseTimestamp": undefined,
       "toVersion": "9.0",
       "updateType": "major",
@@ -939,7 +942,7 @@ Object {
       "version": "8.2.5",
     },
   ],
-  "repositoryUrl": null,
+  "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
       "canBeUnpublished": undefined,
@@ -948,6 +951,7 @@ Object {
       "newMajor": 8,
       "newMinor": 2,
       "newValue": "8.2.5",
+      "newVersion": "8.2.5",
       "releaseTimestamp": undefined,
       "toVersion": "8.2.5",
       "updateType": "minor",

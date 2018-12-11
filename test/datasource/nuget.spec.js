@@ -37,7 +37,7 @@ describe('datasource/nuget', () => {
       const res = await datasource.getPkgReleases('pkg:nuget/nunit');
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.repositoryUrl).toBeDefined();
+      expect(res.sourceUrl).toBeDefined();
     });
   });
 });
