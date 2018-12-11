@@ -10,7 +10,7 @@ Array [
       "8.9.4",
       "10.0.1",
     ],
-    "repositoryUrl": "https://github.com/nodejs/node",
+    "sourceUrl": "https://github.com/nodejs/node",
   },
 ]
 `;

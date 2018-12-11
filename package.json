@@ -66,6 +66,7 @@
     "@renovate/pep440": "0.4.0",
     "@sindresorhus/is": "0.13.0",
     "@yarnpkg/lockfile": "1.1.0",
+    "azure-devops-node-api": "6.6.3",
     "bunyan": "1.8.12",
     "cacache": "11.3.1",
     "chalk": "2.4.1",
@@ -123,7 +124,6 @@
     "traverse": "0.6.6",
     "upath": "1.1.0",
     "validator": "10.9.0",
-    "vso-node-api": "6.5.0",
     "www-authenticate": "0.6.2",
     "yarn": "1.9.4"
   },

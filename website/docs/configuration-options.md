@@ -509,6 +509,30 @@ Use this field if you want to have one or more package name patterns excluded in
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### languages
+
+Use this field to restrict rules to a particular language. e.g.
+
+```
+  "packageRules": [{
+    "packageNames": ["request"],
+    "managers": ["python"],
+    "enabled": false
+  }]
+```
+
+### managers
+
+Use this field to restrict rules to a particular package manager. e.g.
+
+```
+  "packageRules": [{
+    "packageNames": ["node"],
+    "managers": ["dockerfile"],
+    "enabled": false
+  }]
+```
+
 ### matchCurrentVersion
 
 `matchCurrentVersion` can be an exact semver version or a semver range.
@@ -540,6 +564,30 @@ Use this field if you want to have one or more package names patterns in your pa
 The above will set `rangeStrategy` to `replace` for any package starting with `angular`.
 
 ### paths
+
+### sourceUrlPrefixes
+
+Here's an example of where you use this to group together all packages from the Vue monorepo:
+
+```json
+{
+  "packageRules": [{
+    "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+    "groupName" "Vue monorepo packages"
+  }]
+}
+```
+
+Here's an example of where you use this to group together all packages from the `renovatebot` github org:
+
+```json
+{
+  "packageRules": [{
+    "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+    "groupName" "All renovate packages"
+  }]
+}
+```
 
 ### updateTypes
 
@@ -685,8 +733,6 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 ## python
 
 Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
-
-## raiseDeprecationWarnings
 
 ## rangeStrategy
 
