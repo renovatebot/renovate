@@ -9,16 +9,19 @@
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
     "debug": "node --inspect-brk lib/renovate",
+    "eslint": "eslint lib test",
+    "eslint-fix": "eslint --fix lib test",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
-    "lint-fix": "eslint --fix lib test",
-    "lint": "eslint lib test",
-    "prettier": "prettier \"**/*.{js,json,md}\" --write",
+    "lint": "yarn eslint && yarn prettier",
+    "lint-fix": "yarn eslint-fix && yarn prettier-fix",
+    "prettier": "prettier --list-different \"**/*.{js,json,md}\"",
+    "prettier-fix": "prettier --write \"**/*.{js,json,md}\"",
     "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
-    "test": "yarn prettier --list-different && yarn lint && yarn jest"
+    "test": "yarn lint && yarn jest"
   },
   "repository": {
     "type": "git",
@@ -26,13 +29,21 @@
   },
   "keywords": [
     "automated",
+    "bazel",
+    "bitbucket",
+    "buildkite",
+    "dependencies",
     "dependency",
     "docker",
+    "github",
+    "gitlab",
     "management",
     "meteor",
     "node",
     "npm",
     "outdated",
+    "php",
+    "python",
     "update",
     "yarn"
   ],
@@ -51,8 +62,7 @@
     "James King <james@jamesking56.uk>",
     "Israel Bethencourt <ieb.core@gmail.com>",
     "Sam Bull <lsb@pocketuniverse.ca>",
-    "Jean-Yves Couët <jycouet@gmail.com>",
-    "Grigorii Eleskin <nyarumilian@gmail.com"
+    "Jean-Yves Couët <jycouet@gmail.com>"
   ],
   "license": "AGPL-3.0",
   "bugs": {
