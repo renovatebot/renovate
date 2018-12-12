@@ -73,7 +73,7 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 #### Linting and formatting
 
-We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then you should find that the offending file will be updated automatically and pass the second time you run `yarn test` because each time you run it, it includes the `--fix` command automatically. You usually shouldn't need to fix any prettier errors manually.
+We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again. You usually shouldn't need to fix any prettier errors manually.
 
 ## Tips and tricks
 
