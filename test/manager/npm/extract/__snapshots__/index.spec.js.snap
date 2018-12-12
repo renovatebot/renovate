@@ -126,7 +126,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/c?ref=tags",
-      "repositoryUrl": "https://github.com/owner/c",
+      "sourceUrl": "https://github.com/owner/c",
     },
     Object {
       "currentValue": "github:owner/d#a7g3eaf",
@@ -145,7 +145,7 @@ Object {
       "githubRepo": "owner/e",
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/e",
-      "repositoryUrl": "https://github.com/owner/e",
+      "sourceUrl": "https://github.com/owner/e",
     },
     Object {
       "currentRawValue": "owner/f#v2.0.0",
@@ -157,7 +157,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/f?ref=tags",
-      "repositoryUrl": "https://github.com/owner/f",
+      "sourceUrl": "https://github.com/owner/f",
     },
     Object {
       "currentValue": "gitlab:owner/g#v1.0.0",
@@ -197,7 +197,7 @@ Object {
       "githubRepo": "owner/k",
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/k",
-      "repositoryUrl": "https://github.com/owner/k",
+      "sourceUrl": "https://github.com/owner/k",
     },
     Object {
       "currentDigest": "abcdef0",
@@ -209,7 +209,7 @@ Object {
       "githubRepo": "owner/l",
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/l",
-      "repositoryUrl": "https://github.com/owner/l",
+      "sourceUrl": "https://github.com/owner/l",
     },
     Object {
       "currentRawValue": "https://github.com/owner/m.git#v1.0.0",
@@ -221,7 +221,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/m?ref=tags",
-      "repositoryUrl": "https://github.com/owner/m",
+      "sourceUrl": "https://github.com/owner/m",
     },
     Object {
       "currentRawValue": "git+https://github.com/owner/n#v2.0.0",
@@ -233,7 +233,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/n?ref=tags",
-      "repositoryUrl": "https://github.com/owner/n",
+      "sourceUrl": "https://github.com/owner/n",
     },
   ],
   "lernaClient": undefined,
