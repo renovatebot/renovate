@@ -11,6 +11,10 @@ Also, be sure to check out Renovate's [shareable config presets](./config-preset
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where it will be promptly answered.
 
+## ansible
+
+Add configuration here if you want to enable or disable something in particular for Ansible files and override the default Docker settings.
+
 ## assignees
 
 Must be valid usernames.
