@@ -142,7 +142,7 @@ describe('api/docker', () => {
       expect(res).toBe('some-digest');
     });
     it('should throw error for 429', async () => {
-      got.mockRejectedValueOnce({statusCode: 429});
+      got.mockRejectedValueOnce({ statusCode: 429 });
       let e;
       try {
         await docker.getDigest({ depName: 'some-dep' }, 'latest');
@@ -152,7 +152,7 @@ describe('api/docker', () => {
       expect(e.message).toBe('registry-failure');
     });
     it('should throw error for 5xx', async () => {
-      got.mockRejectedValueOnce({statusCode: 503});
+      got.mockRejectedValueOnce({ statusCode: 503 });
       let e;
       try {
         await docker.getDigest({ depName: 'some-dep' }, 'latest');
