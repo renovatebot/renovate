@@ -9,16 +9,19 @@
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
     "debug": "node --inspect-brk lib/renovate",
+    "eslint": "eslint lib test",
+    "eslint-fix": "eslint --fix lib test",
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
-    "lint-fix": "eslint --fix lib test",
-    "lint": "eslint lib test",
-    "prettier": "prettier \"**/*.{js,json,md}\" --write",
+    "lint": "yarn eslint && yarn prettier",
+    "lint-fix": "yarn eslint-fix && yarn prettier-fix",
+    "prettier": "prettier --list-different \"**/*.{js,json,md}\"",
+    "prettier-fix": "prettier --write \"**/*.{js,json,md}\"",
     "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
-    "test": "yarn prettier --list-different && yarn lint && yarn jest"
+    "test": "yarn lint && yarn jest"
   },
   "repository": {
     "type": "git",
