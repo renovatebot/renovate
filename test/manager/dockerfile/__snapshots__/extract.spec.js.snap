@@ -15,7 +15,6 @@ Array [
     "fromSuffix": "AS node",
     "lineNumber": 2,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "buildkite/puppeteer:1.1.1",
@@ -29,7 +28,6 @@ Array [
     "fromSuffix": "AS puppeteer",
     "lineNumber": 3,
     "purl": "pkg:docker/buildkite/puppeteer",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -49,7 +47,6 @@ Array [
     "fromSuffix": "as frontend",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "python:3.6-slim",
@@ -63,7 +60,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 4,
     "purl": "pkg:docker/python",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -82,7 +78,6 @@ Array [
     "fromSuffix": "/usr/bin/skaffold /usr/bin/skaffold",
     "lineNumber": 1,
     "purl": "pkg:docker/k8s-skaffold/skaffold?registry=gcr.io",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -102,7 +97,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/node?registry=registry.allmine.info:5005",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -121,7 +115,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/calico/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -141,7 +134,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 3,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -161,7 +153,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/node?registry=registry2.something.info",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -181,7 +172,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/node?registry=registry2.something.info",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -201,7 +191,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/someaccount/node?registry=registry2.something.info",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -221,7 +210,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/node?registry=registry2.something.info:5005",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -241,7 +229,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -261,7 +248,6 @@ Array [
     "fromSuffix": "as base",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -281,7 +267,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -301,7 +286,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/mynamespace/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -321,7 +305,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -341,7 +324,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -361,7 +343,6 @@ Array [
     "fromSuffix": "",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -381,7 +362,6 @@ Array [
     "fromSuffix": "as frontend",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -401,7 +381,6 @@ Array [
     "fromSuffix": "as frontend",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
@@ -421,7 +400,6 @@ Array [
     "fromSuffix": "as frontend",
     "lineNumber": 0,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;

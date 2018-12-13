@@ -13,7 +13,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 36,
     "purl": "pkg:docker/hadolint/hadolint",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "docker:latest",
@@ -26,7 +25,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 53,
     "purl": "pkg:docker/docker",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "docker:dind",
@@ -39,7 +37,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 55,
     "purl": "pkg:docker/docker",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "docker:latest",
@@ -52,7 +49,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 75,
     "purl": "pkg:docker/docker",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "docker:dind",
@@ -65,7 +61,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 77,
     "purl": "pkg:docker/docker",
-    "versionScheme": "docker",
   },
 ]
 `;

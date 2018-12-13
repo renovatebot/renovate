@@ -13,7 +13,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 12,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -26,7 +25,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 57,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -39,7 +37,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 61,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -52,7 +49,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 65,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
 ]
 `;
