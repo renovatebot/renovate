@@ -107,23 +107,6 @@ describe('datasource/github', () => {
         res.releases.find(release => release.version === 'v1.1.0')
       ).toBeDefined();
     });
-    it('returns releases from cache', async () => {
-      const body = [
-        { tag_name: 'a' },
-        { tag_name: 'v' },
-        { tag_name: '1.0.0' },
-        { tag_name: 'v1.1.0' },
-      ];
-      ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res1 = await datasource.getPkgReleases(
-        'pkg:github/some/dep-to-cache?ref=release'
-      );
-      expect(res1.releases).toHaveLength(2);
-      const res2 = await datasource.getPkgReleases(
-        'pkg:github/some/dep-to-cache?ref=release'
-      );
-      expect(res1).toEqual(res2);
-    });
     it('returns null for invalid ref', async () => {
       expect(
         await datasource.getPkgReleases('pkg:github/some/dep?ref=invalid')
