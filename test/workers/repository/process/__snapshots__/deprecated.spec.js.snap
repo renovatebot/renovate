@@ -17,6 +17,7 @@ Affected package file(s): \`package.json\`, \`frontend/package.json\`
 \`\`\`
 
 ",
+    true,
   ],
 ]
 `;
