@@ -147,11 +147,13 @@
     "eslint-config-prettier": "3.1.0",
     "eslint-plugin-import": "2.14.0",
     "eslint-plugin-promise": "4.0.1",
+    "husky": "1.2.1",
     "jest": "23.6.0",
     "jest-silent-reporter": "0.1.1",
     "mockdate": "2.0.2",
     "nock": "10.0.4",
     "prettier": "1.15.3",
+    "pretty-quick": "1.8.0",
     "semantic-release": "15.12.4",
     "tmp-promise": "1.0.5"
   },
@@ -188,6 +190,11 @@
   },
   "publishConfig": {
     "tag": "latest"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   },
   "release": {
     "branch": "master",
