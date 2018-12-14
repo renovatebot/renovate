@@ -103,15 +103,6 @@ describe('workers/pr/changelog', () => {
         })
       ).toMatchSnapshot();
     });
-    it('returns cached JSON', async () => {
-      ghGot.mockClear();
-      const first = await getChangeLogJSON({ ...upgrade });
-      const firstCallsCount = ghGot.mock.calls.length;
-      const second = await getChangeLogJSON({ ...upgrade });
-      const secondCallsCount = ghGot.mock.calls.length - firstCallsCount;
-      expect(first).toEqual(second);
-      expect(firstCallsCount).toBeGreaterThan(secondCallsCount);
-    });
     it('filters unnecessary warns', async () => {
       ghGot.mockImplementation(() => {
         throw new Error('Unknown Github Repo');
