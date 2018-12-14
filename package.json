@@ -186,10 +186,6 @@
       "./test/newline-snapshot-serializer.js"
     ]
   },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "es5"
-  },
   "publishConfig": {
     "tag": "latest"
   },
