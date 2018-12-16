@@ -66,6 +66,7 @@ Array [
     "depType": "orb",
     "lineNumber": 3,
     "purl": "pkg:orb/hutson/library-release-workflows",
+    "rangeStrategy": "pin",
     "versionScheme": "semver",
   },
   Object {
@@ -75,6 +76,7 @@ Array [
     "depType": "orb",
     "lineNumber": 4,
     "purl": "pkg:orb/abc/def",
+    "rangeStrategy": "pin",
     "versionScheme": "semver",
   },
   Object {
@@ -84,6 +86,7 @@ Array [
     "depType": "orb",
     "lineNumber": 5,
     "purl": "pkg:orb/zzz/zzz",
+    "rangeStrategy": "pin",
     "versionScheme": "semver",
   },
   Object {
