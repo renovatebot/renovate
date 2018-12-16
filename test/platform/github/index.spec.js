@@ -1077,6 +1077,30 @@ describe('platform/github', () => {
       const res = await github.ensureIssue('title-1', 'new-content', once);
       expect(res).toEqual(null);
     });
+    it('closes others if ensuring only once', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+            state: 'closed',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+            state: 'open',
+          },
+          {
+            number: 3,
+            title: 'title-1',
+            state: 'open',
+          },
+        ],
+      }));
+      const once = true;
+      const res = await github.ensureIssue('title-1', 'new-content', once);
+      expect(res).toEqual(null);
+    });
     it('updates issue', async () => {
       get.mockReturnValueOnce({
         body: [
