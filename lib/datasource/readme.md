@@ -35,4 +35,4 @@ The `getDigest` function returns a string output representing the digest value. 
 
 ### getPreset
 
-This function is supported by npm and github for retrieving a Renovate preset.
+This function is supported by npm, github and gitlab for retrieving a Renovate preset.
