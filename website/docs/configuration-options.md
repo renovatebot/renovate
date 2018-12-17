@@ -132,9 +132,7 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 ## compatibility
 
-This is used to restrict which versions are possible to upgrade to based on their language support.
-For now this only support `python`, other 
-would be added in the future.
+This is used to manually restrict which versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
 "compatibility": {
