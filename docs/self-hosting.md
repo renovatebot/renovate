@@ -58,6 +58,8 @@ spec:
               value: "your-github-enterprise-renovate-user-token"
             - name: GITHUB_COM_TOKEN
               value: "any-personal-user-token-for-github-com-for-fetching-changelogs"
+            - name: RENOVATE_AUTODISCOVER
+              value: "true"
           restartPolicy: OnFailure
 ```
 
