@@ -133,7 +133,8 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 ## compatibility
 
 This is used to restrict which versions are possible to upgrade to based on their language support.
-For now this only support `python`, other languages would be added in the future.
+For now this only support `python`, other 
+would be added in the future.
 
 ```json
 "compatibility": {
@@ -516,7 +517,7 @@ Use this field to restrict rules to a particular language. e.g.
 ```
   "packageRules": [{
     "packageNames": ["request"],
-    "managers": ["python"],
+    "languages": ["python"],
     "enabled": false
   }]
 ```
