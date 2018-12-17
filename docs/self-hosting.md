@@ -30,6 +30,35 @@ $ docker run renovate/renovate:13
 
 If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 
+#### Kubernetes
+
+Renovate's official Docker image is compatible with Kubernetes. Here is an example manifest of running Renovate against a GitHub Enterprise server:
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: renovate
+spec:
+  schedule: "@hourly"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: renovate
+            image: renovate/renovate@13.153.0 # Update this to the latest available and then enable Renovate on the manifest
+# Environment Variables
+            env:
+            - name: RENOVATE_PLATFORM
+              value: "github"
+            - name: RENOVATE_ENDPOINT
+              value: "https://github.company.com/api/v3"
+            - name: RENOVATE_TOKEN
+              value: "abcdefghijklmnopqrstuvwxyz1234567890"
+          restartPolicy: OnFailure
+```
+
 ## Authentication
 
 You need to select a repository user for `renovate` to assume the identity of,
