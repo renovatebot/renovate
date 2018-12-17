@@ -12,7 +12,6 @@ Array [
     "dockerRegistry": "quay.io",
     "lineNumber": 4,
     "purl": "pkg:docker/something/redis?registry=quay.io",
-    "versionScheme": "docker",
   },
   Object {
     "commitMessageTopic": "Node.js",
@@ -25,7 +24,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 18,
     "purl": "pkg:docker/node",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "postgres:9.4.0",
@@ -37,7 +35,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 21,
     "purl": "pkg:docker/postgres",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "dockersamples/examplevotingapp_vote:before",
@@ -49,7 +46,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 31,
     "purl": "pkg:docker/dockersamples/examplevotingapp_vote",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "dockersamples/examplevotingapp_result:before",
@@ -61,7 +57,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 46,
     "purl": "pkg:docker/dockersamples/examplevotingapp_result",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "dockersamples/examplevotingapp_worker",
@@ -73,7 +68,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 62,
     "purl": "pkg:docker/dockersamples/examplevotingapp_worker",
-    "versionScheme": "docker",
   },
   Object {
     "currentDepTag": "dockersamples/visualizer:stable",
@@ -85,7 +79,6 @@ Array [
     "dockerRegistry": undefined,
     "lineNumber": 79,
     "purl": "pkg:docker/dockersamples/visualizer",
-    "versionScheme": "docker",
   },
 ]
 `;

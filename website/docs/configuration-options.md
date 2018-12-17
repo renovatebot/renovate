@@ -136,8 +136,7 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 ## compatibility
 
-This is used to restrict which versions are possible to upgrade to based on their language support.
-For now this only support `python`, other languages would be added in the future.
+This is used to manually restrict which versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
 "compatibility": {
@@ -520,7 +519,7 @@ Use this field to restrict rules to a particular language. e.g.
 ```
   "packageRules": [{
     "packageNames": ["request"],
-    "managers": ["python"],
+    "languages": ["python"],
     "enabled": false
   }]
 ```
@@ -950,6 +949,12 @@ This field is currently used by some config prefixes.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
+
+## versionScheme
+
+Usually, each language or package manager has a specific type of "version scheme". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as "docker" to address the most common way people tag versions using Docker, and "loose" as a fallback that tries semver first but otherwise just does its best to sort and compare.
+
+By exposing `versionScheme` to config, it allows you to override the default version scheme for a package manager if you really need. In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
 
 ## vulnerabilityAlerts
 
