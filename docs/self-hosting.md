@@ -55,7 +55,9 @@ spec:
             - name: RENOVATE_ENDPOINT
               value: "https://github.company.com/api/v3"
             - name: RENOVATE_TOKEN
-              value: "abcdefghijklmnopqrstuvwxyz1234567890"
+              value: "your-github-enterprise-renovate-user-token"
+            - name: GITHUB_COM_TOKEN
+              value: "any-personal-user-token-for-github-com-for-fetching-changelogs"
           restartPolicy: OnFailure
 ```
 
