@@ -75,7 +75,7 @@
   "dependencies": {
     "@renovate/pep440": "0.4.0",
     "@renovatebot/docker-registry-client": "3.3.0",
-    "@sindresorhus/is": "0.13.0",
+    "@sindresorhus/is": "0.14.0",
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "6.6.3",
     "bunyan": "1.8.12",
