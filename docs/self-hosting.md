@@ -47,7 +47,7 @@ spec:
         spec:
           containers:
           - name: renovate
-            image: renovate/renovate@13.153.0 # Update this to the latest available and then enable Renovate on the manifest
+            image: renovate/renovate:13.153.0 # Update this to the latest available and then enable Renovate on the manifest
 # Environment Variables
             env:
             - name: RENOVATE_PLATFORM
