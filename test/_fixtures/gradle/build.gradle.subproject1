@@ -1,7 +1,4 @@
-plugins {
-    id 'groovy'
-}
 
 dependencies {
-    compile 'org.grails:gorm-hibernate5-spring-boot:6.0.9.RELEASE'
+    compile 'org.hamcrest:hamcrest-core:1.1.1'
 }

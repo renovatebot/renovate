@@ -13,6 +13,9 @@ const platform = require('../../../lib/platform/dummy');
 const renovateJson = `
 {
   "prHourlyLimit": "100",
+  "gradle": {
+    "enabled": true
+  },
   "extends": [
     "config:base"
   ]
@@ -51,12 +54,7 @@ describe('lib/workers/global', () => {
     );
     await globalWorker.start();
     expect(platform.prs.map(pr => pr.title)).toEqual([
-      'Update dependency cglib:cglib-nodep to 3.2.8',
-      'Update dependency com.github.jengelman.gradle.plugins:shadow to 4.0.1',
       'Update dependency mysql:mysql-connector-java to 8.0.12',
-      'Update dependency org.grails:gorm-hibernate5-spring-boot to 6.1.10.RELEASE',
-      'Update dependency org.spockframework:spock-spring to 1.2-RC3-groovy-2.5',
-      'Update dependency org.springframework.boot:spring-boot-gradle-plugin to 2.0.6.RELEASE',
     ]);
   });
 
@@ -96,13 +94,15 @@ describe('lib/workers/global', () => {
     await globalWorker.start();
 
     expect(platform.prs.map(pr => pr.title)).toEqual([
-      'Update dependency cglib:cglib-nodep to 3.2.8',
+      'Update dependency backport-util-concurrent:backport-util-concurrent to 3.1',
       'Update dependency mysql:mysql-connector-java to 8.0.12',
-      'Update dependency org.grails:gorm-hibernate5-spring-boot to 6.1.10.RELEASE',
+      'Update dependency org.hamcrest:hamcrest-core to 2.1-rc3',
     ]);
 
     expect(
-      Array.from(platform.branches.get('renovate/cglib-cglib-nodep-.x').keys())
+      Array.from(
+        platform.branches.get('renovate/backport-util-concurrent-backport-util-concurrent-.x').keys()
+      )
     ).toEqual(['build.gradle']);
     expect(
       Array.from(
@@ -112,7 +112,7 @@ describe('lib/workers/global', () => {
     expect(
       Array.from(
         platform.branches
-          .get('renovate/org.grails-gorm-hibernate5-spring-boot-.x')
+          .get('renovate/org.hamcrest-hamcrest-core-.x')
           .keys()
       )
     ).toEqual(['subproject1/build.gradle']);

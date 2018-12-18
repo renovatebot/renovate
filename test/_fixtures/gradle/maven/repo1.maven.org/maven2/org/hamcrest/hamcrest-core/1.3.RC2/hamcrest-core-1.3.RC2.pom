@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- 
+ | This POM builds hamcrest core.
+ | 
+ | There are some key informations to know about the generated classes:
+ | Upon building a class named "BaseMatchers" will be generated. This will take place after compiling all classes.
+ | So be sure to call "mvn process-classes compile", not only "mvn compile".
+ | "mvn clean package" will result in a package without the generated class.
+ | Instead call "mvn clean process-classes package".
+ |
+ | Some notes for installing, releasing, deploying:
+ | Be sure to generate source and javadoc jars AFTER packaging to contain the generated class. 
+ | Call "mvn clean process-classes package source:jar javadoc:jar".
+ | To generate a bundle call "mvn clean process-classes package source:jar javadoc:jar gpg:sign repository:bundle-create"
+ +-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hamcrest</groupId>
+		<artifactId>hamcrest-parent</artifactId>
+		<version>1.3.RC2</version>
+		<relativePath>..</relativePath>
+	</parent>
+    
+	<groupId>org.hamcrest</groupId>
+	<artifactId>hamcrest-core</artifactId>
+
+	<name>Hamcrest Core</name>
+
+	<description>
+		This is the core API of hamcrest matcher framework 
+		to be used by third-party framework providers. 
+		This includes the a foundation set of matcher
+		implementations for common operations.
+	</description>
+
+	<url>http://code.google.com/p/hamcrest/</url>
+
+	<scm>
+		<url>http://code.google.com/p/hamcrest/source/browse/</url>
+		<connection>scm:svn:http://hamcrest.googlecode.com/svn/trunk/hamcrest-java/hamcrest-core</connection>
+	</scm>
+	
+	<properties>
+		<generator.config>${basedir}/../core-matchers.xml</generator.config>
+		<generated.class>org.hamcrest.CoreMatchers</generated.class>
+	</properties>
+	
+	<profiles>
+		<profile>
+			<id>generate-sources</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+					</plugin>
+					
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+					</plugin>
+
+					<plugin>
+						<artifactId>maven-antrun-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

@@ -1,12 +1,15 @@
 allprojects {
-    repositories {
-        jcenter()
+  configurations {
+    compile
+  }
+
+  repositories {
+    maven {
+      url 'file:///Users/ibethencourt/Projects/renovate/test/_fixtures/gradle/maven/repo1.maven.org/maven2'
     }
+  }
 }
 
-apply plugin: 'groovy'
-
-
 dependencies {
-    compile('cglib:cglib-nodep:3.1')
+  compile('backport-util-concurrent:backport-util-concurrent:2.1')
 }

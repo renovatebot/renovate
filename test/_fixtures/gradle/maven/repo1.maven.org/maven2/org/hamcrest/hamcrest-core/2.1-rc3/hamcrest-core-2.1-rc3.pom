@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.hamcrest</groupId>
+  <artifactId>hamcrest-core</artifactId>
+  <version>2.1-rc3</version>
+  <name>Hamcrest Core</name>
+  <description>Core Hamcrest API - deprecated, please use "hamcrest" instead</description>
+  <url>http://hamcrest.org/JavaHamcrest/</url>
+  <licenses>
+    <license>
+      <name>BSD Licence 3</name>
+      <url>http://opensource.org/licenses/BSD-3-Clause</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>joewalnes</id>
+      <name>Joe Walnes</name>
+    </developer>
+    <developer>
+      <id>npryce</id>
+      <name>Nat Pryce</name>
+    </developer>
+    <developer>
+      <id>sf105</id>
+      <name>Steve Freeman</name>
+    </developer>
+  </developers>
+  <scm>
+    <connection>git@github.com:hamcrest/JavaHamcrest.git</connection>
+    <url>https://github.com/hamcrest/JavaHamcrest</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>2.1-rc3</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>
