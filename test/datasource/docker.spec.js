@@ -136,10 +136,30 @@ describe('api/docker', () => {
         headers: { 'docker-content-digest': 'some-digest' },
       });
       const res = await docker.getDigest(
-        { depName: 'some-dep', tagSuffix: 'alpine' },
-        '8.0.0'
+        { depName: 'some-dep' },
+        '8.0.0-alpine'
       );
       expect(res).toBe('some-digest');
+    });
+    it('should throw error for 429', async () => {
+      got.mockRejectedValueOnce({ statusCode: 429 });
+      let e;
+      try {
+        await docker.getDigest({ depName: 'some-dep' }, 'latest');
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toBe('registry-failure');
+    });
+    it('should throw error for 5xx', async () => {
+      got.mockRejectedValueOnce({ statusCode: 503 });
+      let e;
+      try {
+        await docker.getDigest({ depName: 'some-dep' }, 'latest');
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toBe('registry-failure');
     });
   });
   describe('getPkgReleases', () => {

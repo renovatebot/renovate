@@ -3,7 +3,7 @@ const tmp = require('tmp-promise');
 const { relative } = require('path');
 const {
   extractPackageFile,
-  extractSetupFile,
+  // extractSetupFile,
 } = require('../../../lib/manager/pip_setup/extract');
 
 const packageFile = 'test/_fixtures/pip_setup/setup.py';
@@ -39,6 +39,7 @@ describe('lib/manager/pip_setup/extract', () => {
       ).toBe(null);
     });
   });
+  /*
   describe('extractSetupFile()', () => {
     it('should return parsed setup() call', async () => {
       expect(
@@ -64,4 +65,5 @@ describe('lib/manager/pip_setup/extract', () => {
       ).toEqual({ name: 'talisker' });
     });
   });
+  */
 });

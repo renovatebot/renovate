@@ -10,7 +10,6 @@ Array [
     "lineNumber": 3,
     "multiLine": true,
     "purl": "pkg:go/github.com/aws/aws-sdk-go",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "9fd32a8b3d3d",
@@ -22,7 +21,6 @@ Array [
     "lineNumber": 4,
     "multiLine": true,
     "purl": "pkg:go/github.com/bgentry/go-netrc",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "bcc4c8345a21",
@@ -34,7 +32,6 @@ Array [
     "lineNumber": 5,
     "multiLine": true,
     "purl": "pkg:go/github.com/cloudfoundry/jibber_jabber",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.1.0",
@@ -44,7 +41,6 @@ Array [
     "lineNumber": 6,
     "multiLine": true,
     "purl": "pkg:go/github.com/davecgh/go-spew",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.9.0",
@@ -54,7 +50,6 @@ Array [
     "lineNumber": 7,
     "multiLine": true,
     "purl": "pkg:go/github.com/emirpasic/gods",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.7.0",
@@ -64,7 +59,6 @@ Array [
     "lineNumber": 8,
     "multiLine": true,
     "purl": "pkg:go/github.com/fatih/color",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.4.7",
@@ -74,7 +68,6 @@ Array [
     "lineNumber": 9,
     "multiLine": true,
     "purl": "pkg:go/github.com/fsnotify/fsnotify",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.38.2",
@@ -84,7 +77,6 @@ Array [
     "lineNumber": 10,
     "multiLine": true,
     "purl": "pkg:go/github.com/go-ini/ini",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "604e922904d3",
@@ -96,7 +88,6 @@ Array [
     "lineNumber": 11,
     "multiLine": true,
     "purl": "pkg:go/github.com/golang-collections/collections",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "d5fe4b57a186",
@@ -108,7 +99,6 @@ Array [
     "lineNumber": 12,
     "multiLine": true,
     "purl": "pkg:go/github.com/hashicorp/go-cleanhttp",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "4bda8fa99001",
@@ -120,7 +110,6 @@ Array [
     "lineNumber": 13,
     "multiLine": true,
     "purl": "pkg:go/github.com/hashicorp/go-getter",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "b1a1dbde6fdc",
@@ -132,7 +121,6 @@ Array [
     "lineNumber": 14,
     "multiLine": true,
     "purl": "pkg:go/github.com/hashicorp/go-safetemp",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.0.0",
@@ -142,7 +130,6 @@ Array [
     "lineNumber": 15,
     "multiLine": true,
     "purl": "pkg:go/github.com/hashicorp/go-version",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "ef8a98b0bbce",
@@ -154,7 +141,6 @@ Array [
     "lineNumber": 16,
     "multiLine": true,
     "purl": "pkg:go/github.com/hashicorp/hcl",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "fc0cef2ff331",
@@ -166,7 +152,6 @@ Array [
     "lineNumber": 17,
     "multiLine": true,
     "purl": "pkg:go/github.com/heroku/rollrus",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "d14ea06fba99",
@@ -178,7 +163,6 @@ Array [
     "lineNumber": 18,
     "multiLine": true,
     "purl": "pkg:go/github.com/jbenet/go-context",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "906e15686e63",
@@ -190,7 +174,6 @@ Array [
     "lineNumber": 19,
     "multiLine": true,
     "purl": "pkg:go/github.com/jesseduffield/go-getter",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "03e26ff3f1de",
@@ -202,7 +185,6 @@ Array [
     "lineNumber": 20,
     "multiLine": true,
     "purl": "pkg:go/github.com/jesseduffield/gocui",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "1e272ff78dcb",
@@ -214,7 +196,6 @@ Array [
     "lineNumber": 21,
     "multiLine": true,
     "purl": "pkg:go/github.com/jesseduffield/termbox-go",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "0b12d6b521d8",
@@ -226,7 +207,6 @@ Array [
     "lineNumber": 22,
     "multiLine": true,
     "purl": "pkg:go/github.com/jmespath/go-jmespath",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "ae77be60afb1",
@@ -238,7 +218,6 @@ Array [
     "lineNumber": 23,
     "multiLine": true,
     "purl": "pkg:go/github.com/kardianos/osext",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "9fc7bb800b55",
@@ -250,7 +229,6 @@ Array [
     "lineNumber": 24,
     "multiLine": true,
     "purl": "pkg:go/github.com/kevinburke/ssh_config",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.8.0",
@@ -260,7 +238,6 @@ Array [
     "lineNumber": 25,
     "multiLine": true,
     "purl": "pkg:go/github.com/magiconair/properties",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.0.9",
@@ -270,7 +247,6 @@ Array [
     "lineNumber": 26,
     "multiLine": true,
     "purl": "pkg:go/github.com/mattn/go-colorable",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.0.3",
@@ -280,7 +256,6 @@ Array [
     "lineNumber": 27,
     "multiLine": true,
     "purl": "pkg:go/github.com/mattn/go-isatty",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.0.2",
@@ -290,7 +265,6 @@ Array [
     "lineNumber": 28,
     "multiLine": true,
     "purl": "pkg:go/github.com/mattn/go-runewidth",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.2.0",
@@ -300,7 +274,6 @@ Array [
     "lineNumber": 29,
     "multiLine": true,
     "purl": "pkg:go/github.com/mgutz/str",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "58046073cbff",
@@ -312,7 +285,6 @@ Array [
     "lineNumber": 30,
     "multiLine": true,
     "purl": "pkg:go/github.com/mitchellh/go-homedir",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "a61a99592b77",
@@ -324,7 +296,6 @@ Array [
     "lineNumber": 31,
     "multiLine": true,
     "purl": "pkg:go/github.com/mitchellh/go-testing-interface",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "f15292f7a699",
@@ -336,7 +307,6 @@ Array [
     "lineNumber": 32,
     "multiLine": true,
     "purl": "pkg:go/github.com/mitchellh/mapstructure",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "a16b91a3ba80",
@@ -348,7 +318,6 @@ Array [
     "lineNumber": 33,
     "multiLine": true,
     "purl": "pkg:go/github.com/nicksnyder/go-i18n",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.2.0",
@@ -358,7 +327,6 @@ Array [
     "lineNumber": 34,
     "multiLine": true,
     "purl": "pkg:go/github.com/pelletier/go-buffruneio",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.2.0",
@@ -368,7 +336,6 @@ Array [
     "lineNumber": 35,
     "multiLine": true,
     "purl": "pkg:go/github.com/pelletier/go-toml",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.8.0",
@@ -378,7 +345,6 @@ Array [
     "lineNumber": 36,
     "multiLine": true,
     "purl": "pkg:go/github.com/pkg/errors",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.0.0",
@@ -388,7 +354,6 @@ Array [
     "lineNumber": 37,
     "multiLine": true,
     "purl": "pkg:go/github.com/pmezard/go-difflib",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.0.0",
@@ -398,7 +363,6 @@ Array [
     "lineNumber": 38,
     "multiLine": true,
     "purl": "pkg:go/github.com/sergi/go-diff",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "e180dbdc8da0",
@@ -410,7 +374,6 @@ Array [
     "lineNumber": 39,
     "multiLine": true,
     "purl": "pkg:go/github.com/shibukawa/configdir",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.0.6",
@@ -420,7 +383,6 @@ Array [
     "lineNumber": 40,
     "multiLine": true,
     "purl": "pkg:go/github.com/sirupsen/logrus",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.1.1",
@@ -430,7 +392,6 @@ Array [
     "lineNumber": 41,
     "multiLine": true,
     "purl": "pkg:go/github.com/spf13/afero",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.2.0",
@@ -440,7 +401,6 @@ Array [
     "lineNumber": 42,
     "multiLine": true,
     "purl": "pkg:go/github.com/spf13/cast",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "14d3d4c51834",
@@ -452,7 +412,6 @@ Array [
     "lineNumber": 43,
     "multiLine": true,
     "purl": "pkg:go/github.com/spf13/jwalterweatherman",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.0.2",
@@ -462,7 +421,6 @@ Array [
     "lineNumber": 44,
     "multiLine": true,
     "purl": "pkg:go/github.com/spf13/pflag",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.1.0",
@@ -472,7 +430,6 @@ Array [
     "lineNumber": 45,
     "multiLine": true,
     "purl": "pkg:go/github.com/spf13/viper",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "59b7046e48ad",
@@ -484,7 +441,6 @@ Array [
     "lineNumber": 46,
     "multiLine": true,
     "purl": "pkg:go/github.com/spkg/bom",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v2.3.0",
@@ -494,7 +450,6 @@ Array [
     "lineNumber": 47,
     "multiLine": true,
     "purl": "pkg:go/github.com/src-d/gcfg/v2",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.2.2",
@@ -504,7 +459,6 @@ Array [
     "lineNumber": 48,
     "multiLine": true,
     "purl": "pkg:go/github.com/stretchr/testify",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "3627a5cbeaea",
@@ -516,7 +470,6 @@ Array [
     "lineNumber": 49,
     "multiLine": true,
     "purl": "pkg:go/github.com/stvp/roll",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.1.2",
@@ -526,7 +479,6 @@ Array [
     "lineNumber": 50,
     "multiLine": true,
     "purl": "pkg:go/github.com/tcnksm/go-gitconfig",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.5.4",
@@ -536,7 +488,6 @@ Array [
     "lineNumber": 51,
     "multiLine": true,
     "purl": "pkg:go/github.com/ulikunitz/xz",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.2.0",
@@ -546,7 +497,6 @@ Array [
     "lineNumber": 52,
     "multiLine": true,
     "purl": "pkg:go/github.com/xanzy/ssh-agent",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "de0752318171",
@@ -558,7 +508,6 @@ Array [
     "lineNumber": 53,
     "multiLine": true,
     "purl": "pkg:go/golang.org/x/crypto",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "c39426892332",
@@ -570,7 +519,6 @@ Array [
     "lineNumber": 54,
     "multiLine": true,
     "purl": "pkg:go/golang.org/x/net",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "98c5dad5d1a0",
@@ -582,7 +530,6 @@ Array [
     "lineNumber": 55,
     "multiLine": true,
     "purl": "pkg:go/golang.org/x/sys",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.3.0",
@@ -592,7 +539,6 @@ Array [
     "lineNumber": 56,
     "multiLine": true,
     "purl": "pkg:go/golang.org/x/text",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v4.2.0",
@@ -602,7 +548,6 @@ Array [
     "lineNumber": 57,
     "multiLine": true,
     "purl": "pkg:go/gopkg.in/src-d/go-billy.v4",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v4.0.0-20180807092216-43d17e14b714",
@@ -612,7 +557,6 @@ Array [
     "lineNumber": 58,
     "multiLine": true,
     "purl": "pkg:go/gopkg.in/src-d/go-git.v4",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v0.1.2",
@@ -622,7 +566,6 @@ Array [
     "lineNumber": 59,
     "multiLine": true,
     "purl": "pkg:go/gopkg.in/warnings.v0",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v2.2.1",
@@ -632,7 +575,6 @@ Array [
     "lineNumber": 60,
     "multiLine": true,
     "purl": "pkg:go/gopkg.in/yaml.v2",
-    "versionScheme": "semver",
   },
 ]
 `;
@@ -646,7 +588,6 @@ Array [
     "depType": "require",
     "lineNumber": 2,
     "purl": "pkg:go/github.com/pkg/errors",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.15.21",
@@ -655,7 +596,6 @@ Array [
     "depType": "require",
     "lineNumber": 3,
     "purl": "pkg:go/github.com/aws/aws-sdk-go",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.0.0",
@@ -664,7 +604,6 @@ Array [
     "depType": "require",
     "lineNumber": 4,
     "purl": "pkg:go/github.com/davecgh/go-spew",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.0.0",
@@ -673,7 +612,6 @@ Array [
     "depType": "require",
     "lineNumber": 5,
     "purl": "pkg:go/golang.org/x/foo",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "abcdef1",
@@ -681,7 +619,6 @@ Array [
     "depType": "require",
     "lineNumber": 6,
     "skipReason": "unsupported-version",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v1.0.0",
@@ -690,7 +627,6 @@ Array [
     "depType": "require",
     "lineNumber": 7,
     "purl": "pkg:go/gopkg.in/russross/blackfriday.v1",
-    "versionScheme": "semver",
   },
 ]
 `;
