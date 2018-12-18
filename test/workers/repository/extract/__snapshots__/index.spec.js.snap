@@ -2,6 +2,9 @@
 
 exports[`workers/repository/extract/index extractAllDependencies() runs 1`] = `
 Object {
+  "ansible": Array [
+    Object {},
+  ],
   "bazel": Array [
     Object {},
   ],
