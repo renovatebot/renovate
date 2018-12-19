@@ -155,7 +155,7 @@
     "nock": "10.0.4",
     "prettier": "1.15.3",
     "pretty-quick": "1.8.0",
-    "semantic-release": "15.12.4",
+    "semantic-release": "15.13.1",
     "tmp-promise": "1.0.5"
   },
   "files": [
