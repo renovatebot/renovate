@@ -161,7 +161,7 @@
     into-stream "^4.0.0"
     lodash "^4.17.4"
 
-"@sindresorhus/is@0.14.0":
+"@sindresorhus/is@0.14.0", "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
@@ -3187,12 +3187,12 @@ globby@^8.0.0:
     pify "^3.0.0"
     slash "^1.0.0"
 
-got@9.4.0:
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/got/-/got-9.4.0.tgz#3b52a54306514b0404b869e1ba572b594772f2b1"
-  integrity sha512-k15lhRXITxW0eURHfEGzV+8pBYBHtTrYterFlMzP5rXQcQMPikDC2wvZkgivcJwGH4bv1JzMUTPlHfYGhuXJnw==
+got@9.5.0:
+  version "9.5.0"
+  resolved "https://registry.yarnpkg.com/got/-/got-9.5.0.tgz#6fd0312c6b694c0a11d9119d95fd7daed174eb49"
+  integrity sha512-N+4kb6i9t1lauJ4NwLVVoFVLxZNa6i+iivtNzCSVw7+bVbTXoq0qXctdd8i9rj3lrI0zDk5NGzcO4bfpEP6Uuw==
   dependencies:
-    "@sindresorhus/is" "^0.12.0"
+    "@sindresorhus/is" "^0.14.0"
     "@szmarczak/http-timer" "^1.1.0"
     cacheable-request "^5.1.0"
     decompress-response "^3.3.0"
@@ -7665,10 +7665,10 @@ sax@^1.2.4:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
-semantic-release@15.12.4:
-  version "15.12.4"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.12.4.tgz#d0f4c3649d01e2e29a9df5e4886bab869d75ef02"
-  integrity sha512-po30Te9E26v3Qb/G9pXFO6lCTFO07zvliqH00vmfuCoAjl1Wpg9SKb9dXVFM7BTdg5Fr/KqbdOsqHkT7kR4FeQ==
+semantic-release@15.13.1:
+  version "15.13.1"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.13.1.tgz#18541032504aa0b443d011083685c9b42eb38c9f"
+  integrity sha512-bkrfQ10BhbJRMeq/Ih9DZ9FO4ffDwFYsRR134JP9JvQSf8GVX4sg3SnFFd7Q10C6pKwjKqMZ4+ZNB5uQYMLPEg==
   dependencies:
     "@semantic-release/commit-analyzer" "^6.1.0"
     "@semantic-release/error" "^2.2.0"
