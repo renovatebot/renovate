@@ -59,7 +59,7 @@ Array [
     "/2.0/repositories/some/empty",
   ],
   Array [
-    "/2.0/repositories/some/empty/pullrequests?state=OPEN&pagelen=50",
+    "/2.0/repositories/some/empty/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50",
     undefined,
   ],
   Array [

@@ -977,7 +977,7 @@ describe('manager/npm/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
-      expect(res.repositoryUrl).toBeDefined();
+      expect(res.sourceUrl).toBeDefined();
     });
     it('ignores deprecated', async () => {
       config.currentValue = '1.3.0';

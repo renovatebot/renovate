@@ -11,6 +11,10 @@ Also, be sure to check out Renovate's [shareable config presets](./config-preset
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where it will be promptly answered.
 
+## ansible
+
+Add configuration here if you want to enable or disable something in particular for Ansible files and override the default Docker settings.
+
 ## assignees
 
 Must be valid usernames.
@@ -132,8 +136,7 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 ## compatibility
 
-This is used to restrict which versions are possible to upgrade to based on their language support.
-For now this only support `python`, other languages would be added in the future.
+This is used to manually restrict which versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
 "compatibility": {
@@ -206,7 +209,7 @@ Example:
 
 ## encrypted
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+See https://renovatebot.com/docs/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -214,7 +217,7 @@ Extend this if you wish to configure rules specifically for `engines` definition
 
 ## extends
 
-See https://renovatebot.com/docs/configuration-reference/config-presets for details.
+See https://renovatebot.com/docs/config-presets for details.
 
 ## fileMatch
 
@@ -403,11 +406,11 @@ Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a c
 
 ## npmToken
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovatebot.com/docs/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used.
+See https://renovatebot.com/docs/private-modules for details on how this is used.
 
 ## nuget
 
@@ -513,6 +516,30 @@ Use this field if you want to have one or more package name patterns excluded in
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### languages
+
+Use this field to restrict rules to a particular language. e.g.
+
+```
+  "packageRules": [{
+    "packageNames": ["request"],
+    "languages": ["python"],
+    "enabled": false
+  }]
+```
+
+### managers
+
+Use this field to restrict rules to a particular package manager. e.g.
+
+```
+  "packageRules": [{
+    "packageNames": ["node"],
+    "managers": ["dockerfile"],
+    "enabled": false
+  }]
+```
+
 ### matchCurrentVersion
 
 `matchCurrentVersion` can be an exact semver version or a semver range.
@@ -544,6 +571,30 @@ Use this field if you want to have one or more package names patterns in your pa
 The above will set `rangeStrategy` to `replace` for any package starting with `angular`.
 
 ### paths
+
+### sourceUrlPrefixes
+
+Here's an example of where you use this to group together all packages from the Vue monorepo:
+
+```json
+{
+  "packageRules": [{
+    "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+    "groupName" "Vue monorepo packages"
+  }]
+}
+```
+
+Here's an example of where you use this to group together all packages from the `renovatebot` github org:
+
+```json
+{
+  "packageRules": [{
+    "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+    "groupName" "All renovate packages"
+  }]
+}
+```
 
 ### updateTypes
 
@@ -689,8 +740,6 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 ## python
 
 Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
-
-## raiseDeprecationWarnings
 
 ## rangeStrategy
 
@@ -843,6 +892,16 @@ Language support is limited to those listed below:
 
 - **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/node#configuring-support-policy)
 
+## suppressNotifications
+
+Use this field to suppress various types of warnings and other notifications from Renovate. Example:
+
+```json
+"suppressNotifications": ["prIgnoreNotification"]
+```
+
+The above config will suppress the comment which is added to a PR whenever you close a PR unmerged.
+
 ## terraform
 
 Currently Terraform support is limited to Terraform registry sources and github sources that include semver refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.
@@ -894,6 +953,12 @@ This field is currently used by some config prefixes.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
+
+## versionScheme
+
+Usually, each language or package manager has a specific type of "version scheme". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as "docker" to address the most common way people tag versions using Docker, and "loose" as a fallback that tries semver first but otherwise just does its best to sort and compare.
+
+By exposing `versionScheme` to config, it allows you to override the default version scheme for a package manager if you really need. In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
 
 ## vulnerabilityAlerts
 

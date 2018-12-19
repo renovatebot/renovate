@@ -314,4 +314,20 @@ describe('platform/gh-got-wrapper', () => {
     expect(e).toBeDefined();
     expect(e.message).toEqual('platform-failure');
   });
+  it('should throw for unauthorized integration', async () => {
+    ghGot.mockImplementationOnce(() =>
+      Promise.reject({
+        statusCode: 403,
+        message: 'Resource not accessible by integration (403)',
+      })
+    );
+    let e;
+    try {
+      await get('some-url', {}, 0);
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+    expect(e.message).toEqual('integration-unauthorized');
+  });
 });

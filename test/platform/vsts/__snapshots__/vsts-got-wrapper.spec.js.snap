@@ -5,14 +5,19 @@ WebApi {
   "authHandler": PersonalAccessTokenCredentialHandler {
     "token": "myToken",
   },
+  "isNoProxyHost": [Function],
   "options": Object {
     "ignoreSslError": false,
   },
   "rest": RestClient {
     "client": HttpClient {
+      "_allowRedirects": true,
       "_certConfig": undefined,
+      "_disposed": false,
       "_httpProxy": undefined,
       "_ignoreSslError": false,
+      "_keepAlive": false,
+      "_maxRedirects": 50,
       "_socketTimeout": undefined,
       "handlers": Array [
         PersonalAccessTokenCredentialHandler {
@@ -22,7 +27,6 @@ WebApi {
       "requestOptions": Object {
         "ignoreSslError": false,
       },
-      "userAgent": "vsts-node-api",
     },
   },
   "serverUrl": "myEndpoint/",
@@ -33,9 +37,13 @@ WebApi {
     "baseUrl": "myEndpoint/",
     "restClient": RestClient {
       "client": HttpClient {
+        "_allowRedirects": true,
         "_certConfig": undefined,
+        "_disposed": false,
         "_httpProxy": undefined,
         "_ignoreSslError": false,
+        "_keepAlive": false,
+        "_maxRedirects": 50,
         "_socketTimeout": undefined,
         "handlers": Array [
           PersonalAccessTokenCredentialHandler {
@@ -45,7 +53,6 @@ WebApi {
         "requestOptions": Object {
           "ignoreSslError": false,
         },
-        "userAgent": "vsts-node-api",
       },
     },
   },

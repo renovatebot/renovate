@@ -9,7 +9,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/angular",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.6.0",
@@ -17,7 +16,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/%40angular/cli",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "*",
@@ -26,7 +24,6 @@ Object {
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/foo",
       "skipReason": "any-version",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "file:../foo/bar",
@@ -34,7 +31,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "file",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "",
@@ -43,7 +39,6 @@ Object {
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/baz",
       "skipReason": "empty",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "latest",
@@ -51,7 +46,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "unknown-version",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": ">=1.7.0 <2.0.0",
@@ -59,7 +53,6 @@ Object {
       "depType": "engines",
       "prettyDepType": "engine",
       "skipReason": "unknown-engines",
-      "versionScheme": "semver",
     },
     Object {
       "commitMessageTopic": "Node.js",
@@ -71,7 +64,6 @@ Object {
       },
       "prettyDepType": "engine",
       "purl": "pkg:github/nodejs/node?sanitize=true",
-      "versionScheme": "semver",
     },
     Object {
       "commitMessageTopic": "npm",
@@ -80,7 +72,6 @@ Object {
       "depType": "engines",
       "prettyDepType": "engine",
       "purl": "pkg:npm/npm",
-      "versionScheme": "semver",
     },
     Object {
       "commitMessageTopic": "Yarn",
@@ -90,7 +81,6 @@ Object {
       "prettyDepType": "engine",
       "purl": "pkg:npm/yarn",
       "skipReason": "unknown-version",
-      "versionScheme": "semver",
     },
   ],
   "lernaClient": undefined,
@@ -118,7 +108,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "github:owner/b#master",
@@ -126,7 +115,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unversioned-reference",
-      "versionScheme": "semver",
     },
     Object {
       "currentRawValue": "github:owner/c#v1.1.0",
@@ -138,8 +126,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/c?ref=tags",
-      "repositoryUrl": "https://github.com/owner/c",
-      "versionScheme": "semver",
+      "sourceUrl": "https://github.com/owner/c",
     },
     Object {
       "currentValue": "github:owner/d#a7g3eaf",
@@ -147,7 +134,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unversioned-reference",
-      "versionScheme": "semver",
     },
     Object {
       "currentDigest": "49b5aca613b33c5b626ae68c03a385f25c142f55",
@@ -159,8 +145,7 @@ Object {
       "githubRepo": "owner/e",
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/e",
-      "repositoryUrl": "https://github.com/owner/e",
-      "versionScheme": "semver",
+      "sourceUrl": "https://github.com/owner/e",
     },
     Object {
       "currentRawValue": "owner/f#v2.0.0",
@@ -172,8 +157,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/f?ref=tags",
-      "repositoryUrl": "https://github.com/owner/f",
-      "versionScheme": "semver",
+      "sourceUrl": "https://github.com/owner/f",
     },
     Object {
       "currentValue": "gitlab:owner/g#v1.0.0",
@@ -181,7 +165,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "github:-hello/world#v1.0.0",
@@ -189,7 +172,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "@foo/bar#v2.0.0",
@@ -197,7 +179,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "github:frank#v0.0.1",
@@ -205,7 +186,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "skipReason": "unknown-version",
-      "versionScheme": "semver",
     },
     Object {
       "currentDigest": "49b5aca",
@@ -217,8 +197,7 @@ Object {
       "githubRepo": "owner/k",
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/k",
-      "repositoryUrl": "https://github.com/owner/k",
-      "versionScheme": "semver",
+      "sourceUrl": "https://github.com/owner/k",
     },
     Object {
       "currentDigest": "abcdef0",
@@ -230,8 +209,7 @@ Object {
       "githubRepo": "owner/l",
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/l",
-      "repositoryUrl": "https://github.com/owner/l",
-      "versionScheme": "semver",
+      "sourceUrl": "https://github.com/owner/l",
     },
     Object {
       "currentRawValue": "https://github.com/owner/m.git#v1.0.0",
@@ -243,8 +221,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/m?ref=tags",
-      "repositoryUrl": "https://github.com/owner/m",
-      "versionScheme": "semver",
+      "sourceUrl": "https://github.com/owner/m",
     },
     Object {
       "currentRawValue": "git+https://github.com/owner/n#v2.0.0",
@@ -256,8 +233,7 @@ Object {
       "pinDigests": false,
       "prettyDepType": "dependency",
       "purl": "pkg:github/owner/n?ref=tags",
-      "repositoryUrl": "https://github.com/owner/n",
-      "versionScheme": "semver",
+      "sourceUrl": "https://github.com/owner/n",
     },
   ],
   "lernaClient": undefined,
@@ -285,7 +261,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/autoprefixer",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "~1.6.0",
@@ -293,7 +268,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/bower",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "13.1.0",
@@ -301,7 +275,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/browserify",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "0.9.2",
@@ -309,7 +282,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/browserify-css",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "=0.22.0",
@@ -317,7 +289,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/cheerio",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.21.0",
@@ -325,14 +296,12 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/config",
-      "versionScheme": "semver",
     },
     Object {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "^1.5.8",
@@ -340,7 +309,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/angular",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.5.8",
@@ -348,7 +316,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/angular-touch",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.5.8",
@@ -356,7 +323,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/angular-sanitize",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "4.0.0-beta.1",
@@ -364,7 +330,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/%40angular/core",
-      "versionScheme": "semver",
     },
   ],
   "lernaClient": undefined,
@@ -413,7 +378,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/autoprefixer",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "~1.6.0",
@@ -421,7 +385,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/bower",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "13.1.0",
@@ -429,7 +392,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/browserify",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "0.9.2",
@@ -437,7 +399,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/browserify-css",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "=0.22.0",
@@ -445,7 +406,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/cheerio",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.21.0",
@@ -453,14 +413,12 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/config",
-      "versionScheme": "semver",
     },
     Object {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "^1.5.8",
@@ -468,7 +426,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/angular",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.5.8",
@@ -476,7 +433,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/angular-touch",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.5.8",
@@ -484,7 +440,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/angular-sanitize",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "4.0.0-beta.1",
@@ -492,7 +447,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/%40angular/core",
-      "versionScheme": "semver",
     },
   ],
   "lernaClient": "npm",
@@ -520,7 +474,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/autoprefixer",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "~1.6.0",
@@ -528,7 +481,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/bower",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "13.1.0",
@@ -536,7 +488,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/browserify",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "0.9.2",
@@ -544,7 +495,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/browserify-css",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "=0.22.0",
@@ -552,7 +502,6 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/cheerio",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.21.0",
@@ -560,14 +509,12 @@ Object {
       "depType": "dependencies",
       "prettyDepType": "dependency",
       "purl": "pkg:npm/config",
-      "versionScheme": "semver",
     },
     Object {
       "depName": "enabled",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "skipReason": "invalid-value",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "^1.5.8",
@@ -575,7 +522,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/angular",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.5.8",
@@ -583,7 +529,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/angular-touch",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "1.5.8",
@@ -591,7 +536,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/angular-sanitize",
-      "versionScheme": "semver",
     },
     Object {
       "currentValue": "4.0.0-beta.1",
@@ -599,7 +543,6 @@ Object {
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
       "purl": "pkg:npm/%40angular/core",
-      "versionScheme": "semver",
     },
   ],
   "lernaClient": undefined,

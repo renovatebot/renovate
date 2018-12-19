@@ -2,6 +2,7 @@
 
 exports[`manager readmes has same questions for all managers 1`] = `
 Array [
+  "ansible",
   "bazel",
   "buildkite",
   "bundler",
