@@ -9,15 +9,6 @@ Array [
 
 exports[`platform/git/storage getFile(filePath, branchName) returns null for 404 1`] = `[Error: repository-changed]`;
 
-exports[`platform/git/storage getFileList() should return the correct files 1`] = `
-Array [
-  "future_file",
-  "master_file",
-  "past_file",
-]
-`;
+exports[`platform/git/storage getFileList() should return the correct files 1`] = `Array []`;
 
-exports[`platform/git/storage mergeBranch(branchName) should throw if branch merge throws 1`] = `
-[Error: fatal: 'origin/not_found' is not a commit and a branch 'not_found' cannot be created from it
-]
-`;
+exports[`platform/git/storage mergeBranch(branchName) should throw if branch merge throws 1`] = `[TypeError: Cannot read property 'reset' of null]`;
