@@ -1,8 +1,8 @@
 const datasource = require('../../lib/datasource');
 const gitlab = require('../../lib/datasource/gitlab');
-const ghGot = require('../../lib/platform/github/gh-got-wrapper');
+const glGot = require('../../lib/platform/gitlab/gl-got-wrapper');
 
-jest.mock('../../lib/platform/github/gh-got-wrapper');
+jest.mock('../../lib/platform/gitlab/gl-got-wrapper');
 jest.mock('got');
 
 describe('datasource/gitlab', () => {
@@ -14,13 +14,13 @@ describe('datasource/gitlab', () => {
       ).rejects.toThrow();
     });
     it('throws if no content', async () => {
-      ghGot.mockImplementationOnce(() => ({
+      glGot.mockImplementationOnce(() => ({
         body: {},
       }));
       await expect(gitlab.getPreset('some/repo')).rejects.toThrow();
     });
     it('throws if fails to parse', async () => {
-      ghGot.mockImplementationOnce(() => ({
+      glGot.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('not json').toString('base64'),
         },
@@ -28,7 +28,7 @@ describe('datasource/gitlab', () => {
       await expect(gitlab.getPreset('some/repo')).rejects.toThrow();
     });
     it('should return the preset', async () => {
-      ghGot.mockImplementationOnce(() => ({
+      glGot.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         },
