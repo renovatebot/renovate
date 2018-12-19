@@ -4,15 +4,11 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
 Array [
   Object {
     "depName": "Configuration Error",
+    "message": "extends: Invalid timezone: Europe/Brussel",
+  },
+  Object {
+    "depName": "Configuration Error",
     "message": "Configuration option \`enabled\` should be boolean. Found: 1 (number)",
-  },
-  Object {
-    "depName": "Configuration Error",
-    "message": "Invalid schedule: \`Schedule \\"every 15 mins every weekday\\" should not specify minutes\`",
-  },
-  Object {
-    "depName": "Configuration Error",
-    "message": "timezone: Invalid timezone: Asia",
   },
   Object {
     "depName": "Configuration Error",
@@ -20,19 +16,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Configuration option \`semanticCommitType\` should be a string",
-  },
-  Object {
-    "depName": "Configuration Error",
     "message": "Configuration option \`lockFileMaintenance\` should be a json object",
-  },
-  Object {
-    "depName": "Configuration Error",
-    "message": "extends: Invalid timezone: Europe/Brussel",
-  },
-  Object {
-    "depName": "Configuration Error",
-    "message": "Invalid configuration option: \`packageRules[1].foo\`",
   },
   Object {
     "depName": "Configuration Error",
@@ -40,7 +24,23 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
+    "message": "Configuration option \`semanticCommitType\` should be a string",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid configuration option: \`packageRules[1].foo\`",
+  },
+  Object {
+    "depName": "Configuration Error",
     "message": "Invalid regExp for packageRules[3].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid schedule: \`Schedule \\"every 15 mins every weekday\\" should not specify minutes\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules must contain JSON objects",
   },
   Object {
     "depName": "Configuration Error",
@@ -48,7 +48,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "packageRules must contain JSON objects",
+    "message": "timezone: Invalid timezone: Asia",
   },
 ]
 `;
@@ -85,11 +85,11 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Unsafe regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
+    "message": "Invalid configuration option: \`lockFileMaintenance.bar\`",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid configuration option: \`lockFileMaintenance.bar\`",
+    "message": "Unsafe regExp for packageRules[0].excludePackagePatterns: \`(x+x+)+y\`",
   },
 ]
 `;
@@ -98,11 +98,11 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "packageNames: packageNames should be inside a \`packageRule\` only",
+    "message": "docker.minor.packageNames: packageNames should be inside a \`packageRule\` only",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "docker.minor.packageNames: packageNames should be inside a \`packageRule\` only",
+    "message": "packageNames: packageNames should be inside a \`packageRule\` only",
   },
 ]
 `;
