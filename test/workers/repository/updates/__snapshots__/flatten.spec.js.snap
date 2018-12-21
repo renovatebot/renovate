@@ -86,6 +86,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
+    "versionScheme": "semver",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -180,6 +181,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
+    "versionScheme": "semver",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -274,6 +276,7 @@ Array [
     "updateLockFiles": true,
     "updateNotScheduled": true,
     "updateType": "lockFileMaintenance",
+    "versionScheme": "semver",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -368,6 +371,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
+    "versionScheme": "semver",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -462,6 +466,7 @@ Array [
     "updateLockFiles": true,
     "updateNotScheduled": true,
     "updateType": "lockFileMaintenance",
+    "versionScheme": "semver",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -556,6 +561,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
+    "versionScheme": "semver",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -650,6 +656,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
+    "versionScheme": "docker",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -744,6 +751,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
+    "versionScheme": "docker",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,

@@ -73,11 +73,21 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 #### Linting and formatting
 
-We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then you should find that the offending file will be updated automatically and pass the second time you run `yarn test` because each time you run it, it includes the `--fix` command automatically. You usually shouldn't need to fix any prettier errors manually.
+We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again. You usually shouldn't need to fix any prettier errors manually.
+
+## Keeping your Renovate fork up to date
+
+First of all, never commit to `master` of your fork - always use a branch like `feat/1234-add-yarn-parsing`.
+
+Then, make sure your fork is up to date with `master` each time before creating a new branch. To do this, see these GitHub guides:
+
+[Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
+
+[Syncing a fork](https://help.github.com/articles/syncing-a-fork/)
 
 ## Tips and tricks
 
-#### Forked repositories
+#### Runnign Renovate against forked repositories
 
 Quite often, the quickest way for you to test or fix something is to fork an existing repository.
 However, by default Renovate skips over repositories that are forked.

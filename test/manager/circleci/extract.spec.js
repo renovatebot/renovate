@@ -1,7 +1,8 @@
 const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/circleci/extract');
 
-const yamlFile = fs.readFileSync('test/_fixtures/circleci/config.yml', 'utf8');
+const file1 = fs.readFileSync('test/_fixtures/circleci/config.yml', 'utf8');
+const file2 = fs.readFileSync('test/_fixtures/circleci/config2.yml', 'utf8');
 
 describe('lib/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
@@ -13,9 +14,14 @@ describe('lib/manager/circleci/extract', () => {
       expect(extractPackageFile('nothing here', config)).toBe(null);
     });
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(yamlFile, config);
+      const res = extractPackageFile(file1, config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(4);
+    });
+    it('extracts orbs too', () => {
+      const res = extractPackageFile(file2, config);
+      expect(res.deps).toMatchSnapshot();
+      // expect(res.deps).toHaveLength(4);
     });
   });
 });

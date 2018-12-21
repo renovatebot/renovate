@@ -10,7 +10,6 @@ Array [
     "registryUrls": Array [
       "http://example.com/private-pypi/",
     ],
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==1.0.0",
@@ -20,7 +19,6 @@ Array [
     "registryUrls": Array [
       "http://example.com/private-pypi/",
     ],
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==1.9",
@@ -30,7 +28,6 @@ Array [
     "registryUrls": Array [
       "http://example.com/private-pypi/",
     ],
-    "versionScheme": "pep440",
   },
 ]
 `;
@@ -42,35 +39,30 @@ Array [
     "depName": "Django",
     "lineNumber": 0,
     "purl": "pkg:pypi/Django",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.6.27",
     "depName": "distribute",
     "lineNumber": 1,
     "purl": "pkg:pypi/distribute",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.2",
     "depName": "dj-database-url",
     "lineNumber": 2,
     "purl": "pkg:pypi/dj-database-url",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==2.4.5",
     "depName": "psycopg2",
     "lineNumber": 3,
     "purl": "pkg:pypi/psycopg2",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.1.2",
     "depName": "wsgiref",
     "lineNumber": 4,
     "purl": "pkg:pypi/wsgiref",
-    "versionScheme": "pep440",
   },
 ]
 `;
@@ -82,7 +74,6 @@ Array [
     "depName": "Django",
     "lineNumber": 0,
     "purl": "pkg:pypi/Django",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.6.27",
@@ -90,28 +81,24 @@ Array [
     "lineNumber": 1,
     "purl": "pkg:pypi/distribute",
     "skipReason": "ignored",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.2",
     "depName": "dj-database-url",
     "lineNumber": 2,
     "purl": "pkg:pypi/dj-database-url",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==2.4.5",
     "depName": "psycopg2",
     "lineNumber": 3,
     "purl": "pkg:pypi/psycopg2",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.1.2",
     "depName": "wsgiref",
     "lineNumber": 4,
     "purl": "pkg:pypi/wsgiref",
-    "versionScheme": "pep440",
   },
 ]
 `;
@@ -123,21 +110,18 @@ Array [
     "depName": "Django",
     "lineNumber": 0,
     "purl": "pkg:pypi/Django",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==4.1.1",
     "depName": "celery",
     "lineNumber": 1,
     "purl": "pkg:pypi/celery",
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": " == 3.2.1",
     "depName": "foo",
     "lineNumber": 2,
     "purl": "pkg:pypi/foo",
-    "versionScheme": "pep440",
   },
 ]
 `;
