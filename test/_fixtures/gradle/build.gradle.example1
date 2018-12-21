@@ -5,7 +5,7 @@ configurations {
 
 repositories {
   maven {
-    url 'file:///Users/ibethencourt/Projects/renovate/test/_fixtures/gradle/maven/repo1.maven.org/maven2'
+    url 'file://test/_fixtures/gradle/maven/repo1.maven.org/maven2'
   }
 }
 

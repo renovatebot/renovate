@@ -1,4 +1,4 @@
 
 dependencies {
-    compile 'org.hamcrest:hamcrest-core:1.1.1'
+    compile 'org.hamcrest:hamcrest-core:1.2.1'
 }
