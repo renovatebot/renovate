@@ -3490,10 +3490,10 @@ humanize-ms@^1.2.1:
   dependencies:
     ms "^2.0.0"
 
-husky@1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/husky/-/husky-1.2.1.tgz#33628f7013e345c1790a4dbe4642ad047f772dee"
-  integrity sha512-4Ylal3HWhnDvIszuiyLoVrSGI7QLg/ogkNCoHE34c+yZYzb9kBZNrlTOsdw92cGi3cJT8pPb6CdVfxFkLnc8Dg==
+husky@1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/husky/-/husky-1.3.0.tgz#fbb97b5e52739d945fd86c3bf92def0ea60175c4"
+  integrity sha512-0Yfh4PkWr8Nrume/lEMgSgK5zg8Q19jGM7jDmN7H92VrqgcYSbn+CM1iLGmAvQSNWuaPx9iq/rq/4Y8LPX6dLA==
   dependencies:
     cosmiconfig "^5.0.7"
     execa "^1.0.0"
@@ -5073,10 +5073,10 @@ lru-cache@^4.0.1, lru-cache@^4.1.1, lru-cache@^4.1.2, lru-cache@^4.1.3:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luxon@1.8.2:
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.8.2.tgz#32ca2be3b3f0fcddd607dc5584ff106107fecade"
-  integrity sha512-TPShotrkafGXEksxvEagZ1peYb9gE3ADppq8IPWG6wqYS/4k9ucRUXipBHy/PrMIfUPxy/llfsQXRvQmOXmVcA==
+luxon@1.8.3:
+  version "1.8.3"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.8.3.tgz#6c76b50319b3a91a357002ca2e96576bb3bfe26d"
+  integrity sha512-hICQcGmUl5e9VUnf5PtHAma+tpiwL/wMBV9/6/M/6iSpzWFHdEElK2Rj4IZx8kbk2/baJvYftgb+n/I2wJ7RXQ==
 
 make-dir@^1.0.0:
   version "1.3.0"
@@ -6756,10 +6756,10 @@ pn@^1.1.0:
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
   integrity sha512-2qHaIQr2VLRFoxe2nASzsV6ef4yOOH+Fi9FBOVH6cqeSgUnoyySPZkxzLuzd+RYOQTRpROA0ztTMqxROKSb/nA==
 
-pnpm@2.20.1:
-  version "2.20.1"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.20.1.tgz#ac202fb03e8339e96e0fef0c667037c27e2977de"
-  integrity sha512-gqYgV+A2Hsfl+dj9B60O9LnwV0ye2TYkazEZ8bAfnHjkyXcMHGd4EvvXMXov5WCfgui/raAQ0xcNZEHWFmfPAg==
+pnpm@2.21.1:
+  version "2.21.1"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.21.1.tgz#39e3eb6ccfb015499ce473972a3c2b58a81baa81"
+  integrity sha512-0UEIdUM8VqRHolaBPREYhTEuu/Zfi4qp3Kp0u6ioCtn7Yi33sGFdApEczb/SenmaqtnWD7OUIO74v8Aw9wnYeg==
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
