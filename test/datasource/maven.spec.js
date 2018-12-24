@@ -110,6 +110,13 @@ describe('datasource/maven', () => {
       );
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
+
+    it('should return all versions of a specific library if a repository does not end with /', async () => {
+      const releases = await datasource.getPkgReleases(
+        'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2'
+      );
+      expect(releases).not.toBeNull();
+    });
   });
 });
 
