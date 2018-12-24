@@ -2,6 +2,7 @@ const nock = require('nock');
 const fs = require('fs');
 
 const datasource = require('../../lib/datasource');
+const mavenDatasource = require('../../lib/datasource/maven');
 const { initLogger } = require('../../lib/logger');
 
 initLogger();
@@ -29,6 +30,10 @@ describe('datasource/maven', () => {
     nock('http://failed_repo')
       .get('/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(404, null);
+  });
+
+  it('should not fail when reset cache', () => {
+    mavenDatasource.resetCache();
   });
 
   describe('getPkgReleases', () => {
@@ -82,6 +87,26 @@ describe('datasource/maven', () => {
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {
       const releases = await datasource.getPkgReleases(
         'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/,http://failed_repo/,ftp://protocol_error_repo'
+      );
+      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
+    });
+
+    it('should return all versions of a specific library if a repository fails because invalid metadata file is found in another repository', async () => {
+      const invalidMavenMetadata = `
+        <?xml version="1.0" encoding="UTF-8"?><metadata>
+          <groupId>mysql</groupId>
+          <artifactId>mysql-connector-java</artifactId>
+          <version>8.0.12</version>
+          <versioning>
+            <lastUpdated>20130301200000</lastUpdated>
+          </versioning>
+        </metadata>      
+      `;
+      nock('http://invalid_metadata_repo')
+        .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
+        .reply(200, invalidMavenMetadata);
+      const releases = await datasource.getPkgReleases(
+        'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/,http://invalid_metadata_repo/maven2/'
       );
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
