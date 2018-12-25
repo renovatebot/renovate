@@ -42,6 +42,8 @@ Also note that this option can be combined with other nested settings, such as d
 
 Warning: GitHub currently has a bug where automerge won't work if a GitHub Organization has protected their master branch, and there is no way to configure around this. Hence, automerging will try and fail in such situations. This doc will be updated once that bug/limitation is fixed by GitHub.
 
+Warning: GitHub won't do automerge if the PR has a negative feedback.
+
 ## automergeComment
 
 Example use:
