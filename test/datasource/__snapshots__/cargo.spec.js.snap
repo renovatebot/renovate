@@ -2,6 +2,7 @@
 
 exports[`datasource/cargo getPkgReleases processes real data 1`] = `
 Object {
+  "homepage": "https://github.com/rust-lang/libc",
   "releases": Array [
     Object {
       "version": "0.2.44",
@@ -178,7 +179,7 @@ Object {
       "version": "0.1.0",
     },
   ],
-  "repository": "https://github.com/rust-lang/libc",
+  "sourceUrl": "https://github.com/rust-lang/libc",
 }
 `;
 
@@ -238,6 +239,6 @@ Object {
       "version": "0.1.0",
     },
   ],
-  "repository": "https://github.com/amethyst/amethyst",
+  "sourceUrl": "https://github.com/amethyst/amethyst",
 }
 `;
