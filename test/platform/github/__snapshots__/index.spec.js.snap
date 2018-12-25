@@ -301,15 +301,10 @@ Your **[semantic-release](https://github.com/semantic-release/semantic-release)*
 
 exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `
 Object {
-  "branchName": "renovate/jest-monorepo",
-  "canMerge": false,
-  "canRebase": true,
-  "displayNumber": "Pull Request #2500",
-  "isConflicted": true,
-  "isStale": true,
-  "number": 2500,
-  "state": "open",
-  "title": "chore(deps): update dependency jest to v23.6.0",
+  "displayNumber": "Pull Request #undefined",
+  "object": Object {
+    "sha": "1234123412341234123412341234123412341234",
+  },
 }
 `;
 
