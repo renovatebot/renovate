@@ -242,3 +242,5 @@ Object {
   "sourceUrl": "https://github.com/amethyst/amethyst",
 }
 `;
+
+exports[`datasource/cargo getPkgReleases throws for 5xx 1`] = `[Error: registry-failure]`;
