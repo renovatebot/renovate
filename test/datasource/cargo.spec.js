@@ -70,12 +70,5 @@ describe('datasource/cargo', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
-    it('skips wrong crate', async () => {
-      got.mockReturnValueOnce({
-        body: res1,
-      });
-      const res = await getPkgReleases({ fullname: 'wrong_crate' });
-      expect(res).toBeNull();
-    });
   });
 });
