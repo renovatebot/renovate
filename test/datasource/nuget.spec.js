@@ -9,6 +9,9 @@ const res2 = fs.readFileSync('test/_fixtures/nuget/sample.nuspec', 'utf8');
 
 describe('datasource/nuget', () => {
   describe('getPkgReleases', () => {
+    beforeEach(() => {
+      global.repoCache = {};
+    });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
       expect(await datasource.getPkgReleases('pkg:nuget/something')).toBeNull();

@@ -9,6 +9,7 @@ describe('api/docker', () => {
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      global.repoCache = {};
       hostRules.find.mockReturnValue({
         username: 'some-username',
         password: 'some-password',
