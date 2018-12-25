@@ -16,6 +16,7 @@ describe('api/npm', () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
+    global.repoCache = {};
     npm.resetCache();
     npmResponse = {
       name: 'foobar',

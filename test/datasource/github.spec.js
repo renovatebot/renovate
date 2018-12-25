@@ -10,6 +10,7 @@ describe('datasource/github', () => {
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {
