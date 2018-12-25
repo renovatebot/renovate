@@ -42,6 +42,7 @@ describe('datasource/go', () => {
     });
   });
   describe('getPkgReleases', () => {
+    beforeEach(() => global.renovateCache.rmAll());
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
       expect(

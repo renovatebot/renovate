@@ -23,6 +23,7 @@ describe('datasource/pypi', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       global.repoCache = {};
+      return global.renovateCache.rmAll();
     });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});

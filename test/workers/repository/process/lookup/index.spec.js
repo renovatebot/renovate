@@ -22,6 +22,7 @@ describe('workers/repository/process/lookup', () => {
     config.rangeStrategy = 'replace';
     global.repoCache = {};
     jest.resetAllMocks();
+    return global.renovateCache.rmAll();
   });
 
   describe('.lookupUpdates()', () => {
