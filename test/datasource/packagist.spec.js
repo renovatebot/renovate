@@ -214,8 +214,12 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(mailchimpJson),
       });
+      delete config.registryUrls;
       expect(
-        await datasource.getPkgReleases('pkg:packagist/drewm/mailchimp-api')
+        await datasource.getPkgReleases(
+          'pkg:packagist/drewm/mailchimp-api',
+          config
+        )
       ).toMatchSnapshot();
     });
   });
