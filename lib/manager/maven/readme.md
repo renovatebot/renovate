@@ -14,7 +14,7 @@ Java
 
 #### Does that language have other (competing?) package managers?
 
-Gradle 
+Gradle
 
 ## Package File Detection
 
