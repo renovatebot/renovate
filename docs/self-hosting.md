@@ -32,7 +32,7 @@ If you wish to configure Renovate using a `config.js` file then map it to `/usr/
 
 #### Kubernetes
 
-Renovate's official Docker image is compatible with Kubernetes. Here is an example manifest of running Renovate against a GitHub Enterprise server:
+Renovate's official Docker image is compatible with Kubernetes. The following is an example manifest of running Renovate against a GitHub Enterprise server. First the Kubernetes manifest:
 
 ```yaml
 apiVersion: batch/v1beta1
@@ -41,26 +41,58 @@ metadata:
   name: renovate
 spec:
   schedule: "@hourly"
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
         spec:
           containers:
           - name: renovate
-            image: renovate/renovate:13.153.0 # Update this to the latest available and then enable Renovate on the manifest
-# Environment Variables
+            # Update this to the latest available and then enable Renovate on the manifest
+            image: renovate/renovate:13.153.0
+            # Environment Variables
             env:
             - name: RENOVATE_PLATFORM
-              value: "github"
+              valueFrom:
+                secretKeyRef:
+                  key: renovate-platform
+                  name: renovate-env
             - name: RENOVATE_ENDPOINT
-              value: "https://github.company.com/api/v3"
+              valueFrom:
+                secretKeyRef:
+                  key: renovate-endpoint
+                  name: renovate-env
             - name: RENOVATE_TOKEN
-              value: "your-github-enterprise-renovate-user-token"
+              valueFrom:
+                secretKeyRef:
+                  key: renovate-token
+                  name: renovate-env
             - name: GITHUB_COM_TOKEN
-              value: "any-personal-user-token-for-github-com-for-fetching-changelogs"
+              valueFrom:
+                secretKeyRef:
+                  key: github-token
             - name: RENOVATE_AUTODISCOVER
-              value: "true"
-          restartPolicy: OnFailure
+              valueFrom:
+                secretKeyRef:
+                  key: renovate-autodiscover
+                  name: renovate-env
+          restartPolicy: Never
+```
+
+And also this accompanying `secret.yaml`:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: renovate-env
+type: Opaque
+stringData:
+  renovate-platform: "github"
+  renovate-endpoint: "https://github.company.com/api/v3"
+  renovate-token: "your-github-enterprise-renovate-user-token"
+  github-token: "any-personal-user-token-for-github-com-for-fetching-changelogs"
+  renovate-autodiscover: "true"
 ```
 
 ## Authentication
