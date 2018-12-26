@@ -22,7 +22,7 @@ Gradle
 
 "pomfile" usually named pom.xml. It is possible to override default pom.xml with any filename
 
- `mvn -f <path>/custom_pom.xml <command>`
+`mvn -f <path>/custom_pom.xml <command>`
 
 ---
 
