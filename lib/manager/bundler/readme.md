@@ -1,5 +1,3 @@
-# Work in Progress
-
 ## Overview
 
 #### Name of package manager
@@ -17,7 +15,6 @@ Ruby
 #### Does that language have other (competing?) package managers?
 
 No
-
 
 ## Package File Detection
 
@@ -79,7 +76,7 @@ Yes, Bundler allows "groups" but these are only for the convenience of users and
 
 #### List all the sources/syntaxes of dependencies that can be extracted:
 
-Most are regular gem sources. 
+Most are regular gem sources.
 
 > Git repositories are also valid gem sources, as long as the repo contains one or more valid gems. Specify what to check out with `:tag`, `:branch`, or `:ref`. The default is the `master` branch.
 
