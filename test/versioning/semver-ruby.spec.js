@@ -149,4 +149,12 @@ describe('semverRuby', () => {
       expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc2')).toBe(false);
     });
   });
+
+  describe('.sortVersions', () => {
+    it('sorts versions in an ascending order', () => {
+      expect(
+        ['1.2.3-beta', '2.0.1', '1.3.4', '1.2.3'].sort(semverRuby.sortVersions)
+      ).toEqual(['1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']);
+    });
+  });
 });
