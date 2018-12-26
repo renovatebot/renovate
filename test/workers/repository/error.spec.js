@@ -30,6 +30,7 @@ describe('workers/repository/error', () => {
       'platform-failure',
       'no-vulnerability-alerts',
       'cannot-fork',
+      'integration-unauthorized',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {

@@ -48,6 +48,15 @@ describe('workers/branch/parent', () => {
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBe(undefined);
     });
+    it('returns undefined if PR body check rebase', async () => {
+      platform.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockReturnValue({
+        title: 'Update foo to v4',
+        body: 'blah\nblah\n- [x] <!-- renovate-rebase -->foo\n',
+      });
+      const res = await getParentBranch(config);
+      expect(res.parentBranch).toBe(undefined);
+    });
     it('returns undefined if manual rebase by label', async () => {
       platform.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockReturnValue({

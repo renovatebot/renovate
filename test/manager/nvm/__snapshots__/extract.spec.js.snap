@@ -5,8 +5,7 @@ Array [
   Object {
     "currentValue": "8.4.0",
     "depName": "node",
-    "purl": "pkg:github/nodejs/node?sanitize=true",
-    "versionScheme": "semver",
+    "purl": "pkg:github/nodejs/node?normalize=true",
   },
 ]
 `;
@@ -16,9 +15,8 @@ Array [
   Object {
     "currentValue": "8.4",
     "depName": "node",
-    "purl": "pkg:github/nodejs/node?sanitize=true",
+    "purl": "pkg:github/nodejs/node?normalize=true",
     "skipReason": "unsupported-version",
-    "versionScheme": "semver",
   },
 ]
 `;
