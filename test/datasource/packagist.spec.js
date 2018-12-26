@@ -20,6 +20,7 @@ describe('datasource/packagist', () => {
       hostRules.find = jest.fn(input => input);
       global.repoCache = {};
       config = {
+        versionScheme: 'semver-composer',
         registryUrls: [
           {
             type: 'composer',
