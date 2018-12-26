@@ -157,4 +157,82 @@ describe('semverRuby', () => {
       ).toEqual(['1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']);
     });
   });
+
+  describe('.minSatisfyingVersion', () => {
+    it('returns lowest version that matches range', () => {
+      expect(
+        semverRuby.minSatisfyingVersion(['2.1.5', '2.1.6'], '~> 2.1')
+      ).toEqual('2.1.5');
+
+      expect(
+        semverRuby.minSatisfyingVersion(['2.1.6', '2.1.5'], '~> 2.1.6')
+      ).toEqual('2.1.6');
+
+      expect(
+        semverRuby.minSatisfyingVersion(
+          ['4.7.3', '4.7.4', '4.7.5', '4.7.9'],
+          '~> 4.7, >= 4.7.4'
+        )
+      ).toEqual('4.7.4');
+
+      expect(
+        semverRuby.minSatisfyingVersion(
+          ['2.5.3', '2.5.4', '2.5.5', '2.5.6'],
+          '~>2.5.3'
+        )
+      ).toEqual('2.5.3');
+
+      expect(
+        semverRuby.minSatisfyingVersion(
+          ['2.1.0', '3.0.0.beta', '2.3', '3.0.0-rc.1', '3.0.0', '3.1.1'],
+          '~> 3.0'
+        )
+      ).toEqual('3.0.0');
+    });
+
+    it('returns null if version that matches range absent', () => {
+      expect(
+        semverRuby.minSatisfyingVersion(['1.2.3', '1.2.4'], '>= 3.5.0')
+      ).toEqual(null);
+    });
+  });
+
+  describe('.maxSatisfyingVersion', () => {
+    it('returns greatest version that matches range', () => {
+      expect(
+        semverRuby.maxSatisfyingVersion(['2.1.5', '2.1.6'], '~> 2.1')
+      ).toEqual('2.1.6');
+
+      expect(
+        semverRuby.maxSatisfyingVersion(['2.1.6', '2.1.5'], '~> 2.1.6')
+      ).toEqual('2.1.6');
+
+      expect(
+        semverRuby.maxSatisfyingVersion(
+          ['4.7.3', '4.7.4', '4.7.5', '4.7.9'],
+          '~> 4.7, >= 4.7.4'
+        )
+      ).toEqual('4.7.9');
+
+      expect(
+        semverRuby.maxSatisfyingVersion(
+          ['2.5.3', '2.5.4', '2.5.5', '2.5.6'],
+          '~>2.5.3'
+        )
+      ).toEqual('2.5.6');
+
+      expect(
+        semverRuby.maxSatisfyingVersion(
+          ['2.1.0', '3.0.0.beta', '2.3', '3.0.0-rc.1', '3.0.0', '3.1.1'],
+          '~> 3.0'
+        )
+      ).toEqual('3.1.1');
+    });
+
+    it('returns null if version that matches range absent', () => {
+      expect(
+        semverRuby.maxSatisfyingVersion(['1.2.3', '1.2.4'], '>= 3.5.0')
+      ).toEqual(null);
+    });
+  });
 });
