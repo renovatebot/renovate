@@ -40,13 +40,15 @@ Not many but some user might use custom filenames.
 
 #### Is the fileMatch pattern likely to get many "false hits" for files that have nothing to do with package management?
 
-Usually "pomfile" is in the root of the project and it is not likely that it will be many other xml files in the same directory.
+Usually "pomfile" is in the root of the project and it is not likely that it will be many other xml files in the same directory. But we can search for all pomfiles in a repository and process them all independently.
 
 ## Parsing and Extraction
 
 #### Can package files have "local" links to each other that need to be resolved?
 
-No
+No. All references are to Maven Central or some other source host.
+
+---
 
 #### Is there reason why package files need to be parsed together (in serial) instead of independently?
 
@@ -74,53 +76,78 @@ No
 
 #### List all the sources/syntaxes of dependencies that can be extracted:
 
+All dependencies are similar to this example:
+
+```xml
+<dependency>
+  <groupId>org.springframework.integration</groupId>
+  <artifactId>spring-integration-aws</artifactId>
+  <version>1.2.3</version>
+</dependency>
+```
+
+A range can be used instead of the exact version too.
+
 ---
 
 #### Describe which types of dependencies above are supported and which will be implemented in future:
+
+All to be supported.
 
 ## Versioning
 
 #### What versioning scheme do the package files use?
 
+Custom (Maven): https://maven.apache.org/pom.html#Dependency_Version_Requirement_Specification
+
 ---
 
 #### Does this versioning scheme support range constraints, e.g. `^1.0.0` or `1.x`?
 
-No, it has its own syntax for supporting [versions](https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html).
+Yes, it has its own syntax for supporting [version ranges](https://maven.apache.org/enforcer/enforcer-rules/versionRanges.html).
 
 ---
 
 #### Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?
-It is general package manager. No need to separate it.
+
+It is used for both applications and libraries.
 
 ---
 
 #### If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?
 
+Recommended not to pin anything automatically initially.
+
 ## Lookup
 
 #### Is a new datasource required? Provide details
-Custom sources are possible with [settings.xml](https://maven.apache.org/settings.html).
+
+A Maven datasource is necessary, probably to be shared with the Gradle package manager.
 
 ---
 
 #### Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?
 
-If host is custom it should be possible to find it inside settings.xml
+Custom sources are possible with [settings.xml](https://maven.apache.org/settings.html) but this file is not normally stored within a repository. Users will need to configure custom sources in the Renovate config instead.
 
 ---
 
 #### Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?
-Yes. It is possible to specify the version of target JVM. [example](https://maven.apache.org/plugins/maven-compiler-plugin/examples/set-compiler-source-and-target.html)
+
+Yes. It is possible to specify the version of target JVM. [example](https://maven.apache.org/plugins/maven-compiler-plugin/examples/set-compiler-source-and-target.html). This should influence which results (versions) that Renovate looks up.
 
 ---
 
 #### Will users need the ability to configure language or other constraints using Renovate config?
 
+It is recommended to make the JVM version configurable in Renovate config too.
+
 ## Artifacts
 
 #### Are lock files or checksum files used? Mandatory?
+
 No
+
 ---
 
 #### If so, what tool and exact commands should be used if updating 1 or more package versions in a dependency file?
