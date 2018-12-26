@@ -176,23 +176,6 @@ describe('api/docker', () => {
       });
       expect(res).toBe(null);
     });
-    it('returns tags with no suffix', async () => {
-      const tags = ['a', 'b', '1.0.0', '1.1.0', '1.1.0-alpine'];
-      got.mockReturnValueOnce({
-        headers: {
-          'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
-        },
-      });
-      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
-      got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getPkgReleases({
-        fullname: 'my/node',
-        qualifiers: {},
-      });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
-    });
     it('uses custom registry', async () => {
       const tags = ['1.0.0'];
       got.mockReturnValueOnce({
