@@ -202,10 +202,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getPkgReleases({
-        fullname: 'node',
-        qualifiers: {},
-      });
+      const res = await getPkgReleases('pkg:docker/node');
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -238,21 +235,13 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getPkgReleases({
-        fullname: 'kubernetes-dashboard-amd64',
-        qualifiers: {
-          registry: 'k8s.gcr.io',
-        },
-      });
+      const res = await getPkgReleases('pkg:docker/kubernetes-dashboard-amd64?registry=k8s.gcr.io');
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
-      const res = await docker.getPkgReleases({
-        fullname: 'my/node',
-        qualifiers: {},
-      });
+      const res = await getPkgReleases('pkg:docker/my/node');
       expect(res).toBe(null);
     });
   });
