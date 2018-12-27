@@ -2,7 +2,6 @@ const nock = require('nock');
 const fs = require('fs');
 
 const datasource = require('../../lib/datasource');
-const mavenDatasource = require('../../lib/datasource/maven');
 const { initLogger } = require('../../lib/logger');
 
 initLogger();
@@ -34,10 +33,6 @@ describe('datasource/maven', () => {
     nock('http://failed_repo')
       .get('/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(404, null);
-  });
-
-  it('should not fail when reset cache', () => {
-    mavenDatasource.resetCache();
   });
 
   describe('getPkgReleases', () => {
