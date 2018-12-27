@@ -238,7 +238,10 @@ describe('api/docker', () => {
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
-      const res = await getPkgReleases('pkg:docker/my/node');
+            const res = await docker.getPkgReleases({
+        fullname: 'my/node',
+        qualifiers: {},
+      });
       expect(res).toBe(null);
     });
   });
