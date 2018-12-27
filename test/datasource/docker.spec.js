@@ -238,7 +238,7 @@ describe('api/docker', () => {
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
-            const res = await docker.getPkgReleases({
+      const res = await docker.getPkgReleases({
         fullname: 'my/node',
         qualifiers: {},
       });
