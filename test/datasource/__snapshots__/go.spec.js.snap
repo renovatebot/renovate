@@ -20,21 +20,18 @@ Array [
       "fullname": "x/text",
       "qualifiers": Object {},
     },
-    undefined,
   ],
   Array [
     Object {
       "fullname": "x/text",
       "qualifiers": Object {},
     },
-    undefined,
   ],
   Array [
     Object {
       "fullname": "go-x/x",
       "qualifiers": Object {},
     },
-    undefined,
   ],
 ]
 `;
