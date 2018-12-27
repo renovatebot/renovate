@@ -345,32 +345,6 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
 }
 `;
 
-exports[`api/docker getPkgReleases returns tags with no suffix 1`] = `
-Object {
-  "releases": Array [
-    Object {
-      "version": "1.0.0",
-    },
-    Object {
-      "version": "1.1.0-alpine",
-    },
-    Object {
-      "version": "1.1.0",
-    },
-  ],
-}
-`;
-
-exports[`api/docker getPkgReleases returns tags with suffix 1`] = `
-Object {
-  "releases": Array [
-    Object {
-      "version": "1.1.0",
-    },
-  ],
-}
-`;
-
 exports[`api/docker getPkgReleases uses custom registry 1`] = `
 [MockFunction] {
   "calls": Array [

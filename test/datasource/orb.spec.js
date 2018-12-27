@@ -28,6 +28,7 @@ describe('datasource/orb', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('returns null for empty result', async () => {
