@@ -202,6 +202,10 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases('pkg:docker/node');
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
@@ -216,6 +220,10 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases('pkg:docker/node?registry=docker.io');
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
@@ -230,6 +238,10 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases(
         'pkg:docker/kubernetes-dashboard-amd64?registry=k8s.gcr.io'
       );
