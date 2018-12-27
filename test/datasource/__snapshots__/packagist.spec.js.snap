@@ -232,7 +232,6 @@ Object {
 
 exports[`datasource/packagist getPkgReleases supports plain packages 1`] = `
 Object {
-  "homepage": undefined,
   "name": "vendor/package-name",
   "releases": Array [
     Object {

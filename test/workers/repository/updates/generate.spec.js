@@ -165,6 +165,44 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toEqual('2017-02-08T20:01:41+00:00');
     });
+    it('groups multiple digest updates', () => {
+      const branch = [
+        {
+          depName: 'foo/bar',
+          groupName: 'foo docker images',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          lazyGrouping: true,
+          isDigest: true,
+          foo: 1,
+          newValue: 'abcdef',
+          group: {
+            foo: 2,
+          },
+        },
+        {
+          depName: 'foo/baz',
+          groupName: 'foo docker images',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          lazyGrouping: true,
+          foo: 1,
+          newValue: 'zzzzzzzzzz',
+          group: {
+            foo: 2,
+          },
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.foo).toBe(2);
+      expect(res.singleVersion).toBeUndefined();
+      expect(res.recreateClosed).toBe(true);
+      expect(res.groupName).toBeDefined();
+    });
     it('fixes different messages', () => {
       const branch = [
         {

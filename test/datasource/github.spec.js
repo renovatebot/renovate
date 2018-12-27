@@ -10,6 +10,7 @@ describe('datasource/github', () => {
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {
@@ -82,7 +83,7 @@ describe('datasource/github', () => {
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getPkgReleases(
-        'pkg:github/some/dep?sanitize=true'
+        'pkg:github/some/dep?normalize=true'
       );
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
