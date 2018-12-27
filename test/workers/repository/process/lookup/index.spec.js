@@ -15,11 +15,12 @@ qJson.latestVersion = '1.4.1';
 
 let config;
 
-describe('manager/npm/lookup', () => {
+describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
     config = { ...require('../../../../../lib/config/defaults').getConfig() };
     config.manager = 'npm';
     config.rangeStrategy = 'replace';
+    global.repoCache = {};
     jest.resetAllMocks();
   });
 

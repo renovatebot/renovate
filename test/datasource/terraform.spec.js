@@ -12,6 +12,7 @@ describe('datasource/terraform', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('returns null for empty result', async () => {
@@ -47,18 +48,6 @@ describe('datasource/terraform', () => {
       );
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-    });
-    it('returns from cache', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(consulData),
-      });
-      const res1 = await datasource.getPkgReleases(
-        'pkg:terraform/hashicorp/consul/aws'
-      );
-      const res2 = await datasource.getPkgReleases(
-        'pkg:terraform/hashicorp/consul/aws'
-      );
-      expect(res1).toEqual(res2);
     });
     it('rejects mismatch', async () => {
       got.mockReturnValueOnce({

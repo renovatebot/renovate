@@ -6,7 +6,10 @@ jest.mock('../../lib/platform/gitlab/gl-got-wrapper');
 jest.mock('got');
 
 describe('datasource/gitlab', () => {
-  beforeEach(() => global.renovateCache.rmAll());
+  beforeEach(() => {
+    global.repoCache = {};
+    return global.renovateCache.rmAll();
+  });
   describe('getPreset()', () => {
     it('throws if non-default', async () => {
       await expect(
