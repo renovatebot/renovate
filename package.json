@@ -80,7 +80,7 @@
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "6.6.3",
     "bunyan": "1.8.12",
-    "cacache": "11.3.1",
+    "cacache": "11.3.2",
     "chalk": "2.4.1",
     "changelog-filename-regex": "2.0.1",
     "child-process-promise": "2.2.1",
