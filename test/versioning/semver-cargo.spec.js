@@ -108,9 +108,21 @@ describe('semver.getNewValue()', () => {
     expect(semver.getNewValue('=1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
       '=1.1.0'
     );
+    expect(semver.getNewValue('   =1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
+      '=1.1.0'
+    );
   });
   it('bumps equals space', () => {
     expect(semver.getNewValue('= 1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
+      '= 1.1.0'
+    );
+    expect(semver.getNewValue('  = 1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
+      '=1.1.0'
+    );
+    expect(semver.getNewValue('  =   1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
+      '=1.1.0'
+    );
+    expect(semver.getNewValue('=    1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
       '= 1.1.0'
     );
   });
