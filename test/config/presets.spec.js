@@ -210,6 +210,9 @@ describe('config/presets', () => {
     it('parses github', () => {
       expect(presets.parsePreset('github>some/repo')).toMatchSnapshot();
     });
+    it('parses gitlab', () => {
+      expect(presets.parsePreset('gitlab>some/repo')).toMatchSnapshot();
+    });
     it('returns default package name with params', () => {
       expect(
         presets.parsePreset(':group(packages/eslint, eslint)')
