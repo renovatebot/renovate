@@ -26,7 +26,7 @@ Podfile
 
 #### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
 
-`['Podfile']`\*
+`['(^|/)Podfile$']`\*
 
 ---
 
@@ -139,9 +139,12 @@ Also, all podspec are stored in one [repo](https://github.com/CocoaPods/Specs)
 
 #### Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?
 
-User can provide remove git url ([details](https://guides.cocoapods.org/using/the-podfile.html#from-a-podspec-in-the-root-of-a-library-repo))
+User can specify a different location of the source. The official CocoaPods source is implicit. More details here
 
-`pod 'Alamofire', :git => 'https://github.com/Alamofire/Alamofire.git'`
+```
+source 'https://github.com/artsy/Specs.git'
+source 'https://github.com/CocoaPods/Specs.git'
+```
 
 ---
 
@@ -230,3 +233,6 @@ end
 ```
 
 When you're done you can get an account and push your pod to the CocoaPods Trunk. CocoaPods Trunk is an authentication and CocoaPods API service. To publish new or updated libraries to CocoaPods for public release you will need to be registered with Trunk and have a valid Trunk session on your current device. More details about CocoaPods Trunk you can find [here](https://guides.cocoapods.org/making/getting-setup-with-trunk.html)
+
+It's possible to perform `pod install` and `pod update` action in Docker-based version of cocoapods.
+I used this (image)[https://github.com/MaSpeng/docker-hub-cocoapods] and random iOS project.
