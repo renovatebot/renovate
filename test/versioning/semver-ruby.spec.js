@@ -1,6 +1,22 @@
 const semverRuby = require('../../lib/versioning/semver-ruby');
 
 describe('semverRuby', () => {
+  describe('.equals', () => {
+    it('returns true when versions are equal', () => {
+      expect(semverRuby.equals('1.0.0', '1')).toBe(true);
+      expect(semverRuby.equals('1.2.0', '1.2')).toBe(true);
+      expect(semverRuby.equals('1.2.0', '1.2.0')).toBe(true);
+      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc1')).toBe(true);
+    });
+
+    it('returns false when versions are different', () => {
+      expect(semverRuby.equals('1.2.0', '2')).toBe(false);
+      expect(semverRuby.equals('1.2.0', '1.1')).toBe(false);
+      expect(semverRuby.equals('1.2.0', '1.2.1')).toBe(false);
+      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc2')).toBe(false);
+    });
+  });
+
   describe('.getMajor', () => {
     it('returns major segment of version', () => {
       expect(semverRuby.getMajor('1')).toEqual(1);
@@ -131,22 +147,6 @@ describe('semverRuby', () => {
       expect(semverRuby.isStable('')).toBeFalsy();
       expect(semverRuby.isStable(null)).toBeFalsy();
       expect(semverRuby.isStable('tottally-not-a-version')).toBeFalsy();
-    });
-  });
-
-  describe('.equals', () => {
-    it('returns true when versions are equal', () => {
-      expect(semverRuby.equals('1.0.0', '1')).toBe(true);
-      expect(semverRuby.equals('1.2.0', '1.2')).toBe(true);
-      expect(semverRuby.equals('1.2.0', '1.2.0')).toBe(true);
-      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc1')).toBe(true);
-    });
-
-    it('returns false when versions are different', () => {
-      expect(semverRuby.equals('1.2.0', '2')).toBe(false);
-      expect(semverRuby.equals('1.2.0', '1.1')).toBe(false);
-      expect(semverRuby.equals('1.2.0', '1.2.1')).toBe(false);
-      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc2')).toBe(false);
     });
   });
 
