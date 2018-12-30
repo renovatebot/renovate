@@ -23,7 +23,7 @@ Object {
     },
   ],
   "renovate-config": undefined,
-  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
 `;
@@ -51,7 +51,7 @@ Object {
     },
   ],
   "renovate-config": undefined,
-  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
 `;
@@ -77,7 +77,7 @@ Object {
     },
   ],
   "renovate-config": undefined,
-  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
 `;
@@ -101,7 +101,7 @@ Object {
       "version": "0.0.2",
     },
   ],
-  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -132,7 +132,7 @@ Object {
     },
   ],
   "renovate-config": undefined,
-  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
 `;
@@ -169,7 +169,7 @@ Marking the latest version of an npm package as deprecated results in the entire
     },
   ],
   "renovate-config": undefined,
-  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
 `;
@@ -211,7 +211,7 @@ Object {
     },
   ],
   "renovate-config": undefined,
-  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
 `;
@@ -239,7 +239,7 @@ Object {
     },
   ],
   "renovate-config": undefined,
-  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
 `;
@@ -267,7 +267,7 @@ Object {
     },
   ],
   "renovate-config": undefined,
-  "repositoryUrl": "https://github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "versions": Object {},
 }
 `;

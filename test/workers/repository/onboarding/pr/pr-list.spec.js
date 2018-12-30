@@ -42,7 +42,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           upgrades: [
             {
               updateType: 'pin',
-              repositoryUrl: 'https://a',
+              sourceUrl: 'https://a',
               depName: 'a',
               depType: 'devDependencies',
               newValue: '1.1.0',
@@ -59,7 +59,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           branchName: 'renovate/a-2.x',
           upgrades: [
             {
-              repositoryUrl: 'https://a',
+              sourceUrl: 'https://a',
               depName: 'a',
               currentValue: '^1.0.0',
               depType: 'devDependencies',

@@ -66,6 +66,10 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 
 ## prFooter
 
+## printConfig
+
+This option is useful for troubleshooting, particularly if using presets. e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
+
 ## privateKey
 
 ## repositories

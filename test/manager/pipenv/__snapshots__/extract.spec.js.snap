@@ -12,7 +12,6 @@ Array [
       "https://pypi.org/pypi/",
       "http://example.com/private-pypi/",
     ],
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==1.0.0",
@@ -24,7 +23,6 @@ Array [
       "https://pypi.org/pypi/",
       "http://example.com/private-pypi/",
     ],
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==1.0.0",
@@ -36,7 +34,6 @@ Array [
       "https://pypi.org/pypi/",
       "http://example.com/private-pypi/",
     ],
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.1.0",
@@ -48,7 +45,6 @@ Array [
       "https://pypi.org/pypi/",
       "http://example.com/private-pypi/",
     ],
-    "versionScheme": "pep440",
   },
 ]
 `;
@@ -64,7 +60,6 @@ Array [
     "registryUrls": Array [
       "https://pypi.org/pypi/",
     ],
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.6.27",
@@ -75,7 +70,6 @@ Array [
     "registryUrls": Array [
       "https://pypi.org/pypi/",
     ],
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.2",
@@ -86,7 +80,6 @@ Array [
     "registryUrls": Array [
       "https://pypi.org/pypi/",
     ],
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==2.4.5",
@@ -97,7 +90,6 @@ Array [
     "registryUrls": Array [
       "https://pypi.org/pypi/",
     ],
-    "versionScheme": "pep440",
   },
   Object {
     "currentValue": "==0.1.2",
@@ -108,7 +100,6 @@ Array [
     "registryUrls": Array [
       "https://pypi.org/pypi/",
     ],
-    "versionScheme": "pep440",
   },
 ]
 `;

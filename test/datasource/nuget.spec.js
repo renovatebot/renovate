@@ -9,6 +9,9 @@ const res2 = fs.readFileSync('test/_fixtures/nuget/sample.nuspec', 'utf8');
 
 describe('datasource/nuget', () => {
   describe('getPkgReleases', () => {
+    beforeEach(() => {
+      global.repoCache = {};
+    });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
       expect(await datasource.getPkgReleases('pkg:nuget/something')).toBeNull();
@@ -37,7 +40,7 @@ describe('datasource/nuget', () => {
       const res = await datasource.getPkgReleases('pkg:nuget/nunit');
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.repositoryUrl).toBeDefined();
+      expect(res.sourceUrl).toBeDefined();
     });
   });
 });
