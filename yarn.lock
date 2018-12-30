@@ -264,6 +264,14 @@ aggregate-error@^1.0.0:
     clean-stack "^1.0.0"
     indent-string "^3.0.0"
 
+aggregate-error@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/aggregate-error/-/aggregate-error-2.0.0.tgz#65bd82beba40097eacb2f1077a5b55c593b18abc"
+  integrity sha512-xA1VQPApQdDehIIpS3gBFkMGDRb9pDYwZPVUOoX8A0lU3GB0mjiACqsa9ByBurU53erhjamf5I4VNRitCfXhjg==
+  dependencies:
+    clean-stack "^2.0.0"
+    indent-string "^3.0.0"
+
 ajv@^4.9.1:
   version "4.11.8"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-4.11.8.tgz#82ffb02b29e662ae53bdc20af15947706739c536"
@@ -1350,6 +1358,11 @@ clean-stack@^1.0.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/clean-stack/-/clean-stack-1.3.0.tgz#9e821501ae979986c46b1d66d2d432db2fd4ae31"
   integrity sha1-noIVAa6XmYbEax1m0tQy2y/UrjE=
+
+clean-stack@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/clean-stack/-/clean-stack-2.0.0.tgz#301bfa9e8dd2d3d984c0e542f7aa67b996f63e0a"
+  integrity sha512-VEoL9Qh7I8s8iHnV53DaeWSt8NJ0g3khMfK6NiCPB7H657juhro+cSw2O88uo3bo0c0X5usamtXk0/Of0wXa5A==
 
 cli-boxes@^1.0.0:
   version "1.0.0"
@@ -7758,17 +7771,17 @@ sax@^1.2.4:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
-semantic-release@15.13.1:
-  version "15.13.1"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.13.1.tgz#18541032504aa0b443d011083685c9b42eb38c9f"
-  integrity sha512-bkrfQ10BhbJRMeq/Ih9DZ9FO4ffDwFYsRR134JP9JvQSf8GVX4sg3SnFFd7Q10C6pKwjKqMZ4+ZNB5uQYMLPEg==
+semantic-release@15.13.2:
+  version "15.13.2"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-15.13.2.tgz#a05f1f2ee1a572aca1cde78ef42d15b280b36318"
+  integrity sha512-uUQDfD4X+b48x7rYdTYcWrprRpCmo2gNpiIWn2XnpieOrB3/rRrd4Kn5ekvCnqUgMffN0VWBDqDGp5WxoSfweA==
   dependencies:
     "@semantic-release/commit-analyzer" "^6.1.0"
     "@semantic-release/error" "^2.2.0"
     "@semantic-release/github" "^5.1.0"
     "@semantic-release/npm" "^5.0.5"
     "@semantic-release/release-notes-generator" "^7.1.2"
-    aggregate-error "^1.0.0"
+    aggregate-error "^2.0.0"
     cosmiconfig "^5.0.1"
     debug "^4.0.0"
     env-ci "^3.0.0"
