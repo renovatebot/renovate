@@ -185,4 +185,26 @@ describe('semver.getNewValue()', () => {
       semver.getNewValue('~0.6.1', 'replace', '0.6.8', '0.7.0-rc.2')
     ).toEqual('~0.7.0-rc');
   });
+  it('handles less than version requirements', () => {
+    expect(semver.getNewValue('<1.3.4', 'replace', '1.2.3', '1.5.0')).toEqual(
+      '<1.5.1'
+    );
+    expect(semver.getNewValue('< 1.3.4', 'replace', '1.2.3', '1.5.0')).toEqual(
+      '<1.5.1'
+    );
+    expect(
+      semver.getNewValue('<   1.3.4', 'replace', '1.2.3', '1.5.0')
+    ).toEqual('<1.5.1');
+  });
+  it('handles less than equals version requirements', () => {
+    expect(semver.getNewValue('<=1.3.4', 'replace', '1.2.3', '1.5.0')).toEqual(
+      '<=1.5.0'
+    );
+    expect(semver.getNewValue('<= 1.3.4', 'replace', '1.2.3', '1.5.0')).toEqual(
+      '<=1.5.0'
+    );
+    expect(
+      semver.getNewValue('<=   1.3.4', 'replace', '1.2.3', '1.5.0')
+    ).toEqual('<=1.5.0');
+  });
 });
