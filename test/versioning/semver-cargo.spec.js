@@ -2,12 +2,11 @@ const semver = require('../../lib/versioning/semver-cargo');
 
 describe('semver.matches()', () => {
   it('handles comma', () => {
-    expect(semver.matches('4.2.0', '2.0, >= 3.0 < 5.0.0')).toBe(true);
-    expect(semver.matches('4.2.0', '4.0.0, 3.0.0')).toBe(true);
+    expect(semver.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(true);
+    expect(semver.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBe(false);
+    expect(semver.matches('4.2.0', '4.2.0, < 4.2.4')).toBe(true);
     expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
-    expect(semver.matches('4.2.0', '4.3.0, 3.0.0, > 5.0.0 <= 6.0.0')).toBe(
-      false
-    );
+    expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
   });
 });
 describe('semver.maxSatisfyingVersion()', () => {
@@ -15,15 +14,15 @@ describe('semver.maxSatisfyingVersion()', () => {
     expect(
       semver.maxSatisfyingVersion(
         ['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
-        '3.0, 4.*.0'
+        '4.*.0, < 4.2.5'
       )
     ).toBe('4.2.1');
     expect(
       semver.maxSatisfyingVersion(
-        ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
-        '4.0.0, 5.0'
+        ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3'],
+        '5.0, > 5.0.0'
       )
-    ).toBe('5.0.0');
+    ).toBe('5.0.3');
   });
 });
 describe('semver.isValid()', () => {
@@ -56,10 +55,10 @@ describe('semver.minSatisfyingVersion()', () => {
   it('handles comma', () => {
     expect(
       semver.minSatisfyingVersion(
-        ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
-        '4.*, 5.0'
+        ['0.4.0', '0.5.0', '4.2.0', '4.3.0', '5.0.0'],
+        '4.*, > 4.2'
       )
-    ).toBe('4.2.0');
+    ).toBe('4.3.0');
     expect(
       semver.minSatisfyingVersion(['0.4.0', '0.5.0', '4.2.0', '5.0.0'], '4.0.0')
     ).toBe('4.2.0');
@@ -68,11 +67,11 @@ describe('semver.minSatisfyingVersion()', () => {
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
         '4.0.0, = 0.5.0'
       )
-    ).toBe('0.5.0');
+    ).toBe(null);
     expect(
       semver.minSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
-        '4.0.0, 3.*'
+        '4.0.0, > 4.1.0, <= 4.3.5'
       )
     ).toBe('4.2.0');
     expect(
