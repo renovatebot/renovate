@@ -190,21 +190,21 @@ describe('semver.getNewValue()', () => {
       '<1.5.1'
     );
     expect(semver.getNewValue('< 1.3.4', 'replace', '1.2.3', '1.5.0')).toEqual(
-      '<1.5.1'
+      '< 1.5.1'
     );
     expect(
       semver.getNewValue('<   1.3.4', 'replace', '1.2.3', '1.5.0')
-    ).toEqual('<1.5.1');
+    ).toEqual('< 1.5.1');
   });
   it('handles less than equals version requirements', () => {
     expect(semver.getNewValue('<=1.3.4', 'replace', '1.2.3', '1.5.0')).toEqual(
       '<=1.5.0'
     );
     expect(semver.getNewValue('<= 1.3.4', 'replace', '1.2.3', '1.5.0')).toEqual(
-      '<=1.5.0'
+      '<= 1.5.0'
     );
     expect(
       semver.getNewValue('<=   1.3.4', 'replace', '1.2.3', '1.5.0')
-    ).toEqual('<=1.5.0');
+    ).toEqual('<= 1.5.0');
   });
 });
