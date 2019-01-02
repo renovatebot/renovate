@@ -40,8 +40,6 @@ Not likely
 
 No
 
----
-
 ## Parsing and Extraction
 
 #### Can package files have "local" links to each other that need to be resolved?
