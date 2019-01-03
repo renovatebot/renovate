@@ -1,4 +1,4 @@
-const semverRuby = require('../../lib/versioning/semver-ruby');
+const semverRuby = require('../../lib/versioning/ruby');
 
 describe('semverRuby', () => {
   describe('.equals', () => {
