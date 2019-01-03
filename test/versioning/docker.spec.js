@@ -1,5 +1,5 @@
 const docker = require('../../lib/versioning/docker');
-const semver = require('../../lib/versioning/semver');
+const npm = require('../../lib/versioning/npm');
 
 describe('docker.', () => {
   describe('isValid(version)', () => {
@@ -110,7 +110,7 @@ describe('docker.', () => {
         ['2.0.1', '1.2.3'],
         ['1.2.3', '0.9.5'],
       ].forEach(pair => {
-        expect(docker.sortVersions(...pair)).toBe(semver.sortVersions(...pair));
+        expect(docker.sortVersions(...pair)).toBe(npm.sortVersions(...pair));
       });
     });
   });
