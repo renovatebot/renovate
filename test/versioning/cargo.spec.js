@@ -1,4 +1,4 @@
-const semver = require('../../lib/versioning/semver-cargo');
+const semver = require('../../lib/versioning/cargo');
 
 describe('semver.matches()', () => {
   it('handles comma', () => {
