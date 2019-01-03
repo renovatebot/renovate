@@ -21,6 +21,7 @@ describe('config/migration', () => {
         upgradeInRange: true,
         automergeType: 'branch-push',
         baseBranch: 'next',
+        renovateFork: true,
         ignoreNodeModules: true,
         node: {
           enabled: true,
