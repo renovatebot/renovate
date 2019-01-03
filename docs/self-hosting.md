@@ -113,8 +113,8 @@ You can find instructions for Bitbucket AppPasswords [here](https://confluence.a
 
 Note: you should also configure a GitHub token even if your source host is GitLab or Bitbucket, because Renovate will need to perform many queries to github.com in order to retrieve Release Notes.
 
-You can find instructions for VSTS
-[vsts](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
+You can find instructions for Azure DevOps
+[azureDevOps](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
 
 This token needs to be configured via file, environment variable, or CLI. See
 [docs/configuration.md](configuration.md) for details. The simplest way is

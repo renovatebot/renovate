@@ -74,11 +74,11 @@ describe('config/env', () => {
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
-    it('supports VSTS', () => {
+    it('supports Azure DevOps', () => {
       const envParam = {
         RENOVATE_PLATFORM: 'vsts',
-        VSTS_TOKEN: 'a vsts token',
-        VSTS_ENDPOINT: 'a vsts endpoint',
+        VSTS_TOKEN: 'an Azure DevOps token',
+        VSTS_ENDPOINT: 'an Azure DevOps endpoint',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });

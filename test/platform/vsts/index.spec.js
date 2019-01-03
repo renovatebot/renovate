@@ -711,7 +711,7 @@ describe('platform/vsts', () => {
       expect(vsts.getPrBody(input)).toMatchSnapshot();
     });
   });
-  describe('Not supported by VSTS (yet!)', () => {
+  describe('Not supported by Azure DevOps (yet!)', () => {
     it('setBranchStatus', () => {
       const res = vsts.setBranchStatus();
       expect(res).toBeUndefined();
