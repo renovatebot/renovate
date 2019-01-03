@@ -88,6 +88,23 @@ describe('datasource/maven', () => {
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
 
+    it('should throw registry-failure if maven-central fails', async () => {
+      nock('http://central.maven.org')
+        .get('/maven2/org/artifact/maven-metadata.xml')
+        .times(4)
+        .reply(503);
+
+      expect.assertions(1);
+      try {
+        await datasource.getPkgReleases(
+          'pkg:maven/org/artifact@6.0.5?repository_url=http://central.maven.org/maven2/',
+          config
+        );
+      } catch (e) {
+        expect(e.message).toEqual('registry-failure');
+      }
+    });
+
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {
       const releases = await datasource.getPkgReleases(
         'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/,http://failed_repo/,ftp://protocol_error_repo',
