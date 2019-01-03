@@ -86,7 +86,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
-    "versionScheme": "semver",
+    "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -181,7 +181,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
-    "versionScheme": "semver",
+    "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -276,7 +276,7 @@ Array [
     "updateLockFiles": true,
     "updateNotScheduled": true,
     "updateType": "lockFileMaintenance",
-    "versionScheme": "semver",
+    "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -371,7 +371,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
-    "versionScheme": "semver",
+    "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -466,7 +466,7 @@ Array [
     "updateLockFiles": true,
     "updateNotScheduled": true,
     "updateType": "lockFileMaintenance",
-    "versionScheme": "semver",
+    "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
@@ -561,7 +561,7 @@ Array [
     "unpublishSafe": false,
     "updateLockFiles": true,
     "updateNotScheduled": true,
-    "versionScheme": "semver",
+    "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
       "commitMessageSuffix": "[SECURITY]",
       "enabled": true,
