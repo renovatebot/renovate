@@ -20,6 +20,7 @@ describe('workers/repository/process/lookup', () => {
     config = { ...require('../../../../../lib/config/defaults').getConfig() };
     config.manager = 'npm';
     config.rangeStrategy = 'replace';
+    config.versionScheme = 'npm';
     global.repoCache = {};
     jest.resetAllMocks();
   });
