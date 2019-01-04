@@ -25,7 +25,7 @@ describe('workers/repository/init/apis', () => {
       await initApis(config);
     });
     it('runs vsts', async () => {
-      config.platform = 'vsts';
+      config.platform = 'azure';
       config.repository = 'some/name';
       // config.endpoint = 'https://fabrikam.visualstudio.com/DefaultCollection';
       try {

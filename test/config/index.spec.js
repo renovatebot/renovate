@@ -64,8 +64,8 @@ describe('config/index', () => {
       }
       expect(err.message).toBe('You need to supply a GitLab token.');
     });
-    it('throws for no vsts token', async () => {
-      const env = { RENOVATE_PLATFORM: 'vsts' };
+    it('throws for no Azure DevOps token', async () => {
+      const env = { RENOVATE_PLATFORM: 'azure' };
       let err;
       try {
         await configParser.parseConfigs(env, defaultArgv);
@@ -138,11 +138,11 @@ describe('config/index', () => {
       expect(ghGot.mock.calls.length).toBe(0);
       expect(get.mock.calls.length).toBe(1);
     });
-    it('autodiscovers vsts platform', async () => {
+    it('autodiscovers Azure DevOps platform', async () => {
       const env = {};
       defaultArgv = defaultArgv.concat([
         '--autodiscover',
-        '--platform=vsts',
+        '--platform=azure',
         '--endpoint=endpoint',
         '--token=abc',
       ]);
