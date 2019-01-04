@@ -304,6 +304,10 @@ By default, Renovate won't update any package versions to unstable versions (e.g
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
 
+## includeForks
+
+By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`.
+
 ## includePaths
 
 If you wish for Renovate to process only select paths in the repository, use `includePaths`.
@@ -792,10 +796,6 @@ Typically you shouldn't need to modify this setting.
 ## registryUrls
 
 This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forward compatibility.
-
-## renovateFork
-
-By default, Renovate will skip over any repositories that are forked, even if they contain a `renovate.json`, because that config may have been from the source repository. To enable Renovate on forked repositories, you need to add `renovateFork: true` to your renovate config.
 
 ## requiredStatusChecks
 
