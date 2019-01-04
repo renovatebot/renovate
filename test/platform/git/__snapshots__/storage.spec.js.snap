@@ -18,7 +18,6 @@ Array [
 `;
 
 exports[`platform/git/storage mergeBranch(branchName) should throw if branch merge throws 1`] = `
-[Error: fatal: Cannot update paths and switch to branch 'not_found' at the same time.
-Did you intend to checkout 'origin/not_found' which can not be resolved as commit?
+[Error: fatal: 'origin/not_found' is not a commit and a branch 'not_found' cannot be created from it
 ]
 `;
