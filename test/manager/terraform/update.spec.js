@@ -8,9 +8,8 @@ describe('manager/terraform/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         depType: 'github',
-        depName: 'foo',
         lineNumber: 1,
-        depNameShort: 'hashicorp/example',
+        depName: 'hashicorp/example',
         newValue: 'v1.0.1',
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
@@ -20,9 +19,8 @@ describe('manager/terraform/update', () => {
     it('returns same', () => {
       const upgrade = {
         depType: 'github',
-        depName: 'foo',
         lineNumber: 1,
-        depNameShort: 'hashicorp/example',
+        depName: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
@@ -31,9 +29,8 @@ describe('manager/terraform/update', () => {
     it('returns null if wrong line', () => {
       const upgrade = {
         depType: 'github',
-        depName: 'foo',
         lineNumber: 2,
-        depNameShort: 'hashicorp/example',
+        depName: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
@@ -44,11 +41,9 @@ describe('manager/terraform/update', () => {
         depType: 'github',
         currentValue: 'v0.1.0',
         newValue: 'v0.1.3',
-        depName: 'github.com/tieto-cem/terraform-aws-ecs-task-definition',
-        depNameShort: 'tieto-cem/terraform-aws-ecs-task-definition',
+        depName: 'tieto-cem/terraform-aws-ecs-task-definition',
         lineNumber: 14,
         moduleName: 'container_definition',
-        purl: 'pkg:github/tieto-cem/terraform-aws-ecs-task-definition',
         source:
           'github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0',
       };
@@ -60,11 +55,9 @@ describe('manager/terraform/update', () => {
       const upgrade = {
         currentValue: '0.1.0',
         depName: 'hashicorp/consul/aws',
-        depNameShort: 'hashicorp/consul/aws',
         depType: 'terraform',
         lineNumber: 11,
         moduleName: 'consul',
-        purl: 'pkg:terraform/hashicorp/consul/aws',
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
       };
@@ -75,11 +68,9 @@ describe('manager/terraform/update', () => {
       const upgrade = {
         currentValue: '0.1.0',
         depName: 'hashicorp/consul/aws',
-        depNameShort: 'hashicorp/consul/aws',
         depType: 'terraform',
         lineNumber: 10,
         moduleName: 'consul',
-        purl: 'pkg:terraform/hashicorp/consul/aws',
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
       };

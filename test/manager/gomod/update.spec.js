@@ -8,7 +8,7 @@ describe('manager/gomod/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        depName: 'github.com/pkg/errors',
+        lookupName: 'github.com/pkg/errors',
         lineNumber: 2,
         newValue: 'v0.8.0',
       };
@@ -18,7 +18,7 @@ describe('manager/gomod/update', () => {
     });
     it('replaces two values in one file', () => {
       const upgrade1 = {
-        depName: 'github.com/pkg/errors',
+        lookupName: 'github.com/pkg/errors',
         lineNumber: 2,
         newValue: 'v0.8.0',
       };
@@ -26,7 +26,7 @@ describe('manager/gomod/update', () => {
       expect(res1).not.toEqual(gomod1);
       expect(res1.includes(upgrade1.newValue)).toBe(true);
       const upgrade2 = {
-        depName: 'github.com/aws/aws-sdk-go',
+        lookupName: 'github.com/aws/aws-sdk-go',
         lineNumber: 3,
         newValue: 'v1.15.36',
       };
@@ -36,7 +36,7 @@ describe('manager/gomod/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
-        depName: 'github.com/pkg/errors',
+        lookupName: 'github.com/pkg/errors',
         lineNumber: 2,
         newValue: 'v0.7.0',
       };
@@ -45,7 +45,7 @@ describe('manager/gomod/update', () => {
     });
     it('replaces major updates > 1', () => {
       const upgrade = {
-        depName: 'github.com/pkg/errors',
+        lookupName: 'github.com/pkg/errors',
         lineNumber: 2,
         newMajor: 2,
         updateType: 'major',
@@ -59,7 +59,7 @@ describe('manager/gomod/update', () => {
     });
     it('replaces major gopkg.in updates', () => {
       const upgrade = {
-        depName: 'gopkg.in/russross/blackfriday.v1',
+        lookupName: 'gopkg.in/russross/blackfriday.v1',
         lineNumber: 7,
         newMajor: 2,
         updateType: 'major',
@@ -75,7 +75,7 @@ describe('manager/gomod/update', () => {
     });
     it('returns null if mismatch', () => {
       const upgrade = {
-        depName: 'github.com/aws/aws-sdk-go',
+        lookupName: 'github.com/aws/aws-sdk-go',
         lineNumber: 2,
         newValue: 'v1.15.36',
       };
@@ -88,7 +88,7 @@ describe('manager/gomod/update', () => {
     });
     it('replaces multiline', () => {
       const upgrade = {
-        depName: 'github.com/fatih/color',
+        lookupName: 'github.com/fatih/color',
         lineNumber: 8,
         multiLine: true,
         newValue: 'v1.8.0',
@@ -99,7 +99,7 @@ describe('manager/gomod/update', () => {
     });
     it('replaces quoted multiline', () => {
       const upgrade = {
-        depName: 'gopkg.in/src-d/go-billy.v4',
+        lookupName: 'gopkg.in/src-d/go-billy.v4',
         lineNumber: 57,
         multiLine: true,
         newValue: 'v4.8.0',
@@ -111,7 +111,7 @@ describe('manager/gomod/update', () => {
     });
     it('replaces major multiline', () => {
       const upgrade = {
-        depName: 'github.com/emirpasic/gods',
+        lookupName: 'github.com/emirpasic/gods',
         lineNumber: 7,
         multiLine: true,
         currentValue: 'v1.9.0',
@@ -126,7 +126,7 @@ describe('manager/gomod/update', () => {
     });
     it('bumps major multiline', () => {
       const upgrade = {
-        depName: 'github.com/src-d/gcfg',
+        lookupName: 'github.com/src-d/gcfg',
         lineNumber: 47,
         multiLine: true,
         currentValue: 'v2.3.0',
@@ -141,7 +141,7 @@ describe('manager/gomod/update', () => {
     });
     it('update multiline digest', () => {
       const upgrade = {
-        depName: 'github.com/spf13/jwalterweatherman',
+        lookupName: 'github.com/spf13/jwalterweatherman',
         lineNumber: 43,
         multiLine: true,
         currentVersion: 'v0.0.0',
@@ -156,7 +156,7 @@ describe('manager/gomod/update', () => {
     });
     it('skips already-updated multiline digest', () => {
       const upgrade = {
-        depName: 'github.com/spf13/jwalterweatherman',
+        lookupName: 'github.com/spf13/jwalterweatherman',
         lineNumber: 43,
         multiLine: true,
         currentVersion: 'v0.0.0',
@@ -169,7 +169,7 @@ describe('manager/gomod/update', () => {
     });
     it('handles multiline mismatch', () => {
       const upgrade = {
-        depName: 'github.com/fatih/color',
+        lookupName: 'github.com/fatih/color',
         lineNumber: 8,
         newValue: 'v1.8.0',
       };

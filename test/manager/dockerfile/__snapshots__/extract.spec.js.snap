@@ -9,12 +9,12 @@ Array [
     "currentDigest": "sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
     "currentFrom": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
     "currentValue": "8.11.3-alpine",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "AS node",
     "lineNumber": 2,
-    "purl": "pkg:docker/node",
   },
   Object {
     "currentDepTag": "buildkite/puppeteer:1.1.1",
@@ -22,12 +22,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "buildkite/puppeteer:1.1.1",
     "currentValue": "1.1.1",
+    "datasource": "docker",
     "depName": "buildkite/puppeteer",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "AS puppeteer",
     "lineNumber": 3,
-    "purl": "pkg:docker/buildkite/puppeteer",
   },
 ]
 `;
@@ -41,12 +41,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentValue": "6.12.3",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
   Object {
     "currentDepTag": "python:3.6-slim",
@@ -54,12 +54,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "python:3.6-slim",
     "currentValue": "3.6-slim",
+    "datasource": "docker",
     "depName": "python",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 4,
-    "purl": "pkg:docker/python",
   },
 ]
 `;
@@ -72,12 +72,13 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "gcr.io/k8s-skaffold/skaffold:v0.11.0",
     "currentValue": "v0.11.0",
+    "datasource": "docker",
     "depName": "k8s-skaffold/skaffold",
     "dockerRegistry": "gcr.io",
     "fromPrefix": "COPY --from=",
     "fromSuffix": "/usr/bin/skaffold /usr/bin/skaffold",
     "lineNumber": 1,
-    "purl": "pkg:docker/k8s-skaffold/skaffold?registry=gcr.io",
+    "lookupName": "gcr.io/k8s-skaffold/skaffold",
   },
 ]
 `;
@@ -91,12 +92,13 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "registry.allmine.info:5005/node:8.7.0",
     "currentValue": "8.7.0",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": "registry.allmine.info:5005",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node?registry=registry.allmine.info:5005",
+    "lookupName": "registry.allmine.info:5005/node",
   },
 ]
 `;
@@ -109,12 +111,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "calico/node",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "calico/node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/calico/node",
   },
 ]
 `;
@@ -128,12 +130,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "node",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 3,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -147,12 +149,13 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info/node:8",
     "currentValue": "8",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": "registry2.something.info",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node?registry=registry2.something.info",
+    "lookupName": "registry2.something.info/node",
   },
 ]
 `;
@@ -166,12 +169,13 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info/node:8-alpine",
     "currentValue": "8-alpine",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": "registry2.something.info",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node?registry=registry2.something.info",
+    "lookupName": "registry2.something.info/node",
   },
 ]
 `;
@@ -185,12 +189,13 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info/someaccount/node:8",
     "currentValue": "8",
+    "datasource": "docker",
     "depName": "someaccount/node",
     "dockerRegistry": "registry2.something.info",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/someaccount/node?registry=registry2.something.info",
+    "lookupName": "registry2.something.info/someaccount/node",
   },
 ]
 `;
@@ -204,12 +209,13 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info:5005/node:8",
     "currentValue": "8",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": "registry2.something.info:5005",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node?registry=registry2.something.info:5005",
+    "lookupName": "registry2.something.info:5005/node",
   },
 ]
 `;
@@ -223,12 +229,12 @@ Array [
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentFrom": "node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -242,12 +248,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "node:8.9.0-alpine",
     "currentValue": "8.9.0-alpine",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as base",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -261,12 +267,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "node",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -280,12 +286,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "mynamespace/node:8",
     "currentValue": "8",
+    "datasource": "docker",
     "depName": "mynamespace/node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/mynamespace/node",
   },
 ]
 `;
@@ -299,12 +305,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "node:8.9.0-alpine",
     "currentValue": "8.9.0-alpine",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -318,12 +324,12 @@ Array [
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentFrom": "node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentValue": "8.9.0",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -337,12 +343,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "node",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "From",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -356,12 +362,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentValue": "6.12.3",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -375,12 +381,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentValue": "6.12.3",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -394,12 +400,12 @@ Array [
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentValue": "6.12.3",
+    "datasource": "docker",
     "depName": "node",
     "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;

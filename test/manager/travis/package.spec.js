@@ -1,10 +1,10 @@
-const node = require('../../../lib/manager/travis/package');
+const travis = require('../../../lib/manager/travis/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 const githubDatasource = require('../../../lib/datasource/github');
 
 jest.mock('../../../lib/datasource/github');
 
-describe('lib/manager/node/package', () => {
+describe('lib/manager/travis/package', () => {
   describe('getPackageUpdates', () => {
     let config;
     beforeEach(() => {
@@ -14,22 +14,22 @@ describe('lib/manager/node/package', () => {
     });
     it('returns empty if missing supportPolicy', async () => {
       config.currentValue = ['6', '8'];
-      expect(await node.getPackageUpdates(config)).toEqual([]);
+      expect(await travis.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if invalid supportPolicy', async () => {
       config.currentValue = ['6', '8'];
       config.supportPolicy = ['foo'];
-      expect(await node.getPackageUpdates(config)).toEqual([]);
+      expect(await travis.getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
       config.currentValue = ['8', '10'];
       config.supportPolicy = ['lts_active'];
-      expect(await node.getPackageUpdates(config)).toEqual([]);
+      expect(await travis.getPackageUpdates(config)).toEqual([]);
     });
     it('returns result if needing updates', async () => {
       config.currentValue = ['6', '8', '10'];
       config.supportPolicy = ['lts'];
-      expect(await node.getPackageUpdates(config)).toMatchSnapshot();
+      expect(await travis.getPackageUpdates(config)).toMatchSnapshot();
     });
     it('detects pinning', async () => {
       config.currentValue = ['6.1.0', '8.4.0', '10.0.0'];
@@ -59,7 +59,7 @@ describe('lib/manager/node/package', () => {
           },
         ],
       });
-      expect(await node.getPackageUpdates(config)).toMatchSnapshot();
+      expect(await travis.getPackageUpdates(config)).toMatchSnapshot();
     });
   });
 });
