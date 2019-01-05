@@ -18,6 +18,7 @@ describe('api/npm', () => {
     jest.resetAllMocks();
     global.repoCache = {};
     delete global.testNpmRetries;
+    global.trustLevel = 'low';
     npm.resetCache();
     npmResponse = {
       name: 'foobar',
@@ -354,17 +355,17 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
-    npm.setNpmrc('foo=bar');
-    const res = await npm.getPkgReleases({ fullname: 'foobar' });
+    const npmrc = 'foo=bar';
+    const res = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should cache package info from npm', async () => {
-    npm.setNpmrc('//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz');
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
-    const res1 = await npm.getPkgReleases({ fullname: 'foobar' });
-    const res2 = await npm.getPkgReleases({ fullname: 'foobar' });
+    const npmrc = '//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz';
+    const res1 = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
+    const res2 = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
     expect(res1).not.toBe(null);
     expect(res1).toEqual(res2);
   });
@@ -378,11 +379,10 @@ describe('api/npm', () => {
     nock('https://npm.mycustomregistry.com')
       .get('/foobar')
       .reply(200, npmResponse);
-    npm.setNpmrc(
+    const npmrc =
       'registry=https://npm.mycustomregistry.com/\n//npm.mycustomregistry.com/:_auth = ' +
-        Buffer.from('abcdef').toString('base64')
-    );
-    const res = await npm.getPkgReleases({ fullname: 'foobar' });
+      Buffer.from('abcdef').toString('base64');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should replace any environment variable in npmrc', async () => {
@@ -390,16 +390,18 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
+    global.trustLevel = 'high';
     // eslint-disable-next-line no-template-curly-in-string
-    npm.setNpmrc('registry=${REGISTRY}', 'high');
-    const res = await npm.getPkgReleases({ fullname: 'foobar' });
+    const npmrc = 'registry=${REGISTRY}';
+    const res = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should throw error if necessary env var is not present', () => {
     let e;
     try {
+      global.trustLevel = 'high';
       // eslint-disable-next-line no-template-curly-in-string
-      npm.setNpmrc('registry=${REGISTRY_MISSING}', 'high');
+      npm.setNpmrc('registry=${REGISTRY_MISSING}');
     } catch (err) {
       e = err;
     }
