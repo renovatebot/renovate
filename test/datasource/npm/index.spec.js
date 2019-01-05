@@ -1,7 +1,7 @@
 const registryAuthToken = require('registry-auth-token');
 const nock = require('nock');
 const moment = require('moment');
-const npm = require('../../lib/datasource/npm');
+const npm = require('../../../lib/datasource/npm');
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
