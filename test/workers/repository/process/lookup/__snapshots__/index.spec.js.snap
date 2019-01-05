@@ -201,11 +201,11 @@ Object {
 
 exports[`workers/repository/process/lookup .lookupUpdates() handles github 404 1`] = `Array []`;
 
+exports[`workers/repository/process/lookup .lookupUpdates() handles missing datasource 1`] = `Array []`;
+
 exports[`workers/repository/process/lookup .lookupUpdates() handles packagist 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup .lookupUpdates() handles pypi 404 1`] = `Array []`;
-
-exports[`workers/repository/process/lookup .lookupUpdates() handles unknown purl 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup .lookupUpdates() ignores deprecated 1`] = `
 Object {
@@ -454,6 +454,8 @@ Object {
   "warnings": Array [],
 }
 `;
+
+exports[`workers/repository/process/lookup .lookupUpdates() returns empty result for missing datasource 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup .lookupUpdates() returns minor update if automerging both patch and minor 1`] = `
 Array [

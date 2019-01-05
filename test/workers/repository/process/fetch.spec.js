@@ -65,7 +65,7 @@ describe('workers/repository/process/fetch', () => {
               {
                 depName: 'aaa',
                 depType: 'devDependencies',
-                purl: 'pkg:npm/aaa',
+                datasource: 'npm',
               },
               { depName: 'bbb', depType: 'dependencies' },
             ],
