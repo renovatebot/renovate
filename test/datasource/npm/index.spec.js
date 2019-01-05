@@ -17,6 +17,7 @@ describe('api/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     global.repoCache = {};
+    delete global.testNpmRetries;
     npm.resetCache();
     npmResponse = {
       name: 'foobar',
@@ -51,7 +52,8 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, missingVersions);
-    const res = await npm.getPkgReleases('foobar', { retries: 1 });
+    global.testNpmRetries = 1;
+    const res = await npm.getPkgReleases('foobar');
     expect(res).toBe(null);
   });
   it('should fetch package info from npm', async () => {
@@ -247,7 +249,8 @@ describe('api/npm', () => {
       .reply(200, 'oops');
     let e;
     try {
-      await npm.getPkgReleases('foobar', { retries: 1 });
+      global.testNpmRetries = 1;
+      await npm.getPkgReleases('foobar');
     } catch (err) {
       e = err;
     }
@@ -262,7 +265,8 @@ describe('api/npm', () => {
       .reply(429);
     let e;
     try {
-      await npm.getPkgReleases('foobar', { retries: 1 });
+      global.testNpmRetries = 1;
+      await npm.getPkgReleases('foobar');
     } catch (err) {
       e = err;
     }
@@ -274,7 +278,8 @@ describe('api/npm', () => {
       .reply(503);
     let e;
     try {
-      await npm.getPkgReleases('foobar', { retries: 0 });
+      global.testNpmRetries = 0;
+      await npm.getPkgReleases('foobar');
     } catch (err) {
       e = err;
     }
@@ -286,7 +291,8 @@ describe('api/npm', () => {
       .reply(408);
     let e;
     try {
-      await npm.getPkgReleases('foobar', { retries: 0 });
+      global.testNpmRetries = 0;
+      await npm.getPkgReleases('foobar');
     } catch (err) {
       e = err;
     }
@@ -302,7 +308,8 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200);
-    const res = await npm.getPkgReleases('foobar', { retries: 2 });
+    global.testNpmRetries = 2;
+    const res = await npm.getPkgReleases('foobar');
     expect(res).toMatchSnapshot();
   });
   it('should throw error for others', async () => {
