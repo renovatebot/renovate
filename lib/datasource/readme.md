@@ -4,14 +4,17 @@ Datasources are used in Renovate primarily to fetch released versions of package
 
 ### getPkgReleases
 
-The minimum exported interface for a datasource is a function called `getPkgReleases` that takes a `purl` object as first input, and optionally `config` as the second argument.
+The minimum exported interface for a datasource is a function called `getPkgReleases` that takes a lookup object as first input,.
 
-The `purl` object contains:
+The lookup object contains:
 
-- `fullname`: the package's full name including scope if present (e.g. `@foo/bar`)
-- `qualifiers`: optional addition arguments, may contain fields like `registry`
+- `lookupName`: the package's full name including scope if present (e.g. `@foo/bar`)
+- `datasourceType` if a datasource includes more than one type of lookup (e.g. GitHub with tags and releases)
+- `registryUrls`: an array of registry URLs to lookup, which should override any defaults
+- `npmrc`: an npmrc file, used for npm/yarn/pnpm only,
+- `compatibility`, a freeform object currently used by pypi to restrict lookups to python versions
 
-In the simplest case, the datasource only needs to pay attention to `purl.fullname`.
+In the simplest case, the datasource only needs to pay attention to `lookupName`.
 
 `getPkgReleases` should return an object containing:
 
