@@ -5,24 +5,30 @@ jest.mock('../../lib/datasource/docker');
 jest.mock('../../lib/datasource/npm');
 
 describe('datasource/index', () => {
-  it('returns null for invalid purl', async () => {
-    expect(await datasource.getPkgReleases('pkggithub/some/dep')).toBeNull();
+  it('returns null for no datasource', async () => {
+    expect(await datasource.getPkgReleases({})).toBeNull();
   });
   it('returns getDigest', async () => {
     expect(
-      await datasource.getDigest({ purl: 'pkg:docker/node' })
+      await datasource.getDigest({ datasource: 'docker', depName: 'node' })
     ).toBeUndefined();
   });
   it('adds changelogUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({});
-    const res = await datasource.getPkgReleases('pkg:npm/react-native');
+    const res = await datasource.getPkgReleases({
+      datasource: 'npm',
+      depName: 'react-native',
+    });
     expect(res).toMatchSnapshot();
     expect(res.changelogUrl).toBeDefined();
     expect(res.sourceUrl).toBeDefined();
   });
   it('adds sourceUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({});
-    const res = await datasource.getPkgReleases('pkg:npm/node');
+    const res = await datasource.getPkgReleases({
+      datasource: 'npm',
+      depName: 'node',
+    });
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
   });

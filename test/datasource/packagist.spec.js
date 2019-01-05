@@ -20,6 +20,7 @@ describe('datasource/packagist', () => {
       hostRules.find = jest.fn(input => input);
       global.repoCache = {};
       config = {
+        datasource: 'packagist',
         versionScheme: 'composer',
         registryUrls: [
           {
@@ -32,6 +33,7 @@ describe('datasource/packagist', () => {
     });
     it('supports custom registries', async () => {
       config = {
+        datasource: 'packagist',
         registryUrls: [
           {
             type: 'composer',
@@ -56,11 +58,9 @@ describe('datasource/packagist', () => {
             'packagist.org': false,
           },
         ],
+        depName: 'something/one',
       };
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/something/one',
-        config
-      );
+      const res = await datasource.getPkgReleases(config);
       expect(res).toBeNull();
     });
     it('supports plain packages', async () => {
@@ -77,10 +77,8 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: packagesOnly,
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/vendor/package-name',
-        config
-      );
+      config.depName = 'vendor/package-name';
+      const res = await datasource.getPkgReleases(config);
       expect(res).toMatchSnapshot();
     });
     it('handles auth rejections', async () => {
@@ -89,10 +87,8 @@ describe('datasource/packagist', () => {
           statusCode: 401,
         })
       );
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/vendor/package-name',
-        config
-      );
+      config.depName = 'vendor/package-name';
+      const res = await datasource.getPkgReleases(config);
       expect(res).toBeNull();
     });
     it('handles not found registries', async () => {
@@ -102,10 +98,8 @@ describe('datasource/packagist', () => {
           url: 'https://some.registry/packages.json',
         })
       );
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/drewm/mailchip-api',
-        config
-      );
+      config.depName = 'drewm/mailchimp-api';
+      const res = await datasource.getPkgReleases(config);
       expect(res).toBeNull();
     });
     it('supports includes packages', async () => {
@@ -127,10 +121,8 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(includesJson),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/guzzlehttp/guzzle',
-        config
-      );
+      config.depName = 'guzzlehttp/guzzle';
+      const res = await datasource.getPkgReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
@@ -166,10 +158,8 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/wpackagist-plugin/1beyt',
-        config
-      );
+      config.depName = 'wpackagist-plugin/1beyt';
+      const res = await datasource.getPkgReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
@@ -205,10 +195,8 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/some/other',
-        config
-      );
+      config.depName = 'some/other';
+      const res = await datasource.getPkgReleases(config);
       expect(res).toBeNull();
     });
     it('processes real versioned data', async () => {
@@ -216,12 +204,8 @@ describe('datasource/packagist', () => {
         body: JSON.parse(mailchimpJson),
       });
       delete config.registryUrls;
-      expect(
-        await datasource.getPkgReleases(
-          'pkg:packagist/drewm/mailchimp-api',
-          config
-        )
-      ).toMatchSnapshot();
+      config.depName = 'drewm/mailchimp-api';
+      expect(await datasource.getPkgReleases(config)).toMatchSnapshot();
     });
   });
 });

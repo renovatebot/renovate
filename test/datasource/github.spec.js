@@ -24,7 +24,7 @@ describe('datasource/github', () => {
     it('returns digest', async () => {
       ghGot.mockReturnValueOnce({ body: [{ sha: 'abcdef' }] });
       const res = await github.getDigest(
-        { depName: 'some-dep', purl: 'pkg:github/some/dep?foo=1' },
+        { depName: 'some-dep', lookupName: 'some/dep' },
         null
       );
       expect(res).toBe('abcdef');
@@ -62,23 +62,6 @@ describe('datasource/github', () => {
   });
   describe('getPkgReleases', () => {
     beforeAll(() => global.renovateCache.rmAll());
-    it('returns cleaned tags', async () => {
-      const body = [
-        { name: 'a' },
-        { name: 'v' },
-        { name: '1.0.0' },
-        { name: 'v1.1.0' },
-      ];
-      ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await datasource.getPkgReleases(
-        'pkg:github/some/dep?normalize=true'
-      );
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
-      expect(
-        res.releases.find(release => release.version === '1.1.0')
-      ).toBeDefined();
-    });
     it('returns releases', async () => {
       const body = [
         { tag_name: 'a' },
@@ -87,9 +70,29 @@ describe('datasource/github', () => {
         { tag_name: 'v1.1.0' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await datasource.getPkgReleases(
-        'pkg:github/some/dep?ref=release'
-      );
+      const res = await datasource.getPkgReleases({
+        datasource: 'github',
+        depName: 'some/dep',
+        datasourceType: 'release',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+      expect(
+        res.releases.find(release => release.version === 'v1.1.0')
+      ).toBeDefined();
+    });
+    it('returns tags', async () => {
+      const body = [
+        { name: 'a' },
+        { name: 'v' },
+        { name: '1.0.0' },
+        { name: 'v1.1.0' },
+      ];
+      ghGot.mockReturnValueOnce({ headers: {}, body });
+      const res = await datasource.getPkgReleases({
+        datasource: 'github',
+        depName: 'some/dep',
+      });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
       expect(
@@ -98,7 +101,10 @@ describe('datasource/github', () => {
     });
     it('returns null for invalid ref', async () => {
       expect(
-        await datasource.getPkgReleases('pkg:github/some/dep?ref=invalid')
+        await datasource.getPkgReleases({
+          datasource: 'github',
+          lookupName: 'some/dep?ref=invalid',
+        })
       ).toBeNull();
     });
   });

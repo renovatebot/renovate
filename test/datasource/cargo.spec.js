@@ -50,13 +50,13 @@ describe('datasource/cargo', () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      expect(await getPkgReleases('some_crate')).toBeNull();
+      expect(await getPkgReleases({})).toBeNull();
     });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
         body: res1,
       });
-      const res = await getPkgReleases({ fullname: 'libc' });
+      const res = await getPkgReleases({ lookupName: 'libc' });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -65,7 +65,7 @@ describe('datasource/cargo', () => {
       got.mockReturnValueOnce({
         body: res2,
       });
-      const res = await getPkgReleases({ fullname: 'amethyst' });
+      const res = await getPkgReleases({ lookupName: 'amethyst' });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();

@@ -79,7 +79,7 @@ Object {
 }
 `;
 
-exports[`api/npm should handle purl 1`] = `
+exports[`api/npm should handle regular lookups 1`] = `
 Object {
   "homepage": undefined,
   "latestVersion": "0.0.1",

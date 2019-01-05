@@ -18,7 +18,10 @@ describe('datasource/terraform', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
-        await datasource.getPkgReleases('pkg:terraform/hashicorp/consul/aws')
+        await datasource.getPkgReleases({
+          datasource: 'terraform',
+          depName: 'hashicorp/consul/aws',
+        })
       ).toBeNull();
     });
     it('returns null for 404', async () => {
@@ -28,7 +31,10 @@ describe('datasource/terraform', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases('pkg:terraform/hashicorp/consul/aws')
+        await datasource.getPkgReleases({
+          datasource: 'terraform',
+          depName: 'hashicorp/consul/aws',
+        })
       ).toBeNull();
     });
     it('returns null for unknown error', async () => {
@@ -36,16 +42,43 @@ describe('datasource/terraform', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases('pkg:terraform/hashicorp/consul/aws')
+        await datasource.getPkgReleases({
+          datasource: 'terraform',
+          depName: 'hashicorp/consul/aws',
+        })
       ).toBeNull();
     });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:terraform/hashicorp/consul/aws'
-      );
+      const res = await datasource.getPkgReleases({
+        datasource: 'terraform',
+        depName: 'hashicorp/consul/aws',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
+    it('supports specified registry', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(consulData),
+      });
+      const res = await datasource.getPkgReleases({
+        datasource: 'terraform',
+        lookupName: 'app.terraform.io/hashicorp/consul/aws',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
+    it('uses custom registry', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(consulData),
+      });
+      const res = await datasource.getPkgReleases({
+        datasource: 'terraform',
+        depName: 'hashicorp/consul/aws',
+        registryUrls: ['myregistry.renovatebot.com'],
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
@@ -53,9 +86,10 @@ describe('datasource/terraform', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:terraform/consul/foo?registry=hashicorp'
-      );
+      const res = await datasource.getPkgReleases({
+        datasource: 'terraform',
+        depName: 'hashicorp/consul/foo',
+      });
       expect(res).toBeNull();
     });
   });
