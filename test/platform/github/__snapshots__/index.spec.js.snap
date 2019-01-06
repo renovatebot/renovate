@@ -308,6 +308,17 @@ Object {
   "isConflicted": true,
   "isStale": true,
   "number": 2500,
+  "reviews": Object {
+    "nodes": Array [
+      Object {
+        "author": Object {
+          "login": "login",
+        },
+        "createdAt": "2018-12-30T15:53:22Z",
+        "state": "CHANGES_REQUESTED",
+      },
+    ],
+  },
   "state": "open",
   "title": "chore(deps): update dependency jest to v23.6.0",
 }
@@ -357,6 +368,66 @@ Object {
   "number": 1,
   "sha": undefined,
   "state": "open",
+}
+`;
+
+exports[`platform/github getPr(prNo) should return a mergeable PR if last review from the user is APPROVED 1`] = `
+Object {
+  "branchName": "renovate/major-got-packages",
+  "canMerge": true,
+  "canRebase": true,
+  "displayNumber": "Pull Request #2433",
+  "isConflicted": false,
+  "isStale": true,
+  "labels": Array [
+    "blocked",
+  ],
+  "number": 2433,
+  "reviews": Object {
+    "nodes": Array [
+      Object {
+        "author": Object {
+          "login": "login",
+        },
+        "createdAt": "2018-12-30T15:53:22Z",
+        "state": "CHANGES_REQUESTED",
+      },
+      Object {
+        "author": Object {
+          "login": "login",
+        },
+        "createdAt": "2018-12-30T15:53:29Z",
+        "state": "APPROVED",
+      },
+    ],
+  },
+  "state": "open",
+  "title": "build(deps): update got packages (major)",
+}
+`;
+
+exports[`platform/github getPr(prNo) should return a not mergeable PR if last review from the user is CHANGES_REQUESTED 1`] = `
+Object {
+  "branchName": "renovate/jest-monorepo",
+  "canMerge": false,
+  "canRebase": true,
+  "displayNumber": "Pull Request #2500",
+  "isConflicted": true,
+  "isStale": true,
+  "number": 2500,
+  "reviews": Object {
+    "nodes": Array [
+      Object {
+        "author": Object {
+          "login": "login",
+        },
+        "createdAt": "2018-12-30T15:53:22Z",
+        "state": "CHANGES_REQUESTED",
+      },
+    ],
+  },
+  "state": "open",
+  "title": "chore(deps): update dependency jest to v23.6.0",
 }
 `;
 
