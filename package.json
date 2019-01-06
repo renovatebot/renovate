@@ -98,7 +98,7 @@
     "form-data": "2.3.3",
     "fs-extra": "7.0.1",
     "get-installed-path": "4.0.8",
-    "gh-got": "8.0.1",
+    "gh-got": "8.1.0",
     "github-url-from-git": "1.5.0",
     "gl-got": "9.0.2",
     "got": "9.5.0",
