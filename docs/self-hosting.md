@@ -30,6 +30,71 @@ $ docker run renovate/renovate:13
 
 If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 
+#### Kubernetes
+
+Renovate's official Docker image is compatible with Kubernetes. The following is an example manifest of running Renovate against a GitHub Enterprise server. First the Kubernetes manifest:
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: renovate
+spec:
+  schedule: '@hourly'
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: renovate
+              # Update this to the latest available and then enable Renovate on the manifest
+              image: renovate/renovate:13.153.0
+              # Environment Variables
+              env:
+                - name: RENOVATE_PLATFORM
+                  valueFrom:
+                    secretKeyRef:
+                      key: renovate-platform
+                      name: renovate-env
+                - name: RENOVATE_ENDPOINT
+                  valueFrom:
+                    secretKeyRef:
+                      key: renovate-endpoint
+                      name: renovate-env
+                - name: RENOVATE_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: renovate-token
+                      name: renovate-env
+                - name: GITHUB_COM_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: github-token
+                - name: RENOVATE_AUTODISCOVER
+                  valueFrom:
+                    secretKeyRef:
+                      key: renovate-autodiscover
+                      name: renovate-env
+          restartPolicy: Never
+```
+
+And also this accompanying `secret.yaml`:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: renovate-env
+type: Opaque
+stringData:
+  renovate-platform: 'github'
+  renovate-endpoint: 'https://github.company.com/api/v3'
+  renovate-token: 'your-github-enterprise-renovate-user-token'
+  github-token: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+  renovate-autodiscover: 'true'
+```
+
 ## Authentication
 
 You need to select a repository user for `renovate` to assume the identity of,

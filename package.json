@@ -80,8 +80,8 @@
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "6.6.3",
     "bunyan": "1.8.12",
-    "cacache": "11.3.1",
-    "chalk": "2.4.1",
+    "cacache": "11.3.2",
+    "chalk": "2.4.2",
     "changelog-filename-regex": "2.0.1",
     "child-process-promise": "2.2.1",
     "clean-git-ref": "1.0.3",
@@ -94,11 +94,11 @@
     "detect-indent": "5.0.0",
     "email-addresses": "3.0.3",
     "fast-clone": "1.5.3",
-    "fast-xml-parser": "3.12.10",
+    "fast-xml-parser": "3.12.11",
     "form-data": "2.3.3",
     "fs-extra": "7.0.1",
     "get-installed-path": "4.0.8",
-    "gh-got": "8.0.1",
+    "gh-got": "8.1.0",
     "github-url-from-git": "1.5.0",
     "gl-got": "9.0.2",
     "got": "9.5.0",
@@ -120,7 +120,7 @@
     "p-all": "1.0.0",
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
-    "pnpm": "2.21.1",
+    "pnpm": "2.23.1",
     "proxy-agent": "3.0.3",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
@@ -136,7 +136,8 @@
     "upath": "1.1.0",
     "validator": "10.9.0",
     "www-authenticate": "0.6.2",
-    "yarn": "1.9.4"
+    "yarn": "1.9.4",
+    "@snyk/ruby-semver": "2.0.0"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
@@ -155,7 +156,7 @@
     "nock": "10.0.4",
     "prettier": "1.15.3",
     "pretty-quick": "1.8.0",
-    "semantic-release": "15.13.1",
+    "semantic-release": "15.13.2",
     "tmp-promise": "1.0.5"
   },
   "files": [

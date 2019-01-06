@@ -15,6 +15,7 @@ Array [
   "gomod",
   "gradle",
   "kubernetes",
+  "maven",
   "meteor",
   "npm",
   "nuget",

@@ -20,6 +20,7 @@ describe('datasource/packagist', () => {
       hostRules.find = jest.fn(input => input);
       global.repoCache = {};
       config = {
+        versionScheme: 'composer',
         registryUrls: [
           {
             type: 'composer',

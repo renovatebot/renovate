@@ -63,7 +63,8 @@ Object {
         "enabled": false,
       },
       "prettyDepType": "engine",
-      "purl": "pkg:github/nodejs/node?normalize=true",
+      "purl": "pkg:github/nodejs/node",
+      "versionScheme": "node",
     },
     Object {
       "commitMessageTopic": "npm",
