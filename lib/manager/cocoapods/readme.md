@@ -60,7 +60,7 @@ Package file uses ruby syntax.
 
 #### How do you suggest parsing the file? Using an off-the-shelf parser, using regex, or can it be custom-parsed line by line?
 
-Using regex
+Using line-by-line parser.
 
 ---
 
@@ -96,7 +96,7 @@ Cocoapods supports dependencies from git source and local path.
 
 #### What versioning scheme do the package files use?
 
-Package file use semver 2.0. ([details](https://semver.org))
+Package file use semver 2.0
 
 ---
 
@@ -125,7 +125,7 @@ Package manager used for applications only
 
 #### If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?
 
-I don't see such reason.
+They can be pinned as cocoapods is only for applications.
 
 ## Lookup
 
