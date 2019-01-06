@@ -29,7 +29,7 @@ async function validate(desc, config, isPreset = false) {
 }
 
 (async () => {
-  for (const file of configFileNames) {
+  for (const file of configFileNames.filter(name => name !== 'package.json')) {
     try {
       const rawContent = fs.readFileSync(file, 'utf8');
       console.log(`Validating ${file}`);
