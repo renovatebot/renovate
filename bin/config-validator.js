@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const { validateConfig } = require('../lib/config/validation');
 const { massageConfig } = require('../lib/config/massage');
 const { initLogger } = require('../lib/logger');
-const { configFileNames } = require('../lib/workers/repository/config');
+const { configFileNames } = require('../lib/config/app-strings');
 
 initLogger();
 
