@@ -14,6 +14,7 @@ Array [
   "gitlabci",
   "gomod",
   "gradle",
+  "gradle-wrapper",
   "kubernetes",
   "maven",
   "meteor",

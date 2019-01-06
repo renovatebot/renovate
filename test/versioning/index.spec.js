@@ -7,7 +7,9 @@ describe('versioning.get(versionScheme)', () => {
   });
 
   it('should return the same interface', () => {
-    const semverApi = Object.keys(versioning.get('semver'));
+    const semverApi = Object.keys(versioning.get('semver')).filter(
+      prop => prop !== 'coerce'
+    );
     const pep440Api = Object.keys(versioning.get('pep440')).concat(
       'isLessThanRange'
     );

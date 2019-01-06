@@ -243,6 +243,8 @@ Configuration for Go Modules (`go mod`). Supercedes anything in the `go` config 
 
 Configuration for Java gradle projects
 
+## gradle-wrapper
+
 ## group
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to _add_ settings to any group by defining your own `group` configuration object.

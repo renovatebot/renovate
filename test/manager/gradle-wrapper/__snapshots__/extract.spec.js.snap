@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/gradle-wrapper/extract extractPackageFile() extracts all version line 1`] = `
+Array [
+  Object {
+    "currentValue": "4.10.3",
+    "depName": "gradle",
+    "depType": "gradle-wrapper",
+    "lineNumber": 5,
+    "purl": "pkg:gradle",
+    "shaCurrentValue": "336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043",
+    "shaLineNumber": 6,
+    "type": "all",
+    "versionScheme": "semver",
+  },
+]
+`;
+
+exports[`lib/manager/gradle-wrapper/extract extractPackageFile() extracts bin version line 1`] = `
+Array [
+  Object {
+    "currentValue": "4.8",
+    "depName": "gradle",
+    "depType": "gradle-wrapper",
+    "lineNumber": 4,
+    "purl": "pkg:gradle",
+    "type": "bin",
+    "versionScheme": "semver",
+  },
+]
+`;
