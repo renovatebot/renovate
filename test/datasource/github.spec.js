@@ -29,18 +29,6 @@ describe('datasource/github', () => {
       );
       expect(res).toBe('abcdef');
     });
-    it('returns cached digest', async () => {
-      ghGot.mockReturnValueOnce({ body: [{ sha: '12345' }] });
-      await github.getDigest(
-        { depName: 'some-dep', githubRepo: 'some/dep' },
-        null
-      );
-      const res = await github.getDigest(
-        { depName: 'some-dep', githubRepo: 'some/dep' },
-        null
-      );
-      expect(res).toBe('12345');
-    });
   });
   describe('getPreset()', () => {
     it('throws if non-default', async () => {
