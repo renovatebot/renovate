@@ -1,7 +1,7 @@
 const registryAuthToken = require('registry-auth-token');
 const nock = require('nock');
 const moment = require('moment');
-const npm = require('../../lib/datasource/npm');
+const npm = require('../../../lib/datasource/npm');
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
@@ -17,6 +17,8 @@ describe('api/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     global.repoCache = {};
+    delete global.testNpmRetries;
+    global.trustLevel = 'low';
     npm.resetCache();
     npmResponse = {
       name: 'foobar',
@@ -51,14 +53,15 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, missingVersions);
-    const res = await npm.getPkgReleases('foobar', { retries: 1 });
+    global.testNpmRetries = 1;
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(res).toBe(null);
   });
   it('should fetch package info from npm', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
-    const res = await npm.getPkgReleases('foobar');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
     expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(false);
@@ -192,7 +195,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, deprecatedPackage);
-    const res = await npm.getPkgReleases('foobar');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(res.deprecationMessage).toMatchSnapshot();
   });
@@ -208,7 +211,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
-    const res = await npm.getPkgReleases('foobar');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
     expect(getRelease(res, '0.0.2').canBeUnpublished).toBeUndefined();
@@ -220,7 +223,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
-    const res = await npm.getPkgReleases('foobar');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
     expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(true);
   });
@@ -228,14 +231,14 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(401);
-    const res = await npm.getPkgReleases('foobar');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(res).toBeNull();
   });
   it('should return null if lookup fails', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(404);
-    const res = await npm.getPkgReleases('foobar');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(res).toBeNull();
   });
   it('should throw error for unparseable', async () => {
@@ -247,7 +250,8 @@ describe('api/npm', () => {
       .reply(200, 'oops');
     let e;
     try {
-      await npm.getPkgReleases('foobar', { retries: 1 });
+      global.testNpmRetries = 1;
+      await npm.getPkgReleases({ fullname: 'foobar' });
     } catch (err) {
       e = err;
     }
@@ -262,7 +266,8 @@ describe('api/npm', () => {
       .reply(429);
     let e;
     try {
-      await npm.getPkgReleases('foobar', { retries: 1 });
+      global.testNpmRetries = 1;
+      await npm.getPkgReleases({ fullname: 'foobar' });
     } catch (err) {
       e = err;
     }
@@ -274,7 +279,8 @@ describe('api/npm', () => {
       .reply(503);
     let e;
     try {
-      await npm.getPkgReleases('foobar', { retries: 0 });
+      global.testNpmRetries = 0;
+      await npm.getPkgReleases({ fullname: 'foobar' });
     } catch (err) {
       e = err;
     }
@@ -286,7 +292,8 @@ describe('api/npm', () => {
       .reply(408);
     let e;
     try {
-      await npm.getPkgReleases('foobar', { retries: 0 });
+      global.testNpmRetries = 0;
+      await npm.getPkgReleases({ fullname: 'foobar' });
     } catch (err) {
       e = err;
     }
@@ -302,7 +309,8 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200);
-    const res = await npm.getPkgReleases('foobar', { retries: 2 });
+    global.testNpmRetries = 2;
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(res).toMatchSnapshot();
   });
   it('should throw error for others', async () => {
@@ -311,7 +319,7 @@ describe('api/npm', () => {
       .reply(451);
     let e;
     try {
-      await npm.getPkgReleases('foobar');
+      await npm.getPkgReleases({ fullname: 'foobar' });
     } catch (err) {
       e = err;
     }
@@ -325,7 +333,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
-    const res = await npm.getPkgReleases('foobar');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(res).toMatchSnapshot();
   });
   it('should use NPM_TOKEN if provided', async () => {
@@ -334,7 +342,7 @@ describe('api/npm', () => {
       .reply(200, npmResponse);
     const oldToken = process.env.NPM_TOKEN;
     process.env.NPM_TOKEN = 'some-token';
-    const res = await npm.getPkgReleases('foobar');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     process.env.NPM_TOKEN = oldToken;
     expect(res).toMatchSnapshot();
   });
@@ -347,35 +355,34 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
-    npm.setNpmrc('foo=bar');
-    const res = await npm.getPkgReleases('foobar');
+    const npmrc = 'foo=bar';
+    const res = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should cache package info from npm', async () => {
-    npm.setNpmrc('//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz');
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
-    const res1 = await npm.getPkgReleases('foobar');
-    const res2 = await npm.getPkgReleases('foobar');
+    const npmrc = '//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz';
+    const res1 = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
+    const res2 = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
     expect(res1).not.toBe(null);
     expect(res1).toEqual(res2);
   });
   it('should use global cache', async () => {
     const dummyValue = 'abc123';
     await global.renovateCache.set('datasource-npm', 'foobar', dummyValue, 10);
-    const res = await npm.getPkgReleases('foobar');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' });
     expect(res).toEqual(dummyValue);
   });
   it('should fetch package info from custom registry', async () => {
     nock('https://npm.mycustomregistry.com')
       .get('/foobar')
       .reply(200, npmResponse);
-    npm.setNpmrc(
+    const npmrc =
       'registry=https://npm.mycustomregistry.com/\n//npm.mycustomregistry.com/:_auth = ' +
-        Buffer.from('abcdef').toString('base64')
-    );
-    const res = await npm.getPkgReleases('foobar');
+      Buffer.from('abcdef').toString('base64');
+    const res = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should replace any environment variable in npmrc', async () => {
@@ -383,16 +390,18 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
+    global.trustLevel = 'high';
     // eslint-disable-next-line no-template-curly-in-string
-    npm.setNpmrc('registry=${REGISTRY}', 'high');
-    const res = await npm.getPkgReleases('foobar');
+    const npmrc = 'registry=${REGISTRY}';
+    const res = await npm.getPkgReleases({ fullname: 'foobar' }, { npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should throw error if necessary env var is not present', () => {
     let e;
     try {
+      global.trustLevel = 'high';
       // eslint-disable-next-line no-template-curly-in-string
-      npm.setNpmrc('registry=${REGISTRY_MISSING}', 'high');
+      npm.setNpmrc('registry=${REGISTRY_MISSING}');
     } catch (err) {
       e = err;
     }
