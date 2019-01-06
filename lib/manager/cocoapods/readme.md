@@ -26,7 +26,7 @@ Podfile
 
 #### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
 
-`['(^|/)Podfile$']`\*
+`['(^|/)Podfile$']`
 
 ---
 
