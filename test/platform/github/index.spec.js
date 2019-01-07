@@ -1651,46 +1651,6 @@ describe('platform/github', () => {
       expect(pr.canRebase).toBe(false);
       expect(pr).toMatchSnapshot();
     });
-    it('should return a mergeable PR if last review from the user is APPROVED', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      });
-      get.post.mockImplementationOnce(() => ({
-        body: graphqlOpenPullRequests,
-      }));
-      // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1234',
-          },
-        },
-      }));
-      const pr = await github.getPr(2433);
-      expect(pr.canMerge).toBe(true);
-      expect(pr).toMatchSnapshot();
-    });
-    it('should return a not mergeable PR if last review from the user is CHANGES_REQUESTED', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      });
-      get.post.mockImplementationOnce(() => ({
-        body: graphqlOpenPullRequests,
-      }));
-      // getBranchCommit
-      get.mockImplementationOnce(() => ({
-        body: {
-          object: {
-            sha: '1234',
-          },
-        },
-      }));
-      const pr = await github.getPr(2500);
-      expect(pr.canMerge).toBe(false);
-      expect(pr).toMatchSnapshot();
-    });
   });
   describe('getPrFiles()', () => {
     it('should return empty if no prNo is passed', async () => {
