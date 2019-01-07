@@ -61,12 +61,12 @@
     node-fetch "^2.1.1"
     url-template "^2.0.8"
 
-"@renovate/pep440@0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@renovate/pep440/-/pep440-0.4.0.tgz#fbc38e1c440ea949db2fdc776833615494515171"
-  integrity sha512-vKD/m0yKaX38UGV7evfOTGARmNdp3+EsBzoJ0sLGVCGGsNCGKAsOEsht+S41ixh0xTgKLgdbkohhr+23eKp0MQ==
+"@renovate/pep440@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@renovate/pep440/-/pep440-0.4.1.tgz#0b0d2c30547f3ecc6ac0083cd7afd15db04979be"
+  integrity sha512-UJR4qqM5l1b84iXd9SS8nPOFfxCWDgL3uOhhYwb15DgC1j8wf5ZLoyTcVUhnCLXG770c999PNLJEUl4wRscvhQ==
   dependencies:
-    xregexp "^4.1.1"
+    xregexp "4.2.0"
 
 "@renovatebot/docker-registry-client@3.3.0":
   version "3.3.0"
@@ -9187,10 +9187,10 @@ xregexp@4.0.0:
   resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.0.0.tgz#e698189de49dd2a18cc5687b05e17c8e43943020"
   integrity sha512-PHyM+sQouu7xspQQwELlGwwd05mXUFqwFYfqPO0cC7x4fxyHnnuetmQr6CjJiafIDoH4MogHb9dOoJzR/Y4rFg==
 
-xregexp@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.1.1.tgz#eb8a032aa028d403f7b1b22c47a5f16c24b21d8d"
-  integrity sha512-QJ1gfSUV7kEOLfpKFCjBJRnfPErUzkNKFMso4kDSmGpp3x6ZgkyKf74inxI7PnnQCFYq5TqYJCd7DrgDN8Q05A==
+xregexp@4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.2.0.tgz#33f09542b0d7cabed46728eeacac4d5bd764ccf5"
+  integrity sha512-IyMa7SVe9FyT4WbQVW3b95mTLVceHhLEezQ02+QMvmIqDnKTxk0MLWIQPSW2MXAr1zQb+9yvwYhcyQULneh3wA==
 
 xtend@^4.0.1, xtend@~4.0.1:
   version "4.0.1"

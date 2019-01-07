@@ -74,7 +74,7 @@
     "node": ">= 8.11.0"
   },
   "dependencies": {
-    "@renovate/pep440": "0.4.0",
+    "@renovate/pep440": "0.4.1",
     "@renovatebot/docker-registry-client": "3.3.0",
     "@sindresorhus/is": "0.14.0",
     "@yarnpkg/lockfile": "1.1.0",
