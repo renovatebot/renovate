@@ -21,7 +21,6 @@ const simpleResult = {
       currentValue: '42',
       mavenXmlPath: [
         {
-          groupId: 'org.example',
           artifactId: 'parent',
         },
       ],
@@ -34,7 +33,6 @@ const simpleResult = {
         'dependencies',
         'dependency',
         {
-          groupId: 'org.example',
           artifactId: 'foo',
         },
       ],
@@ -47,8 +45,23 @@ const simpleResult = {
         'dependencies',
         'dependency',
         {
-          groupId: 'org.example',
           artifactId: 'bar',
+        },
+      ],
+    },
+    {
+      depName: 'org.apache.maven.scm:maven-scm-provider-gitexe',
+      currentValue: '1.8.1',
+      mavenXmlPath: [
+        'build',
+        'plugins',
+        'plugin',
+        {
+          artifactId: 'maven-release-plugin',
+        },
+        'dependencies',
+        {
+          artifactId: 'maven-scm-provider-gitexe',
         },
       ],
     },
@@ -59,7 +72,6 @@ const simpleResult = {
         'dependencies',
         'dependency',
         {
-          groupId: 'org.example',
           artifactId: '${artifact-id-placeholder}',
         },
       ],
@@ -72,7 +84,6 @@ const simpleResult = {
         'dependencies',
         'dependency',
         {
-          groupId: '${group-id-placeholder}',
           artifactId: 'baz',
         },
       ],
@@ -85,7 +96,6 @@ const simpleResult = {
         'dependencies',
         'dependency',
         {
-          groupId: 'org.example',
           artifactId: 'quux',
         },
       ],
@@ -98,7 +108,6 @@ const simpleResult = {
         'dependencies',
         'dependency',
         {
-          groupId: 'org.example',
           artifactId: 'quuz',
         },
       ],
@@ -113,7 +122,6 @@ const simpleResult = {
         },
         'dependencies',
         {
-          groupId: 'org.example',
           artifactId: 'profile-artifact',
         },
       ],
@@ -126,7 +134,6 @@ const simpleResult = {
         'reporting',
         'plugins',
         {
-          groupId: 'org.apache.maven.plugins',
           artifactId: 'maven-checkstyle-plugin',
         },
       ],
