@@ -11,8 +11,6 @@
     "debug": "node --inspect-brk lib/renovate",
     "eslint": "eslint lib test",
     "eslint-fix": "eslint --fix lib test",
-    "heroku-push": "git push heroku master",
-    "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
     "lint": "yarn eslint && yarn prettier",
