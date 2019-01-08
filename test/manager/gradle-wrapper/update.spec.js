@@ -40,7 +40,11 @@ describe('manager/gradle-wrapper/update', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).not.toEqual(propertiesFile2);
-      expect(res.includes(upgrade.downloadUrl.replace(':', '\\:'))).toBe(true);
+      expect(
+        res.includes(
+          'https\\://services.gradle.org/distributions/gradle-5.0-all.zip'
+        )
+      ).toBe(true);
       expect(res.includes(checksum)).toBe(true);
     });
 
