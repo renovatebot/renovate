@@ -20,7 +20,7 @@ const simpleResult = {
     {
       depName: 'org.example:parent',
       currentValue: '42',
-      path: [
+      mavenXmlPath: [
         {
           groupId: 'org.example',
           artifactId: 'parent',
@@ -30,7 +30,7 @@ const simpleResult = {
     {
       depName: 'org.example:foo',
       currentValue: '0.0.1',
-      path: [
+      mavenXmlPath: [
         'dependencyManagement',
         'dependencies',
         'dependency',
@@ -43,7 +43,7 @@ const simpleResult = {
     {
       depName: 'org.example:bar',
       currentValue: '1.0.0',
-      path: [
+      mavenXmlPath: [
         'dependencyManagement',
         'dependencies',
         'dependency',
@@ -56,7 +56,7 @@ const simpleResult = {
     {
       depName: 'org.example:${artifact-id-placeholder}',
       currentValue: '0.0.1',
-      path: [
+      mavenXmlPath: [
         'dependencies',
         'dependency',
         {
@@ -69,7 +69,7 @@ const simpleResult = {
     {
       depName: '${group-id-placeholder}:baz',
       currentValue: '0.0.1',
-      path: [
+      mavenXmlPath: [
         'dependencies',
         'dependency',
         {
@@ -82,7 +82,7 @@ const simpleResult = {
     {
       depName: 'org.example:quux',
       currentValue: '${resourceServerVersion}',
-      path: [
+      mavenXmlPath: [
         'dependencies',
         'dependency',
         {
@@ -95,7 +95,7 @@ const simpleResult = {
     {
       depName: 'org.example:quuz',
       currentValue: '1.2.3',
-      path: [
+      mavenXmlPath: [
         'dependencies',
         'dependency',
         {
@@ -107,7 +107,7 @@ const simpleResult = {
     {
       depName: 'org.example:profile-artifact',
       currentValue: '${profile-placeholder}',
-      path: [
+      mavenXmlPath: [
         'profiles',
         {
           id: 'profile-id',
@@ -123,7 +123,7 @@ const simpleResult = {
     {
       depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',
       currentValue: '2.17',
-      path: [
+      mavenXmlPath: [
         'reporting',
         'plugins',
         {
@@ -137,6 +137,10 @@ const simpleResult = {
 
 describe('manager/maven/extract', () => {
   describe('.extractDependencies()', () => {
+    it('returns null for invalid XML', () => {
+      const res = extractDependencies('<project></project>');
+      expect(res).toEqual(null);
+    });
     it('extract dependencies from any XML position', () => {
       const res = extractDependencies(simpleContent);
       expect(res).toEqual(simpleResult);
