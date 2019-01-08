@@ -61,12 +61,12 @@
     node-fetch "^2.1.1"
     url-template "^2.0.8"
 
-"@renovate/pep440@0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@renovate/pep440/-/pep440-0.4.0.tgz#fbc38e1c440ea949db2fdc776833615494515171"
-  integrity sha512-vKD/m0yKaX38UGV7evfOTGARmNdp3+EsBzoJ0sLGVCGGsNCGKAsOEsht+S41ixh0xTgKLgdbkohhr+23eKp0MQ==
+"@renovate/pep440@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@renovate/pep440/-/pep440-0.4.1.tgz#0b0d2c30547f3ecc6ac0083cd7afd15db04979be"
+  integrity sha512-UJR4qqM5l1b84iXd9SS8nPOFfxCWDgL3uOhhYwb15DgC1j8wf5ZLoyTcVUhnCLXG770c999PNLJEUl4wRscvhQ==
   dependencies:
-    xregexp "^4.1.1"
+    xregexp "4.2.0"
 
 "@renovatebot/docker-registry-client@3.3.0":
   version "3.3.0"
@@ -1250,10 +1250,10 @@ chai@^4.1.2:
     pathval "^1.0.0"
     type-detect "^4.0.0"
 
-chalk@2.4.1, chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.3.0, chalk@^2.3.1, chalk@^2.3.2:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.1.tgz#18c49ab16a037b6eb0152cc83e3471338215b66e"
-  integrity sha512-ObN6h1v2fTJSmUXoS3nMQ92LbDK9be4TV+6G+omQlGJFdcUX5heKi1LZ1YnRMIgwTLEj3E24bT6tYni50rlCfQ==
+chalk@2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
+  integrity sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==
   dependencies:
     ansi-styles "^3.2.1"
     escape-string-regexp "^1.0.5"
@@ -1269,6 +1269,15 @@ chalk@^1.1.3:
     has-ansi "^2.0.0"
     strip-ansi "^3.0.0"
     supports-color "^2.0.0"
+
+chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.3.0, chalk@^2.3.1, chalk@^2.3.2:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.1.tgz#18c49ab16a037b6eb0152cc83e3471338215b66e"
+  integrity sha512-ObN6h1v2fTJSmUXoS3nMQ92LbDK9be4TV+6G+omQlGJFdcUX5heKi1LZ1YnRMIgwTLEj3E24bT6tYni50rlCfQ==
+  dependencies:
+    ansi-styles "^3.2.1"
+    escape-string-regexp "^1.0.5"
+    supports-color "^5.3.0"
 
 changelog-filename-regex@2.0.1:
   version "2.0.1"
@@ -3065,12 +3074,12 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
-gh-got@8.0.1:
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/gh-got/-/gh-got-8.0.1.tgz#857c5e9bcd52956e14a9f200d010c641a2f992b3"
-  integrity sha512-i2TkU/u5ti1Wgc34y65FDSCKDuuuVH1Qa6192e0E2Z2CvleS0zPgArpiPZroiQdp9f5gbohw9UZCTTcrjIzwFw==
+gh-got@8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/gh-got/-/gh-got-8.1.0.tgz#2378d07ac293f524549c75f8dc6f3604a885ab01"
+  integrity sha512-Jy7+73XqsAVeAtM5zA0dd+A7mmzkQVIzFuw3xRjFbPsQVqS+aeci8v8H1heOCAPlBYWED5ZYPhlYqZVXdD3Fmg==
   dependencies:
-    got "^9.1.0"
+    got "^9.5.0"
 
 git-log-parser@^1.2.0:
   version "1.2.0"
@@ -3232,7 +3241,7 @@ globby@^8.0.0:
     pify "^3.0.0"
     slash "^1.0.0"
 
-got@9.5.0:
+got@9.5.0, got@^9.5.0:
   version "9.5.0"
   resolved "https://registry.yarnpkg.com/got/-/got-9.5.0.tgz#6fd0312c6b694c0a11d9119d95fd7daed174eb49"
   integrity sha512-N+4kb6i9t1lauJ4NwLVVoFVLxZNa6i+iivtNzCSVw7+bVbTXoq0qXctdd8i9rj3lrI0zDk5NGzcO4bfpEP6Uuw==
@@ -3266,7 +3275,7 @@ got@^6.7.1:
     unzip-response "^2.0.1"
     url-parse-lax "^1.0.0"
 
-got@^9.1.0, got@^9.2.0:
+got@^9.2.0:
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/got/-/got-9.3.0.tgz#9187472a6e7c642264d041b0e670fd8bb1eebb67"
   integrity sha512-4WTeObCRe7hatjQmeCwmkviu+ibyfeF5v6De+FeZdfsLEIe/7d9rl3VOzrknXveeQV/Pq/+f+KbscBQsP8ZxUg==
@@ -6828,10 +6837,10 @@ pn@^1.1.0:
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
   integrity sha512-2qHaIQr2VLRFoxe2nASzsV6ef4yOOH+Fi9FBOVH6cqeSgUnoyySPZkxzLuzd+RYOQTRpROA0ztTMqxROKSb/nA==
 
-pnpm@2.23.1:
-  version "2.23.1"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.23.1.tgz#7e98c8c252a2a5978ec6e88ae27bdd409a6bb6a6"
-  integrity sha512-NQ1D4JhoGgzAEGnNrZ3N2NHQgGTxs0xub7b/xYO0mvRIBu2U50eDfUyhy+gKi50dSHHUflGGAaychXr+DoIBew==
+pnpm@2.25.0:
+  version "2.25.0"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-2.25.0.tgz#d648289eb97f4864efff7bd3a6c2810d8d7bac62"
+  integrity sha512-o665cbzHRt0MLJsgUHRYM+4JwsfRc/HY41ezcjnbL69Z3rW6sSJ1TYdL1UoxxHPFrxtAljdd5VAbwR4/huFDkg==
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
@@ -9178,10 +9187,10 @@ xregexp@4.0.0:
   resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.0.0.tgz#e698189de49dd2a18cc5687b05e17c8e43943020"
   integrity sha512-PHyM+sQouu7xspQQwELlGwwd05mXUFqwFYfqPO0cC7x4fxyHnnuetmQr6CjJiafIDoH4MogHb9dOoJzR/Y4rFg==
 
-xregexp@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.1.1.tgz#eb8a032aa028d403f7b1b22c47a5f16c24b21d8d"
-  integrity sha512-QJ1gfSUV7kEOLfpKFCjBJRnfPErUzkNKFMso4kDSmGpp3x6ZgkyKf74inxI7PnnQCFYq5TqYJCd7DrgDN8Q05A==
+xregexp@4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.2.0.tgz#33f09542b0d7cabed46728eeacac4d5bd764ccf5"
+  integrity sha512-IyMa7SVe9FyT4WbQVW3b95mTLVceHhLEezQ02+QMvmIqDnKTxk0MLWIQPSW2MXAr1zQb+9yvwYhcyQULneh3wA==
 
 xtend@^4.0.1, xtend@~4.0.1:
   version "4.0.1"
