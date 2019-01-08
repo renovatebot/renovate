@@ -15,7 +15,6 @@ const simpleResult = {
   datasource: 'maven',
   homepage: 'http://example.org/index.html',
   sourceUrl: 'http://example.org/src.git',
-  changelogUrl: 'http://example.org/',
   deps: [
     {
       depName: 'org.example:parent',
