@@ -29,15 +29,19 @@ describe('datasource/gradle', () => {
       ).toBeNull();
     });
 
-    it('returns null for 404', async () => {
+    it('throws for 404', async () => {
       got.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 404,
         })
       );
-      expect(
-        await datasource.getPkgReleases('pkg:gradleVersion', config)
-      ).toBeNull();
+      let e;
+      try {
+        await datasource.getPkgReleases('pkg:gradleVersion', config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
 
     it('returns null for unknown error', async () => {
