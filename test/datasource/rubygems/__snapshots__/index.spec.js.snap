@@ -15,7 +15,6 @@ Object {
   "homepage": "http://rubyonrails.org",
   "releases": Array [
     Object {
-      "prerelease": false,
       "releaseDate": "2018-12-04T18:15:02.233Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -23,7 +22,6 @@ Object {
       "version": "5.2.2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-11-28T22:55:23.827Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -31,7 +29,6 @@ Object {
       "version": "5.2.2.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-11-27T20:14:16.796Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -39,7 +36,6 @@ Object {
       "version": "5.2.1.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-08-07T21:44:52.020Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -47,7 +43,6 @@ Object {
       "version": "5.2.1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-07-30T20:22:38.749Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -55,7 +50,6 @@ Object {
       "version": "5.2.1.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-04-09T20:07:04.834Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -63,7 +57,6 @@ Object {
       "version": "5.2.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-03-20T17:54:58.165Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -71,7 +64,6 @@ Object {
       "version": "5.2.0.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-01-30T23:38:56.843Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -79,7 +71,6 @@ Object {
       "version": "5.2.0.rc1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-11-28T05:04:37.765Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -87,7 +78,6 @@ Object {
       "version": "5.2.0.beta2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-11-27T19:19:13.809Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -95,7 +85,6 @@ Object {
       "version": "5.2.0.beta1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-11-27T20:11:47.585Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -103,7 +92,6 @@ Object {
       "version": "5.1.6.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-03-29T18:29:03.149Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -111,7 +99,6 @@ Object {
       "version": "5.1.6",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-02-14T20:02:02.541Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -119,7 +106,6 @@ Object {
       "version": "5.1.5",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-02-01T19:00:37.520Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -127,7 +113,6 @@ Object {
       "version": "5.1.5.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-09-08T00:52:07.791Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -135,7 +120,6 @@ Object {
       "version": "5.1.4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-08-24T19:37:37.728Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -143,7 +127,6 @@ Object {
       "version": "5.1.4.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-08-03T19:15:15.370Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -151,7 +134,6 @@ Object {
       "version": "5.1.3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-31T19:12:53.241Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -159,7 +141,6 @@ Object {
       "version": "5.1.3.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-25T20:18:18.420Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -167,7 +148,6 @@ Object {
       "version": "5.1.3.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-19T19:38:05.393Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -175,7 +155,6 @@ Object {
       "version": "5.1.3.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-06-26T21:51:41.161Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -183,7 +162,6 @@ Object {
       "version": "5.1.2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-06-20T17:03:49.322Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -191,7 +169,6 @@ Object {
       "version": "5.1.2.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-05-12T20:11:39.743Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -199,7 +176,6 @@ Object {
       "version": "5.1.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-04-27T21:00:47.670Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -207,7 +183,6 @@ Object {
       "version": "5.1.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-04-21T01:31:13.442Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -215,7 +190,6 @@ Object {
       "version": "5.1.0.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-03-20T18:57:56.595Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -223,7 +197,6 @@ Object {
       "version": "5.1.0.rc1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-02-23T20:00:44.720Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -231,7 +204,6 @@ Object {
       "version": "5.1.0.beta1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-11-27T20:09:36.347Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -239,7 +211,6 @@ Object {
       "version": "5.0.7.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-03-29T18:18:14.388Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -247,7 +218,6 @@ Object {
       "version": "5.0.7",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-09-08T00:47:42.201Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -255,7 +225,6 @@ Object {
       "version": "5.0.6",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-08-24T19:21:20.599Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -263,7 +232,6 @@ Object {
       "version": "5.0.6.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-07-31T19:05:29.060Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -271,7 +239,6 @@ Object {
       "version": "5.0.5",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-25T20:26:10.369Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -279,7 +246,6 @@ Object {
       "version": "5.0.5.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-19T19:43:58.280Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -287,7 +253,6 @@ Object {
       "version": "5.0.5.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-06-19T21:58:56.501Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -295,7 +260,6 @@ Object {
       "version": "5.0.4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-06-14T20:49:29.610Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -303,7 +267,6 @@ Object {
       "version": "5.0.4.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-05-12T20:08:33.226Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -311,7 +274,6 @@ Object {
       "version": "5.0.3",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-03-01T23:13:53.219Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -319,7 +281,6 @@ Object {
       "version": "5.0.2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-02-25T00:55:48.618Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -327,7 +288,6 @@ Object {
       "version": "5.0.2.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-12-21T00:07:46.527Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -335,7 +295,6 @@ Object {
       "version": "5.0.1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-12-09T19:13:12.953Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -343,7 +302,6 @@ Object {
       "version": "5.0.1.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-11-30T20:02:44.553Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -351,7 +309,6 @@ Object {
       "version": "5.0.1.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-08-11T17:35:27.196Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -359,7 +316,6 @@ Object {
       "version": "5.0.0.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-06-30T21:32:45.255Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -367,7 +323,6 @@ Object {
       "version": "5.0.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-06-22T20:03:41.237Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -375,7 +330,6 @@ Object {
       "version": "5.0.0.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-05-06T21:57:46.793Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -383,7 +337,6 @@ Object {
       "version": "5.0.0.rc1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-05-06T22:02:43.345Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -391,7 +344,6 @@ Object {
       "version": "5.0.0.racecar1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-04-27T20:55:26.508Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -399,7 +351,6 @@ Object {
       "version": "5.0.0.beta4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-02-24T16:16:22.722Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -407,7 +358,6 @@ Object {
       "version": "5.0.0.beta3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-02-01T22:06:25.279Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -415,7 +365,6 @@ Object {
       "version": "5.0.0.beta2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-01-25T19:26:49.903Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -423,7 +372,6 @@ Object {
       "version": "5.0.0.beta1.1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-12-18T21:18:13.306Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -431,7 +379,6 @@ Object {
       "version": "5.0.0.beta1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-11-27T20:07:25.845Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -439,7 +386,6 @@ Object {
       "version": "4.2.11",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-09-27T14:29:42.567Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -447,7 +393,6 @@ Object {
       "version": "4.2.10",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-09-20T19:42:33.297Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -455,7 +400,6 @@ Object {
       "version": "4.2.10.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-06-26T21:30:56.077Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -463,7 +407,6 @@ Object {
       "version": "4.2.9",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-06-19T22:28:22.086Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -471,7 +414,6 @@ Object {
       "version": "4.2.9.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-06-13T18:50:29.897Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -479,7 +421,6 @@ Object {
       "version": "4.2.9.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-02-21T16:08:53.220Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -487,7 +428,6 @@ Object {
       "version": "4.2.8",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-02-10T02:46:51.222Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -495,7 +435,6 @@ Object {
       "version": "4.2.8.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-08-11T17:35:16.160Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -503,7 +442,6 @@ Object {
       "version": "4.2.7.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-07-13T02:57:05.601Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -511,7 +449,6 @@ Object {
       "version": "4.2.7",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-07-01T00:33:36.424Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -519,7 +456,6 @@ Object {
       "version": "4.2.7.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-03-07T22:33:22.563Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -527,7 +463,6 @@ Object {
       "version": "4.2.6",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-03-01T18:37:54.172Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -535,7 +470,6 @@ Object {
       "version": "4.2.6.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-02-29T19:17:10.564Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -543,7 +477,6 @@ Object {
       "version": "4.2.5.2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-01-25T19:26:41.410Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -551,7 +484,6 @@ Object {
       "version": "4.2.5.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-11-12T17:06:55.226Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -559,7 +491,6 @@ Object {
       "version": "4.2.5",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-11-05T03:02:33.340Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -567,7 +498,6 @@ Object {
       "version": "4.2.5.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-10-30T20:47:59.397Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -575,7 +505,6 @@ Object {
       "version": "4.2.5.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-08-24T18:27:12.716Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -583,7 +512,6 @@ Object {
       "version": "4.2.4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-08-14T15:21:15.566Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -591,7 +519,6 @@ Object {
       "version": "4.2.4.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-25T21:30:57.890Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -599,7 +526,6 @@ Object {
       "version": "4.2.3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-06-22T14:23:17.788Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -607,7 +533,6 @@ Object {
       "version": "4.2.3.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-16T18:03:17.061Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -615,7 +540,6 @@ Object {
       "version": "4.2.2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-03-19T16:42:01.191Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -623,7 +547,6 @@ Object {
       "version": "4.2.1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-03-12T21:25:52.551Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -631,7 +554,6 @@ Object {
       "version": "4.2.1.rc4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-03-02T21:35:50.169Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -639,7 +561,6 @@ Object {
       "version": "4.2.1.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-02-25T22:19:50.245Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -647,7 +568,6 @@ Object {
       "version": "4.2.1.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-02-20T22:21:34.214Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -655,7 +575,6 @@ Object {
       "version": "4.2.1.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-12-20T00:15:37.476Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -663,7 +582,6 @@ Object {
       "version": "4.2.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-12-13T02:58:44.762Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -671,7 +589,6 @@ Object {
       "version": "4.2.0.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-12-05T23:20:12.824Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -679,7 +596,6 @@ Object {
       "version": "4.2.0.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-11-28T17:53:27.822Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -687,7 +603,6 @@ Object {
       "version": "4.2.0.rc1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-10-30T22:13:30.689Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -695,7 +610,6 @@ Object {
       "version": "4.2.0.beta4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-10-30T18:37:59.690Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -703,7 +617,6 @@ Object {
       "version": "4.2.0.beta3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-09-29T17:16:38.761Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -711,7 +624,6 @@ Object {
       "version": "4.2.0.beta2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-08-20T02:34:44.046Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -719,7 +631,6 @@ Object {
       "version": "4.2.0.beta1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-07-12T22:20:56.527Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -727,7 +638,6 @@ Object {
       "version": "4.1.16",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-07-02T02:15:20.923Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -735,7 +645,6 @@ Object {
       "version": "4.1.16.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-03-07T22:37:14.594Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -743,7 +652,6 @@ Object {
       "version": "4.1.15",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-03-01T18:43:40.764Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -751,7 +659,6 @@ Object {
       "version": "4.1.15.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-02-29T19:19:55.523Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -759,7 +666,6 @@ Object {
       "version": "4.1.14.2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-01-25T19:26:27.339Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -767,7 +673,6 @@ Object {
       "version": "4.1.14.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-11-12T18:20:40.613Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -775,7 +680,6 @@ Object {
       "version": "4.1.14",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-11-05T02:55:44.276Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -783,7 +687,6 @@ Object {
       "version": "4.1.14.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-10-30T20:45:42.801Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -791,7 +694,6 @@ Object {
       "version": "4.1.14.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-08-24T18:02:56.741Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -799,7 +701,6 @@ Object {
       "version": "4.1.13",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-08-14T15:13:26.943Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -807,7 +708,6 @@ Object {
       "version": "4.1.13.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-25T21:26:08.544Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -815,7 +715,6 @@ Object {
       "version": "4.1.12",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-06-22T14:05:08.486Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -823,7 +722,6 @@ Object {
       "version": "4.1.12.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-16T18:00:13.043Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -831,7 +729,6 @@ Object {
       "version": "4.1.11",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-03-19T16:50:27.388Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -839,7 +736,6 @@ Object {
       "version": "4.1.10",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-03-12T21:32:52.724Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -847,7 +743,6 @@ Object {
       "version": "4.1.10.rc4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-03-02T21:39:47.964Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -855,7 +750,6 @@ Object {
       "version": "4.1.10.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-02-25T22:22:40.645Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -863,7 +757,6 @@ Object {
       "version": "4.1.10.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-02-20T22:25:09.666Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -871,7 +764,6 @@ Object {
       "version": "4.1.10.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-01-06T20:04:31.185Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -879,7 +771,6 @@ Object {
       "version": "4.1.9",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-01-02T01:11:10.973Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -887,7 +778,6 @@ Object {
       "version": "4.1.9.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-17T16:01:13.385Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -895,7 +785,6 @@ Object {
       "version": "4.1.8",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-19T19:12:12.692Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -903,7 +792,6 @@ Object {
       "version": "4.1.7.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-10-30T18:37:49.213Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -911,7 +799,6 @@ Object {
       "version": "4.1.7",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-09-11T17:26:04.576Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -919,7 +806,6 @@ Object {
       "version": "4.1.6",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-09-08T18:13:12.723Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -927,7 +813,6 @@ Object {
       "version": "4.1.6.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-08-19T20:52:47.110Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -935,7 +820,6 @@ Object {
       "version": "4.1.6.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-08-18T17:01:03.727Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -943,7 +827,6 @@ Object {
       "version": "4.1.5",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T19:53:35.556Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -951,7 +834,6 @@ Object {
       "version": "4.1.4",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T17:06:42.181Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -959,7 +841,6 @@ Object {
       "version": "4.1.3",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-06-26T14:50:09.079Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -967,7 +848,6 @@ Object {
       "version": "4.1.2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-06-23T17:28:46.002Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -975,7 +855,6 @@ Object {
       "version": "4.1.2.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-06-16T16:30:46.332Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -983,7 +862,6 @@ Object {
       "version": "4.1.2.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-05-27T16:12:48.106Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -991,7 +869,6 @@ Object {
       "version": "4.1.2.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-05-06T16:11:31.458Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -999,7 +876,6 @@ Object {
       "version": "4.1.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-04-08T19:21:51.275Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1007,7 +883,6 @@ Object {
       "version": "4.1.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-03-25T20:12:47.195Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1015,7 +890,6 @@ Object {
       "version": "4.1.0.rc2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-01-06T20:08:59.935Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1023,7 +897,6 @@ Object {
       "version": "4.0.13",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-01-02T00:54:54.587Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1031,7 +904,6 @@ Object {
       "version": "4.0.13.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-17T16:01:00.306Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1039,7 +911,6 @@ Object {
       "version": "4.0.12",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-19T19:09:54.075Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1047,7 +918,6 @@ Object {
       "version": "4.0.11.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-10-30T18:37:38.192Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1055,7 +925,6 @@ Object {
       "version": "4.0.11",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-09-11T17:33:15.455Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1063,7 +932,6 @@ Object {
       "version": "4.0.10",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-09-08T17:55:45.314Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1071,7 +939,6 @@ Object {
       "version": "4.0.10.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-08-19T20:48:29.471Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1079,7 +946,6 @@ Object {
       "version": "4.0.10.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-08-18T17:03:01.087Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1087,7 +953,6 @@ Object {
       "version": "4.0.9",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T19:42:37.603Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1095,7 +960,6 @@ Object {
       "version": "4.0.8",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T17:04:32.418Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1103,7 +967,6 @@ Object {
       "version": "4.0.7",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-06-26T16:30:13.579Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1111,7 +974,6 @@ Object {
       "version": "4.0.6",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-06-23T17:24:41.466Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1119,7 +981,6 @@ Object {
       "version": "4.0.6.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-06-16T16:16:01.642Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1127,7 +988,6 @@ Object {
       "version": "4.0.6.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-05-27T16:06:55.364Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1135,7 +995,6 @@ Object {
       "version": "4.0.6.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-05-06T16:13:27.132Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1143,7 +1002,6 @@ Object {
       "version": "4.0.5",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-09-14T21:19:01.962Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1151,7 +1009,6 @@ Object {
       "version": "3.2.22.5",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-08-11T19:20:46.883Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1159,7 +1016,6 @@ Object {
       "version": "3.2.22.4",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-08-11T17:34:59.710Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1167,7 +1023,6 @@ Object {
       "version": "3.2.22.3",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-02-29T19:24:19.757Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1175,7 +1030,6 @@ Object {
       "version": "3.2.22.2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-01-25T19:26:12.364Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1183,7 +1037,6 @@ Object {
       "version": "3.2.22.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-16T18:06:38.294Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1191,7 +1044,6 @@ Object {
       "version": "3.2.22",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-17T16:00:44.994Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1199,7 +1051,6 @@ Object {
       "version": "3.2.21",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-10-30T18:37:26.434Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1207,7 +1058,6 @@ Object {
       "version": "3.2.20",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T17:02:48.733Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1215,7 +1065,6 @@ Object {
       "version": "3.2.19",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-05-06T16:17:02.829Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -1233,7 +1082,6 @@ Object {
   "homepage": "http://rubyonrails.org",
   "releases": Array [
     Object {
-      "prerelease": false,
       "releaseDate": "2018-12-04T18:15:02.233Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1241,7 +1089,6 @@ Object {
       "version": "5.2.2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-11-28T22:55:23.827Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1249,7 +1096,6 @@ Object {
       "version": "5.2.2.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-11-27T20:14:16.796Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1257,7 +1103,6 @@ Object {
       "version": "5.2.1.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-08-07T21:44:52.020Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1265,7 +1110,6 @@ Object {
       "version": "5.2.1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-07-30T20:22:38.749Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1273,7 +1117,6 @@ Object {
       "version": "5.2.1.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-04-09T20:07:04.834Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1281,7 +1124,6 @@ Object {
       "version": "5.2.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-03-20T17:54:58.165Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1289,7 +1131,6 @@ Object {
       "version": "5.2.0.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-01-30T23:38:56.843Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1297,7 +1138,6 @@ Object {
       "version": "5.2.0.rc1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-11-28T05:04:37.765Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1305,7 +1145,6 @@ Object {
       "version": "5.2.0.beta2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-11-27T19:19:13.809Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1313,7 +1152,6 @@ Object {
       "version": "5.2.0.beta1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-11-27T20:11:47.585Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1321,7 +1159,6 @@ Object {
       "version": "5.1.6.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-03-29T18:29:03.149Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1329,7 +1166,6 @@ Object {
       "version": "5.1.6",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-02-14T20:02:02.541Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1337,7 +1173,6 @@ Object {
       "version": "5.1.5",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2018-02-01T19:00:37.520Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1345,7 +1180,6 @@ Object {
       "version": "5.1.5.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-09-08T00:52:07.791Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1353,7 +1187,6 @@ Object {
       "version": "5.1.4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-08-24T19:37:37.728Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1361,7 +1194,6 @@ Object {
       "version": "5.1.4.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-08-03T19:15:15.370Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1369,7 +1201,6 @@ Object {
       "version": "5.1.3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-31T19:12:53.241Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1377,7 +1208,6 @@ Object {
       "version": "5.1.3.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-25T20:18:18.420Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1385,7 +1215,6 @@ Object {
       "version": "5.1.3.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-19T19:38:05.393Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1393,7 +1222,6 @@ Object {
       "version": "5.1.3.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-06-26T21:51:41.161Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1401,7 +1229,6 @@ Object {
       "version": "5.1.2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-06-20T17:03:49.322Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1409,7 +1236,6 @@ Object {
       "version": "5.1.2.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-05-12T20:11:39.743Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1417,7 +1243,6 @@ Object {
       "version": "5.1.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-04-27T21:00:47.670Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1425,7 +1250,6 @@ Object {
       "version": "5.1.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-04-21T01:31:13.442Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1433,7 +1257,6 @@ Object {
       "version": "5.1.0.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-03-20T18:57:56.595Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1441,7 +1264,6 @@ Object {
       "version": "5.1.0.rc1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-02-23T20:00:44.720Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1449,7 +1271,6 @@ Object {
       "version": "5.1.0.beta1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-11-27T20:09:36.347Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1457,7 +1278,6 @@ Object {
       "version": "5.0.7.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-03-29T18:18:14.388Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1465,7 +1285,6 @@ Object {
       "version": "5.0.7",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-09-08T00:47:42.201Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1473,7 +1292,6 @@ Object {
       "version": "5.0.6",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-08-24T19:21:20.599Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1481,7 +1299,6 @@ Object {
       "version": "5.0.6.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-07-31T19:05:29.060Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1489,7 +1306,6 @@ Object {
       "version": "5.0.5",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-25T20:26:10.369Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1497,7 +1313,6 @@ Object {
       "version": "5.0.5.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-07-19T19:43:58.280Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1505,7 +1320,6 @@ Object {
       "version": "5.0.5.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-06-19T21:58:56.501Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1513,7 +1327,6 @@ Object {
       "version": "5.0.4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-06-14T20:49:29.610Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1521,7 +1334,6 @@ Object {
       "version": "5.0.4.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-05-12T20:08:33.226Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1529,7 +1341,6 @@ Object {
       "version": "5.0.3",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-03-01T23:13:53.219Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1537,7 +1348,6 @@ Object {
       "version": "5.0.2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-02-25T00:55:48.618Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1545,7 +1355,6 @@ Object {
       "version": "5.0.2.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-12-21T00:07:46.527Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1553,7 +1362,6 @@ Object {
       "version": "5.0.1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-12-09T19:13:12.953Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1561,7 +1369,6 @@ Object {
       "version": "5.0.1.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-11-30T20:02:44.553Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1569,7 +1376,6 @@ Object {
       "version": "5.0.1.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-08-11T17:35:27.196Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1577,7 +1383,6 @@ Object {
       "version": "5.0.0.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-06-30T21:32:45.255Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1585,7 +1390,6 @@ Object {
       "version": "5.0.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-06-22T20:03:41.237Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1593,7 +1397,6 @@ Object {
       "version": "5.0.0.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-05-06T21:57:46.793Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1601,7 +1404,6 @@ Object {
       "version": "5.0.0.rc1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-05-06T22:02:43.345Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1609,7 +1411,6 @@ Object {
       "version": "5.0.0.racecar1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-04-27T20:55:26.508Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1617,7 +1418,6 @@ Object {
       "version": "5.0.0.beta4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-02-24T16:16:22.722Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1625,7 +1425,6 @@ Object {
       "version": "5.0.0.beta3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-02-01T22:06:25.279Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1633,7 +1432,6 @@ Object {
       "version": "5.0.0.beta2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-01-25T19:26:49.903Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1641,7 +1439,6 @@ Object {
       "version": "5.0.0.beta1.1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-12-18T21:18:13.306Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 2.2.2",
@@ -1649,7 +1446,6 @@ Object {
       "version": "5.0.0.beta1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2018-11-27T20:07:25.845Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1657,7 +1453,6 @@ Object {
       "version": "4.2.11",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-09-27T14:29:42.567Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1665,7 +1460,6 @@ Object {
       "version": "4.2.10",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-09-20T19:42:33.297Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1673,7 +1467,6 @@ Object {
       "version": "4.2.10.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-06-26T21:30:56.077Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1681,7 +1474,6 @@ Object {
       "version": "4.2.9",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-06-19T22:28:22.086Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1689,7 +1481,6 @@ Object {
       "version": "4.2.9.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-06-13T18:50:29.897Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1697,7 +1488,6 @@ Object {
       "version": "4.2.9.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2017-02-21T16:08:53.220Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1705,7 +1495,6 @@ Object {
       "version": "4.2.8",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2017-02-10T02:46:51.222Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1713,7 +1502,6 @@ Object {
       "version": "4.2.8.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-08-11T17:35:16.160Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1721,7 +1509,6 @@ Object {
       "version": "4.2.7.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-07-13T02:57:05.601Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1729,7 +1516,6 @@ Object {
       "version": "4.2.7",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-07-01T00:33:36.424Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1737,7 +1523,6 @@ Object {
       "version": "4.2.7.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-03-07T22:33:22.563Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1745,7 +1530,6 @@ Object {
       "version": "4.2.6",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-03-01T18:37:54.172Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1753,7 +1537,6 @@ Object {
       "version": "4.2.6.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-02-29T19:17:10.564Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1761,7 +1544,6 @@ Object {
       "version": "4.2.5.2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-01-25T19:26:41.410Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1769,7 +1551,6 @@ Object {
       "version": "4.2.5.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-11-12T17:06:55.226Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1777,7 +1558,6 @@ Object {
       "version": "4.2.5",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-11-05T03:02:33.340Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1785,7 +1565,6 @@ Object {
       "version": "4.2.5.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-10-30T20:47:59.397Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1793,7 +1572,6 @@ Object {
       "version": "4.2.5.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-08-24T18:27:12.716Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1801,7 +1579,6 @@ Object {
       "version": "4.2.4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-08-14T15:21:15.566Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1809,7 +1586,6 @@ Object {
       "version": "4.2.4.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-25T21:30:57.890Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1817,7 +1593,6 @@ Object {
       "version": "4.2.3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-06-22T14:23:17.788Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1825,7 +1600,6 @@ Object {
       "version": "4.2.3.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-16T18:03:17.061Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1833,7 +1607,6 @@ Object {
       "version": "4.2.2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-03-19T16:42:01.191Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1841,7 +1614,6 @@ Object {
       "version": "4.2.1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-03-12T21:25:52.551Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1849,7 +1621,6 @@ Object {
       "version": "4.2.1.rc4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-03-02T21:35:50.169Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1857,7 +1628,6 @@ Object {
       "version": "4.2.1.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-02-25T22:19:50.245Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1865,7 +1635,6 @@ Object {
       "version": "4.2.1.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-02-20T22:21:34.214Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1873,7 +1642,6 @@ Object {
       "version": "4.2.1.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-12-20T00:15:37.476Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1881,7 +1649,6 @@ Object {
       "version": "4.2.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-12-13T02:58:44.762Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1889,7 +1656,6 @@ Object {
       "version": "4.2.0.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-12-05T23:20:12.824Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1897,7 +1663,6 @@ Object {
       "version": "4.2.0.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-11-28T17:53:27.822Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1905,7 +1670,6 @@ Object {
       "version": "4.2.0.rc1",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-10-30T22:13:30.689Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1913,7 +1677,6 @@ Object {
       "version": "4.2.0.beta4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-10-30T18:37:59.690Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1921,7 +1684,6 @@ Object {
       "version": "4.2.0.beta3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-09-29T17:16:38.761Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1929,7 +1691,6 @@ Object {
       "version": "4.2.0.beta2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-08-20T02:34:44.046Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1937,7 +1698,6 @@ Object {
       "version": "4.2.0.beta1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-07-12T22:20:56.527Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1945,7 +1705,6 @@ Object {
       "version": "4.1.16",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-07-02T02:15:20.923Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1953,7 +1712,6 @@ Object {
       "version": "4.1.16.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-03-07T22:37:14.594Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1961,7 +1719,6 @@ Object {
       "version": "4.1.15",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2016-03-01T18:43:40.764Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1969,7 +1726,6 @@ Object {
       "version": "4.1.15.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-02-29T19:19:55.523Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1977,7 +1733,6 @@ Object {
       "version": "4.1.14.2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-01-25T19:26:27.339Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1985,7 +1740,6 @@ Object {
       "version": "4.1.14.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-11-12T18:20:40.613Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -1993,7 +1747,6 @@ Object {
       "version": "4.1.14",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-11-05T02:55:44.276Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2001,7 +1754,6 @@ Object {
       "version": "4.1.14.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-10-30T20:45:42.801Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2009,7 +1761,6 @@ Object {
       "version": "4.1.14.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-08-24T18:02:56.741Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2017,7 +1768,6 @@ Object {
       "version": "4.1.13",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-08-14T15:13:26.943Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2025,7 +1775,6 @@ Object {
       "version": "4.1.13.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-25T21:26:08.544Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2033,7 +1782,6 @@ Object {
       "version": "4.1.12",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-06-22T14:05:08.486Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2041,7 +1789,6 @@ Object {
       "version": "4.1.12.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-16T18:00:13.043Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2049,7 +1796,6 @@ Object {
       "version": "4.1.11",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-03-19T16:50:27.388Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2057,7 +1803,6 @@ Object {
       "version": "4.1.10",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-03-12T21:32:52.724Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2065,7 +1810,6 @@ Object {
       "version": "4.1.10.rc4",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-03-02T21:39:47.964Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2073,7 +1817,6 @@ Object {
       "version": "4.1.10.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-02-25T22:22:40.645Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2081,7 +1824,6 @@ Object {
       "version": "4.1.10.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-02-20T22:25:09.666Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2089,7 +1831,6 @@ Object {
       "version": "4.1.10.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-01-06T20:04:31.185Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2097,7 +1838,6 @@ Object {
       "version": "4.1.9",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-01-02T01:11:10.973Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2105,7 +1845,6 @@ Object {
       "version": "4.1.9.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-17T16:01:13.385Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2113,7 +1852,6 @@ Object {
       "version": "4.1.8",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-19T19:12:12.692Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2121,7 +1859,6 @@ Object {
       "version": "4.1.7.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-10-30T18:37:49.213Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2129,7 +1866,6 @@ Object {
       "version": "4.1.7",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-09-11T17:26:04.576Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2137,7 +1873,6 @@ Object {
       "version": "4.1.6",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-09-08T18:13:12.723Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2145,7 +1880,6 @@ Object {
       "version": "4.1.6.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-08-19T20:52:47.110Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2153,7 +1887,6 @@ Object {
       "version": "4.1.6.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-08-18T17:01:03.727Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2161,7 +1894,6 @@ Object {
       "version": "4.1.5",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T19:53:35.556Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2169,7 +1901,6 @@ Object {
       "version": "4.1.4",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T17:06:42.181Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2177,7 +1908,6 @@ Object {
       "version": "4.1.3",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-06-26T14:50:09.079Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2185,7 +1915,6 @@ Object {
       "version": "4.1.2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-06-23T17:28:46.002Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2193,7 +1922,6 @@ Object {
       "version": "4.1.2.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-06-16T16:30:46.332Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2201,7 +1929,6 @@ Object {
       "version": "4.1.2.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-05-27T16:12:48.106Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2209,7 +1936,6 @@ Object {
       "version": "4.1.2.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-05-06T16:11:31.458Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2217,7 +1943,6 @@ Object {
       "version": "4.1.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-04-08T19:21:51.275Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2225,7 +1950,6 @@ Object {
       "version": "4.1.0",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-03-25T20:12:47.195Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2233,7 +1957,6 @@ Object {
       "version": "4.1.0.rc2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-01-06T20:08:59.935Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2241,7 +1964,6 @@ Object {
       "version": "4.0.13",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2015-01-02T00:54:54.587Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2249,7 +1971,6 @@ Object {
       "version": "4.0.13.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-17T16:01:00.306Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2257,7 +1978,6 @@ Object {
       "version": "4.0.12",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-19T19:09:54.075Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2265,7 +1985,6 @@ Object {
       "version": "4.0.11.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-10-30T18:37:38.192Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2273,7 +1992,6 @@ Object {
       "version": "4.0.11",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-09-11T17:33:15.455Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2281,7 +1999,6 @@ Object {
       "version": "4.0.10",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-09-08T17:55:45.314Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2289,7 +2006,6 @@ Object {
       "version": "4.0.10.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-08-19T20:48:29.471Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2297,7 +2013,6 @@ Object {
       "version": "4.0.10.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-08-18T17:03:01.087Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2305,7 +2020,6 @@ Object {
       "version": "4.0.9",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T19:42:37.603Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2313,7 +2027,6 @@ Object {
       "version": "4.0.8",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T17:04:32.418Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2321,7 +2034,6 @@ Object {
       "version": "4.0.7",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-06-26T16:30:13.579Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2329,7 +2041,6 @@ Object {
       "version": "4.0.6",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-06-23T17:24:41.466Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2337,7 +2048,6 @@ Object {
       "version": "4.0.6.rc3",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-06-16T16:16:01.642Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2345,7 +2055,6 @@ Object {
       "version": "4.0.6.rc2",
     },
     Object {
-      "prerelease": true,
       "releaseDate": "2014-05-27T16:06:55.364Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2353,7 +2062,6 @@ Object {
       "version": "4.0.6.rc1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-05-06T16:13:27.132Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.9.3",
@@ -2361,7 +2069,6 @@ Object {
       "version": "4.0.5",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-09-14T21:19:01.962Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -2369,7 +2076,6 @@ Object {
       "version": "3.2.22.5",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-08-11T19:20:46.883Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -2377,7 +2083,6 @@ Object {
       "version": "3.2.22.4",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-08-11T17:34:59.710Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -2385,7 +2090,6 @@ Object {
       "version": "3.2.22.3",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-02-29T19:24:19.757Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -2393,7 +2097,6 @@ Object {
       "version": "3.2.22.2",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2016-01-25T19:26:12.364Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -2401,7 +2104,6 @@ Object {
       "version": "3.2.22.1",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2015-06-16T18:06:38.294Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -2409,7 +2111,6 @@ Object {
       "version": "3.2.22",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-11-17T16:00:44.994Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -2417,7 +2118,6 @@ Object {
       "version": "3.2.21",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-10-30T18:37:26.434Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -2425,7 +2125,6 @@ Object {
       "version": "3.2.20",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-07-02T17:02:48.733Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
@@ -2433,7 +2132,6 @@ Object {
       "version": "3.2.19",
     },
     Object {
-      "prerelease": false,
       "releaseDate": "2014-05-06T16:17:02.829Z",
       "rubyPlatform": "ruby",
       "rubyVersion": ">= 1.8.7",
