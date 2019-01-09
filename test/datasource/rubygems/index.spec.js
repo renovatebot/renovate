@@ -1,5 +1,4 @@
 const got = require('got');
-const head = require('lodash/head');
 const railsInfo = require('../../_fixtures/rubygems/rails/info.json');
 const railsVersions = require('../../_fixtures/rubygems/rails/versions.json');
 const rubygems = require('../../../lib/datasource/rubygems/index.js');
@@ -9,17 +8,11 @@ jest.mock('got');
 describe('datasource/rubygems', () => {
   describe('getPkgReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
-    const params = [
-      {
-        fullname: 'rails',
-      },
-      {
-        compatibility: {
-          ruby: '2.2.2',
-        },
-        registryUrls: ['https://thirdparty.com', 'https://firstparty.com'],
-      },
-    ];
+
+    const pkg = { fullname: 'rails' };
+    const compatibility = { ruby: '2.2.2' };
+    const registryUrls = ['https://thirdparty.com', 'https://firstparty.com'];
+    const params = [pkg, { compatibility, registryUrls }];
 
     beforeEach(() => {
       process.env.RENOVATE_SKIP_CACHE = true;
@@ -63,7 +56,8 @@ describe('datasource/rubygems', () => {
         .mockImplementationOnce(() => ({ body: railsVersions }));
 
       expect(
-        await rubygems.getPkgReleases(head(params), {
+        await rubygems.getPkgReleases(pkg, {
+          registryUrls,
           compatibility: { ruby: '1.0.0' },
         })
       ).toMatchSnapshot();
