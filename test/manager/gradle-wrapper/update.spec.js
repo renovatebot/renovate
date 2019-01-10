@@ -4,10 +4,6 @@ const dcUpdate = require('../../../lib/manager/gradle-wrapper/update');
 
 jest.mock('got');
 
-const propertiesFile1 = fs.readFileSync(
-  'test/_fixtures/gradle-wrapper/gradle-wrapper-1.properties',
-  'utf8'
-);
 const propertiesFile2 = fs.readFileSync(
   'test/_fixtures/gradle-wrapper/gradle-wrapper-2.properties',
   'utf8'
@@ -45,30 +41,6 @@ describe('manager/gradle-wrapper/update', () => {
           'https\\://services.gradle.org/distributions/gradle-5.0-all.zip'
         )
       ).toBe(true);
-      expect(res.includes(checksum)).toBe(true);
-    });
-
-    it('replaces existing value and add digest', async () => {
-      const upgrade = {
-        gradleWrapperType: 'bin',
-        toVersion: '5.0.0',
-        version: '5.0.0',
-        lineNumber: 4,
-        downloadUrl:
-          'https://services.gradle.org/distributions/gradle-5.0-bin.zip',
-        checksumUrl:
-          'https://services.gradle.org/distributions/gradle-5.0-bin.zip.sha256',
-      };
-      const checksum =
-        '6157ac9f3410bc63644625b3b3e9e96c963afd7910ae0697792db57813ee79a6';
-      got.mockReturnValueOnce({
-        body: checksum,
-      });
-      const res = await dcUpdate.updateDependency(propertiesFile1, upgrade);
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
-      expect(res).not.toEqual(propertiesFile1);
-      expect(res.includes(upgrade.downloadUrl.replace(':', '\\:'))).toBe(true);
       expect(res.includes(checksum)).toBe(true);
     });
 
