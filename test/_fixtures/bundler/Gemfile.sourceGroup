@@ -1,0 +1,16 @@
+source "https://rubygems.org"
+
+source "https://gems.example.com" do
+  gem "some_internal_gem"
+  gem "another_internal_gem"
+end
+
+platforms :ruby do
+  gem "ruby-debug"
+  gem "sqlite3"
+end
+
+group :development, :optional => true do
+  gem "wirble"
+  gem "faker"
+end

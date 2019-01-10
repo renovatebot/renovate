@@ -1,0 +1,525 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": ">= 11.1",
+      "depName": "rake",
+      "lineNumber": 9,
+    },
+    Object {
+      "currentValue": ">= 2.15",
+      "depName": "capybara",
+      "lineNumber": 11,
+    },
+    Object {
+      "currentValue": "~> 1.2",
+      "depName": "rack-cache",
+      "lineNumber": 13,
+    },
+    Object {
+      "depName": "sass-rails",
+      "lineNumber": 14,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 5",
+      "depName": "turbolinks",
+      "lineNumber": 15,
+    },
+    Object {
+      "depName": "webpacker",
+      "lineNumber": 16,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 3.1.11",
+      "depName": "bcrypt",
+      "lineNumber": 20,
+    },
+    Object {
+      "currentValue": ">= 1.3.0",
+      "depName": "uglifier",
+      "lineNumber": 24,
+    },
+    Object {
+      "currentValue": ">= 2.0.0",
+      "depName": "json",
+      "lineNumber": 27,
+    },
+    Object {
+      "currentValue": ">= 0.47",
+      "depName": "rubocop",
+      "lineNumber": 29,
+    },
+    Object {
+      "currentValue": "~> 1.0",
+      "depName": "sdoc",
+      "depTypes": Array [
+        "doc",
+      ],
+      "lineNumber": 32,
+    },
+    Object {
+      "currentValue": "~> 3.2.3",
+      "depName": "redcarpet",
+      "depTypes": Array [
+        "doc",
+      ],
+      "lineNumber": 33,
+    },
+    Object {
+      "depName": "w3c_validators",
+      "depTypes": Array [
+        "doc",
+      ],
+      "lineNumber": 34,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 1.2.0",
+      "depName": "kindlerb",
+      "depTypes": Array [
+        "doc",
+      ],
+      "lineNumber": 35,
+    },
+    Object {
+      "depName": "dalli",
+      "lineNumber": 39,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": ">= 3.0.5",
+      "depName": "listen",
+      "lineNumber": 40,
+    },
+    Object {
+      "depName": "libxml-ruby",
+      "lineNumber": 41,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "connection_pool",
+      "lineNumber": 42,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": ">= 1.1.0",
+      "depName": "bootsnap",
+      "lineNumber": 45,
+    },
+    Object {
+      "depName": "resque",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 49,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "resque-scheduler",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 50,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "sidekiq",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 51,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "sucker_punch",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 52,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "delayed_job",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 53,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "queue_classic",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 54,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "sneakers",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 55,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "que",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 56,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "backburner",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 57,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "delayed_job_active_record",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 58,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "sequel",
+      "depTypes": Array [
+        "job",
+      ],
+      "lineNumber": 59,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "puma",
+      "depTypes": Array [
+        "cable",
+      ],
+      "lineNumber": 64,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "hiredis",
+      "depTypes": Array [
+        "cable",
+      ],
+      "lineNumber": 66,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 4.0",
+      "depName": "redis",
+      "depTypes": Array [
+        "cable",
+      ],
+      "lineNumber": 67,
+    },
+    Object {
+      "depName": "redis-namespace",
+      "depTypes": Array [
+        "cable",
+      ],
+      "lineNumber": 69,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "websocket-client-simple",
+      "depTypes": Array [
+        "cable",
+      ],
+      "lineNumber": 71,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "blade",
+      "depTypes": Array [
+        "cable",
+      ],
+      "lineNumber": 73,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "blade-sauce_labs_plugin",
+      "depTypes": Array [
+        "cable",
+      ],
+      "lineNumber": 74,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "sprockets-export",
+      "depTypes": Array [
+        "cable",
+      ],
+      "lineNumber": 75,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "aws-sdk-s3",
+      "depTypes": Array [
+        "storage",
+      ],
+      "lineNumber": 80,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 1.11",
+      "depName": "google-cloud-storage",
+      "depTypes": Array [
+        "storage",
+      ],
+      "lineNumber": 81,
+    },
+    Object {
+      "depName": "azure-storage",
+      "depTypes": Array [
+        "storage",
+      ],
+      "lineNumber": 82,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": "~> 1.2",
+      "depName": "image_processing",
+      "depTypes": Array [
+        "storage",
+      ],
+      "lineNumber": 84,
+    },
+    Object {
+      "depName": "aws-sdk-sns",
+      "lineNumber": 88,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "webmock",
+      "lineNumber": 89,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "qunit-selenium",
+      "depTypes": Array [
+        "ujs",
+      ],
+      "lineNumber": 92,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "chromedriver-helper",
+      "depTypes": Array [
+        "ujs",
+      ],
+      "lineNumber": 93,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "minitest-bisect",
+      "depTypes": Array [
+        "test",
+      ],
+      "lineNumber": 101,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "minitest-retry",
+      "depTypes": Array [
+        "test",
+      ],
+      "lineNumber": 102,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "stackprof",
+      "depTypes": Array [
+        "test",
+      ],
+      "lineNumber": 105,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "byebug",
+      "depTypes": Array [
+        "test",
+      ],
+      "lineNumber": 106,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "benchmark-ips",
+      "depTypes": Array [
+        "test",
+      ],
+      "lineNumber": 109,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": ">= 1.8.1",
+      "depName": "nokogiri",
+      "lineNumber": 113,
+    },
+    Object {
+      "currentValue": ">=1.4.6",
+      "depName": "racc",
+      "lineNumber": 116,
+    },
+    Object {
+      "currentValue": "~> 1.3.6",
+      "depName": "sqlite3",
+      "lineNumber": 119,
+    },
+    Object {
+      "currentValue": ">= 0.18.0",
+      "depName": "pg",
+      "depTypes": Array [
+        "db",
+      ],
+      "lineNumber": 122,
+    },
+    Object {
+      "currentValue": ">= 0.4.10",
+      "depName": "mysql2",
+      "depTypes": Array [
+        "db",
+      ],
+      "lineNumber": 123,
+    },
+    Object {
+      "depName": "activerecord-jdbcsqlite3-adapter",
+      "lineNumber": 129,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "activerecord-jdbcmysql-adapter",
+      "depTypes": Array [
+        "db",
+      ],
+      "lineNumber": 131,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "activerecord-jdbcpostgresql-adapter",
+      "depTypes": Array [
+        "db",
+      ],
+      "lineNumber": 132,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": ">= 1.3.0",
+      "depName": "activerecord-jdbcsqlite3-adapter",
+      "lineNumber": 135,
+    },
+    Object {
+      "currentValue": ">= 1.3.0",
+      "depName": "activerecord-jdbcmysql-adapter",
+      "depTypes": Array [
+        "db",
+      ],
+      "lineNumber": 137,
+    },
+    Object {
+      "currentValue": ">= 1.3.0",
+      "depName": "activerecord-jdbcpostgresql-adapter",
+      "depTypes": Array [
+        "db",
+      ],
+      "lineNumber": 138,
+    },
+    Object {
+      "currentValue": "~> 3.0",
+      "depName": "psych",
+      "lineNumber": 146,
+    },
+    Object {
+      "currentValue": "~> 2.2",
+      "depName": "ruby-oci8",
+      "lineNumber": 152,
+    },
+    Object {
+      "depName": "activerecord-oracle_enhanced-adapter",
+      "lineNumber": 154,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "ibm_db",
+      "lineNumber": 158,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "tzinfo-data",
+      "lineNumber": 159,
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": ">= 0.1.0",
+      "depName": "wdm",
+      "lineNumber": 160,
+    },
+  ],
+  "repositoryUrls": Array [
+    "https://rubygems.org",
+  ],
+}
+`;
+
+exports[`lib/manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "depName": "some_internal_gem",
+      "lineNumber": 3,
+      "repositoryUrls": Array [
+        "https://gems.example.com",
+      ],
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "another_internal_gem",
+      "lineNumber": 4,
+      "repositoryUrls": Array [
+        "https://gems.example.com",
+      ],
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "ruby-debug",
+      "lineNumber": 8,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "sqlite3",
+      "lineNumber": 9,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "wirble",
+      "depTypes": Array [
+        "development",
+        "optional => true",
+      ],
+      "lineNumber": 13,
+      "skipReason": "no-version",
+    },
+    Object {
+      "depName": "faker",
+      "depTypes": Array [
+        "development",
+        "optional => true",
+      ],
+      "lineNumber": 14,
+      "skipReason": "no-version",
+    },
+  ],
+  "repositoryUrls": Array [
+    "https://rubygems.org",
+  ],
+}
+`;
