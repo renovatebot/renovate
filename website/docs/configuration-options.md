@@ -625,7 +625,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-By default, Renovate will add sha256 digests to Docker source images so that they are then "immutable". Set this to false to continue using only tags to identify source images.
+If enabled Renovate will pin docker images by means of their sha256 digest and not only by tag so that they are immutable.
 
 ## pip_requirements
 
