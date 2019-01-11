@@ -10,13 +10,23 @@ Array [
 ]
 `;
 
-exports[`lib/manager/nvm/extract extractPackageFile() skips non-pinned 1`] = `
+exports[`lib/manager/nvm/extract extractPackageFile() skips non ranges 1`] = `
+Array [
+  Object {
+    "currentValue": "latestn",
+    "depName": "node",
+    "purl": "pkg:github/nodejs/node",
+    "skipReason": "unsupported-version",
+  },
+]
+`;
+
+exports[`lib/manager/nvm/extract extractPackageFile() supports ranges 1`] = `
 Array [
   Object {
     "currentValue": "8.4",
     "depName": "node",
     "purl": "pkg:github/nodejs/node",
-    "skipReason": "unsupported-version",
   },
 ]
 `;
