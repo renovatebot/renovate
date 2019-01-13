@@ -6,8 +6,8 @@ describe('lib/manager/bundler/update', () => {
     beforeEach(() => {
       config = {};
     });
-    it('returns same', () => {
-      expect(updateDependency('abc', config)).toEqual('abc');
+    it('returns null on error', () => {
+      expect(updateDependency('abc', config)).toEqual(null);
     });
   });
 });
