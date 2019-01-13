@@ -76,7 +76,7 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
-        'gradle --init-script init.gradle dependencyUpdates -Drevision=release'
+        'gradle --init-script init.gradle renovate'
       );
       expect(exec.mock.calls[0][1]).toMatchObject({
         cwd: 'localDir',
@@ -91,14 +91,6 @@ describe('manager/gradle', () => {
       ).toBeNull();
 
       expect(exec.mock.calls.length).toBe(0);
-    });
-
-    it('should return empty if not content', async () => {
-      platform.getFile.mockReturnValue(null);
-      const res = await manager.extractAllPackageFiles(config, [
-        'build.gradle',
-      ]);
-      expect(res).toEqual([]);
     });
 
     it('should write files before extracting', async () => {
@@ -141,38 +133,8 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
-        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script init.gradle dependencyUpdates -Drevision=release'
+        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script init.gradle renovate'
       );
-    });
-  });
-
-  describe('getPackageUpdates', () => {
-    it('should return the new version if it is available', async () => {
-      const newVersion = {
-        ...config,
-        depName: 'cglib:cglib-nodep',
-        available: {
-          release: '3.2.8',
-        },
-      };
-      const outdatedDependencies = await manager.getPackageUpdates(newVersion);
-
-      expect(outdatedDependencies).toMatchObject([
-        {
-          depName: 'cglib:cglib-nodep',
-          newValue: '3.2.8',
-        },
-      ]);
-    });
-
-    it('should return empty if there is no new version', async () => {
-      const newVersion = {
-        ...config,
-        depName: 'cglib:cglib-nodep',
-      };
-      const outdatedDependencies = await manager.getPackageUpdates(newVersion);
-
-      expect(outdatedDependencies).toMatchObject([]);
     });
   });
 
@@ -184,8 +146,7 @@ describe('manager/gradle', () => {
       );
       // prettier-ignore
       const upgrade = {
-        depGroup: 'cglib', name: 'cglib-nodep', version: '3.1',
-        available: { release: '3.2.8', milestone: null, integration: null },
+        depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8'
       };
       const buildGradleContentUpdated = manager.updateDependency(
         buildGradleContent,
