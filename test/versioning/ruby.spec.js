@@ -297,6 +297,10 @@ describe('semverRuby', () => {
       expect(semverRuby.isValid('~> 1.2.0-alpha.1')).toBeTruthy();
     });
 
+    it('returns true when range is valid', () => {
+      expect(semverRuby.isValid('>= 3.0.5, < 3.2')).toBeTruthy();
+    });
+
     it('returns false when version is invalid', () => {
       expect(semverRuby.isVersion()).toBeFalsy();
       expect(semverRuby.isVersion('')).toBeFalsy();
