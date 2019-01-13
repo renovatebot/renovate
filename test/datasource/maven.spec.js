@@ -27,12 +27,17 @@ const config = {
 
 describe('datasource/maven', () => {
   beforeEach(() => {
+    nock.disableNetConnect();
     nock('http://central.maven.org')
       .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(200, MYSQL_MAVEN_METADATA);
     nock('http://failed_repo')
       .get('/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(404, null);
+  });
+
+  afterEach(() => {
+    nock.enableNetConnect();
   });
 
   describe('getPkgReleases', () => {
