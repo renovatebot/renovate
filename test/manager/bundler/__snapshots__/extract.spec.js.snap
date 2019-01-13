@@ -102,7 +102,7 @@ Object {
       "skipReason": "no-version",
     },
     Object {
-      "currentValue": ">= 3.0.5",
+      "currentValue": ">= 3.0.5, < 3.2",
       "depName": "listen",
       "lineNumber": 40,
       "purl": "pkg:rubygems/listen",
