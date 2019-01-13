@@ -14,6 +14,7 @@
     "heroku-push": "git push heroku master",
     "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
+    "jest-debug": "NODE_ENV=test LOG_LEVEL=fatal node --inspect-brk node_modules/.bin/jest",
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
     "lint": "yarn eslint && yarn prettier",
     "lint-fix": "yarn eslint-fix && yarn prettier-fix",
