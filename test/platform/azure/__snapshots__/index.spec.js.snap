@@ -1,0 +1,175 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/azure createPr() should create and return a PR object 1`] = `
+Object {
+  "displayNumber": "Pull Request #456",
+  "number": 456,
+  "pullRequestId": 456,
+}
+`;
+
+exports[`platform/azure createPr() should create and return a PR object from base branch 1`] = `
+Object {
+  "displayNumber": "Pull Request #456",
+  "number": 456,
+  "pullRequestId": 456,
+}
+`;
+
+exports[`platform/azure ensureComment add comment 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "number": 1,
+  "state": "closed",
+  "title": "branch a pr",
+}
+`;
+
+exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "number": 1,
+  "state": "closed",
+  "title": "branch a pr",
+}
+`;
+
+exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "number": 1,
+  "state": "open",
+  "title": "branch a pr",
+}
+`;
+
+exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
+Object {
+  "head": Object {
+    "ref": "branch-a",
+  },
+  "number": 1,
+  "state": "closed",
+  "title": "branch a pr",
+}
+`;
+
+exports[`platform/azure getAllRenovateBranches() should return all renovate branches 1`] = `
+Array [
+  "renovate/a",
+  "renovate/b",
+]
+`;
+
+exports[`platform/azure getBranchLastCommitTime should return a Date 1`] = `"1986-11-07T00:00:00Z"`;
+
+exports[`platform/azure getBranchPr(branchName) should return the pr 1`] = `null`;
+
+exports[`platform/azure getCommitMessages() returns commits messages 1`] = `
+Array [
+  "com1",
+  "com2",
+  "com3",
+]
+`;
+
+exports[`platform/azure getFile(filePatch, branchName) should return the encoded file content 1`] = `"Hello Renovate!"`;
+
+exports[`platform/azure getFileList should return the files matching the fileName 1`] = `
+Array [
+  "package.json",
+  "src/app/package.json",
+  "src/otherapp/package.json",
+  "symlinks/package.json",
+]
+`;
+
+exports[`platform/azure getPr(prNo) should return a pr in the right format 1`] = `
+Object {
+  "pullRequestId": 1234,
+}
+`;
+
+exports[`platform/azure getPrBody(input) returns updated pr body 1`] = `"https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)"`;
+
+exports[`platform/azure getRepos should return an array of repos 1`] = `
+Array [
+  Array [],
+]
+`;
+
+exports[`platform/azure getRepos should return an array of repos 2`] = `
+Array [
+  "prj1/repo1",
+  "prj1/repo2",
+]
+`;
+
+exports[`platform/azure initRepo should initialise the config for a repo 1`] = `
+Array [
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/azure initRepo should initialise the config for a repo 2`] = `
+Object {
+  "baseBranch": "defBr",
+  "baseCommitSHA": "1234",
+  "defaultBranch": "defBr",
+  "fileList": null,
+  "isFork": false,
+  "mergeMethod": "merge",
+  "owner": "?owner?",
+  "prList": null,
+  "privateRepo": true,
+  "repoForceRebase": false,
+  "repoId": "1",
+  "repository": "some-repo",
+}
+`;
+
+exports[`platform/azure setBaseBranch(branchName) sets the base branch 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/azure setBaseBranch(branchName) sets the base branch 2`] = `
+Array [
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/azure updatePr(prNo, title, body) should update the PR 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
+exports[`platform/azure updatePr(prNo, title, body) should update the PR without description 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
