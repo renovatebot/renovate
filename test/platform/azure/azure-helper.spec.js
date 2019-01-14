@@ -1,75 +1,75 @@
 const { Readable } = require('stream');
 
-describe('platform/vsts/helpers', () => {
-  let vstsHelper;
-  let vstsApi;
+describe('platform/azure/helpers', () => {
+  let azureHelper;
+  let azureApi;
 
   beforeEach(() => {
     // reset module
     jest.resetModules();
-    jest.mock('../../../lib/platform/vsts/vsts-got-wrapper');
-    vstsHelper = require('../../../lib/platform/vsts/vsts-helper');
-    vstsApi = require('../../../lib/platform/vsts/vsts-got-wrapper');
+    jest.mock('../../../lib/platform/azure/azure-got-wrapper');
+    azureHelper = require('../../../lib/platform/azure/azure-helper');
+    azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
   });
 
   describe('getNewBranchName', () => {
     it('should add refs/heads', () => {
-      const res = vstsHelper.getNewBranchName('testBB');
+      const res = azureHelper.getNewBranchName('testBB');
       expect(res).toBe(`refs/heads/testBB`);
     });
     it('should be the same', () => {
-      const res = vstsHelper.getNewBranchName('refs/heads/testBB');
+      const res = azureHelper.getNewBranchName('refs/heads/testBB');
       expect(res).toBe(`refs/heads/testBB`);
     });
   });
 
   describe('getBranchNameWithoutRefsheadsPrefix', () => {
     it('should be renamed', () => {
-      const res = vstsHelper.getBranchNameWithoutRefsheadsPrefix(
+      const res = azureHelper.getBranchNameWithoutRefsheadsPrefix(
         'refs/heads/testBB'
       );
       expect(res).toBe(`testBB`);
     });
     it('should log error and return null', () => {
-      const res = vstsHelper.getBranchNameWithoutRefsheadsPrefix();
+      const res = azureHelper.getBranchNameWithoutRefsheadsPrefix();
       expect(res).toBeNull();
     });
     it('should return the input', () => {
-      const res = vstsHelper.getBranchNameWithoutRefsheadsPrefix('testBB');
+      const res = azureHelper.getBranchNameWithoutRefsheadsPrefix('testBB');
       expect(res).toBe('testBB');
     });
   });
 
   describe('getRef', () => {
     it('should get the ref', async () => {
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => [{ objectId: 132 }]),
       }));
-      const res = await vstsHelper.getRefs('123', 'branch');
+      const res = await azureHelper.getRefs('123', 'branch');
       expect(res).toMatchSnapshot();
     });
     it('should get 0 ref', async () => {
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => []),
       }));
-      const res = await vstsHelper.getRefs('123');
+      const res = await azureHelper.getRefs('123');
       expect(res.length).toBe(0);
     });
     it('should get the ref', async () => {
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => [{ objectId: '132' }]),
       }));
-      const res = await vstsHelper.getRefs('123', 'refs/head/branch1');
+      const res = await azureHelper.getRefs('123', 'refs/head/branch1');
       expect(res).toMatchSnapshot();
     });
   });
 
-  describe('getVSTSBranchObj', () => {
+  describe('getAzureBranchObj', () => {
     it('should be the branch object formated', async () => {
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => [{ objectId: '132' }]),
       }));
-      const res = await vstsHelper.getVSTSBranchObj(
+      const res = await azureHelper.getAzureBranchObj(
         '123',
         'branchName',
         'base'
@@ -77,10 +77,10 @@ describe('platform/vsts/helpers', () => {
       expect(res).toMatchSnapshot();
     });
     it('should be the branch object formated', async () => {
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getRefs: jest.fn(() => []),
       }));
-      const res = await vstsHelper.getVSTSBranchObj('123', 'branchName');
+      const res = await azureHelper.getAzureBranchObj('123', 'branchName');
       expect(res).toMatchSnapshot();
     });
   });
@@ -101,11 +101,11 @@ describe('platform/vsts/helpers', () => {
         },
       });
 
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => mockEventStream),
       }));
 
-      const res = await vstsHelper.getChanges(
+      const res = await azureHelper.getChanges(
         [
           {
             name: './myFilePath/test',
@@ -119,11 +119,11 @@ describe('platform/vsts/helpers', () => {
       expect(res).toMatchSnapshot();
     });
     it('should be get the commit obj formated (file to create)', async () => {
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => null),
       }));
 
-      const res = await vstsHelper.getChanges(
+      const res = await azureHelper.getChanges(
         [
           {
             name: './myFilePath/test',
@@ -154,11 +154,11 @@ describe('platform/vsts/helpers', () => {
         },
       });
 
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => mockEventStream),
       }));
 
-      const res = await vstsHelper.getFile(
+      const res = await azureHelper.getFile(
         '123',
         'repository',
         './myFilePath/test',
@@ -182,11 +182,11 @@ describe('platform/vsts/helpers', () => {
         },
       });
 
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => mockEventStream),
       }));
 
-      const res = await vstsHelper.getFile(
+      const res = await azureHelper.getFile(
         '123',
         'repository',
         './myFilePath/test',
@@ -210,11 +210,11 @@ describe('platform/vsts/helpers', () => {
         },
       });
 
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => mockEventStream),
       }));
 
-      const res = await vstsHelper.getFile(
+      const res = await azureHelper.getFile(
         '123',
         'repository',
         './myFilePath/test',
@@ -224,13 +224,13 @@ describe('platform/vsts/helpers', () => {
     });
 
     it('should return null because the file is not readable', async () => {
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getItemText: jest.fn(() => ({
           readable: false,
         })),
       }));
 
-      const res = await vstsHelper.getFile(
+      const res = await azureHelper.getFile(
         '123',
         'repository',
         './myFilePath/test',
@@ -242,7 +242,7 @@ describe('platform/vsts/helpers', () => {
 
   describe('max4000Chars', () => {
     it('should be the same', () => {
-      const res = vstsHelper.max4000Chars('Hello');
+      const res = azureHelper.max4000Chars('Hello');
       expect(res).toMatchSnapshot();
     });
     it('should be truncated', () => {
@@ -250,58 +250,58 @@ describe('platform/vsts/helpers', () => {
       for (let i = 0; i < 5000; i += 1) {
         str += 'a';
       }
-      const res = vstsHelper.max4000Chars(str);
+      const res = azureHelper.max4000Chars(str);
       expect(res.length).toBe(3999);
     });
   });
 
   describe('getRenovatePRFormat', () => {
     it('should be formated (closed)', () => {
-      const res = vstsHelper.getRenovatePRFormat({ status: 2 });
+      const res = azureHelper.getRenovatePRFormat({ status: 2 });
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (closed v2)', () => {
-      const res = vstsHelper.getRenovatePRFormat({ status: 3 });
+      const res = azureHelper.getRenovatePRFormat({ status: 3 });
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (not closed)', () => {
-      const res = vstsHelper.getRenovatePRFormat({ status: 1 });
+      const res = azureHelper.getRenovatePRFormat({ status: 1 });
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (isConflicted)', () => {
-      const res = vstsHelper.getRenovatePRFormat({ mergeStatus: 2 });
+      const res = azureHelper.getRenovatePRFormat({ mergeStatus: 2 });
       expect(res).toMatchSnapshot();
     });
   });
 
   describe('getCommitDetails', () => {
     it('should get commit details', async () => {
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getCommit: jest.fn(() => ({
           parents: ['123456'],
         })),
       }));
-      const res = await vstsHelper.getCommitDetails('123', '123456');
+      const res = await azureHelper.getCommitDetails('123', '123456');
       expect(res).toMatchSnapshot();
     });
   });
 
   describe('getProjectAndRepo', () => {
     it('should return the object with same strings', async () => {
-      const res = await vstsHelper.getProjectAndRepo('myRepoName');
+      const res = await azureHelper.getProjectAndRepo('myRepoName');
       expect(res).toMatchSnapshot();
     });
     it('should return the object with project and repo', async () => {
-      const res = await vstsHelper.getProjectAndRepo('prjName/myRepoName');
+      const res = await azureHelper.getProjectAndRepo('prjName/myRepoName');
       expect(res).toMatchSnapshot();
     });
     it('should return an error', async () => {
       let err;
       try {
-        await vstsHelper.getProjectAndRepo('prjName/myRepoName/blalba');
+        await azureHelper.getProjectAndRepo('prjName/myRepoName/blalba');
       } catch (error) {
         err = error;
       }

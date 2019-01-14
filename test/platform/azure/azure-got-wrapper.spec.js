@@ -1,25 +1,25 @@
-describe('platform/vsts/vsts-got-wrapper', () => {
+describe('platform/azure/azure-got-wrapper', () => {
   let hostRules;
-  let vsts;
+  let azure;
   beforeEach(() => {
     // reset module
     jest.resetModules();
     hostRules = require('../../../lib/util/host-rules');
-    vsts = require('../../../lib/platform/vsts/vsts-got-wrapper');
+    azure = require('../../../lib/platform/azure/azure-got-wrapper');
   });
 
   describe('gitApi', () => {
     it('should throw an error if no token is provided', () => {
-      expect(vsts.gitApi).toThrow('No token found for vsts');
-      expect(vsts.getCoreApi).toThrow('No token found for vsts');
+      expect(azure.gitApi).toThrow('No token found for azure');
+      expect(azure.getCoreApi).toThrow('No token found for azure');
     });
     it('should set token and endpoint', async () => {
       hostRules.update({
-        platform: 'vsts',
+        platform: 'azure',
         token: 'myToken',
         endpoint: 'myEndpoint',
       });
-      const res = await vsts.vstsObj();
+      const res = await azure.azureObj();
 
       delete res.rest.client.userAgent;
       delete res.vsoClient.restClient.client.userAgent;
