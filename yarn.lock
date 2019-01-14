@@ -3104,10 +3104,10 @@ github-url-from-git@1.5.0:
   resolved "https://registry.yarnpkg.com/github-url-from-git/-/github-url-from-git-1.5.0.tgz#f985fedcc0a9aa579dc88d7aff068d55cc6251a0"
   integrity sha1-+YX+3MCpqledyI16/waNVcxiUaA=
 
-gl-got@9.0.2:
-  version "9.0.2"
-  resolved "https://registry.yarnpkg.com/gl-got/-/gl-got-9.0.2.tgz#8d631c321535b9fbe015e504b29dfd2e5c0e6a6a"
-  integrity sha512-TWEa8Px5YYeLECdB7oZSlte9rFzfpy57wDaEprqHV212ctBTDYKv1aiRFmlfv6J8L+NS6ZIqFwb/aKfF86o/9A==
+gl-got@9.0.3:
+  version "9.0.3"
+  resolved "https://registry.yarnpkg.com/gl-got/-/gl-got-9.0.3.tgz#ceddbbf71f09d9369d9179a35ca919ffb289259b"
+  integrity sha512-qT1Jx80DvD99G/gjG5ZHOEv9RS55mwyRakMhe4U4+BSvoTn0Mjjs01t7mRUHoB6TxaoublB2Bv0IYcXzOgKGrQ==
   dependencies:
     got "^9.2.0"
 
