@@ -106,7 +106,7 @@ describe('platform/gitlab', () => {
     ].forEach(([envToken, token, endpoint, gitAuthor], i) => {
       it(`should initialise the config for the repo - ${i}`, async () => {
         if (envToken !== undefined) {
-          process.env.GITLAB_TOKEN = envToken;
+          process.env.RENOVATE_TOKEN = envToken;
         }
         get.mockReturnValue({ body: [] });
         const config = await initRepo({
