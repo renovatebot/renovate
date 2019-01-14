@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/vsts/vsts-got-wrapper gitApi should set token and endpoint 1`] = `
+exports[`platform/azure/azure-got-wrapper gitApi should set token and endpoint 1`] = `
 WebApi {
   "authHandler": PersonalAccessTokenCredentialHandler {
     "token": "myToken",

@@ -19,6 +19,6 @@
 - [ ] The Renovate GitHub App
 - [ ] Self-hosted GitHub
 - [ ] Self-hosted GitLab
-- [ ] Self-hosted VSTS
+- [ ] Self-hosted Azure DevOps
 
 #### Please describe the issue:
