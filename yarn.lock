@@ -5134,10 +5134,10 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-luxon@1.8.3:
-  version "1.8.3"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.8.3.tgz#6c76b50319b3a91a357002ca2e96576bb3bfe26d"
-  integrity sha512-hICQcGmUl5e9VUnf5PtHAma+tpiwL/wMBV9/6/M/6iSpzWFHdEElK2Rj4IZx8kbk2/baJvYftgb+n/I2wJ7RXQ==
+luxon@1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.10.0.tgz#335b55e2fed50e09f869aee828897a3f67c7044e"
+  integrity sha512-ry3GKh//v3isD6oJN5pFWmdh+3GiScwv9q8VgG6fZ2j1guGOol2vVVdo4GBAWCrcq5RHOqSeipqHBnOu/u024Q==
 
 make-dir@^1.0.0:
   version "1.3.0"
