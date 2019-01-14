@@ -52,7 +52,9 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('You need to supply a GitHub token.');
+      expect(err.message).toBe(
+        'No authentication found for platform https://api.github.com/ (github)'
+      );
     });
     it('throws for no GitLab token', async () => {
       const env = { RENOVATE_PLATFORM: 'gitlab' };
@@ -62,7 +64,9 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('You need to supply a GitLab token.');
+      expect(err.message).toBe(
+        'No authentication found for platform https://gitlab.com/api/v4/ (gitlab)'
+      );
     });
     it('throws for no Azure DevOps token', async () => {
       const env = { RENOVATE_PLATFORM: 'azure' };
@@ -72,10 +76,12 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('You need to supply an Azure DevOps token.');
+      expect(err.message).toBe(
+        'No authentication found for platform undefined (azure)'
+      );
     });
     it('supports token in env', async () => {
-      const env = { GITHUB_TOKEN: 'abc' };
+      const env = { RENOVATE_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports token in CLI options', async () => {
@@ -85,7 +91,7 @@ describe('config/index', () => {
     });
     it('supports forceCli', async () => {
       defaultArgv = defaultArgv.concat(['--force-cli=true']);
-      const env = { GITHUB_TOKEN: 'abc' };
+      const env = { RENOVATE_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports Bitbucket username/passwod', async () => {
@@ -173,7 +179,7 @@ describe('config/index', () => {
       expect(azureApi.gitApi.mock.calls.length).toBe(1);
     });
     it('logs if no autodiscovered repositories', async () => {
-      const env = { GITHUB_TOKEN: 'abc' };
+      const env = { RENOVATE_TOKEN: 'abc' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
       ghGot.mockImplementationOnce(() => ({
         headers: {},
@@ -208,7 +214,7 @@ describe('config/index', () => {
       ).toMatchSnapshot();
     });
     it('adds a log file', async () => {
-      const env = { GITHUB_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
+      const env = { RENOVATE_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
       ghGot.mockImplementationOnce(() => ({
         headers: {},
@@ -221,7 +227,7 @@ describe('config/index', () => {
     it('resolves all presets', async () => {
       defaultArgv.push('--pr-hourly-limit=10', '--automerge=false');
       const env = {
-        GITHUB_TOKEN: 'abc',
+        RENOVATE_TOKEN: 'abc',
         RENOVATE_CONFIG_FILE: require.resolve(
           '../_fixtures/config/file-with-repo-presets.js'
         ),

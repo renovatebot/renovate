@@ -35,42 +35,33 @@ describe('config/env', () => {
       expect(env.getConfig(envParam).lockFileMaintenance).toEqual({});
     });
     it('supports GitHub token', () => {
-      const envParam = { GITHUB_TOKEN: 'github.com token' };
+      const envParam = { RENOVATE_TOKEN: 'github.com token' };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitHub custom endpoint', () => {
-      const envParam = { GITHUB_ENDPOINT: 'a ghe endpoint' };
+      const envParam = { RENOVATE_ENDPOINT: 'a ghe endpoint' };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitHub custom endpoint and github.com', () => {
       const envParam = {
         GITHUB_COM_TOKEN: 'a github.com token',
-        GITHUB_ENDPOINT: 'a ghe endpoint',
-        GITHUB_TOKEN: 'a ghe token',
-      };
-      expect(env.getConfig(envParam)).toMatchSnapshot();
-    });
-    it('supports GitHub custom endpoint and github.com and gitlab.com', () => {
-      const envParam = {
-        GITHUB_COM_TOKEN: 'a github.com token',
-        GITHUB_ENDPOINT: 'a ghe endpoint',
-        GITHUB_TOKEN: 'a ghe token',
-        GITLAB_TOKEN: 'a gitlab token',
+        RENOVATE_ENDPOINT: 'a ghe endpoint',
+        RENOVATE_TOKEN: 'a ghe token',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitLab token', () => {
       const envParam = {
         RENOVATE_PLATFORM: 'gitlab',
-        GITLAB_TOKEN: 'a gitlab.com token',
+        RENOVATE_TOKEN: 'a gitlab.com token',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports GitLab custom endpoint', () => {
       const envParam = {
         RENOVATE_PLATFORM: 'gitlab',
-        GITLAB_TOKEN: 'a gitlab token',
-        GITLAB_ENDPOINT: 'a gitlab endpoint',
+        RENOVATE_TOKEN: 'a gitlab token',
+        RENOVATE_ENDPOINT: 'a gitlab endpoint',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
@@ -92,19 +83,18 @@ describe('config/env', () => {
     it('supports Bitbucket token', () => {
       const envParam = {
         RENOVATE_PLATFORM: 'bitbucket',
-        BITBUCKET_TOKEN: 'a bitbucket token',
-        BITBUCKET_ENDPOINT: 'a bitbucket endpoint',
-        BITBUCKET_USERNAME: 'some-username',
-        BITBUCKET_PASSWORD: 'app-password',
+        RENOVATE_ENDPOINT: 'a bitbucket endpoint',
+        RENOVATE_USERNAME: 'some-username',
+        RENOVATE_PASSWORD: 'app-password',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
     it('supports Bitbucket username/password', () => {
       const envParam = {
         RENOVATE_PLATFORM: 'bitbucket',
-        BITBUCKET_ENDPOINT: 'a bitbucket endpoint',
-        BITBUCKET_USERNAME: 'some-username',
-        BITBUCKET_PASSWORD: 'app-password',
+        RENOVATE_ENDPOINT: 'a bitbucket endpoint',
+        RENOVATE_USERNAME: 'some-username',
+        RENOVATE_PASSWORD: 'app-password',
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });

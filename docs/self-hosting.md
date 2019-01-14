@@ -117,8 +117,7 @@ You can find instructions for Azure DevOps
 [azureDevOps](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats).
 
 This token needs to be configured via file, environment variable, or CLI. See
-[docs/configuration.md](configuration.md) for details. The simplest way is
-to expose it as `RENOVATE_TOKEN`.
+[docs/configuration.md](configuration.md) for details. The simplest way is to expose it as `RENOVATE_TOKEN`.
 
 For Bitbucket, you can configure `RENOVATE_USERNAME` and `RENOVATE_PASSWORD`.
 
@@ -159,15 +158,14 @@ Most people will run Renovate via cron, e.g. once per hour. Here is an example b
 
 export PATH="/home/user/.yarn/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 export RENOVATE_CONFIG_FILE="/home/user/renovate-config.js"
-export GITHUB_TOKEN="**github-token**" # Delete this if using GitHub Enterprise
-export GITLAB_TOKEN="**github-token**" # Delete this if using GitHub
-export GITHUB_COM_TOKEN="**github-token**" # Delete this if using GitLab or github.com
+export RENOVATE_TOKEN="**some-token**" # GitHub, GitLab, Azure DevOps or BitBucket
+export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 
 # Renovate
 renovate
 ```
 
-Note: the GitHub token in env is necessary in order to retrieve Release Notes that are hosted on github.com. Use `GITHUB_COM_TOKEN` if running against GitHub Enterprise or `GITHUB_TOKEN` if running against GitLab. i.e. remove one of the lines as applicable.
+Note: the GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com. You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 
