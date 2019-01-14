@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/azure/helpers getAzureBranchObj should be the branch object formated 1`] = `
+Object {
+  "name": "refs/heads/branchName",
+  "oldObjectId": "132",
+}
+`;
+
+exports[`platform/azure/helpers getAzureBranchObj should be the branch object formated 2`] = `
+Object {
+  "name": "refs/heads/branchName",
+  "oldObjectId": "0000000000000000000000000000000000000000",
+}
+`;
+
+exports[`platform/azure/helpers getChanges should be get the commit obj formated (file to create) 1`] = `
+Array [
+  Object {
+    "changeType": 1,
+    "item": Object {
+      "path": "./myFilePath/test",
+    },
+    "newContent": Object {
+      "Content": "Hello world!",
+      "ContentType": 0,
+    },
+  },
+]
+`;
+
+exports[`platform/azure/helpers getChanges should be get the commit obj formated (file to update) 1`] = `
+Array [
+  Object {
+    "changeType": 2,
+    "item": Object {
+      "path": "./myFilePath/test",
+    },
+    "newContent": Object {
+      "Content": "Hello world!",
+      "ContentType": 0,
+    },
+  },
+]
+`;
+
+exports[`platform/azure/helpers getCommitDetails should get commit details 1`] = `
+Object {
+  "parents": Array [
+    "123456",
+  ],
+}
+`;
+
+exports[`platform/azure/helpers getFile should return the file content because it is not a json 1`] = `"{\\"hello\\"= \\"test\\"}"`;
+
+exports[`platform/azure/helpers getProjectAndRepo should return the object with project and repo 1`] = `
+Object {
+  "project": "prjName",
+  "repo": "myRepoName",
+}
+`;
+
+exports[`platform/azure/helpers getProjectAndRepo should return the object with same strings 1`] = `
+Object {
+  "project": "myRepoName",
+  "repo": "myRepoName",
+}
+`;
+
+exports[`platform/azure/helpers getRef should get the ref 1`] = `
+Array [
+  Object {
+    "objectId": 132,
+  },
+]
+`;
+
+exports[`platform/azure/helpers getRef should get the ref 2`] = `
+Array [
+  Object {
+    "objectId": "132",
+  },
+]
+`;
+
+exports[`platform/azure/helpers getRenovatePRFormat should be formated (closed v2) 1`] = `
+Object {
+  "canRebase": true,
+  "displayNumber": "Pull Request #undefined",
+  "number": undefined,
+  "state": "merged",
+  "status": 3,
+}
+`;
+
+exports[`platform/azure/helpers getRenovatePRFormat should be formated (closed) 1`] = `
+Object {
+  "canRebase": true,
+  "displayNumber": "Pull Request #undefined",
+  "number": undefined,
+  "state": "closed",
+  "status": 2,
+}
+`;
+
+exports[`platform/azure/helpers getRenovatePRFormat should be formated (isConflicted) 1`] = `
+Object {
+  "canRebase": true,
+  "displayNumber": "Pull Request #undefined",
+  "isConflicted": true,
+  "mergeStatus": 2,
+  "number": undefined,
+  "state": "open",
+}
+`;
+
+exports[`platform/azure/helpers getRenovatePRFormat should be formated (not closed) 1`] = `
+Object {
+  "canRebase": true,
+  "displayNumber": "Pull Request #undefined",
+  "number": undefined,
+  "state": "open",
+  "status": 1,
+}
+`;
+
+exports[`platform/azure/helpers max4000Chars should be the same 1`] = `"Hello"`;

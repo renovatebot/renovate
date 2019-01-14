@@ -16,8 +16,8 @@ describe('config/index', () => {
     let defaultArgv;
     let ghGot;
     let get;
-    let vstsApi;
-    let vstsHelper;
+    let azureApi;
+    let azure;
     beforeEach(() => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
@@ -28,10 +28,10 @@ describe('config/index', () => {
       ghGot = require('gh-got');
       jest.mock('gl-got');
       get = require('gl-got');
-      jest.mock('../../lib/platform/vsts/vsts-got-wrapper');
-      vstsApi = require('../../lib/platform/vsts/vsts-got-wrapper');
-      jest.mock('../../lib/platform/vsts/vsts-helper');
-      vstsHelper = require('../../lib/platform/vsts/vsts-helper');
+      jest.mock('../../lib/platform/azure/azure-got-wrapper');
+      azureApi = require('../../lib/platform/azure/azure-got-wrapper');
+      jest.mock('../../lib/platform/azure/azure-helper');
+      azure = require('../../lib/platform/azure/azure-helper');
     });
     it('throws for invalid platform', async () => {
       const env = {};
@@ -72,7 +72,7 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('You need to supply a VSTS token.');
+      expect(err.message).toBe('You need to supply an Azure DevOps token.');
     });
     it('supports token in env', async () => {
       const env = { GITHUB_TOKEN: 'abc' };
@@ -146,8 +146,8 @@ describe('config/index', () => {
         '--endpoint=endpoint',
         '--token=abc',
       ]);
-      vstsHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azure.getFile.mockImplementationOnce(() => `Hello Renovate!`);
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getRepositories: jest.fn(() => [
           {
             name: 'repo1',
@@ -163,14 +163,14 @@ describe('config/index', () => {
           },
         ]),
       }));
-      vstsHelper.getProjectAndRepo.mockImplementationOnce(() => ({
+      azure.getProjectAndRepo.mockImplementationOnce(() => ({
         project: 'prj1',
         repo: 'repo1',
       }));
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(0);
       expect(get.mock.calls.length).toBe(0);
-      expect(vstsApi.gitApi.mock.calls.length).toBe(1);
+      expect(azureApi.gitApi.mock.calls.length).toBe(1);
     });
     it('logs if no autodiscovered repositories', async () => {
       const env = { GITHUB_TOKEN: 'abc' };

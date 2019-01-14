@@ -114,25 +114,13 @@ You can find instructions for Bitbucket AppPasswords [here](https://confluence.a
 Note: you should also configure a GitHub token even if your source host is GitLab or Bitbucket, because Renovate will need to perform many queries to github.com in order to retrieve Release Notes.
 
 You can find instructions for Azure DevOps
-[azureDevOps](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats?view=vsts).
+[azureDevOps](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats).
 
 This token needs to be configured via file, environment variable, or CLI. See
 [docs/configuration.md](configuration.md) for details. The simplest way is
-to expose it as `GITHUB_TOKEN`, `GITLAB_TOKEN` or `VSTS_TOKEN`.
+to expose it as `RENOVATE_TOKEN`.
 
-For Bitbucket, you can configure `BITBUCKET_USERNAME` and `BITBUCKET_PASSWORD`, or combine them together yourself into `BITBUCKET_TOKEN` using the node REPL:
-
-```
-const btoa = str => Buffer.from(str, 'binary').toString('base64');
-
-btoa(`${user}:${bbaAppPassword}`)
-```
-
-You must then expose either the token or username + password to your env, or provide them via the CLI. Example:
-
-```sh
-renovate --platform=bitbucket --username=rarkins --password=ABCDEFghijklmop123 rarkins/testrepo1
-```
+For Bitbucket, you can configure `RENOVATE_USERNAME` and `RENOVATE_PASSWORD`.
 
 ## Usage
 
