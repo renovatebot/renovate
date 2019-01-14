@@ -517,9 +517,10 @@ Object {
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": "latest",
       "depName": "ruby-debug",
       "lineNumber": 8,
-      "skipReason": "no-version",
+      "skipReason": "invalid-value",
     },
     Object {
       "depName": "sqlite3",

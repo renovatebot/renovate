@@ -6,7 +6,7 @@ source "https://gems.example.com" do
 end
 
 platforms :ruby do
-  gem "ruby-debug"
+  gem "ruby-debug", "latest"
   gem "sqlite3"
 end
 
