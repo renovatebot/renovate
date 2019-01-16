@@ -17,126 +17,66 @@ const simpleResult = {
   sourceUrl: 'http://example.org/src.git',
   deps: [
     {
-      depName: 'org.example:parent',
+      depName: 'org.example/parent',
       currentValue: '42',
-      mavenXmlPath: [
-        {
-          artifactId: 'parent',
-        },
-      ],
+      fileReplacePosition: 178,
+      purl:
+        'pkg:maven/org.example/parent?repository_url=http://repo.maven.apache.org/maven2',
     },
     {
-      depName: 'org.example:foo',
+      depName: 'org.example/foo',
       currentValue: '0.0.1',
-      mavenXmlPath: [
-        'dependencyManagement',
-        'dependencies',
-        'dependency',
-        {
-          artifactId: 'foo',
-        },
-      ],
+      fileReplacePosition: 749,
+      purl:
+        'pkg:maven/org.example/foo?repository_url=http://repo.maven.apache.org/maven2',
     },
     {
-      depName: 'org.example:bar',
+      depName: 'org.example/bar',
       currentValue: '1.0.0',
-      mavenXmlPath: [
-        'dependencyManagement',
-        'dependencies',
-        'dependency',
-        {
-          artifactId: 'bar',
-        },
-      ],
+      fileReplacePosition: 897,
+      purl:
+        'pkg:maven/org.example/bar?repository_url=http://repo.maven.apache.org/maven2',
     },
     {
-      depName: 'org.apache.maven.scm:maven-scm-provider-gitexe',
+      depName: 'org.apache.maven.scm/maven-scm-provider-gitexe',
       currentValue: '1.8.1',
-      mavenXmlPath: [
-        'build',
-        'plugins',
-        'plugin',
-        {
-          artifactId: 'maven-release-plugin',
-        },
-        'dependencies',
-        {
-          artifactId: 'maven-scm-provider-gitexe',
-        },
-      ],
+      fileReplacePosition: 1329,
+      purl:
+        'pkg:maven/org.apache.maven.scm/maven-scm-provider-gitexe?repository_url=http://repo.maven.apache.org/maven2',
     },
     {
-      depName: 'org.example:${artifact-id-placeholder}',
+      depName: 'org.example/${artifact-id-placeholder}',
       currentValue: '0.0.1',
-      mavenXmlPath: [
-        'dependencies',
-        'dependency',
-        {
-          artifactId: '${artifact-id-placeholder}',
-        },
-      ],
       skipReason: 'name-placeholder',
     },
     {
-      depName: '${group-id-placeholder}:baz',
+      depName: '${group-id-placeholder}/baz',
       currentValue: '0.0.1',
-      mavenXmlPath: [
-        'dependencies',
-        'dependency',
-        {
-          artifactId: 'baz',
-        },
-      ],
       skipReason: 'name-placeholder',
     },
     {
-      depName: 'org.example:quux',
+      depName: 'org.example/quux',
       currentValue: '${resourceServerVersion}',
-      mavenXmlPath: [
-        'dependencies',
-        'dependency',
-        {
-          artifactId: 'quux',
-        },
-      ],
       skipReason: 'version-placeholder',
     },
     {
-      depName: 'org.example:quuz',
+      depName: 'org.example/quuz',
       currentValue: '1.2.3',
-      mavenXmlPath: [
-        'dependencies',
-        'dependency',
-        {
-          artifactId: 'quuz',
-        },
-      ],
+      fileReplacePosition: 2521,
+      purl:
+        'pkg:maven/org.example/quuz?repository_url=http://repo.maven.apache.org/maven2',
     },
     {
-      depName: 'org.example:profile-artifact',
+      depName: 'org.example/profile-artifact',
       currentValue: '${profile-placeholder}',
-      mavenXmlPath: [
-        'profiles',
-        {
-          id: 'profile-id',
-        },
-        'dependencies',
-        {
-          artifactId: 'profile-artifact',
-        },
-      ],
       skipReason: 'version-placeholder',
     },
     {
-      depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',
+      depName: 'org.apache.maven.plugins/maven-checkstyle-plugin',
       currentValue: '2.17',
-      mavenXmlPath: [
-        'reporting',
-        'plugins',
-        {
-          artifactId: 'maven-checkstyle-plugin',
-        },
-      ],
+      fileReplacePosition: 3057,
+      purl:
+        'pkg:maven/org.apache.maven.plugins/maven-checkstyle-plugin?repository_url=http://repo.maven.apache.org/maven2',
     },
   ],
 };
