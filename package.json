@@ -136,7 +136,7 @@
     "upath": "1.1.0",
     "validator": "10.9.0",
     "www-authenticate": "0.6.2",
-    "xmldoc": "^1.1.2",
+    "xmldoc": "1.1.2",
     "yarn": "1.9.4",
     "@snyk/ruby-semver": "2.0.0"
   },
