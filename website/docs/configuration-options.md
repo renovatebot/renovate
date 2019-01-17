@@ -98,6 +98,10 @@ Set this value to 'patch', 'minor' or 'major' to have Renovate update the versio
 
 You can also set this field to `"mirror:x"` where `x` is the name of a package in the `package.json`. Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on. Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
+## bundler
+
+Bundler is now in alpha stage and ready for testing! [Details](https://renovatebot.com/blog/ruby-bundler-support)
+
 ## circleci
 
 ## commitBody
@@ -242,6 +246,8 @@ Configuration for Go Modules (`go mod`). Supercedes anything in the `go` config 
 ## gradle
 
 Configuration for Java gradle projects
+
+## gradle-wrapper
 
 ## group
 
@@ -623,7 +629,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-By default, Renovate will add sha256 digests to Docker source images so that they are then "immutable". Set this to false to continue using only tags to identify source images.
+If enabled Renovate will pin docker images by means of their sha256 digest and not only by tag so that they are immutable.
 
 ## pip_requirements
 
@@ -810,6 +816,8 @@ Must be valid usernames. Note: does not currently work with the GitHub App due t
 ## rollbackPrs
 
 Set this to false either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
+
+## ruby
 
 ## schedule
 
