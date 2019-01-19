@@ -5,6 +5,7 @@ const responses = require('../../_fixtures/bitbucket-server/responses');
 
 describe('platform/bitbucket', () => {
   let bitbucket;
+
   let api;
   let hostRules;
   beforeEach(() => {
@@ -20,6 +21,7 @@ describe('platform/bitbucket', () => {
     hostRules.update({
       platform: 'bitbucket-server',
       token: 'token',
+      endpoint: responses.baseURL,
     });
   });
 
@@ -29,12 +31,14 @@ describe('platform/bitbucket', () => {
 
   describe('getRepos()', () => {
     it('returns repos', async () => {
-      api.get.mockReturnValueOnce({
-        body: {
-          values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
-        },
-      });
-      expect(await bitbucket.getRepos()).toEqual(['foo/bar', 'some/repo']);
+      api.get
+        .mockReturnValueOnce({
+          body: responses['/rest/api/1.0/projects'],
+        })
+        .mockReturnValueOnce({
+          body: responses['/rest/api/1.0/projects/SOME/repos'],
+        });
+      expect(await bitbucket.getRepos()).toEqual(['some/repo']);
     });
   });
 });
