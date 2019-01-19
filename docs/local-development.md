@@ -7,7 +7,7 @@ Please submit PRs to improve it if you think anything is unclear or you can thin
 
 #### Fork and Clone
 
-If you will contribute to the project, you should first "fork" it using the GitHub Website and then clone your fork.
+If you will contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
 
 #### Node version
 
@@ -27,25 +27,31 @@ FATAL: Renovate fatal error: You need to supply a GitHub token.
 
 ## Platform Account Setup
 
-Although it's possible to make small source code improvements without testing against a real repository, in most cases it's important that you run a "real" test on a repository before you submit a feature or fix. It's possible to do this against GitHub or GitLab public hosts, and you can also use both.
+Although it's possible to make small source code improvements without testing against a real repository, in most cases it's important that you run a "real" test on a repository before you submit a feature or fix. It's possible to do this against GitHub, GitLab or Bitbucket public servers.
 
 #### Register new account (optional)
 
-It's recommended that you set up a dedicated test account on GitHub or GitLab, so that you minimise the risk that you accidentally cause problems when testing out Renovate.
+If you're going to be doing a lot of Renovate development then it's recommended that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
 
 e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing" for use with Renovate.
 
 #### Generate platform token
 
-Once you have decided on your platform and account, log in and generate a "Personal Access Token" that can be used to authenticate Renovate.
+Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate.
 
 #### Export platform token
 
-Although you can specify a token to Renovate using `--token=`, it is annoying if you need to include this every time.
+Although you can specify a token to Renovate using `--token=`, it can be inconvenient if you need to include this every time.
 You are better off to instead export an Environment Variable for this.
 
 If your platform of choice is GitHub, then export `GITHUB_TOKEN`, and if it's GitLab then export `GITLAB_TOKEN`.
 It's also find to export both so that you can switch between platforms.
+
+#### Run against a real repo
+
+To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`. Now, add a file called `.nvmrc` with the content `8.13.0`. Now run against the test repo you created, e.g. `yarn start r4harry/testrepo1`. If your token is set up correctly, you should find that it added a "Configure Renovate" PR inside the repo.
+
+If this is working then in future you can create other test repos to verify your code changes against.
 
 ## Tests
 
@@ -53,7 +59,7 @@ You can run `yarn test` locally to test your code. We test all PRs using the sam
 
 ## Jest
 
-You can run just the Jest unit tests by running `yarn jest`. You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest lock-files` or `yarn jest workers/branch`. If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end. e.g. `yarn jest lock-files -u` would update the saved Snapshots for _all_ tests in `test/workers/branch/lock-files.spec.js`.
+You can run just the Jest unit tests by running `yarn jest`. You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`. If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end. e.g. `yarn jest composer -u` would update the saved Snapshots for _all_ tests in `test/manager/composer/*`.
 
 #### Coverage
 
@@ -67,17 +73,27 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 #### Linting and formatting
 
-We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then you should find that the offending file will be updated automatically and pass the second time you run `yarn test` because each time you run it, it includes the `--fix` command automatically. You usually shouldn't need to fix any prettier errors manually.
+We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again. You usually shouldn't need to fix any prettier errors manually.
+
+## Keeping your Renovate fork up to date
+
+First of all, never commit to `master` of your fork - always use a branch like `feat/1234-add-yarn-parsing`.
+
+Then, make sure your fork is up to date with `master` each time before creating a new branch. To do this, see these GitHub guides:
+
+[Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
+
+[Syncing a fork](https://help.github.com/articles/syncing-a-fork/)
 
 ## Tips and tricks
 
-#### Forked repositories
+#### Runnign Renovate against forked repositories
 
 Quite often, the quickest way for you to test or fix something is to fork an existing repository.
 However, by default Renovate skips over repositories that are forked.
-To override this default, you need to specify the setting `renovateFork` as `true`.
+To override this default, you need to specify the setting `includeForks` as `true`.
 
-Option 1: Add `"renovateFork": true` to the `renovate.json` of the repository
+Option 1: Add `"includeForks": true` to the `renovate.json` of the repository
 Option 2: Run Renovate with the CLI flag `--renovate-fork=true`
 
 #### Log files

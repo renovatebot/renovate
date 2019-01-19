@@ -2,6 +2,9 @@
 
 exports[`workers/repository/extract/index extractAllDependencies() runs 1`] = `
 Object {
+  "ansible": Array [
+    Object {},
+  ],
   "bazel": Array [
     Object {},
   ],
@@ -33,6 +36,9 @@ Object {
     Object {},
   ],
   "gradle": Array [
+    Object {},
+  ],
+  "gradle-wrapper": Array [
     Object {},
   ],
   "kubernetes": Array [
