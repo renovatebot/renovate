@@ -78,6 +78,7 @@
     "@renovate/pep440": "0.4.1",
     "@renovatebot/docker-registry-client": "3.3.0",
     "@sindresorhus/is": "0.14.0",
+    "@snyk/ruby-semver": "2.0.0",
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "6.6.3",
     "bunyan": "1.8.12",
@@ -137,8 +138,7 @@
     "validator": "10.11.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.9.4",
-    "@snyk/ruby-semver": "2.0.0"
+    "yarn": "1.9.4"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
