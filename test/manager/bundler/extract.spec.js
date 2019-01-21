@@ -5,6 +5,10 @@ const railsGemfile = fs.readFileSync(
   'test/_fixtures/bundler/Gemfile.rails',
   'utf8'
 );
+const railsGemfileLock = fs.readFileSync(
+  'test/_fixtures/bundler/Gemfile.rails.lock',
+  'utf8'
+);
 
 const sourceGroupGemfile = fs.readFileSync(
   'test/_fixtures/bundler/Gemfile.sourceGroup',
@@ -19,16 +23,17 @@ function validateGems(raw, parsed) {
 
 describe('lib/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here')).toBeNull();
+    it('returns null for empty', async () => {
+      expect(await extractPackageFile('nothing here', 'Gemfile')).toBeNull();
     });
-    it('parses rails Gemfile', () => {
-      const res = extractPackageFile(railsGemfile);
+    it('parses rails Gemfile', async () => {
+      platform.getFile.mockReturnValueOnce(railsGemfileLock);
+      const res = await extractPackageFile(railsGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       validateGems(railsGemfile, res);
     });
-    it('parses sourceGroups', () => {
-      const res = extractPackageFile(sourceGroupGemfile);
+    it('parses sourceGroups', async () => {
+      const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       validateGems(sourceGroupGemfile, res);
     });

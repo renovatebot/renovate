@@ -2,6 +2,9 @@
 
 exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
 Object {
+  "compatibility": Object {
+    "bundler": "1.17.2",
+  },
   "deps": Array [
     Object {
       "currentValue": ">= 11.1",
