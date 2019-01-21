@@ -19,12 +19,8 @@ function validateGems(raw, parsed) {
 
 describe('lib/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
-    beforeEach(() => {
-      config = {};
-    });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBeNull();
+      expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('parses rails Gemfile', () => {
       const res = extractPackageFile(railsGemfile);
