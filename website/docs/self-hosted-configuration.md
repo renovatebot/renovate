@@ -50,10 +50,6 @@ Set it to a string specifing the transport used by Git (`https`, `http` or `ssh`
 
 ## logLevel
 
-## mirrorMode
-
-You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
-
 ## onboarding
 
 Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
