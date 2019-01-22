@@ -112,7 +112,7 @@
     "luxon": "1.10.0",
     "markdown-it": "8.4.2",
     "minimatch": "3.0.4",
-    "moment": "2.23.0",
+    "moment": "2.24.0",
     "moment-timezone": "0.5.23",
     "node-html-parser": "1.1.12",
     "npm": "6.6.0",
