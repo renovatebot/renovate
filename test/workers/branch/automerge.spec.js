@@ -34,9 +34,17 @@ describe('workers/branch/automerge', () => {
       platform.getBranchPr.mockReturnValueOnce({});
       config.automerge = true;
       config.automergeType = 'branch';
-      platform.getBranchStatus.mockReturnValueOnce('success');
       expect(await tryBranchAutomerge(config)).toBe(
         'automerge aborted - PR exists'
+      );
+    });
+    it('returns false if PR exists and success branch', async () => {
+      platform.getBranchPr.mockReturnValueOnce({});
+      config.automerge = true;
+      config.automergeType = 'branch';
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      expect(await tryBranchAutomerge(config)).toBe(
+        'automerge aborted - Human commits detected'
       );
     });
     it('returns false if automerge fails', async () => {
