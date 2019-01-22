@@ -33,6 +33,7 @@ describe('api/npm', () => {
       repository: {
         type: 'git',
         url: 'git://github.com/renovateapp/dummy.git',
+        directory: 'src/a',
       },
       'dist-tags': {
         latest: '0.0.1',
