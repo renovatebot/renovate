@@ -82,7 +82,7 @@ describe('platform/github', () => {
     ].forEach(([envToken, token, endpoint], i) => {
       it(`should initialise the config for the repo - ${i}`, async () => {
         if (envToken !== undefined) {
-          process.env.GITHUB_TOKEN = envToken;
+          process.env.RENOVATE_TOKEN = envToken;
         }
         const config = await initRepo({
           repository: 'some/repo',
@@ -1007,10 +1007,12 @@ describe('platform/github', () => {
           {
             number: 1,
             title: 'title-1',
+            state: 'open',
           },
           {
             number: 2,
             title: 'title-2',
+            state: 'open',
           },
         ],
       });
@@ -1026,15 +1028,78 @@ describe('platform/github', () => {
           {
             number: 1,
             title: 'title-1',
+            state: 'open',
           },
           {
             number: 2,
             title: 'title-2',
+            state: 'open',
           },
         ],
       }));
       const res = await github.ensureIssue('new-title', 'new-content');
       expect(res).toEqual('created');
+    });
+    it('creates issue if not ensuring only once', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+            state: 'closed',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+            state: 'open',
+          },
+        ],
+      }));
+      const res = await github.ensureIssue('title-1', 'new-content');
+      expect(res).toEqual(null);
+    });
+    it('does not create issue if ensuring only once', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+            state: 'closed',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+            state: 'open',
+          },
+        ],
+      }));
+      const once = true;
+      const res = await github.ensureIssue('title-1', 'new-content', once);
+      expect(res).toEqual(null);
+    });
+    it('closes others if ensuring only once', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 1,
+            title: 'title-1',
+            state: 'closed',
+          },
+          {
+            number: 2,
+            title: 'title-2',
+            state: 'open',
+          },
+          {
+            number: 3,
+            title: 'title-1',
+            state: 'open',
+          },
+        ],
+      }));
+      const once = true;
+      const res = await github.ensureIssue('title-1', 'new-content', once);
+      expect(res).toEqual(null);
     });
     it('updates issue', async () => {
       get.mockReturnValueOnce({
@@ -1042,10 +1107,12 @@ describe('platform/github', () => {
           {
             number: 1,
             title: 'title-1',
+            state: 'open',
           },
           {
             number: 2,
             title: 'title-2',
+            state: 'open',
           },
         ],
       });
@@ -1059,10 +1126,12 @@ describe('platform/github', () => {
           {
             number: 1,
             title: 'title-1',
+            state: 'open',
           },
           {
             number: 2,
             title: 'title-2',
+            state: 'open',
           },
         ],
       });
@@ -1076,10 +1145,12 @@ describe('platform/github', () => {
           {
             number: 1,
             title: 'title-1',
+            state: 'open',
           },
           {
             number: 2,
             title: 'title-1',
+            state: 'open',
           },
         ],
       });
@@ -1095,10 +1166,12 @@ describe('platform/github', () => {
           {
             number: 1,
             title: 'title-1',
+            state: 'open',
           },
           {
             number: 2,
             title: 'title-2',
+            state: 'open',
           },
         ],
       }));

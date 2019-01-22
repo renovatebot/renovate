@@ -92,7 +92,7 @@ Object {
       "version": "0.1.7",
     },
   ],
-  "repositoryUrl": "https://github.com/Azure/azure-cli",
+  "sourceUrl": "https://github.com/Azure/azure-cli",
 }
 `;
 
@@ -112,7 +112,6 @@ Object {
       "version": "0.31.0",
     },
   ],
-  "repositoryUrl": undefined,
 }
 `;
 
@@ -120,14 +119,26 @@ exports[`datasource/pypi getPkgReleases returns non-github home_page 1`] = `
 Object {
   "homepage": "https://microsoft.com",
   "releases": Array [],
-  "repositoryUrl": undefined,
 }
 `;
 
 exports[`datasource/pypi getPkgReleases supports custom datasource url 1`] = `
 Array [
   Array [
-    "https://custom.pypi.net/azure-cli-monitor/json",
+    Url {
+      "auth": null,
+      "hash": null,
+      "host": "custom.pypi.net",
+      "hostname": "custom.pypi.net",
+      "href": "https://custom.pypi.net/azure-cli-monitor/json",
+      "path": "/azure-cli-monitor/json",
+      "pathname": "/azure-cli-monitor/json",
+      "port": null,
+      "protocol": "https:",
+      "query": null,
+      "search": null,
+      "slashes": true,
+    },
     Object {
       "json": true,
     },
@@ -138,7 +149,63 @@ Array [
 exports[`datasource/pypi getPkgReleases supports custom datasource url from environmental variable 1`] = `
 Array [
   Array [
-    "https://my.pypi.python/pypi/azure-cli-monitor/json",
+    Url {
+      "auth": null,
+      "hash": null,
+      "host": "my.pypi.python",
+      "hostname": "my.pypi.python",
+      "href": "https://my.pypi.python/pypi/azure-cli-monitor/json",
+      "path": "/pypi/azure-cli-monitor/json",
+      "pathname": "/pypi/azure-cli-monitor/json",
+      "port": null,
+      "protocol": "https:",
+      "query": null,
+      "search": null,
+      "slashes": true,
+    },
+    Object {
+      "json": true,
+    },
+  ],
+]
+`;
+
+exports[`datasource/pypi getPkgReleases supports multiple custom datasource urls 1`] = `
+Array [
+  Array [
+    Url {
+      "auth": null,
+      "hash": null,
+      "host": "custom.pypi.net",
+      "hostname": "custom.pypi.net",
+      "href": "https://custom.pypi.net/azure-cli-monitor/json",
+      "path": "/azure-cli-monitor/json",
+      "pathname": "/azure-cli-monitor/json",
+      "port": null,
+      "protocol": "https:",
+      "query": null,
+      "search": null,
+      "slashes": true,
+    },
+    Object {
+      "json": true,
+    },
+  ],
+  Array [
+    Url {
+      "auth": null,
+      "hash": null,
+      "host": "second-index",
+      "hostname": "second-index",
+      "href": "https://second-index/azure-cli-monitor/json",
+      "path": "/azure-cli-monitor/json",
+      "pathname": "/azure-cli-monitor/json",
+      "port": null,
+      "protocol": "https:",
+      "query": null,
+      "search": null,
+      "slashes": true,
+    },
     Object {
       "json": true,
     },

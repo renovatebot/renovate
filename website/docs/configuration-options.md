@@ -11,6 +11,10 @@ Also, be sure to check out Renovate's [shareable config presets](./config-preset
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where it will be promptly answered.
 
+## ansible
+
+Add configuration here if you want to enable or disable something in particular for Ansible files and override the default Docker settings.
+
 ## assignees
 
 Must be valid usernames.
@@ -37,6 +41,8 @@ Also note that this option can be combined with other nested settings, such as d
 ```
 
 Warning: GitHub currently has a bug where automerge won't work if a GitHub Organization has protected their master branch, and there is no way to configure around this. Hence, automerging will try and fail in such situations. This doc will be updated once that bug/limitation is fixed by GitHub.
+
+Warning: GitHub won't do automerge if the PR has a negative feedback.
 
 ## automergeComment
 
@@ -92,6 +98,10 @@ Set this value to 'patch', 'minor' or 'major' to have Renovate update the versio
 
 You can also set this field to `"mirror:x"` where `x` is the name of a package in the `package.json`. Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on. Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
+## bundler
+
+Bundler is now in alpha stage and ready for testing! [Details](https://renovatebot.com/blog/ruby-bundler-support)
+
 ## circleci
 
 ## commitBody
@@ -132,8 +142,7 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 
 ## compatibility
 
-This is used to restrict which versions are possible to upgrade to based on their language support.
-For now this only support `python`, other languages would be added in the future.
+This is used to manually restrict which versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
 "compatibility": {
@@ -206,7 +215,7 @@ Example:
 
 ## encrypted
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used to encrypt npm tokens.
+See https://renovatebot.com/docs/private-modules for details on how this is used to encrypt npm tokens.
 
 ## engines
 
@@ -214,7 +223,7 @@ Extend this if you wish to configure rules specifically for `engines` definition
 
 ## extends
 
-See https://renovatebot.com/docs/configuration-reference/config-presets for details.
+See https://renovatebot.com/docs/config-presets for details.
 
 ## fileMatch
 
@@ -237,6 +246,8 @@ Configuration for Go Modules (`go mod`). Supercedes anything in the `go` config 
 ## gradle
 
 Configuration for Java gradle projects
+
+## gradle-wrapper
 
 ## group
 
@@ -298,6 +309,10 @@ Using this setting, you can selectively ignore package files that you don't want
 By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same major.minor.patch and was _already_ unstable (e.g. it was already on `4.0.0-rc2`). Renovate will not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will upate you to `4.0.0` only. If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
+
+## includeForks
+
+By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`.
 
 ## includePaths
 
@@ -399,11 +414,11 @@ Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a c
 
 ## npmToken
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
+See https://renovatebot.com/docs/private-modules for details on how this is used. Typically you would encrypt it and put it inside the `encrypted` object.
 
 ## npmrc
 
-See https://renovatebot.com/docs/deep-dives/private-modules for details on how this is used.
+See https://renovatebot.com/docs/private-modules for details on how this is used.
 
 ## nuget
 
@@ -509,6 +524,30 @@ Use this field if you want to have one or more package name patterns excluded in
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### languages
+
+Use this field to restrict rules to a particular language. e.g.
+
+```
+  "packageRules": [{
+    "packageNames": ["request"],
+    "languages": ["python"],
+    "enabled": false
+  }]
+```
+
+### managers
+
+Use this field to restrict rules to a particular package manager. e.g.
+
+```
+  "packageRules": [{
+    "packageNames": ["node"],
+    "managers": ["dockerfile"],
+    "enabled": false
+  }]
+```
+
 ### matchCurrentVersion
 
 `matchCurrentVersion` can be an exact semver version or a semver range.
@@ -541,6 +580,30 @@ The above will set `rangeStrategy` to `replace` for any package starting with `a
 
 ### paths
 
+### sourceUrlPrefixes
+
+Here's an example of where you use this to group together all packages from the Vue monorepo:
+
+```json
+{
+  "packageRules": [{
+    "sourceUrlPrefixes": ["https://github.com/vuejs/vue"],
+    "groupName" "Vue monorepo packages"
+  }]
+}
+```
+
+Here's an example of where you use this to group together all packages from the `renovatebot` github org:
+
+```json
+{
+  "packageRules": [{
+    "sourceUrlPrefixes": ["https://github.com/renovatebot/"],
+    "groupName" "All renovate packages"
+  }]
+}
+```
+
 ### updateTypes
 
 Use this field to match rules against types of updates. For example to apply a special label for Major updates:
@@ -566,7 +629,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-By default, Renovate will add sha256 digests to Docker source images so that they are then "immutable". Set this to false to continue using only tags to identify source images.
+If enabled Renovate will pin docker images by means of their sha256 digest and not only by tag so that they are immutable.
 
 ## pip_requirements
 
@@ -577,6 +640,12 @@ Add configuration here to specifically override settings for `pip` requirements 
 Add configuration here to specifically override settings for `setup.py` files.
 
 Warning: `setup.py` support is currently in beta, so is not enabled by default. You will need to configure `{ "pip_setup": { "enabled": true }}" to enable.
+
+## pipenv
+
+Add configuration here to change pipenv settings, e.g. to change the file pattern for pipenv so that you can use filenames other than Pipfile.
+
+Warning: 'pipenv' support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}" to enable.
 
 ## prBodyColumns
 
@@ -680,8 +749,6 @@ The PR title is important for some of Renovate's matching algorithms (e.g. deter
 
 Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
-## raiseDeprecationWarnings
-
 ## rangeStrategy
 
 Behaviour:
@@ -732,10 +799,6 @@ Typically you shouldn't need to modify this setting.
 
 This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forward compatibility.
 
-## renovateFork
-
-By default, Renovate will skip over any repositories that are forked, even if they contain a `renovate.json`, because that config may have been from the source repository. To enable Renovate on forked repositories, you need to add `renovateFork: true` to your renovate config.
-
 ## requiredStatusChecks
 
 This is a future feature that is partially implemented. Currently Renovate's default behaviour is to only automerge if every status check has succeeded. In future, this might be configurable to allow certain status checks to be ignored.
@@ -753,6 +816,8 @@ Must be valid usernames. Note: does not currently work with the GitHub App due t
 ## rollbackPrs
 
 Set this to false either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
+
+## ruby
 
 ## schedule
 
@@ -833,6 +898,16 @@ Language support is limited to those listed below:
 
 - **Node.js** - [Read our Node.js documentation](https://renovatebot.com/docs/node#configuring-support-policy)
 
+## suppressNotifications
+
+Use this field to suppress various types of warnings and other notifications from Renovate. Example:
+
+```json
+"suppressNotifications": ["prIgnoreNotification"]
+```
+
+The above config will suppress the comment which is added to a PR whenever you close a PR unmerged.
+
 ## terraform
 
 Currently Terraform support is limited to Terraform registry sources and github sources that include semver refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.
@@ -884,6 +959,12 @@ This field is currently used by some config prefixes.
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
 
 This defaults to true, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule. If you wish to disable all updates outside of scheduled hours then set this field to false.
+
+## versionScheme
+
+Usually, each language or package manager has a specific type of "version scheme". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as "docker" to address the most common way people tag versions using Docker, and "loose" as a fallback that tries semver first but otherwise just does its best to sort and compare.
+
+By exposing `versionScheme` to config, it allows you to override the default version scheme for a package manager if you really need. In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
 
 ## vulnerabilityAlerts
 

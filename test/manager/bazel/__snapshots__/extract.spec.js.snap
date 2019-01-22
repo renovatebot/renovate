@@ -13,11 +13,11 @@ Array [
     "depName": "com_github_bitly_go-nsq",
     "depType": "go_repository",
     "purl": "pkg:go/github.com/bitly/go-nsq",
-    "versionScheme": "semver",
   },
   Object {
     "currentDigest": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
-    "currentValue": "dec09d7",
+    "currentDigestShort": "dec09d7",
+    "currentValue": "v0.0.0",
     "def": "go_repository(
    name = \\"com_github_google_uuid\\",
    importpath = \\"github.com/google/uuid\\",
@@ -28,7 +28,6 @@ Array [
     "depType": "go_repository",
     "digestOneAndOnly": true,
     "purl": "pkg:go/github.com/google/uuid",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "v2",
@@ -41,7 +40,6 @@ Array [
     "depName": "com_gopkgin_mgo_v2",
     "depType": "go_repository",
     "purl": "pkg:go/gopkg.in/mgo.v2",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "0.3.1",
@@ -55,7 +53,6 @@ Array [
     "depType": "git_repository",
     "purl": "pkg:github/bazelbuild/rules_nodejs",
     "remote": "https://github.com/bazelbuild/rules_nodejs.git",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "0.6.1",
@@ -69,7 +66,6 @@ Array [
     "depType": "git_repository",
     "purl": "pkg:github/bazelbuild/rules_typescript",
     "remote": "https://github.com/bazelbuild/rules_typescript.git",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "0.0.3",
@@ -83,7 +79,6 @@ Array [
     "depType": "git_repository",
     "purl": "pkg:github/bazelbuild/rules_sass",
     "remote": "https://github.com/bazelbuild/rules_sass.git",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "0.7.1",
@@ -97,7 +92,6 @@ Array [
     "depType": "http_archive",
     "purl": "pkg:github/bazelbuild/rules_go?ref=release",
     "repo": "bazelbuild/rules_go",
-    "versionScheme": "semver",
   },
   Object {
     "currentValue": "0.5.0",
@@ -115,7 +109,6 @@ Array [
     "depType": "http_archive",
     "purl": "pkg:github/bazelbuild/bazel-skylib?ref=release",
     "repo": "bazelbuild/bazel-skylib",
-    "versionScheme": "semver",
   },
 ]
 `;

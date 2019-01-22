@@ -2,10 +2,16 @@
 
 exports[`workers/repository/extract/index extractAllDependencies() runs 1`] = `
 Object {
+  "ansible": Array [
+    Object {},
+  ],
   "bazel": Array [
     Object {},
   ],
   "buildkite": Array [
+    Object {},
+  ],
+  "bundler": Array [
     Object {},
   ],
   "cargo": Array [
@@ -32,6 +38,9 @@ Object {
   "gradle": Array [
     Object {},
   ],
+  "gradle-wrapper": Array [
+    Object {},
+  ],
   "kubernetes": Array [
     Object {},
   ],
@@ -51,6 +60,9 @@ Object {
     Object {},
   ],
   "pip_setup": Array [
+    Object {},
+  ],
+  "pipenv": Array [
     Object {},
   ],
   "terraform": Array [

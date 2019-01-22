@@ -1,0 +1,14 @@
+steps:
+  - plugins:
+      - docker-login#v2.0.1:
+          username: xyz
+      - docker-compose#v2.5.1:
+          build: app
+          image-repository: index.docker.io/myorg/myrepo
+  - wait
+  - command: test.sh
+    plugins:
+      - docker-login#v2.0.1:
+          username: xyz
+      - docker-compose#v2.5.1:
+          run: app

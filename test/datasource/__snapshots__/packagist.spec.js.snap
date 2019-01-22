@@ -81,7 +81,7 @@ Object {
       "version": "2.5",
     },
   ],
-  "repositoryUrl": "https://github.com/drewm/mailchimp-api",
+  "sourceUrl": "https://github.com/drewm/mailchimp-api",
 }
 `;
 
@@ -226,13 +226,12 @@ Object {
       "version": "3.8.1",
     },
   ],
-  "repositoryUrl": "https://github.com/guzzle/guzzle",
+  "sourceUrl": "https://github.com/guzzle/guzzle",
 }
 `;
 
 exports[`datasource/packagist getPkgReleases supports plain packages 1`] = `
 Object {
-  "homepage": undefined,
   "name": "vendor/package-name",
   "releases": Array [
     Object {
@@ -280,6 +279,6 @@ Object {
       "version": "1.5.1",
     },
   ],
-  "repositoryUrl": "https://plugins.svn.wordpress.org/1beyt/",
+  "sourceUrl": "https://plugins.svn.wordpress.org/1beyt/",
 }
 `;
