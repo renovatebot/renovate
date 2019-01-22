@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/gradle-wrapper/update updateDependency replaces existing value 1`] = `
+"distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+# @See https://gradle.org/releases/
+distributionUrl=https\\\\://services.gradle.org/distributions/gradle-5.0-all.zip
+distributionSha256Sum=17847c8e12b2bcfce26a79f425f082c31d4ded822f99a66127eee2d96bf18216
+"
+`;

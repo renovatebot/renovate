@@ -40,24 +40,6 @@
                   }
                 }
               ]
-            },
-            "reviews": {
-              "nodes": [
-                {
-                  "state": "CHANGES_REQUESTED",
-                  "author": {
-                    "login": "login"
-                  },
-                  "createdAt": "2018-12-30T15:53:22Z"
-                },
-                {
-                  "state": "APPROVED",
-                  "author": {
-                    "login": "login"
-                  },
-                  "createdAt": "2018-12-30T15:53:29Z"
-                }
-              ]
             }
           },
           {
@@ -88,17 +70,6 @@
                       ]
                     }
                   }
-                }
-              ]
-            },
-            "reviews": {
-              "nodes": [
-                {
-                  "state": "CHANGES_REQUESTED",
-                  "author": {
-                    "login": "login"
-                  },
-                  "createdAt": "2018-12-30T15:53:22Z"
                 }
               ]
             }
@@ -137,7 +108,7 @@
           {
             "number": 2086,
             "headRefName": "fix/deletePRafterDeleteBranch",
-            "title": "feat(vsts): abandon pr after delete branch",
+            "title": "feat(azure): abandon pr after delete branch",
             "mergeable": "MERGEABLE",
             "mergeStateStatus": "BEHIND",
             "commits": {

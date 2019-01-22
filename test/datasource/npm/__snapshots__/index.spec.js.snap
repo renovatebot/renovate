@@ -19,6 +19,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "sourceDirectory": "src/a",
   "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
@@ -46,6 +47,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "sourceDirectory": "src/a",
   "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
@@ -71,6 +73,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "sourceDirectory": "src/a",
   "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
@@ -98,6 +101,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "sourceDirectory": "src/a",
   "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
@@ -125,6 +129,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "sourceDirectory": "src/a",
   "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
@@ -202,6 +207,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "sourceDirectory": "src/a",
   "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
@@ -229,6 +235,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "sourceDirectory": "src/a",
   "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
@@ -256,6 +263,7 @@ Object {
       "version": "0.0.2",
     },
   ],
+  "sourceDirectory": "src/a",
   "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",

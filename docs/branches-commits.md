@@ -22,6 +22,6 @@ For GitHub, we use the low-level `git`-based API to manually make the commits an
 
 In GitLab, Merge Request are not automatically closed if you delete the associated branch, so that gives us more flexibility. Therefore the way we update a branch is simply to delete it and then create the branch + commits again, and GitLab immediately reassociates the new (single) commit with the existing PR.
 
-#### VSTS
+#### Azure DevOps
 
-VSTS is implemented similarly to GitLab.
+Azure DevOps is implemented similarly to GitLab.

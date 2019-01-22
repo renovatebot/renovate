@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/azure/azure-got-wrapper gitApi should set token and endpoint 1`] = `
+WebApi {
+  "authHandler": PersonalAccessTokenCredentialHandler {
+    "token": "myToken",
+  },
+  "isNoProxyHost": [Function],
+  "options": Object {
+    "ignoreSslError": false,
+  },
+  "rest": RestClient {
+    "client": HttpClient {
+      "_allowRedirects": true,
+      "_certConfig": undefined,
+      "_disposed": false,
+      "_httpProxy": undefined,
+      "_ignoreSslError": false,
+      "_keepAlive": false,
+      "_maxRedirects": 50,
+      "_socketTimeout": undefined,
+      "handlers": Array [
+        PersonalAccessTokenCredentialHandler {
+          "token": "myToken",
+        },
+      ],
+      "requestOptions": Object {
+        "ignoreSslError": false,
+      },
+    },
+  },
+  "serverUrl": "myEndpoint/",
+  "vsoClient": VsoClient {
+    "_initializationPromise": Promise {},
+    "_locationsByAreaPromises": Object {},
+    "basePath": "myEndpoint/",
+    "baseUrl": "myEndpoint/",
+    "restClient": RestClient {
+      "client": HttpClient {
+        "_allowRedirects": true,
+        "_certConfig": undefined,
+        "_disposed": false,
+        "_httpProxy": undefined,
+        "_ignoreSslError": false,
+        "_keepAlive": false,
+        "_maxRedirects": 50,
+        "_socketTimeout": undefined,
+        "handlers": Array [
+          PersonalAccessTokenCredentialHandler {
+            "token": "myToken",
+          },
+        ],
+        "requestOptions": Object {
+          "ignoreSslError": false,
+        },
+      },
+    },
+  },
+}
+`;
