@@ -12,6 +12,7 @@ branches:
   only:
     - master
     - stable
+    - v13
 
 if: tag IS blank
 
