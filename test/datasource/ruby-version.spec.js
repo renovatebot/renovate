@@ -18,9 +18,15 @@ describe('datasource/gradle', () => {
       const res = await getPkgReleases();
       expect(res).toMatchSnapshot();
     });
-    it('returns null for empty result', async () => {
+    it('throws for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
-      expect(await getPkgReleases()).toBeNull();
+      let e;
+      try {
+        await getPkgReleases();
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
 
     it('throws for 404', async () => {
