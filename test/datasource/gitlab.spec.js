@@ -32,6 +32,14 @@ describe('datasource/gitlab', () => {
     });
     it('should return the preset', async () => {
       glGot.mockImplementationOnce(() => ({
+        body: [
+          {
+            name: 'master',
+            default: true,
+          },
+        ],
+      }));
+      glGot.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         },

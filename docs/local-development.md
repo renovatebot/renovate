@@ -42,10 +42,7 @@ Once you have decided on your platform and account, log in and [generate a "Pers
 #### Export platform token
 
 Although you can specify a token to Renovate using `--token=`, it can be inconvenient if you need to include this every time.
-You are better off to instead export an Environment Variable for this.
-
-If your platform of choice is GitHub, then export `GITHUB_TOKEN`, and if it's GitLab then export `GITLAB_TOKEN`.
-It's also find to export both so that you can switch between platforms.
+You are better off to instead export the Environment Variable `RENOVATE_TOKEN` for this.
 
 #### Run against a real repo
 
