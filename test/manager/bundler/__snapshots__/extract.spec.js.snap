@@ -2,6 +2,9 @@
 
 exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
 Object {
+  "compatibility": Object {
+    "bundler": "1.17.2",
+  },
   "deps": Array [
     Object {
       "currentValue": ">= 11.1",
@@ -499,10 +502,13 @@ Object {
 
 exports[`lib/manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
 Object {
+  "compatibility": Object {
+    "ruby": "~> 1.5.3",
+  },
   "deps": Array [
     Object {
       "depName": "some_internal_gem",
-      "lineNumber": 3,
+      "lineNumber": 4,
       "registryUrls": Array [
         "https://gems.example.com",
       ],
@@ -510,7 +516,7 @@ Object {
     },
     Object {
       "depName": "another_internal_gem",
-      "lineNumber": 4,
+      "lineNumber": 5,
       "registryUrls": Array [
         "https://gems.example.com",
       ],
@@ -519,12 +525,12 @@ Object {
     Object {
       "currentValue": "latest",
       "depName": "ruby-debug",
-      "lineNumber": 8,
+      "lineNumber": 9,
       "skipReason": "invalid-value",
     },
     Object {
       "depName": "sqlite3",
-      "lineNumber": 9,
+      "lineNumber": 10,
       "skipReason": "no-version",
     },
     Object {
@@ -533,7 +539,7 @@ Object {
         "development",
         "optional => true",
       ],
-      "lineNumber": 13,
+      "lineNumber": 14,
       "skipReason": "no-version",
     },
     Object {
@@ -542,7 +548,7 @@ Object {
         "development",
         "optional => true",
       ],
-      "lineNumber": 14,
+      "lineNumber": 15,
       "skipReason": "no-version",
     },
   ],

@@ -11,8 +11,6 @@
     "debug": "node --inspect-brk lib/renovate",
     "eslint": "eslint lib test",
     "eslint-fix": "eslint --fix lib test",
-    "heroku-push": "git push heroku master",
-    "heroku-scheduler": "heroku addons:open scheduler",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "jest-debug": "NODE_ENV=test LOG_LEVEL=fatal node --inspect-brk node_modules/.bin/jest",
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
@@ -72,12 +70,13 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": ">= 8.11.0"
+    "node": ">= 10.14.0"
   },
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@renovatebot/docker-registry-client": "3.3.0",
     "@sindresorhus/is": "0.14.0",
+    "@snyk/ruby-semver": "2.0.0",
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "6.6.3",
     "bunyan": "1.8.12",
@@ -115,12 +114,13 @@
     "minimatch": "3.0.4",
     "moment": "2.23.0",
     "moment-timezone": "0.5.23",
-    "npm": "6.5.0",
+    "node-html-parser": "1.1.12",
+    "npm": "6.6.0",
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
-    "pnpm": "2.25.1",
+    "pnpm": "2.25.4",
     "proxy-agent": "3.0.3",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
@@ -134,11 +134,10 @@
     "tomlify-j0.4": "3.0.0",
     "traverse": "0.6.6",
     "upath": "1.1.0",
-    "validator": "10.9.0",
+    "validator": "10.11.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.9.4",
-    "@snyk/ruby-semver": "2.0.0"
+    "yarn": "1.9.4"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
@@ -150,7 +149,7 @@
     "eslint-config-prettier": "3.1.0",
     "eslint-plugin-import": "2.14.0",
     "eslint-plugin-promise": "4.0.1",
-    "husky": "1.3.0",
+    "husky": "1.3.1",
     "jest": "23.6.0",
     "jest-silent-reporter": "0.1.1",
     "mockdate": "2.0.2",

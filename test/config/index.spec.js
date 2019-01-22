@@ -16,8 +16,8 @@ describe('config/index', () => {
     let defaultArgv;
     let ghGot;
     let get;
-    let vstsApi;
-    let vstsHelper;
+    let azureApi;
+    let azure;
     beforeEach(() => {
       jest.resetModules();
       configParser = require('../../lib/config/index.js');
@@ -28,10 +28,10 @@ describe('config/index', () => {
       ghGot = require('gh-got');
       jest.mock('gl-got');
       get = require('gl-got');
-      jest.mock('../../lib/platform/vsts/vsts-got-wrapper');
-      vstsApi = require('../../lib/platform/vsts/vsts-got-wrapper');
-      jest.mock('../../lib/platform/vsts/vsts-helper');
-      vstsHelper = require('../../lib/platform/vsts/vsts-helper');
+      jest.mock('../../lib/platform/azure/azure-got-wrapper');
+      azureApi = require('../../lib/platform/azure/azure-got-wrapper');
+      jest.mock('../../lib/platform/azure/azure-helper');
+      azure = require('../../lib/platform/azure/azure-helper');
     });
     it('throws for invalid platform', async () => {
       const env = {};
@@ -52,7 +52,9 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('You need to supply a GitHub token.');
+      expect(err.message).toBe(
+        'No authentication found for platform https://api.github.com/ (github)'
+      );
     });
     it('throws for no GitLab token', async () => {
       const env = { RENOVATE_PLATFORM: 'gitlab' };
@@ -62,20 +64,24 @@ describe('config/index', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('You need to supply a GitLab token.');
+      expect(err.message).toBe(
+        'No authentication found for platform https://gitlab.com/api/v4/ (gitlab)'
+      );
     });
-    it('throws for no vsts token', async () => {
-      const env = { RENOVATE_PLATFORM: 'vsts' };
+    it('throws for no Azure DevOps token', async () => {
+      const env = { RENOVATE_PLATFORM: 'azure' };
       let err;
       try {
         await configParser.parseConfigs(env, defaultArgv);
       } catch (e) {
         err = e;
       }
-      expect(err.message).toBe('You need to supply a VSTS token.');
+      expect(err.message).toBe(
+        'No authentication found for platform undefined (azure)'
+      );
     });
     it('supports token in env', async () => {
-      const env = { GITHUB_TOKEN: 'abc' };
+      const env = { RENOVATE_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports token in CLI options', async () => {
@@ -85,7 +91,7 @@ describe('config/index', () => {
     });
     it('supports forceCli', async () => {
       defaultArgv = defaultArgv.concat(['--force-cli=true']);
-      const env = { GITHUB_TOKEN: 'abc' };
+      const env = { RENOVATE_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);
     });
     it('supports Bitbucket username/passwod', async () => {
@@ -138,16 +144,16 @@ describe('config/index', () => {
       expect(ghGot.mock.calls.length).toBe(0);
       expect(get.mock.calls.length).toBe(1);
     });
-    it('autodiscovers vsts platform', async () => {
+    it('autodiscovers Azure DevOps platform', async () => {
       const env = {};
       defaultArgv = defaultArgv.concat([
         '--autodiscover',
-        '--platform=vsts',
+        '--platform=azure',
         '--endpoint=endpoint',
         '--token=abc',
       ]);
-      vstsHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);
-      vstsApi.gitApi.mockImplementationOnce(() => ({
+      azure.getFile.mockImplementationOnce(() => `Hello Renovate!`);
+      azureApi.gitApi.mockImplementationOnce(() => ({
         getRepositories: jest.fn(() => [
           {
             name: 'repo1',
@@ -163,17 +169,17 @@ describe('config/index', () => {
           },
         ]),
       }));
-      vstsHelper.getProjectAndRepo.mockImplementationOnce(() => ({
+      azure.getProjectAndRepo.mockImplementationOnce(() => ({
         project: 'prj1',
         repo: 'repo1',
       }));
       await configParser.parseConfigs(env, defaultArgv);
       expect(ghGot.mock.calls.length).toBe(0);
       expect(get.mock.calls.length).toBe(0);
-      expect(vstsApi.gitApi.mock.calls.length).toBe(1);
+      expect(azureApi.gitApi.mock.calls.length).toBe(1);
     });
     it('logs if no autodiscovered repositories', async () => {
-      const env = { GITHUB_TOKEN: 'abc' };
+      const env = { RENOVATE_TOKEN: 'abc' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
       ghGot.mockImplementationOnce(() => ({
         headers: {},
@@ -208,7 +214,7 @@ describe('config/index', () => {
       ).toMatchSnapshot();
     });
     it('adds a log file', async () => {
-      const env = { GITHUB_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
+      const env = { RENOVATE_TOKEN: 'abc', RENOVATE_LOG_FILE: 'debug.log' };
       defaultArgv = defaultArgv.concat(['--autodiscover']);
       ghGot.mockImplementationOnce(() => ({
         headers: {},
@@ -221,7 +227,7 @@ describe('config/index', () => {
     it('resolves all presets', async () => {
       defaultArgv.push('--pr-hourly-limit=10', '--automerge=false');
       const env = {
-        GITHUB_TOKEN: 'abc',
+        RENOVATE_TOKEN: 'abc',
         RENOVATE_CONFIG_FILE: require.resolve(
           '../_fixtures/config/file-with-repo-presets.js'
         ),
