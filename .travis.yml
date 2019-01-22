@@ -4,14 +4,14 @@ notifications:
 language: node_js
 
 node_js:
-  - "8.11.1"
+  - '8.11.1'
 
 sudo: false
 
 branches:
   only:
-  - master
-  - stable
+    - master
+    - stable
 
 if: tag IS blank
 
@@ -27,9 +27,9 @@ install:
 cache:
   yarn: true
   directories:
-    - ".cache"
-    - ".eslintcache"
-    - "node_modules"
+    - '.cache'
+    - '.eslintcache'
+    - 'node_modules'
 
 script:
   - yarn prettier --list-different
