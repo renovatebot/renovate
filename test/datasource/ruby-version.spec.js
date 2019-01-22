@@ -11,6 +11,7 @@ const rubyReleasesHtml = fs.readFileSync(
 
 describe('datasource/gradle', () => {
   describe('getPkgReleases', () => {
+    beforeEach(() => global.renovateCache.rmAll());
     it('parses real data', async () => {
       got.mockReturnValueOnce({
         body: rubyReleasesHtml,
