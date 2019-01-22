@@ -62,5 +62,12 @@ describe('workers/branch/automerge', () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       expect(await tryBranchAutomerge(config)).toBe('automerged');
     });
+    it('merge branch if PR exists and have one commit and success branch', async () => {
+      platform.getBranchPr.mockReturnValueOnce({ canRebase: true });
+      config.automerge = true;
+      config.automergeType = 'branch';
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      expect(await tryBranchAutomerge(config)).toBe('automerged');
+    });
   });
 });
