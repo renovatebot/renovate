@@ -201,7 +201,7 @@
     }
   },
   "release": {
-    "branch": "master",
+    "branch": "v13",
     "tagFormat": "${version}",
     "analyzeCommits": {
       "preset": "angular",
