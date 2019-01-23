@@ -758,6 +758,7 @@ Behaviour:
 - `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise 'replace' for updates out of range
 
 Renovate's "auto" strategy works like this for npm:
 
@@ -953,10 +954,6 @@ Because Docker uses tags instead of semver, there is no fixed convention for how
 This field is currently used by some config prefixes.
 
 ## updateLockFiles
-
-## updateLockfileWithinRange
-
-Enable this option if you need to retain ranges in your package file (e.g. `^2.0.0` in `package.json`) but wish to have the exact values in the lock file updated (e.g. from `2.1.0` to `2.2.0` in `package-lock.json` or `yarn.lock`);
 
 ## updateNotScheduled
 
