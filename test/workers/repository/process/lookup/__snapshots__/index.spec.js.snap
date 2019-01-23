@@ -1236,7 +1236,7 @@ Array [
   Object {
     "canBeUnpublished": false,
     "fromVersion": "0.4.0",
-    "isLockUpdate": true,
+    "isLockfileUpdate": true,
     "isRange": true,
     "isSingleVersion": true,
     "newMajor": 0,
