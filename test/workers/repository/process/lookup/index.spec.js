@@ -54,10 +54,9 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
-    it('supports updateLockfileWithinRange mixed with regular updates', async () => {
-      config.updateLockfileWithinRange = true;
+    it('supports lock file updates mixed with regular updates', async () => {
       config.currentValue = '^0.4.0';
-      config.rangeStrategy = 'replace';
+      config.rangeStrategy = 'lockfile-update';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
       config.lockedVersion = '0.4.0';

@@ -1143,6 +1143,48 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup .lookupUpdates() supports lock file updates mixed with regular updates 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.0",
+    "isLockfileUpdate": true,
+    "isRange": true,
+    "isSingleVersion": true,
+    "newMajor": 0,
+    "newMinor": 4,
+    "newValue": "^0.4.0",
+    "releaseTimestamp": "2011-06-10T17:20:04.719Z",
+    "toVersion": "0.4.4",
+    "updateType": "minor",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.4",
+    "isRange": true,
+    "isSingleVersion": false,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "^0.9.0",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
+    "toVersion": "0.9.7",
+    "updateType": "minor",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.4",
+    "isRange": true,
+    "isSingleVersion": false,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "^1.0.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "toVersion": "1.4.1",
+    "updateType": "major",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup .lookupUpdates() supports majorgte updates 1`] = `
 Array [
   Object {
@@ -1224,48 +1266,6 @@ Array [
     "newMajor": 1,
     "newMinor": 4,
     "newValue": "1.4.1",
-    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
-    "toVersion": "1.4.1",
-    "updateType": "major",
-  },
-]
-`;
-
-exports[`workers/repository/process/lookup .lookupUpdates() supports updateLockfileWithinRange mixed with regular updates 1`] = `
-Array [
-  Object {
-    "canBeUnpublished": false,
-    "fromVersion": "0.4.0",
-    "isLockfileUpdate": true,
-    "isRange": true,
-    "isSingleVersion": true,
-    "newMajor": 0,
-    "newMinor": 4,
-    "newValue": "^0.4.0",
-    "releaseTimestamp": "2011-06-10T17:20:04.719Z",
-    "toVersion": "0.4.4",
-    "updateType": "minor",
-  },
-  Object {
-    "canBeUnpublished": false,
-    "fromVersion": "0.4.4",
-    "isRange": true,
-    "isSingleVersion": false,
-    "newMajor": 0,
-    "newMinor": 9,
-    "newValue": "^0.9.0",
-    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
-    "toVersion": "0.9.7",
-    "updateType": "minor",
-  },
-  Object {
-    "canBeUnpublished": false,
-    "fromVersion": "0.4.4",
-    "isRange": true,
-    "isSingleVersion": false,
-    "newMajor": 1,
-    "newMinor": 4,
-    "newValue": "^1.0.0",
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
     "updateType": "major",
