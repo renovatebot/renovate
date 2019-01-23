@@ -87,6 +87,7 @@ Array [
     "timezone": null,
     "unpublishSafe": false,
     "updateLockFiles": true,
+    "updateLockfileWithinRange": false,
     "updateNotScheduled": true,
     "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
@@ -184,6 +185,7 @@ Array [
     "timezone": null,
     "unpublishSafe": false,
     "updateLockFiles": true,
+    "updateLockfileWithinRange": false,
     "updateNotScheduled": true,
     "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
@@ -280,6 +282,7 @@ Array [
     "timezone": null,
     "unpublishSafe": false,
     "updateLockFiles": true,
+    "updateLockfileWithinRange": false,
     "updateNotScheduled": true,
     "updateType": "lockFileMaintenance",
     "versionScheme": "npm",
@@ -378,6 +381,7 @@ Array [
     "timezone": null,
     "unpublishSafe": false,
     "updateLockFiles": true,
+    "updateLockfileWithinRange": false,
     "updateNotScheduled": true,
     "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
@@ -474,6 +478,7 @@ Array [
     "timezone": null,
     "unpublishSafe": false,
     "updateLockFiles": true,
+    "updateLockfileWithinRange": false,
     "updateNotScheduled": true,
     "updateType": "lockFileMaintenance",
     "versionScheme": "npm",
@@ -572,6 +577,7 @@ Array [
     "timezone": null,
     "unpublishSafe": false,
     "updateLockFiles": true,
+    "updateLockfileWithinRange": false,
     "updateNotScheduled": true,
     "versionScheme": "npm",
     "vulnerabilityAlerts": Object {
@@ -669,6 +675,7 @@ Array [
     "timezone": null,
     "unpublishSafe": false,
     "updateLockFiles": true,
+    "updateLockfileWithinRange": false,
     "updateNotScheduled": true,
     "versionScheme": "docker",
     "vulnerabilityAlerts": Object {
@@ -766,6 +773,7 @@ Array [
     "timezone": null,
     "unpublishSafe": false,
     "updateLockFiles": true,
+    "updateLockfileWithinRange": false,
     "updateNotScheduled": true,
     "versionScheme": "docker",
     "vulnerabilityAlerts": Object {

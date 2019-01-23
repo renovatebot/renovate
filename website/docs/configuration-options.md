@@ -954,6 +954,10 @@ This field is currently used by some config prefixes.
 
 ## updateLockFiles
 
+## updateLockfileWithinRange
+
+Enable this option if you need to retain ranges in your package file (e.g. `^2.0.0` in `package.json`) but wish to have the exact values in the lock file updated (e.g. from `2.1.0` to `2.2.0` in `package-lock.json` or `yarn.lock`);
+
 ## updateNotScheduled
 
 When schedules are in use, it generally means "no updates". However there are cases where updates might be desirable - e.g. if you have set prCreation=not-pending, or you have rebaseStale=true and master branch is updated so you want Renovate PRs to be rebased.
