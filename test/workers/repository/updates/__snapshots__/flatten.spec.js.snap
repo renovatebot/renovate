@@ -51,7 +51,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}\`{{{newValue}}}\`",
+      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -148,7 +148,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}\`{{{newValue}}}\`",
+      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -242,7 +242,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}\`{{{newValue}}}\`",
+      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -342,7 +342,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}\`{{{newValue}}}\`",
+      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -436,7 +436,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}\`{{{newValue}}}\`",
+      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -536,7 +536,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}\`{{{newValue}}}\`",
+      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -633,7 +633,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}\`{{{newValue}}}\`",
+      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -730,7 +730,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}\`{{{newValue}}}\`",
+      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
