@@ -54,6 +54,17 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+    it('supports lock file updates mixed with regular updates', async () => {
+      config.currentValue = '^0.4.0';
+      config.rangeStrategy = 'lockfile-update';
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      config.lockedVersion = '0.4.0';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
     it('returns multiple updates if grouping but separateMajorMinor=true', async () => {
       config.groupName = 'somegroup';
       config.currentValue = '0.4.0';
