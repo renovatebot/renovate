@@ -115,7 +115,7 @@
     "moment": "2.24.0",
     "moment-timezone": "0.5.23",
     "node-html-parser": "1.1.12",
-    "npm": "6.6.0",
+    "npm": "6.7.0",
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-diff": "0.5.1",
