@@ -241,7 +241,7 @@ Configuration added here applies for all Go-related updates, however currently t
 
 ## gomod
 
-Configuration for Go Modules (`go mod`). Supercedes anything in the `go` config object.
+Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
 ## gradle
 
@@ -302,11 +302,11 @@ There may be times where an `.npmrc` file in your repository causes problems, su
 
 ## ignorePaths
 
-Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want kept up to date.
+Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
 
 ## ignoreUnstable
 
-By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same major.minor.patch and was _already_ unstable (e.g. it was already on `4.0.0-rc2`). Renovate will not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will upate you to `4.0.0` only. If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
+By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same major.minor.patch and was _already_ unstable (e.g. it was already on `4.0.0-rc2`). Renovate will not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will update you to `4.0.0` only. If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
 
@@ -408,7 +408,7 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehensive explanation of how the `node` option can be used.
 
 ## npm
 
@@ -483,7 +483,7 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
 
 ### allowedVersions
 
-Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could defined this to be `<= 1.5` or `< 1.6.0`:
+Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
 
 ```
   "packageRules": [{
@@ -782,7 +782,7 @@ On GitHub it is possible to add a label to a PR to manually request Renovate to 
 
 ## rebaseStalePrs
 
-This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+This field defaults to `null` because it has the potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
 
 If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch` automerge then Renovate will still rebase as necessary for that.
 
