@@ -70,7 +70,7 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": ">= 10.14.0"
+    "node": ">= 10.13.0"
   },
   "dependencies": {
     "@renovate/pep440": "0.4.1",
@@ -100,7 +100,7 @@
     "gh-got": "8.1.0",
     "github-url-from-git": "1.5.0",
     "gl-got": "9.0.3",
-    "got": "9.5.1",
+    "got": "9.6.0",
     "handlebars": "4.0.12",
     "ini": "1.3.5",
     "js-yaml": "3.12.0",
@@ -112,10 +112,10 @@
     "luxon": "1.10.0",
     "markdown-it": "8.4.2",
     "minimatch": "3.0.4",
-    "moment": "2.23.0",
+    "moment": "2.24.0",
     "moment-timezone": "0.5.23",
     "node-html-parser": "1.1.12",
-    "npm": "6.6.0",
+    "npm": "6.7.0",
     "openpgp": "2.6.2",
     "p-all": "1.0.0",
     "parse-diff": "0.5.1",
