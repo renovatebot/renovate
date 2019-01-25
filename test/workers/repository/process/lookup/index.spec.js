@@ -153,6 +153,17 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
+    it('falls back to semver syntax allowedVersions', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '<1';
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      config.versionScheme = 'docker'; // this doesn't make sense but works for this test
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
     it('skips invalid allowedVersions', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = 'less than 1';
