@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/pypi getPkgReleases process data from simple endpoint 1`] = `null`;
+
 exports[`datasource/pypi getPkgReleases processes real data 1`] = `
 Object {
   "releases": Array [
