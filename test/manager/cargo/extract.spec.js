@@ -33,7 +33,7 @@ describe('lib/manager/cargo/extract', () => {
     it('handles standard tables', () => {
       const res = extractPackageFile(cargo4toml, config);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(4);
+      expect(res.deps).toHaveLength(5);
     });
   });
 });

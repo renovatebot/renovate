@@ -35,3 +35,7 @@ path = "./foo/bar"
 # version = "3.2.1"
 # default-features = true
 # path = "./foo/bar"
+
+[dependencies.dep7]
+vesion = "1.2.3" # Intentional typo
+default-features = true

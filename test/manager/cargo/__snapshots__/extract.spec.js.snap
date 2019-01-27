@@ -22,6 +22,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 18,
     "purl": "pkg:cargo/pcap-sys",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.21.0",
@@ -31,12 +32,12 @@ Array [
     "purl": "pkg:cargo/pnet",
   },
   Object {
-    "currentValue": "=0.3.6",
+    "currentValue": "0.4.2",
     "depName": "winapi",
     "depType": "standardTable",
     "lineNumber": 21,
     "purl": "pkg:cargo/winapi",
-    "versionLineNumber": 22,
+    "versionLineNumber": 26,
   },
   Object {
     "currentValue": "0.4.2",
@@ -57,6 +58,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 53,
     "purl": "pkg:cargo/amethyst_animation",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.3.0",
@@ -64,6 +66,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 54,
     "purl": "pkg:cargo/amethyst_assets",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.2.0",
@@ -71,6 +74,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 55,
     "purl": "pkg:cargo/amethyst_audio",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.6.0",
@@ -78,6 +82,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 56,
     "purl": "pkg:cargo/amethyst_config",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.2.0",
@@ -85,6 +90,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 57,
     "purl": "pkg:cargo/amethyst_core",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.1.0",
@@ -92,6 +98,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 58,
     "purl": "pkg:cargo/amethyst_controls",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.1.0",
@@ -99,6 +106,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 59,
     "purl": "pkg:cargo/amethyst_locale",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.7",
@@ -106,6 +114,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 60,
     "purl": "pkg:cargo/amethyst_renderer",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.3",
@@ -113,6 +122,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 61,
     "purl": "pkg:cargo/amethyst_input",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.2",
@@ -120,6 +130,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 62,
     "purl": "pkg:cargo/amethyst_ui",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.2",
@@ -127,6 +138,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 63,
     "purl": "pkg:cargo/amethyst_utils",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "1.0",
@@ -183,6 +195,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 74,
     "purl": "pkg:cargo/amethyst_gltf",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.5.10",
@@ -237,6 +250,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 5,
     "purl": "pkg:cargo/pcap-sys",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "0.21.0",
@@ -251,6 +265,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 7,
     "purl": "pkg:cargo/dep1",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "3.4",
@@ -258,6 +273,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 8,
     "purl": "pkg:cargo/dep2",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "~12.3.1",
@@ -265,6 +281,7 @@ Array [
     "depType": "inlineTable",
     "lineNumber": 9,
     "purl": "pkg:cargo/dep3",
+    "skipReason": "path-dependency",
   },
   Object {
     "currentValue": "INVALID 3.3.1 VERSION",
@@ -287,28 +304,31 @@ Array [
 exports[`lib/manager/cargo/extract extractPackageFile() handles standard tables 1`] = `
 Array [
   Object {
-    "currentValue": "1.2",
+    "currentValue": "INVALID 1.3.1 VERSION",
     "depName": "dep1",
     "depType": "standardTable",
     "lineNumber": 4,
     "purl": "pkg:cargo/dep1",
-    "versionLineNumber": 8,
+    "skipReason": "path-dependency",
+    "versionLineNumber": 24,
   },
   Object {
-    "currentValue": "3.4",
+    "currentValue": "INVALID 1.3.1 VERSION",
     "depName": "dep2",
     "depType": "standardTable",
     "lineNumber": 13,
     "purl": "pkg:cargo/dep2",
-    "versionLineNumber": 17,
+    "skipReason": "path-dependency",
+    "versionLineNumber": 24,
   },
   Object {
-    "currentValue": "~12.3.1",
+    "currentValue": "INVALID 1.3.1 VERSION",
     "depName": "dep3",
     "depType": "standardTable",
     "lineNumber": 18,
     "purl": "pkg:cargo/dep3",
-    "versionLineNumber": 19,
+    "skipReason": "path-dependency",
+    "versionLineNumber": 24,
   },
   Object {
     "currentValue": "INVALID 1.3.1 VERSION",
@@ -316,8 +336,14 @@ Array [
     "depType": "standardTable",
     "lineNumber": 23,
     "purl": "pkg:cargo/dep4",
-    "skipReason": "unknown-version",
+    "skipReason": "path-dependency",
     "versionLineNumber": 24,
+  },
+  Object {
+    "depName": "dep5",
+    "lineNumber": 28,
+    "purl": "pkg:cargo/dep5",
+    "skipReason": "path-dependency",
   },
 ]
 `;
