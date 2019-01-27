@@ -134,6 +134,7 @@
     "tomlify-j0.4": "3.0.0",
     "traverse": "0.6.6",
     "upath": "1.1.0",
+    "validate-npm-package-name": "3.0.0",
     "validator": "10.11.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
