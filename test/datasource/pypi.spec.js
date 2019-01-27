@@ -5,6 +5,7 @@ const datasource = require('../../lib/datasource');
 jest.mock('got');
 
 const res1 = fs.readFileSync('test/_fixtures/pypi/azure-cli-monitor.json');
+const htmlResponse = fs.readFileSync('test/_fixtures/pypi/versions-html.html');
 
 describe('datasource/pypi', () => {
   describe('getPkgReleases', () => {
@@ -124,6 +125,17 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases('pkg:pypi/doit', {
           compatibility: { python: '2.7' },
         })
+      ).toMatchSnapshot();
+    });
+    it('process data from simple endpoint', async () => {
+      got.mockReturnValueOnce({
+        body: htmlResponse,
+      });
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases('pkg:pypi/test', config)
       ).toMatchSnapshot();
     });
   });
