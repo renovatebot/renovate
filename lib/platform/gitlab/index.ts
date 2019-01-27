@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 
 import api from './gl-got-wrapper';
@@ -22,6 +22,8 @@ const defaults = {
   endpoint: 'https://gitlab.com/api/v4/',
 };
 
+let authorId: number;
+
 export async function initPlatform({
   endpoint,
   token,
@@ -42,7 +44,9 @@ export async function initPlatform({
     logger.info('Using default GitLab endpoint: ' + res.endpoint);
   }
   try {
-    res.gitAuthor = (await api.get(`user`, { token })).body.email;
+    const user = (await api.get(`user`, { token })).body;
+    res.gitAuthor = user.email;
+    authorId = user.id;
   } catch (err) {
     logger.info(
       { err },
@@ -203,8 +207,13 @@ export async function getBranchPr(branchName: string) {
   if (!(await branchExists(branchName))) {
     return null;
   }
-  const urlString = `projects/${config.repository}/merge_requests?state=opened&per_page=100`;
-  const res = await api.get(urlString, { paginate: true });
+  const query = new URLSearchParams({
+    per_page: '100',
+    state: 'opened',
+    source_branch: branchName,
+  });
+  const urlString = `projects/${config.repository}/merge_requests`;
+  const res = await api.get(urlString, { query, paginate: true });
   logger.debug(`Got res with ${res.body.length} results`);
   let pr: any = null;
   res.body.forEach((result: { source_branch: string }) => {
@@ -590,25 +599,29 @@ export async function ensureCommentRemoval(issueNo: number, topic: string) {
   }
 }
 
+const mapPullRequests = (pr: {
+  iid: number;
+  source_branch: string;
+  title: string;
+  state: string;
+  created_at: string;
+}) => ({
+  number: pr.iid,
+  branchName: pr.source_branch,
+  title: pr.title,
+  state: pr.state === 'opened' ? 'open' : pr.state,
+  createdAt: pr.created_at,
+});
+
 export async function getPrList() {
   if (!config.prList) {
-    const urlString = `projects/${config.repository}/merge_requests?per_page=100`;
-    const res = await api.get(urlString, { paginate: true });
-    config.prList = res.body.map(
-      (pr: {
-        iid: number;
-        source_branch: string;
-        title: string;
-        state: string;
-        created_at: string;
-      }) => ({
-        number: pr.iid,
-        branchName: pr.source_branch,
-        title: pr.title,
-        state: pr.state === 'opened' ? 'open' : pr.state,
-        createdAt: pr.created_at,
-      })
-    );
+    const query = new URLSearchParams({
+      per_page: '100',
+      author_id: `${authorId}`,
+    });
+    const urlString = `projects/${config.repository}/merge_requests`;
+    const res = await api.get(urlString, { query, paginate: true });
+    config.prList = res.body.map(mapPullRequests);
   }
   return config.prList;
 }

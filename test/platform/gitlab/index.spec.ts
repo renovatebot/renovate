@@ -258,13 +258,13 @@ describe('platform/gitlab', () => {
         // branchExists
         body: [],
       } as any);
-      const pr = await gitlab.getBranchPr('somebranch');
+      const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toBeNull();
     });
     it('should return the PR object', async () => {
       await initRepo();
       api.get.mockReturnValueOnce({
-        body: [{ number: 91, source_branch: 'somebranch' }],
+        body: [{ iid: 91, source_branch: 'some-branch', state: 'opened' }],
       } as any);
       api.get.mockReturnValueOnce({
         body: {
@@ -282,7 +282,7 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({ body: [] } as any); // get branch commit
       api.get.mockReturnValueOnce({ body: [{ status: 'success' }] } as any); // get commit statuses
       api.get.mockReturnValueOnce({ body: 'foo' } as any);
-      const pr = await gitlab.getBranchPr('somebranch');
+      const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
     });
   });
@@ -631,7 +631,7 @@ describe('platform/gitlab', () => {
       api.get.mockResolvedValueOnce({
         body: [
           {
-            number: 1,
+            iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
             state: 'opened',
@@ -645,7 +645,7 @@ describe('platform/gitlab', () => {
       api.get.mockReturnValueOnce({
         body: [
           {
-            number: 1,
+            iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
             state: 'merged',
@@ -655,25 +655,35 @@ describe('platform/gitlab', () => {
       const res = await gitlab.findPr('branch-a', null, '!open');
       expect(res).toBeDefined();
     });
-    it('caches pr list', async () => {
+
+    it('returns true if open and with title', async () => {
       api.get.mockReturnValueOnce({
         body: [
           {
-            number: 1,
+            iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
             state: 'opened',
           },
         ],
       } as any);
-      let res = await gitlab.findPr('branch-a', null);
+      const res = await gitlab.findPr('branch-a', 'branch a pr', 'open');
       expect(res).toBeDefined();
-      res = await gitlab.findPr('branch-a', 'branch a pr');
+    });
+
+    it('returns true with title', async () => {
+      api.get.mockReturnValueOnce({
+        body: [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'opened',
+          },
+        ],
+      } as any);
+      const res = await gitlab.findPr('branch-a', 'branch a pr');
       expect(res).toBeDefined();
-      res = await gitlab.findPr('branch-a', 'branch a pr', 'open');
-      expect(res).toBeDefined();
-      res = await gitlab.findPr('branch-b');
-      expect(res).not.toBeDefined();
     });
   });
   describe('createPr(branchName, title, body)', () => {
