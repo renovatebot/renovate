@@ -138,7 +138,7 @@
     "validator": "10.11.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.9.4"
+    "yarn": "1.13.0"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "6.26.0",
