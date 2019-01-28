@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/npm/extract .extractPackageFile() catches invalid names 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "depName": "kgabis/parson",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+      "skipReason": "invalid-name",
+    },
+  ],
+  "lernaClient": undefined,
+  "lernaDir": undefined,
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": undefined,
+  "packageJsonType": "app",
+  "packageJsonVersion": undefined,
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
+}
+`;
+
 exports[`manager/npm/extract .extractPackageFile() extracts engines 1`] = `
 Object {
   "deps": Array [

@@ -118,6 +118,6 @@ If you wish to add one, add it to `lib/config/definitions.js` and then add docum
 It's really easy to debug Renovate using Chrome's inspect tool. Try like this:
 
 1. Open `chrome://inspect` in Chrome, then click on "Open dedicated DevTools for Node"
-2. Run `yarn debug ...` instead of `yarn start ...`
-3. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+2. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+3. Run Renovate using `yarn debug ...` instead of `yarn start ...`
 4. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered

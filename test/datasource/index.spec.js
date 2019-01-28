@@ -6,7 +6,9 @@ jest.mock('../../lib/datasource/npm');
 
 describe('datasource/index', () => {
   it('returns null for invalid purl', async () => {
-    expect(await datasource.getPkgReleases('pkggithub/some/dep')).toBeNull();
+    expect(
+      await datasource.getPkgReleases({ purl: 'pkggithub/some/dep' })
+    ).toBeNull();
   });
   it('returns getDigest', async () => {
     expect(
@@ -15,14 +17,16 @@ describe('datasource/index', () => {
   });
   it('adds changelogUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({});
-    const res = await datasource.getPkgReleases('pkg:npm/react-native');
+    const res = await datasource.getPkgReleases({
+      purl: 'pkg:npm/react-native',
+    });
     expect(res).toMatchSnapshot();
     expect(res.changelogUrl).toBeDefined();
     expect(res.sourceUrl).toBeDefined();
   });
   it('adds sourceUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({});
-    const res = await datasource.getPkgReleases('pkg:npm/node');
+    const res = await datasource.getPkgReleases({ purl: 'pkg:npm/node' });
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
   });

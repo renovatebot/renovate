@@ -80,5 +80,11 @@ Array [
     "lineNumber": 79,
     "purl": "pkg:docker/dockersamples/visualizer",
   },
+  Object {
+    "currentFrom": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
+    "lineNumber": 90,
+    "purl": "pkg:docker/undefined",
+    "skipReason": "contains-variable",
+  },
 ]
 `;

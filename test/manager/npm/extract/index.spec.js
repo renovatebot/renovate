@@ -13,6 +13,7 @@ function readFixture(fixture) {
 const input01Content = readFixture('inputs/01.json');
 const workspacesContent = readFixture('inputs/workspaces.json');
 const vendorisedContent = readFixture('is-object.json');
+const invalidNameContent = readFixture('invalid-name.json');
 
 describe('manager/npm/extract', () => {
   describe('.extractPackageFile()', () => {
@@ -26,6 +27,14 @@ describe('manager/npm/extract', () => {
         defaultConfig
       );
       expect(res).toBe(null);
+    });
+    it('catches invalid names', async () => {
+      const res = await npmExtract.extractPackageFile(
+        invalidNameContent,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
     });
     it('ignores vendorised package.json', async () => {
       const res = await npmExtract.extractPackageFile(

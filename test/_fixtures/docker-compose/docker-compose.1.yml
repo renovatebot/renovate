@@ -87,6 +87,9 @@ services:
       placement:
         constraints: [node.role == manager]
 
+  edplugins:
+    image: ${IMAGE:-synkodevelopers/edplugins}:${TAG:-latest}
+
 networks:
   frontend:
   backend:
