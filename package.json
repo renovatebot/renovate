@@ -162,7 +162,7 @@
   },
   "files": [
     "bin/config-validator.js",
-    "bin/yarn-1.10.1.js",
+    "bin/yarn-1.9.4.js",
     "lib"
   ],
   "babel": {
