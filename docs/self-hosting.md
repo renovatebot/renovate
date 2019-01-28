@@ -176,11 +176,13 @@ See
 for details.
 
 ## Kubernetes for Gitlab, using Git over SSH
+
 This section describes how to use git binary with ssh for Gitlab, to avoid API shortcomings.
 
 You need to first create a ssh key, then add the public part to Gitlab (see this [guide](https://docs.gitlab.com/ee/ssh/))
 
 Then, you need to create the secret to add the ssh key, and the following config to your container
+
 ```
 host gitlab.com
   HostName gitlab.com
@@ -188,13 +190,15 @@ host gitlab.com
   IdentityFile ~/.ssh/id_rsa
   User git
 ```
-To easily create the secret, you can do the following (see [docs](https://kubernetes.io/docs/concepts/configuration/secret/#use-case-pod-with-ssh-keys
-))
+
+To easily create the secret, you can do the following (see [docs](https://kubernetes.io/docs/concepts/configuration/secret/#use-case-pod-with-ssh-keys))
+
 ```
 kubectl create secret generic ssh-key-secret --from-file=config=/path/to/config --from-file=id_rsa=/path/to/.ssh/id_rsa --from-file=id_rsa.pub=/path/to/.ssh/id_rsa.pub
 ```
 
-It creates something like this 
+It creates something like this
+
 ```
 apiVersion: v1
 data:
@@ -209,6 +213,7 @@ metadata:
 
 Then you just need to add Git author, and mount volumes
 The final configuration should look like something like this :
+
 ```
 ---
 apiVersion: v1
@@ -264,7 +269,7 @@ spec:
                 - name: ssh-key-volume
                   readOnly: true
                   mountPath: "/home/ubuntu/.ssh"
-              args: 
+              args:
                 - <repository>
               # Environment Variables
               env:
