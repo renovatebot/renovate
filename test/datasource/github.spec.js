@@ -88,7 +88,7 @@ describe('datasource/github', () => {
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:github/some/dep?ref=release',
+        purl: 'pkg:github/some/dep?lookupType=release',
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);

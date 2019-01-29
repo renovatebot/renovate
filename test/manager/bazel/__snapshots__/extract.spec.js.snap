@@ -90,7 +90,7 @@ Array [
 ",
     "depName": "io_bazel_rules_go",
     "depType": "http_archive",
-    "purl": "pkg:github/bazelbuild/rules_go?ref=release",
+    "purl": "pkg:github/bazelbuild/rules_go?lookupType=release",
     "repo": "bazelbuild/rules_go",
   },
   Object {
@@ -107,7 +107,7 @@ Array [
 ",
     "depName": "bazel_skylib",
     "depType": "http_archive",
-    "purl": "pkg:github/bazelbuild/bazel-skylib?ref=release",
+    "purl": "pkg:github/bazelbuild/bazel-skylib?lookupType=release",
     "repo": "bazelbuild/bazel-skylib",
   },
 ]
