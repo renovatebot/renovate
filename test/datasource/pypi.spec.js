@@ -142,13 +142,13 @@ describe('datasource/pypi', () => {
     });
     it('process data from simple endpoint', async () => {
       got.mockReturnValueOnce({
-        body: htmlResponse,
+        body: htmlResponse + '',
       });
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
       };
       expect(
-        await datasource.getPkgReleases('pkg:pypi/test', config)
+        await datasource.getPkgReleases('pkg:pypi/dj-database-url', config)
       ).toMatchSnapshot();
     });
   });
