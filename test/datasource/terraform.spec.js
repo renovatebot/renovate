@@ -59,9 +59,13 @@ describe('datasource/terraform', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),
       });
-      const res = await datasource.getPkgReleases({
-        purl: 'pkg:terraform/consul/foo?registry=hashicorp',
-      });
+      const config = { registryUrls: 'https://terraform.company.com' };
+      const res = await datasource.getPkgReleases(
+        {
+          purl: 'pkg:terraform/consul/foo',
+        },
+        config
+      );
       expect(res).toBeNull();
     });
   });
