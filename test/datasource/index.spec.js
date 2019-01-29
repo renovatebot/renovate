@@ -5,6 +5,14 @@ jest.mock('../../lib/datasource/docker');
 jest.mock('../../lib/datasource/npm');
 
 describe('datasource/index', () => {
+  it('returns if digests are supported', async () => {
+    expect(await datasource.supportsDigests('pkg:github/some/dep')).toBe(true);
+  });
+  it('returns null for unknown datasource', async () => {
+    expect(
+      await datasource.getPkgReleases({ purl: 'pkg:gitbucket/some/dep' })
+    ).toBeNull();
+  });
   it('returns null for invalid purl', async () => {
     expect(
       await datasource.getPkgReleases({ purl: 'pkggithub/some/dep' })

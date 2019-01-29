@@ -15,3 +15,19 @@ Object {
   "sourceUrl": "https://github.com/some/dep",
 }
 `;
+
+exports[`datasource/github getPkgReleases returns tags 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "v1.0.0",
+      "version": "v1.0.0",
+    },
+    Object {
+      "gitRef": "v1.1.0",
+      "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/some/dep2",
+}
+`;

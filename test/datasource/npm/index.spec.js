@@ -35,6 +35,7 @@ describe('api/npm', () => {
         url: 'git://github.com/renovateapp/dummy.git',
         directory: 'src/a',
       },
+      homepage: 'https://github.com/renovateapp/dummy',
       'dist-tags': {
         latest: '0.0.1',
       },
@@ -153,7 +154,7 @@ describe('api/npm', () => {
       },
       repository: {
         type: 'git',
-        url: 'git://github.com/renovateapp/dummy.git',
+        url: 'https://github.com/renovateapp/dummy.git',
       },
       'dist-tags': {
         latest: '0.0.2',
