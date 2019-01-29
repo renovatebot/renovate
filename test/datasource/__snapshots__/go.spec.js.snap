@@ -18,19 +18,16 @@ Array [
   Array [
     Object {
       "lookupName": "x/text",
-      "qualifiers": Object {},
     },
   ],
   Array [
     Object {
       "lookupName": "x/text",
-      "qualifiers": Object {},
     },
   ],
   Array [
     Object {
       "lookupName": "go-x/x",
-      "qualifiers": Object {},
     },
   ],
 ]
