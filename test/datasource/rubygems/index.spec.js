@@ -9,7 +9,7 @@ describe('datasource/rubygems', () => {
   describe('getPkgReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 
-    const pkg = { fullname: 'rails' };
+    const pkg = { lookupName: 'rails' };
     const registryUrls = ['https://thirdparty.com', 'https://firstparty.com'];
     const params = [pkg, { registryUrls }];
 
