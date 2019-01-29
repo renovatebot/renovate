@@ -11,7 +11,7 @@ If you will contribute to the project, you should first "fork" the main project 
 
 #### Node version
 
-Renovate supports node.js versions 8 and above. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
+Renovate supports node.js version 10.14.0 and above. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
 
 #### Install dependencies
 
@@ -37,7 +37,7 @@ e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing
 
 #### Generate platform token
 
-Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate.
+Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate. Select **repo** scope when generating the token.
 
 #### Export platform token
 

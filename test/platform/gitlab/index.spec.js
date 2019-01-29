@@ -257,20 +257,24 @@ describe('platform/gitlab', () => {
   });
   describe('getAllRenovateBranches()', () => {
     it('should return all renovate branches', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            name: 'renovate/a',
-          },
-          {
-            name: 'master',
-          },
-          {
-            name: 'renovate/b',
-          },
-        ],
-      }));
-      const res = await gitlab.getAllRenovateBranches('renovate/');
+      const search = 'renovate/';
+      get.mockImplementationOnce(path => {
+        expect(path).toBe(
+          'projects/undefined/repository/branches?search=^renovate%2F'
+        );
+
+        return {
+          body: [
+            {
+              name: 'renovate/a',
+            },
+            {
+              name: 'renovate/b',
+            },
+          ],
+        };
+      });
+      const res = await gitlab.getAllRenovateBranches(search);
       expect(res).toMatchSnapshot();
     });
   });
