@@ -17,19 +17,19 @@ exports[`datasource/go getPkgReleases works for known servers 1`] = `
 Array [
   Array [
     Object {
-      "fullname": "x/text",
+      "lookupName": "x/text",
       "qualifiers": Object {},
     },
   ],
   Array [
     Object {
-      "fullname": "x/text",
+      "lookupName": "x/text",
       "qualifiers": Object {},
     },
   ],
   Array [
     Object {
-      "fullname": "go-x/x",
+      "lookupName": "go-x/x",
       "qualifiers": Object {},
     },
   ],
