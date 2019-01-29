@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`util/purl parse() parses github with lookupType 1`] = `
+Object {
+  "datasource": "github",
+  "lookupName": "abc/def",
+  "lookupType": "releases",
+  "qualifiers": Object {},
+}
+`;
+
 exports[`util/purl parse() parses namespaced npm 1`] = `
 Object {
   "datasource": "npm",
