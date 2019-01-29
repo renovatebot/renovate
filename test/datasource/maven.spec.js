@@ -40,7 +40,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         ...config,
         purl:
-          'pkg:maven/unknown/unknown@1.0.5?repository_url=file://test/_fixtures/gradle/maven/repo1.maven.org/maven2/',
+          'pkg:maven/unknown/unknown?repository_url=file://test/_fixtures/gradle/maven/repo1.maven.org/maven2/',
       });
       expect(releases).toBeNull();
     });
@@ -49,7 +49,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         ...config,
         purl:
-          'pkg:maven/org.hamcrest/hamcrest-core@1.2?repository_url=file://test/_fixtures/gradle/maven/repo1.maven.org/maven2/,file://test/_fixtures/gradle/maven/custom_maven_repo/maven2/',
+          'pkg:maven/org.hamcrest/hamcrest-core?repository_url=file://test/_fixtures/gradle/maven/repo1.maven.org/maven2/,file://test/_fixtures/gradle/maven/custom_maven_repo/maven2/',
       });
       expect(releases.releases).toEqual(
         generateReleases([
@@ -68,7 +68,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         ...config,
         purl:
-          'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=file://test/_fixtures/gradle/maven/repo1.maven.org/maven2/,file://test/_fixtures/gradle/maven/custom_maven_repo/maven2/',
+          'pkg:maven/mysql/mysql-connector-java?repository_url=file://test/_fixtures/gradle/maven/repo1.maven.org/maven2/,file://test/_fixtures/gradle/maven/custom_maven_repo/maven2/',
       });
       expect(releases.releases).toEqual(
         generateReleases(['6.0.4', ...MYSQL_VERSIONS])
@@ -79,7 +79,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         ...config,
         purl:
-          'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/',
+          'pkg:maven/mysql/mysql-connector-java?repository_url=http://central.maven.org/maven2/',
       });
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
@@ -88,7 +88,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         ...config,
         purl:
-          'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/,http://failed_repo/,http://dns_error_repo',
+          'pkg:maven/mysql/mysql-connector-java?repository_url=http://central.maven.org/maven2/,http://failed_repo/,http://dns_error_repo',
       });
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
@@ -104,7 +104,7 @@ describe('datasource/maven', () => {
         await datasource.getPkgReleases({
           ...config,
           purl:
-            'pkg:maven/org/artifact@6.0.5?repository_url=http://central.maven.org/maven2/',
+            'pkg:maven/org/artifact?repository_url=http://central.maven.org/maven2/',
         });
       } catch (e) {
         expect(e.message).toEqual('registry-failure');
@@ -115,7 +115,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         ...config,
         purl:
-          'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/,http://failed_repo/,ftp://protocol_error_repo',
+          'pkg:maven/mysql/mysql-connector-java?repository_url=http://central.maven.org/maven2/,http://failed_repo/,ftp://protocol_error_repo',
       });
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
@@ -137,7 +137,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         ...config,
         purl:
-          'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/,http://invalid_metadata_repo/maven2/',
+          'pkg:maven/mysql/mysql-connector-java?repository_url=http://central.maven.org/maven2/,http://invalid_metadata_repo/maven2/',
       });
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
@@ -152,7 +152,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         config,
         purl:
-          'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/,http://invalid_metadata_repo/maven2/',
+          'pkg:maven/mysql/mysql-connector-java?repository_url=http://central.maven.org/maven2/,http://invalid_metadata_repo/maven2/',
       });
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
@@ -161,7 +161,7 @@ describe('datasource/maven', () => {
       const releases = await datasource.getPkgReleases({
         config,
         purl:
-          'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2',
+          'pkg:maven/mysql/mysql-connector-java?repository_url=http://central.maven.org/maven2',
       });
       expect(releases).not.toBeNull();
     });
@@ -169,7 +169,7 @@ describe('datasource/maven', () => {
     it('should return null if no repositories defined', async () => {
       const releases = await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:maven/mysql/mysql-connector-java@6.0.5',
+        purl: 'pkg:maven/mysql/mysql-connector-java',
       });
       expect(releases).toBeNull();
     });
