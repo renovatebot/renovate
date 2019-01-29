@@ -26,5 +26,8 @@ describe('util/purl', () => {
     it('parses npm with version and 2 qualifiers and subpath', () => {
       expect(parse('pkg:npm/foo@1.0.0?a=b&c=d#stop')).toMatchSnapshot();
     });
+    it('parses github with lookupType', () => {
+      expect(parse('pkg:github/abc/def?lookupType=releases')).toMatchSnapshot();
+    });
   });
 });
