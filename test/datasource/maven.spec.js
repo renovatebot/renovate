@@ -45,7 +45,7 @@ describe('datasource/maven', () => {
       expect(releases).toBeNull();
     });
 
-    it('should return all versions of a specific library', async () => {
+    it('should simply return all versions of a specific library', async () => {
       const releases = await datasource.getPkgReleases({
         ...config,
         purl:
@@ -150,7 +150,7 @@ describe('datasource/maven', () => {
         .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
         .reply(200, invalidMavenMetadata);
       const releases = await datasource.getPkgReleases({
-        config,
+        ...config,
         purl:
           'pkg:maven/mysql/mysql-connector-java?repository_url=http://central.maven.org/maven2/,http://invalid_metadata_repo/maven2/',
       });
@@ -159,7 +159,7 @@ describe('datasource/maven', () => {
 
     it('should return all versions of a specific library if a repository does not end with /', async () => {
       const releases = await datasource.getPkgReleases({
-        config,
+        ...config,
         purl:
           'pkg:maven/mysql/mysql-connector-java?repository_url=http://central.maven.org/maven2',
       });

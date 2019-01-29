@@ -58,6 +58,17 @@ Object {
 }
 `;
 
+exports[`util/purl parse() parses repository_url qualifier 1`] = `
+Object {
+  "datasource": "maven",
+  "lookupName": "org.apache.xmlgraphics/batik-anim",
+  "qualifiers": Object {},
+  "repositoryUrls": Array [
+    "repo.spring.io/release",
+  ],
+}
+`;
+
 exports[`util/purl parse() parses simple npm 1`] = `
 Object {
   "datasource": "npm",

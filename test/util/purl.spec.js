@@ -29,5 +29,12 @@ describe('util/purl', () => {
     it('parses github with lookupType', () => {
       expect(parse('pkg:github/abc/def?lookupType=releases')).toMatchSnapshot();
     });
+    it('parses repository_url qualifier', () => {
+      expect(
+        parse(
+          'pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?repository_url=repo.spring.io/release'
+        )
+      ).toMatchSnapshot();
+    });
   });
 });
