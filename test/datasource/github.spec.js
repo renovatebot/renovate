@@ -79,6 +79,15 @@ describe('datasource/github', () => {
         res.releases.find(release => release.version === 'v1.1.0')
       ).toBeDefined();
     });
+    it('returns tags', async () => {
+      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
+      ghGot.mockReturnValueOnce({ headers: {}, body });
+      const res = await datasource.getPkgReleases({
+        purl: 'pkg:github/some/dep2',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+    });
     it('returns null for invalid ref', async () => {
       expect(
         await datasource.getPkgReleases({
