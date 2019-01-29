@@ -17,7 +17,6 @@ Object {
   "name": "bar",
   "namespace": "@foo",
   "qualifiers": Object {},
-  "version": "1.0.0",
 }
 `;
 
@@ -29,7 +28,6 @@ Object {
   "qualifiers": Object {
     "a": "b",
   },
-  "version": "1.0.0",
 }
 `;
 
@@ -42,7 +40,6 @@ Object {
     "a": "b",
     "c": "d",
   },
-  "version": "1.0.0",
 }
 `;
 
@@ -56,7 +53,6 @@ Object {
     "c": "d",
   },
   "subpath": "stop",
-  "version": "1.0.0",
 }
 `;
 
