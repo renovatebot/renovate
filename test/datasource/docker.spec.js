@@ -150,7 +150,7 @@ describe('api/docker', () => {
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
-      const res = await getPkgReleases('pkg:docker/node');
+      const res = await getPkgReleases({ purl: 'pkg:docker/node' });
       expect(res).toBe(null);
     });
     it('uses custom registry', async () => {
@@ -162,7 +162,7 @@ describe('api/docker', () => {
       const config = {
         registryUrls: ['https://registry.company.com'],
       };
-      const res = await getPkgReleases('pkg:docker/node', config);
+      const res = await getPkgReleases({ ...config, purl: 'pkg:docker/node' });
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -176,7 +176,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await getPkgReleases('pkg:docker/node');
+      const res = await getPkgReleases({ purl: 'pkg:docker/node' });
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -190,7 +190,9 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await getPkgReleases('pkg:docker/node?registry=docker.io');
+      const res = await getPkgReleases({
+        purl: 'pkg:docker/node?registry=docker.io',
+      });
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -204,9 +206,9 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await getPkgReleases(
-        'pkg:docker/kubernetes-dashboard-amd64?registry=k8s.gcr.io'
-      );
+      const res = await getPkgReleases({
+        purl: 'pkg:docker/kubernetes-dashboard-amd64?registry=k8s.gcr.io',
+      });
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });

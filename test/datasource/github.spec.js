@@ -70,9 +70,9 @@ describe('datasource/github', () => {
         { name: 'v1.1.0' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await datasource.getPkgReleases(
-        'pkg:github/some/dep?normalize=true'
-      );
+      const res = await datasource.getPkgReleases({
+        purl: 'pkg:github/some/dep?normalize=true',
+      });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
       expect(
@@ -87,9 +87,9 @@ describe('datasource/github', () => {
         { tag_name: 'v1.1.0' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await datasource.getPkgReleases(
-        'pkg:github/some/dep?ref=release'
-      );
+      const res = await datasource.getPkgReleases({
+        purl: 'pkg:github/some/dep?ref=release',
+      });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
       expect(
@@ -98,7 +98,9 @@ describe('datasource/github', () => {
     });
     it('returns null for invalid ref', async () => {
       expect(
-        await datasource.getPkgReleases('pkg:github/some/dep?ref=invalid')
+        await datasource.getPkgReleases({
+          purl: 'pkg:github/some/dep?ref=invalid',
+        })
       ).toBeNull();
     });
   });
