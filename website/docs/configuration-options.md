@@ -249,7 +249,7 @@ Configuration for Java gradle projects
 
 ## gradle-wrapper
 
-Wether Renovate should upgrade the version of gradle specified in the wrapper.
+Configuration for Gradle Wrapper updates. Changes here affect how Renovate updates the version of gradle in the wrapper, not how it uses the wrapper.
 
 ## group
 
