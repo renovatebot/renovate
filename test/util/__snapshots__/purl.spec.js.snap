@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`util/purl parse() parses github with lookupType 1`] = `
+exports[`util/purl parse() parses github with subpath/lookupType 1`] = `
 Object {
   "datasource": "github",
   "lookupName": "abc/def",
@@ -43,18 +43,6 @@ Object {
     "a": "b",
     "c": "d",
   },
-}
-`;
-
-exports[`util/purl parse() parses npm with version and 2 qualifiers and subpath 1`] = `
-Object {
-  "datasource": "npm",
-  "lookupName": "foo",
-  "qualifiers": Object {
-    "a": "b",
-    "c": "d",
-  },
-  "subpath": "stop",
 }
 `;
 
