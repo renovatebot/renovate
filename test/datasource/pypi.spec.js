@@ -148,7 +148,11 @@ describe('datasource/pypi', () => {
         registryUrls: ['https://pypi.org/simple/'],
       };
       expect(
-        await datasource.getPkgReleases('pkg:pypi/dj-database-url', config)
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          purl: 'pkg:pypi/dj-database-url-',
+        })
       ).toMatchSnapshot();
     });
   });
