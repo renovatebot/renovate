@@ -5,7 +5,6 @@ Object {
   "datasource": "github",
   "lookupName": "abc/def",
   "lookupType": "releases",
-  "qualifiers": Object {},
 }
 `;
 
@@ -13,7 +12,6 @@ exports[`util/purl parse() parses namespaced npm 1`] = `
 Object {
   "datasource": "npm",
   "lookupName": "@foo/bar",
-  "qualifiers": Object {},
 }
 `;
 
@@ -21,7 +19,6 @@ exports[`util/purl parse() parses namespaced npm with version 1`] = `
 Object {
   "datasource": "npm",
   "lookupName": "@foo/bar",
-  "qualifiers": Object {},
 }
 `;
 
@@ -29,9 +26,6 @@ exports[`util/purl parse() parses npm with version and 1 qualifier 1`] = `
 Object {
   "datasource": "npm",
   "lookupName": "foo",
-  "qualifiers": Object {
-    "a": "b",
-  },
 }
 `;
 
@@ -39,10 +33,6 @@ exports[`util/purl parse() parses npm with version and 2 qualifiers 1`] = `
 Object {
   "datasource": "npm",
   "lookupName": "foo",
-  "qualifiers": Object {
-    "a": "b",
-    "c": "d",
-  },
 }
 `;
 
@@ -50,7 +40,6 @@ exports[`util/purl parse() parses repository_url qualifier 1`] = `
 Object {
   "datasource": "maven",
   "lookupName": "org.apache.xmlgraphics/batik-anim",
-  "qualifiers": Object {},
   "registryUrls": Array [
     "repo.spring.io/release",
   ],
@@ -61,6 +50,5 @@ exports[`util/purl parse() parses simple npm 1`] = `
 Object {
   "datasource": "npm",
   "lookupName": "foo",
-  "qualifiers": Object {},
 }
 `;
