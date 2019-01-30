@@ -51,7 +51,7 @@ Object {
   "datasource": "maven",
   "lookupName": "org.apache.xmlgraphics/batik-anim",
   "qualifiers": Object {},
-  "repositoryUrls": Array [
+  "registryUrls": Array [
     "repo.spring.io/release",
   ],
 }
