@@ -9,7 +9,6 @@ The minimum exported interface for a datasource is a function called `getPkgRele
 The `purl` object contains:
 
 - `lookupName`: the package's full name including scope if present (e.g. `@foo/bar`)
-- `qualifiers`: optional addition arguments, may contain fields like `registry`
 
 In the simplest case, the datasource only needs to pay attention to `purl.lookupName`.
 

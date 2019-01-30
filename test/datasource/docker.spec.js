@@ -231,7 +231,6 @@ describe('api/docker', () => {
       got.mockReturnValueOnce({});
       const res = await docker.getPkgReleases({
         lookupName: 'my/node',
-        qualifiers: {},
       });
       expect(res).toBe(null);
     });
