@@ -249,6 +249,8 @@ Configuration for Java gradle projects
 
 ## gradle-wrapper
 
+Wether Renovate should upgrade the version of gradle specified in the wrapper.
+
 ## group
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to _add_ settings to any group by defining your own `group` configuration object.
