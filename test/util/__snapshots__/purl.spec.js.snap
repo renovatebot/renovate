@@ -1,70 +1,54 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`util/purl parse() parses github with subpath/lookupType 1`] = `
+Object {
+  "datasource": "github",
+  "lookupName": "abc/def",
+  "lookupType": "releases",
+}
+`;
+
 exports[`util/purl parse() parses namespaced npm 1`] = `
 Object {
-  "fullname": "@foo/bar",
-  "name": "bar",
-  "namespace": "@foo",
-  "qualifiers": Object {},
-  "type": "npm",
+  "datasource": "npm",
+  "lookupName": "@foo/bar",
 }
 `;
 
 exports[`util/purl parse() parses namespaced npm with version 1`] = `
 Object {
-  "fullname": "@foo/bar",
-  "name": "bar",
-  "namespace": "@foo",
-  "qualifiers": Object {},
-  "type": "npm",
-  "version": "1.0.0",
+  "datasource": "npm",
+  "lookupName": "@foo/bar",
 }
 `;
 
 exports[`util/purl parse() parses npm with version and 1 qualifier 1`] = `
 Object {
-  "fullname": "foo",
-  "name": "foo",
-  "qualifiers": Object {
-    "a": "b",
-  },
-  "type": "npm",
-  "version": "1.0.0",
+  "datasource": "npm",
+  "lookupName": "foo",
 }
 `;
 
 exports[`util/purl parse() parses npm with version and 2 qualifiers 1`] = `
 Object {
-  "fullname": "foo",
-  "name": "foo",
-  "qualifiers": Object {
-    "a": "b",
-    "c": "d",
-  },
-  "type": "npm",
-  "version": "1.0.0",
+  "datasource": "npm",
+  "lookupName": "foo",
 }
 `;
 
-exports[`util/purl parse() parses npm with version and 2 qualifiers and subpath 1`] = `
+exports[`util/purl parse() parses repository_url qualifier 1`] = `
 Object {
-  "fullname": "foo",
-  "name": "foo",
-  "qualifiers": Object {
-    "a": "b",
-    "c": "d",
-  },
-  "subpath": "stop",
-  "type": "npm",
-  "version": "1.0.0",
+  "datasource": "maven",
+  "lookupName": "org.apache.xmlgraphics/batik-anim",
+  "registryUrls": Array [
+    "repo.spring.io/release",
+  ],
 }
 `;
 
 exports[`util/purl parse() parses simple npm 1`] = `
 Object {
-  "fullname": "foo",
-  "name": "foo",
-  "qualifiers": Object {},
-  "type": "npm",
+  "datasource": "npm",
+  "lookupName": "foo",
 }
 `;

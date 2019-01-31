@@ -23,8 +23,15 @@ describe('util/purl', () => {
     it('parses npm with version and 2 qualifiers', () => {
       expect(parse('pkg:npm/foo@1.0.0?a=b&c=d')).toMatchSnapshot();
     });
-    it('parses npm with version and 2 qualifiers and subpath', () => {
-      expect(parse('pkg:npm/foo@1.0.0?a=b&c=d#stop')).toMatchSnapshot();
+    it('parses github with subpath/lookupType', () => {
+      expect(parse('pkg:github/abc/def#releases')).toMatchSnapshot();
+    });
+    it('parses repository_url qualifier', () => {
+      expect(
+        parse(
+          'pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?repository_url=repo.spring.io/release'
+        )
+      ).toMatchSnapshot();
     });
   });
 });
