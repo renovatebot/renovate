@@ -92,6 +92,11 @@
       <artifactId>quuz</artifactId>
       <version>1.2.3</version>
     </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>quuuz</artifactId>
+      <version>it's not a version</version>
+    </dependency>
   </dependencies>
 
   <profiles>

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/maven/extract .extractDependencies() extract dependencies from any XML position 1`] = `
+exports[`manager/maven/extract extractDependencies extract dependencies from any XML position 1`] = `
 Object {
   "datasource": "maven",
   "deps": Array [
@@ -50,6 +50,11 @@ Object {
       "purl": "pkg:maven/org.example/quuz?repository_url=https://repo.maven.apache.org/maven2",
     },
     Object {
+      "currentValue": "it's not a version",
+      "depName": "org.example/quuuz",
+      "skipReason": "not-a-version",
+    },
+    Object {
       "currentValue": "\${profile-placeholder}",
       "depName": "org.example/profile-artifact",
       "skipReason": "version-placeholder",
@@ -57,7 +62,7 @@ Object {
     Object {
       "currentValue": "2.17",
       "depName": "org.apache.maven.plugins/maven-checkstyle-plugin",
-      "fileReplacePosition": 3065,
+      "fileReplacePosition": 3218,
       "purl": "pkg:maven/org.apache.maven.plugins/maven-checkstyle-plugin?repository_url=https://repo.maven.apache.org/maven2",
     },
   ],

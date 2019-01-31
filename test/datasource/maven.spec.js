@@ -21,6 +21,11 @@ const MYSQL_MAVEN_METADATA = fs.readFileSync(
   'utf8'
 );
 
+const MYSQL_MAVEN_MYSQL_POM = fs.readFileSync(
+  'test/_fixtures/gradle/maven/repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom',
+  'utf8'
+);
+
 const config = {
   versionScheme: 'loose',
 };
@@ -30,9 +35,17 @@ describe('datasource/maven', () => {
     nock('http://central.maven.org')
       .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(200, MYSQL_MAVEN_METADATA);
+    nock('http://central.maven.org')
+      .get(
+        '/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom'
+      )
+      .reply(200, MYSQL_MAVEN_MYSQL_POM);
     nock('http://failed_repo')
       .get('/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(404, null);
+    nock('http://empty_repo')
+      .get('/mysql/mysql-connector-java/maven-metadata.xml')
+      .reply(200, 'non-sense');
   });
 
   describe('getPkgReleases', () => {
@@ -82,7 +95,7 @@ describe('datasource/maven', () => {
 
     it('should return all versions of a specific library if a repository fails', async () => {
       const releases = await datasource.getPkgReleases(
-        'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/,http://failed_repo/,http://dns_error_repo',
+        'pkg:maven/mysql/mysql-connector-java@6.0.5?repository_url=http://central.maven.org/maven2/,http://failed_repo/,http://dns_error_repo,http://empty_repo',
         config
       );
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
