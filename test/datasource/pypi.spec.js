@@ -168,7 +168,7 @@ describe('datasource/pypi', () => {
         })
       ).toBeNull();
     });
-    it('returns null for 404', async () => {
+    it('returns null for 404 response from simple endpoint', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
