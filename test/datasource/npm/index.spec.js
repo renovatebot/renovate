@@ -358,7 +358,7 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     const npmrc = 'foo=bar';
-    const res = await npm.getPkgReleases({ lookupName: 'foobar' }, { npmrc });
+    const res = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should cache package info from npm', async () => {
@@ -366,8 +366,8 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     const npmrc = '//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz';
-    const res1 = await npm.getPkgReleases({ lookupName: 'foobar' }, { npmrc });
-    const res2 = await npm.getPkgReleases({ lookupName: 'foobar' }, { npmrc });
+    const res1 = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
+    const res2 = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
     expect(res1).not.toBe(null);
     expect(res1).toEqual(res2);
   });
@@ -384,7 +384,7 @@ describe('api/npm', () => {
     const npmrc =
       'registry=https://npm.mycustomregistry.com/\n//npm.mycustomregistry.com/:_auth = ' +
       Buffer.from('abcdef').toString('base64');
-    const res = await npm.getPkgReleases({ lookupName: 'foobar' }, { npmrc });
+    const res = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should replace any environment variable in npmrc', async () => {
@@ -395,7 +395,7 @@ describe('api/npm', () => {
     global.trustLevel = 'high';
     // eslint-disable-next-line no-template-curly-in-string
     const npmrc = 'registry=${REGISTRY}';
-    const res = await npm.getPkgReleases({ lookupName: 'foobar' }, { npmrc });
+    const res = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
   });
   it('should throw error if necessary env var is not present', () => {

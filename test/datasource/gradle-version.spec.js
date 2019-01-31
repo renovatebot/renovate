@@ -25,7 +25,10 @@ describe('datasource/gradle', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:gradleVersion' }, config)
+        await datasource.getPkgReleases({
+          ...config,
+          purl: 'pkg:gradleVersion',
+        })
       ).toBeNull();
     });
 
@@ -37,7 +40,10 @@ describe('datasource/gradle', () => {
       );
       let e;
       try {
-        await datasource.getPkgReleases({ purl: 'pkg:gradleVersion' }, config);
+        await datasource.getPkgReleases({
+          ...config,
+          purl: 'pkg:gradleVersion',
+        });
       } catch (err) {
         e = err;
       }
@@ -49,7 +55,10 @@ describe('datasource/gradle', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:gradleVersion' }, config)
+        await datasource.getPkgReleases({
+          ...config,
+          purl: 'pkg:gradleVersion',
+        })
       ).toBeNull();
     });
 
