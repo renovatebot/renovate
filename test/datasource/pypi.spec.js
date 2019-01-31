@@ -155,5 +155,33 @@ describe('datasource/pypi', () => {
         })
       ).toMatchSnapshot();
     });
+    it('returns null for empty resonse', async () => {
+      got.mockReturnValueOnce({});
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          purl: 'pkg:pypi/dj-database-url-',
+        })
+      ).toBeNull();
+    });
+    it('returns null for 404', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          purl: 'pkg:pypi/dj-database-url-',
+        })
+      ).toBeNull();
+    });
   });
 });
