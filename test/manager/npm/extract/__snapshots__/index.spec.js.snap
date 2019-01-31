@@ -152,7 +152,7 @@ Object {
       "githubRepo": "owner/c",
       "pinDigests": false,
       "prettyDepType": "dependency",
-      "purl": "pkg:github/owner/c?ref=tags",
+      "purl": "pkg:github/owner/c",
       "sourceUrl": "https://github.com/owner/c",
     },
     Object {
@@ -183,7 +183,7 @@ Object {
       "githubRepo": "owner/f",
       "pinDigests": false,
       "prettyDepType": "dependency",
-      "purl": "pkg:github/owner/f?ref=tags",
+      "purl": "pkg:github/owner/f",
       "sourceUrl": "https://github.com/owner/f",
     },
     Object {
@@ -247,7 +247,7 @@ Object {
       "githubRepo": "owner/m",
       "pinDigests": false,
       "prettyDepType": "dependency",
-      "purl": "pkg:github/owner/m?ref=tags",
+      "purl": "pkg:github/owner/m",
       "sourceUrl": "https://github.com/owner/m",
     },
     Object {
@@ -259,7 +259,7 @@ Object {
       "githubRepo": "owner/n",
       "pinDigests": false,
       "prettyDepType": "dependency",
-      "purl": "pkg:github/owner/n?ref=tags",
+      "purl": "pkg:github/owner/n",
       "sourceUrl": "https://github.com/owner/n",
     },
   ],

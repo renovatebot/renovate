@@ -11,7 +11,7 @@ If you will contribute to the project, you should first "fork" the main project 
 
 #### Node version
 
-Renovate supports node.js version 10.14.0 and above. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
+Renovate supports Node.js `>= 10.13.0 <11.0.0`. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
 
 #### Install dependencies
 

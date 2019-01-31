@@ -55,12 +55,23 @@ describe('datasource/terraform', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+    it('processes with registry in name', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(consulData),
+      });
+      const res = await datasource.getPkgReleases({
+        purl: 'pkg:terraform/registry.terraform.io/hashicorp/consul/aws',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
     it('rejects mismatch', async () => {
       got.mockReturnValueOnce({
         body: JSON.parse(consulData),
       });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:terraform/consul/foo?registry=hashicorp',
+        purl: 'pkg:terraform/consul/foo',
+        registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();
     });

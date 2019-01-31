@@ -70,7 +70,7 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": ">= 10.13.0"
+    "node": "^10.13.0"
   },
   "dependencies": {
     "@renovate/pep440": "0.4.1",
