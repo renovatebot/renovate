@@ -6,6 +6,9 @@ jest.mock('got');
 
 const res1 = fs.readFileSync('test/_fixtures/pypi/azure-cli-monitor.json');
 const htmlResponse = fs.readFileSync('test/_fixtures/pypi/versions-html.html');
+const badResponse = fs.readFileSync(
+  'test/_fixtures/pypi/versions-html-badfile.html'
+);
 
 describe('datasource/pypi', () => {
   describe('getPkgReleases', () => {
@@ -151,7 +154,7 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          purl: 'pkg:pypi/dj-database-url-',
+          purl: 'pkg:pypi/dj-database-url',
         })
       ).toMatchSnapshot();
     });
@@ -164,7 +167,7 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          purl: 'pkg:pypi/dj-database-url-',
+          purl: 'pkg:pypi/dj-database-url',
         })
       ).toBeNull();
     });
@@ -179,9 +182,24 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          purl: 'pkg:pypi/dj-database-url-',
+          purl: 'pkg:pypi/dj-database-url',
         })
       ).toBeNull();
+    });
+    it('returns null for response with no versions', async () => {
+      got.mockReturnValueOnce({
+        body: badResponse + '',
+      });
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          purl: 'pkg:pypi/dj-database-url',
+        })
+      ).toEqual({ releases: [] });
     });
   });
 });
