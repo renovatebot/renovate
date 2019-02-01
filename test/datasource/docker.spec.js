@@ -89,6 +89,36 @@ describe('api/docker', () => {
         'sha256:b3d6068234f3a18ebeedd2dab81e67b6a192e81192a099df4112ecfc7c3be84f'
       );
     });
+    it('supports basic authentication', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        },
+      });
+      got.mockReturnValueOnce({
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        headers: { 'docker-content-digest': 'some-digest' },
+      });
+      const res = await docker.getDigest({ depName: 'some-dep' }, 'some-tag');
+      expect(got.mock.calls[1][1].headers.Authorization).toBe(
+        'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+      );
+      expect(res).toBe('some-digest');
+    });
+    it('returns null for 403 with basic authentication', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        },
+      });
+      got.mockReturnValueOnce({
+        statusCode: 403,
+      });
+      const res = await docker.getDigest({ depName: 'some-dep' }, 'some-tag');
+      expect(res).toBeNull();
+    });
     it('continues without token, when no header is present', async () => {
       got.mockReturnValueOnce({
         headers: {
