@@ -43,7 +43,8 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotes(
         'some/repository',
         '1.0.0',
-        'https://github.com/'
+        'https://github.com/',
+        'https://api.github.com/'
       );
       expect(res).toMatchSnapshot();
     });
@@ -61,7 +62,8 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotes(
         'some/other-repository',
         '1.0.1',
-        'https://github.com/'
+        'https://github.com/',
+        'https://api.github.com/'
       );
       expect(res).toMatchSnapshot();
     });
@@ -71,7 +73,8 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotesMd(
         'chalk',
         '2.0.0',
-        'https://github.com/'
+        'https://github.com/',
+        'https://api.github.com/'
       );
       expect(res).toBe(null);
     });
@@ -82,7 +85,8 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotesMd(
         'chalk',
         '2.0.0',
-        'https://github.com/'
+        'https://github.com/',
+        'https://api.github.com/'
       );
       expect(res).toBe(null);
     });
@@ -97,7 +101,8 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotesMd(
         'some/repository1',
         '1.0.0',
-        'https://github.com/'
+        'https://github.com/',
+        'https://api.github.com/'
       );
       expect(res).toBe(null);
     });
@@ -112,7 +117,8 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotesMd(
         'some/repository2',
         '1.0.0',
-        'https://github.com/'
+        'https://github.com/',
+        'https://api.github.com/'
       );
       expect(res).toBe(null);
     });
@@ -127,7 +133,8 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotesMd(
         'angular/angular.js',
         '1.6.9',
-        'https://github.com/'
+        'https://github.com/',
+        'https://api.github.com/'
       );
       expect(res).not.toBe(null);
       expect(res).toMatchSnapshot();
@@ -143,7 +150,8 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotesMd(
         'facebook/jest',
         '22.0.0',
-        'https://github.com/'
+        'https://github.com/',
+        'https://api.github.com/'
       );
       expect(res).not.toBe(null);
       expect(res).toMatchSnapshot();
@@ -159,7 +167,8 @@ describe('workers/pr/release-notes', () => {
       const res = await getReleaseNotesMd(
         'nodeca/js-yaml',
         '3.10.0',
-        'https://github.com/'
+        'https://github.com/',
+        'https://api.github.com/'
       );
       expect(res).not.toBe(null);
       expect(res).toMatchSnapshot();

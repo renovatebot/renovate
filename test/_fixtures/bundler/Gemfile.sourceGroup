@@ -1,4 +1,5 @@
 source "https://rubygems.org"
+ruby "~> 1.5.3"
 
 source "https://gems.example.com" do
   gem "some_internal_gem"

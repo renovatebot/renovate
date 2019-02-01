@@ -57,10 +57,10 @@ describe('datasource/packagist', () => {
           },
         ],
       };
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/something/one',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        purl: 'pkg:packagist/something/one',
+      });
       expect(res).toBeNull();
     });
     it('supports plain packages', async () => {
@@ -77,10 +77,10 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: packagesOnly,
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/vendor/package-name',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        purl: 'pkg:packagist/vendor/package-name',
+      });
       expect(res).toMatchSnapshot();
     });
     it('handles auth rejections', async () => {
@@ -89,10 +89,10 @@ describe('datasource/packagist', () => {
           statusCode: 401,
         })
       );
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/vendor/package-name',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        purl: 'pkg:packagist/vendor/package-name',
+      });
       expect(res).toBeNull();
     });
     it('handles not found registries', async () => {
@@ -102,10 +102,10 @@ describe('datasource/packagist', () => {
           url: 'https://some.registry/packages.json',
         })
       );
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/drewm/mailchip-api',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        purl: 'pkg:packagist/drewm/mailchip-api',
+      });
       expect(res).toBeNull();
     });
     it('supports includes packages', async () => {
@@ -127,10 +127,10 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(includesJson),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/guzzlehttp/guzzle',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        purl: 'pkg:packagist/guzzlehttp/guzzle',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
@@ -166,10 +166,10 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/wpackagist-plugin/1beyt',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        purl: 'pkg:packagist/wpackagist-plugin/1beyt',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
@@ -205,10 +205,10 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/some/other',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        purl: 'pkg:packagist/some/other',
+      });
       expect(res).toBeNull();
     });
     it('processes real versioned data', async () => {
@@ -217,10 +217,10 @@ describe('datasource/packagist', () => {
       });
       delete config.registryUrls;
       expect(
-        await datasource.getPkgReleases(
-          'pkg:packagist/drewm/mailchimp-api',
-          config
-        )
+        await datasource.getPkgReleases({
+          ...config,
+          purl: 'pkg:packagist/drewm/mailchimp-api',
+        })
       ).toMatchSnapshot();
     });
   });

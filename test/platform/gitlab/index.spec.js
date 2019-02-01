@@ -106,7 +106,7 @@ describe('platform/gitlab', () => {
     ].forEach(([envToken, token, endpoint, gitAuthor], i) => {
       it(`should initialise the config for the repo - ${i}`, async () => {
         if (envToken !== undefined) {
-          process.env.GITLAB_TOKEN = envToken;
+          process.env.RENOVATE_TOKEN = envToken;
         }
         get.mockReturnValue({ body: [] });
         const config = await initRepo({
@@ -257,20 +257,24 @@ describe('platform/gitlab', () => {
   });
   describe('getAllRenovateBranches()', () => {
     it('should return all renovate branches', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            name: 'renovate/a',
-          },
-          {
-            name: 'master',
-          },
-          {
-            name: 'renovate/b',
-          },
-        ],
-      }));
-      const res = await gitlab.getAllRenovateBranches('renovate/');
+      const search = 'renovate/';
+      get.mockImplementationOnce(path => {
+        expect(path).toBe(
+          'projects/undefined/repository/branches?search=^renovate%2F'
+        );
+
+        return {
+          body: [
+            {
+              name: 'renovate/a',
+            },
+            {
+              name: 'renovate/b',
+            },
+          ],
+        };
+      });
+      const res = await gitlab.getAllRenovateBranches(search);
       expect(res).toMatchSnapshot();
     });
   });

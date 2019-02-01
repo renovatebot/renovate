@@ -62,23 +62,6 @@ describe('datasource/github', () => {
   });
   describe('getPkgReleases', () => {
     beforeAll(() => global.renovateCache.rmAll());
-    it('returns cleaned tags', async () => {
-      const body = [
-        { name: 'a' },
-        { name: 'v' },
-        { name: '1.0.0' },
-        { name: 'v1.1.0' },
-      ];
-      ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await datasource.getPkgReleases(
-        'pkg:github/some/dep?normalize=true'
-      );
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
-      expect(
-        res.releases.find(release => release.version === '1.1.0')
-      ).toBeDefined();
-    });
     it('returns releases', async () => {
       const body = [
         { tag_name: 'a' },
@@ -87,18 +70,29 @@ describe('datasource/github', () => {
         { tag_name: 'v1.1.0' },
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await datasource.getPkgReleases(
-        'pkg:github/some/dep?ref=release'
-      );
+      const res = await datasource.getPkgReleases({
+        purl: 'pkg:github/some/dep#releases',
+      });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
       expect(
         res.releases.find(release => release.version === 'v1.1.0')
       ).toBeDefined();
     });
+    it('returns tags', async () => {
+      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
+      ghGot.mockReturnValueOnce({ headers: {}, body });
+      const res = await datasource.getPkgReleases({
+        purl: 'pkg:github/some/dep2',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+    });
     it('returns null for invalid ref', async () => {
       expect(
-        await datasource.getPkgReleases('pkg:github/some/dep?ref=invalid')
+        await datasource.getPkgReleases({
+          purl: 'pkg:github/some/dep?ref=invalid',
+        })
       ).toBeNull();
     });
   });

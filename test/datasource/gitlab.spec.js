@@ -52,7 +52,9 @@ describe('datasource/gitlab', () => {
     beforeAll(() => global.renovateCache.rmAll());
     it('returns null for invalid ref', async () => {
       expect(
-        await datasource.getPkgReleases('pkg:github/some/dep?ref=invalid')
+        await datasource.getPkgReleases({
+          purl: 'pkg:github/some/dep?ref=invalid',
+        })
       ).toBeNull();
     });
   });

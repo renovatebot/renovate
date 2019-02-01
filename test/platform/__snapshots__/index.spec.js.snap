@@ -1,5 +1,47 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform has a list of supported methods for azure 1`] = `
+Array [
+  "getRepos",
+  "cleanRepo",
+  "initRepo",
+  "getRepoStatus",
+  "getRepoForceRebase",
+  "setBaseBranch",
+  "getFileList",
+  "branchExists",
+  "getAllRenovateBranches",
+  "isBranchStale",
+  "getBranchPr",
+  "getBranchStatus",
+  "getBranchStatusCheck",
+  "setBranchStatus",
+  "deleteBranch",
+  "mergeBranch",
+  "getBranchLastCommitTime",
+  "findIssue",
+  "ensureIssue",
+  "ensureIssueClosing",
+  "addAssignees",
+  "addReviewers",
+  "deleteLabel",
+  "ensureComment",
+  "ensureCommentRemoval",
+  "getPrList",
+  "findPr",
+  "createPr",
+  "getPr",
+  "getPrFiles",
+  "updatePr",
+  "mergePr",
+  "getPrBody",
+  "commitFilesToBranch",
+  "getFile",
+  "getCommitMessages",
+  "getVulnerabilityAlerts",
+]
+`;
+
 exports[`platform has a list of supported methods for github 1`] = `
 Array [
   "getRepos",
@@ -43,48 +85,6 @@ Array [
 `;
 
 exports[`platform has a list of supported methods for gitlab 1`] = `
-Array [
-  "getRepos",
-  "cleanRepo",
-  "initRepo",
-  "getRepoStatus",
-  "getRepoForceRebase",
-  "setBaseBranch",
-  "getFileList",
-  "branchExists",
-  "getAllRenovateBranches",
-  "isBranchStale",
-  "getBranchPr",
-  "getBranchStatus",
-  "getBranchStatusCheck",
-  "setBranchStatus",
-  "deleteBranch",
-  "mergeBranch",
-  "getBranchLastCommitTime",
-  "findIssue",
-  "ensureIssue",
-  "ensureIssueClosing",
-  "addAssignees",
-  "addReviewers",
-  "deleteLabel",
-  "ensureComment",
-  "ensureCommentRemoval",
-  "getPrList",
-  "findPr",
-  "createPr",
-  "getPr",
-  "getPrFiles",
-  "updatePr",
-  "mergePr",
-  "getPrBody",
-  "commitFilesToBranch",
-  "getFile",
-  "getCommitMessages",
-  "getVulnerabilityAlerts",
-]
-`;
-
-exports[`platform has a list of supported methods for vsts 1`] = `
 Array [
   "getRepos",
   "cleanRepo",

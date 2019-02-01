@@ -108,7 +108,7 @@
           {
             "number": 2086,
             "headRefName": "fix/deletePRafterDeleteBranch",
-            "title": "feat(vsts): abandon pr after delete branch",
+            "title": "feat(azure): abandon pr after delete branch",
             "mergeable": "MERGEABLE",
             "mergeStateStatus": "BEHIND",
             "commits": {

@@ -11,7 +11,7 @@ If you will contribute to the project, you should first "fork" the main project 
 
 #### Node version
 
-Renovate supports node.js versions 8 and above. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
+Renovate supports Node.js `>= 10.13.0 <11.0.0`. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
 
 #### Install dependencies
 
@@ -37,15 +37,12 @@ e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing
 
 #### Generate platform token
 
-Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate.
+Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate. Select **repo** scope when generating the token.
 
 #### Export platform token
 
 Although you can specify a token to Renovate using `--token=`, it can be inconvenient if you need to include this every time.
-You are better off to instead export an Environment Variable for this.
-
-If your platform of choice is GitHub, then export `GITHUB_TOKEN`, and if it's GitLab then export `GITLAB_TOKEN`.
-It's also find to export both so that you can switch between platforms.
+You are better off to instead export the Environment Variable `RENOVATE_TOKEN` for this.
 
 #### Run against a real repo
 
@@ -121,6 +118,6 @@ If you wish to add one, add it to `lib/config/definitions.js` and then add docum
 It's really easy to debug Renovate using Chrome's inspect tool. Try like this:
 
 1. Open `chrome://inspect` in Chrome, then click on "Open dedicated DevTools for Node"
-2. Run `yarn debug ...` instead of `yarn start ...`
-3. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+2. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+3. Run Renovate using `yarn debug ...` instead of `yarn start ...`
 4. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered

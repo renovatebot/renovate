@@ -9,10 +9,9 @@ describe('datasource/rubygems', () => {
   describe('getPkgReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
 
-    const pkg = { fullname: 'rails' };
-    const compatibility = { ruby: '2.2.2' };
+    const pkg = { lookupName: 'rails' };
     const registryUrls = ['https://thirdparty.com', 'https://firstparty.com'];
-    const params = [pkg, { compatibility, registryUrls }];
+    const params = [pkg, { registryUrls }];
 
     beforeEach(() => {
       process.env.RENOVATE_SKIP_CACHE = true;
@@ -48,19 +47,6 @@ describe('datasource/rubygems', () => {
     it('returns null if mismatched name', async () => {
       got.mockReturnValueOnce({ body: { ...railsInfo, name: 'oooops' } });
       expect(await rubygems.getPkgReleases(...params)).toBeNull();
-    });
-
-    it('respects compatibility', async () => {
-      got
-        .mockImplementationOnce(() => ({ body: railsInfo }))
-        .mockImplementationOnce(() => ({ body: railsVersions }));
-
-      expect(
-        await rubygems.getPkgReleases(pkg, {
-          registryUrls,
-          compatibility: { ruby: '1.0.0' },
-        })
-      ).toMatchSnapshot();
     });
 
     afterEach(() => {

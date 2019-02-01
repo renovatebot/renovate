@@ -30,6 +30,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.9.99';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
+      config.rollbackPrs = true;
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -39,6 +40,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^0.9.99';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
+      config.rollbackPrs = true;
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -49,6 +51,17 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
+    it('supports lock file updates mixed with regular updates', async () => {
+      config.currentValue = '^0.4.0';
+      config.rangeStrategy = 'lockfile-update';
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      config.lockedVersion = '0.4.0';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -135,6 +148,17 @@ describe('workers/repository/process/lookup', () => {
       config.allowedVersions = '<1';
       config.depName = 'q';
       config.purl = 'pkg:npm/q';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
+    it('falls back to semver syntax allowedVersions', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '<1';
+      config.depName = 'q';
+      config.purl = 'pkg:npm/q';
+      config.versionScheme = 'docker'; // this doesn't make sense but works for this test
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -714,6 +738,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'typescript';
       config.purl = 'pkg:npm/typescript';
       config.followTag = 'insiders';
+      config.rollbackPrs = true;
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
@@ -786,6 +811,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.16.1';
       config.depName = 'coffeelint';
       config.purl = 'pkg:npm/coffeelint';
+      config.rollbackPrs = true;
       nock('https://registry.npmjs.org')
         .get('/coffeelint')
         .reply(200, coffeelintJson);

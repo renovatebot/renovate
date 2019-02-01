@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`manager/npm/extract .extractPackageFile() catches invalid names 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "depName": "kgabis/parson",
+      "depType": "dependencies",
+      "prettyDepType": "dependency",
+      "skipReason": "invalid-name",
+    },
+  ],
+  "lernaClient": undefined,
+  "lernaDir": undefined,
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": undefined,
+  "packageJsonType": "app",
+  "packageJsonVersion": undefined,
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
+}
+`;
+
 exports[`manager/npm/extract .extractPackageFile() extracts engines 1`] = `
 Object {
   "deps": Array [
@@ -126,7 +152,7 @@ Object {
       "githubRepo": "owner/c",
       "pinDigests": false,
       "prettyDepType": "dependency",
-      "purl": "pkg:github/owner/c?ref=tags",
+      "purl": "pkg:github/owner/c",
       "sourceUrl": "https://github.com/owner/c",
     },
     Object {
@@ -157,7 +183,7 @@ Object {
       "githubRepo": "owner/f",
       "pinDigests": false,
       "prettyDepType": "dependency",
-      "purl": "pkg:github/owner/f?ref=tags",
+      "purl": "pkg:github/owner/f",
       "sourceUrl": "https://github.com/owner/f",
     },
     Object {
@@ -221,7 +247,7 @@ Object {
       "githubRepo": "owner/m",
       "pinDigests": false,
       "prettyDepType": "dependency",
-      "purl": "pkg:github/owner/m?ref=tags",
+      "purl": "pkg:github/owner/m",
       "sourceUrl": "https://github.com/owner/m",
     },
     Object {
@@ -233,7 +259,7 @@ Object {
       "githubRepo": "owner/n",
       "pinDigests": false,
       "prettyDepType": "dependency",
-      "purl": "pkg:github/owner/n?ref=tags",
+      "purl": "pkg:github/owner/n",
       "sourceUrl": "https://github.com/owner/n",
     },
   ],
