@@ -9,7 +9,6 @@ Object {
           "datasource": "npm",
           "depName": "aaa",
           "depType": "devDependencies",
-          "purl": "pkg:npm/aaa",
           "updates": Array [
             "a",
             "b",

@@ -201,7 +201,7 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
     expect(res.deprecationMessage).toMatchSnapshot();
   });
-  it('should handle purl', async () => {
+  it('should handle foobar', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, npmResponse);
