@@ -987,7 +987,7 @@ describe('workers/repository/process/lookup', () => {
       config.lockedVersion = '0.9.4';
       config.currentValue = '~=0.9';
       config.depName = 'q';
-      // TODO: we are using npm as source, since purl for pypi is not implimented
+      // TODO: we are using npm as source to test pep440
       config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
