@@ -6,21 +6,18 @@ Array [
     "currentValue": "v1.3.2.5",
     "depName": "namespace/docker-compose",
     "lineNumber": 4,
-    "purl": undefined,
     "skipReason": "invalid-version",
   },
   Object {
     "currentValue": "v1.3.2",
     "depName": "https://github.com/buildkite/plugin-docker-compose",
     "lineNumber": 15,
-    "purl": undefined,
     "skipReason": "git-plugin",
   },
   Object {
     "currentValue": "v1.3.2",
     "depName": "github.com/buildkite/plugin-docker-compose",
     "lineNumber": 22,
-    "purl": undefined,
     "skipReason": "unknown",
   },
 ]
@@ -30,16 +27,18 @@ exports[`lib/manager/buildkite/extract extractPackageFile() extracts arrays of p
 Array [
   Object {
     "currentValue": "v2.0.1",
+    "datasource": "github",
     "depName": "docker-login",
     "lineNumber": 2,
-    "purl": "pkg:github/buildkite-plugins/docker-login-buildkite-plugin",
+    "lookupName": "buildkite-plugins/docker-login-buildkite-plugin",
     "skipReason": undefined,
   },
   Object {
     "currentValue": "v2.0.1",
+    "datasource": "github",
     "depName": "docker-login",
     "lineNumber": 10,
-    "purl": "pkg:github/buildkite-plugins/docker-login-buildkite-plugin",
+    "lookupName": "buildkite-plugins/docker-login-buildkite-plugin",
     "skipReason": undefined,
   },
 ]
@@ -49,16 +48,18 @@ exports[`lib/manager/buildkite/extract extractPackageFile() extracts multiple pl
 Array [
   Object {
     "currentValue": "v1.3.2",
+    "datasource": "github",
     "depName": "docker-compose",
     "lineNumber": 4,
-    "purl": "pkg:github/buildkite-plugins/docker-compose-buildkite-plugin",
+    "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
     "skipReason": undefined,
   },
   Object {
     "currentValue": "v1.3.2",
+    "datasource": "github",
     "depName": "docker-compose",
     "lineNumber": 15,
-    "purl": "pkg:github/buildkite-plugins/docker-compose-buildkite-plugin",
+    "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
     "skipReason": undefined,
   },
 ]
@@ -68,9 +69,10 @@ exports[`lib/manager/buildkite/extract extractPackageFile() extracts simple sing
 Array [
   Object {
     "currentValue": "v2.0.0",
+    "datasource": "github",
     "depName": "abc/detect-clowns",
     "lineNumber": 2,
-    "purl": "pkg:github/abc/detect-clowns-buildkite-plugin",
+    "lookupName": "abc/detect-clowns-buildkite-plugin",
     "skipReason": undefined,
   },
 ]
