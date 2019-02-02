@@ -27,7 +27,10 @@ describe('datasource/pypi', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:pypi/something' })
+        await datasource.getPkgReleases({
+          datasource: 'pypi',
+          lookupName: 'something',
+        })
       ).toBeNull();
     });
     it('returns null for 404', async () => {
@@ -35,7 +38,10 @@ describe('datasource/pypi', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:pypi/something' })
+        await datasource.getPkgReleases({
+          datasource: 'pypi',
+          lookupName: 'something',
+        })
       ).toBeNull();
     });
     it('processes real data', async () => {
@@ -43,7 +49,10 @@ describe('datasource/pypi', () => {
         body: JSON.parse(res1),
       });
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:pypi/azure-cli-monitor' })
+        await datasource.getPkgReleases({
+          datasource: 'pypi',
+          lookupName: 'azure-cli-monitor',
+        })
       ).toMatchSnapshot();
     });
     it('supports custom datasource url', async () => {
@@ -55,7 +64,8 @@ describe('datasource/pypi', () => {
       };
       await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:pypi/azure-cli-monitor',
+        datasource: 'pypi',
+        lookupName: 'azure-cli-monitor',
       });
       expect(got.mock.calls).toMatchSnapshot();
     });
@@ -65,7 +75,10 @@ describe('datasource/pypi', () => {
       });
       const pipIndexUrl = process.env.PIP_INDEX_URL;
       process.env.PIP_INDEX_URL = 'https://my.pypi.python/pypi/';
-      await datasource.getPkgReleases({ purl: 'pkg:pypi/azure-cli-monitor' });
+      await datasource.getPkgReleases({
+        datasource: 'pypi',
+        lookupName: 'azure-cli-monitor',
+      });
       expect(got.mock.calls).toMatchSnapshot();
       process.env.PIP_INDEX_URL = pipIndexUrl;
     });
@@ -84,7 +97,8 @@ describe('datasource/pypi', () => {
       };
       await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:pypi/azure-cli-monitor',
+        datasource: 'pypi',
+        lookupName: 'azure-cli-monitor',
       });
       expect(got.mock.calls).toMatchSnapshot();
     });
@@ -98,7 +112,10 @@ describe('datasource/pypi', () => {
         },
       });
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:pypi/something' })
+        await datasource.getPkgReleases({
+          datasource: 'pypi',
+          lookupName: 'something',
+        })
       ).toMatchSnapshot();
     });
     it('returns null if mismatched name', async () => {
@@ -111,7 +128,10 @@ describe('datasource/pypi', () => {
         },
       });
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:pypi/something' })
+        await datasource.getPkgReleases({
+          datasource: 'pypi',
+          lookupName: 'something',
+        })
       ).toBeNull();
     });
 
@@ -135,7 +155,8 @@ describe('datasource/pypi', () => {
       expect(
         await datasource.getPkgReleases({
           compatibility: { python: '2.7' },
-          purl: 'pkg:pypi/doit',
+          datasource: 'pypi',
+          lookupName: 'doit',
         })
       ).toMatchSnapshot();
     });

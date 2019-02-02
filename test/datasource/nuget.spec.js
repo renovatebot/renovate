@@ -15,7 +15,10 @@ describe('datasource/nuget', () => {
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:nuget/something' })
+        await datasource.getPkgReleases({
+          datasource: 'nuget',
+          lookupName: 'something',
+        })
       ).toBeNull();
     });
     it('returns null for 404', async () => {
@@ -25,7 +28,10 @@ describe('datasource/nuget', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:nuget/something' })
+        await datasource.getPkgReleases({
+          datasource: 'nuget',
+          lookupName: 'something',
+        })
       ).toBeNull();
     });
     it('returns null for unknown error', async () => {
@@ -33,7 +39,10 @@ describe('datasource/nuget', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases({ purl: 'pkg:nuget/something' })
+        await datasource.getPkgReleases({
+          datasource: 'nuget',
+          lookupName: 'something',
+        })
       ).toBeNull();
     });
     it('processes real data', async () => {
@@ -43,7 +52,10 @@ describe('datasource/nuget', () => {
       got.mockReturnValueOnce({
         body: res2,
       });
-      const res = await datasource.getPkgReleases({ purl: 'pkg:nuget/nunit' });
+      const res = await datasource.getPkgReleases({
+        datasource: 'nuget',
+        lookupName: 'nunit',
+      });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();

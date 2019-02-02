@@ -6,6 +6,7 @@ Object {
     Object {
       "deps": Array [
         Object {
+          "datasource": "npm",
           "depName": "aaa",
           "depType": "devDependencies",
           "purl": "pkg:npm/aaa",

@@ -63,6 +63,7 @@ describe('workers/repository/process/fetch', () => {
             packageJsonType: 'app',
             deps: [
               {
+                datasource: 'npm',
                 depName: 'aaa',
                 depType: 'devDependencies',
                 purl: 'pkg:npm/aaa',
