@@ -5,11 +5,11 @@ Array [
   Object {
     "checksumLineNumber": 6,
     "currentValue": "4.10.3",
+    "datasource": "gradleVersion",
     "depName": "gradle",
     "depType": "gradle-wrapper",
     "gradleWrapperType": "all",
     "lineNumber": 5,
-    "purl": "pkg:gradleVersion",
     "versionScheme": "semver",
   },
 ]
@@ -19,11 +19,11 @@ exports[`lib/manager/gradle-wrapper/extract extractPackageFile() extracts bin ve
 Array [
   Object {
     "currentValue": "4.8.0",
+    "datasource": "gradleVersion",
     "depName": "gradle",
     "depType": "gradle-wrapper",
     "gradleWrapperType": "bin",
     "lineNumber": 4,
-    "purl": "pkg:gradleVersion",
     "versionScheme": "semver",
   },
 ]
