@@ -24,6 +24,12 @@ Array [
   Array [
     Object {
       "datasource": "github",
+      "lookupName": "x/text",
+    },
+  ],
+  Array [
+    Object {
+      "datasource": "github",
       "lookupName": "go-x/x",
     },
   ],
