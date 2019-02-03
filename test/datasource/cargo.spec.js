@@ -11,6 +11,9 @@ jest.mock('got');
 
 describe('datasource/cargo', () => {
   describe('getPkgReleases', () => {
+    beforeEach(() => {
+      global.repoCache = {};
+    });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
       expect(
