@@ -398,6 +398,8 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
 
+## maven
+
 ## meteor
 
 Set enabled to `true` to enable meteor package updating.
