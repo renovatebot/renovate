@@ -1,9 +1,9 @@
 const fs = require('fs');
-const got = require('../../lib/util/got');
+const got = require('../../lib/util/got/datasource');
 const datasource = require('../../lib/datasource');
 const hostRules = require('../../lib/util/host-rules');
 
-jest.mock('../../lib/util/got');
+jest.mock('../../lib/util/got/datasource');
 jest.mock('../../lib/util/host-rules');
 
 const includesJson = fs.readFileSync('test/_fixtures/packagist/includes.json');

@@ -1,8 +1,8 @@
 const fs = require('fs');
-const got = require('../../lib/util/got');
+const got = require('../../lib/util/got/datasource');
 const { getPkgReleases } = require('../../lib/datasource/ruby-version');
 
-jest.mock('../../lib/util/got');
+jest.mock('../../lib/util/got/datasource');
 
 const rubyReleasesHtml = fs.readFileSync(
   'test/_fixtures/ruby-version/releases.html',
