@@ -1,8 +1,8 @@
 const fs = require('fs');
-const got = require('../../lib/util/got/datasource');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 
-jest.mock('../../lib/util/got/datasource');
+jest.mock('../../lib/util/got');
 
 const consulData = fs.readFileSync(
   'test/_fixtures/terraform/registry-consul.json'

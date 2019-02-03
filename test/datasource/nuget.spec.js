@@ -1,8 +1,8 @@
 const fs = require('fs');
-const got = require('../../lib/util/got/datasource');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 
-jest.mock('../../lib/util/got/datasource');
+jest.mock('../../lib/util/got');
 
 const res1 = fs.readFileSync('test/_fixtures/nuget/nunit.json', 'utf8');
 const res2 = fs.readFileSync('test/_fixtures/nuget/sample.nuspec', 'utf8');

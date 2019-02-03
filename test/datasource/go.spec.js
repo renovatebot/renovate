@@ -1,9 +1,9 @@
-const got = require('../../lib/util/got/datasource');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 const github = require('../../lib/datasource/github');
 const go = require('../../lib/datasource/go');
 
-jest.mock('../../lib/util/got/datasource');
+jest.mock('../../lib/util/got');
 jest.mock('../../lib/datasource/github');
 
 const res1 = `<!DOCTYPE html>

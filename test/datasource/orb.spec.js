@@ -1,7 +1,7 @@
-const got = require('../../lib/util/got/datasource');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 
-jest.mock('../../lib/util/got/datasource');
+jest.mock('../../lib/util/got');
 
 const orbData = {
   data: {

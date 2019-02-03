@@ -3,7 +3,7 @@ const github = require('../../lib/datasource/github');
 const ghGot = require('../../lib/platform/github/gh-got-wrapper');
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
-jest.mock('../../lib/util/got/datasource');
+jest.mock('../../lib/util/got');
 
 describe('datasource/github', () => {
   beforeEach(() => global.renovateCache.rmAll());

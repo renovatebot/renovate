@@ -1,9 +1,9 @@
-const got = require('../../../lib/util/got/datasource');
+const got = require('../../../lib/util/got');
 const railsInfo = require('../../_fixtures/rubygems/rails/info.json');
 const railsVersions = require('../../_fixtures/rubygems/rails/versions.json');
 const rubygems = require('../../../lib/datasource/rubygems/index.js');
 
-jest.mock('../../../lib/util/got/datasource');
+jest.mock('../../../lib/util/got');
 
 describe('datasource/rubygems', () => {
   describe('getPkgReleases', () => {
