@@ -37,6 +37,7 @@ describe('manager/gradle', () => {
     it('should return gradle dependencies', async () => {
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
+        'subproject/build.gradle',
       ]);
       expect(dependencies).toMatchSnapshot();
     });
@@ -104,7 +105,7 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
-        'gradle --init-script init.gradle renovate'
+        'gradle --init-script renovate-plugin.gradle renovate'
       );
       expect(exec.mock.calls[0][1]).toMatchObject({
         cwd: 'localDir',
@@ -149,7 +150,7 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(toUnix(fs.writeFile.mock.calls[0][0])).toBe(
-        'localDir/init.gradle'
+        'localDir/renovate-plugin.gradle'
       );
     });
 
@@ -161,7 +162,7 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
-        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script init.gradle renovate'
+        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script renovate-plugin.gradle renovate'
       );
     });
   });

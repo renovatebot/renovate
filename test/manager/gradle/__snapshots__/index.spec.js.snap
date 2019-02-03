@@ -3,25 +3,58 @@
 exports[`manager/gradle extractPackageFile should return gradle dependencies 1`] = `
 Array [
   Object {
-    "currentValue": null,
-    "depGroup": "org.springframework.boot",
-    "depName": "org.springframework.boot:spring-boot-starter-jersey",
-    "name": "spring-boot-starter-jersey",
-    "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-jersey?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-jersey?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "purl": "pkg:maven/org.spockframework/spock-core?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "purl": "pkg:maven/cglib/cglib-nodep?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+      },
+    ],
+    "manager": "gradle",
+    "packageFile": "build.gradle",
   },
   Object {
-    "currentValue": "1.0-groovy-2.4",
-    "depGroup": "org.spockframework",
-    "depName": "org.spockframework:spock-core",
-    "name": "spock-core",
-    "purl": "pkg:maven/org.spockframework/spock-core?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
-  },
-  Object {
-    "currentValue": "3.1",
-    "depGroup": "cglib",
-    "depName": "cglib:cglib-nodep",
-    "name": "cglib-nodep",
-    "purl": "pkg:maven/cglib/cglib-nodep?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-jersey?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "purl": "pkg:maven/org.spockframework/spock-core?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "purl": "pkg:maven/cglib/cglib-nodep?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+      },
+    ],
+    "manager": "gradle",
+    "packageFile": "subproject/build.gradle",
   },
 ]
 `;
@@ -29,25 +62,31 @@ Array [
 exports[`manager/gradle extractPackageFile should use repositories only for current project 1`] = `
 Array [
   Object {
-    "currentValue": null,
-    "depGroup": "org.springframework.boot",
-    "depName": "org.springframework.boot:spring-boot-starter-jersey",
-    "name": "spring-boot-starter-jersey",
-    "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-jersey?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
-  },
-  Object {
-    "currentValue": "3.1",
-    "depGroup": "cglib",
-    "depName": "cglib:cglib-nodep",
-    "name": "cglib-nodep",
-    "purl": "pkg:maven/cglib/cglib-nodep?repository_url=https://repo.maven.apache.org/maven2/",
-  },
-  Object {
-    "currentValue": "1.0-groovy-2.4",
-    "depGroup": "org.spockframework",
-    "depName": "org.spockframework:spock-core",
-    "name": "spock-core",
-    "purl": "pkg:maven/org.spockframework/spock-core?repository_url=https://jitpack.io",
+    "deps": Array [
+      Object {
+        "currentValue": null,
+        "depGroup": "org.springframework.boot",
+        "depName": "org.springframework.boot:spring-boot-starter-jersey",
+        "name": "spring-boot-starter-jersey",
+        "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-jersey?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+      },
+      Object {
+        "currentValue": "3.1",
+        "depGroup": "cglib",
+        "depName": "cglib:cglib-nodep",
+        "name": "cglib-nodep",
+        "purl": "pkg:maven/cglib/cglib-nodep?repository_url=https://repo.maven.apache.org/maven2/",
+      },
+      Object {
+        "currentValue": "1.0-groovy-2.4",
+        "depGroup": "org.spockframework",
+        "depName": "org.spockframework:spock-core",
+        "name": "spock-core",
+        "purl": "pkg:maven/org.spockframework/spock-core?repository_url=https://jitpack.io",
+      },
+    ],
+    "manager": "gradle",
+    "packageFile": "build.gradle",
   },
 ]
 `;
