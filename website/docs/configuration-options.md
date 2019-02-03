@@ -522,7 +522,7 @@ Use this field if you want to have one or more package name patterns excluded in
 ```
   "packageRules": [{
     "packagePatterns": ["^eslint"],
-    "excludePackageNames": ["^eslint-foo"]
+    "excludePackagePatterns": ["^eslint-foo"]
   }]
 ```
 
@@ -575,7 +575,7 @@ Use this field if you want to have one or more package names patterns in your pa
 
 ```
   "packageRules": [{
-    "packageNames": ["^angular"],
+    "packagePatterns": ["^angular"],
     "rangeStrategy": "replace"
   }]
 ```
