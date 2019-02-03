@@ -62,7 +62,7 @@ describe('datasource/orb', () => {
       ).toBeNull();
     });
     it('processes real data', async () => {
-      got.post.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
@@ -73,7 +73,7 @@ describe('datasource/orb', () => {
     });
     it('processes homeUrl', async () => {
       orbData.data.orb.homeUrl = 'https://google.com';
-      got.post.mockReturnValueOnce({
+      got.mockReturnValueOnce({
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
