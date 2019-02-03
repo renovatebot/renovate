@@ -3,7 +3,7 @@ const gitlab = require('../../lib/datasource/gitlab');
 const glGot = require('../../lib/platform/gitlab/gl-got-wrapper');
 
 jest.mock('../../lib/platform/gitlab/gl-got-wrapper');
-jest.mock('got');
+jest.mock('../../lib/util/got');
 
 describe('datasource/gitlab', () => {
   beforeEach(() => {

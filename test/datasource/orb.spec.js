@@ -1,7 +1,7 @@
-const got = require('got');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 
-jest.mock('got');
+jest.mock('../../lib/util/got');
 
 const orbData = {
   data: {
@@ -62,7 +62,7 @@ describe('datasource/orb', () => {
       ).toBeNull();
     });
     it('processes real data', async () => {
-      got.mockReturnValueOnce({
+      got.post.mockReturnValueOnce({
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
@@ -73,7 +73,7 @@ describe('datasource/orb', () => {
     });
     it('processes homeUrl', async () => {
       orbData.data.orb.homeUrl = 'https://google.com';
-      got.mockReturnValueOnce({
+      got.post.mockReturnValueOnce({
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
