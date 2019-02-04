@@ -19,7 +19,8 @@ describe('datasource/terraform', () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
         await datasource.getPkgReleases({
-          purl: 'pkg:terraform/hashicorp/consul/aws',
+          datasource: 'terraform',
+          lookupName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
     });
@@ -31,7 +32,8 @@ describe('datasource/terraform', () => {
       );
       expect(
         await datasource.getPkgReleases({
-          purl: 'pkg:terraform/hashicorp/consul/aws',
+          datasource: 'terraform',
+          lookupName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
     });
@@ -41,7 +43,8 @@ describe('datasource/terraform', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          purl: 'pkg:terraform/hashicorp/consul/aws',
+          datasource: 'terraform',
+          lookupName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
     });
@@ -50,7 +53,8 @@ describe('datasource/terraform', () => {
         body: JSON.parse(consulData),
       });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:terraform/hashicorp/consul/aws',
+        datasource: 'terraform',
+        lookupName: 'hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -60,7 +64,8 @@ describe('datasource/terraform', () => {
         body: JSON.parse(consulData),
       });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:terraform/registry.terraform.io/hashicorp/consul/aws',
+        datasource: 'terraform',
+        lookupName: 'registry.terraform.io/hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -70,7 +75,8 @@ describe('datasource/terraform', () => {
         body: JSON.parse(consulData),
       });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:terraform/consul/foo',
+        datasource: 'terraform',
+        lookupName: 'consul/foo',
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();

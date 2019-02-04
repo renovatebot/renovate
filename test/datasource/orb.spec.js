@@ -35,7 +35,8 @@ describe('datasource/orb', () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
         await datasource.getPkgReleases({
-          purl: 'pkg:orb/hyper-expanse/library-release-workflows',
+          datasource: 'orb',
+          lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
     });
@@ -47,7 +48,8 @@ describe('datasource/orb', () => {
       );
       expect(
         await datasource.getPkgReleases({
-          purl: 'pkg:orb/hyper-expanse/library-release-workflows',
+          datasource: 'orb',
+          lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
     });
@@ -57,7 +59,8 @@ describe('datasource/orb', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          purl: 'pkg:orb/hyper-expanse/library-release-workflows',
+          datasource: 'orb',
+          lookupName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
     });
@@ -66,7 +69,8 @@ describe('datasource/orb', () => {
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:orb/hyper-expanse/library-release-workflows',
+        datasource: 'orb',
+        lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -77,7 +81,8 @@ describe('datasource/orb', () => {
         body: orbData,
       });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:orb/hyper-expanse/library-release-workflows',
+        datasource: 'orb',
+        lookupName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
       expect(res.homepage).toEqual('https://google.com');

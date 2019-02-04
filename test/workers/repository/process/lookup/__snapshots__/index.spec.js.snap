@@ -201,7 +201,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles packagist 1`
 
 exports[`workers/repository/process/lookup .lookupUpdates() handles pypi 404 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles unknown purl 1`] = `Array []`;
+exports[`workers/repository/process/lookup .lookupUpdates() handles unknown datasource 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup .lookupUpdates() ignores deprecated 1`] = `
 Object {
