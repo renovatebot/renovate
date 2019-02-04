@@ -1,8 +1,8 @@
 const fs = require('fs');
-const got = require('got');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 
-jest.mock('got');
+jest.mock('../../lib/util/got');
 
 const res1 = fs.readFileSync('test/_fixtures/pypi/azure-cli-monitor.json');
 

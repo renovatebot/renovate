@@ -1,9 +1,9 @@
-const got = require('got');
+const got = require('../../lib/util/got');
 const docker = require('../../lib/datasource/docker');
 const { getPkgReleases } = require('../../lib/datasource');
 const hostRules = require('../../lib/util/host-rules');
 
-jest.mock('got');
+jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
 describe('api/docker', () => {

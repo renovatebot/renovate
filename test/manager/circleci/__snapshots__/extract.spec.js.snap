@@ -60,7 +60,7 @@ Array [
     "lineNumber": 3,
     "lookupName": "hutson/library-release-workflows",
     "rangeStrategy": "pin",
-    "versionScheme": "semver",
+    "versionScheme": "npm",
   },
   Object {
     "commitMessageTopic": "{{{depName}}} orb",
@@ -71,7 +71,7 @@ Array [
     "lineNumber": 4,
     "lookupName": "abc/def",
     "rangeStrategy": "pin",
-    "versionScheme": "semver",
+    "versionScheme": "npm",
   },
   Object {
     "commitMessageTopic": "{{{depName}}} orb",
@@ -82,7 +82,7 @@ Array [
     "lineNumber": 5,
     "lookupName": "zzz/zzz",
     "rangeStrategy": "pin",
-    "versionScheme": "semver",
+    "versionScheme": "npm",
   },
   Object {
     "currentDepTag": "python:3.7",
