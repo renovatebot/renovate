@@ -5,6 +5,9 @@ const { toUnix } = require('upath');
 const fs = require('fs-extra');
 const fsReal = require('fs');
 const { exec } = require('child-process-promise');
+const { initLogger } = require('../../../lib/logger');
+
+initLogger();
 
 const manager = require('../../../lib/manager/gradle/index');
 
@@ -34,6 +37,7 @@ describe('manager/gradle', () => {
     it('should return gradle dependencies', async () => {
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
+        'subproject/build.gradle',
       ]);
       expect(dependencies).toMatchSnapshot();
     });
@@ -72,11 +76,36 @@ describe('manager/gradle', () => {
       expect(dependencies).toEqual([]);
     });
 
+    it('should return empty if renovate report is invalid', async () => {
+      const renovateReport = `
+        Invalid JSON]
+      `;
+      fs.readFile.mockReturnValue(renovateReport);
+
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'build.gradle',
+      ]);
+      expect(dependencies).toEqual([]);
+    });
+
+    it('should use repositories only for current project', async () => {
+      const multiProjectUpdatesReport = fsReal.readFileSync(
+        'test/_fixtures/gradle/MultiProjectUpdatesReport.json',
+        'utf8'
+      );
+      fs.readFile.mockReturnValue(multiProjectUpdatesReport);
+
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'build.gradle',
+      ]);
+      expect(dependencies).toMatchSnapshot();
+    });
+
     it('should execute gradle with the proper parameters', async () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
-        'gradle --init-script init.gradle dependencyUpdates -Drevision=release'
+        'gradle --init-script renovate-plugin.gradle renovate'
       );
       expect(exec.mock.calls[0][1]).toMatchObject({
         cwd: 'localDir',
@@ -91,14 +120,6 @@ describe('manager/gradle', () => {
       ).toBeNull();
 
       expect(exec.mock.calls.length).toBe(0);
-    });
-
-    it('should return empty if not content', async () => {
-      platform.getFile.mockReturnValue(null);
-      const res = await manager.extractAllPackageFiles(config, [
-        'build.gradle',
-      ]);
-      expect(res).toEqual([]);
     });
 
     it('should write files before extracting', async () => {
@@ -125,11 +146,11 @@ describe('manager/gradle', () => {
       expect(fs.outputFile.mock.calls.length).toBe(0);
     });
 
-    it('should configure the useLatestVersion plugin', async () => {
+    it('should configure the renovate report plugin', async () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(toUnix(fs.writeFile.mock.calls[0][0])).toBe(
-        'localDir/init.gradle'
+        'localDir/renovate-plugin.gradle'
       );
     });
 
@@ -141,38 +162,8 @@ describe('manager/gradle', () => {
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
-        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script init.gradle dependencyUpdates -Drevision=release'
+        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script renovate-plugin.gradle renovate'
       );
-    });
-  });
-
-  describe('getPackageUpdates', () => {
-    it('should return the new version if it is available', async () => {
-      const newVersion = {
-        ...config,
-        depName: 'cglib:cglib-nodep',
-        available: {
-          release: '3.2.8',
-        },
-      };
-      const outdatedDependencies = await manager.getPackageUpdates(newVersion);
-
-      expect(outdatedDependencies).toMatchObject([
-        {
-          depName: 'cglib:cglib-nodep',
-          newValue: '3.2.8',
-        },
-      ]);
-    });
-
-    it('should return empty if there is no new version', async () => {
-      const newVersion = {
-        ...config,
-        depName: 'cglib:cglib-nodep',
-      };
-      const outdatedDependencies = await manager.getPackageUpdates(newVersion);
-
-      expect(outdatedDependencies).toMatchObject([]);
     });
   });
 
@@ -184,8 +175,7 @@ describe('manager/gradle', () => {
       );
       // prettier-ignore
       const upgrade = {
-        depGroup: 'cglib', name: 'cglib-nodep', version: '3.1',
-        available: { release: '3.2.8', milestone: null, integration: null },
+        depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8'
       };
       const buildGradleContentUpdated = manager.updateDependency(
         buildGradleContent,
