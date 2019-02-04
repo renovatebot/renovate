@@ -5,84 +5,73 @@ Array [
   Object {
     "deps": Array [
       Object {
-        "currentValue": null,
-        "depGroup": "org.springframework.boot",
-        "depName": "org.springframework.boot:spring-boot-starter-jersey",
-        "name": "spring-boot-starter-jersey",
-        "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-jersey?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+        "currentValue": "0.1",
+        "depGroup": "com.fkorotkov",
+        "depName": "com.fkorotkov:gradle-libraries-plugin",
+        "name": "gradle-libraries-plugin",
+        "version": "0.1",
       },
       Object {
-        "currentValue": "1.0-groovy-2.4",
-        "depGroup": "org.spockframework",
-        "depName": "org.spockframework:spock-core",
-        "name": "spock-core",
-        "purl": "pkg:maven/org.spockframework/spock-core?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+        "currentValue": "0.2.3",
+        "depGroup": "gradle.plugin.se.patrikerdes",
+        "depName": "gradle.plugin.se.patrikerdes:gradle-use-latest-versions-plugin",
+        "name": "gradle-use-latest-versions-plugin",
+        "version": "0.2.3",
       },
       Object {
+        "currentValue": "1.3",
+        "depGroup": "org.hamcrest",
+        "depName": "org.hamcrest:hamcrest-core",
+        "name": "hamcrest-core",
+        "version": "1.3",
+      },
+      Object {
+        "available": Object {
+          "integration": null,
+          "milestone": null,
+          "release": "3.2.8",
+        },
         "currentValue": "3.1",
         "depGroup": "cglib",
         "depName": "cglib:cglib-nodep",
         "name": "cglib-nodep",
-        "purl": "pkg:maven/cglib/cglib-nodep?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
+        "version": "3.1",
       },
-    ],
-    "manager": "gradle",
-    "packageFile": "build.gradle",
-  },
-  Object {
-    "deps": Array [
       Object {
-        "currentValue": null,
+        "available": Object {
+          "integration": null,
+          "milestone": null,
+          "release": "6.1.10.RELEASE",
+        },
+        "currentValue": "6.0.9.RELEASE",
+        "depGroup": "org.grails",
+        "depName": "org.grails:gorm-hibernate5-spring-boot",
+        "name": "gorm-hibernate5-spring-boot",
+        "version": "6.0.9.RELEASE",
+      },
+      Object {
+        "available": Object {
+          "integration": null,
+          "milestone": null,
+          "release": "8.0.12",
+        },
+        "currentValue": "5.1.41",
+        "depGroup": "mysql",
+        "depName": "mysql:mysql-connector-java",
+        "name": "mysql-connector-java",
+        "version": "5.1.41",
+      },
+      Object {
+        "available": Object {
+          "integration": null,
+          "milestone": null,
+          "release": "2.0.5.RELEASE",
+        },
+        "currentValue": "1.5.2.RELEASE",
         "depGroup": "org.springframework.boot",
-        "depName": "org.springframework.boot:spring-boot-starter-jersey",
-        "name": "spring-boot-starter-jersey",
-        "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-jersey?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
-      },
-      Object {
-        "currentValue": "1.0-groovy-2.4",
-        "depGroup": "org.spockframework",
-        "depName": "org.spockframework:spock-core",
-        "name": "spock-core",
-        "purl": "pkg:maven/org.spockframework/spock-core?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
-      },
-      Object {
-        "currentValue": "3.1",
-        "depGroup": "cglib",
-        "depName": "cglib:cglib-nodep",
-        "name": "cglib-nodep",
-        "purl": "pkg:maven/cglib/cglib-nodep?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
-      },
-    ],
-    "manager": "gradle",
-    "packageFile": "subproject/build.gradle",
-  },
-]
-`;
-
-exports[`manager/gradle extractPackageFile should use repositories only for current project 1`] = `
-Array [
-  Object {
-    "deps": Array [
-      Object {
-        "currentValue": null,
-        "depGroup": "org.springframework.boot",
-        "depName": "org.springframework.boot:spring-boot-starter-jersey",
-        "name": "spring-boot-starter-jersey",
-        "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-jersey?repository_url=https://repo.maven.apache.org/maven2/,https://jitpack.io",
-      },
-      Object {
-        "currentValue": "3.1",
-        "depGroup": "cglib",
-        "depName": "cglib:cglib-nodep",
-        "name": "cglib-nodep",
-        "purl": "pkg:maven/cglib/cglib-nodep?repository_url=https://repo.maven.apache.org/maven2/",
-      },
-      Object {
-        "currentValue": "1.0-groovy-2.4",
-        "depGroup": "org.spockframework",
-        "depName": "org.spockframework:spock-core",
-        "name": "spock-core",
-        "purl": "pkg:maven/org.spockframework/spock-core?repository_url=https://jitpack.io",
+        "depName": "org.springframework.boot:spring-boot-starter-test",
+        "name": "spring-boot-starter-test",
+        "version": "1.5.2.RELEASE",
       },
     ],
     "manager": "gradle",
