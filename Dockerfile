@@ -98,6 +98,18 @@ RUN npm i -g yarn@${YARN_VERSION}
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
+
+# Install pip and pipenv
+RUN apt -y install python3-pip python3-dev
+RUN pip3 install pipenv
+
+# -- Adding Pipfiles
+ONBUILD COPY Pipfile Pipfile
+ONBUILD COPY Pipfile.lock Pipfile.lock
+
+# -- Install dependencies:
+ONBUILD RUN set -ex && pipenv install --deploy --system
+
 COPY lib lib
 COPY bin bin
 
