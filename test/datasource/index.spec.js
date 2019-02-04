@@ -52,4 +52,14 @@ describe('datasource/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
   });
+  it('trims sourceUrl', async () => {
+    npmDatasource.getPkgReleases.mockReturnValue({
+      sourceUrl: ' https://abc.com',
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: 'npm',
+      depName: 'abc',
+    });
+    expect(res.sourceUrl).toEqual('https://abc.com');
+  });
 });
