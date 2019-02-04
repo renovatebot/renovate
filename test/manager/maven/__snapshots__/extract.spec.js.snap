@@ -6,27 +6,39 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "42",
+      "datasource": "maven",
       "depName": "org.example/parent",
       "fileReplacePosition": 186,
-      "purl": "pkg:maven/org.example/parent?repository_url=https://repo.maven.apache.org/maven2",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
     },
     Object {
       "currentValue": "0.0.1",
+      "datasource": "maven",
       "depName": "org.example/foo",
       "fileReplacePosition": 757,
-      "purl": "pkg:maven/org.example/foo?repository_url=https://repo.maven.apache.org/maven2",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
     },
     Object {
       "currentValue": "1.0.0",
+      "datasource": "maven",
       "depName": "org.example/bar",
       "fileReplacePosition": 905,
-      "purl": "pkg:maven/org.example/bar?repository_url=https://repo.maven.apache.org/maven2",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
     },
     Object {
       "currentValue": "1.8.1",
+      "datasource": "maven",
       "depName": "org.apache.maven.scm/maven-scm-provider-gitexe",
       "fileReplacePosition": 1337,
-      "purl": "pkg:maven/org.apache.maven.scm/maven-scm-provider-gitexe?repository_url=https://repo.maven.apache.org/maven2",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
     },
     Object {
       "currentValue": "0.0.1",
@@ -45,9 +57,12 @@ Object {
     },
     Object {
       "currentValue": "1.2.3",
+      "datasource": "maven",
       "depName": "org.example/quuz",
       "fileReplacePosition": 2529,
-      "purl": "pkg:maven/org.example/quuz?repository_url=https://repo.maven.apache.org/maven2",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
     },
     Object {
       "currentValue": "it's not a version",
@@ -61,9 +76,12 @@ Object {
     },
     Object {
       "currentValue": "2.17",
+      "datasource": "maven",
       "depName": "org.apache.maven.plugins/maven-checkstyle-plugin",
       "fileReplacePosition": 3218,
-      "purl": "pkg:maven/org.apache.maven.plugins/maven-checkstyle-plugin?repository_url=https://repo.maven.apache.org/maven2",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
     },
   ],
   "homepage": "http://example.org/index.html",
