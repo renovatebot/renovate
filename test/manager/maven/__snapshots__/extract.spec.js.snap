@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/maven/extract extractDependencies extract dependencies from any XML position 1`] = `
+Object {
+  "datasource": "maven",
+  "deps": Array [
+    Object {
+      "currentValue": "42",
+      "datasource": "maven",
+      "depName": "org.example/parent",
+      "fileReplacePosition": 186,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.1",
+      "datasource": "maven",
+      "depName": "org.example/foo",
+      "fileReplacePosition": 757,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.0.0",
+      "datasource": "maven",
+      "depName": "org.example/bar",
+      "fileReplacePosition": 905,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.8.1",
+      "datasource": "maven",
+      "depName": "org.apache.maven.scm/maven-scm-provider-gitexe",
+      "fileReplacePosition": 1337,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "0.0.1",
+      "depName": "org.example/\${artifact-id-placeholder}",
+      "skipReason": "name-placeholder",
+    },
+    Object {
+      "currentValue": "0.0.1",
+      "depName": "\${group-id-placeholder}/baz",
+      "skipReason": "name-placeholder",
+    },
+    Object {
+      "currentValue": "\${resourceServerVersion}",
+      "depName": "org.example/quux",
+      "skipReason": "version-placeholder",
+    },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "maven",
+      "depName": "org.example/quuz",
+      "fileReplacePosition": 2529,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "it's not a version",
+      "depName": "org.example/quuuz",
+      "skipReason": "not-a-version",
+    },
+    Object {
+      "currentValue": "\${profile-placeholder}",
+      "depName": "org.example/profile-artifact",
+      "skipReason": "version-placeholder",
+    },
+    Object {
+      "currentValue": "2.17",
+      "datasource": "maven",
+      "depName": "org.apache.maven.plugins/maven-checkstyle-plugin",
+      "fileReplacePosition": 3218,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+  ],
+  "homepage": "http://example.org/index.html",
+  "sourceUrl": "http://example.org/src.git",
+}
+`;

@@ -44,6 +44,9 @@ Object {
   "kubernetes": Array [
     Object {},
   ],
+  "maven": Array [
+    Object {},
+  ],
   "meteor": Array [
     Object {},
   ],

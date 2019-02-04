@@ -5,33 +5,33 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "0.2.0",
+      "datasource": "npm",
       "depName": "xml2js",
-      "purl": "pkg:npm/xml2js",
     },
     Object {
       "currentValue": "0.6.0",
+      "datasource": "npm",
       "depName": "xml-crypto",
-      "purl": "pkg:npm/xml-crypto",
     },
     Object {
       "currentValue": "0.1.19",
+      "datasource": "npm",
       "depName": "xmldom",
-      "purl": "pkg:npm/xmldom",
     },
     Object {
       "currentValue": "2.7.10",
+      "datasource": "npm",
       "depName": "connect",
-      "purl": "pkg:npm/connect",
     },
     Object {
       "currentValue": "2.6.4",
+      "datasource": "npm",
       "depName": "xmlbuilder",
-      "purl": "pkg:npm/xmlbuilder",
     },
     Object {
       "currentValue": "0.2.0",
+      "datasource": "npm",
       "depName": "querystring",
-      "purl": "pkg:npm/querystring",
     },
   ],
 }

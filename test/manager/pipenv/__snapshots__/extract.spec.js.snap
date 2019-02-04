@@ -4,10 +4,10 @@ exports[`lib/manager/pipenv/extract extractPackageFile() extracts dependencies 1
 Array [
   Object {
     "currentValue": "==0.3.1",
+    "datasource": "pypi",
     "depName": "some-package",
     "depType": "packages",
     "pipenvNestedVersion": false,
-    "purl": "pkg:pypi/some-package",
     "registryUrls": Array [
       "https://pypi.org/simple",
       "http://example.com/private-pypi/",
@@ -15,10 +15,10 @@ Array [
   },
   Object {
     "currentValue": "==1.0.0",
+    "datasource": "pypi",
     "depName": "some-other-package",
     "depType": "packages",
     "pipenvNestedVersion": false,
-    "purl": "pkg:pypi/some-other-package",
     "registryUrls": Array [
       "https://pypi.org/simple",
       "http://example.com/private-pypi/",
@@ -26,10 +26,10 @@ Array [
   },
   Object {
     "currentValue": "==1.0.0",
+    "datasource": "pypi",
     "depName": "pytest-benchmark",
     "depType": "packages",
     "pipenvNestedVersion": true,
-    "purl": "pkg:pypi/pytest-benchmark",
     "registryUrls": Array [
       "https://pypi.org/simple",
       "http://example.com/private-pypi/",
@@ -37,10 +37,10 @@ Array [
   },
   Object {
     "currentValue": "==0.1.0",
+    "datasource": "pypi",
     "depName": "dev-package",
     "depType": "dev-packages",
     "pipenvNestedVersion": false,
-    "purl": "pkg:pypi/dev-package",
     "registryUrls": Array [
       "https://pypi.org/simple",
       "http://example.com/private-pypi/",
@@ -53,50 +53,50 @@ exports[`lib/manager/pipenv/extract extractPackageFile() extracts multiple depen
 Array [
   Object {
     "currentValue": "==1",
+    "datasource": "pypi",
     "depName": "Django",
     "depType": "packages",
     "pipenvNestedVersion": false,
-    "purl": "pkg:pypi/Django",
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],
   },
   Object {
     "currentValue": "==0.6.27",
+    "datasource": "pypi",
     "depName": "distribute",
     "depType": "packages",
     "pipenvNestedVersion": false,
-    "purl": "pkg:pypi/distribute",
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],
   },
   Object {
     "currentValue": "==0.2",
+    "datasource": "pypi",
     "depName": "dj-database-url",
     "depType": "packages",
     "pipenvNestedVersion": false,
-    "purl": "pkg:pypi/dj-database-url",
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],
   },
   Object {
     "currentValue": "==2.4.5",
+    "datasource": "pypi",
     "depName": "psycopg2",
     "depType": "packages",
     "pipenvNestedVersion": false,
-    "purl": "pkg:pypi/psycopg2",
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],
   },
   Object {
     "currentValue": "==0.1.2",
+    "datasource": "pypi",
     "depName": "wsgiref",
     "depType": "packages",
     "pipenvNestedVersion": false,
-    "purl": "pkg:pypi/wsgiref",
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],

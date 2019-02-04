@@ -36,9 +36,8 @@ go_repository(
         `,
         config
       );
-      expect(successStory.deps[0].purl).toBe(
-        'pkg:go/github.com/test/uuid-fork'
-      );
+      expect(successStory.deps[0].datasource).toBe('go');
+      expect(successStory.deps[0].lookupName).toBe('github.com/test/uuid-fork');
 
       const badStory = extractPackageFile(
         `
