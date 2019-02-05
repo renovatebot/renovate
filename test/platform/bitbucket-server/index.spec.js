@@ -108,6 +108,35 @@ describe('platform/bitbucket', () => {
     });
   });
 
+  describe('getPr()', () => {
+    // beforeEach(() => initRepo())
+    it('returns null for no prNo', async () => {
+      expect(await bitbucket.getPr()).toBe(null);
+    });
+    it('gets a PR', async () => {
+      api.get.mockReturnValueOnce({
+        body:
+          responses['/rest/api/1.0/projects/some/repos/repo/pullrequests/5'],
+      });
+      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+    });
+  });
+
+  describe('getPrFiles()', () => {
+    it('returns empty files', async () => {
+      expect(await bitbucket.getPrFiles(5)).toHaveLength(0);
+    });
+  });
+
+  describe('updatePr()', () => {
+    it('puts PR', async () => {
+      await initRepo();
+      api.get.mockReturnValueOnce({ body: { version: 1 } });
+      await bitbucket.updatePr(5, 'title', 'body');
+      expect(api.put.mock.calls).toMatchSnapshot();
+    });
+  });
+
   describe('mergePr()', () => {
     it('posts Merge', async () => {
       await initRepo();

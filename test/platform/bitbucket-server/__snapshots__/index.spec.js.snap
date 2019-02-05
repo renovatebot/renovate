@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/bitbucket getPr() gets a PR 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #5",
+  "number": 5,
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
 exports[`platform/bitbucket getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
 exports[`platform/bitbucket initRepo() works 1`] = `
@@ -14,6 +28,21 @@ exports[`platform/bitbucket mergePr() posts Merge 1`] = `
 Array [
   Array [
     "/rest/api/1.0/projects/some/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket updatePr() puts PR 1`] = `
+Array [
+  Array [
+    "/rest/api/1.0/projects/some/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "title": "title",
+        "version": 1,
+      },
+    },
   ],
 ]
 `;
