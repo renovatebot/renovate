@@ -1,9 +1,9 @@
-const got = require('got');
+const got = require('../../lib/util/got');
 const docker = require('../../lib/datasource/docker');
 const { getPkgReleases } = require('../../lib/datasource');
 const hostRules = require('../../lib/util/host-rules');
 
-jest.mock('got');
+jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
 describe('api/docker', () => {
@@ -20,7 +20,7 @@ describe('api/docker', () => {
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
       const res = await docker.getDigest(
-        { depName: 'some-dep' },
+        { lookupName: 'some-dep' },
         'some-new-value'
       );
       expect(res).toBe(null);
@@ -28,7 +28,7 @@ describe('api/docker', () => {
     it('returns null if errored', async () => {
       got.mockReturnValueOnce({ body: { token: 'some-token' } });
       const res = await docker.getDigest(
-        { depName: 'some-dep' },
+        { lookupName: 'some-dep' },
         'some-new-value'
       );
       expect(res).toBe(null);
@@ -45,7 +45,7 @@ describe('api/docker', () => {
         headers: { 'docker-content-digest': 'some-digest' },
       });
       const res = await docker.getDigest(
-        { depName: 'some-dep' },
+        { lookupName: 'some-dep' },
         'some-new-value'
       );
       expect(res).toBe('some-digest');
@@ -82,12 +82,48 @@ describe('api/docker', () => {
        }`,
       });
       const res = await docker.getDigest(
-        { depName: 'some-dep' },
+        { lookupName: 'some-dep' },
         'some-new-value'
       );
       expect(res).toBe(
         'sha256:b3d6068234f3a18ebeedd2dab81e67b6a192e81192a099df4112ecfc7c3be84f'
       );
+    });
+    it('supports basic authentication', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        },
+      });
+      got.mockReturnValueOnce({
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        headers: { 'docker-content-digest': 'some-digest' },
+      });
+      const res = await docker.getDigest(
+        { lookupName: 'some-dep' },
+        'some-tag'
+      );
+      expect(got.mock.calls[1][1].headers.Authorization).toBe(
+        'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+      );
+      expect(res).toBe('some-digest');
+    });
+    it('returns null for 403 with basic authentication', async () => {
+      got.mockReturnValueOnce({
+        headers: {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        },
+      });
+      got.mockReturnValueOnce({
+        statusCode: 403,
+      });
+      const res = await docker.getDigest(
+        { lookupName: 'some-dep' },
+        'some-tag'
+      );
+      expect(res).toBeNull();
     });
     it('continues without token, when no header is present', async () => {
       got.mockReturnValueOnce({
@@ -99,7 +135,7 @@ describe('api/docker', () => {
         headers: { 'docker-content-digest': 'some-digest' },
       });
       const res = await docker.getDigest(
-        { depName: 'some-dep' },
+        { lookupName: 'some-dep' },
         'some-new-value'
       );
       expect(res).toBe('some-digest');
@@ -116,7 +152,7 @@ describe('api/docker', () => {
         headers: { 'docker-content-digest': 'some-digest' },
       });
       const res = await docker.getDigest(
-        { depName: 'some-dep' },
+        { lookupName: 'some-dep' },
         '8.0.0-alpine'
       );
       expect(res).toBe('some-digest');
@@ -125,7 +161,7 @@ describe('api/docker', () => {
       got.mockRejectedValueOnce({ statusCode: 429 });
       let e;
       try {
-        await docker.getDigest({ depName: 'some-dep' }, 'latest');
+        await docker.getDigest({ lookupName: 'some-dep' }, 'latest');
       } catch (err) {
         e = err;
       }
@@ -135,7 +171,7 @@ describe('api/docker', () => {
       got.mockRejectedValueOnce({ statusCode: 503 });
       let e;
       try {
-        await docker.getDigest({ depName: 'some-dep' }, 'latest');
+        await docker.getDigest({ lookupName: 'some-dep' }, 'latest');
       } catch (err) {
         e = err;
       }
@@ -150,19 +186,40 @@ describe('api/docker', () => {
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
-      const res = await getPkgReleases('pkg:docker/node');
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        depName: 'node',
+      });
       expect(res).toBe(null);
     });
-    it('uses custom registry', async () => {
+    it('uses custom registry with registryUrls', async () => {
       const tags = ['1.0.0'];
       got.mockReturnValueOnce({
         headers: {},
       });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
       const config = {
+        datasource: 'docker',
+        depName: 'node',
         registryUrls: ['https://registry.company.com'],
       };
-      const res = await getPkgReleases('pkg:docker/node', config);
+      const res = await getPkgReleases(config);
+      expect(res.releases).toHaveLength(1);
+      expect(got.mock.calls).toMatchSnapshot();
+      expect(got.mock.calls[0][0].startsWith(config.registryUrls[0])).toBe(
+        true
+      );
+    });
+    it('uses custom registry in depName', async () => {
+      const tags = ['1.0.0'];
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        depName: 'registry.company.com/node',
+      });
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -176,7 +233,10 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await getPkgReleases('pkg:docker/node');
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        depName: 'node',
+      });
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -190,7 +250,10 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await getPkgReleases('pkg:docker/node?registry=docker.io');
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        depName: 'docker.io/node',
+      });
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -204,17 +267,17 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await getPkgReleases(
-        'pkg:docker/kubernetes-dashboard-amd64?registry=k8s.gcr.io'
-      );
+      const res = await getPkgReleases({
+        datasource: 'docker',
+        depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
+      });
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
     it('returns null on error', async () => {
       got.mockReturnValueOnce({});
       const res = await docker.getPkgReleases({
-        fullname: 'my/node',
-        qualifiers: {},
+        lookupName: 'my/node',
       });
       expect(res).toBe(null);
     });

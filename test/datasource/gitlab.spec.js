@@ -1,9 +1,8 @@
-const datasource = require('../../lib/datasource');
 const gitlab = require('../../lib/datasource/gitlab');
 const glGot = require('../../lib/platform/gitlab/gl-got-wrapper');
 
 jest.mock('../../lib/platform/gitlab/gl-got-wrapper');
-jest.mock('got');
+jest.mock('../../lib/util/got');
 
 describe('datasource/gitlab', () => {
   beforeEach(() => {
@@ -46,14 +45,6 @@ describe('datasource/gitlab', () => {
       }));
       const content = await gitlab.getPreset('some/repo');
       expect(content).toEqual({ foo: 'bar' });
-    });
-  });
-  describe('getPkgReleases', () => {
-    beforeAll(() => global.renovateCache.rmAll());
-    it('returns null for invalid ref', async () => {
-      expect(
-        await datasource.getPkgReleases('pkg:github/some/dep?ref=invalid')
-      ).toBeNull();
     });
   });
 });

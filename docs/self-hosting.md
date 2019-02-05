@@ -113,26 +113,13 @@ You can find instructions for Bitbucket AppPasswords [here](https://confluence.a
 
 Note: you should also configure a GitHub token even if your source host is GitLab or Bitbucket, because Renovate will need to perform many queries to github.com in order to retrieve Release Notes.
 
-You can find instructions for VSTS
-[vsts](https://www.visualstudio.com/en-us/docs/integrate/get-started/authentication/pats).
+You can find instructions for Azure DevOps
+[azureDevOps](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats).
 
 This token needs to be configured via file, environment variable, or CLI. See
-[docs/configuration.md](configuration.md) for details. The simplest way is
-to expose it as `GITHUB_TOKEN`, `GITLAB_TOKEN` or `VSTS_TOKEN`.
+[docs/configuration.md](configuration.md) for details. The simplest way is to expose it as `RENOVATE_TOKEN`.
 
-For Bitbucket, you can configure `BITBUCKET_USERNAME` and `BITBUCKET_PASSWORD`, or combine them together yourself into `BITBUCKET_TOKEN` using the node REPL:
-
-```
-const btoa = str => Buffer.from(str, 'binary').toString('base64');
-
-btoa(`${user}:${bbaAppPassword}`)
-```
-
-You must then expose either the token or username + password to your env, or provide them via the CLI. Example:
-
-```sh
-renovate --platform=bitbucket --username=rarkins --password=ABCDEFghijklmop123 rarkins/testrepo1
-```
+For Bitbucket, you can configure `RENOVATE_USERNAME` and `RENOVATE_PASSWORD`.
 
 ## Usage
 
@@ -171,15 +158,14 @@ Most people will run Renovate via cron, e.g. once per hour. Here is an example b
 
 export PATH="/home/user/.yarn/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 export RENOVATE_CONFIG_FILE="/home/user/renovate-config.js"
-export GITHUB_TOKEN="**github-token**" # Delete this if using GitHub Enterprise
-export GITLAB_TOKEN="**github-token**" # Delete this if using GitHub
-export GITHUB_COM_TOKEN="**github-token**" # Delete this if using GitLab or github.com
+export RENOVATE_TOKEN="**some-token**" # GitHub, GitLab, Azure DevOps or BitBucket
+export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 
 # Renovate
 renovate
 ```
 
-Note: the GitHub token in env is necessary in order to retrieve Release Notes that are hosted on github.com. Use `GITHUB_COM_TOKEN` if running against GitHub Enterprise or `GITHUB_TOKEN` if running against GitLab. i.e. remove one of the lines as applicable.
+Note: the GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com. You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 
@@ -188,3 +174,133 @@ You should save and test out this script manually first, and add it to cron once
 See
 [deployment docs](https://github.com/renovatebot/renovate/blob/master/docs/deployment.md)
 for details.
+
+## Kubernetes for Gitlab, using Git over SSH
+
+This section describes how to use git binary with ssh for Gitlab, to avoid API shortcomings.
+
+You need to first create a ssh key, then add the public part to Gitlab (see this [guide](https://docs.gitlab.com/ee/ssh/))
+
+Then, you need to create the secret to add the ssh key, and the following config to your container
+
+```
+host gitlab.com
+  HostName gitlab.com
+  StrictHostKeyChecking no
+  IdentityFile ~/.ssh/id_rsa
+  User git
+```
+
+To easily create the secret, you can do the following (see [docs](https://kubernetes.io/docs/concepts/configuration/secret/#use-case-pod-with-ssh-keys))
+
+```
+kubectl create secret generic ssh-key-secret --from-file=config=/path/to/config --from-file=id_rsa=/path/to/.ssh/id_rsa --from-file=id_rsa.pub=/path/to/.ssh/id_rsa.pub
+```
+
+It creates something like this
+
+```
+apiVersion: v1
+data:
+  config: aG9zdCBnaXRsYWIuY29tCiAgSG9zdE5hbWUgZ2l0bGFiLmNvbQogIFN0cmljdEhvc3RLZXlDaGVja2luZyBubwogIElkZW50aXR5RmlsZSB+Ly5zc2gvaWRfcnNhCiAgVXNlciBnaXQ=
+  id_rsa: <base64String>
+  id_rsa.pub: <base64String>
+kind: Secret
+metadata:
+  name: ssh-key-secret
+  namespace: <namespace>
+```
+
+Then you just need to add Git author, and mount volumes
+The final configuration should look like something like this :
+
+```
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: <namespace, for example renovate>
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: renovate-env
+  namespace: <namespace>
+type: Opaque
+stringData:
+  renovate-platform: 'gitlab'
+  renovate-endpoint: 'https://gitlab.com/api/v4'
+  renovate-token: <Gitlab Token>
+  github-token: <Github Token>
+  renovate-autodiscover: 'false'
+---
+apiVersion: v1
+data:
+  config: aG9zdCBnaXRsYWIuY29tCiAgSG9zdE5hbWUgZ2l0bGFiLmNvbQogIFN0cmljdEhvc3RLZXlDaGVja2luZyBubwogIElkZW50aXR5RmlsZSB+Ly5zc2gvaWRfcnNhCiAgVXNlciBnaXQ=
+  id_rsa: <base64String>
+  id_rsa.pub: <base64String>
+kind: Secret
+metadata:
+  name: ssh-key-secret
+  namespace: <namespace>
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: renovate
+  namespace: <namespace>
+spec:
+  schedule: '@hourly'
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+            - name: ssh-key-volume
+              secret:
+                secretName: ssh-key-secret
+          containers:
+            - name: renovate
+              # Update this to the latest available and then enable Renovate on the manifest
+              image: renovate/renovate:14.1.0
+              volumeMounts:
+                - name: ssh-key-volume
+                  readOnly: true
+                  mountPath: "/home/ubuntu/.ssh"
+              args:
+                - <repository>
+              # Environment Variables
+              env:
+                - name: RENOVATE_GIT_AUTHOR
+                  value: <Git Author, with format 'User <email@email.com>'>
+                - name: RENOVATE_GIT_FS
+                  value: ssh
+                - name: RENOVATE_PLATFORM
+                  valueFrom:
+                    secretKeyRef:
+                      key: renovate-platform
+                      name: renovate-env
+                - name: RENOVATE_ENDPOINT
+                  valueFrom:
+                    secretKeyRef:
+                      key: renovate-endpoint
+                      name: renovate-env
+                - name: RENOVATE_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: renovate-token
+                      name: renovate-env
+                - name: GITHUB_COM_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      key: github-token
+                      name: renovate-env
+                - name: RENOVATE_AUTODISCOVER
+                  valueFrom:
+                    secretKeyRef:
+                      key: renovate-autodiscover
+                      name: renovate-env
+          restartPolicy: Never
+```

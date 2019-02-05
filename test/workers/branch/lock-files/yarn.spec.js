@@ -22,6 +22,22 @@ describe('generateLockFile', () => {
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
+  it('performs lock file updates', async () => {
+    getInstalledPath.mockReturnValueOnce('node_modules/yarn');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'package-lock-contents');
+    const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
+      { depName: 'some-dep', isLockfileUpdate: true },
+    ]);
+    expect(res.lockFile).toEqual('package-lock-contents');
+  });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     exec.mockReturnValueOnce({

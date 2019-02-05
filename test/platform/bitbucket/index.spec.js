@@ -1,37 +1,44 @@
 const URL = require('url');
 const responses = require('../../_fixtures/bitbucket/responses');
 
-function streamToString(stream) {
-  // eslint-disable-next-line promise/avoid-new
-  return new Promise(resolve => {
-    const chunks = [];
-    stream.on('data', chunk => {
-      chunks.push(chunk.toString());
-    });
-    stream.on('end', () => {
-      resolve(chunks.join(''));
-    });
-    stream.resume();
-  });
-}
-
 describe('platform/bitbucket', () => {
   let bitbucket;
   let api;
   let hostRules;
+  let GitStorage;
   beforeEach(() => {
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
+    jest.mock('../../../lib/platform/git/storage');
     hostRules = require('../../../lib/util/host-rules');
     api = require('../../../lib/platform/bitbucket/bb-got-wrapper');
     bitbucket = require('../../../lib/platform/bitbucket');
+    GitStorage = require('../../../lib/platform/git/storage');
+    GitStorage.mockImplementation(() => ({
+      initRepo: jest.fn(),
+      cleanRepo: jest.fn(),
+      getFileList: jest.fn(),
+      branchExists: jest.fn(() => true),
+      isBranchStale: jest.fn(() => false),
+      setBaseBranch: jest.fn(),
+      getBranchLastCommitTime: jest.fn(),
+      getAllRenovateBranches: jest.fn(),
+      getCommitMessages: jest.fn(),
+      getFile: jest.fn(),
+      commitFilesToBranch: jest.fn(),
+      mergeBranch: jest.fn(),
+      deleteBranch: jest.fn(),
+      getRepoStatus: jest.fn(),
+    }));
 
     // clean up hostRules
     hostRules.clear();
     hostRules.update({
       platform: 'bitbucket',
       token: 'token',
+      username: 'username',
+      password: 'password',
     });
   });
 
@@ -105,55 +112,31 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getFileList()', () => {
-    const getFileList = wrap('getFileList');
-    it('works', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
-      expect(await getFileList('branch')).toEqual([
-        'foo_folder/foo_file',
-        'bar_file',
-      ]);
-    });
-    it('returns cached result', async () => {
-      await initRepo();
-      expect(await getFileList('branch')).toEqual([
-        'foo_folder/foo_file',
-        'bar_file',
-      ]);
+      await mocked(async () => {
+        await bitbucket.getFileList();
+      });
     });
   });
 
   describe('branchExists()', () => {
-    it('returns true if branch exist in repo', async () => {
-      api.get.mockImplementationOnce(() => ({ body: { name: 'branch1' } }));
-      const actual = await bitbucket.branchExists('branch1');
-      const expected = true;
-      expect(actual).toBe(expected);
-    });
-
-    it('returns false if branch does not exist in repo', async () => {
-      api.get.mockImplementationOnce(() => ({ body: { name: 'branch2' } }));
-      const actual = await bitbucket.branchExists('branch1');
-      const expected = false;
-      expect(actual).toBe(expected);
-    });
-
-    it('returns false if 404', async () => {
-      api.get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
-      const actual = await bitbucket.branchExists('branch1');
-      const expected = false;
-      expect(actual).toBe(expected);
+    describe('getFileList()', () => {
+      it('sends to gitFs', async () => {
+        await initRepo();
+        await mocked(async () => {
+          await bitbucket.branchExists();
+        });
+      });
     });
   });
 
   describe('isBranchStale()', () => {
-    const isBranchStale = wrap('isBranchStale');
-    it('returns false for same hash', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
-      expect(await isBranchStale('branch')).toBe(false);
+      await mocked(async () => {
+        await bitbucket.isBranchStale();
+      });
     });
   });
 
@@ -207,26 +190,38 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      expect(await bitbucket.getRepoStatus()).toEqual({});
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.getRepoStatus();
+      });
     });
   });
 
   describe('deleteBranch()', () => {
-    it('exists', () => {
-      expect(bitbucket.deleteBranch).toBeDefined();
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.deleteBranch();
+      });
     });
   });
 
   describe('mergeBranch()', () => {
-    it('throws', async () => {
-      await expect(bitbucket.mergeBranch()).rejects.toBeDefined();
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.mergeBranch();
+      });
     });
   });
 
   describe('getBranchLastCommitTime()', () => {
-    it('exists', () => {
-      expect(bitbucket.getBranchLastCommitTime).toBeDefined();
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.getBranchLastCommitTime();
+      });
     });
   });
 
@@ -378,67 +373,47 @@ describe('platform/bitbucket', () => {
   });
 
   describe('commitFilesToBranch()', () => {
-    it('posts files', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
-      const files = [
-        {
-          name: 'package.json',
-          contents: 'hello world',
-        },
-      ];
       await mocked(async () => {
-        await bitbucket.commitFilesToBranch('branch', files, 'message');
-        expect(api.post.mock.calls).toHaveLength(1);
-        const { body } = api.post.mock.calls[0][1];
-        const content = (await streamToString(body)).split(
-          '--' + body.getBoundary()
-        );
-        expect(content).toMatchSnapshot();
+        await bitbucket.commitFilesToBranch();
       });
     });
   });
 
   describe('getFile()', () => {
-    beforeEach(initRepo);
-    const getFile = wrap('getFile');
-    it('works', async () => {
-      expect(await getFile('bar_file', 'branch')).toBe('bar_file content');
-    });
-    it('returns null for file not found', async () => {
-      expect(await getFile('not_found', 'master')).toBe(null);
-    });
-    it('returns null for 404', async () => {
-      expect(await getFile('not_found', 'branch')).toBe(null);
-    });
-    it('throws for non 404', async () => {
-      await expect(getFile('error', 'branch')).rejects.toBeDefined();
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.getFile();
+      });
     });
   });
 
   describe('getCommitMessages()', () => {
-    const getCommitMessages = wrap('getCommitMessages');
-    it('works', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
-      expect(await getCommitMessages()).toMatchSnapshot();
+      await mocked(async () => {
+        await bitbucket.getCommitMessages();
+      });
     });
   });
 
   describe('getAllRenovateBranches()', () => {
-    const getAllRenovateBranches = wrap('getAllRenovateBranches');
-    it('retuns filtered branches', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
-      expect(await getAllRenovateBranches('renovate/')).toEqual([
-        'renovate/branch',
-        'renovate/upgrade',
-      ]);
+      await mocked(async () => {
+        await bitbucket.getAllRenovateBranches();
+      });
     });
   });
 
   describe('getBranchLastCommitTime()', () => {
-    const getBranchLastCommitTime = wrap('getBranchLastCommitTime');
-    it('returns last commit time', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
-      expect(await getBranchLastCommitTime('renovate/foo')).toBeDefined();
+      await mocked(async () => {
+        await bitbucket.getBranchLastCommitTime();
+      });
     });
   });
 

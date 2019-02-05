@@ -32,7 +32,7 @@ Array [
 
 | Package | Type | Update | Change | References |
 |---|---|---|---|---|
-| dummy | devDependencies | pin | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| dummy | devDependencies | pin | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 :pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` your config if you instead don't wish to pin dependencies.
 
@@ -78,7 +78,7 @@ Array [
 
 | Package | Type | Update | Change | References |
 |---|---|---|---|---|
-| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 ---
 
@@ -122,7 +122,7 @@ Array [
 
 | Package | Type | Update | Change | References |
 |---|---|---|---|---|
-| dummy | devDependencies | lockFileMaintenance | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| dummy | devDependencies | lockFileMaintenance | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 | a |  |  | \`aaaaaaa\` |  |
 | b |  | pin | \`some_new_value@bbbbbbb\` |  |
 | c |  |  |  |  |
@@ -183,7 +183,7 @@ Array [
 
 | Package | Type | Update | Change | References |
 |---|---|---|---|---|
-| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 ---
 
@@ -225,7 +225,7 @@ Object {
 
 | Package | Type | Update | Change | References |
 |---|---|---|---|---|
-| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 ---
 
@@ -267,7 +267,7 @@ Object {
 
 | Package | Type | Update | Change | References |
 |---|---|---|---|---|
-| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
 
 ---
 

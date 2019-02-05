@@ -2,24 +2,27 @@
 
 exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
 Object {
+  "compatibility": Object {
+    "bundler": "1.17.2",
+  },
   "deps": Array [
     Object {
       "currentValue": ">= 11.1",
+      "datasource": "rubygems",
       "depName": "rake",
       "lineNumber": 9,
-      "purl": "pkg:rubygems/rake",
     },
     Object {
       "currentValue": ">= 2.15",
+      "datasource": "rubygems",
       "depName": "capybara",
       "lineNumber": 11,
-      "purl": "pkg:rubygems/capybara",
     },
     Object {
       "currentValue": "~> 1.2",
+      "datasource": "rubygems",
       "depName": "rack-cache",
       "lineNumber": 13,
-      "purl": "pkg:rubygems/rack-cache",
     },
     Object {
       "depName": "sass-rails",
@@ -28,9 +31,9 @@ Object {
     },
     Object {
       "currentValue": "~> 5",
+      "datasource": "rubygems",
       "depName": "turbolinks",
       "lineNumber": 15,
-      "purl": "pkg:rubygems/turbolinks",
     },
     Object {
       "depName": "webpacker",
@@ -39,45 +42,45 @@ Object {
     },
     Object {
       "currentValue": "~> 3.1.11",
+      "datasource": "rubygems",
       "depName": "bcrypt",
       "lineNumber": 20,
-      "purl": "pkg:rubygems/bcrypt",
     },
     Object {
       "currentValue": ">= 1.3.0",
+      "datasource": "rubygems",
       "depName": "uglifier",
       "lineNumber": 24,
-      "purl": "pkg:rubygems/uglifier",
     },
     Object {
       "currentValue": ">= 2.0.0",
+      "datasource": "rubygems",
       "depName": "json",
       "lineNumber": 27,
-      "purl": "pkg:rubygems/json",
     },
     Object {
       "currentValue": ">= 0.47",
+      "datasource": "rubygems",
       "depName": "rubocop",
       "lineNumber": 29,
-      "purl": "pkg:rubygems/rubocop",
     },
     Object {
       "currentValue": "~> 1.0",
+      "datasource": "rubygems",
       "depName": "sdoc",
       "depTypes": Array [
         "doc",
       ],
       "lineNumber": 32,
-      "purl": "pkg:rubygems/sdoc",
     },
     Object {
       "currentValue": "~> 3.2.3",
+      "datasource": "rubygems",
       "depName": "redcarpet",
       "depTypes": Array [
         "doc",
       ],
       "lineNumber": 33,
-      "purl": "pkg:rubygems/redcarpet",
     },
     Object {
       "depName": "w3c_validators",
@@ -89,12 +92,12 @@ Object {
     },
     Object {
       "currentValue": "~> 1.2.0",
+      "datasource": "rubygems",
       "depName": "kindlerb",
       "depTypes": Array [
         "doc",
       ],
       "lineNumber": 35,
-      "purl": "pkg:rubygems/kindlerb",
     },
     Object {
       "depName": "dalli",
@@ -103,9 +106,9 @@ Object {
     },
     Object {
       "currentValue": ">= 3.0.5, < 3.2",
+      "datasource": "rubygems",
       "depName": "listen",
       "lineNumber": 40,
-      "purl": "pkg:rubygems/listen",
     },
     Object {
       "depName": "libxml-ruby",
@@ -119,9 +122,9 @@ Object {
     },
     Object {
       "currentValue": ">= 1.1.0",
+      "datasource": "rubygems",
       "depName": "bootsnap",
       "lineNumber": 45,
-      "purl": "pkg:rubygems/bootsnap",
     },
     Object {
       "depName": "resque",
@@ -229,12 +232,12 @@ Object {
     },
     Object {
       "currentValue": "~> 4.0",
+      "datasource": "rubygems",
       "depName": "redis",
       "depTypes": Array [
         "cable",
       ],
       "lineNumber": 67,
-      "purl": "pkg:rubygems/redis",
     },
     Object {
       "depName": "redis-namespace",
@@ -286,12 +289,12 @@ Object {
     },
     Object {
       "currentValue": "~> 1.11",
+      "datasource": "rubygems",
       "depName": "google-cloud-storage",
       "depTypes": Array [
         "storage",
       ],
       "lineNumber": 81,
-      "purl": "pkg:rubygems/google-cloud-storage",
     },
     Object {
       "depName": "azure-storage",
@@ -303,12 +306,12 @@ Object {
     },
     Object {
       "currentValue": "~> 1.2",
+      "datasource": "rubygems",
       "depName": "image_processing",
       "depTypes": Array [
         "storage",
       ],
       "lineNumber": 84,
-      "purl": "pkg:rubygems/image_processing",
     },
     Object {
       "depName": "aws-sdk-sns",
@@ -378,39 +381,39 @@ Object {
     },
     Object {
       "currentValue": ">= 1.8.1",
+      "datasource": "rubygems",
       "depName": "nokogiri",
       "lineNumber": 113,
-      "purl": "pkg:rubygems/nokogiri",
     },
     Object {
       "currentValue": ">=1.4.6",
+      "datasource": "rubygems",
       "depName": "racc",
       "lineNumber": 116,
-      "purl": "pkg:rubygems/racc",
     },
     Object {
       "currentValue": "~> 1.3.6",
+      "datasource": "rubygems",
       "depName": "sqlite3",
       "lineNumber": 119,
-      "purl": "pkg:rubygems/sqlite3",
     },
     Object {
       "currentValue": ">= 0.18.0",
+      "datasource": "rubygems",
       "depName": "pg",
       "depTypes": Array [
         "db",
       ],
       "lineNumber": 122,
-      "purl": "pkg:rubygems/pg",
     },
     Object {
       "currentValue": ">= 0.4.10",
+      "datasource": "rubygems",
       "depName": "mysql2",
       "depTypes": Array [
         "db",
       ],
       "lineNumber": 123,
-      "purl": "pkg:rubygems/mysql2",
     },
     Object {
       "depName": "activerecord-jdbcsqlite3-adapter",
@@ -435,39 +438,39 @@ Object {
     },
     Object {
       "currentValue": ">= 1.3.0",
+      "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
       "lineNumber": 135,
-      "purl": "pkg:rubygems/activerecord-jdbcsqlite3-adapter",
     },
     Object {
       "currentValue": ">= 1.3.0",
+      "datasource": "rubygems",
       "depName": "activerecord-jdbcmysql-adapter",
       "depTypes": Array [
         "db",
       ],
       "lineNumber": 137,
-      "purl": "pkg:rubygems/activerecord-jdbcmysql-adapter",
     },
     Object {
       "currentValue": ">= 1.3.0",
+      "datasource": "rubygems",
       "depName": "activerecord-jdbcpostgresql-adapter",
       "depTypes": Array [
         "db",
       ],
       "lineNumber": 138,
-      "purl": "pkg:rubygems/activerecord-jdbcpostgresql-adapter",
     },
     Object {
       "currentValue": "~> 3.0",
+      "datasource": "rubygems",
       "depName": "psych",
       "lineNumber": 146,
-      "purl": "pkg:rubygems/psych",
     },
     Object {
       "currentValue": "~> 2.2",
+      "datasource": "rubygems",
       "depName": "ruby-oci8",
       "lineNumber": 152,
-      "purl": "pkg:rubygems/ruby-oci8",
     },
     Object {
       "depName": "activerecord-oracle_enhanced-adapter",
@@ -486,9 +489,9 @@ Object {
     },
     Object {
       "currentValue": ">= 0.1.0",
+      "datasource": "rubygems",
       "depName": "wdm",
       "lineNumber": 160,
-      "purl": "pkg:rubygems/wdm",
     },
   ],
   "registryUrls": Array [
@@ -499,10 +502,13 @@ Object {
 
 exports[`lib/manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
 Object {
+  "compatibility": Object {
+    "ruby": "~> 1.5.3",
+  },
   "deps": Array [
     Object {
       "depName": "some_internal_gem",
-      "lineNumber": 3,
+      "lineNumber": 4,
       "registryUrls": Array [
         "https://gems.example.com",
       ],
@@ -510,7 +516,7 @@ Object {
     },
     Object {
       "depName": "another_internal_gem",
-      "lineNumber": 4,
+      "lineNumber": 5,
       "registryUrls": Array [
         "https://gems.example.com",
       ],
@@ -519,12 +525,12 @@ Object {
     Object {
       "currentValue": "latest",
       "depName": "ruby-debug",
-      "lineNumber": 8,
+      "lineNumber": 9,
       "skipReason": "invalid-value",
     },
     Object {
       "depName": "sqlite3",
-      "lineNumber": 9,
+      "lineNumber": 10,
       "skipReason": "no-version",
     },
     Object {
@@ -533,7 +539,7 @@ Object {
         "development",
         "optional => true",
       ],
-      "lineNumber": 13,
+      "lineNumber": 14,
       "skipReason": "no-version",
     },
     Object {
@@ -542,7 +548,7 @@ Object {
         "development",
         "optional => true",
       ],
-      "lineNumber": 14,
+      "lineNumber": 15,
       "skipReason": "no-version",
     },
   ],

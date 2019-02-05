@@ -59,7 +59,6 @@ describe('lib/manager/dockerfile/extract', () => {
         config
       ).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].dockerRegistry).toEqual('registry2.something.info');
     });
     it('handles custom hosts and suffix', () => {
       const res = extractPackageFile(
@@ -67,7 +66,6 @@ describe('lib/manager/dockerfile/extract', () => {
         config
       ).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].dockerRegistry).toEqual('registry2.something.info');
     });
     it('handles custom hosts with port', () => {
       const res = extractPackageFile(
@@ -75,12 +73,10 @@ describe('lib/manager/dockerfile/extract', () => {
         config
       ).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].dockerRegistry).toEqual('registry2.something.info:5005');
     });
     it('handles namespaced images', () => {
       const res = extractPackageFile('FROM mynamespace/node:8\n', config).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].dockerRegistry).toBeUndefined();
     });
     it('handles custom hosts with namespace', () => {
       const res = extractPackageFile(
@@ -88,8 +84,6 @@ describe('lib/manager/dockerfile/extract', () => {
         config
       ).deps;
       expect(res).toMatchSnapshot();
-      expect(res[0].dockerRegistry).toEqual('registry2.something.info');
-      expect(res[0].depName).toEqual('someaccount/node');
     });
     it('handles abnoral spacing', () => {
       const res = extractPackageFile(

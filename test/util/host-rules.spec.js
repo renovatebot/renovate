@@ -11,16 +11,16 @@ describe('util/host-rules', () => {
       );
     });
     it('throws if no endpoint ', () => {
-      expect(() => update({ platform: 'vsts' })).toThrow(
-        `Failed to configure platform 'vsts': no endpoint defined`
+      expect(() => update({ platform: 'azure' })).toThrow(
+        `Failed to configure platform 'azure': no endpoint defined`
       );
     });
 
     it('throws if invalid endpoint ', () => {
       expect(() =>
-        update({ platform: 'vsts', endpoint: '/some/path' })
+        update({ platform: 'azure', endpoint: '/some/path' })
       ).toThrow(
-        `Failed to configure platform 'vsts': no host for endpoint '/some/path'`
+        `Failed to configure platform 'azure': no host for endpoint '/some/path'`
       );
     });
     it('supports endpoint-only', () => {

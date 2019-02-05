@@ -1,9 +1,9 @@
 const fs = require('fs');
-const got = require('got');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 const hostRules = require('../../lib/util/host-rules');
 
-jest.mock('got');
+jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
 const includesJson = fs.readFileSync('test/_fixtures/packagist/includes.json');
@@ -20,6 +20,7 @@ describe('datasource/packagist', () => {
       hostRules.find = jest.fn(input => input);
       global.repoCache = {};
       config = {
+        datasource: 'packagist',
         versionScheme: 'composer',
         registryUrls: [
           {
@@ -32,6 +33,7 @@ describe('datasource/packagist', () => {
     });
     it('supports custom registries', async () => {
       config = {
+        datasource: 'packagist',
         registryUrls: [
           {
             type: 'composer',
@@ -57,10 +59,10 @@ describe('datasource/packagist', () => {
           },
         ],
       };
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/something/one',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'something/one',
+      });
       expect(res).toBeNull();
     });
     it('supports plain packages', async () => {
@@ -77,10 +79,10 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: packagesOnly,
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/vendor/package-name',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'vendor/package-name',
+      });
       expect(res).toMatchSnapshot();
     });
     it('handles auth rejections', async () => {
@@ -89,10 +91,10 @@ describe('datasource/packagist', () => {
           statusCode: 401,
         })
       );
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/vendor/package-name',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'vendor/package-name',
+      });
       expect(res).toBeNull();
     });
     it('handles not found registries', async () => {
@@ -102,10 +104,10 @@ describe('datasource/packagist', () => {
           url: 'https://some.registry/packages.json',
         })
       );
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/drewm/mailchip-api',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'drewm/mailchip-api',
+      });
       expect(res).toBeNull();
     });
     it('supports includes packages', async () => {
@@ -127,10 +129,10 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(includesJson),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/guzzlehttp/guzzle',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'guzzlehttp/guzzle',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
@@ -166,10 +168,10 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/wpackagist-plugin/1beyt',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'wpackagist-plugin/1beyt',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
@@ -205,10 +207,10 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:packagist/some/other',
-        config
-      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'some/other',
+      });
       expect(res).toBeNull();
     });
     it('processes real versioned data', async () => {
@@ -217,10 +219,10 @@ describe('datasource/packagist', () => {
       });
       delete config.registryUrls;
       expect(
-        await datasource.getPkgReleases(
-          'pkg:packagist/drewm/mailchimp-api',
-          config
-        )
+        await datasource.getPkgReleases({
+          ...config,
+          lookupName: 'drewm/mailchimp-api',
+        })
       ).toMatchSnapshot();
     });
   });
