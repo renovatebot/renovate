@@ -96,4 +96,9 @@ describe('platform/bitbucket', () => {
       expect(await initRepo()).toMatchSnapshot();
     });
   });
+  describe('getVulnerabilityAlerts()', () => {
+    it('returns empty array', async () => {
+      expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
+    });
+  });
 });
