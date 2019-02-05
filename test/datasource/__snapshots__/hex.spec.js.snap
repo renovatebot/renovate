@@ -62,6 +62,6 @@ Object {
       "version": "0.1.1",
     },
   ],
-  "sourceUrl": "https://hex.pm/packages/certifi",
+  "sourceUrl": "https://github.com/certifi/erlang-certifi",
 }
 `;
