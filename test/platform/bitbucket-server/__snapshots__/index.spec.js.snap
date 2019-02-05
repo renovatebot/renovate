@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/bitbucket getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`platform/bitbucket initRepo() works 1`] = `
+Object {
+  "isFork": false,
+  "privateRepo": undefined,
+  "repoFullName": "repo",
+}
+`;
+
+exports[`platform/bitbucket mergePr() posts Merge 1`] = `
+Array [
+  Array [
+    "/rest/api/1.0/projects/some/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;

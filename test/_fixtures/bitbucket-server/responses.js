@@ -134,23 +134,26 @@ module.exports = {
     ],
     start: 0,
   },
-  '/rest/api/1.0/projects/SOME/repos': {
+  '/rest/api/1.0/projects/some/repos': {
     size: 1,
     limit: 25,
     isLastPage: true,
     values: [generateRepo('SOME', 'repo')],
     start: 0,
   },
-  '/rest/api/1.0/projects/SOME/repos/repo': generateRepo('SOME', 'repo'),
-  '/rest/api/1.0/projects/SOME/repos/repo/issues': {
+  '/rest/api/1.0/projects/some/repos/repo': generateRepo('SOME', 'repo'),
+  '/rest/api/1.0/projects/some/repos/repo/branches/default': {
+    displayId: 'master',
+  },
+  '/rest/api/1.0/projects/some/repos/repo/issues': {
     // TODO - I'm not sure there is an issues link to provide
     values: [],
   },
-  '/rest/api/1.0/projects/SOME/repos/repo/pullrequests': {
+  '/rest/api/1.0/projects/some/repos/repo/pullrequests': {
     values: [generatePR()],
   },
-  '/rest/api/1.0/projects/SOME/repos/repo/pullrequests/5': generatePR(),
-  '/rest/api/1.0/projects/SOME/repos/repo/pullrequests/5/diff': {
+  '/rest/api/1.0/projects/some/repos/repo/pullrequests/5': generatePR(),
+  '/rest/api/1.0/projects/some/repos/repo/pullrequests/5/diff': {
     fromHash: 'afdcf5e55dfce85055a146783434b0e2a81722c1',
     toHash: '590e661bb8c189b5a4bee115b475c9f14bf112bd',
     contextLines: 10,
@@ -374,10 +377,10 @@ module.exports = {
     ],
     truncated: false,
   },
-  '/rest/api/1.0/projects/SOME/repos/repo/pullrequests/5/commits': {
+  '/rest/api/1.0/projects/some/repos/repo/pullrequests/5/commits': {
     values: [{}],
   },
-  '/rest/api/1.0/projects/SOME/repos/branches': {
+  '/rest/api/1.0/projects/some/repos/branches': {
     isLastPage: true,
     limit: 25,
     size: 2,

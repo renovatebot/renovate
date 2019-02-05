@@ -48,30 +48,16 @@ describe('platform/bitbucket', () => {
   afterEach(() => {
     bitbucket.cleanRepo();
   });
-  async function mocked(fn) {
-    const oldGet = api.get;
-    try {
-      api.get = jest.fn().mockImplementation(mockedGet);
-      return await fn();
-    } finally {
-      api.get = oldGet;
-    }
-  }
-  async function mockedGet(path) {
-    let body = responses[URL.parse(path).pathname] || { values: [] };
-    if (typeof body === 'function') {
-      body = await body();
-    }
-    return { body };
-  }
 
   function initRepo() {
-    return mocked(() =>
-      bitbucket.initRepo({
-        repository: 'some/repo',
-        localDir: '',
-      })
-    );
+    api.get.mockReturnValueOnce({
+      body: responses['/rest/api/1.0/projects/some/repos/repo'],
+    });
+    api.get.mockReturnValueOnce({
+      body:
+        responses['/rest/api/1.0/projects/some/repos/repo/branches/default'],
+    });
+    return bitbucket.initRepo({ repository: 'some/repo' });
   }
 
   describe('getRepos()', () => {
@@ -81,7 +67,7 @@ describe('platform/bitbucket', () => {
           body: responses['/rest/api/1.0/projects'],
         })
         .mockReturnValueOnce({
-          body: responses['/rest/api/1.0/projects/SOME/repos'],
+          body: responses['/rest/api/1.0/projects/some/repos'],
         });
       expect(await bitbucket.getRepos()).toEqual(['some/repo']);
     });
@@ -89,13 +75,64 @@ describe('platform/bitbucket', () => {
 
   describe('initRepo()', () => {
     it('works', async () => {
-      api.get.mockReturnValueOnce({
-        body: responses['/rest/api/1.0/projects/SOME/repos/repo'],
-      });
-
-      expect(await initRepo()).toMatchSnapshot();
+      const res = await initRepo();
+      expect(res).toMatchSnapshot();
     });
   });
+
+  describe('commitFilesToBranch()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await bitbucket.commitFilesToBranch('some-branch', [{}]);
+    });
+  });
+
+  describe('getFile()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await bitbucket.getFile();
+    });
+  });
+
+  describe('getAllRenovateBranches()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await bitbucket.getAllRenovateBranches();
+    });
+  });
+
+  describe('getBranchLastCommitTime()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await bitbucket.getBranchLastCommitTime();
+    });
+  });
+
+  describe('mergePr()', () => {
+    it('posts Merge', async () => {
+      await initRepo();
+      await bitbucket.mergePr(5, 'branch');
+      expect(api.post.mock.calls).toMatchSnapshot();
+    });
+  });
+
+  describe('getPrBody()', () => {
+    it('returns diff files', () => {
+      expect(
+        bitbucket.getPrBody(
+          '<details><summary>foo</summary>bar</details>text<details>'
+        )
+      ).toMatchSnapshot();
+    });
+  });
+
+  describe('getCommitMessages()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await bitbucket.getCommitMessages();
+    });
+  });
+
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty array', async () => {
       expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
