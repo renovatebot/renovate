@@ -88,6 +88,7 @@ describe('versioning/maven/index', () => {
     expect(isVersion('1-final')).toEqual(true);
     expect(isVersion('v1.0.0')).toEqual(true);
     expect(isVersion('x1.0.0')).toEqual(false);
+    expect(isVersion('2.1.1.RELEASE')).toEqual(true);
   });
   it('checks if version is stable', () => {
     expect(isStable('')).toEqual(null);

@@ -5,20 +5,39 @@ jest.mock('../../lib/datasource/docker');
 jest.mock('../../lib/datasource/npm');
 
 describe('datasource/index', () => {
-  it('returns null for invalid purl', async () => {
+  it('returns if digests are supported', async () => {
+    expect(await datasource.supportsDigests({ datasource: 'github' })).toBe(
+      true
+    );
+  });
+  it('returns null for no datasource', async () => {
     expect(
-      await datasource.getPkgReleases({ purl: 'pkggithub/some/dep' })
+      await datasource.getPkgReleases({
+        depName: 'some/dep',
+      })
+    ).toBeNull();
+  });
+  it('returns null for unknown datasource', async () => {
+    expect(
+      await datasource.getPkgReleases({
+        datasource: 'gitbucket',
+        depName: 'some/dep',
+      })
     ).toBeNull();
   });
   it('returns getDigest', async () => {
     expect(
-      await datasource.getDigest({ purl: 'pkg:docker/node' })
+      await datasource.getDigest({
+        datasource: 'docker',
+        depName: 'docker/node',
+      })
     ).toBeUndefined();
   });
   it('adds changelogUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({});
     const res = await datasource.getPkgReleases({
-      purl: 'pkg:npm/react-native',
+      datasource: 'npm',
+      depName: 'react-native',
     });
     expect(res).toMatchSnapshot();
     expect(res.changelogUrl).toBeDefined();
@@ -26,8 +45,21 @@ describe('datasource/index', () => {
   });
   it('adds sourceUrl', async () => {
     npmDatasource.getPkgReleases.mockReturnValue({});
-    const res = await datasource.getPkgReleases({ purl: 'pkg:npm/node' });
+    const res = await datasource.getPkgReleases({
+      datasource: 'npm',
+      depName: 'node',
+    });
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
+  });
+  it('trims sourceUrl', async () => {
+    npmDatasource.getPkgReleases.mockReturnValue({
+      sourceUrl: ' https://abc.com',
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: 'npm',
+      depName: 'abc',
+    });
+    expect(res.sourceUrl).toEqual('https://abc.com');
   });
 });

@@ -249,6 +249,8 @@ Configuration for Java gradle projects
 
 ## gradle-wrapper
 
+Configuration for Gradle Wrapper updates. Changes here affect how Renovate updates the version of gradle in the wrapper, not how it uses the wrapper.
+
 ## group
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to _add_ settings to any group by defining your own `group` configuration object.
@@ -396,6 +398,8 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
 
+## maven
+
 ## meteor
 
 Set enabled to `true` to enable meteor package updating.
@@ -518,7 +522,7 @@ Use this field if you want to have one or more package name patterns excluded in
 ```
   "packageRules": [{
     "packagePatterns": ["^eslint"],
-    "excludePackageNames": ["^eslint-foo"]
+    "excludePackagePatterns": ["^eslint-foo"]
   }]
 ```
 
@@ -571,7 +575,7 @@ Use this field if you want to have one or more package names patterns in your pa
 
 ```
   "packageRules": [{
-    "packageNames": ["^angular"],
+    "packagePatterns": ["^angular"],
     "rangeStrategy": "replace"
   }]
 ```

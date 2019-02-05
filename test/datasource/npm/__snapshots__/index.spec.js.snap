@@ -56,33 +56,7 @@ Object {
 }
 `;
 
-exports[`api/npm should handle no time 1`] = `
-Object {
-  "homepage": undefined,
-  "latestVersion": "0.0.1",
-  "name": "foobar",
-  "releases": Array [
-    Object {
-      "canBeUnpublished": false,
-      "gitRef": undefined,
-      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
-      "version": "0.0.1",
-    },
-    Object {
-      "gitRef": undefined,
-      "version": "0.0.2",
-    },
-  ],
-  "sourceDirectory": "src/a",
-  "sourceUrl": "https://github.com/renovateapp/dummy",
-  "tags": Object {
-    "latest": "0.0.1",
-  },
-  "versions": Object {},
-}
-`;
-
-exports[`api/npm should handle purl 1`] = `
+exports[`api/npm should handle foobar 1`] = `
 Object {
   "homepage": undefined,
   "latestVersion": "0.0.1",
@@ -98,6 +72,32 @@ Object {
       "canBeUnpublished": false,
       "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
+      "version": "0.0.2",
+    },
+  ],
+  "sourceDirectory": "src/a",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "tags": Object {
+    "latest": "0.0.1",
+  },
+  "versions": Object {},
+}
+`;
+
+exports[`api/npm should handle no time 1`] = `
+Object {
+  "homepage": undefined,
+  "latestVersion": "0.0.1",
+  "name": "foobar",
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": undefined,
+      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+    Object {
+      "gitRef": undefined,
       "version": "0.0.2",
     },
   ],
