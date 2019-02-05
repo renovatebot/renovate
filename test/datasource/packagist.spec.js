@@ -1,9 +1,9 @@
 const fs = require('fs');
-const got = require('got');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 const hostRules = require('../../lib/util/host-rules');
 
-jest.mock('got');
+jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
 const includesJson = fs.readFileSync('test/_fixtures/packagist/includes.json');
@@ -20,6 +20,7 @@ describe('datasource/packagist', () => {
       hostRules.find = jest.fn(input => input);
       global.repoCache = {};
       config = {
+        datasource: 'packagist',
         versionScheme: 'composer',
         registryUrls: [
           {
@@ -32,6 +33,7 @@ describe('datasource/packagist', () => {
     });
     it('supports custom registries', async () => {
       config = {
+        datasource: 'packagist',
         registryUrls: [
           {
             type: 'composer',
@@ -59,7 +61,7 @@ describe('datasource/packagist', () => {
       };
       const res = await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:packagist/something/one',
+        lookupName: 'something/one',
       });
       expect(res).toBeNull();
     });
@@ -79,7 +81,7 @@ describe('datasource/packagist', () => {
       });
       const res = await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:packagist/vendor/package-name',
+        lookupName: 'vendor/package-name',
       });
       expect(res).toMatchSnapshot();
     });
@@ -91,7 +93,7 @@ describe('datasource/packagist', () => {
       );
       const res = await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:packagist/vendor/package-name',
+        lookupName: 'vendor/package-name',
       });
       expect(res).toBeNull();
     });
@@ -104,7 +106,7 @@ describe('datasource/packagist', () => {
       );
       const res = await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:packagist/drewm/mailchip-api',
+        lookupName: 'drewm/mailchip-api',
       });
       expect(res).toBeNull();
     });
@@ -129,7 +131,7 @@ describe('datasource/packagist', () => {
       });
       const res = await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:packagist/guzzlehttp/guzzle',
+        lookupName: 'guzzlehttp/guzzle',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -168,7 +170,7 @@ describe('datasource/packagist', () => {
       });
       const res = await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:packagist/wpackagist-plugin/1beyt',
+        lookupName: 'wpackagist-plugin/1beyt',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -207,7 +209,7 @@ describe('datasource/packagist', () => {
       });
       const res = await datasource.getPkgReleases({
         ...config,
-        purl: 'pkg:packagist/some/other',
+        lookupName: 'some/other',
       });
       expect(res).toBeNull();
     });
@@ -219,7 +221,7 @@ describe('datasource/packagist', () => {
       expect(
         await datasource.getPkgReleases({
           ...config,
-          purl: 'pkg:packagist/drewm/mailchimp-api',
+          lookupName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
     });

@@ -1,8 +1,8 @@
 const fs = require('fs');
-const got = require('got');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 
-jest.mock('got');
+jest.mock('../../lib/util/got');
 
 const consulData = fs.readFileSync(
   'test/_fixtures/terraform/registry-consul.json'
@@ -19,7 +19,8 @@ describe('datasource/terraform', () => {
       got.mockReturnValueOnce({ body: {} });
       expect(
         await datasource.getPkgReleases({
-          purl: 'pkg:terraform/hashicorp/consul/aws',
+          datasource: 'terraform',
+          lookupName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
     });
@@ -31,7 +32,8 @@ describe('datasource/terraform', () => {
       );
       expect(
         await datasource.getPkgReleases({
-          purl: 'pkg:terraform/hashicorp/consul/aws',
+          datasource: 'terraform',
+          lookupName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
     });
@@ -41,7 +43,8 @@ describe('datasource/terraform', () => {
       });
       expect(
         await datasource.getPkgReleases({
-          purl: 'pkg:terraform/hashicorp/consul/aws',
+          datasource: 'terraform',
+          lookupName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
     });
@@ -50,7 +53,19 @@ describe('datasource/terraform', () => {
         body: JSON.parse(consulData),
       });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:terraform/hashicorp/consul/aws',
+        datasource: 'terraform',
+        lookupName: 'hashicorp/consul/aws',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
+    it('processes with registry in name', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(consulData),
+      });
+      const res = await datasource.getPkgReleases({
+        datasource: 'terraform',
+        lookupName: 'registry.terraform.io/hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -60,7 +75,9 @@ describe('datasource/terraform', () => {
         body: JSON.parse(consulData),
       });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:terraform/consul/foo?registry=hashicorp',
+        datasource: 'terraform',
+        lookupName: 'consul/foo',
+        registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();
     });
