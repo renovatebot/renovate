@@ -434,19 +434,6 @@ See https://renovatebot.com/docs/private-modules for details on how this is used
 
 The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style .csproj's, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj` format in order to be detected and supported by Renovate.
 
-There is an ability to configure the `nuget feeds` and its api version. By default is is an official nuget.org.
-
-```json
-"nuget": {
-    "nugetFeeds": [
-      {
-        "url": "https://api.nuget.org",
-        "version": 3
-      }
-    ]
-  }
-```
-
 ## nvm
 
 For settings common to all node.js version updates (e.g. travis, nvm, etc) you can use the `node` object instead.

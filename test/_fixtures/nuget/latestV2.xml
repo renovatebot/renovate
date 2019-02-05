@@ -1,0 +1,54 @@
+<feed xml:base="https://www.nuget.org/api/v2" xmlns="http://www.w3.org/2005/Atom" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:georss="http://www.georss.org/georss" xmlns:gml="http://www.opengis.net/gml">
+  <id>http://schemas.datacontract.org/2004/07/</id>
+  <title/>
+  <updated>2019-02-04T11:39:35Z</updated>
+  <link rel="self" href="https://www.nuget.org/api/v2/Packages"/>
+  <entry>
+    <id>https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.11.0')</id>
+    <category term="NuGetGallery.OData.V2FeedPackage" scheme="http://schemas.microsoft.com/ado/2007/08/dataservices/scheme"/>
+    <link rel="edit" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.11.0')"/>
+    <link rel="self" href="https://www.nuget.org/api/v2/Packages(Id='NUnit',Version='3.11.0')"/>
+    <title type="text">NUnit</title>
+    <summary type="text">NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.</summary>
+    <updated>2018-10-07T01:17:31Z</updated>
+    <author>
+      <name>Charlie Poole, Rob Prouse</name>
+    </author>
+    <content type="application/zip" src="https://www.nuget.org/api/v2/package/NUnit/3.11.0"/>
+    <m:properties>
+      <d:Id>NUnit</d:Id>
+      <d:Version>3.11.0</d:Version>
+      <d:NormalizedVersion>3.11.0</d:NormalizedVersion>
+      <d:Authors>Charlie Poole, Rob Prouse</d:Authors>
+      <d:Copyright>Copyright (c) 2018 Charlie Poole, Rob Prouse</d:Copyright>
+      <d:Created m:type="Edm.DateTime">2018-10-07T01:17:31.31</d:Created>
+      <d:Dependencies>::net20|::net35|::net40|::net45|NETStandard.Library:[1.6.1, ):netstandard1.4|System.Reflection.TypeExtensions:[4.4.0, ):netstandard1.4|NETStandard.Library:[2.0.0, ):netstandard2.0</d:Dependencies>
+      <d:Description>NUnit features a fluent assert syntax, parameterized, generic and theory tests and is user-extensible.This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.Supported platforms:- .NET Framework 2.0+- .NET Standard 1.4+- .NET Core</d:Description>
+      <d:DownloadCount m:type="Edm.Int32">34501529</d:DownloadCount>
+      <d:GalleryDetailsUrl>https://www.nuget.org/packages/NUnit/3.11.0</d:GalleryDetailsUrl>
+      <d:IconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</d:IconUrl>
+      <d:IsLatestVersion m:type="Edm.Boolean">true</d:IsLatestVersion>
+      <d:IsAbsoluteLatestVersion m:type="Edm.Boolean">true</d:IsAbsoluteLatestVersion>
+      <d:IsPrerelease m:type="Edm.Boolean">false</d:IsPrerelease>
+      <d:Language>en-US</d:Language>
+      <d:LastUpdated m:type="Edm.DateTime">2018-10-07T01:17:31.31</d:LastUpdated>
+      <d:Published m:type="Edm.DateTime">2018-10-07T01:17:31.31</d:Published>
+      <d:PackageHash>zecrYxUA5p5w8AZ2bvbBbiUIcrQnZAVPrziNMSWMdcOi0D2Oe7yKUNivWPIQMcUwQDHmWtS/ijnD48ubU/eHZQ==</d:PackageHash>
+      <d:PackageHashAlgorithm>SHA512</d:PackageHashAlgorithm>
+      <d:PackageSize m:type="Edm.Int64">4124503</d:PackageSize>
+      <d:ProjectUrl>http://nunit.org/</d:ProjectUrl>
+      <d:ReportAbuseUrl>https://www.nuget.org/packages/NUnit/3.11.0/ReportAbuse</d:ReportAbuseUrl>
+      <d:ReleaseNotes>This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.</d:ReleaseNotes>
+      <d:RequireLicenseAcceptance m:type="Edm.Boolean">false</d:RequireLicenseAcceptance>
+      <d:Summary>NUnit is a unit-testing framework for all .NET languages with a strong TDD focus.</d:Summary>
+      <d:Tags>nunit test testing tdd framework fluent assert theory plugin addin</d:Tags>
+      <d:Title>NUnit</d:Title>
+      <d:VersionDownloadCount m:type="Edm.Int32">1282250</d:VersionDownloadCount>
+      <d:MinClientVersion>2.12</d:MinClientVersion>
+      <d:LastEdited m:type="Edm.DateTime">2018-10-07T01:21:48.043</d:LastEdited>
+      <d:LicenseUrl>https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt</d:LicenseUrl>
+      <d:LicenseNames m:null="true"/>
+      <d:LicenseReportUrl m:null="true"/>
+    </m:properties>
+  </entry>
+</feed>

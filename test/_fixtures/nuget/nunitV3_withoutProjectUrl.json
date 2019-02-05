@@ -18,7 +18,6 @@
       "title": "NUnit",
       "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
       "licenseUrl": "https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt",
-      "projectUrl": "http://nunit.org/",
       "tags": [
         "nunit",
         "test",
