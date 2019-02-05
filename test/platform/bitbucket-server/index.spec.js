@@ -5,9 +5,9 @@ const responses = require('../../_fixtures/bitbucket-server/responses');
 
 describe('platform/bitbucket', () => {
   let bitbucket;
-
   let api;
   let hostRules;
+  let GitStorage;
   beforeEach(() => {
     // reset module
     jest.resetModules();
@@ -16,10 +16,22 @@ describe('platform/bitbucket', () => {
     hostRules = require('../../../lib/util/host-rules');
     api = require('../../../lib/platform/bitbucket-server/bb-got-wrapper');
     bitbucket = require('../../../lib/platform/bitbucket-server');
-    let gitStorage = require('../../../lib/platform/git/storage');
-    gitStorage.mockImplementation(() => ({
-      initRepo: () => {},
-      cleanRepo: () => {},
+    GitStorage = require('../../../lib/platform/git/storage');
+    GitStorage.mockImplementation(() => ({
+      initRepo: jest.fn(),
+      cleanRepo: jest.fn(),
+      getFileList: jest.fn(),
+      branchExists: jest.fn(() => true),
+      isBranchStale: jest.fn(() => false),
+      setBaseBranch: jest.fn(),
+      getBranchLastCommitTime: jest.fn(),
+      getAllRenovateBranches: jest.fn(),
+      getCommitMessages: jest.fn(),
+      getFile: jest.fn(),
+      commitFilesToBranch: jest.fn(),
+      mergeBranch: jest.fn(),
+      deleteBranch: jest.fn(),
+      getRepoStatus: jest.fn(),
     }));
 
     // clean up hostRules
@@ -27,6 +39,8 @@ describe('platform/bitbucket', () => {
     hostRules.update({
       platform: 'bitbucket-server',
       token: 'token',
+      username: 'username',
+      password: 'password',
       endpoint: responses.baseURL,
     });
   });
