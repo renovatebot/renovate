@@ -80,6 +80,52 @@ describe('platform/bitbucket', () => {
     });
   });
 
+  describe('repoForceRebase()', () => {
+    it('always return false, since bitbucket does not support force rebase', () => {
+      const actual = bitbucket.getRepoForceRebase();
+      const expected = false;
+      expect(actual).toBe(expected);
+    });
+  });
+
+  describe('setBaseBranch()', () => {
+    it('updates file list', async () => {
+      await initRepo();
+      await bitbucket.setBaseBranch('branch');
+      expect(api.get.mock.calls).toMatchSnapshot();
+    });
+  });
+
+  describe('getFileList()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await bitbucket.getFileList();
+    });
+  });
+
+  describe('branchExists()', () => {
+    describe('getFileList()', () => {
+      it('sends to gitFs', async () => {
+        await initRepo();
+        await bitbucket.branchExists();
+      });
+    });
+  });
+
+  describe('isBranchStale()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await bitbucket.isBranchStale();
+    });
+  });
+
+  describe('deleteBranch()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await bitbucket.deleteBranch('branch');
+    });
+  });
+
   describe('commitFilesToBranch()', () => {
     it('sends to gitFs', async () => {
       await initRepo();
@@ -105,6 +151,66 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await bitbucket.getBranchLastCommitTime();
+    });
+  });
+
+  describe('addAssignees()', () => {
+    it('does not throw', async () => {
+      await bitbucket.addAssignees(3, ['some']);
+    });
+  });
+
+  describe('addReviewers', () => {
+    it('does not throw', async () => {
+      await bitbucket.addReviewers(5, ['some']);
+    });
+  });
+
+  describe('deleteLAbel()', () => {
+    it('does not throw', async () => {
+      await bitbucket.deleteLabel(5, 'renovate');
+    });
+  });
+
+  describe('ensureComment()', () => {
+    it('does not throw', async () => {
+      await bitbucket.ensureComment(3, 'topic', 'content');
+    });
+  });
+
+  describe('ensureCommentRemoval()', () => {
+    it('does not throw', async () => {
+      await bitbucket.ensureCommentRemoval(3, 'topic');
+    });
+  });
+
+  describe('getPrList()', () => {
+    it('exists', () => {
+      expect(bitbucket.getPrList).toBeDefined();
+      // TODO
+    });
+  });
+
+  describe('findPr()', () => {
+    it('exists', () => {
+      expect(bitbucket.findPr).toBeDefined();
+      // TODO
+    });
+  });
+
+  describe('createPr()', () => {
+    it('posts PR', async () => {
+      await initRepo();
+      api.post.mockReturnValueOnce({
+        body: {
+          id: 5,
+          fromRef: { displayId: 'renovate/some-branch' },
+          state: 'OPEN',
+        },
+      });
+      const { id } = await bitbucket.createPr('branch', 'title', 'body');
+      expect(id).toBe(5);
+      expect(api.post.mock.calls).toMatchSnapshot();
     });
   });
 

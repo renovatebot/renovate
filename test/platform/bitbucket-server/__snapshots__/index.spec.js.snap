@@ -1,5 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/bitbucket createPr() posts PR 1`] = `
+Array [
+  Array [
+    "/rest/api/1.0/projects/some/repos/repo/pull-requests",
+    Object {
+      "body": Object {
+        "description": "body",
+        "fromRef": Object {
+          "id": "refs/heads/branch",
+        },
+        "title": "title",
+        "toRef": Object {
+          "id": "refs/heads/master",
+        },
+      },
+    },
+  ],
+]
+`;
+
 exports[`platform/bitbucket getPr() gets a PR 1`] = `
 Object {
   "body": "* Line 1
@@ -28,6 +48,17 @@ exports[`platform/bitbucket mergePr() posts Merge 1`] = `
 Array [
   Array [
     "/rest/api/1.0/projects/some/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket setBaseBranch() updates file list 1`] = `
+Array [
+  Array [
+    "/rest/api/1.0/projects/some/repos/repo",
+  ],
+  Array [
+    "/rest/api/1.0/projects/some/repos/repo/branches/default",
   ],
 ]
 `;
