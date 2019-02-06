@@ -26,6 +26,8 @@ const nugetIndexV3 = fs.readFileSync(
 );
 
 const configV3V2 = {
+  datasource: 'nuget',
+  lookupName: 'nunit',
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
     'https://www.nuget.org/api/v2/',
@@ -33,10 +35,14 @@ const configV3V2 = {
 };
 
 const configV2 = {
+  datasource: 'nuget',
+  lookupName: 'nunit',
   registryUrls: ['https://www.nuget.org/api/v2/'],
 };
 
 const configV3 = {
+  datasource: 'nuget',
+  lookupName: 'nunit',
   registryUrls: ['https://api.nuget.org/v3/index.json'],
 };
 
@@ -52,7 +58,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...config,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -67,7 +72,6 @@ describe('datasource/nuget', () => {
       });
       const res = await datasource.getPkgReleases({
         ...configV3,
-        purl: 'pkg:nuget/nunit',
       });
 
       expect(res).toBeNull();
@@ -83,7 +87,6 @@ describe('datasource/nuget', () => {
       });
       const res = await datasource.getPkgReleases({
         ...configV3,
-        purl: 'pkg:nuget/nunit',
       });
 
       expect(res).toBeNull();
@@ -100,7 +103,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV2,
-          purl: 'pkg:nuget/nunit',
         })
       ).toBeNull();
     });
@@ -110,7 +112,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV3V2,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -119,7 +120,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV2,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -128,7 +128,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV3,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -142,7 +141,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV3V2,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -155,7 +153,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV3,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -168,7 +165,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV2,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -180,7 +176,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV3V2,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -191,7 +186,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV3,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -206,7 +200,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV3,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -217,7 +210,6 @@ describe('datasource/nuget', () => {
       expect(
         await datasource.getPkgReleases({
           ...configV2,
-          purl: 'pkg:nuget/something',
         })
       ).toBeNull();
     });
@@ -233,7 +225,6 @@ describe('datasource/nuget', () => {
       });
       const res = await datasource.getPkgReleases({
         ...configV3,
-        purl: 'pkg:nuget/nunit',
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
@@ -250,7 +241,6 @@ describe('datasource/nuget', () => {
       });
       const res = await datasource.getPkgReleases({
         ...configV3,
-        purl: 'pkg:nuget/nunit',
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
@@ -267,7 +257,6 @@ describe('datasource/nuget', () => {
       });
       const res = await datasource.getPkgReleases({
         ...configV2,
-        purl: 'pkg:nuget/nunit',
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
@@ -284,7 +273,6 @@ describe('datasource/nuget', () => {
       });
       const res = await datasource.getPkgReleases({
         ...configV2,
-        purl: 'pkg:nuget/nunit',
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
