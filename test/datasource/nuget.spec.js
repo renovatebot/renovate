@@ -53,7 +53,11 @@ describe('datasource/nuget', () => {
     });
 
     it(`can't detect nuget feed version`, async () => {
-      const config = { registryUrls: ['#$#api.nuget.org/v3/index.xml'] };
+      const config = {
+        datasource: 'nuget',
+        lookupName: 'nunit',
+        registryUrls: ['#$#api.nuget.org/v3/index.xml'],
+      };
 
       expect(
         await datasource.getPkgReleases({
