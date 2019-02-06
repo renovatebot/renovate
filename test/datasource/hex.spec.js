@@ -32,6 +32,14 @@ describe('datasource/hex', () => {
       );
       expect(await getPkgReleases({ lookupName: 'some_package' })).toBeNull();
     });
+    it('returns null for 401', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 401,
+        })
+      );
+      expect(await getPkgReleases({ lookupName: 'some_package' })).toBeNull();
+    });
     it('returns null for unknown error', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
