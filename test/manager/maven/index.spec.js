@@ -10,7 +10,7 @@ const pomContent = fs.readFileSync(
   'utf8'
 );
 
-const findFn = ({ depName }) => depName === 'org.example/quuz';
+const findFn = ({ depName }) => depName === 'org.example:quuz';
 
 describe('manager/maven', () => {
   describe('extractAllPackageFiles', () => {
