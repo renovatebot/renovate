@@ -36,7 +36,7 @@
       <d:PackageHash>zecrYxUA5p5w8AZ2bvbBbiUIcrQnZAVPrziNMSWMdcOi0D2Oe7yKUNivWPIQMcUwQDHmWtS/ijnD48ubU/eHZQ==</d:PackageHash>
       <d:PackageHashAlgorithm>SHA512</d:PackageHashAlgorithm>
       <d:PackageSize m:type="Edm.Int64">4124503</d:PackageSize>
-      <d:ProjectUrl>http://nunit.org/</d:ProjectUrl>
+      <d:ProjectUrl>https://github.com/nunit/nunit</d:ProjectUrl>
       <d:ReportAbuseUrl>https://www.nuget.org/packages/NUnit/3.11.0/ReportAbuse</d:ReportAbuseUrl>
       <d:ReleaseNotes>This package includes the NUnit 3 framework assembly, which is referenced by your tests. You will need to install version 3 of the nunit3-console program or a third-party runner that supports NUnit 3 in order to execute tests. Runners intended for use with NUnit 2.x will not run NUnit 3 tests correctly.</d:ReleaseNotes>
       <d:RequireLicenseAcceptance m:type="Edm.Boolean">false</d:RequireLicenseAcceptance>

@@ -119,7 +119,7 @@ Object {
       "version": "3.11.0",
     },
   ],
-  "sourceUrl": "http://nunit.org/",
+  "sourceUrl": "https://github.com/nunit/nunit",
 }
 `;
 
@@ -203,7 +203,7 @@ Object {
       "version": "3.11.0",
     },
   ],
-  "sourceUrl": "http://nunit.org/",
+  "sourceUrl": "https://github.com/nunit/nunit",
 }
 `;
 
