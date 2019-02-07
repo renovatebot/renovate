@@ -97,29 +97,42 @@ stringData:
 
 ## Authentication
 
-You need to select a repository user for `renovate` to assume the identity of,
-and generate a Personal Access Token. It's strongly recommended that you use a
-dedicated "bot" account for this to avoid user confusion and to avoid the
-Renovate bot mistaking changes you have made or PRs you have raised for its own.
+You need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token. It is recommended to be `@renovate-bot` if you are using a self-hosted server and can pick any username you want.
 
-You can find instructions for GitHub
-[here](https://help.github.com/articles/creating-an-access-token-for-command-line-use/)
-(select "repo" permissions)
+#### GitHub Enterprise
 
-You can find instructions for GitLab
-[here](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens).
+First, [create a personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" permissions).
+Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
-You can find instructions for Bitbucket AppPasswords [here](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html).
+#### GitLab CE/EE
 
-Note: you should also configure a GitHub token even if your source host is GitLab or Bitbucket, because Renovate will need to perform many queries to github.com in order to retrieve Release Notes.
+First, [create a personal access token](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens) for the bot account.
+Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+Don't forget to configure `platform=gitlab` somewhere in config.
 
-You can find instructions for Azure DevOps
-[azureDevOps](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats).
+#### Bitbucket Cloud
 
-This token needs to be configured via file, environment variable, or CLI. See
-[docs/configuration.md](configuration.md) for details. The simplest way is to expose it as `RENOVATE_TOKEN`.
+First, [create an AppPassword](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html) for the bot account.
+Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
+Also be sure to configure the `username` for your bot account too.
+Don't forget to configure `platform=bitbucket` somewhere in config.
 
-For Bitbucket, you can configure `RENOVATE_USERNAME` and `RENOVATE_PASSWORD`.
+#### Bitbucket Server
+
+Create a [Personal Access Token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for your bot account.
+Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
+Also configure the `username` for your bot account too, if you decided not to name it `@renovate-bot`.
+Don't forget to configure `platform=bitbucket-server` somewhere in config.
+
+#### Azure DevOps
+
+First, [create a personal access token](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats) for the bot account.
+Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+Don't forget to configure `platform=azure` somewhere in config.
+
+## GitHub.com token for release notes
+
+If you are running on any platform except github.com, it's important to also configure GITHUB*COM_TOKEN containing a personal access token for github.com. This account can actually be \_any* account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit.
 
 ## Usage
 
@@ -158,7 +171,7 @@ Most people will run Renovate via cron, e.g. once per hour. Here is an example b
 
 export PATH="/home/user/.yarn/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 export RENOVATE_CONFIG_FILE="/home/user/renovate-config.js"
-export RENOVATE_TOKEN="**some-token**" # GitHub, GitLab, Azure DevOps or BitBucket
+export RENOVATE_TOKEN="**some-token**" # GitHub, GitLab, Azure DevOps
 export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 
 # Renovate
