@@ -175,7 +175,8 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          purl: 'pkg:pypi/dj-database-url',
+          datasource: 'pypi',
+          depName: 'dj-database-url',
         })
       ).toMatchSnapshot();
     });
@@ -188,7 +189,8 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          purl: 'pkg:pypi/dj-database-url',
+          datasource: 'pypi',
+          depName: 'dj-database-url',
         })
       ).toBeNull();
     });
@@ -203,7 +205,8 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          purl: 'pkg:pypi/dj-database-url',
+          datasource: 'pypi',
+          depName: 'dj-database-url',
         })
       ).toBeNull();
     });
@@ -218,7 +221,8 @@ describe('datasource/pypi', () => {
         await datasource.getPkgReleases({
           ...config,
           compatibility: { python: '2.7' },
-          purl: 'pkg:pypi/dj-database-url',
+          datasource: 'pypi',
+          depName: 'dj-database-url',
         })
       ).toEqual({ releases: [] });
     });
