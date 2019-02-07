@@ -126,6 +126,13 @@ describe('platform/bitbucket', () => {
     });
   });
 
+  describe('mergeBranch()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await bitbucket.mergeBranch('branch');
+    });
+  });
+
   describe('commitFilesToBranch()', () => {
     it('sends to gitFs', async () => {
       await initRepo();
