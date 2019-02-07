@@ -25,8 +25,11 @@ Object {
   "body": "* Line 1
 * Line 2",
   "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": true,
   "createdAt": undefined,
   "displayNumber": "Pull Request #5",
+  "isConflicted": false,
   "number": 5,
   "state": "open",
   "title": "title",

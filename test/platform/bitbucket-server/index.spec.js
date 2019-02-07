@@ -224,6 +224,11 @@ describe('platform/bitbucket', () => {
         body:
           responses['/rest/api/1.0/projects/some/repos/repo/pullrequests/5'],
       });
+      api.get.mockReturnValueOnce({
+        body: {
+          conflicted: false,
+        },
+      });
       expect(await bitbucket.getPr(5)).toMatchSnapshot();
     });
   });
