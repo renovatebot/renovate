@@ -37,7 +37,7 @@ describe('platform/azure', () => {
     return azure.getRepos(token, endpoint);
   }
 
-  describe('getRepos', () => {
+  describe('getRepos()', () => {
     it('should return an array of repos', async () => {
       const repos = await getRepos(
         'sometoken',
