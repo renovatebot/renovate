@@ -86,6 +86,7 @@ Array [
 
 exports[`platform/azure/helpers getRenovatePRFormat should be formated (closed v2) 1`] = `
 Object {
+  "body": undefined,
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
@@ -96,6 +97,7 @@ Object {
 
 exports[`platform/azure/helpers getRenovatePRFormat should be formated (closed) 1`] = `
 Object {
+  "body": undefined,
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
@@ -106,6 +108,7 @@ Object {
 
 exports[`platform/azure/helpers getRenovatePRFormat should be formated (isConflicted) 1`] = `
 Object {
+  "body": undefined,
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
   "isConflicted": true,
@@ -117,6 +120,7 @@ Object {
 
 exports[`platform/azure/helpers getRenovatePRFormat should be formated (not closed) 1`] = `
 Object {
+  "body": undefined,
   "canRebase": true,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
