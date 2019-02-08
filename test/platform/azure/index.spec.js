@@ -1,20 +1,24 @@
-const hostRules = require('../../../lib/util/host-rules');
-
 describe('platform/azure', () => {
   let azure;
   let azureApi;
   let azureHelper;
+  let hostRules;
   beforeEach(() => {
-    // clean up hostRules
-    hostRules.clear();
-
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/azure/azure-got-wrapper');
     jest.mock('../../../lib/platform/azure/azure-helper');
+    hostRules = require('../../../lib/util/host-rules');
     azure = require('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
     azureHelper = require('../../../lib/platform/azure/azure-helper');
+    // clean up hostRules
+    hostRules.clear();
+    hostRules.update({
+      endpoint: 'https://dev.azure.com/renovate12345',
+      platform: 'azure',
+      token: 'token',
+    });
   });
 
   function getRepos(token, endpoint) {
@@ -37,11 +41,11 @@ describe('platform/azure', () => {
     return azure.getRepos(token, endpoint);
   }
 
-  describe('getRepos', () => {
+  describe('getRepos()', () => {
     it('should return an array of repos', async () => {
       const repos = await getRepos(
         'sometoken',
-        'https://fabrikam.VisualStudio.com/DefaultCollection'
+        'https://dev.azure.com/renovate12345'
       );
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
@@ -90,12 +94,12 @@ describe('platform/azure', () => {
       return azure.initRepo({
         repository: args[0],
         token: args[1],
-        endpoint: 'https://my.custom.endpoint/',
+        endpoint: 'https://dev.azure.com/renovate12345',
       });
     }
 
     return azure.initRepo({
-      endpoint: 'https://my.custom.endpoint/',
+      endpoint: 'https://dev.azure.com/renovate12345',
       ...args[0],
     });
   }
@@ -105,7 +109,7 @@ describe('platform/azure', () => {
       const config = await initRepo({
         repository: 'some-repo',
         token: 'token',
-        endpoint: 'https://my.custom.endpoint/',
+        endpoint: 'https://dev.azure.com/renovate12345',
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
@@ -148,9 +152,9 @@ describe('platform/azure', () => {
       const config = await initRepo(
         'some-repo',
         'token',
-        'https://my.custom.endpoint/'
+        'https://dev.azure.com/renovate12345'
       );
-      expect(config.repoId).toBe('1');
+      expect(config.isFork).toBe(false);
       azureApi.gitApi.mockImplementationOnce(() => ({
         getCommits: jest.fn(() => [
           { comment: 'com1' },
