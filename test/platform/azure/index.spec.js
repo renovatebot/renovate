@@ -1,20 +1,48 @@
-const hostRules = require('../../../lib/util/host-rules');
-
 describe('platform/azure', () => {
   let azure;
   let azureApi;
   let azureHelper;
+  let hostRules;
+  let GitStorage;
   beforeEach(() => {
-    // clean up hostRules
-    hostRules.clear();
-
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/azure/azure-got-wrapper');
     jest.mock('../../../lib/platform/azure/azure-helper');
+    jest.mock('../../../lib/platform/git/storage');
+    hostRules = require('../../../lib/util/host-rules');
     azure = require('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
     azureHelper = require('../../../lib/platform/azure/azure-helper');
+    GitStorage = require('../../../lib/platform/git/storage');
+    GitStorage.mockImplementation(() => ({
+      initRepo: jest.fn(),
+      cleanRepo: jest.fn(),
+      getFileList: jest.fn(),
+      branchExists: jest.fn(() => true),
+      isBranchStale: jest.fn(() => false),
+      setBaseBranch: jest.fn(),
+      getBranchLastCommitTime: jest.fn(),
+      getAllRenovateBranches: jest.fn(),
+      getCommitMessages: jest.fn(),
+      getFile: jest.fn(),
+      commitFilesToBranch: jest.fn(),
+      mergeBranch: jest.fn(),
+      deleteBranch: jest.fn(),
+      getRepoStatus: jest.fn(),
+    }));
+
+    // clean up hostRules
+    hostRules.clear();
+    hostRules.update({
+      platform: 'azure',
+      endpoint: 'https://dev.azure.com/renovate12345',
+      token: 'token',
+    });
+  });
+
+  afterEach(() => {
+    azure.cleanRepo();
   });
 
   function getRepos(token, endpoint) {
@@ -37,21 +65,24 @@ describe('platform/azure', () => {
     return azure.getRepos(token, endpoint);
   }
 
-  describe('getRepos', () => {
+  describe('getRepos()', () => {
     it('should return an array of repos', async () => {
       const repos = await getRepos(
         'sometoken',
-        'https://fabrikam.VisualStudio.com/DefaultCollection'
+        'https://dev.azure.com/renovate12345'
       );
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
   });
+
   describe('getRepoStatus()', () => {
     it('exists', async () => {
-      expect(await azure.getRepoStatus()).toEqual({});
+      await initRepo();
+      expect(await azure.getRepoStatus()).toBeUndefined();
     });
   });
+
   describe('cleanRepo()', () => {
     it('exists', () => {
       azure.cleanRepo();
@@ -90,12 +121,13 @@ describe('platform/azure', () => {
       return azure.initRepo({
         repository: args[0],
         token: args[1],
-        endpoint: 'https://my.custom.endpoint/',
+        endpoint: 'https://dev.azure.com/renovate12345',
       });
     }
 
     return azure.initRepo({
-      endpoint: 'https://my.custom.endpoint/',
+      endpoint: 'https://dev.azure.com/renovate12345',
+      repository: 'some/repo',
       ...args[0],
     });
   }
@@ -105,7 +137,7 @@ describe('platform/azure', () => {
       const config = await initRepo({
         repository: 'some-repo',
         token: 'token',
-        endpoint: 'https://my.custom.endpoint/',
+        endpoint: 'https://dev.azure.com/renovate12345',
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
@@ -115,68 +147,6 @@ describe('platform/azure', () => {
   describe('getRepoForceRebase', () => {
     it('should return false', () => {
       expect(azure.getRepoForceRebase()).toBe(false);
-    });
-  });
-
-  describe('setBaseBranch(branchName)', () => {
-    it('sets the base branch', async () => {
-      await initRepo('some-repo', 'token');
-      // getBranchCommit
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getBranch: jest.fn(() => ({
-          commit: { commitId: '1234' },
-        })),
-      }));
-      await azure.setBaseBranch('some-branch');
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
-    });
-    it('sets the base branch', async () => {
-      await initRepo('some-repo', 'token');
-      // getBranchCommit
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getBranch: jest.fn(() => ({
-          commit: { commitId: '1234' },
-        })),
-      }));
-      await azure.setBaseBranch();
-      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
-    });
-  });
-
-  describe('getCommitMessages()', () => {
-    it('returns commits messages', async () => {
-      const config = await initRepo(
-        'some-repo',
-        'token',
-        'https://my.custom.endpoint/'
-      );
-      expect(config.repoId).toBe('1');
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getCommits: jest.fn(() => [
-          { comment: 'com1' },
-          { comment: 'com2' },
-          { comment: 'com3' },
-        ]),
-      }));
-      const msg = await azure.getCommitMessages();
-      expect(msg).toMatchSnapshot();
-    });
-    it('returns empty array if error', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => {
-        throw new Error('some error');
-      });
-      const msgs = await azure.getCommitMessages();
-      expect(msgs).toEqual([]);
-    });
-  });
-
-  describe('getFile(filePatch, branchName)', () => {
-    it('should return the encoded file content', async () => {
-      await initRepo('some-repo', 'token');
-      azureHelper.getFile.mockImplementationOnce(() => `Hello Renovate!`);
-      const content = await azure.getFile('package.json');
-      expect(content).toMatchSnapshot();
     });
   });
 
@@ -273,137 +243,10 @@ describe('platform/azure', () => {
       const res = await azure.findPr('branch-a', 'branch a pr');
       expect(res).toMatchSnapshot();
     });
-    /*
-    it('returns pr if found it but add an error', async () => {
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getPullRequests: jest.fn(() => [
-          {
-            pullRequestId: 1,
-            sourceRefName: 'refs/heads/branch-a',
-            title: 'branch a pr',
-            status: 2,
-          },
-        ]),
-      }));
-      azureHelper.getNewBranchName.mockImplementationOnce(
-        () => 'refs/heads/branch-a'
-      );
-      azureHelper.getRenovatePRFormat.mockImplementationOnce(() => ({
-        number: 1,
-        head: { ref: 'branch-a' },
-        title: 'branch a pr',
-        isClosed: true,
-      }));
-      const res = await azure.findPr('branch-a', 'branch a pr', 'blabla');
-      expect(res).toMatchSnapshot();
-    });
-    it('returns null if error', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => {
-        throw new Error('some error');
-      });
-      const pr = await azure.findPr('branch-a', 'branch a pr');
-      expect(pr).toBeNull();
-    });
-    */
   });
   describe('getPrList()', () => {
     it('returns empty array', () => {
       expect(azure.getPrList()).toEqual([]);
-    });
-  });
-  describe('getFileList', () => {
-    it('returns empty array if error', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => {
-        throw new Error('some error');
-      });
-      const files = await azure.getFileList();
-      expect(files).toEqual([]);
-    });
-    it('caches the result', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getItems: jest.fn(() => [
-          { path: '/symlinks/package.json' },
-          { isFolder: false, path: '/package.json' },
-          { isFolder: true, path: '/some-dir' },
-          { type: 'blob', path: '/src/app/package.json' },
-          { type: 'blob', path: '/src/otherapp/package.json' },
-        ]),
-      }));
-      let files = await azure.getFileList();
-      expect(files.length).toBe(4);
-      files = await azure.getFileList();
-      expect(files.length).toBe(4);
-    });
-    it('should return the files matching the fileName', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getItems: jest.fn(() => [
-          { path: '/symlinks/package.json' },
-          { isFolder: false, path: '/package.json' },
-          { isFolder: true, path: '/some-dir' },
-          { type: 'blob', path: '/src/app/package.json' },
-          { type: 'blob', path: '/src/otherapp/package.json' },
-        ]),
-      }));
-      const files = await azure.getFileList();
-      expect(files).toMatchSnapshot();
-    });
-  });
-
-  describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
-    it('should add a new commit to the branch', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        createPush: jest.fn(() => true),
-      }));
-      azureHelper.getAzureBranchObj.mockImplementationOnce(() => 'newBranch');
-      azureHelper.getRefs.mockImplementation(() => [{ objectId: '123' }]);
-
-      const files = [
-        {
-          name: 'package.json',
-          contents: 'hello world',
-        },
-      ];
-      await azure.commitFilesToBranch(
-        'package.json',
-        files,
-        'my commit message'
-      );
-      expect(azureApi.gitApi.mock.calls.length).toBe(3);
-    });
-    it('should add a new commit to an existing branch', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        createPush: jest.fn(() => true),
-      }));
-      azureHelper.getAzureBranchObj.mockImplementationOnce(() => 'newBranch');
-      azureHelper.getRefs.mockImplementation(() => []);
-
-      const files = [
-        {
-          name: 'package.json',
-          contents: 'hello world',
-        },
-      ];
-      await azure.commitFilesToBranch(
-        'package.json',
-        files,
-        'my commit message'
-      );
-      expect(azureApi.gitApi.mock.calls.length).toBe(3);
-    });
-  });
-
-  describe('branchExists(branchName)', () => {
-    it('should return false if the branch does not exist', async () => {
-      await initRepo('some-repo', 'token');
-      azureHelper.getRefs.mockImplementation(() => []);
-      const exists = await azure.branchExists('thebranchname');
-      expect(exists).toBe(false);
     });
   });
 
@@ -578,46 +421,6 @@ describe('platform/azure', () => {
     });
   });
 
-  describe('isBranchStale', () => {
-    it('should return true', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getBranch: jest.fn(() => ({ commit: { commitId: '123456' } })),
-      }));
-      azureHelper.getCommitDetails.mockImplementation(() => ({
-        parents: ['789654'],
-      }));
-      const res = await azure.isBranchStale();
-      expect(res).toBe(true);
-    });
-    it('should return false', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getBranch: jest.fn(() => ({ commit: { commitId: '123457' } })),
-      }));
-      azureHelper.getCommitDetails.mockImplementation(() => ({
-        parents: ['1234'],
-      }));
-      const res = await azure.isBranchStale('branch');
-      expect(res).toBe(false);
-    });
-  });
-
-  describe('getAllRenovateBranches()', () => {
-    it('should return all renovate branches', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getBranches: jest.fn(() => [
-          { name: 'master' },
-          { name: 'renovate/a' },
-          { name: 'renovate/b' },
-        ]),
-      }));
-      const res = await azure.getAllRenovateBranches('renovate/');
-      expect(res).toMatchSnapshot();
-    });
-  });
-
   describe('ensureCommentRemoval', () => {
     it('deletes comment if found', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -644,35 +447,6 @@ describe('platform/azure', () => {
       }));
       await azure.ensureCommentRemoval(42, 'some-subject');
       expect(azureApi.gitApi.mock.calls.length).toBe(3);
-    });
-  });
-
-  describe('getBranchLastCommitTime', () => {
-    it('should return a Date', async () => {
-      await initRepo({ repository: 'some/repo', token: 'token' });
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getBranch: jest.fn(() => ({
-          commit: { committer: { date: '1986-11-07T00:00:00Z' } },
-        })),
-      }));
-      const res = await azure.getBranchLastCommitTime('some-branch');
-      expect(res).toMatchSnapshot();
-    });
-  });
-
-  describe('deleteBranch and abandon PR', () => {
-    it('should delete the branch', async () => {
-      azureHelper.getRefs.mockImplementation(() => [{ objectId: '123' }]);
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        updateRefs: jest.fn(() => [
-          {
-            name: 'refs/head/testBranch',
-            oldObjectId: '123456',
-            newObjectId: '0000000000000000000000000000000000000000',
-          },
-        ]),
-      }));
-      await azure.deleteBranch();
     });
   });
 
@@ -704,6 +478,7 @@ describe('platform/azure', () => {
       expect(azureApi.gitApi.mock.calls.length).toBe(3);
     });
   });
+
   describe('getPrBody(input)', () => {
     it('returns updated pr body', () => {
       const input =
@@ -711,14 +486,10 @@ describe('platform/azure', () => {
       expect(azure.getPrBody(input)).toMatchSnapshot();
     });
   });
+
   describe('Not supported by Azure DevOps (yet!)', () => {
     it('setBranchStatus', () => {
       const res = azure.setBranchStatus();
-      expect(res).toBeUndefined();
-    });
-
-    it('mergeBranch', async () => {
-      const res = await azure.mergeBranch();
       expect(res).toBeUndefined();
     });
 
@@ -733,6 +504,7 @@ describe('platform/azure', () => {
       expect(res.length).toBe(0);
     });
   });
+
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty', async () => {
       const res = await azure.getVulnerabilityAlerts();

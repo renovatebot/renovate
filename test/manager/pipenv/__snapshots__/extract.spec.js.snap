@@ -9,7 +9,7 @@ Array [
     "depType": "packages",
     "pipenvNestedVersion": false,
     "registryUrls": Array [
-      "https://pypi.org/pypi/",
+      "https://pypi.org/simple",
       "http://example.com/private-pypi/",
     ],
   },
@@ -20,7 +20,7 @@ Array [
     "depType": "packages",
     "pipenvNestedVersion": false,
     "registryUrls": Array [
-      "https://pypi.org/pypi/",
+      "https://pypi.org/simple",
       "http://example.com/private-pypi/",
     ],
   },
@@ -31,7 +31,7 @@ Array [
     "depType": "packages",
     "pipenvNestedVersion": true,
     "registryUrls": Array [
-      "https://pypi.org/pypi/",
+      "https://pypi.org/simple",
       "http://example.com/private-pypi/",
     ],
   },
@@ -42,7 +42,7 @@ Array [
     "depType": "dev-packages",
     "pipenvNestedVersion": false,
     "registryUrls": Array [
-      "https://pypi.org/pypi/",
+      "https://pypi.org/simple",
       "http://example.com/private-pypi/",
     ],
   },
@@ -58,7 +58,7 @@ Array [
     "depType": "packages",
     "pipenvNestedVersion": false,
     "registryUrls": Array [
-      "https://pypi.org/pypi/",
+      "https://pypi.org/simple",
     ],
   },
   Object {
@@ -68,7 +68,7 @@ Array [
     "depType": "packages",
     "pipenvNestedVersion": false,
     "registryUrls": Array [
-      "https://pypi.org/pypi/",
+      "https://pypi.org/simple",
     ],
   },
   Object {
@@ -78,7 +78,7 @@ Array [
     "depType": "packages",
     "pipenvNestedVersion": false,
     "registryUrls": Array [
-      "https://pypi.org/pypi/",
+      "https://pypi.org/simple",
     ],
   },
   Object {
@@ -88,7 +88,7 @@ Array [
     "depType": "packages",
     "pipenvNestedVersion": false,
     "registryUrls": Array [
-      "https://pypi.org/pypi/",
+      "https://pypi.org/simple",
     ],
   },
   Object {
@@ -98,7 +98,7 @@ Array [
     "depType": "packages",
     "pipenvNestedVersion": false,
     "registryUrls": Array [
-      "https://pypi.org/pypi/",
+      "https://pypi.org/simple",
     ],
   },
 ]
