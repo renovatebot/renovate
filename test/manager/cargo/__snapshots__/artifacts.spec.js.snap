@@ -2,7 +2,7 @@
 
 exports[`cargo.getArtifacts() catches errors 1`] = `
 Object {
-  "lockFileError": Object {
+  "artifactError": Object {
     "lockFile": undefined,
     "stderr": "Cannot read property 'replace' of undefined",
   },

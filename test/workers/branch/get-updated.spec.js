@@ -65,7 +65,7 @@ describe('workers/branch/get-updated', () => {
       });
       composer.updateDependency.mockReturnValue('some new content');
       composer.getArtifacts.mockReturnValue({
-        lockFileError: {
+        artifactError: {
           name: 'composer.lock',
           stderr: 'some error',
         },

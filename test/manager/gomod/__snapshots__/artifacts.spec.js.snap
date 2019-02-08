@@ -2,7 +2,7 @@
 
 exports[`.getArtifacts() catches errors 1`] = `
 Object {
-  "lockFileError": Object {
+  "artifactError": Object {
     "lockFile": "go.sum",
     "stderr": "This update totally doesnt work",
   },

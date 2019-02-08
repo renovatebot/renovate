@@ -2,7 +2,7 @@
 
 exports[`.getArtifacts() catches errors 1`] = `
 Object {
-  "lockFileError": Object {
+  "artifactError": Object {
     "lockFile": "composer.lock",
     "stderr": "not found",
   },
@@ -11,7 +11,7 @@ Object {
 
 exports[`.getArtifacts() catches unmet requirements errors 1`] = `
 Object {
-  "lockFileError": Object {
+  "artifactError": Object {
     "lockFile": "composer.lock",
     "stderr": "fooYour requirements could not be resolved to an installable set of packages.bar",
   },
