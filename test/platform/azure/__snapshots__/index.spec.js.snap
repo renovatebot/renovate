@@ -68,35 +68,7 @@ Object {
 }
 `;
 
-exports[`platform/azure getAllRenovateBranches() should return all renovate branches 1`] = `
-Array [
-  "renovate/a",
-  "renovate/b",
-]
-`;
-
-exports[`platform/azure getBranchLastCommitTime should return a Date 1`] = `"1986-11-07T00:00:00Z"`;
-
 exports[`platform/azure getBranchPr(branchName) should return the pr 1`] = `null`;
-
-exports[`platform/azure getCommitMessages() returns commits messages 1`] = `
-Array [
-  "com1",
-  "com2",
-  "com3",
-]
-`;
-
-exports[`platform/azure getFile(filePatch, branchName) should return the encoded file content 1`] = `"Hello Renovate!"`;
-
-exports[`platform/azure getFileList should return the files matching the fileName 1`] = `
-Array [
-  "package.json",
-  "src/app/package.json",
-  "src/otherapp/package.json",
-  "symlinks/package.json",
-]
-`;
 
 exports[`platform/azure getPr(prNo) should return a pr in the right format 1`] = `
 Object {
@@ -131,21 +103,6 @@ Object {
   "isFork": false,
   "privateRepo": true,
 }
-`;
-
-exports[`platform/azure setBaseBranch(branchName) sets the base branch 1`] = `
-Array [
-  Array [],
-  Array [],
-  Array [],
-]
-`;
-
-exports[`platform/azure setBaseBranch(branchName) sets the base branch 2`] = `
-Array [
-  Array [],
-  Array [],
-]
 `;
 
 exports[`platform/azure updatePr(prNo, title, body) should update the PR 1`] = `
