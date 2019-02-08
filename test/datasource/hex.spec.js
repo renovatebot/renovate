@@ -1,11 +1,13 @@
 const fs = require('fs');
 const got = require('../../lib/util/got');
+const hostRules = require('../../lib/util/host-rules');
 const { getPkgReleases } = require('../../lib/datasource/hex');
 
 let res1 = fs.readFileSync('test/_fixtures/hex/certifi.json', 'utf8');
 res1 = JSON.parse(res1);
 
 jest.mock('../../lib/util/got');
+jest.mock('../../lib/util/host-rules');
 
 describe('datasource/hex', () => {
   describe('getPkgReleases', () => {
@@ -47,6 +49,16 @@ describe('datasource/hex', () => {
       expect(await getPkgReleases('some_package')).toBeNull();
     });
     it('processes real data', async () => {
+      got.mockReturnValueOnce({
+        body: res1,
+      });
+      const res = await getPkgReleases({ lookupName: 'certifi' });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+    });
+    it('process public repo without auth', async () => {
+      hostRules.find.mockReturnValueOnce(null);
       got.mockReturnValueOnce({
         body: res1,
       });
