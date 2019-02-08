@@ -150,7 +150,7 @@ describe('platform/azure', () => {
         'token',
         'https://my.custom.endpoint/'
       );
-      expect(config.repoId).toBe('1');
+      expect(config.isFork).toBe(false);
       azureApi.gitApi.mockImplementationOnce(() => ({
         getCommits: jest.fn(() => [
           { comment: 'com1' },

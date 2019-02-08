@@ -128,18 +128,8 @@ Array [
 
 exports[`platform/azure initRepo should initialise the config for a repo 2`] = `
 Object {
-  "baseBranch": "defBr",
-  "baseCommitSHA": "1234",
-  "defaultBranch": "defBr",
-  "fileList": null,
   "isFork": false,
-  "mergeMethod": "merge",
-  "owner": "?owner?",
-  "prList": null,
   "privateRepo": true,
-  "repoForceRebase": false,
-  "repoId": "1",
-  "repository": "some-repo",
 }
 `;
 
