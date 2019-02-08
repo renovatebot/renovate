@@ -2,7 +2,7 @@
 
 exports[`.getArtifacts() catches errors 1`] = `
 Object {
-  "lockFileError": Object {
+  "artifactError": Object {
     "lockFile": "Pipfile.lock",
     "stderr": "not found",
   },
