@@ -48,6 +48,16 @@ describe('datasource/hex', () => {
       });
       expect(await getPkgReleases('some_package')).toBeNull();
     });
+    it('returns null with wrong auth token', async () => {
+      hostRules.find.mockReturnValueOnce('this_simple_token');
+      got.mockReturnValueOnce(
+        Promise.reject({
+          statusCode: 401,
+        })
+      );
+      const res = await getPkgReleases({ lookupName: 'certifi' });
+      expect(res).toBeNull();
+    });
     it('processes real data', async () => {
       got.mockReturnValueOnce({
         body: res1,
