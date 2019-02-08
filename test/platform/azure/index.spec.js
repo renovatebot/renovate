@@ -41,7 +41,7 @@ describe('platform/azure', () => {
     it('should return an array of repos', async () => {
       const repos = await getRepos(
         'sometoken',
-        'https://fabrikam.VisualStudio.com/DefaultCollection'
+        'https://dev.azure.com/renovate12345'
       );
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
@@ -90,12 +90,12 @@ describe('platform/azure', () => {
       return azure.initRepo({
         repository: args[0],
         token: args[1],
-        endpoint: 'https://my.custom.endpoint/',
+        endpoint: 'https://dev.azure.com/renovate12345',
       });
     }
 
     return azure.initRepo({
-      endpoint: 'https://my.custom.endpoint/',
+      endpoint: 'https://dev.azure.com/renovate12345',
       ...args[0],
     });
   }
@@ -105,7 +105,7 @@ describe('platform/azure', () => {
       const config = await initRepo({
         repository: 'some-repo',
         token: 'token',
-        endpoint: 'https://my.custom.endpoint/',
+        endpoint: 'https://dev.azure.com/renovate12345',
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
@@ -148,7 +148,7 @@ describe('platform/azure', () => {
       const config = await initRepo(
         'some-repo',
         'token',
-        'https://my.custom.endpoint/'
+        'https://dev.azure.com/renovate12345'
       );
       expect(config.isFork).toBe(false);
       azureApi.gitApi.mockImplementationOnce(() => ({
