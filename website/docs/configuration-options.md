@@ -314,7 +314,7 @@ Also check out the `followTag` configuration option above if you wish Renovate t
 
 ## includeForks
 
-By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`.
+By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`. If you are using the hosted Renovate application then you need to add a `renovate.json` to your forked repo manually, and include `"includeForks": true` inside.
 
 ## includePaths
 
