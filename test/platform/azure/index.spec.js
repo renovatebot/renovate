@@ -1,20 +1,24 @@
-const hostRules = require('../../../lib/util/host-rules');
-
 describe('platform/azure', () => {
   let azure;
   let azureApi;
   let azureHelper;
+  let hostRules;
   beforeEach(() => {
-    // clean up hostRules
-    hostRules.clear();
-
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/azure/azure-got-wrapper');
     jest.mock('../../../lib/platform/azure/azure-helper');
+    hostRules = require('../../../lib/util/host-rules');
     azure = require('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
     azureHelper = require('../../../lib/platform/azure/azure-helper');
+    // clean up hostRules
+    hostRules.clear();
+    hostRules.update({
+      endpoint: 'https://dev.azure.com/renovate12345',
+      platform: 'azure',
+      token: 'token',
+    });
   });
 
   function getRepos(token, endpoint) {
