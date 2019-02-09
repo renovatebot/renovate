@@ -1,68 +1,239 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
+exports[`lib/manager/bundler/extract extractAllPackageFiles() parses complex Gemfile 1`] = `
 Object {
   "compatibility": Object {
     "bundler": "1.17.2",
+    "ruby": "ruby 2.6.0p0",
+  },
+  "deps": Array [
+    Object {
+      "currentValue": null,
+      "depName": "minitest-bisect",
+      "depTypes": Array [
+        "test",
+      ],
+      "lineNumbers": Array [
+        6,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": ">= 1.0.0, < 5",
+      "datasource": "rubygems",
+      "depName": "minitest-retry",
+      "depTypes": Array [
+        "test",
+        "development",
+      ],
+      "lineNumbers": Array [
+        7,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
+    },
+    Object {
+      "currentValue": null,
+      "depName": "byebug",
+      "depTypes": Array [
+        "test",
+      ],
+      "lineNumbers": Array [
+        10,
+      ],
+      "platforms": Array [
+        "mri",
+      ],
+      "registryUrls": Array [
+        "https://external.com/",
+      ],
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": null,
+      "depName": "stackprof",
+      "depTypes": Array [
+        "test",
+      ],
+      "lineNumbers": Array [
+        11,
+      ],
+      "platforms": Array [
+        "mri",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": null,
+      "depName": "benchmark-ips",
+      "depTypes": Array [
+        "test",
+      ],
+      "lineNumbers": Array [
+        15,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://another-external.com/",
+      ],
+      "skipReason": "no-version",
+    },
+  ],
+  "manager": "bundler",
+  "packageFile": "Gemfile.complex",
+  "registryUrls": Array [
+    "https://rubygems.org/",
+    "https://external.com/",
+    "https://another-external.com/",
+  ],
+}
+`;
+
+exports[`lib/manager/bundler/extract extractAllPackageFiles() parses rails Gemfile 1`] = `
+Object {
+  "compatibility": Object {
+    "bundler": "1.17.2",
+    "ruby": null,
   },
   "deps": Array [
     Object {
       "currentValue": ">= 11.1",
       "datasource": "rubygems",
       "depName": "rake",
-      "lineNumber": 9,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        10,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": ">= 2.15",
       "datasource": "rubygems",
       "depName": "capybara",
-      "lineNumber": 11,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        12,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "rack-cache",
-      "lineNumber": 13,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        14,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "sass-rails",
-      "lineNumber": 14,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        15,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
       "currentValue": "~> 5",
       "datasource": "rubygems",
       "depName": "turbolinks",
-      "lineNumber": 15,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        16,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "webpacker",
-      "lineNumber": 16,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        17,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
       "currentValue": "~> 3.1.11",
       "datasource": "rubygems",
       "depName": "bcrypt",
-      "lineNumber": 20,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        21,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "uglifier",
-      "lineNumber": 24,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        25,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": ">= 2.0.0",
       "datasource": "rubygems",
       "depName": "json",
-      "lineNumber": 27,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        28,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": ">= 0.47",
       "datasource": "rubygems",
       "depName": "rubocop",
-      "lineNumber": 29,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        30,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": "~> 1.0",
@@ -71,7 +242,13 @@ Object {
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 32,
+      "lineNumbers": Array [
+        33,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": "~> 3.2.3",
@@ -80,14 +257,29 @@ Object {
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 33,
+      "lineNumbers": Array [
+        34,
+      ],
+      "platforms": Array [
+        "ruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "w3c_validators",
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 34,
+      "lineNumbers": Array [
+        35,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
@@ -97,137 +289,276 @@ Object {
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 35,
+      "lineNumbers": Array [
+        36,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "dalli",
-      "lineNumber": 39,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        40,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 3.0.5, < 3.2",
       "datasource": "rubygems",
       "depName": "listen",
-      "lineNumber": 40,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        41,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "libxml-ruby",
-      "lineNumber": 41,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        42,
+      ],
+      "platforms": Array [
+        "ruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "connection_pool",
-      "lineNumber": 42,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        43,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 1.1.0",
       "datasource": "rubygems",
       "depName": "bootsnap",
-      "lineNumber": 45,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        46,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "resque",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 49,
+      "lineNumbers": Array [
+        50,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "resque-scheduler",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 50,
+      "lineNumbers": Array [
+        51,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "sidekiq",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 51,
+      "lineNumbers": Array [
+        52,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "sucker_punch",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 52,
+      "lineNumbers": Array [
+        53,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "delayed_job",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 53,
+      "lineNumbers": Array [
+        54,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "queue_classic",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 54,
+      "lineNumbers": Array [
+        55,
+      ],
+      "platforms": Array [
+        "ruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "sneakers",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 55,
+      "lineNumbers": Array [
+        56,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "que",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 56,
+      "lineNumbers": Array [
+        57,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "backburner",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 57,
+      "lineNumbers": Array [
+        58,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "delayed_job_active_record",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 58,
+      "lineNumbers": Array [
+        59,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "sequel",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 59,
+      "lineNumbers": Array [
+        60,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "puma",
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 64,
+      "lineNumbers": Array [
+        65,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "hiredis",
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 66,
+      "lineNumbers": Array [
+        67,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
@@ -237,54 +568,106 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 67,
+      "lineNumbers": Array [
+        68,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "redis-namespace",
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 69,
+      "lineNumbers": Array [
+        70,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "websocket-client-simple",
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 71,
+      "lineNumbers": Array [
+        72,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "blade",
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 73,
+      "lineNumbers": Array [
+        74,
+      ],
+      "platforms": Array [
+        "ruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "blade-sauce_labs_plugin",
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 74,
+      "lineNumbers": Array [
+        75,
+      ],
+      "platforms": Array [
+        "ruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "sprockets-export",
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 75,
+      "lineNumbers": Array [
+        76,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "aws-sdk-s3",
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 80,
+      "lineNumbers": Array [
+        81,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
@@ -294,14 +677,27 @@ Object {
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 81,
+      "lineNumbers": Array [
+        82,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "azure-storage",
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 82,
+      "lineNumbers": Array [
+        83,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
@@ -311,91 +707,205 @@ Object {
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 84,
+      "lineNumbers": Array [
+        85,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "aws-sdk-sns",
-      "lineNumber": 88,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        89,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "webmock",
-      "lineNumber": 89,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        90,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "qunit-selenium",
       "depTypes": Array [
         "ujs",
       ],
-      "lineNumber": 92,
+      "lineNumbers": Array [
+        93,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "chromedriver-helper",
       "depTypes": Array [
         "ujs",
       ],
-      "lineNumber": 93,
+      "lineNumbers": Array [
+        94,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "minitest-bisect",
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 101,
+      "lineNumbers": Array [
+        102,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "minitest-retry",
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 102,
+      "lineNumbers": Array [
+        103,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "stackprof",
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 105,
+      "lineNumbers": Array [
+        106,
+      ],
+      "platforms": Array [
+        "mri",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "byebug",
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 106,
+      "lineNumbers": Array [
+        107,
+      ],
+      "platforms": Array [
+        "mri",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "benchmark-ips",
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 109,
+      "lineNumbers": Array [
+        110,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 1.8.1",
       "datasource": "rubygems",
       "depName": "nokogiri",
-      "lineNumber": 113,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        114,
+      ],
+      "platforms": Array [
+        "ruby",
+        "mswin",
+        "mswin64",
+        "mingw",
+        "x64_mingw",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
-      "currentValue": ">=1.4.6",
+      "currentValue": ">= 1.4.6",
       "datasource": "rubygems",
       "depName": "racc",
-      "lineNumber": 116,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        117,
+      ],
+      "platforms": Array [
+        "ruby",
+        "mswin",
+        "mswin64",
+        "mingw",
+        "x64_mingw",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": "~> 1.3.6",
       "datasource": "rubygems",
       "depName": "sqlite3",
-      "lineNumber": 119,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        120,
+      ],
+      "platforms": Array [
+        "ruby",
+        "mswin",
+        "mswin64",
+        "mingw",
+        "x64_mingw",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": ">= 0.18.0",
@@ -404,7 +914,19 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 122,
+      "lineNumbers": Array [
+        123,
+      ],
+      "platforms": Array [
+        "ruby",
+        "mswin",
+        "mswin64",
+        "mingw",
+        "x64_mingw",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": ">= 0.4.10",
@@ -413,147 +935,318 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 123,
+      "lineNumbers": Array [
+        124,
+      ],
+      "platforms": Array [
+        "ruby",
+        "mswin",
+        "mswin64",
+        "mingw",
+        "x64_mingw",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "activerecord-jdbcsqlite3-adapter",
-      "lineNumber": 129,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        130,
+      ],
+      "platforms": Array [
+        "jruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "activerecord-jdbcmysql-adapter",
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 131,
+      "lineNumbers": Array [
+        132,
+      ],
+      "platforms": Array [
+        "jruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "activerecord-jdbcpostgresql-adapter",
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 132,
+      "lineNumbers": Array [
+        133,
+      ],
+      "platforms": Array [
+        "jruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
-    },
-    Object {
-      "currentValue": ">= 1.3.0",
-      "datasource": "rubygems",
-      "depName": "activerecord-jdbcsqlite3-adapter",
-      "lineNumber": 135,
-    },
-    Object {
-      "currentValue": ">= 1.3.0",
-      "datasource": "rubygems",
-      "depName": "activerecord-jdbcmysql-adapter",
-      "depTypes": Array [
-        "db",
-      ],
-      "lineNumber": 137,
-    },
-    Object {
-      "currentValue": ">= 1.3.0",
-      "datasource": "rubygems",
-      "depName": "activerecord-jdbcpostgresql-adapter",
-      "depTypes": Array [
-        "db",
-      ],
-      "lineNumber": 138,
     },
     Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "psych",
-      "lineNumber": 146,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        147,
+      ],
+      "platforms": Array [
+        "rbx",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
       "currentValue": "~> 2.2",
       "datasource": "rubygems",
       "depName": "ruby-oci8",
-      "lineNumber": 152,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        153,
+      ],
+      "platforms": Array [
+        "ruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
     Object {
+      "currentValue": null,
       "depName": "activerecord-oracle_enhanced-adapter",
-      "lineNumber": 154,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        155,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "ibm_db",
-      "lineNumber": 158,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        159,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "tzinfo-data",
-      "lineNumber": 159,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        160,
+      ],
+      "platforms": Array [
+        "mingw",
+        "mswin",
+        "x64_mingw",
+        "jruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 0.1.0",
       "datasource": "rubygems",
       "depName": "wdm",
-      "lineNumber": 160,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        161,
+      ],
+      "platforms": Array [
+        "mingw",
+        "mswin",
+        "x64_mingw",
+        "mswin64",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
+    },
+    Object {
+      "currentValue": ">= 1.3.0",
+      "datasource": "rubygems",
+      "depName": "activerecord-jdbcsqlite3-adapter",
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        136,
+      ],
+      "platforms": Array [
+        "jruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
+    },
+    Object {
+      "currentValue": ">= 1.3.0",
+      "datasource": "rubygems",
+      "depName": "activerecord-jdbcmysql-adapter",
+      "depTypes": Array [
+        "db",
+      ],
+      "lineNumbers": Array [
+        138,
+      ],
+      "platforms": Array [
+        "jruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
+    },
+    Object {
+      "currentValue": ">= 1.3.0",
+      "datasource": "rubygems",
+      "depName": "activerecord-jdbcpostgresql-adapter",
+      "depTypes": Array [
+        "db",
+      ],
+      "lineNumbers": Array [
+        139,
+      ],
+      "platforms": Array [
+        "jruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
     },
   ],
+  "manager": "bundler",
+  "packageFile": "Gemfile.rails",
   "registryUrls": Array [
-    "https://rubygems.org",
+    "https://rubygems.org/",
   ],
 }
 `;
 
-exports[`lib/manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
+exports[`lib/manager/bundler/extract extractAllPackageFiles() parses sourceGroup Gemfile 1`] = `
 Object {
   "compatibility": Object {
-    "ruby": "~> 1.5.3",
+    "bundler": "1.17.2",
+    "ruby": "ruby 2.6.0p0",
   },
   "deps": Array [
     Object {
+      "currentValue": null,
       "depName": "some_internal_gem",
-      "lineNumber": 4,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        5,
+      ],
+      "platforms": Array [],
       "registryUrls": Array [
-        "https://gems.example.com",
+        "https://gems.example.com/",
       ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "another_internal_gem",
-      "lineNumber": 5,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        6,
+      ],
+      "platforms": Array [],
       "registryUrls": Array [
-        "https://gems.example.com",
+        "https://gems.example.com/",
       ],
       "skipReason": "no-version",
     },
     Object {
-      "currentValue": "latest",
+      "currentValue": null,
       "depName": "ruby-debug",
-      "lineNumber": 9,
-      "skipReason": "invalid-value",
-    },
-    Object {
-      "depName": "sqlite3",
-      "lineNumber": 10,
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        10,
+      ],
+      "platforms": Array [
+        "ruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
+      "depName": "sqlite3",
+      "depTypes": Array [],
+      "lineNumbers": Array [
+        11,
+      ],
+      "platforms": Array [
+        "ruby",
+      ],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
+      "skipReason": "no-version",
+    },
+    Object {
+      "currentValue": null,
       "depName": "wirble",
       "depTypes": Array [
         "development",
-        "optional => true",
       ],
-      "lineNumber": 14,
+      "lineNumbers": Array [
+        15,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
     Object {
+      "currentValue": null,
       "depName": "faker",
       "depTypes": Array [
         "development",
-        "optional => true",
       ],
-      "lineNumber": 15,
+      "lineNumbers": Array [
+        16,
+      ],
+      "platforms": Array [],
+      "registryUrls": Array [
+        "https://rubygems.org/",
+      ],
       "skipReason": "no-version",
     },
   ],
+  "manager": "bundler",
+  "packageFile": "Gemfile.sourceGroup",
   "registryUrls": Array [
-    "https://rubygems.org",
+    "https://gems.example.com/",
+    "https://rubygems.org/",
   ],
 }
 `;

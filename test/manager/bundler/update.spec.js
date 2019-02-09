@@ -11,7 +11,7 @@ describe('manager/docker-compose/update', () => {
     it('replaces existing value', () => {
       // gem "rack-cache", "~> 1.2"
       const upgrade = {
-        lineNumber: 13,
+        lineNumbers: [14],
         depName: 'rack-cache',
         newValue: '~> 1.3',
       };
@@ -22,7 +22,7 @@ describe('manager/docker-compose/update', () => {
     it('returns same', () => {
       // gem "rack-cache", "~> 1.2"
       const upgrade = {
-        lineNumber: 13,
+        lineNumbers: [14],
         depName: 'rack-cache',
         newValue: '~> 1.2',
       };
@@ -32,7 +32,7 @@ describe('manager/docker-compose/update', () => {
     it('returns null if mismatch', () => {
       // gem "rack-cache", "~> 1.2"
       const upgrade = {
-        lineNumber: 13,
+        lineNumbers: [13],
         depName: 'wrong',
         newValue: '~> 1.3',
       };

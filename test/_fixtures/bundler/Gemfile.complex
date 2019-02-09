@@ -1,0 +1,17 @@
+ruby '2.5.3'
+
+source 'https://rubygems.org'
+
+group :test do
+  gem 'minitest-bisect'
+  gem 'minitest-retry', '>= 1.0.0', '< 5', group: :development
+
+  platforms :mri do
+    gem 'byebug', source: 'https://external.com'
+    gem 'stackprof'
+  end
+
+  source 'https://another-external.com' do
+    gem 'benchmark-ips'
+  end
+end

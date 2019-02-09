@@ -126,7 +126,7 @@ platforms :ruby, :mswin, :mswin64, :mingw, :x64_mingw do
 end
 
 platforms :jruby do
-  if ENV["AR_JDBC"]
+  if false
     gem "activerecord-jdbcsqlite3-adapter", github: "jruby/activerecord-jdbc-adapter", branch: "master"
     group :db do
       gem "activerecord-jdbcmysql-adapter", github: "jruby/activerecord-jdbc-adapter", branch: "master"
@@ -148,7 +148,7 @@ platforms :rbx do
 end
 
 # Gems that are necessary for Active Record tests with Oracle.
-if ENV["ORACLE_ENHANCED"]
+if false
   platforms :ruby do
     gem "ruby-oci8", "~> 2.2"
   end
@@ -156,6 +156,6 @@ if ENV["ORACLE_ENHANCED"]
 end
 
 # A gem necessary for Active Record tests with IBM DB.
-gem "ibm_db" if ENV["IBM_DB"]
+gem "ibm_db" if false
 gem "tzinfo-data", platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem "wdm", ">= 0.1.0", platforms: [:mingw, :mswin, :x64_mingw, :mswin64]

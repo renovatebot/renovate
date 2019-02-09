@@ -1,41 +1,72 @@
 const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/bundler/extract');
+const { extractAllPackageFiles } = require('../../../lib/manager/bundler');
 
-const railsGemfile = fs.readFileSync(
-  'test/_fixtures/bundler/Gemfile.rails',
-  'utf8'
-);
-const railsGemfileLock = fs.readFileSync(
-  'test/_fixtures/bundler/Gemfile.rails.lock',
-  'utf8'
-);
+function getFilesContent(fixtureName) {
+  const gemfilePath = `test/_fixtures/bundler/${fixtureName}`;
+  const lockfilePath = `test/_fixtures/bundler/${fixtureName}.lock`;
 
-const sourceGroupGemfile = fs.readFileSync(
-  'test/_fixtures/bundler/Gemfile.sourceGroup',
-  'utf8'
-);
+  return [gemfilePath, lockfilePath].map(path => fs.readFileSync(path, 'utf8'));
+}
 
-function validateGems(raw, parsed) {
-  const gemfileGemCount = raw.match(/\n\s*gem\s+/g).length;
-  const parsedGemCount = parsed.deps.length;
-  expect(gemfileGemCount).toEqual(parsedGemCount);
+function validateGems(content, result) {
+  const numberOfResultGems = result.deps.length;
+  const numberOfFileGems = content.match(/\n\s*gem\s+/g).length;
+
+  expect(numberOfResultGems).toEqual(numberOfFileGems);
 }
 
 describe('lib/manager/bundler/extract', () => {
-  describe('extractPackageFile()', () => {
+  describe('extractAllPackageFiles()', () => {
     it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', 'Gemfile')).toBeNull();
+      platform.getFile.mockReturnValue(null);
+      expect(await extractAllPackageFiles({}, ['Gemfile.empty'])).toHaveLength(
+        0
+      );
     });
+
     it('parses rails Gemfile', async () => {
-      platform.getFile.mockReturnValueOnce(railsGemfileLock);
-      const res = await extractPackageFile(railsGemfile, 'Gemfile');
-      expect(res).toMatchSnapshot();
-      validateGems(railsGemfile, res);
+      const file = 'Gemfile.rails';
+      const [gemfileContent, lockfileContent] = getFilesContent(file);
+
+      platform.getFile.mockReturnValueOnce(gemfileContent);
+      platform.getFile.mockReturnValueOnce(lockfileContent);
+
+      const [result, ...rest] = await extractAllPackageFiles({}, [file]);
+
+      expect(rest).toHaveLength(0);
+      expect(result).toMatchSnapshot();
+
+      validateGems(gemfileContent, result);
     });
-    it('parses sourceGroups', async () => {
-      const res = await extractPackageFile(sourceGroupGemfile, 'Gemfile');
-      expect(res).toMatchSnapshot();
-      validateGems(sourceGroupGemfile, res);
+
+    it('parses sourceGroup Gemfile', async () => {
+      const file = 'Gemfile.sourceGroup';
+      const [gemfileContent, lockfileContent] = getFilesContent(file);
+
+      platform.getFile.mockReturnValueOnce(gemfileContent);
+      platform.getFile.mockReturnValueOnce(lockfileContent);
+
+      const [result, ...rest] = await extractAllPackageFiles({}, [file]);
+
+      expect(rest).toHaveLength(0);
+      expect(result).toMatchSnapshot();
+
+      validateGems(gemfileContent, result);
+    });
+
+    it('parses complex Gemfile', async () => {
+      const file = 'Gemfile.complex';
+      const [gemfileContent, lockfileContent] = getFilesContent(file);
+
+      platform.getFile.mockReturnValueOnce(gemfileContent);
+      platform.getFile.mockReturnValueOnce(lockfileContent);
+
+      const [result, ...rest] = await extractAllPackageFiles({}, [file]);
+
+      expect(rest).toHaveLength(0);
+      expect(result).toMatchSnapshot();
+
+      validateGems(gemfileContent, result);
     });
   });
 });
