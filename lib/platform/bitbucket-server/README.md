@@ -1,15 +1,15 @@
 # Bitbucket Server Support
 
-Bitbucket Server support is considered in "alpha" release status.
+Bitbucket Server support is considered in "alpha" release status. There are no known problems or limitations other than what is documented below, but we want to wait for a little more feedback and ideally 1-2 or the mising features below before moving it to beta and then GA.
 
 ## Unsupported platform features/concepts
 
 - Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
 - Adding/removing labels (Bitbucket limitation?)
 
-## Features requiring implementation
+## Features awaiting implementation
 
-- Creating issues not implemented yet, e.g. when there is a config error
+- Creating issues not implemented yet, used to alert users when there is a config error
 - Adding reviewers to PRs not implemented yet
 - Adding comments to PRs not implemented yet, e.g. when a PR has been edited or has a lockfile error
 
@@ -38,6 +38,15 @@ At this point you should have a project ready for Renovate, and the `@renovate-b
 yarn start --platform=bitbucket-server --endpoint=http://localhost:7990 --git-fs=http --username=renovate-bot --password=abc123456789! --log-level=debug --autodiscover=true
 ```
 
-Remember that the above CLI parameters can also be exported to env if you prefer, e.g. `export RENOVATE_PLATFORM=bitbucket-server`, etc.
+Alternatively using env:
+```
+export RENOVATE_PLATFORM=bitbucket-server
+export RENOVATE_ENDPOINT=http://localhost:7990
+export RENOVATE_GIT_FS=http
+export RENOVATE_USERNAME=renovate-bot
+export RENOVATE_PASSWORD=abc123456789!
+export LOG_LEVEL=debug
+yarn start --autodiscover=true
+```
 
-You should then receive a "Configure Renovate" onboarding PR in the project.
+You should then receive a "Configure Renovate" onboarding PR in any projects that `@renovate-bot` has been invited to.
