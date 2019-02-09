@@ -39,6 +39,7 @@ yarn start --platform=bitbucket-server --endpoint=http://localhost:7990 --git-fs
 ```
 
 Alternatively using env:
+
 ```
 export RENOVATE_PLATFORM=bitbucket-server
 export RENOVATE_ENDPOINT=http://localhost:7990
