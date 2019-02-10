@@ -124,4 +124,16 @@
       </plugin>
     </plugins>
   </reporting>
+
+  <repositories>
+    <repository>
+      <id>atlassian</id>
+      <name>Atlassian Repository</name>
+      <url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+    </repository>
+    <repository>
+      <id>nonsense</id>
+      <name>The item without url</name>
+    </repository>
+  </repositories>
 </project>

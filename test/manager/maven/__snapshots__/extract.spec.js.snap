@@ -11,6 +11,7 @@ Object {
       "fileReplacePosition": 186,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
     Object {
@@ -20,6 +21,7 @@ Object {
       "fileReplacePosition": 757,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
     Object {
@@ -29,6 +31,7 @@ Object {
       "fileReplacePosition": 905,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
     Object {
@@ -38,6 +41,7 @@ Object {
       "fileReplacePosition": 1337,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
     Object {
@@ -62,6 +66,7 @@ Object {
       "fileReplacePosition": 2529,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
     Object {
@@ -81,6 +86,7 @@ Object {
       "fileReplacePosition": 3218,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
   ],
