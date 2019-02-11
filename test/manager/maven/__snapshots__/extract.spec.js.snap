@@ -17,7 +17,7 @@ Object {
       "currentValue": "0.0.1",
       "datasource": "maven",
       "depName": "org.example:foo",
-      "fileReplacePosition": 757,
+      "fileReplacePosition": 905,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
@@ -26,7 +26,7 @@ Object {
       "currentValue": "1.0.0",
       "datasource": "maven",
       "depName": "org.example:bar",
-      "fileReplacePosition": 905,
+      "fileReplacePosition": 1053,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
@@ -35,50 +35,74 @@ Object {
       "currentValue": "1.8.1",
       "datasource": "maven",
       "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
-      "fileReplacePosition": 1337,
+      "fileReplacePosition": 1485,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
     },
     Object {
       "currentValue": "0.0.1",
+      "datasource": "maven",
       "depName": "org.example:\${artifact-id-placeholder}",
+      "fileReplacePosition": 2230,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
       "skipReason": "name-placeholder",
     },
     Object {
       "currentValue": "0.0.1",
+      "datasource": "maven",
       "depName": "\${group-id-placeholder}:baz",
+      "fileReplacePosition": 2380,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
       "skipReason": "name-placeholder",
     },
     Object {
-      "currentValue": "\${resourceServerVersion}",
+      "currentValue": "1.2.3.4",
+      "datasource": "maven",
       "depName": "org.example:quux",
-      "skipReason": "version-placeholder",
+      "fileReplacePosition": 698,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
     },
     Object {
       "currentValue": "1.2.3",
       "datasource": "maven",
       "depName": "org.example:quuz",
-      "fileReplacePosition": 2529,
+      "fileReplacePosition": 2673,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
     },
     Object {
       "currentValue": "it's not a version",
+      "datasource": "maven",
       "depName": "org.example:quuuz",
+      "fileReplacePosition": 2813,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
       "skipReason": "not-a-version",
     },
     Object {
       "currentValue": "\${profile-placeholder}",
+      "datasource": "maven",
       "depName": "org.example:profile-artifact",
+      "fileReplacePosition": 3086,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
       "skipReason": "version-placeholder",
     },
     Object {
       "currentValue": "2.17",
       "datasource": "maven",
       "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
-      "fileReplacePosition": 3218,
+      "fileReplacePosition": 3362,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
