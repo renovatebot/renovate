@@ -66,13 +66,34 @@ TOML can be parsed line by line
 
 #### Does the package file structure distinguish between different "types" of dependencies? e.g. production dependencies, dev dependencies, etc?
 
-No
+Yes, `dependencies`, `dev-dependencies`, and `optional dependencies`
+
+```toml
+[tool.poetry.dependencies]
+python = "~2.7 || ^3.2"  # Compatible python versions must be declared here
+toml = "^0.9"
+# Dependencies with extras
+requests = { version = "^2.13", extras = [ "security" ] }
+# Python specific dependencies with prereleases allowed
+pathlib2 = { version = "^2.2", python = "~2.7", allows-prereleases = true }
+# Git dependencies
+cleo = { git = "https://github.com/sdispater/cleo.git", branch = "master" }
+
+# Optional dependencies (extras)
+pendulum = { version = "^1.4", optional = true }
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+```
 
 ---
 
 #### List all the sources/syntaxes of dependencies that can be extracted:
 
-TODO
+- **classic** `numpy="1.16.1"` or `numpy={ version="1.16.1" }`
+- **git** `cleo = { git = "https://github.com/sdispater/cleo.git", branch = "master" }`
+- **path**, target can be directory or file _.py_ `docs = { path = "./packages/docs" }`
+- **file**, target can be archive or wheel `docs = { file = "./my_wheel.whl" }`
 
 ---
 
@@ -112,7 +133,15 @@ No, it can reuse the pypi data source.
 
 #### Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?
 
-Yes, TODO
+Yes
+
+A registry can be specified in _pyproject.toml_ with:
+
+```toml
+[[tool.poetry.source]]
+name = 'private'
+url = 'http://example.com/simple'
+```
 
 ---
 
@@ -155,7 +184,8 @@ Update 1 dependency
 
 #### If applicable, describe how the tool maintains a cache and if it can be controlled via CLI or env? Do you recommend the cache be kept or disabled/ignored?
 
-TODO
+- poetry virtual env: https://poetry.eustace.io/docs/configuration/#settingsvirtualenvspath-string
+- pip, used in background by poetry. Can be done with env variable `PIP_CACHE_DIR`
 
 ---
 
