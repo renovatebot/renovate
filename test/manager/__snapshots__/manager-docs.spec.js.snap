@@ -11,6 +11,7 @@ Array [
   "composer",
   "docker-compose",
   "dockerfile",
+  "github-actions",
   "gitlabci",
   "gomod",
   "gradle",

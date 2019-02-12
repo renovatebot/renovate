@@ -5,29 +5,25 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.11.3-alpine",
-    "currentDepTagDigest": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
     "currentDigest": "sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
     "currentFrom": "node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d",
     "currentValue": "8.11.3-alpine",
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "AS node",
     "lineNumber": 2,
-    "purl": "pkg:docker/node",
   },
   Object {
     "currentDepTag": "buildkite/puppeteer:1.1.1",
-    "currentDepTagDigest": "buildkite/puppeteer:1.1.1",
     "currentDigest": undefined,
     "currentFrom": "buildkite/puppeteer:1.1.1",
     "currentValue": "1.1.1",
+    "datasource": "docker",
     "depName": "buildkite/puppeteer",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "AS puppeteer",
     "lineNumber": 3,
-    "purl": "pkg:docker/buildkite/puppeteer",
   },
 ]
 `;
@@ -37,29 +33,25 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node:6.12.3",
-    "currentDepTagDigest": "node:6.12.3",
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentValue": "6.12.3",
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
   Object {
     "currentDepTag": "python:3.6-slim",
-    "currentDepTagDigest": "python:3.6-slim",
     "currentDigest": undefined,
     "currentFrom": "python:3.6-slim",
     "currentValue": "3.6-slim",
+    "datasource": "docker",
     "depName": "python",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 4,
-    "purl": "pkg:docker/python",
   },
 ]
 `;
@@ -67,17 +59,15 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles COPY --from 1`] = `
 Array [
   Object {
-    "currentDepTag": "k8s-skaffold/skaffold:v0.11.0",
-    "currentDepTagDigest": "k8s-skaffold/skaffold:v0.11.0",
+    "currentDepTag": "gcr.io/k8s-skaffold/skaffold:v0.11.0",
     "currentDigest": undefined,
     "currentFrom": "gcr.io/k8s-skaffold/skaffold:v0.11.0",
     "currentValue": "v0.11.0",
-    "depName": "k8s-skaffold/skaffold",
-    "dockerRegistry": "gcr.io",
+    "datasource": "docker",
+    "depName": "gcr.io/k8s-skaffold/skaffold",
     "fromPrefix": "COPY --from=",
     "fromSuffix": "/usr/bin/skaffold /usr/bin/skaffold",
     "lineNumber": 1,
-    "purl": "pkg:docker/k8s-skaffold/skaffold?registry=gcr.io",
   },
 ]
 `;
@@ -85,18 +75,15 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles abnoral spacing 1`] = `
 Array [
   Object {
-    "commitMessageTopic": "Node.js",
-    "currentDepTag": "node:8.7.0",
-    "currentDepTagDigest": "node:8.7.0",
+    "currentDepTag": "registry.allmine.info:5005/node:8.7.0",
     "currentDigest": undefined,
     "currentFrom": "registry.allmine.info:5005/node:8.7.0",
-    "currentValue": "8.7.0",
-    "depName": "node",
-    "dockerRegistry": "registry.allmine.info:5005",
+    "currentValue": "5005/node",
+    "datasource": "docker",
+    "depName": "registry.allmine.info",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node?registry=registry.allmine.info:5005",
   },
 ]
 `;
@@ -105,16 +92,14 @@ exports[`lib/manager/dockerfile/extract extractPackageFile() handles calico/node
 Array [
   Object {
     "currentDepTag": "calico/node",
-    "currentDepTagDigest": "calico/node",
     "currentDigest": undefined,
     "currentFrom": "calico/node",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "calico/node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/calico/node",
   },
 ]
 `;
@@ -124,16 +109,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
-    "currentDepTagDigest": "node",
     "currentDigest": undefined,
     "currentFrom": "node",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 3,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -142,17 +125,15 @@ exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom host
 Array [
   Object {
     "commitMessageTopic": "Node.js",
-    "currentDepTag": "node:8",
-    "currentDepTagDigest": "node:8",
+    "currentDepTag": "registry2.something.info/node:8",
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info/node:8",
     "currentValue": "8",
-    "depName": "node",
-    "dockerRegistry": "registry2.something.info",
+    "datasource": "docker",
+    "depName": "registry2.something.info/node",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node?registry=registry2.something.info",
   },
 ]
 `;
@@ -161,17 +142,15 @@ exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom host
 Array [
   Object {
     "commitMessageTopic": "Node.js",
-    "currentDepTag": "node:8-alpine",
-    "currentDepTagDigest": "node:8-alpine",
+    "currentDepTag": "registry2.something.info/node:8-alpine",
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info/node:8-alpine",
     "currentValue": "8-alpine",
-    "depName": "node",
-    "dockerRegistry": "registry2.something.info",
+    "datasource": "docker",
+    "depName": "registry2.something.info/node",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node?registry=registry2.something.info",
   },
 ]
 `;
@@ -180,17 +159,15 @@ exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom host
 Array [
   Object {
     "commitMessageTopic": "Node.js",
-    "currentDepTag": "someaccount/node:8",
-    "currentDepTagDigest": "someaccount/node:8",
+    "currentDepTag": "registry2.something.info/someaccount/node:8",
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info/someaccount/node:8",
     "currentValue": "8",
-    "depName": "someaccount/node",
-    "dockerRegistry": "registry2.something.info",
+    "datasource": "docker",
+    "depName": "registry2.something.info/someaccount/node",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/someaccount/node?registry=registry2.something.info",
   },
 ]
 `;
@@ -198,18 +175,15 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom hosts with port 1`] = `
 Array [
   Object {
-    "commitMessageTopic": "Node.js",
-    "currentDepTag": "node:8",
-    "currentDepTagDigest": "node:8",
+    "currentDepTag": "registry2.something.info:5005/node:8",
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info:5005/node:8",
-    "currentValue": "8",
-    "depName": "node",
-    "dockerRegistry": "registry2.something.info:5005",
+    "currentValue": "5005/node",
+    "datasource": "docker",
+    "depName": "registry2.something.info",
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node?registry=registry2.something.info:5005",
   },
 ]
 `;
@@ -219,16 +193,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
-    "currentDepTagDigest": "node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentFrom": "node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -238,16 +210,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0-alpine",
-    "currentDepTagDigest": "node:8.9.0-alpine",
     "currentDigest": undefined,
     "currentFrom": "node:8.9.0-alpine",
     "currentValue": "8.9.0-alpine",
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as base",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -257,16 +227,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
-    "currentDepTagDigest": "node",
     "currentDigest": undefined,
     "currentFrom": "node",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -276,16 +244,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "mynamespace/node:8",
-    "currentDepTagDigest": "mynamespace/node:8",
     "currentDigest": undefined,
     "currentFrom": "mynamespace/node:8",
     "currentValue": "8",
+    "datasource": "docker",
     "depName": "mynamespace/node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/mynamespace/node",
   },
 ]
 `;
@@ -295,16 +261,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0-alpine",
-    "currentDepTagDigest": "node:8.9.0-alpine",
     "currentDigest": undefined,
     "currentFrom": "node:8.9.0-alpine",
     "currentValue": "8.9.0-alpine",
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -314,16 +278,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node:8.9.0",
-    "currentDepTagDigest": "node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentDigest": "sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentFrom": "node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063",
     "currentValue": "8.9.0",
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -333,16 +295,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node",
-    "currentDepTagDigest": "node",
     "currentDigest": undefined,
     "currentFrom": "node",
     "currentValue": undefined,
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "From",
     "fromSuffix": "",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -352,16 +312,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node:6.12.3",
-    "currentDepTagDigest": "node:6.12.3",
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentValue": "6.12.3",
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -371,16 +329,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node:6.12.3",
-    "currentDepTagDigest": "node:6.12.3",
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentValue": "6.12.3",
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;
@@ -390,16 +346,14 @@ Array [
   Object {
     "commitMessageTopic": "Node.js",
     "currentDepTag": "node:6.12.3",
-    "currentDepTagDigest": "node:6.12.3",
     "currentDigest": undefined,
     "currentFrom": "node:6.12.3",
     "currentValue": "6.12.3",
+    "datasource": "docker",
     "depName": "node",
-    "dockerRegistry": undefined,
     "fromPrefix": "FROM",
     "fromSuffix": "as frontend",
     "lineNumber": 0,
-    "purl": "pkg:docker/node",
   },
 ]
 `;

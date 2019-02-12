@@ -315,8 +315,8 @@ describe('manager/npm/post-update', () => {
       config.updateLockFiles = false;
       const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toMatchSnapshot();
-      expect(res.lockFileErrors).toHaveLength(0);
-      expect(res.updatedLockFiles).toHaveLength(0);
+      expect(res.artifactErrors).toHaveLength(0);
+      expect(res.updatedArtifacts).toHaveLength(0);
     });
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.updateType = 'lockFileMaintenance';
@@ -324,8 +324,8 @@ describe('manager/npm/post-update', () => {
       platform.branchExists.mockReturnValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toMatchSnapshot();
-      expect(res.lockFileErrors).toHaveLength(0);
-      expect(res.updatedLockFiles).toHaveLength(0);
+      expect(res.artifactErrors).toHaveLength(0);
+      expect(res.updatedArtifacts).toHaveLength(0);
     });
     /*
     it('returns no error and empty lockfiles if none updated', async () => {
@@ -338,8 +338,8 @@ describe('manager/npm/post-update', () => {
       });
       const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();
-      expect(res.lockFileErrors).toHaveLength(0);
-      expect(res.updatedLockFiles).toHaveLength(0);
+      expect(res.artifactErrors).toHaveLength(0);
+      expect(res.updatedArtifacts).toHaveLength(0);
     });
     it('tries multiple lock files', async () => {
       lockFiles.determineLockFileDirs.mockReturnValueOnce({
@@ -351,8 +351,8 @@ describe('manager/npm/post-update', () => {
       });
       const res = await getAdditionalFiles(config);
       expect(res).toMatchSnapshot();
-      expect(res.lockFileErrors).toHaveLength(0);
-      expect(res.updatedLockFiles).toHaveLength(0);
+      expect(res.artifactErrors).toHaveLength(0);
+      expect(res.updatedArtifacts).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(3);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
       expect(platform.getFile.mock.calls).toHaveLength(7);
@@ -396,8 +396,8 @@ describe('manager/npm/post-update', () => {
       yarn.generateLockFile.mockReturnValueOnce({ error: true });
       pnpm.generateLockFile.mockReturnValueOnce({ error: true });
       const res = await getAdditionalFiles(config);
-      expect(res.lockFileErrors).toHaveLength(3);
-      expect(res.updatedLockFiles).toHaveLength(0);
+      expect(res.artifactErrors).toHaveLength(3);
+      expect(res.updatedArtifacts).toHaveLength(0);
       expect(npm.generateLockFile.mock.calls).toHaveLength(3);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
       expect(platform.getFile.mock.calls).toHaveLength(4);
@@ -414,8 +414,8 @@ describe('manager/npm/post-update', () => {
       yarn.generateLockFile.mockReturnValueOnce('some new lock file contents');
       pnpm.generateLockFile.mockReturnValueOnce('some new lock file contents');
       const res = await getAdditionalFiles(config);
-      expect(res.lockFileErrors).toHaveLength(0);
-      expect(res.updatedLockFiles).toHaveLength(3);
+      expect(res.artifactErrors).toHaveLength(0);
+      expect(res.updatedArtifacts).toHaveLength(3);
       expect(npm.generateLockFile.mock.calls).toHaveLength(3);
       expect(yarn.generateLockFile.mock.calls).toHaveLength(2);
       expect(platform.getFile.mock.calls).toHaveLength(7);

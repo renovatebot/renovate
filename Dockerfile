@@ -1,4 +1,4 @@
-FROM amd64/ubuntu:18.04@sha256:cef0c2cde57a973ed80513a7d3614bc654d9d6becad2c068c9328b41bb3f6713
+FROM amd64/ubuntu:18.04@sha256:be159ff0e12a38fd2208022484bee14412680727ec992680b66cdead1ba76d19
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -9,13 +9,13 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client && apt-get clean -y
+RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar && apt-get clean -y
 
 ## Node.js
 
 # START copy Node.js from https://github.com/nodejs/docker-node/blob/master/10/jessie/Dockerfile
 
-ENV NODE_VERSION 10.15.0
+ENV NODE_VERSION 10.15.1
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
@@ -50,7 +50,7 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && curl -fsSLO --compressed "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
   && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
   && grep " node-v$NODE_VERSION-linux-$ARCH.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
-  && tar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
+  && bsdtar -xJf "node-v$NODE_VERSION-linux-$ARCH.tar.xz" -C /usr/local --strip-components=1 --no-same-owner \
   && rm "node-v$NODE_VERSION-linux-$ARCH.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
   && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
@@ -82,6 +82,17 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 ENV CGO_ENABLED=0
 
+# Python
+
+RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && apt-get clean
+
+RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.7 /usr/bin/python3
+RUN ln /usr/bin/python3.7 /usr/bin/python
+
+# Pip
+
+RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python
+
 # Set up ubuntu user
 
 RUN groupadd --gid 1000 ubuntu \
@@ -91,7 +102,15 @@ RUN chmod -R a+rw /usr
 
 USER ubuntu
 
-ENV YARN_VERSION=1.12.3
+# Pipenv
+
+ENV PATH="/home/ubuntu/.local/bin:$PATH"
+
+RUN pip install --user pipenv
+
+# Yarn
+
+ENV YARN_VERSION=1.13.0
 
 RUN npm i -g yarn@${YARN_VERSION}
 
@@ -99,6 +118,7 @@ COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
 COPY lib lib
+COPY bin bin
 
 ENTRYPOINT ["node", "/usr/src/app/lib/renovate.js"]
 CMD ["--help"]

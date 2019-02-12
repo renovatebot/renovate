@@ -1,8 +1,8 @@
 const fs = require('fs');
-const got = require('got');
+const got = require('../../lib/util/got');
 const { getPkgReleases } = require('../../lib/datasource/ruby-version');
 
-jest.mock('got');
+jest.mock('../../lib/util/got');
 
 const rubyReleasesHtml = fs.readFileSync(
   'test/_fixtures/ruby-version/releases.html',
@@ -11,7 +11,10 @@ const rubyReleasesHtml = fs.readFileSync(
 
 describe('datasource/gradle', () => {
   describe('getPkgReleases', () => {
-    beforeEach(() => global.renovateCache.rmAll());
+    beforeEach(() => {
+      global.repoCache = {};
+      return global.renovateCache.rmAll();
+    });
     it('parses real data', async () => {
       got.mockReturnValueOnce({
         body: rubyReleasesHtml,
