@@ -24,6 +24,7 @@ describe('workers/repository/error', () => {
       'blocked',
       'not-found',
       'forbidden',
+      'bad-credentials',
       'rate-limit-exceeded',
       'lockfile-error',
       'disk-space',
