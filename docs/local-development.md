@@ -22,7 +22,7 @@ We use [yarn](https://github.com/yarnpkg/yarn) so run `yarn install` to install 
 Run `yarn start`. You should see this error:
 
 ```
-FATAL: Renovate fatal error: You need to supply a GitHub token.
+Fatal error: No authentication found for platform https://api.github.com/ (github)
 ```
 
 ## Platform Account Setup
