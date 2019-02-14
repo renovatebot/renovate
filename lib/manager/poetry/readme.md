@@ -20,13 +20,13 @@ pip
 
 #### What type of package files and names does it use?
 
-_pyproject.toml_ and _poetry.lock_
+_pyproject.toml_
 
 ---
 
 #### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
 
-_pyproject.toml_ and _poetry.lock_
+`(^|/)pyproject\\.toml$`
 
 ---
 
@@ -38,7 +38,7 @@ No
 
 #### Is the fileMatch pattern likely to get many "false hits" for files that have nothing to do with package management?
 
-No
+There may be cases where a project has a `pyproject.toml` but no Poetry entries.
 
 ## Parsing and Extraction
 
@@ -60,7 +60,7 @@ TOML
 
 #### How do you suggest parsing the file? Using an off-the-shelf parser, using regex, or can it be custom-parsed line by line?
 
-TOML can be parsed line by line
+Use TOML parser like done for pipenv
 
 ---
 
@@ -99,6 +99,8 @@ pytest = "^3.0"
 
 #### Describe which types of dependencies above are supported and which will be implemented in future:
 
+Support classic references only in initial development.
+
 ## Versioning
 
 #### What versioning scheme do the package files use?
@@ -121,7 +123,7 @@ Both, TODO
 
 #### If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?
 
-It isn't clear yet
+Dev dependencies can always be pinned.
 
 ## Lookup
 
