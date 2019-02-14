@@ -5,7 +5,6 @@ describe('manager readmes', () => {
     const managers = (await fs.readdir('lib/manager')).filter(
       item => !item.includes('.')
     );
-    expect(managers).toMatchSnapshot();
     let expectedHeaders;
     for (const manager of managers) {
       let readme;
@@ -22,7 +21,6 @@ describe('manager readmes', () => {
           .match(/\n#### (.*?)\n/g)
           .map(match => match.substring(6, match.length - 1));
         expectedHeaders = expectedHeaders || headers;
-        expect(headers).toMatchSnapshot();
         expect(headers).toEqual(expectedHeaders);
       }
     }
