@@ -231,6 +231,10 @@ See https://renovatebot.com/docs/config-presets for details.
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
 
+## github-actions
+
+Add to this configuration setting if you need to override any of the GitHub Actions default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
+
 ## gitlabci
 
 Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
@@ -242,6 +246,8 @@ Configuration added here applies for all Go-related updates, however currently t
 ## gomod
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
+
+## gomodTidy
 
 ## gradle
 

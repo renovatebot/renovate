@@ -23,6 +23,14 @@
     <url>http://example.org/</url>
   </issueManagement>
 
+  <properties>
+    <quuxGroup>org.example</quuxGroup>
+    <quuxId>quux</quuxId>
+    <quuxVersion>
+      1.2.3.4
+    </quuxVersion>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -83,9 +91,9 @@
       <version>0.0.1</version>
     </dependency>
     <dependency>
-      <groupId>org.example</groupId>
-      <artifactId>quux</artifactId>
-      <version>${resourceServerVersion}</version>
+      <groupId>${quuxGroup}</groupId>
+      <artifactId>${quuxId}</artifactId>
+      <version>${quuxVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.example</groupId>
@@ -124,4 +132,16 @@
       </plugin>
     </plugins>
   </reporting>
+
+  <repositories>
+    <repository>
+      <id>atlassian</id>
+      <name>Atlassian Repository</name>
+      <url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+    </repository>
+    <repository>
+      <id>nonsense</id>
+      <name>The item without url</name>
+    </repository>
+  </repositories>
 </project>
