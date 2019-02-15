@@ -1,4 +1,8 @@
-const { compare, parseRange } = require('../../lib/versioning/maven/compare');
+const {
+  compare,
+  parseRange,
+  rangeToStr,
+} = require('../../lib/versioning/maven/compare');
 const {
   isVersion,
   isStable,
@@ -77,97 +81,118 @@ describe('versioning/maven/compare', () => {
     expect(compare('1-ga-1', '1-sp-1')).toEqual(1);
     expect(compare('1', '1-cr1')).toEqual(1);
   });
-  it('parses version ranges', () => {
-    expect(parseRange('[]')).toEqual(null);
-    expect(parseRange('[,]')).toEqual(null);
-    expect(parseRange('1.0')).toEqual(null);
-    expect(parseRange('(')).toEqual(null);
-    expect(parseRange('[')).toEqual(null);
-    expect(parseRange(',')).toEqual(null);
-    expect(parseRange('[1.0')).toEqual(null);
-    expect(parseRange('1.0]')).toEqual(null);
-    expect(parseRange('[1.0],')).toEqual(null);
-    expect(parseRange(',[1.0]')).toEqual(null);
-    expect(parseRange('[1.0]')).toEqual([
-      {
-        leftType: 'INCLUDING_POINT',
-        leftValue: '1.0',
-        rightType: 'INCLUDING_POINT',
-        rightValue: '1.0',
-      },
-    ]);
-    expect(parseRange('[,1.0]')).toEqual(null);
-    expect(parseRange('(,1.0]')).toEqual([
-      {
-        leftType: 'EXCLUDING_POINT',
-        leftValue: null,
-        rightType: 'INCLUDING_POINT',
-        rightValue: '1.0',
-      },
-    ]);
-    expect(parseRange('[1.2,1.3],1.4')).toEqual(null);
-    expect(parseRange('[1.2,,1.3]')).toEqual(null);
-    expect(parseRange('[1.3,1.2]')).toEqual(null);
-    expect(parseRange('[1,[2,3],4]')).toEqual(null);
-    expect(parseRange('[1.2,1.3]')).toEqual([
-      {
-        leftType: 'INCLUDING_POINT',
-        leftValue: '1.2',
-        rightType: 'INCLUDING_POINT',
-        rightValue: '1.3',
-      },
-    ]);
-    expect(parseRange('[2.0,1.0)')).toEqual(null);
-    expect(parseRange('[1.0,2.0)')).toEqual([
-      {
-        leftType: 'INCLUDING_POINT',
-        leftValue: '1.0',
-        rightType: 'EXCLUDING_POINT',
-        rightValue: '2.0',
-      },
-    ]);
-    expect(parseRange('[1.5,]')).toEqual(null);
-    expect(parseRange('[1.5,)')).toEqual([
-      {
-        leftType: 'INCLUDING_POINT',
-        leftValue: '1.5',
-        rightType: 'EXCLUDING_POINT',
-        rightValue: null,
-      },
-    ]);
-    expect(parseRange('(,1.0],,[1.2,)')).toEqual(null);
-    expect(parseRange('(,1.0],[1.2,),')).toEqual(null);
-    expect(parseRange('(,1.0],[1.2,)')).toEqual([
-      {
-        leftType: 'EXCLUDING_POINT',
-        leftValue: null,
-        rightType: 'INCLUDING_POINT',
-        rightValue: '1.0',
-      },
-      {
-        leftType: 'INCLUDING_POINT',
-        leftValue: '1.2',
-        rightType: 'EXCLUDING_POINT',
-        rightValue: null,
-      },
-    ]);
-    expect(parseRange('(,1.1),(1.0,)')).toEqual(null);
-    expect(parseRange('(0,1.1),(1.0,2.0)')).toEqual(null);
-    expect(parseRange('(0,1.1),(,2.0)')).toEqual(null);
-    expect(parseRange('(,1.1),(1.1,)')).toEqual([
-      {
-        leftType: 'EXCLUDING_POINT',
-        leftValue: null,
-        rightType: 'EXCLUDING_POINT',
-        rightValue: '1.1',
-      },
-      {
-        leftType: 'EXCLUDING_POINT',
-        leftValue: '1.1',
-        rightType: 'EXCLUDING_POINT',
-        rightValue: null,
-      },
-    ]);
+  it('filters out incorrect ranges', () => {
+    const nulls = [
+      '[]',
+      '[,]',
+      '1.0',
+      '(',
+      '[',
+      ',',
+      '[1.0',
+      '1.0]',
+      '[1.0],',
+      ',[1.0]',
+      '(,1.1),(1.0,)',
+      '(0,1.1),(1.0,2.0)',
+      '(0,1.1),(,2.0)',
+      '(,1.0],,[1.2,)',
+      '(,1.0],[1.2,),',
+      '[1.5,]',
+      '[2.0,1.0)',
+      '[1.2,1.3],1.4',
+      '[1.2,,1.3]',
+      '[1.3,1.2]',
+      '[1,[2,3],4]',
+      '[,1.0]',
+    ];
+    Object.keys(nulls).forEach(rangeStr => {
+      const range = parseRange(rangeStr);
+      expect(range).toEqual(null);
+      expect(rangeToStr(range)).toEqual(null);
+    });
+  });
+  it('parses version ranges and translates them back to string', () => {
+    const presetRanges = {
+      '[1.0]': [
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.0',
+          rightType: 'INCLUDING_POINT',
+          rightValue: '1.0',
+        },
+      ],
+      '(,1.0]': [
+        {
+          leftType: 'EXCLUDING_POINT',
+          leftValue: null,
+          rightType: 'INCLUDING_POINT',
+          rightValue: '1.0',
+        },
+      ],
+      '[1.2,1.3]': [
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.2',
+          rightType: 'INCLUDING_POINT',
+          rightValue: '1.3',
+        },
+      ],
+      '[1.0,2.0)': [
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.0',
+          rightType: 'EXCLUDING_POINT',
+          rightValue: '2.0',
+        },
+      ],
+      '[1.5,)': [
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.5',
+          rightType: 'EXCLUDING_POINT',
+          rightValue: null,
+        },
+      ],
+      '(,1.0],[1.2,)': [
+        {
+          leftType: 'EXCLUDING_POINT',
+          leftValue: null,
+          rightType: 'INCLUDING_POINT',
+          rightValue: '1.0',
+        },
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.2',
+          rightType: 'EXCLUDING_POINT',
+          rightValue: null,
+        },
+      ],
+      '(,1.1),(1.1,)': [
+        {
+          leftType: 'EXCLUDING_POINT',
+          leftValue: null,
+          rightType: 'EXCLUDING_POINT',
+          rightValue: '1.1',
+        },
+        {
+          leftType: 'EXCLUDING_POINT',
+          leftValue: '1.1',
+          rightType: 'EXCLUDING_POINT',
+          rightValue: null,
+        },
+      ],
+    };
+    Object.keys(presetRanges).forEach(rangeStr => {
+      const presetValue = presetRanges[rangeStr];
+      const fullRange = parseRange(rangeStr);
+      expect(presetValue).toEqual(fullRange);
+      if (fullRange === null) {
+        expect(presetValue).toEqual(null);
+      } else {
+        expect(rangeToStr(fullRange)).toEqual(rangeStr);
+      }
+    });
   });
 });
 
