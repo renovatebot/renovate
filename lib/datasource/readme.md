@@ -4,14 +4,13 @@ Datasources are used in Renovate primarily to fetch released versions of package
 
 ### getPkgReleases
 
-The minimum exported interface for a datasource is a function called `getPkgReleases` that takes a `purl` object as first input, and optionally `config` as the second argument.
+The minimum exported interface for a datasource is a function called `getPkgReleases` that takes a lookup config as input.
 
-The `purl` object contains:
+The config contains:
 
-- `fullname`: the package's full name including scope if present (e.g. `@foo/bar`)
-- `qualifiers`: optional addition arguments, may contain fields like `registry`
-
-In the simplest case, the datasource only needs to pay attention to `purl.fullname`.
+- `lookupName`: the package's full name including scope if present (e.g. `@foo/bar`)
+- `lookupType`: used only when there is a need to specify different types of lookups within the same datasource
+- `registryUrls`: an array of registry Urls to try
 
 `getPkgReleases` should return an object containing:
 
@@ -28,7 +27,7 @@ Datasources that support the concept of digests (e.g. docker digests and git com
 
 The `getDigest` function has two inputs:
 
-- `config`: the Renovate config for the package being updated
+- `config`: the Renovate config for the package being updated, contains same fields as `getPkgReleases`
 - `newValue`: the version or value to retrieve the digest for
 
 The `getDigest` function returns a string output representing the digest value. If none is found then a return value of `null` should be returned.

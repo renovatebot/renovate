@@ -23,7 +23,6 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
       "https://index.docker.io/v2/library/node/tags/list?n=10000",
       Object {
         "headers": Object {
-          "Accept": "application/vnd.docker.distribution.manifest.v2+json",
           "Authorization": "Bearer some-token ",
         },
         "json": true,
@@ -87,7 +86,6 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
       "https://index.docker.io/v2/library/node/tags/list?n=10000",
       Object {
         "headers": Object {
-          "Accept": "application/vnd.docker.distribution.manifest.v2+json",
           "Authorization": "Bearer some-token ",
         },
         "json": true,
@@ -151,7 +149,6 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
       "https://k8s.gcr.io/v2/kubernetes-dashboard-amd64/tags/list?n=10000",
       Object {
         "headers": Object {
-          "Accept": "application/vnd.docker.distribution.manifest.v2+json",
           "Authorization": "Bearer some-token ",
         },
         "json": true,
@@ -192,17 +189,17 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
 }
 `;
 
-exports[`api/docker getPkgReleases uses custom registry 1`] = `
+exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
-      "https://https://registry.company.com/v2/",
+      "https://registry.company.com/v2/",
       Object {
         "throwHttpErrors": false,
       },
     ],
     Array [
-      "https://https://registry.company.com/v2/library/node/tags/list?n=10000",
+      "https://registry.company.com/v2/node/tags/list?n=10000",
       Object {
         "headers": Object {},
         "json": true,
@@ -230,4 +227,23 @@ exports[`api/docker getPkgReleases uses custom registry 1`] = `
     },
   ],
 }
+`;
+
+exports[`api/docker getPkgReleases uses custom registry with registryUrls 1`] = `
+Array [
+  Array [
+    "https://registry.company.com/v2/",
+    Object {
+      "throwHttpErrors": false,
+    },
+  ],
+  Array [
+    "https://registry.company.com/v2/node/tags/list?n=10000",
+    Object {
+      "headers": Object {},
+      "json": true,
+      "timeout": 10000,
+    },
+  ],
+]
 `;

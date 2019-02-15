@@ -48,7 +48,6 @@ describe('manager/terraform/update', () => {
         depNameShort: 'tieto-cem/terraform-aws-ecs-task-definition',
         lineNumber: 14,
         moduleName: 'container_definition',
-        purl: 'pkg:github/tieto-cem/terraform-aws-ecs-task-definition',
         source:
           'github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0',
       };
@@ -64,7 +63,6 @@ describe('manager/terraform/update', () => {
         depType: 'terraform',
         lineNumber: 11,
         moduleName: 'consul',
-        purl: 'pkg:terraform/hashicorp/consul/aws',
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
       };
@@ -79,7 +77,6 @@ describe('manager/terraform/update', () => {
         depType: 'terraform',
         lineNumber: 10,
         moduleName: 'consul',
-        purl: 'pkg:terraform/hashicorp/consul/aws',
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
       };

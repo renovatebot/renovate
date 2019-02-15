@@ -82,7 +82,7 @@ describe('platform/github', () => {
     ].forEach(([envToken, token, endpoint], i) => {
       it(`should initialise the config for the repo - ${i}`, async () => {
         if (envToken !== undefined) {
-          process.env.GITHUB_TOKEN = envToken;
+          process.env.RENOVATE_TOKEN = envToken;
         }
         const config = await initRepo({
           repository: 'some/repo',

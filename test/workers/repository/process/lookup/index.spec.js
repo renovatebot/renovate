@@ -19,6 +19,7 @@ describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
     config = { ...require('../../../../../lib/config/defaults').getConfig() };
     config.manager = 'npm';
+    config.versionScheme = 'npm';
     config.rangeStrategy = 'replace';
     global.repoCache = {};
     jest.resetAllMocks();
@@ -28,7 +29,8 @@ describe('workers/repository/process/lookup', () => {
     it('returns rollback for pinned version', async () => {
       config.currentValue = '0.9.99';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
+      config.rollbackPrs = true;
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -37,7 +39,8 @@ describe('workers/repository/process/lookup', () => {
     it('returns rollback for ranged version', async () => {
       config.currentValue = '^0.9.99';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
+      config.rollbackPrs = true;
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -47,7 +50,18 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
+    it('supports lock file updates mixed with regular updates', async () => {
+      config.currentValue = '^0.4.0';
+      config.rangeStrategy = 'lockfile-update';
+      config.depName = 'q';
+      config.datasource = 'npm';
+      config.lockedVersion = '0.4.0';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -58,7 +72,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -72,7 +86,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.separateMinorPatch = true;
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -86,7 +100,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.separateMajorMinor = false;
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -99,7 +113,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -112,7 +126,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -123,7 +137,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -133,7 +147,18 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '<1';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
+    it('falls back to semver syntax allowedVersions', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '<1';
+      config.depName = 'q';
+      config.datasource = 'npm';
+      config.versionScheme = 'docker'; // this doesn't make sense but works for this test
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -143,7 +168,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = 'less than 1';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -153,7 +178,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -170,7 +195,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -188,7 +213,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -201,7 +226,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -212,7 +237,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.8.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -225,7 +250,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -236,7 +261,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.0.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -246,7 +271,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~0.4.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -256,7 +281,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~0.9.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -266,7 +291,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~1.0.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -276,7 +301,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~1.3.0';
       config.rangeStrategy = 'widen';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -286,7 +311,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~1.2.0 || ~1.3.0';
       config.rangeStrategy = 'replace';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -296,7 +321,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^2.0.0';
       config.rangeStrategy = 'widen';
       config.depName = 'webpack';
-      config.purl = 'pkg:npm/webpack';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -306,7 +331,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^1.0.0 || ^2.0.0';
       config.rangeStrategy = 'replace';
       config.depName = 'webpack';
-      config.purl = 'pkg:npm/webpack';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -316,7 +341,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^1.0.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -327,7 +352,7 @@ describe('workers/repository/process/lookup', () => {
       config.lockedVersion = '1.0.0';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -337,7 +362,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^1.0.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -347,7 +372,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.currentValue = '~1.3.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -357,7 +382,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.3.x';
       config.rangeStrategy = 'pin';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -367,7 +392,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~1.3.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -377,7 +402,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '0.x';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -387,7 +412,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '1.3.x';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -397,7 +422,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '1.2.x - 1.3.x';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -407,7 +432,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -417,7 +442,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '1.3';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -427,7 +452,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.7.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -437,7 +462,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^0.7.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -447,7 +472,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '^0.7.0 || ^0.8.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -459,7 +484,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '^1.0.0 || ^2.0.0';
       config.depName = 'webpack';
-      config.purl = 'pkg:npm/webpack';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -469,7 +494,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '1.x - 2.x';
       config.depName = 'webpack';
-      config.purl = 'pkg:npm/webpack';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -479,7 +504,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '1.x || 2.x';
       config.depName = 'webpack';
-      config.purl = 'pkg:npm/webpack';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -489,7 +514,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '1 || 2';
       config.depName = 'webpack';
-      config.purl = 'pkg:npm/webpack';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -499,7 +524,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '~1.2.0 || ~1.3.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -509,7 +534,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '>= 0.7.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -519,7 +544,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '<= 0.7.2';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -529,7 +554,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '< 0.7.2';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -539,7 +564,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '< 1';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -549,7 +574,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '<= 1.3';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -560,7 +585,7 @@ describe('workers/repository/process/lookup', () => {
       config.respectLatest = false;
       config.currentValue = '<= 1';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -570,7 +595,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '<= 1.0.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -582,7 +607,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '< 1.0.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -594,7 +619,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '>= 0.5.0 < 1.0.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -606,7 +631,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '>= 0.5.0 <0.8';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -619,7 +644,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '>= 0.5.0 <= 0.8.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -632,7 +657,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.currentValue = '<= 0.8.0 >= 0.5.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -643,7 +668,7 @@ describe('workers/repository/process/lookup', () => {
       config.respectLatest = false;
       config.currentValue = '1.4.1';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -652,7 +677,7 @@ describe('workers/repository/process/lookup', () => {
     it('should ignore unstable versions if the current version is stable', async () => {
       config.currentValue = '2.5.16';
       config.depName = 'vue';
-      config.purl = 'pkg:npm/vue';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/vue')
         .reply(200, vueJson);
@@ -662,7 +687,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '2.5.16';
       config.ignoreUnstable = false;
       config.depName = 'vue';
-      config.purl = 'pkg:npm/vue';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/vue')
         .reply(200, vueJson);
@@ -674,7 +699,7 @@ describe('workers/repository/process/lookup', () => {
     it('should allow unstable versions if the current version is unstable', async () => {
       config.currentValue = '3.1.0-dev.20180731';
       config.depName = 'typescript';
-      config.purl = 'pkg:npm/typescript';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
@@ -686,7 +711,7 @@ describe('workers/repository/process/lookup', () => {
     it('should not jump unstable versions', async () => {
       config.currentValue = '3.0.1-insiders.20180726';
       config.depName = 'typescript';
-      config.purl = 'pkg:npm/typescript';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
@@ -698,7 +723,7 @@ describe('workers/repository/process/lookup', () => {
     it('should follow dist-tag even if newer version exists', async () => {
       config.currentValue = '3.0.1-insiders.20180713';
       config.depName = 'typescript';
-      config.purl = 'pkg:npm/typescript';
+      config.datasource = 'npm';
       config.followTag = 'insiders';
       nock('https://registry.npmjs.org')
         .get('/typescript')
@@ -711,8 +736,9 @@ describe('workers/repository/process/lookup', () => {
     it('should roll back to dist-tag if current version is higher', async () => {
       config.currentValue = '3.1.0-dev.20180813';
       config.depName = 'typescript';
-      config.purl = 'pkg:npm/typescript';
+      config.datasource = 'npm';
       config.followTag = 'insiders';
+      config.rollbackPrs = true;
       nock('https://registry.npmjs.org')
         .get('/typescript')
         .reply(200, typescriptJson);
@@ -724,7 +750,7 @@ describe('workers/repository/process/lookup', () => {
     it('should jump unstable versions if followTag', async () => {
       config.currentValue = '3.0.0-insiders.20180706';
       config.depName = 'typescript';
-      config.purl = 'pkg:npm/typescript';
+      config.datasource = 'npm';
       config.followTag = 'insiders';
       nock('https://registry.npmjs.org')
         .get('/typescript')
@@ -737,7 +763,7 @@ describe('workers/repository/process/lookup', () => {
     it('should update nothing if current version is dist-tag', async () => {
       config.currentValue = '3.0.1-insiders.20180726';
       config.depName = 'typescript';
-      config.purl = 'pkg:npm/typescript';
+      config.datasource = 'npm';
       config.followTag = 'insiders';
       nock('https://registry.npmjs.org')
         .get('/typescript')
@@ -748,7 +774,7 @@ describe('workers/repository/process/lookup', () => {
     it('should warn if no version matches dist-tag', async () => {
       config.currentValue = '3.0.1-dev.20180726';
       config.depName = 'typescript';
-      config.purl = 'pkg:npm/typescript';
+      config.datasource = 'npm';
       config.followTag = 'foo';
       nock('https://registry.npmjs.org')
         .get('/typescript')
@@ -765,7 +791,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';
       config.depName = '@types/helmet';
-      config.purl = 'pkg:npm/%40types/helmet';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
@@ -775,7 +801,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '^0.0.34';
       config.depName = '@types/helmet';
-      config.purl = 'pkg:npm/%40types/helmet';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/@types%2Fhelmet')
         .reply(200, helmetJson);
@@ -784,7 +810,8 @@ describe('workers/repository/process/lookup', () => {
     it('should downgrade from missing versions', async () => {
       config.currentValue = '1.16.1';
       config.depName = 'coffeelint';
-      config.purl = 'pkg:npm/coffeelint';
+      config.datasource = 'npm';
+      config.rollbackPrs = true;
       nock('https://registry.npmjs.org')
         .get('/coffeelint')
         .reply(200, coffeelintJson);
@@ -795,7 +822,7 @@ describe('workers/repository/process/lookup', () => {
     it('should upgrade to only one major', async () => {
       config.currentValue = '1.0.0';
       config.depName = 'webpack';
-      config.purl = 'pkg:npm/webpack';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -806,7 +833,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.0.0';
       config.separateMultipleMajor = true;
       config.depName = 'webpack';
-      config.purl = 'pkg:npm/webpack';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
@@ -817,7 +844,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';
       config.depName = 'next';
-      config.purl = 'pkg:npm/next';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/next')
         .reply(200, nextJson);
@@ -828,7 +855,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '^1.0.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -838,7 +865,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '~1.0.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -849,7 +876,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~1.0.0';
       config.depName = 'q';
       config.separateMinorPatch = true;
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -859,7 +886,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>=1.0.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -869,7 +896,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>=0.9.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -879,7 +906,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '>1.0.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -889,7 +916,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '1.x';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -899,7 +926,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'bump';
       config.currentValue = '^0.9.0 || ^1.0.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -907,7 +934,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('replaces non-range in-range updates', async () => {
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       config.packageFile = 'package.json';
       config.rangeStrategy = 'bump';
       config.currentValue = '1.0.0';
@@ -918,7 +945,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('handles github 404', async () => {
       config.depName = 'foo';
-      config.purl = 'pkg:github/some/repo';
+      config.datasource = 'github';
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
       nock('https://pypi.org')
@@ -928,7 +955,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('handles pypi 404', async () => {
       config.depName = 'foo';
-      config.purl = 'pkg:pypi/foo';
+      config.datasource = 'pypi';
       config.packageFile = 'requirements.txt';
       config.currentValue = '1.0.0';
       nock('https://api.github.com')
@@ -938,7 +965,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('handles packagist', async () => {
       config.depName = 'foo/bar';
-      config.purl = 'pkg:packagist/foo/bar';
+      config.datasource = 'packagist';
       config.packageFile = 'composer.json';
       config.currentValue = '1.0.0';
       nock('https://packagist.org')
@@ -946,9 +973,9 @@ describe('workers/repository/process/lookup', () => {
         .reply(404);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
-    it('handles unknown purl', async () => {
+    it('handles unknown datasource', async () => {
       config.depName = 'foo';
-      config.purl = 'pkg:typo/some/repo';
+      config.datasource = 'typo';
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
@@ -960,8 +987,8 @@ describe('workers/repository/process/lookup', () => {
       config.lockedVersion = '0.9.4';
       config.currentValue = '~=0.9';
       config.depName = 'q';
-      // TODO: we are using npm as source, since purl for pypi is not implimented
-      config.purl = 'pkg:npm/q';
+      // TODO: we are using npm as source to test pep440
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -971,7 +998,7 @@ describe('workers/repository/process/lookup', () => {
     it('returns complex object', async () => {
       config.currentValue = '1.3.0';
       config.depName = 'q';
-      config.purl = 'pkg:npm/q';
+      config.datasource = 'npm';
       nock('https://registry.npmjs.org')
         .get('/q')
         .reply(200, qJson);
@@ -983,7 +1010,7 @@ describe('workers/repository/process/lookup', () => {
     it('ignores deprecated', async () => {
       config.currentValue = '1.3.0';
       config.depName = 'q2';
-      config.purl = 'pkg:npm/q2';
+      config.datasource = 'npm';
       const returnJson = JSON.parse(JSON.stringify(qJson));
       returnJson.name = 'q2';
       returnJson.versions['1.4.1'].deprecated = 'true';
@@ -998,20 +1025,20 @@ describe('workers/repository/process/lookup', () => {
     it('skips unsupported values', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
-      config.purl = 'pkg:docker/node';
+      config.datasource = 'docker';
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
     it('skips undefined values', async () => {
       config.depName = 'node';
-      config.purl = 'pkg:docker/node';
+      config.datasource = 'docker';
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
     it('handles digest pin', async () => {
       config.currentValue = '8.0.0';
       config.depName = 'node';
-      config.purl = 'pkg:docker/node';
+      config.datasource = 'docker';
       config.pinDigests = true;
       docker.getPkgReleases.mockReturnValueOnce({
         releases: [
@@ -1032,7 +1059,7 @@ describe('workers/repository/process/lookup', () => {
       it('skips uncompatible versions for ' + currentValue, async () => {
         config.currentValue = currentValue;
         config.depName = 'node';
-        config.purl = 'pkg:docker/node';
+        config.datasource = 'docker';
         config.versionScheme = 'docker';
         docker.getPkgReleases.mockReturnValueOnce({
           releases: [
@@ -1054,7 +1081,7 @@ describe('workers/repository/process/lookup', () => {
     it('handles digest pin for up to date version', async () => {
       config.currentValue = '8.1.0';
       config.depName = 'node';
-      config.purl = 'pkg:docker/node';
+      config.datasource = 'docker';
       config.pinDigests = true;
       docker.getPkgReleases.mockReturnValueOnce({
         releases: [
@@ -1073,7 +1100,7 @@ describe('workers/repository/process/lookup', () => {
     it('handles digest pin for non-version', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
-      config.purl = 'pkg:docker/node';
+      config.datasource = 'docker';
       config.pinDigests = true;
       docker.getPkgReleases.mockReturnValueOnce({
         releases: [
@@ -1095,7 +1122,7 @@ describe('workers/repository/process/lookup', () => {
     it('handles digest lookup failure', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
-      config.purl = 'pkg:docker/node';
+      config.datasource = 'docker';
       config.pinDigests = true;
       docker.getPkgReleases.mockReturnValueOnce({
         releases: [
@@ -1117,7 +1144,7 @@ describe('workers/repository/process/lookup', () => {
     it('handles digest update', async () => {
       config.currentValue = '8.0.0';
       config.depName = 'node';
-      config.purl = 'pkg:docker/node';
+      config.datasource = 'docker';
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
       docker.getPkgReleases.mockReturnValueOnce({
@@ -1138,7 +1165,7 @@ describe('workers/repository/process/lookup', () => {
     it('handles digest update for non-version', async () => {
       config.currentValue = 'alpine';
       config.depName = 'node';
-      config.purl = 'pkg:docker/node';
+      config.datasource = 'docker';
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
       docker.getPkgReleases.mockReturnValueOnce({

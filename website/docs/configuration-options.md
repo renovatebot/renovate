@@ -42,6 +42,8 @@ Also note that this option can be combined with other nested settings, such as d
 
 Warning: GitHub currently has a bug where automerge won't work if a GitHub Organization has protected their master branch, and there is no way to configure around this. Hence, automerging will try and fail in such situations. This doc will be updated once that bug/limitation is fixed by GitHub.
 
+Warning: GitHub won't do automerge if the PR has a negative feedback.
+
 ## automergeComment
 
 Example use:
@@ -95,6 +97,10 @@ This field is combined with `branchPrefix` and `managerBranchPrefix` to form the
 Set this value to 'patch', 'minor' or 'major' to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, set this to `patch`.
 
 You can also set this field to `"mirror:x"` where `x` is the name of a package in the `package.json`. Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on. Make sure that version is a pinned version of course, as otherwise it won't be valid.
+
+## bundler
+
+Bundler is now in alpha stage and ready for testing! [Details](https://renovatebot.com/blog/ruby-bundler-support)
 
 ## circleci
 
@@ -225,6 +231,10 @@ See https://renovatebot.com/docs/config-presets for details.
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
 
+## github-actions
+
+Add to this configuration setting if you need to override any of the GitHub Actions default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
+
 ## gitlabci
 
 Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
@@ -235,11 +245,17 @@ Configuration added here applies for all Go-related updates, however currently t
 
 ## gomod
 
-Configuration for Go Modules (`go mod`). Supercedes anything in the `go` config object.
+Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
+
+## gomodTidy
 
 ## gradle
 
 Configuration for Java gradle projects
+
+## gradle-wrapper
+
+Configuration for Gradle Wrapper updates. Changes here affect how Renovate updates the version of gradle in the wrapper, not how it uses the wrapper.
 
 ## group
 
@@ -294,13 +310,17 @@ There may be times where an `.npmrc` file in your repository causes problems, su
 
 ## ignorePaths
 
-Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want kept up to date.
+Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
 
 ## ignoreUnstable
 
-By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same major.minor.patch and was _already_ unstable (e.g. it was already on `4.0.0-rc2`). Renovate will not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will upate you to `4.0.0` only. If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
+By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same major.minor.patch and was _already_ unstable (e.g. it was already on `4.0.0-rc2`). Renovate will not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will update you to `4.0.0` only. If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
+
+## includeForks
+
+By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`. If you are using the hosted Renovate application then you need to add a `renovate.json` to your forked repo manually, and include `"includeForks": true` inside.
 
 ## includePaths
 
@@ -384,6 +404,8 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
 
+## maven
+
 ## meteor
 
 Set enabled to `true` to enable meteor package updating.
@@ -396,7 +418,7 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehensive explanation of how the `node` option can be used.
 
 ## npm
 
@@ -471,7 +493,7 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
 
 ### allowedVersions
 
-Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could defined this to be `<= 1.5` or `< 1.6.0`:
+Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
 
 ```
   "packageRules": [{
@@ -506,7 +528,7 @@ Use this field if you want to have one or more package name patterns excluded in
 ```
   "packageRules": [{
     "packagePatterns": ["^eslint"],
-    "excludePackageNames": ["^eslint-foo"]
+    "excludePackagePatterns": ["^eslint-foo"]
   }]
 ```
 
@@ -559,7 +581,7 @@ Use this field if you want to have one or more package names patterns in your pa
 
 ```
   "packageRules": [{
-    "packageNames": ["^angular"],
+    "packagePatterns": ["^angular"],
     "rangeStrategy": "replace"
   }]
 ```
@@ -617,7 +639,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-By default, Renovate will add sha256 digests to Docker source images so that they are then "immutable". Set this to false to continue using only tags to identify source images.
+If enabled Renovate will pin docker images by means of their sha256 digest and not only by tag so that they are immutable.
 
 ## pip_requirements
 
@@ -746,6 +768,7 @@ Behaviour:
 - `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise 'replace' for updates out of range
 
 Renovate's "auto" strategy works like this for npm:
 
@@ -769,7 +792,7 @@ On GitHub it is possible to add a label to a PR to manually request Renovate to 
 
 ## rebaseStalePrs
 
-This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+This field defaults to `null` because it has the potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
 
 If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch` automerge then Renovate will still rebase as necessary for that.
 
@@ -786,10 +809,6 @@ Typically you shouldn't need to modify this setting.
 ## registryUrls
 
 This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forward compatibility.
-
-## renovateFork
-
-By default, Renovate will skip over any repositories that are forked, even if they contain a `renovate.json`, because that config may have been from the source repository. To enable Renovate on forked repositories, you need to add `renovateFork: true` to your renovate config.
 
 ## requiredStatusChecks
 
@@ -808,6 +827,8 @@ Must be valid usernames. Note: does not currently work with the GitHub App due t
 ## rollbackPrs
 
 Set this to false either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
+
+## ruby
 
 ## schedule
 

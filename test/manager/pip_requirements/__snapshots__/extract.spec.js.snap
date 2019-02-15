@@ -4,27 +4,27 @@ exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts depe
 Array [
   Object {
     "currentValue": "==0.3.1",
+    "datasource": "pypi",
     "depName": "some-package",
     "lineNumber": 2,
-    "purl": "pkg:pypi/some-package",
     "registryUrls": Array [
       "http://example.com/private-pypi/",
     ],
   },
   Object {
     "currentValue": "==1.0.0",
+    "datasource": "pypi",
     "depName": "some-other-package",
     "lineNumber": 3,
-    "purl": "pkg:pypi/some-other-package",
     "registryUrls": Array [
       "http://example.com/private-pypi/",
     ],
   },
   Object {
     "currentValue": "==1.9",
+    "datasource": "pypi",
     "depName": "not_semver",
     "lineNumber": 4,
-    "purl": "pkg:pypi/not_semver",
     "registryUrls": Array [
       "http://example.com/private-pypi/",
     ],
@@ -36,33 +36,33 @@ exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts mult
 Array [
   Object {
     "currentValue": "==1",
+    "datasource": "pypi",
     "depName": "Django",
     "lineNumber": 0,
-    "purl": "pkg:pypi/Django",
   },
   Object {
     "currentValue": "==0.6.27",
+    "datasource": "pypi",
     "depName": "distribute",
     "lineNumber": 1,
-    "purl": "pkg:pypi/distribute",
   },
   Object {
     "currentValue": "==0.2",
+    "datasource": "pypi",
     "depName": "dj-database-url",
     "lineNumber": 2,
-    "purl": "pkg:pypi/dj-database-url",
   },
   Object {
     "currentValue": "==2.4.5",
+    "datasource": "pypi",
     "depName": "psycopg2",
     "lineNumber": 3,
-    "purl": "pkg:pypi/psycopg2",
   },
   Object {
     "currentValue": "==0.1.2",
+    "datasource": "pypi",
     "depName": "wsgiref",
     "lineNumber": 4,
-    "purl": "pkg:pypi/wsgiref",
   },
 ]
 `;
@@ -71,34 +71,34 @@ exports[`lib/manager/pip_requirements/extract extractPackageFile() handles comme
 Array [
   Object {
     "currentValue": "==1.2.7",
+    "datasource": "pypi",
     "depName": "Django",
     "lineNumber": 0,
-    "purl": "pkg:pypi/Django",
   },
   Object {
     "currentValue": "==0.6.27",
+    "datasource": "pypi",
     "depName": "distribute",
     "lineNumber": 1,
-    "purl": "pkg:pypi/distribute",
     "skipReason": "ignored",
   },
   Object {
     "currentValue": "==0.2",
+    "datasource": "pypi",
     "depName": "dj-database-url",
     "lineNumber": 2,
-    "purl": "pkg:pypi/dj-database-url",
   },
   Object {
     "currentValue": "==2.4.5",
+    "datasource": "pypi",
     "depName": "psycopg2",
     "lineNumber": 3,
-    "purl": "pkg:pypi/psycopg2",
   },
   Object {
     "currentValue": "==0.1.2",
+    "datasource": "pypi",
     "depName": "wsgiref",
     "lineNumber": 4,
-    "purl": "pkg:pypi/wsgiref",
   },
 ]
 `;
@@ -107,21 +107,21 @@ exports[`lib/manager/pip_requirements/extract extractPackageFile() handles extra
 Array [
   Object {
     "currentValue": "==2.0.8",
+    "datasource": "pypi",
     "depName": "Django",
     "lineNumber": 0,
-    "purl": "pkg:pypi/Django",
   },
   Object {
     "currentValue": "==4.1.1",
+    "datasource": "pypi",
     "depName": "celery",
     "lineNumber": 1,
-    "purl": "pkg:pypi/celery",
   },
   Object {
     "currentValue": " == 3.2.1",
+    "datasource": "pypi",
     "depName": "foo",
     "lineNumber": 2,
-    "purl": "pkg:pypi/foo",
   },
 ]
 `;

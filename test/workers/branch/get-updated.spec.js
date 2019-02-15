@@ -49,12 +49,14 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
       });
       composer.updateDependency.mockReturnValue('some new content');
-      composer.getArtifacts.mockReturnValue({
-        file: {
-          name: 'composer.json',
-          contents: 'some contents',
+      composer.getArtifacts.mockReturnValue([
+        {
+          file: {
+            name: 'composer.json',
+            contents: 'some contents',
+          },
         },
-      });
+      ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
@@ -64,12 +66,14 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
       });
       composer.updateDependency.mockReturnValue('some new content');
-      composer.getArtifacts.mockReturnValue({
-        lockFileError: {
-          name: 'composer.lock',
-          stderr: 'some error',
+      composer.getArtifacts.mockReturnValue([
+        {
+          artifactError: {
+            name: 'composer.lock',
+            stderr: 'some error',
+          },
         },
-      });
+      ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });

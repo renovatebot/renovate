@@ -1,6 +1,6 @@
 const github = require('../../lib/platform/github');
 const gitlab = require('../../lib/platform/gitlab');
-const vsts = require('../../lib/platform/vsts');
+const azure = require('../../lib/platform/azure');
 const bitbucket = require('../../lib/platform/bitbucket');
 
 describe('platform', () => {
@@ -14,9 +14,9 @@ describe('platform', () => {
     expect(gitlabMethods).toMatchSnapshot();
   });
 
-  it('has a list of supported methods for vsts', () => {
-    const vstsMethods = Object.keys(vsts);
-    expect(vstsMethods).toMatchSnapshot();
+  it('has a list of supported methods for azure', () => {
+    const azureMethods = Object.keys(azure);
+    expect(azureMethods).toMatchSnapshot();
   });
 
   it('has same API for github and gitlab', () => {
@@ -25,10 +25,10 @@ describe('platform', () => {
     expect(githubMethods).toMatchObject(gitlabMethods);
   });
 
-  it('has same API for github and vsts', () => {
+  it('has same API for github and azure', () => {
     const githubMethods = Object.keys(github);
-    const vstsMethods = Object.keys(vsts);
-    expect(githubMethods).toMatchObject(vstsMethods);
+    const azureMethods = Object.keys(azure);
+    expect(githubMethods).toMatchObject(azureMethods);
   });
 
   it('has same API for github and Bitbucket', () => {

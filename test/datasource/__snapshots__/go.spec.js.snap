@@ -17,24 +17,21 @@ exports[`datasource/go getPkgReleases works for known servers 1`] = `
 Array [
   Array [
     Object {
-      "fullname": "x/text",
-      "qualifiers": Object {},
+      "datasource": "github",
+      "lookupName": "x/text",
     },
-    undefined,
   ],
   Array [
     Object {
-      "fullname": "x/text",
-      "qualifiers": Object {},
+      "datasource": "github",
+      "lookupName": "x/text",
     },
-    undefined,
   ],
   Array [
     Object {
-      "fullname": "go-x/x",
-      "qualifiers": Object {},
+      "datasource": "github",
+      "lookupName": "go-x/x",
     },
-    undefined,
   ],
 ]
 `;

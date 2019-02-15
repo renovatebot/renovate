@@ -24,6 +24,7 @@ describe('workers/repository/error', () => {
       'blocked',
       'not-found',
       'forbidden',
+      'bad-credentials',
       'rate-limit-exceeded',
       'lockfile-error',
       'disk-space',
@@ -31,6 +32,7 @@ describe('workers/repository/error', () => {
       'no-vulnerability-alerts',
       'cannot-fork',
       'integration-unauthorized',
+      'authentication-error',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {
