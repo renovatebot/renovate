@@ -9,6 +9,11 @@ const pkgListV3WithoutProkjectUrl = fs.readFileSync(
   'test/_fixtures/nuget/nunitV3_withoutProjectUrl.json',
   'utf8'
 );
+const pkgInfoV3FromNuget = fs.readFileSync(
+  'test/_fixtures/nuget/nunitv3_nuget-org.xml',
+  'utf8'
+);
+
 const pkgListV2 = fs.readFileSync('test/_fixtures/nuget/nunitV2.xml', 'utf8');
 
 const pkgLatestV2 = fs.readFileSync(
@@ -44,6 +49,12 @@ const configV3 = {
   datasource: 'nuget',
   lookupName: 'nunit',
   registryUrls: ['https://api.nuget.org/v3/index.json'],
+};
+
+const configV3NotNugetOrg = {
+  datasource: 'nuget',
+  lookupName: 'nunit',
+  registryUrls: ['https://myprivatefeed/index.json'],
 };
 
 describe('datasource/nuget', () => {
@@ -218,7 +229,27 @@ describe('datasource/nuget', () => {
       ).toBeNull();
     });
 
-    it('processes real data (v3)', async () => {
+    it('processes real data (v3) feed is a nuget.org', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(nugetIndexV3),
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        body: JSON.parse(pkgListV3),
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        body: pkgInfoV3FromNuget,
+        statusCode: 200,
+      });
+      const res = await datasource.getPkgReleases({
+        ...configV3,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+      expect(res.sourceUrl).toBeDefined();
+    });
+    it('processes real data (v3) feed is not a nuget.org', async () => {
       got.mockReturnValueOnce({
         body: JSON.parse(nugetIndexV3),
         statusCode: 200,
@@ -228,7 +259,7 @@ describe('datasource/nuget', () => {
         statusCode: 200,
       });
       const res = await datasource.getPkgReleases({
-        ...configV3,
+        ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
@@ -244,7 +275,7 @@ describe('datasource/nuget', () => {
         statusCode: 200,
       });
       const res = await datasource.getPkgReleases({
-        ...configV3,
+        ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
