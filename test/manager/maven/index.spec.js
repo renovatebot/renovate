@@ -75,7 +75,6 @@ describe('manager/maven', () => {
 
       expect(updatedContent).toBeNull();
     });
-
     it('should update ranges', () => {
       const newVersion = '1.2.3';
       const newRangeValue = '[1.2.3]';
@@ -88,6 +87,18 @@ describe('manager/maven', () => {
       );
       const newDep = select(newContent);
       expect(newDep.currentValue).toEqual(newRangeValue);
+    });
+    it('should retain ranges containing new version', () => {
+      const newValue = '1.0.0';
+      const select = depSet =>
+        depSet && depSet.deps
+          ? selectDep(depSet.deps, 'org.example:hard-range')
+          : null;
+      const oldContent = extractDependencies(pomContent);
+      const dep = select(oldContent);
+      expect(dep).not.toEqual(null);
+      const upgrade = { ...dep, newValue };
+      expect(updateDependency(pomContent, upgrade)).toEqual(pomContent);
     });
   });
 });
