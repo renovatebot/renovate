@@ -75,6 +75,16 @@ Object {
       "skipReason": "not-a-version",
     },
     Object {
+      "currentValue": "[1.0.0]",
+      "datasource": "maven",
+      "depName": "org.example:hard-range",
+      "fileReplacePosition": 2827,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://maven.atlassian.com/content/repositories/atlassian-public/",
+      ],
+    },
+    Object {
       "currentValue": "\${profile-placeholder}",
       "depName": "org.example:profile-artifact",
       "skipReason": "version-placeholder",
@@ -83,7 +93,7 @@ Object {
       "currentValue": "2.17",
       "datasource": "maven",
       "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
-      "fileReplacePosition": 3218,
+      "fileReplacePosition": 3365,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
