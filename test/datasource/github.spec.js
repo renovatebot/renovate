@@ -3,7 +3,7 @@ const github = require('../../lib/datasource/github');
 const ghGot = require('../../lib/platform/github/gh-got-wrapper');
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
-jest.mock('got');
+jest.mock('../../lib/util/got');
 
 describe('datasource/github', () => {
   beforeEach(() => global.renovateCache.rmAll());
@@ -24,7 +24,7 @@ describe('datasource/github', () => {
     it('returns digest', async () => {
       ghGot.mockReturnValueOnce({ body: [{ sha: 'abcdef' }] });
       const res = await github.getDigest(
-        { depName: 'some-dep', purl: 'pkg:github/some/dep?foo=1' },
+        { depName: 'some-dep', lookupName: 'some/dep' },
         null
       );
       expect(res).toBe('abcdef');
@@ -71,7 +71,9 @@ describe('datasource/github', () => {
       ];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:github/some/dep#releases',
+        datasource: 'github',
+        depName: 'some/dep',
+        lookupType: 'releases',
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
@@ -83,17 +85,11 @@ describe('datasource/github', () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       ghGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getPkgReleases({
-        purl: 'pkg:github/some/dep2',
+        datasource: 'github',
+        depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
-    });
-    it('returns null for invalid ref', async () => {
-      expect(
-        await datasource.getPkgReleases({
-          purl: 'pkg:github/some/dep?ref=invalid',
-        })
-      ).toBeNull();
     });
   });
 });

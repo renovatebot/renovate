@@ -24,17 +24,5 @@ describe('workers/repository/init/apis', () => {
       glGot.mockReturnValueOnce({ body: [] });
       await initApis(config);
     });
-    it('runs azure', async () => {
-      config.platform = 'azure';
-      config.repository = 'some/name';
-      // config.endpoint = 'https://fabrikam.visualstudio.com/DefaultCollection';
-      try {
-        await initApis(config);
-      } catch (error) {
-        expect(error.message).toBe(
-          `Failed to configure platform 'azure': no endpoint defined`
-        );
-      }
-    });
   });
 });

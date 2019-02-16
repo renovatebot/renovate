@@ -1,33 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/bitbucket commitFilesToBranch() posts files 1`] = `
-Array [
-  "",
-  "
-Content-Disposition: form-data; name=\\"message\\"
-
-message
-",
-  "
-Content-Disposition: form-data; name=\\"parents\\"
-
-master_hash
-",
-  "
-Content-Disposition: form-data; name=\\"branch\\"
-
-branch
-",
-  "
-Content-Disposition: form-data; name=\\"/package.json\\"
-
-hello world
-",
-  "--
-",
-]
-`;
-
 exports[`platform/bitbucket createPr() posts PR 1`] = `
 Array [
   Array [
@@ -60,13 +32,6 @@ Array [
   ],
   Array [
     "/2.0/repositories/some/empty/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50",
-    undefined,
-  ],
-  Array [
-    "/2.0/repositories/some/empty/refs/branches/master",
-  ],
-  Array [
-    "/2.0/repositories/some/empty/src/null/?pagelen=100",
     undefined,
   ],
   Array [
@@ -165,31 +130,6 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket getCommitMessages() works 1`] = `
-Array [
-  "Commit messsage 0",
-  "Commit messsage 1",
-  "Commit messsage 2",
-  "Commit messsage 3",
-  "Commit messsage 4",
-  "Commit messsage 5",
-  "Commit messsage 6",
-  "Commit messsage 7",
-  "Commit messsage 8",
-  "Commit messsage 9",
-  "Commit messsage 10",
-  "Commit messsage 11",
-  "Commit messsage 12",
-  "Commit messsage 13",
-  "Commit messsage 14",
-  "Commit messsage 15",
-  "Commit messsage 16",
-  "Commit messsage 17",
-  "Commit messsage 18",
-  "Commit messsage 19",
-]
-`;
-
 exports[`platform/bitbucket getPr() exists 1`] = `
 Object {
   "body": "summary",
@@ -236,21 +176,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket setBaseBranch() updates file list 1`] = `
-Array [
-  Array [
-    "/2.0/repositories/some/repo/refs/branches/branch",
-  ],
-  Array [
-    "/2.0/repositories/some/repo/src/branch_hash/?pagelen=100",
-    undefined,
-  ],
-  Array [
-    "/2.0/repositories/some/repo/src/branch_hash/foo_folder/?pagelen=100",
-    undefined,
-  ],
-]
-`;
+exports[`platform/bitbucket setBaseBranch() updates file list 1`] = `Array []`;
 
 exports[`platform/bitbucket setBranchStatus() posts status 1`] = `
 Array [

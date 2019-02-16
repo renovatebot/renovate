@@ -10,7 +10,7 @@ const pomContent = fs.readFileSync(
   'utf8'
 );
 
-const findFn = ({ depName }) => depName === 'org.example/quuz';
+const findFn = ({ depName }) => depName === 'org.example:quuz';
 
 describe('manager/maven', () => {
   describe('extractAllPackageFiles', () => {
@@ -47,6 +47,19 @@ describe('manager/maven', () => {
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
       const updatedDep = extractDependencies(updatedContent).deps.find(findFn);
+
+      expect(updatedDep.currentValue).toEqual(newValue);
+    });
+
+    it('should update existing dependency defined via properties', () => {
+      const finder = ({ depName }) => depName === 'org.example:quux';
+      const newValue = '9.9.9.9-final';
+
+      const { deps } = extractDependencies(pomContent);
+      const dep = deps.find(finder);
+      const upgrade = { ...dep, newValue };
+      const updatedContent = updateDependency(pomContent, upgrade);
+      const updatedDep = extractDependencies(updatedContent).deps.find(finder);
 
       expect(updatedDep.currentValue).toEqual(newValue);
     });

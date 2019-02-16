@@ -90,3 +90,5 @@ Array [
   },
 ]
 `;
+
+exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 1`] = `[Error: registry-failure]`;
