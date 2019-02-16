@@ -247,6 +247,8 @@ Configuration added here applies for all Go-related updates, however currently t
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
+## gomodTidy
+
 ## gradle
 
 Configuration for Java gradle projects

@@ -53,6 +53,19 @@ describe('manager/maven', () => {
       expect(updatedDep.currentValue).toEqual(newValue);
     });
 
+    it('should update existing dependency defined via properties', () => {
+      const finder = ({ depName }) => depName === 'org.example:quux';
+      const newValue = '9.9.9.9-final';
+
+      const { deps } = extractDependencies(pomContent);
+      const dep = deps.find(finder);
+      const upgrade = { ...dep, newValue };
+      const updatedContent = updateDependency(pomContent, upgrade);
+      const updatedDep = extractDependencies(updatedContent).deps.find(finder);
+
+      expect(updatedDep.currentValue).toEqual(newValue);
+    });
+
     it('should not touch content if new and old versions are equal', () => {
       const newValue = '1.2.3';
 
