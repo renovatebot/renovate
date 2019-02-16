@@ -20,6 +20,7 @@
   {
     "project": "project2",
     "repositories": [
+      "https://repo.maven.apache.org/maven2/",
       "https://jitpack.io"
     ],
     "dependencies": [
