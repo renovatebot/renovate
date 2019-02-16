@@ -39,17 +39,5 @@ describe('workers/repository/finalise/prune', () => {
       expect(platform.deleteBranch.mock.calls).toHaveLength(1);
       expect(platform.updatePr.mock.calls).toHaveLength(1);
     });
-    it('deletes lock file maintenance if pr is unmergeable', async () => {
-      config.branchList = ['renovate/lock-file-maintenance'];
-      platform.getAllRenovateBranches.mockReturnValueOnce([
-        'renovate/lock-file-maintenance',
-      ]);
-      platform.getBranchPr = jest.fn(() => ({ isConflicted: true }));
-      await cleanup.pruneStaleBranches(config, [
-        'renovate/lock-file-maintenance',
-      ]);
-      expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(1);
-      expect(platform.deleteBranch.mock.calls).toHaveLength(1);
-    });
   });
 });
