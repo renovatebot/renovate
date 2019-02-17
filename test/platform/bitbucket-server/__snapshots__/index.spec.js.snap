@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/bitbucket createPr() posts PR 1`] = `
+exports[`platform/bitbucket-server createPr() posts PR 1`] = `
 Array [
   Array [
     "/rest/api/1.0/projects/some/repos/repo/pull-requests",
@@ -20,7 +20,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket getPr() gets a PR 1`] = `
+exports[`platform/bitbucket-server getPr() gets a PR 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -37,9 +37,9 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+exports[`platform/bitbucket-server getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket initRepo() works 1`] = `
+exports[`platform/bitbucket-server initRepo() works 1`] = `
 Object {
   "isFork": false,
   "privateRepo": undefined,
@@ -47,7 +47,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket mergePr() posts Merge 1`] = `
+exports[`platform/bitbucket-server mergePr() posts Merge 1`] = `
 Array [
   Array [
     "/rest/api/1.0/projects/some/repos/repo/pull-requests/5/merge",
@@ -55,7 +55,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket setBaseBranch() updates file list 1`] = `
+exports[`platform/bitbucket-server setBaseBranch() updates file list 1`] = `
 Array [
   Array [
     "/rest/api/1.0/projects/some/repos/repo",
@@ -66,7 +66,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket updatePr() puts PR 1`] = `
+exports[`platform/bitbucket-server updatePr() puts PR 1`] = `
 Array [
   Array [
     "/rest/api/1.0/projects/some/repos/repo/pull-requests/5",
