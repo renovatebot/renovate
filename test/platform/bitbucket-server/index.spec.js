@@ -3,7 +3,7 @@ const URL = require('url');
 // eslint-disable-next-line no-unused-vars
 const responses = require('../../_fixtures/bitbucket-server/responses');
 
-describe('platform/bitbucket', () => {
+describe('platform/bitbucket-server', () => {
   let bitbucket;
   let api;
   let hostRules;
