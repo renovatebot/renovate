@@ -34,16 +34,7 @@ describe('datasource/github', () => {
     });
   });
   describe('getPreset()', () => {
-    it('throws if non-default', async () => {
-      let e;
-      try {
-        await github.getPreset('some/repo', 'non-default');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
-    });
-    it('throws if got throws', async () => {
+    it('tries default then renovate', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
@@ -63,7 +54,7 @@ describe('datasource/github', () => {
       }));
       await expect(github.getPreset('some/repo')).rejects.toThrow();
     });
-    it('should return the preset', async () => {
+    it('should return default.json', async () => {
       hostRules.find.mockReturnValueOnce({ token: 'abc' });
       got.mockImplementationOnce(() => ({
         body: {
@@ -71,6 +62,16 @@ describe('datasource/github', () => {
         },
       }));
       const content = await github.getPreset('some/repo');
+      expect(content).toEqual({ foo: 'bar' });
+    });
+    it('should return custom.json', async () => {
+      hostRules.find.mockReturnValueOnce({ token: 'abc' });
+      got.mockImplementationOnce(() => ({
+        body: {
+          content: Buffer.from('{"foo":"bar"}').toString('base64'),
+        },
+      }));
+      const content = await github.getPreset('some/repo', 'custom');
       expect(content).toEqual({ foo: 'bar' });
     });
   });
