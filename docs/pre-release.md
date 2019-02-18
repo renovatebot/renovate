@@ -6,15 +6,15 @@ The below is a list of upcoming features with statuses, as well as info on how y
 
 As a general guide:
 
-- Alpha: in need to additional testing
-- Beta: almost ready for default for everyone, ideally needs a few more users running it in production giving it the thumbs-up
+- Alpha: in need of additional testing
+- Beta: almost ready for default enabling for everyone, but ideally needs a few more users running it in production giving it the thumbs-up
 - Generally Available (GA): safe to enable by default for everyone
 
 ### Bitbucket Cloud
 
 Status: beta
 
-Bitbucket Cloud (i.e. [https://bitbucket.org](https://bitbucket.org)) is still missing some nice-to-have features (reviewers, issues, etc) but none of these have to hold it back from being considered GA. Mostly, we'd just like to get some more feedback from users who have been testing it.
+Bitbucket Cloud support (i.e. [https://bitbucket.org](https://bitbucket.org)) is still missing some nice-to-have features (reviewers, issues, etc) but none of these have to hold it back from being considered GA. Mostly, we'd just like to get some more feedback from users who have been testing it.
 
 Note: we plan to add support for Bitbucket.org to the _hosted_ Renovate Bot _service_ that already supports GitHub.com and GitLab.com, so you won't need to run your own bot unless you want to.
 
@@ -24,7 +24,7 @@ How to use: run your own bot from npm, Docker or clone the repository. Follow th
 
 Status: beta
 
-Bitbucket Server (i.e. self-hosted Bitbucket) came after Bitbucket Cloud but has already had perhaps more testing than Cloud nad may make GA first. Once we get a few thumbs-ups from users testing it on "real" repositories we will elevate this to GA.
+Bitbucket Server (i.e. self-hosted Bitbucket) came after Bitbucket Cloud but has already had perhaps more testing than Cloud and may make GA first. Once we get a few more thumbs-ups from users testing it on "real" repositories we will elevate this to GA.
 
 How to use: run your own bot from npm, Docker or clone the repository. Follow the instructions from [https://github.com/renovatebot/renovate/blob/master/lib/platform/bitbucket-server/README.md](https://github.com/renovatebot/renovate/blob/master/lib/platform/bitbucket-server/README.md).
 
@@ -32,7 +32,7 @@ How to use: run your own bot from npm, Docker or clone the repository. Follow th
 
 Status: alpha
 
-Bundler support is considered "alpha" because there's currently an effort underway to replace the initial JS-based parsing with a Ruby-based one. Perhaps your `Gemfile` works already though, in which case you can test out the other features.
+Bundler support is considered "alpha" because there's currently a PR underway to replace the initial JS-based parsing with a Ruby-based one. Perhaps your `Gemfile` works already though, in which case you can test out the other features.
 
 How to use: Add `"bundler": { "enabled": true }` to either your bot config or your repository's `renovate.json`. If your repository contains _only_ Bundler package files and no others then you'll need to add the `renovate.json` manually as otherwise Renovate won't detect any package files by default and will skip the Onboarding PR.
 
