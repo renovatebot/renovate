@@ -1,9 +1,12 @@
 const datasource = require('../../lib/datasource');
 const github = require('../../lib/datasource/github');
 const ghGot = require('../../lib/platform/github/gh-got-wrapper');
+const got = require('../../lib/util/got');
+const hostRules = require('../../lib/util/host-rules');
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../lib/util/got');
+jest.mock('../../lib/util/host-rules');
 
 describe('datasource/github', () => {
   beforeEach(() => global.renovateCache.rmAll());
@@ -32,18 +35,28 @@ describe('datasource/github', () => {
   });
   describe('getPreset()', () => {
     it('throws if non-default', async () => {
-      await expect(
-        github.getPreset('some/repo', 'non-default')
-      ).rejects.toThrow();
+      let e;
+      try {
+        await github.getPreset('some/repo', 'non-default');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
+    it('throws if got throws', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      await expect(github.getPreset('some/repo')).rejects.toThrow();
     });
     it('throws if no content', async () => {
-      ghGot.mockImplementationOnce(() => ({
+      got.mockImplementationOnce(() => ({
         body: {},
       }));
       await expect(github.getPreset('some/repo')).rejects.toThrow();
     });
     it('throws if fails to parse', async () => {
-      ghGot.mockImplementationOnce(() => ({
+      got.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('not json').toString('base64'),
         },
@@ -51,7 +64,8 @@ describe('datasource/github', () => {
       await expect(github.getPreset('some/repo')).rejects.toThrow();
     });
     it('should return the preset', async () => {
-      ghGot.mockImplementationOnce(() => ({
+      hostRules.find.mockReturnValueOnce({ token: 'abc' });
+      got.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         },
