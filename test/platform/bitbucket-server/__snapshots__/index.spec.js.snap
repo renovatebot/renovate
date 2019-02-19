@@ -1,9 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/bitbucket createPr() posts PR 1`] = `
+exports[`platform/bitbucket-server endpoint with no path addReviewers sends the reviewer name as a reviewer 1`] = `
 Array [
   Array [
-    "/rest/api/1.0/projects/some/repos/repo/pull-requests",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/participants",
+    Object {
+      "body": Object {
+        "role": "REVIEWER",
+        "user": Object {
+          "name": "name",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path createPr() posts PR 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests",
     Object {
       "body": Object {
         "description": "body",
@@ -20,7 +36,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket getPr() gets a PR 1`] = `
+exports[`platform/bitbucket-server endpoint with no path getPr() gets a PR 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -37,9 +53,9 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+exports[`platform/bitbucket-server endpoint with no path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket initRepo() works 1`] = `
+exports[`platform/bitbucket-server endpoint with no path initRepo() works 1`] = `
 Object {
   "isFork": false,
   "privateRepo": undefined,
@@ -47,29 +63,126 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket mergePr() posts Merge 1`] = `
+exports[`platform/bitbucket-server endpoint with no path mergePr() posts Merge 1`] = `
 Array [
   Array [
-    "/rest/api/1.0/projects/some/repos/repo/pull-requests/5/merge",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
   ],
 ]
 `;
 
-exports[`platform/bitbucket setBaseBranch() updates file list 1`] = `
+exports[`platform/bitbucket-server endpoint with no path setBaseBranch() updates file list 1`] = `
 Array [
   Array [
-    "/rest/api/1.0/projects/some/repos/repo",
+    "./rest/api/1.0/projects/SOME/repos/repo",
   ],
   Array [
-    "/rest/api/1.0/projects/some/repos/repo/branches/default",
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
 ]
 `;
 
-exports[`platform/bitbucket updatePr() puts PR 1`] = `
+exports[`platform/bitbucket-server endpoint with no path updatePr() puts PR 1`] = `
 Array [
   Array [
-    "/rest/api/1.0/projects/some/repos/repo/pull-requests/5",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path addReviewers sends the reviewer name as a reviewer 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/participants",
+    Object {
+      "body": Object {
+        "role": "REVIEWER",
+        "user": Object {
+          "name": "name",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path createPr() posts PR 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests",
+    Object {
+      "body": Object {
+        "description": "body",
+        "fromRef": Object {
+          "id": "refs/heads/branch",
+        },
+        "title": "title",
+        "toRef": Object {
+          "id": "refs/heads/master",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getPr() gets a PR 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": true,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #5",
+  "isConflicted": false,
+  "number": 5,
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`platform/bitbucket-server endpoint with path initRepo() works 1`] = `
+Object {
+  "isFork": false,
+  "privateRepo": undefined,
+  "repoFullName": "repo",
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with path mergePr() posts Merge 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path setBaseBranch() updates file list 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path updatePr() puts PR 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "body": Object {
         "description": "body",

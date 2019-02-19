@@ -52,15 +52,17 @@ describe('manager/gradle', () => {
       expect(dependencies).toEqual([]);
     });
 
-    it('should return null if gradle execution fails', async () => {
+    it('should throw registry failure if gradle execution fails', async () => {
       exec.mockImplementation(() => {
         throw new Error();
       });
-
-      const dependencies = await manager.extractAllPackageFiles(config, [
-        'build.gradle',
-      ]);
-      expect(dependencies).toEqual(null);
+      let e;
+      try {
+        await manager.extractAllPackageFiles(config, ['build.gradle']);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toMatchSnapshot();
     });
 
     it('should return empty if there is no dependency report', async () => {
