@@ -65,5 +65,21 @@ describe('util/host-rules', () => {
         find({ platform: 'github', host: 'example.com' }, overrides)
       ).toMatchSnapshot();
     });
+    it('needs exact host matches', () => {
+      update({
+        platform: 'nuget',
+        endpoint: 'endpoint',
+        host: 'nuget.org',
+        username: 'root',
+        password: 'p4$$w0rd',
+      });
+      expect(find({ platform: 'nuget', host: 'nuget.org' })).toMatchSnapshot();
+      expect(
+        find({ platform: 'nuget', host: 'not.nuget.org' })
+      ).toMatchSnapshot();
+      expect(
+        find({ platform: 'nuget', host: 'not-nuget.org' })
+      ).toMatchSnapshot();
+    });
   });
 });
