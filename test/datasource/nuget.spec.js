@@ -1,8 +1,10 @@
 const fs = require('fs');
 const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
+const hostRules = require('../../lib/util/host-rules');
 
 jest.mock('../../lib/util/got');
+jest.mock('../../lib/util/host-rules');
 
 const pkgListV3 = fs.readFileSync('test/_fixtures/nuget/nunitV3.json', 'utf8');
 const pkgListV3WithoutProkjectUrl = fs.readFileSync(
@@ -60,6 +62,7 @@ const configV3NotNugetOrg = {
 describe('datasource/nuget', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
+      jest.resetAllMocks();
       global.repoCache = {};
     });
 
@@ -75,6 +78,30 @@ describe('datasource/nuget', () => {
           ...config,
         })
       ).toBeNull();
+    });
+
+    it('supports basic authentication', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(nugetIndexV3),
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        body: JSON.parse('{"totalHits": 0}'),
+        statusCode: 200,
+      });
+
+      hostRules.find.mockReturnValue({
+        username: 'some-username',
+        password: 'some-password',
+      });
+
+      await datasource.getPkgReleases({
+        ...configV3,
+      });
+
+      expect(got.mock.calls[0][1].headers.Authorization).toBe(
+        'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+      );
     });
 
     it(`can't get packages list (v3)`, async () => {
