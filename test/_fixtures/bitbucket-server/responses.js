@@ -464,4 +464,5 @@ function generateServerResponses(endpoint) {
 
 module.exports = {
   'endpoint with no path': generateServerResponses('https://stash.renovatebot.com'),
+  'endpoint with path': generateServerResponses('https://stash.renovatebot.com/vcs'),
 };
