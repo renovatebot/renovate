@@ -24,6 +24,22 @@ To convert your .NET Framework .csproj into an SDK-style project, one can follow
 3.  Renovate will look up the latest version on [nuget.org](https://nuget.org) to determine if any upgrades are available
 4.  If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
 
+## Alternate nuget feeds
+
+Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json`, but it also supports alternative nuget feeds. Alternative feeds can be specified in configuration file:
+
+```json
+"nuget": {
+  "registryUrls": [
+    "https://api.nuget.org/v3/index.json",
+    "http://example1.com/nuget/"
+    "http://example2.com/nuget/v3/index.json"
+  ]
+}
+```
+
+If this example we defined 3 nuget feeds. Packages resolving will process feeds consequentially. It means that if package will be resolved in second feed renovate won't look in last one.
+
 ## Future work
 
 Contributions and/or feature requests are welcome to support more patterns or additional use cases.
