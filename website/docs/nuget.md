@@ -21,10 +21,10 @@ To convert your .NET Framework .csproj into an SDK-style project, one can follow
 
 1.  Renovate will search each repository for any files with a `.csproj` extension.
 2.  Existing dependencies will be extracted from `<PackageReference>` tags
-3.  Renovate will look up the latest version on [nuget.org](https://nuget.org) to determine if any upgrades are available
+3.  Renovate will look up the latest version on [nuget.org](https://nuget.org) (or on [alternate feeds](#Alternate%20feeds)) to determine if any upgrades are available
 4.  If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
 
-## Alternate nuget feeds
+## Alternate feeds
 
 Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json`, but it also supports alternative nuget feeds. Alternative feeds can be specified in configuration file:
 
@@ -39,6 +39,23 @@ Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json
 ```
 
 If this example we defined 3 nuget feeds. Packages resolving will process feeds consequentially. It means that if package will be resolved in second feed renovate won't look in last one.
+
+## Authenticated feeds
+
+Credentials for authenticated/private feeds can be provided via host rules in the configuration options (file or command line parameter).
+
+```json
+"hostRules": [
+  {
+    "platform": "nuget",
+    "endpoint": "http://example1.com/nuget"
+    "username": "root",
+    "password": "p4$$w0rd"
+  }
+]
+```
+
+Please note that at the moment only Basic HTTP authentication (via username and password) is supported.
 
 ## Future work
 
