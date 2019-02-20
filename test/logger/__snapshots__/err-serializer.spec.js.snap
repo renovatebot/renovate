@@ -5,6 +5,11 @@ Object {
   "a": 1,
   "b": 2,
   "body": "some response body",
+  "gotOptions": Object {
+    "headers": Object {
+      "authorization": "** redacted **",
+    },
+  },
   "message": "some message",
   "response": Object {
     "body": "some response body",

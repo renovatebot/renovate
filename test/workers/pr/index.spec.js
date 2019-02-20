@@ -121,6 +121,7 @@ describe('workers/pr', () => {
       config.updateType = 'minor';
       config.homepage = 'https://dummy.com';
       config.sourceUrl = 'https://github.com/renovateapp/dummy';
+      config.sourceDirectory = 'packages/a';
       config.changelogUrl = 'https://github.com/renovateapp/dummy/changelog.md';
       platform.createPr.mockReturnValue({ displayNumber: 'New Pull Request' });
       config.upgrades = [config];
