@@ -9,3 +9,6 @@
 /.vscode
 /.idea
 package-lock.json
+*.json
+*.json
+*.lock
