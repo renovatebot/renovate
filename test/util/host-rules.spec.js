@@ -81,5 +81,26 @@ describe('util/host-rules', () => {
         find({ platform: 'nuget', host: 'not-nuget.org' })
       ).toMatchSnapshot();
     });
+    it('matches on endpoint', () => {
+      update({
+        platform: 'nuget',
+        endpoint: 'https://nuget.local/api',
+      });
+      expect(
+        find({ platform: 'nuget', endpoint: 'https://nuget.local/api' })
+      ).toMatchSnapshot();
+    });
+    it('matches on endpoint subresource', () => {
+      update({
+        platform: 'nuget',
+        endpoint: 'https://nuget.local/api',
+      });
+      expect(
+        find({
+          platform: 'nuget',
+          endpoint: 'https://nuget.local/api/sub-resource',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });
