@@ -21,6 +21,7 @@ describe('config/migration', () => {
         upgradeInRange: true,
         automergeType: 'branch-push',
         baseBranch: 'next',
+        renovateFork: true,
         ignoreNodeModules: true,
         node: {
           enabled: true,
@@ -57,7 +58,9 @@ describe('config/migration', () => {
             enabled: false,
           },
         ],
+        exposeEnv: true,
         lockFileMaintenance: {
+          exposeEnv: false,
           gitFs: true,
           automerge: 'any',
           schedule: 'before 5am every day',
@@ -83,6 +86,7 @@ describe('config/migration', () => {
             schedule: 'before 5am on Mondays',
           },
         ],
+        raiseDeprecationWarnings: false,
       };
       const parentConfig = { ...defaultConfig, semanticCommits: false };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(

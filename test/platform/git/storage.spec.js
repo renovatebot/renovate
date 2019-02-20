@@ -20,6 +20,7 @@ describe('platform/git/storage', () => {
     await repo.commit('past message');
 
     await repo.checkoutBranch('renovate/past_branch', 'master');
+    await repo.checkoutBranch('develop', 'master');
 
     await repo.checkout('master');
     await fs.writeFile(base.path + '/master_file', 'master');
@@ -66,8 +67,11 @@ describe('platform/git/storage', () => {
   });
 
   describe('setBaseBranch(branchName)', () => {
-    it('sets the base branch', async () => {
-      await git.setBaseBranch('some-branch');
+    it('sets the base branch as master', async () => {
+      await git.setBaseBranch('master');
+    });
+    it('sets non-master base branch', async () => {
+      await git.setBaseBranch('develop');
     });
   });
   describe('getFileList()', () => {

@@ -9,6 +9,10 @@ const pipeline2 = fs.readFileSync(
   'test/_fixtures/buildkite/pipeline2.yml',
   'utf8'
 );
+const pipeline4 = fs.readFileSync(
+  'test/_fixtures/buildkite/pipeline4.yml',
+  'utf8'
+);
 
 describe('manager/buildkite/update', () => {
   describe('updateDependency', () => {
@@ -19,6 +23,15 @@ describe('manager/buildkite/update', () => {
       };
       const res = bkUpdate.updateDependency(pipeline1, upgrade);
       expect(res).not.toEqual(pipeline1);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+    });
+    it('replaces arrays', () => {
+      const upgrade = {
+        lineNumber: 10,
+        newValue: 'v2.2.0',
+      };
+      const res = bkUpdate.updateDependency(pipeline4, upgrade);
+      expect(res).not.toEqual(pipeline4);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('replaces two values in one file', () => {

@@ -34,11 +34,11 @@ Renovate supports a [`supportPolicy`](configuration-options/#supportpolicy) opti
 
 | supportPolicy | versions | description                                               |
 | ------------- | -------- | --------------------------------------------------------- |
-| lts           | 4,6,8    | All releases classified as LTS, including in maintenance  |
-| active        | 6,8,9    | All releases classified as active and not maintenance     |
-| current       | 9        | The latest Node.js classified as "current"                |
-| lts_active    | 6,8      | All releases classified as Active LTS and not maintenance |
-| lts_latest    | 8        | The latest LTS release                                    |
+| lts           | 6,8,10   | All releases classified as LTS, including in maintenance  |
+| active        | 8,10,11  | All releases classified as active and not maintenance     |
+| current       | 11       | The latest Node.js classified as "current"                |
+| lts_active    | 8,10     | All releases classified as Active LTS and not maintenance |
+| lts_latest    | 10       | The latest LTS release                                    |
 
 The version numbers associated with each support policy will be updated as new versions of Node.js are released, moved to LTS or maintenance, etc.
 

@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/pip_setup/extract extractPackageFile() returns found deps 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": ">=19.7.0,<20.0",
+      "depName": "gunicorn",
+      "lineNumber": 61,
+      "purl": "pkg:pypi/gunicorn",
+    },
+    Object {
+      "currentValue": ">=0.11.5,<0.15",
+      "depName": "Werkzeug",
+      "lineNumber": 62,
+      "purl": "pkg:pypi/Werkzeug",
+    },
+    Object {
+      "currentValue": ">=3.2.1,<4.0",
+      "depName": "statsd",
+      "lineNumber": 63,
+      "purl": "pkg:pypi/statsd",
+    },
+    Object {
+      "currentValue": ">=2.10.0,<3.0",
+      "depName": "requests",
+      "lineNumber": 64,
+      "purl": "pkg:pypi/requests",
+      "skipReason": "ignored",
+    },
+    Object {
+      "currentValue": ">=5.27.1,<7.0",
+      "depName": "raven",
+      "lineNumber": 65,
+      "purl": "pkg:pypi/raven",
+    },
+    Object {
+      "currentValue": ">=0.15.2,<0.17",
+      "depName": "future",
+      "lineNumber": 66,
+      "purl": "pkg:pypi/future",
+    },
+    Object {
+      "currentValue": ">=1.0.16,<2.0",
+      "depName": "ipaddress",
+      "lineNumber": 67,
+      "purl": "pkg:pypi/ipaddress",
+    },
+    Object {
+      "currentValue": ">=3.1.13.0,<5.0",
+      "depName": "celery",
+      "lineNumber": 36,
+      "purl": "pkg:pypi/celery",
+    },
+    Object {
+      "currentValue": ">=0.11,<2.0",
+      "depName": "flask",
+      "lineNumber": 48,
+      "purl": "pkg:pypi/flask",
+    },
+    Object {
+      "currentValue": ">=1.4,<2.0",
+      "depName": "blinker",
+      "lineNumber": 49,
+      "purl": "pkg:pypi/blinker",
+    },
+    Object {
+      "currentValue": ">=1.7",
+      "depName": "logging_tree",
+      "lineNumber": 39,
+      "purl": "pkg:pypi/logging_tree",
+    },
+    Object {
+      "currentValue": ">=2.2",
+      "depName": "pygments",
+      "lineNumber": 40,
+      "purl": "pkg:pypi/pygments",
+    },
+    Object {
+      "currentValue": ">=5.0",
+      "depName": "psutil",
+      "lineNumber": 41,
+      "purl": "pkg:pypi/psutil",
+    },
+    Object {
+      "currentValue": ">=3.0",
+      "depName": "objgraph",
+      "lineNumber": 42,
+      "purl": "pkg:pypi/objgraph",
+    },
+    Object {
+      "currentValue": ">=1.10,<2.0",
+      "depName": "django",
+      "lineNumber": 45,
+      "purl": "pkg:pypi/django",
+    },
+  ],
+}
+`;

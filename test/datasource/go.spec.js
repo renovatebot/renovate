@@ -20,6 +20,9 @@ Nothing to see here; <a href="https://godoc.org/golang.org/x/text">move along</a
 </html>`;
 
 describe('datasource/go', () => {
+  beforeEach(() => {
+    global.repoCache = {};
+  });
   describe('getPkgReleases', () => {
     it('returns null for wrong name', async () => {
       got.mockReturnValueOnce({
@@ -67,7 +70,9 @@ describe('datasource/go', () => {
       got.mockReturnValueOnce({
         body: res1,
       });
-      github.getPkgReleases.mockReturnValueOnce({ releases: [1, 2] });
+      github.getPkgReleases.mockReturnValueOnce({
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+      });
       const res = await datasource.getPkgReleases('pkg:go/golang.org/x/text');
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();

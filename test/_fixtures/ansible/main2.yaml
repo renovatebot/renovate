@@ -1,0 +1,56 @@
+---
+- name: run containers
+  docker_service:
+    project_name: gitlab
+    definition:
+      version: "3.1"
+      services:
+        gitlab:
+          image: sameersbn/gitlab:11.5.1
+          ports:
+            - 0.0.0.0:22:22
+          volumes:
+            - data:/home/git/data:rw
+          environment:
+            - GITLAB_HOST=mygitlab.de
+            - GITLAB_TIMEZONE=Europe/Berlin
+            - GITLAB_REGISTRY_ENABLED=true
+            - GITLAB_REGISTRY_HOST=registry.mygitlab.de
+            - GITLAB_REGISTRY_PORT=443
+            - GITLAB_REGISTRY_API_URL=http://registry:5000
+            - GITLAB_REGISTRY_KEY_PATH=/home/git/data/.certs/registry-auth.key
+            - REDIS_HOST=redis
+            - DB_HOST=db
+            - DB_NAME=gitlab
+            - DB_USER=gitlab
+          restart: unless-stopped
+          depends_on:
+            - db
+            - redis
+        db:
+          image: sameersbn/postgresql:10
+          volumes:
+            - db:/var/lib/postgresql:rw
+          environment:
+            - DB_NAME=gitlab
+            - DB_USER=gitlab
+          restart: unless-stopped
+        redis:
+          image: sameersbn/redis:4.0.9-1
+          volumes:
+            - redis:/var/lib/redis:rw
+          restart: unless-stopped
+        registry:
+          image: registry:2.6.2
+          volumes:
+            - data:/data:rw
+          environment:
+            - REGISTRY_AUTH_TOKEN_SERVICE=container_registry
+            - REGISTRY_AUTH_TOKEN_ISSUER=gitlab-issuer
+            - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/data/.certs/registry-auth.crt
+            - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data/shared/registry
+          restart: unless-stopped
+      volumes:
+        ? data
+        ? db
+        ? redis

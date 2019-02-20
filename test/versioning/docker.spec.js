@@ -1,5 +1,5 @@
-const docker = require('../../lib/versioning')('docker');
-const semver = require('../../lib/versioning')('semver');
+const docker = require('../../lib/versioning/docker');
+const semver = require('../../lib/versioning/semver');
 
 describe('docker.', () => {
   describe('isValid(version)', () => {

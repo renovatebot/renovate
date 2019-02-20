@@ -28,10 +28,12 @@ Object {
   "ignorePaths": Array [
     "node_modules/",
   ],
+  "includeForks": true,
   "lockFileMaintenance": Object {
     "automerge": true,
     "gitFs": "https",
     "schedule": "before 5am",
+    "trustLevel": "low",
   },
   "major": Object {
     "automerge": false,
@@ -127,9 +129,13 @@ Object {
   "separateMajorMinor": true,
   "separateMajorReleases": true,
   "separateMinorPatch": true,
+  "suppressNotifications": Array [
+    "deprecationWarningIssues",
+  ],
   "travis": Object {
     "enabled": true,
   },
+  "trustLevel": "high",
 }
 `;
 

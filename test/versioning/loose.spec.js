@@ -1,4 +1,4 @@
-const loose = require('../../lib/versioning')('loose');
+const loose = require('../../lib/versioning/loose');
 
 describe('loose.', () => {
   describe('isValid(version)', () => {

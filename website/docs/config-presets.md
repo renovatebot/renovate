@@ -130,6 +130,16 @@ From then on Renovate will use the renovate config from the preset repo's defaul
 
 Note: Unlike npmjs-hosted presets, GitHub-hosted ones can contain only one config.
 
+## GitLab-hosted Presets
+
+It is also possible to host your preset config using just a regular GitLab repository and without needing to publish it to npmjs. In such cases Renovate will simply look for a renovate.json file in the default branch, (for now only the master branch is supported).
+
+To host your preset config on GitLab:
+
+- Create a new repository on GitLab. Normally you'd call it renovate-config but it can be named anything
+- Add a renovate.json to this new repo containing the preset config. No other files are necessary.
+- In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
+
 ## Presets and Private Modules
 
 Using your own preset config along with private npm modules can present a chicken and egg problem. You want to configure the encrypted token just once, which means in the preset. But you also probably want the preset to be private too, so how can the other repos reference it?

@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/orb getPkgReleases processes homeUrl 1`] = `
+Object {
+  "homepage": "https://google.com",
+  "name": "hyper-expanse/library-release-workflows",
+  "releases": Array [
+    Object {
+      "version": "3.0.0",
+    },
+    Object {
+      "version": "4.0.0",
+    },
+    Object {
+      "version": "4.1.0",
+    },
+    Object {
+      "version": "4.1.1",
+    },
+    Object {
+      "version": "4.1.2",
+    },
+    Object {
+      "version": "4.1.3",
+    },
+    Object {
+      "version": "4.1.4",
+    },
+    Object {
+      "version": "4.1.5",
+    },
+    Object {
+      "version": "4.1.6",
+    },
+    Object {
+      "version": "4.2.0",
+    },
+  ],
+  "versions": Object {},
+}
+`;
+
+exports[`datasource/orb getPkgReleases processes real data 1`] = `
+Object {
+  "homepage": "https://circleci.com/orbs/registry/orb/hyper-expanse/library-release-workflows",
+  "name": "hyper-expanse/library-release-workflows",
+  "releases": Array [
+    Object {
+      "version": "3.0.0",
+    },
+    Object {
+      "version": "4.0.0",
+    },
+    Object {
+      "version": "4.1.0",
+    },
+    Object {
+      "version": "4.1.1",
+    },
+    Object {
+      "version": "4.1.2",
+    },
+    Object {
+      "version": "4.1.3",
+    },
+    Object {
+      "version": "4.1.4",
+    },
+    Object {
+      "version": "4.1.5",
+    },
+    Object {
+      "version": "4.1.6",
+    },
+    Object {
+      "version": "4.2.0",
+    },
+  ],
+  "versions": Object {},
+}
+`;

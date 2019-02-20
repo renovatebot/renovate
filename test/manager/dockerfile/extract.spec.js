@@ -45,7 +45,6 @@ describe('lib/manager/dockerfile/extract', () => {
       const res = extractPackageFile('FROM node:8.9.0-alpine as base\n', config)
         .deps;
       expect(res).toMatchSnapshot();
-      //  expect(res.currentTag.includes(' ')).toBe(false);
     });
     it('handles comments', () => {
       const res = extractPackageFile(

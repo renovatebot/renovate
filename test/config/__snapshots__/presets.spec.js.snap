@@ -89,6 +89,15 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset parses gitlab 1`] = `
+Object {
+  "datasource": "gitlab",
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "default",
+}
+`;
+
 exports[`config/presets parsePreset returns default package name 1`] = `
 Object {
   "datasource": "npm",

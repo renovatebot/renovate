@@ -43,7 +43,7 @@ This function doesn't necessarily need to _understand_ the file or even syntax t
 
 As a general approach, we want to extract _all_ dependencies from each dependency file, even if they contain values we don't support. For any that have unsupported values that we cannot renovate, this `extractPackageFile` function should set a `skipReason` to a value that would be helpful to someone reading the logs.
 
-Also, if a file is passed to `extractPackageFile` that is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files. A common case for this is in Meteor, where its `package.js` file name is not unique and there many be many non-Meteor paojects using that filename.
+Also, if a file is passed to `extractPackageFile` that is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files. A common case for this is in Meteor, where its `package.js` file name is not unique and there many be many non-Meteor projects using that filename.
 
 ##### `extractAllPackageFiles(packageFiles)` (async, optional)
 

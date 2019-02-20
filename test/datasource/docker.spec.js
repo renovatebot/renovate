@@ -1,5 +1,6 @@
 const got = require('got');
 const docker = require('../../lib/datasource/docker');
+const { getPkgReleases } = require('../../lib/datasource');
 const hostRules = require('../../lib/util/host-rules');
 
 jest.mock('got');
@@ -9,6 +10,7 @@ describe('api/docker', () => {
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      global.repoCache = {};
       hostRules.find.mockReturnValue({
         username: 'some-username',
         password: 'some-password',
@@ -47,28 +49,6 @@ describe('api/docker', () => {
         'some-new-value'
       );
       expect(res).toBe('some-digest');
-    });
-    it('returns from cache', async () => {
-      got.mockReturnValueOnce({
-        headers: {
-          'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
-        },
-      });
-      got.mockReturnValueOnce({ body: { token: 'some-token' } });
-      got.mockReturnValueOnce({
-        headers: { 'docker-content-digest': 'some-digest' },
-      });
-      const res = await docker.getDigest(
-        { depName: 'some-dep-to-cache' },
-        'some-newer-value'
-      );
-      expect(res).toBe('some-digest');
-      const res2 = await docker.getDigest(
-        { depName: 'some-dep-to-cache' },
-        'some-newer-value'
-      );
-      expect(res2).toBe('some-digest');
     });
     it('falls back to body for digest', async () => {
       got.mockReturnValueOnce({
@@ -136,79 +116,42 @@ describe('api/docker', () => {
         headers: { 'docker-content-digest': 'some-digest' },
       });
       const res = await docker.getDigest(
-        { depName: 'some-dep', tagSuffix: 'alpine' },
-        '8.0.0'
+        { depName: 'some-dep' },
+        '8.0.0-alpine'
       );
       expect(res).toBe('some-digest');
+    });
+    it('should throw error for 429', async () => {
+      got.mockRejectedValueOnce({ statusCode: 429 });
+      let e;
+      try {
+        await docker.getDigest({ depName: 'some-dep' }, 'latest');
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toBe('registry-failure');
+    });
+    it('should throw error for 5xx', async () => {
+      got.mockRejectedValueOnce({ statusCode: 503 });
+      let e;
+      try {
+        await docker.getDigest({ depName: 'some-dep' }, 'latest');
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toBe('registry-failure');
     });
   });
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
-      const res = await docker.getPkgReleases({
-        fullname: 'node',
-        qualifiers: {},
-      });
+      const res = await getPkgReleases('pkg:docker/node');
       expect(res).toBe(null);
-    });
-    it('returns tags with no suffix', async () => {
-      const tags = ['a', 'b', '1.0.0', '1.1.0', '1.1.0-alpine'];
-      got.mockReturnValueOnce({
-        headers: {
-          'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
-        },
-      });
-      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
-      got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getPkgReleases({
-        fullname: 'my/node',
-        qualifiers: {},
-      });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(3);
-    });
-    it('returns tags with suffix', async () => {
-      const tags = ['a', 'b', '1.0.0', '1.1.0-alpine'];
-      got.mockReturnValueOnce({
-        headers: {
-          'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
-        },
-      });
-      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
-      got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getPkgReleases({
-        fullname: 'my/node',
-        qualifiers: { suffix: 'alpine' },
-      });
-      expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(1);
-    });
-    it('returns cached tags', async () => {
-      const tags = ['a', 'b', '1.0.0', '1.1.0-alpine'];
-      got.mockReturnValueOnce({
-        headers: {
-          'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:samalba/my-app:pull  "',
-        },
-      });
-      got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
-      got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getPkgReleases({
-        fullname: 'my/node',
-        qualifiers: { suffix: 'alpine' },
-      });
-      expect(res.releases).toHaveLength(1);
-      const res2 = await docker.getPkgReleases({
-        fullname: 'my/node',
-        qualifiers: { suffix: 'alpine' },
-      });
-      expect(res2.releases).toHaveLength(1);
     });
     it('uses custom registry', async () => {
       const tags = ['1.0.0'];
@@ -219,13 +162,7 @@ describe('api/docker', () => {
       const config = {
         registryUrls: ['https://registry.company.com'],
       };
-      const res = await docker.getPkgReleases(
-        {
-          fullname: 'node',
-          qualifiers: {},
-        },
-        config
-      );
+      const res = await getPkgReleases('pkg:docker/node', config);
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -239,10 +176,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getPkgReleases({
-        fullname: 'node',
-        qualifiers: {},
-      });
+      const res = await getPkgReleases('pkg:docker/node');
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -256,12 +190,7 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getPkgReleases({
-        fullname: 'node',
-        qualifiers: {
-          registry: 'docker.io',
-        },
-      });
+      const res = await getPkgReleases('pkg:docker/node?registry=docker.io');
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });
@@ -275,12 +204,9 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
-      const res = await docker.getPkgReleases({
-        fullname: 'kubernetes-dashboard-amd64',
-        qualifiers: {
-          registry: 'k8s.gcr.io',
-        },
-      });
+      const res = await getPkgReleases(
+        'pkg:docker/kubernetes-dashboard-amd64?registry=k8s.gcr.io'
+      );
       expect(res.releases).toHaveLength(1);
       expect(got).toMatchSnapshot();
     });

@@ -120,6 +120,99 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+  it('filters depTypes', () => {
+    const config = {
+      packageRules: [
+        {
+          depTypeList: ['test'],
+          packageNames: ['a'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depTypes: ['build', 'test'],
+      depName: 'a',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('filters managers with matching manager', () => {
+    const config = {
+      packageRules: [
+        {
+          managers: ['npm', 'meteor'],
+          packageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      language: 'js',
+      manager: 'meteor',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('filters managers with non-matching manager', () => {
+    const config = {
+      packageRules: [
+        {
+          managers: ['dockerfile', 'npm'],
+          packageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      language: 'python',
+      manager: 'pipenv',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+  it('filters languages with matching language', () => {
+    const config = {
+      packageRules: [
+        {
+          languages: ['js', 'node'],
+          packageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      language: 'js',
+      manager: 'meteor',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('filters languages with non-matching language', () => {
+    const config = {
+      packageRules: [
+        {
+          languages: ['docker'],
+          packageNames: ['node'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      language: 'python',
+      manager: 'pipenv',
+      depName: 'node',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
   it('filters updateType', () => {
     const config = {
       packageRules: [
@@ -136,6 +229,68 @@ describe('applyPackageRules()', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
+  });
+  it('matches sourceUrlPrefixes', () => {
+    const config = {
+      packageRules: [
+        {
+          sourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch',
+      sourceUrl: 'https://github.com/renovatebot/presets',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('non-matches sourceUrlPrefixes', () => {
+    const config = {
+      packageRules: [
+        {
+          sourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch',
+      sourceUrl: 'https://github.com/vuejs/vue',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+  it('handles sourceUrlPrefixes when missing sourceUrl', () => {
+    const config = {
+      packageRules: [
+        {
+          sourceUrlPrefixes: [
+            'https://github.com/foo/bar',
+            'https://github.com/renovatebot/',
+          ],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      updateType: 'patch',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
   });
   it('filters naked depType', () => {
     const config = {

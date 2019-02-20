@@ -31,6 +31,26 @@ describe('manager/bazel/update', () => {
       const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
     });
+    it('updates commit to tag', async () => {
+      const upgrade = {
+        depName: 'com_github_google_uuid',
+        depType: 'go_repository',
+        def: `go_repository(
+    name = "com_github_google_uuid",
+    importpath = "github.com/google/uuid",
+    commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+)
+`,
+        currentValue: 'v0.0.0',
+        currentDigest: 'dec09d789f3dba190787f8b4454c7d3c936fed9e',
+        newValue: 'v1.0.3',
+        updateType: 'major',
+      };
+      const res = await bazelfile.updateDependency(content, upgrade);
+      expect(res).toMatchSnapshot();
+      expect(res).not.toEqual(content);
+      expect(res.includes('tag = "v1.0.3"')).toBe(true);
+    });
     it('updates http archive', async () => {
       const upgrade = {
         depName: 'io_bazel_rules_go',

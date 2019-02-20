@@ -110,6 +110,6 @@ Object {
       "version": "3.10.1",
     },
   ],
-  "repositoryUrl": "https://github.com/JamesNK/Newtonsoft.Json",
+  "sourceUrl": "https://github.com/JamesNK/Newtonsoft.Json",
 }
 `;

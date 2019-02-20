@@ -12,7 +12,7 @@ Object {
       "version": "1.1.0",
     },
   ],
-  "repositoryUrl": "https://github.com/some/dep",
+  "sourceUrl": "https://github.com/some/dep",
 }
 `;
 
@@ -28,6 +28,6 @@ Object {
       "version": "v1.1.0",
     },
   ],
-  "repositoryUrl": "https://github.com/some/dep",
+  "sourceUrl": "https://github.com/some/dep",
 }
 `;

@@ -75,7 +75,7 @@ Object {
       "version": "0.4.0",
     },
   ],
-  "repositoryUrl": "https://github.com/hashicorp/terraform-aws-consul",
+  "sourceUrl": "https://github.com/hashicorp/terraform-aws-consul",
   "versions": Object {},
 }
 `;
