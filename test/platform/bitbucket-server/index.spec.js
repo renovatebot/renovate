@@ -65,7 +65,10 @@ describe('platform/bitbucket-server', () => {
       });
 
       function initRepo() {
-        return bitbucket.initRepo({ repository: 'SOME/repo' });
+        return bitbucket.initRepo({
+          repository: 'SOME/repo',
+          gitAuthor: 'bot@renovateapp.com',
+        });
       }
 
       describe('getRepos()', () => {
