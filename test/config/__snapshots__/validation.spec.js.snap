@@ -68,6 +68,30 @@ Array [
 
 exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `Array []`;
 
+exports[`config/validation validateConfig(config) included managers of the wrong type 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Configuration option \`packageRules[0].managers\` should be a list (Array)",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules: Managers should be type of List. You have included string.",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) included unsupported manager 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "packageRules:
+        You have included unsupported manager: foo. 
+        Supported managers are: (ansible, bazel, buildkite, bundler, cargo, circleci, composer, docker-compose, dockerfile, github-actions, gitlabci, gomod, gradle, gradle-wrapper, kubernetes, maven, meteor, npm, nuget, nvm, pip_requirements, pip_setup, pipenv, terraform, travis).",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) returns deprecation warnings 1`] = `
 Array [
   Object {
