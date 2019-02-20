@@ -255,6 +255,43 @@ describe('platform/bitbucket-server', () => {
           await bitbucket.mergePr(5, 'branch');
           expect(api.post.mock.calls).toMatchSnapshot();
         });
+
+        it('throws not-found', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockImplementationOnce(() =>
+            Promise.reject({
+              statusCode: 404,
+            })
+          );
+          await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
+            'not-found'
+          );
+        });
+
+        it('throws conflicted', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockImplementationOnce(() =>
+            Promise.reject({
+              statusCode: 409,
+            })
+          );
+          await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
+            'repository-changed'
+          );
+        });
+
+        it('unknown error', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockImplementationOnce(() =>
+            Promise.reject({
+              statusCode: 405,
+            })
+          );
+          await expect(bitbucket.mergePr(5, 'branch')).resolves.toBeFalsy();
+        });
       });
 
       describe('getPrBody()', () => {
