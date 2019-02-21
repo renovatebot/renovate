@@ -486,6 +486,17 @@ function generateServerResponses(endpoint) {
       ],
     },
     },
+    [`${endpoint}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`]: {
+      'GET': {
+        isLastPage: true,
+        values: [
+          { key: 'context-1', state: 'SUCCESSFUL' },
+        ],
+      },
+    },
+    [`${endpoint}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`]: {
+      'POST': {}
+    },
   }
 }
 

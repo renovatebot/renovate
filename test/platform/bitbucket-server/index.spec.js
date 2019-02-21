@@ -48,7 +48,9 @@ describe('platform/bitbucket-server', () => {
           mergeBranch: jest.fn(),
           deleteBranch: jest.fn(),
           getRepoStatus: jest.fn(),
-          getBranchCommit: jest.fn(() => 'commit-id'),
+          getBranchCommit: jest.fn(
+            () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          ),
         }));
 
         // clean up hostRules
@@ -573,8 +575,9 @@ describe('platform/bitbucket-server', () => {
 
       describe('setBranchStatus()', () => {
         it('should be success', async () => {
-          expect.assertions(1);
+          expect.assertions(2);
           await initRepo();
+          api.get.mockClear();
 
           await bitbucket.setBranchStatus(
             'somebranch',
@@ -608,6 +611,14 @@ describe('platform/bitbucket-server', () => {
             'success'
           );
 
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-1',
+            null,
+            'success'
+          );
+
+          expect(api.get.mock.calls).toHaveLength(5);
           expect(api.post.mock.calls).toHaveLength(4);
         });
       });
