@@ -19,6 +19,7 @@ defmodule MyProject.MixProject do
       {:ecto, "~> 2.0.0"},
       {:postgrex, "~> 0.8.1"},
       {:cowboy, github: "ninenines/cowboy"},
+      {:secret, "~> 1.0", organization: "acme"},
     ]
   end
 end

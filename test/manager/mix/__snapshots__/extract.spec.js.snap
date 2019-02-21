@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/mix/extract extractPackageFile() extracts all dependencies 1`] = `
+Array [
+  Object {
+    "currentValue": "~> 2.0.0",
+    "datasource": "hex",
+    "depName": "ecto",
+    "depType": "hex",
+    "lineNumber": 18,
+    "organization": undefined,
+    "skipReason": "not-version",
+  },
+  Object {
+    "currentValue": "~> 0.8.1",
+    "datasource": "hex",
+    "depName": "postgrex",
+    "depType": "hex",
+    "lineNumber": 19,
+    "organization": undefined,
+    "skipReason": "not-version",
+  },
+  Object {
+    "currentValue": "ninenines/cowboy",
+    "datasource": "github",
+    "depName": "cowboy",
+    "depType": "hex",
+    "lineNumber": 20,
+    "organization": undefined,
+    "skipReason": "not-version",
+  },
+  Object {
+    "currentValue": "~> 1.0",
+    "datasource": "hex",
+    "depName": "secret",
+    "depType": "hex",
+    "lineNumber": 21,
+    "organization": "acme",
+    "skipReason": "not-version",
+  },
+]
+`;
