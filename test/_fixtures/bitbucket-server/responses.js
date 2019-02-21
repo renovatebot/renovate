@@ -450,6 +450,7 @@ function generateServerResponses(endpoint) {
         isLastPage: true,
         values: [
           { action: 'COMMENTED', commentAction: 'ADDED', comment: { id: 21, text: '### some-subject\n\nblablabla' } },
+          { action: 'COMMENTED', commentAction: 'ADDED', comment: { id: 22, text: '!merge' } },
         ],
       },
     },
@@ -457,6 +458,12 @@ function generateServerResponses(endpoint) {
       'POST': {},
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`]: {
+      'GET': {
+        version: 1
+      },
+      'PUT': {},
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/22`]: {
       'GET': {
         version: 1
       },
