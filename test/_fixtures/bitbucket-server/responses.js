@@ -445,6 +445,26 @@ function generateServerResponses(endpoint) {
         },
       },
     },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`]: {
+      'GET': {
+        isLastPage: true,
+        values: [
+          { action: 'COMMENTED', commentAction: 'ADDED', comment: { id: 21, text: '### some-subject\n\nblablabla' } },
+        ],
+      },
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments`]: {
+      'POST': {},
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`]: {
+      'GET': {
+        version: 1
+      },
+      'PUT': {},
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21?version=1`]: {
+      'DELETE': {},
+    },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/branches`]: {
       'GET': {
       isLastPage: true,
