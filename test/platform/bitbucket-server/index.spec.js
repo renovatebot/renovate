@@ -65,7 +65,10 @@ describe('platform/bitbucket-server', () => {
       });
 
       function initRepo() {
-        return bitbucket.initRepo({ repository: 'SOME/repo' });
+        return bitbucket.initRepo({
+          repository: 'SOME/repo',
+          gitAuthor: 'bot@renovateapp.com',
+        });
       }
 
       describe('getRepos()', () => {
@@ -251,6 +254,43 @@ describe('platform/bitbucket-server', () => {
           await initRepo();
           await bitbucket.mergePr(5, 'branch');
           expect(api.post.mock.calls).toMatchSnapshot();
+        });
+
+        it('throws not-found', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockImplementationOnce(() =>
+            Promise.reject({
+              statusCode: 404,
+            })
+          );
+          await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
+            'not-found'
+          );
+        });
+
+        it('throws conflicted', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockImplementationOnce(() =>
+            Promise.reject({
+              statusCode: 409,
+            })
+          );
+          await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
+            'repository-changed'
+          );
+        });
+
+        it('unknown error', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockImplementationOnce(() =>
+            Promise.reject({
+              statusCode: 405,
+            })
+          );
+          await expect(bitbucket.mergePr(5, 'branch')).resolves.toBeFalsy();
         });
       });
 
