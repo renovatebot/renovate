@@ -17,13 +17,8 @@ const pkgInfoV3FromNuget = fs.readFileSync(
 );
 
 const pkgListV2 = fs.readFileSync('test/_fixtures/nuget/nunitV2.xml', 'utf8');
-
-const pkgLatestV2 = fs.readFileSync(
-  'test/_fixtures/nuget/latestV2.xml',
-  'utf8'
-);
-const pkgLatestV2WithoutProkjectUrl = fs.readFileSync(
-  'test/_fixtures/nuget/latestV2_withoutProjectUrl.xml',
+const pkgListV2WithoutProjectUrl = fs.readFileSync(
+  'test/_fixtures/nuget/nunitV2_withoutProjectUrl.xml',
   'utf8'
 );
 
@@ -132,21 +127,6 @@ describe('datasource/nuget', () => {
       });
 
       expect(res).toBeNull();
-    });
-    it(`can't get package info (v2)`, async () => {
-      got.mockReturnValueOnce({
-        body: pkgListV2,
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: pkgLatestV2,
-        statusCode: 500,
-      });
-      expect(
-        await datasource.getPkgReleases({
-          ...configV2,
-        })
-      ).toBeNull();
     });
 
     it('returns null for empty result (v3v2)', async () => {
@@ -313,10 +293,6 @@ describe('datasource/nuget', () => {
         body: pkgListV2,
         statusCode: 200,
       });
-      got.mockReturnValueOnce({
-        body: pkgLatestV2,
-        statusCode: 200,
-      });
       const res = await datasource.getPkgReleases({
         ...configV2,
       });
@@ -326,11 +302,7 @@ describe('datasource/nuget', () => {
     });
     it('processes real data without project url (v2)', async () => {
       got.mockReturnValueOnce({
-        body: pkgListV2,
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: pkgLatestV2WithoutProkjectUrl,
+        body: pkgListV2WithoutProjectUrl,
         statusCode: 200,
       });
       const res = await datasource.getPkgReleases({
