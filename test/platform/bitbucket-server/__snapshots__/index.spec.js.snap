@@ -89,6 +89,29 @@ Array [
     Object {
       "body": Object {
         "description": "body",
+        "reviewers": Array [
+          Object {
+            "approved": false,
+            "role": "REVIEWER",
+            "status": "UNAPPROVED",
+            "user": Object {
+              "active": true,
+              "displayName": "Renovate bot 2",
+              "emailAddress": "userName2@renovatebot.com",
+              "id": 71155,
+              "links": Object {
+                "self": Array [
+                  Object {
+                    "href": "https://stash.renovatebot.com/users/userName2",
+                  },
+                ],
+              },
+              "name": "userName2",
+              "slug": "userName2",
+              "type": "NORMAL",
+            },
+          },
+        ],
         "title": "title",
         "version": 1,
       },
@@ -186,6 +209,29 @@ Array [
     Object {
       "body": Object {
         "description": "body",
+        "reviewers": Array [
+          Object {
+            "approved": false,
+            "role": "REVIEWER",
+            "status": "UNAPPROVED",
+            "user": Object {
+              "active": true,
+              "displayName": "Renovate bot 2",
+              "emailAddress": "userName2@renovatebot.com",
+              "id": 71155,
+              "links": Object {
+                "self": Array [
+                  Object {
+                    "href": "https://stash.renovatebot.com/vcs/users/userName2",
+                  },
+                ],
+              },
+              "name": "userName2",
+              "slug": "userName2",
+              "type": "NORMAL",
+            },
+          },
+        ],
         "title": "title",
         "version": 1,
       },

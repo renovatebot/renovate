@@ -30,6 +30,7 @@ describe('platform/bitbucket-server', () => {
         jest.spyOn(api, 'get');
         jest.spyOn(api, 'post');
         jest.spyOn(api, 'put');
+        jest.spyOn(api, 'delete');
         bitbucket = require('../../../lib/platform/bitbucket-server');
         GitStorage = require('../../../lib/platform/git/storage');
         GitStorage.mockImplementation(() => ({
@@ -47,6 +48,9 @@ describe('platform/bitbucket-server', () => {
           mergeBranch: jest.fn(),
           deleteBranch: jest.fn(),
           getRepoStatus: jest.fn(),
+          getBranchCommit: jest.fn(
+            () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          ),
         }));
 
         // clean up hostRules
@@ -192,13 +196,102 @@ describe('platform/bitbucket-server', () => {
 
       describe('ensureComment()', () => {
         it('does not throw', async () => {
-          await bitbucket.ensureComment(3, 'topic', 'content');
+          expect.assertions(2);
+          expect(
+            await bitbucket.ensureComment(3, 'topic', 'content')
+          ).toBeFalsy();
+          expect(api.get.mock.calls).toHaveLength(1);
+        });
+
+        it('add comment if not found', async () => {
+          expect.assertions(6);
+          await initRepo();
+          api.get.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, 'topic', 'content')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.post.mock.calls).toHaveLength(1);
+
+          api.get.mockClear();
+          api.post.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, null, 'content')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.post.mock.calls).toHaveLength(1);
+        });
+
+        it('add updates comment if necessary', async () => {
+          expect.assertions(8);
+          await initRepo();
+          api.get.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, 'some-subject', 'some\ncontent')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(2);
+          expect(api.post.mock.calls).toHaveLength(0);
+          expect(api.put.mock.calls).toHaveLength(1);
+
+          api.get.mockClear();
+          api.put.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, null, 'some\ncontent')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.post.mock.calls).toHaveLength(1);
+          expect(api.put.mock.calls).toHaveLength(0);
+        });
+
+        it('skips comment', async () => {
+          expect.assertions(6);
+          await initRepo();
+          api.get.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, 'some-subject', 'blablabla')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.put.mock.calls).toHaveLength(0);
+
+          api.get.mockClear();
+          api.put.mockClear();
+
+          expect(await bitbucket.ensureComment(5, null, '!merge')).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.put.mock.calls).toHaveLength(0);
         });
       });
 
       describe('ensureCommentRemoval()', () => {
         it('does not throw', async () => {
-          await bitbucket.ensureCommentRemoval(3, 'topic');
+          expect.assertions(1);
+          await bitbucket.ensureCommentRemoval(5, 'topic');
+          expect(api.get.mock.calls).toHaveLength(1);
+        });
+
+        it('deletes comment if found', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockClear();
+
+          await bitbucket.ensureCommentRemoval(5, 'some-subject');
+          expect(api.get.mock.calls).toHaveLength(2);
+          expect(api.delete.mock.calls).toHaveLength(1);
+        });
+
+        it('deletes nothing', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockClear();
+
+          await bitbucket.ensureCommentRemoval(5, 'topic');
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.delete.mock.calls).toHaveLength(0);
         });
       });
 
@@ -314,6 +407,219 @@ describe('platform/bitbucket-server', () => {
       describe('getVulnerabilityAlerts()', () => {
         it('returns empty array', async () => {
           expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
+        });
+      });
+
+      describe('getBranchStatus()', () => {
+        it('should be success', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              successful: 3,
+              inProgress: 0,
+              failed: 0,
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('success');
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch')
+          ).resolves.toEqual('success');
+        });
+
+        it('should be pending', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              successful: 3,
+              inProgress: 1,
+              failed: 0,
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('pending');
+
+          api.get.mockReturnValueOnce({
+            body: {
+              successful: 0,
+              inProgress: 0,
+              failed: 0,
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('pending');
+        });
+
+        it('should be failed', async () => {
+          expect.assertions(2);
+          await initRepo();
+
+          api.get.mockReturnValueOnce({
+            body: {
+              successful: 1,
+              inProgress: 1,
+              failed: 1,
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('failed');
+
+          api.get.mockImplementationOnce(() => {
+            throw new Error('requst-failed');
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('failed');
+        });
+      });
+
+      describe('getBranchStatusCheck()', () => {
+        it('should be success', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              isLastPage: true,
+              values: [
+                {
+                  state: 'SUCCESSFUL',
+                  key: 'context-2',
+                  url: 'https://renovatebot.com',
+                },
+              ],
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toEqual('success');
+        });
+
+        it('should be pending', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              isLastPage: true,
+              values: [
+                {
+                  state: 'INPROGRESS',
+                  key: 'context-2',
+                  url: 'https://renovatebot.com',
+                },
+              ],
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toEqual('pending');
+        });
+
+        it('should be failure', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              isLastPage: true,
+              values: [
+                {
+                  state: 'FAILED',
+                  key: 'context-2',
+                  url: 'https://renovatebot.com',
+                },
+              ],
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toEqual('failure');
+        });
+
+        it('should be null', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockImplementationOnce(() => {
+            throw new Error('requst-failed');
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toBeNull();
+
+          api.get.mockReturnValueOnce({
+            body: {
+              isLastPage: true,
+              values: [],
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toBeNull();
+        });
+      });
+
+      describe('setBranchStatus()', () => {
+        it('should be success', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockClear();
+
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-2',
+            null,
+            'success'
+          );
+
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-2',
+            null,
+            'failed'
+          );
+
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-2',
+            null,
+            'pending'
+          );
+
+          api.post.mockImplementationOnce(() => {
+            throw new Error('requst-failed');
+          });
+
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-2',
+            null,
+            'success'
+          );
+
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-1',
+            null,
+            'success'
+          );
+
+          expect(api.get.mock.calls).toHaveLength(5);
+          expect(api.post.mock.calls).toHaveLength(4);
         });
       });
     });
