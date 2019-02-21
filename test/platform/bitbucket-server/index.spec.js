@@ -30,6 +30,7 @@ describe('platform/bitbucket-server', () => {
         jest.spyOn(api, 'get');
         jest.spyOn(api, 'post');
         jest.spyOn(api, 'put');
+        jest.spyOn(api, 'delete');
         bitbucket = require('../../../lib/platform/bitbucket-server');
         GitStorage = require('../../../lib/platform/git/storage');
         GitStorage.mockImplementation(() => ({
@@ -193,13 +194,102 @@ describe('platform/bitbucket-server', () => {
 
       describe('ensureComment()', () => {
         it('does not throw', async () => {
-          await bitbucket.ensureComment(3, 'topic', 'content');
+          expect.assertions(2);
+          expect(
+            await bitbucket.ensureComment(3, 'topic', 'content')
+          ).toBeFalsy();
+          expect(api.get.mock.calls).toHaveLength(1);
+        });
+
+        it('add comment if not found', async () => {
+          expect.assertions(6);
+          await initRepo();
+          api.get.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, 'topic', 'content')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.post.mock.calls).toHaveLength(1);
+
+          api.get.mockClear();
+          api.post.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, null, 'content')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.post.mock.calls).toHaveLength(1);
+        });
+
+        it('add updates comment if necessary', async () => {
+          expect.assertions(8);
+          await initRepo();
+          api.get.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, 'some-subject', 'some\ncontent')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(2);
+          expect(api.post.mock.calls).toHaveLength(0);
+          expect(api.put.mock.calls).toHaveLength(1);
+
+          api.get.mockClear();
+          api.put.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, null, 'some\ncontent')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.post.mock.calls).toHaveLength(1);
+          expect(api.put.mock.calls).toHaveLength(0);
+        });
+
+        it('skips comment', async () => {
+          expect.assertions(6);
+          await initRepo();
+          api.get.mockClear();
+
+          expect(
+            await bitbucket.ensureComment(5, 'some-subject', 'blablabla')
+          ).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.put.mock.calls).toHaveLength(0);
+
+          api.get.mockClear();
+          api.put.mockClear();
+
+          expect(await bitbucket.ensureComment(5, null, '!merge')).toBeTruthy();
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.put.mock.calls).toHaveLength(0);
         });
       });
 
       describe('ensureCommentRemoval()', () => {
         it('does not throw', async () => {
-          await bitbucket.ensureCommentRemoval(3, 'topic');
+          expect.assertions(1);
+          await bitbucket.ensureCommentRemoval(5, 'topic');
+          expect(api.get.mock.calls).toHaveLength(1);
+        });
+
+        it('deletes comment if found', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockClear();
+
+          await bitbucket.ensureCommentRemoval(5, 'some-subject');
+          expect(api.get.mock.calls).toHaveLength(2);
+          expect(api.delete.mock.calls).toHaveLength(1);
+        });
+
+        it('deletes nothing', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockClear();
+
+          await bitbucket.ensureCommentRemoval(5, 'topic');
+          expect(api.get.mock.calls).toHaveLength(1);
+          expect(api.delete.mock.calls).toHaveLength(0);
         });
       });
 
