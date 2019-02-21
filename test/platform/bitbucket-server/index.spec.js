@@ -47,6 +47,7 @@ describe('platform/bitbucket-server', () => {
           mergeBranch: jest.fn(),
           deleteBranch: jest.fn(),
           getRepoStatus: jest.fn(),
+          getBranchCommit: jest.fn(() => 'commit-id'),
         }));
 
         // clean up hostRules
@@ -314,6 +315,210 @@ describe('platform/bitbucket-server', () => {
       describe('getVulnerabilityAlerts()', () => {
         it('returns empty array', async () => {
           expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
+        });
+      });
+
+      describe('getBranchStatus()', () => {
+        it('should be success', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              successful: 3,
+              inProgress: 0,
+              failed: 0,
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('success');
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch')
+          ).resolves.toEqual('success');
+        });
+
+        it('should be pending', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              successful: 3,
+              inProgress: 1,
+              failed: 0,
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('pending');
+
+          api.get.mockReturnValueOnce({
+            body: {
+              successful: 0,
+              inProgress: 0,
+              failed: 0,
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('pending');
+        });
+
+        it('should be failed', async () => {
+          expect.assertions(2);
+          await initRepo();
+
+          api.get.mockReturnValueOnce({
+            body: {
+              successful: 1,
+              inProgress: 1,
+              failed: 1,
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('failed');
+
+          api.get.mockImplementationOnce(() => {
+            throw new Error('requst-failed');
+          });
+
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).resolves.toEqual('failed');
+        });
+      });
+
+      describe('getBranchStatusCheck()', () => {
+        it('should be success', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              isLastPage: true,
+              values: [
+                {
+                  state: 'SUCCESSFUL',
+                  key: 'context-2',
+                  url: 'https://renovatebot.com',
+                },
+              ],
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toEqual('success');
+        });
+
+        it('should be pending', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              isLastPage: true,
+              values: [
+                {
+                  state: 'INPROGRESS',
+                  key: 'context-2',
+                  url: 'https://renovatebot.com',
+                },
+              ],
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toEqual('pending');
+        });
+
+        it('should be failure', async () => {
+          expect.assertions(1);
+          await initRepo();
+          api.get.mockReturnValueOnce({
+            body: {
+              isLastPage: true,
+              values: [
+                {
+                  state: 'FAILED',
+                  key: 'context-2',
+                  url: 'https://renovatebot.com',
+                },
+              ],
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toEqual('failure');
+        });
+
+        it('should be null', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockImplementationOnce(() => {
+            throw new Error('requst-failed');
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toBeNull();
+
+          api.get.mockReturnValueOnce({
+            body: {
+              isLastPage: true,
+              values: [],
+            },
+          });
+
+          await expect(
+            bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+          ).resolves.toBeNull();
+        });
+      });
+
+      describe('setBranchStatus()', () => {
+        it('should be success', async () => {
+          expect.assertions(1);
+          await initRepo();
+
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-2',
+            null,
+            'success'
+          );
+
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-2',
+            null,
+            'failed'
+          );
+
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-2',
+            null,
+            'pending'
+          );
+
+          api.post.mockImplementationOnce(() => {
+            throw new Error('requst-failed');
+          });
+
+          await bitbucket.setBranchStatus(
+            'somebranch',
+            'context-2',
+            null,
+            'success'
+          );
+
+          expect(api.post.mock.calls).toHaveLength(4);
         });
       });
     });
