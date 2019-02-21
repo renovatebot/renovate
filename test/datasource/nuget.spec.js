@@ -27,6 +27,11 @@ const nugetIndexV3 = fs.readFileSync(
   'utf8'
 );
 
+const configNoRegistryUrls = {
+  datasource: 'nuget',
+  lookupName: 'nunit',
+};
+
 const configV3V2 = {
   datasource: 'nuget',
   lookupName: 'nunit',
@@ -96,6 +101,15 @@ describe('datasource/nuget', () => {
 
       expect(got.mock.calls[0][1].headers.Authorization).toBe(
         'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+      );
+    });
+
+    it('queries the default nuget feed if no registries are supplied', async () => {
+      await datasource.getPkgReleases({
+        ...configNoRegistryUrls,
+      });
+      expect(got.mock.calls[0][0]).toEqual(
+        'https://api.nuget.org/v3/index.json'
       );
     });
 
