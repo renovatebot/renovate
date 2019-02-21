@@ -445,6 +445,33 @@ function generateServerResponses(endpoint) {
         },
       },
     },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`]: {
+      'GET': {
+        isLastPage: true,
+        values: [
+          { action: 'COMMENTED', commentAction: 'ADDED', comment: { id: 21, text: '### some-subject\n\nblablabla' } },
+          { action: 'COMMENTED', commentAction: 'ADDED', comment: { id: 22, text: '!merge' } },
+        ],
+      },
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments`]: {
+      'POST': {},
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`]: {
+      'GET': {
+        version: 1
+      },
+      'PUT': {},
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/22`]: {
+      'GET': {
+        version: 1
+      },
+      'PUT': {},
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21?version=1`]: {
+      'DELETE': {},
+    },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/branches`]: {
       'GET': {
       isLastPage: true,
@@ -458,6 +485,17 @@ function generateServerResponses(endpoint) {
         { displayId: 'renovate/upgrade', id: 'refs/heads/renovate/upgrade' },
       ],
     },
+    },
+    [`${endpoint}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`]: {
+      'GET': {
+        isLastPage: true,
+        values: [
+          { key: 'context-1', state: 'SUCCESSFUL' },
+        ],
+      },
+    },
+    [`${endpoint}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`]: {
+      'POST': {}
     },
   }
 }
