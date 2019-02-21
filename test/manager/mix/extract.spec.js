@@ -9,9 +9,9 @@ describe('lib/manager/mix/extract', () => {
     beforeEach(() => {
       config = {};
     });
-    // it('returns empty for invalid csproj', () => {
-    //   expect(extractPackageFile('nothing here', config)).toMatchSnapshot();
-    // });
+    it('returns empty for invalid dependency file', () => {
+      expect(extractPackageFile('nothing here', config)).toMatchSnapshot();
+    });
     it('extracts all dependencies', () => {
       const res = extractPackageFile(sample, config).deps;
       expect(res).toMatchSnapshot();

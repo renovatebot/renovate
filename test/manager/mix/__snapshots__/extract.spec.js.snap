@@ -8,8 +8,6 @@ Array [
     "depName": "ecto",
     "depType": "hex",
     "lineNumber": 18,
-    "organization": undefined,
-    "skipReason": "not-version",
   },
   Object {
     "currentValue": "~> 0.8.1",
@@ -17,17 +15,15 @@ Array [
     "depName": "postgrex",
     "depType": "hex",
     "lineNumber": 19,
-    "organization": undefined,
-    "skipReason": "not-version",
   },
   Object {
-    "currentValue": "ninenines/cowboy",
+    "currentValue": null,
     "datasource": "github",
     "depName": "cowboy",
-    "depType": "hex",
+    "depType": "github",
     "lineNumber": 20,
-    "organization": undefined,
-    "skipReason": "not-version",
+    "lookupName": "ninenines/cowboy",
+    "skipReason": "unsupported-version",
   },
   Object {
     "currentValue": "~> 1.0",
@@ -36,7 +32,12 @@ Array [
     "depType": "hex",
     "lineNumber": 21,
     "organization": "acme",
-    "skipReason": "not-version",
   },
 ]
+`;
+
+exports[`lib/manager/mix/extract extractPackageFile() returns empty for invalid dependency file 1`] = `
+Object {
+  "deps": Array [],
+}
 `;
