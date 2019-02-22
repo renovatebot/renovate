@@ -119,23 +119,12 @@ function generatePR(endpoint, projectKey, repositorySlug) {
 function generateServerResponses(endpoint) {
   return {
     baseURL: endpoint,
-    [`${endpoint}/rest/api/1.0/projects?limit=100`]: {
+    [`${endpoint}/rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE&limit=100`]: {
       'GET': {
       size: 1,
       limit: 100,
       isLastPage: true,
-      values: [
-        {
-          key: 'SOME',
-          id: 1964,
-          name: 'Some',
-          public: false,
-          type: 'NORMAL',
-          links: {
-            self: [{ href: `${endpoint}/projects/SOME` }],
-          },
-        },
-      ],
+      values: [generateRepo(endpoint, 'SOME', 'repo')],
       start: 0,
     },
     },
