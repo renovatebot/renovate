@@ -5,6 +5,10 @@ const datasource = require('../../lib/datasource');
 jest.mock('../../lib/util/got');
 
 const res1 = fs.readFileSync('test/_fixtures/pypi/azure-cli-monitor.json');
+const htmlResponse = fs.readFileSync('test/_fixtures/pypi/versions-html.html');
+const badResponse = fs.readFileSync(
+  'test/_fixtures/pypi/versions-html-badfile.html'
+);
 
 describe('datasource/pypi', () => {
   describe('getPkgReleases', () => {
@@ -159,6 +163,68 @@ describe('datasource/pypi', () => {
           lookupName: 'doit',
         })
       ).toMatchSnapshot();
+    });
+    it('process data from simple endpoint', async () => {
+      got.mockReturnValueOnce({
+        body: htmlResponse + '',
+      });
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          datasource: 'pypi',
+          depName: 'dj-database-url',
+        })
+      ).toMatchSnapshot();
+    });
+    it('returns null for empty resonse', async () => {
+      got.mockReturnValueOnce({});
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          datasource: 'pypi',
+          depName: 'dj-database-url',
+        })
+      ).toBeNull();
+    });
+    it('returns null for 404 response from simple endpoint', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          datasource: 'pypi',
+          depName: 'dj-database-url',
+        })
+      ).toBeNull();
+    });
+    it('returns null for response with no versions', async () => {
+      got.mockReturnValueOnce({
+        body: badResponse + '',
+      });
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          compatibility: { python: '2.7' },
+          datasource: 'pypi',
+          depName: 'dj-database-url',
+        })
+      ).toEqual({ releases: [] });
     });
   });
 });

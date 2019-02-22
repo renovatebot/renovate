@@ -29,6 +29,9 @@ Object {
   "dockerfile": Array [
     Object {},
   ],
+  "github-actions": Array [
+    Object {},
+  ],
   "gitlabci": Array [
     Object {},
   ],

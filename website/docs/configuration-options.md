@@ -116,9 +116,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 ## commitMessage
 
-The commit message is less important than branchName so you may override it if you wish.
-
-Example commit message: "chore(deps): Update dependency eslint to version 4.0.1"
+Editing of `commitMessage` directly is now deprecated and not recommended. Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
 
 ## commitMessageAction
 
@@ -231,6 +229,10 @@ See https://renovatebot.com/docs/config-presets for details.
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
 
+## github-actions
+
+Add to this configuration setting if you need to override any of the GitHub Actions default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
+
 ## gitlabci
 
 Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
@@ -242,6 +244,8 @@ Configuration added here applies for all Go-related updates, however currently t
 ## gomod
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
+
+## gomodTidy
 
 ## gradle
 
@@ -306,6 +310,19 @@ There may be times where an `.npmrc` file in your repository causes problems, su
 
 Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
 
+## ignorePresets
+
+Use this if you are extending a complex preset but won't want to use every "sub preset" that it uses. For example, take this config:
+
+```json
+{
+  "extends": ["config:base"],
+  "ignorePresets": [":prHourlyLimit2"]
+}
+```
+
+It would take the entire "config:base" preset - which contains a lot of sub-presets - but ignore the ":prHourlyLimit2" rule.
+
 ## ignoreUnstable
 
 By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same major.minor.patch and was _already_ unstable (e.g. it was already on `4.0.0-rc2`). Renovate will not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will update you to `4.0.0` only. If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
@@ -314,7 +331,7 @@ Also check out the `followTag` configuration option above if you wish Renovate t
 
 ## includeForks
 
-By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`.
+By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`. If you are using the hosted Renovate application then you need to add a `renovate.json` to your forked repo manually, and include `"includeForks": true` inside.
 
 ## includePaths
 
