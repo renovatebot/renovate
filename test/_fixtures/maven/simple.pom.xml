@@ -105,6 +105,11 @@
       <artifactId>quuuz</artifactId>
       <version>it's not a version</version>
     </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>hard-range</artifactId>
+      <version>[1.0.0]</version>
+    </dependency>
   </dependencies>
 
   <profiles>
