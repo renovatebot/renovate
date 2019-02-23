@@ -116,9 +116,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 ## commitMessage
 
-The commit message is less important than branchName so you may override it if you wish.
-
-Example commit message: "chore(deps): Update dependency eslint to version 4.0.1"
+Editing of `commitMessage` directly is now deprecated and not recommended. Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
 
 ## commitMessageAction
 
@@ -311,6 +309,19 @@ There may be times where an `.npmrc` file in your repository causes problems, su
 ## ignorePaths
 
 Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
+
+## ignorePresets
+
+Use this if you are extending a complex preset but won't want to use every "sub preset" that it uses. For example, take this config:
+
+```json
+{
+  "extends": ["config:base"],
+  "ignorePresets": [":prHourlyLimit2"]
+}
+```
+
+It would take the entire "config:base" preset - which contains a lot of sub-presets - but ignore the ":prHourlyLimit2" rule.
 
 ## ignoreUnstable
 
