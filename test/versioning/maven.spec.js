@@ -2,7 +2,7 @@ const {
   compare,
   parseRange,
   rangeToStr,
-  extendRange,
+  autoExtendMavenRange,
 } = require('../../lib/versioning/maven/compare');
 const {
   isVersion,
@@ -210,7 +210,7 @@ describe('versioning/maven/compare', () => {
       ['[1.2.3,]', '1.2.4', '[1.2.3,]'], // invalid range
     ];
     sample.forEach(([oldRepr, newValue, newRepr]) => {
-      expect(extendRange(oldRepr, newValue)).toEqual(newRepr);
+      expect(autoExtendMavenRange(oldRepr, newValue)).toEqual(newRepr);
     });
   });
 });
