@@ -177,12 +177,13 @@ describe('platform/bitbucket-server', () => {
 
       describe('addReviewers', () => {
         it('does not throw', async () => {
-          initRepo();
+          await initRepo();
           await bitbucket.addReviewers(5, ['name']);
         });
 
         it('sends the reviewer name as a reviewer', async () => {
-          initRepo();
+          expect.assertions(1);
+          await initRepo();
           await bitbucket.addReviewers(5, ['name']);
           expect(api.post.mock.calls).toMatchSnapshot();
         });
@@ -311,6 +312,7 @@ describe('platform/bitbucket-server', () => {
 
       describe('createPr()', () => {
         it('posts PR', async () => {
+          expect.assertions(2);
           await initRepo();
           const { id } = await bitbucket.createPr('branch', 'title', 'body');
           expect(id).toBe(5);
@@ -320,22 +322,26 @@ describe('platform/bitbucket-server', () => {
 
       describe('getPr()', () => {
         it('returns null for no prNo', async () => {
+          expect.assertions(1);
           expect(await bitbucket.getPr()).toBe(null);
         });
         it('gets a PR', async () => {
-          initRepo();
+          expect.assertions(1);
+          await initRepo();
           expect(await bitbucket.getPr(5)).toMatchSnapshot();
         });
       });
 
       describe('getPrFiles()', () => {
         it('returns empty files', async () => {
+          expect.assertions(1);
           expect(await bitbucket.getPrFiles(5)).toHaveLength(0);
         });
       });
 
       describe('updatePr()', () => {
         it('puts PR', async () => {
+          expect.assertions(1);
           await initRepo();
           await bitbucket.updatePr(5, 'title', 'body');
           expect(api.put.mock.calls).toMatchSnapshot();
@@ -344,6 +350,7 @@ describe('platform/bitbucket-server', () => {
 
       describe('mergePr()', () => {
         it('posts Merge', async () => {
+          expect.assertions(1);
           await initRepo();
           await bitbucket.mergePr(5, 'branch');
           expect(api.post.mock.calls).toMatchSnapshot();
@@ -406,6 +413,7 @@ describe('platform/bitbucket-server', () => {
 
       describe('getVulnerabilityAlerts()', () => {
         it('returns empty array', async () => {
+          expect.assertions(1);
           expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
         });
       });
