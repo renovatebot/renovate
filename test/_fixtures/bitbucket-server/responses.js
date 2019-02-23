@@ -152,10 +152,13 @@ function generateServerResponses(endpoint) {
     //   },
     // },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`]: {
+      'POST': generatePR(endpoint, 'SOME', 'repo'),
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100`]: {
       'GET': {
+        isLastPage: true,
         values: [generatePR(endpoint, 'SOME', 'repo')],
       },
-      'POST': generatePR(endpoint, 'SOME', 'repo'),
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`]: {
       'GET': generatePR(endpoint, 'SOME', 'repo'),
