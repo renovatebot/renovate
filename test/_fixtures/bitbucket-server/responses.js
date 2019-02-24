@@ -160,6 +160,9 @@ function generateServerResponses(endpoint) {
         values: [generatePR(endpoint, 'SOME', 'repo')],
       },
     },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`]: {
+      'GET': Promise.reject({ statusCode: 404 }),
+    },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`]: {
       'GET': generatePR(endpoint, 'SOME', 'repo'),
       'PUT': generatePR(endpoint, 'SOME', 'repo'),
@@ -414,15 +417,6 @@ function generateServerResponses(endpoint) {
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`]: {
       'GET': { conflicted: false },
-      'POST': Promise.reject({
-    "errors": [
-        {
-            "context": null,
-            "message": "A detailed error message.",
-            "exceptionName": null
-        }
-    ]
-}),
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`]: {
       'POST': {
@@ -439,10 +433,19 @@ function generateServerResponses(endpoint) {
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`]: {
       'GET': {
-        isLastPage: true,
+        isLastPage: false,
+        nextPageStart: 1,
         values: [
           { action: 'COMMENTED', commentAction: 'ADDED', comment: { id: 21, text: '### some-subject\n\nblablabla' } },
           { action: 'COMMENTED', commentAction: 'ADDED', comment: { id: 22, text: '!merge' } },
+        ],
+      },
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`]: {
+      'GET': {
+        isLastPage: true,
+        values: [
+          { action: 'OTHER' },
         ],
       },
     },
