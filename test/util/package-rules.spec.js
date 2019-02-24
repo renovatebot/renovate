@@ -120,6 +120,23 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
+  it('filters depTypes', () => {
+    const config = {
+      packageRules: [
+        {
+          depTypeList: ['test'],
+          packageNames: ['a'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depTypes: ['build', 'test'],
+      depName: 'a',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
   it('filters managers with matching manager', () => {
     const config = {
       packageRules: [

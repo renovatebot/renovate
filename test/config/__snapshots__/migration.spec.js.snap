@@ -28,6 +28,7 @@ Object {
   "ignorePaths": Array [
     "node_modules/",
   ],
+  "includeForks": true,
   "lockFileMaintenance": Object {
     "automerge": true,
     "gitFs": "https",

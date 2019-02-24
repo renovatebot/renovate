@@ -121,6 +121,7 @@ describe('workers/pr', () => {
       config.updateType = 'minor';
       config.homepage = 'https://dummy.com';
       config.sourceUrl = 'https://github.com/renovateapp/dummy';
+      config.sourceDirectory = 'packages/a';
       config.changelogUrl = 'https://github.com/renovateapp/dummy/changelog.md';
       platform.createPr.mockReturnValue({ displayNumber: 'New Pull Request' });
       config.upgrades = [config];
@@ -366,11 +367,11 @@ describe('workers/pr', () => {
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][2];
     });
-    it('should create PR if waiting for not pending but lockFileErrors', async () => {
+    it('should create PR if waiting for not pending but artifactErrors', async () => {
       platform.getBranchStatus.mockReturnValueOnce('pending');
       platform.getBranchLastCommitTime.mockImplementationOnce(() => new Date());
       config.prCreation = 'not-pending';
-      config.lockFileErrors = [{}];
+      config.artifactErrors = [{}];
       config.platform = 'gitlab';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });

@@ -22,8 +22,7 @@ describe('manager/docker-compose/update', () => {
     it('returns same', () => {
       const upgrade = {
         lineNumber: 4,
-        dockerRegistry: 'quay.io',
-        depName: 'something/redis',
+        depName: 'quay.io/something/redis',
         newValue: 'alpine',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);

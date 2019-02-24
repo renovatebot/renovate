@@ -22,6 +22,34 @@ Object {
 }
 `;
 
+exports[`util/host-rules find() matches on endpoint 1`] = `
+Object {
+  "endpoint": "https://nuget.local/api/",
+  "platform": "nuget",
+}
+`;
+
+exports[`util/host-rules find() matches on endpoint subresource 1`] = `
+Object {
+  "endpoint": "https://nuget.local/api/",
+  "platform": "nuget",
+}
+`;
+
+exports[`util/host-rules find() needs exact host matches 1`] = `
+Object {
+  "endpoint": "endpoint/",
+  "host": "nuget.org",
+  "password": "p4$$w0rd",
+  "platform": "nuget",
+  "username": "root",
+}
+`;
+
+exports[`util/host-rules find() needs exact host matches 2`] = `null`;
+
+exports[`util/host-rules find() needs exact host matches 3`] = `null`;
+
 exports[`util/host-rules update() supports endpoint-only 1`] = `
 Object {
   "endpoint": "https://some.endpoint",

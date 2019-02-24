@@ -29,6 +29,9 @@ Object {
   "dockerfile": Array [
     Object {},
   ],
+  "github-actions": Array [
+    Object {},
+  ],
   "gitlabci": Array [
     Object {},
   ],
@@ -38,7 +41,13 @@ Object {
   "gradle": Array [
     Object {},
   ],
+  "gradle-wrapper": Array [
+    Object {},
+  ],
   "kubernetes": Array [
+    Object {},
+  ],
+  "maven": Array [
     Object {},
   ],
   "meteor": Array [

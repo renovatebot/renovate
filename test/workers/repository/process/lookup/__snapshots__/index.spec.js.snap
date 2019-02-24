@@ -92,7 +92,6 @@ Object {
   "updates": Array [
     Object {
       "blockedByPin": true,
-      "canBeUnpublished": undefined,
       "fromVersion": "8.0.0",
       "isSingleVersion": true,
       "newDigest": "sha256:abcdef1234567890",
@@ -100,7 +99,6 @@ Object {
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
-      "releaseTimestamp": undefined,
       "toVersion": "8.1.0",
       "updateType": "minor",
     },
@@ -162,7 +160,6 @@ Object {
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
-      "canBeUnpublished": undefined,
       "fromVersion": "8.0.0",
       "isSingleVersion": true,
       "newDigest": "sha256:abcdef1234567890",
@@ -170,7 +167,6 @@ Object {
       "newMajor": 8,
       "newMinor": 1,
       "newValue": "8.1.0",
-      "releaseTimestamp": undefined,
       "toVersion": "8.1.0",
       "updateType": "minor",
     },
@@ -205,7 +201,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles packagist 1`
 
 exports[`workers/repository/process/lookup .lookupUpdates() handles pypi 404 1`] = `Array []`;
 
-exports[`workers/repository/process/lookup .lookupUpdates() handles unknown purl 1`] = `Array []`;
+exports[`workers/repository/process/lookup .lookupUpdates() handles unknown datasource 1`] = `Array []`;
 
 exports[`workers/repository/process/lookup .lookupUpdates() ignores deprecated 1`] = `
 Object {
@@ -862,14 +858,12 @@ Object {
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
-      "canBeUnpublished": undefined,
       "fromVersion": "8",
       "isSingleVersion": true,
       "newMajor": 9,
       "newMinor": null,
       "newValue": "9",
       "newVersion": "9",
-      "releaseTimestamp": undefined,
       "toVersion": "9",
       "updateType": "major",
     },
@@ -896,26 +890,22 @@ Object {
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
-      "canBeUnpublished": undefined,
       "fromVersion": "8.1",
       "isSingleVersion": true,
       "newMajor": 8,
       "newMinor": 2,
       "newValue": "8.2",
       "newVersion": "8.2",
-      "releaseTimestamp": undefined,
       "toVersion": "8.2",
       "updateType": "minor",
     },
     Object {
-      "canBeUnpublished": undefined,
       "fromVersion": "8.1",
       "isSingleVersion": true,
       "newMajor": 9,
       "newMinor": 0,
       "newValue": "9.0",
       "newVersion": "9.0",
-      "releaseTimestamp": undefined,
       "toVersion": "9.0",
       "updateType": "major",
     },
@@ -945,14 +935,12 @@ Object {
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
     Object {
-      "canBeUnpublished": undefined,
       "fromVersion": "8.1.0",
       "isSingleVersion": true,
       "newMajor": 8,
       "newMinor": 2,
       "newValue": "8.2.5",
       "newVersion": "8.2.5",
-      "releaseTimestamp": undefined,
       "toVersion": "8.2.5",
       "updateType": "minor",
     },
@@ -1151,6 +1139,50 @@ Array [
     "releaseTimestamp": "2015-05-17T04:25:07.299Z",
     "toVersion": "1.4.1",
     "updateType": "minor",
+  },
+]
+`;
+
+exports[`workers/repository/process/lookup .lookupUpdates() supports lock file updates mixed with regular updates 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "displayFrom": "0.4.0",
+    "displayTo": "0.4.4",
+    "fromVersion": "0.4.0",
+    "isLockfileUpdate": true,
+    "isRange": true,
+    "isSingleVersion": true,
+    "newMajor": 0,
+    "newMinor": 4,
+    "newValue": "^0.4.0",
+    "releaseTimestamp": "2011-06-10T17:20:04.719Z",
+    "toVersion": "0.4.4",
+    "updateType": "minor",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.4",
+    "isRange": true,
+    "isSingleVersion": false,
+    "newMajor": 0,
+    "newMinor": 9,
+    "newValue": "^0.9.0",
+    "releaseTimestamp": "2013-09-04T17:07:22.948Z",
+    "toVersion": "0.9.7",
+    "updateType": "minor",
+  },
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "0.4.4",
+    "isRange": true,
+    "isSingleVersion": false,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "^1.0.0",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "toVersion": "1.4.1",
+    "updateType": "major",
   },
 ]
 `;
