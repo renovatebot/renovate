@@ -1,8 +1,10 @@
 const fs = require('fs');
 const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
+const hostRules = require('../../lib/util/host-rules');
 
 jest.mock('../../lib/util/got');
+jest.mock('../../lib/util/host-rules');
 
 const pkgListV3 = fs.readFileSync('test/_fixtures/nuget/nunitV3.json', 'utf8');
 const pkgListV3WithoutProkjectUrl = fs.readFileSync(
@@ -15,13 +17,8 @@ const pkgInfoV3FromNuget = fs.readFileSync(
 );
 
 const pkgListV2 = fs.readFileSync('test/_fixtures/nuget/nunitV2.xml', 'utf8');
-
-const pkgLatestV2 = fs.readFileSync(
-  'test/_fixtures/nuget/latestV2.xml',
-  'utf8'
-);
-const pkgLatestV2WithoutProkjectUrl = fs.readFileSync(
-  'test/_fixtures/nuget/latestV2_withoutProjectUrl.xml',
+const pkgListV2WithoutProjectUrl = fs.readFileSync(
+  'test/_fixtures/nuget/nunitV2_withoutProjectUrl.xml',
   'utf8'
 );
 
@@ -29,6 +26,11 @@ const nugetIndexV3 = fs.readFileSync(
   'test/_fixtures/nuget/indexV3.json',
   'utf8'
 );
+
+const configNoRegistryUrls = {
+  datasource: 'nuget',
+  lookupName: 'nunit',
+};
 
 const configV3V2 = {
   datasource: 'nuget',
@@ -60,6 +62,7 @@ const configV3NotNugetOrg = {
 describe('datasource/nuget', () => {
   describe('getPkgReleases', () => {
     beforeEach(() => {
+      jest.resetAllMocks();
       global.repoCache = {};
     });
 
@@ -75,6 +78,39 @@ describe('datasource/nuget', () => {
           ...config,
         })
       ).toBeNull();
+    });
+
+    it('supports basic authentication', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(nugetIndexV3),
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        body: JSON.parse('{"totalHits": 0}'),
+        statusCode: 200,
+      });
+
+      hostRules.find.mockReturnValue({
+        username: 'some-username',
+        password: 'some-password',
+      });
+
+      await datasource.getPkgReleases({
+        ...configV3,
+      });
+
+      expect(got.mock.calls[0][1].headers.Authorization).toBe(
+        'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+      );
+    });
+
+    it('queries the default nuget feed if no registries are supplied', async () => {
+      await datasource.getPkgReleases({
+        ...configNoRegistryUrls,
+      });
+      expect(got.mock.calls[0][0]).toEqual(
+        'https://api.nuget.org/v3/index.json'
+      );
     });
 
     it(`can't get packages list (v3)`, async () => {
@@ -105,21 +141,6 @@ describe('datasource/nuget', () => {
       });
 
       expect(res).toBeNull();
-    });
-    it(`can't get package info (v2)`, async () => {
-      got.mockReturnValueOnce({
-        body: pkgListV2,
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: pkgLatestV2,
-        statusCode: 500,
-      });
-      expect(
-        await datasource.getPkgReleases({
-          ...configV2,
-        })
-      ).toBeNull();
     });
 
     it('returns null for empty result (v3v2)', async () => {
@@ -286,10 +307,6 @@ describe('datasource/nuget', () => {
         body: pkgListV2,
         statusCode: 200,
       });
-      got.mockReturnValueOnce({
-        body: pkgLatestV2,
-        statusCode: 200,
-      });
       const res = await datasource.getPkgReleases({
         ...configV2,
       });
@@ -299,11 +316,7 @@ describe('datasource/nuget', () => {
     });
     it('processes real data without project url (v2)', async () => {
       got.mockReturnValueOnce({
-        body: pkgListV2,
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: pkgLatestV2WithoutProkjectUrl,
+        body: pkgListV2WithoutProjectUrl,
         statusCode: 200,
       });
       const res = await datasource.getPkgReleases({

@@ -119,23 +119,12 @@ function generatePR(endpoint, projectKey, repositorySlug) {
 function generateServerResponses(endpoint) {
   return {
     baseURL: endpoint,
-    [`${endpoint}/rest/api/1.0/projects?limit=100`]: {
+    [`${endpoint}/rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE&limit=100`]: {
       'GET': {
       size: 1,
       limit: 100,
       isLastPage: true,
-      values: [
-        {
-          key: 'SOME',
-          id: 1964,
-          name: 'Some',
-          public: false,
-          type: 'NORMAL',
-          links: {
-            self: [{ href: `${endpoint}/projects/SOME` }],
-          },
-        },
-      ],
+      values: [generateRepo(endpoint, 'SOME', 'repo')],
       start: 0,
     },
     },
@@ -163,10 +152,16 @@ function generateServerResponses(endpoint) {
     //   },
     // },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`]: {
+      'POST': generatePR(endpoint, 'SOME', 'repo'),
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100`]: {
       'GET': {
+        isLastPage: true,
         values: [generatePR(endpoint, 'SOME', 'repo')],
       },
-      'POST': generatePR(endpoint, 'SOME', 'repo'),
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`]: {
+      'GET': Promise.reject({ statusCode: 404 }),
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`]: {
       'GET': generatePR(endpoint, 'SOME', 'repo'),
@@ -422,15 +417,6 @@ function generateServerResponses(endpoint) {
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`]: {
       'GET': { conflicted: false },
-      'POST': Promise.reject({
-    "errors": [
-        {
-            "context": null,
-            "message": "A detailed error message.",
-            "exceptionName": null
-        }
-    ]
-}),
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`]: {
       'POST': {
@@ -445,6 +431,42 @@ function generateServerResponses(endpoint) {
         },
       },
     },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`]: {
+      'GET': {
+        isLastPage: false,
+        nextPageStart: 1,
+        values: [
+          { action: 'COMMENTED', commentAction: 'ADDED', comment: { id: 21, text: '### some-subject\n\nblablabla' } },
+          { action: 'COMMENTED', commentAction: 'ADDED', comment: { id: 22, text: '!merge' } },
+        ],
+      },
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`]: {
+      'GET': {
+        isLastPage: true,
+        values: [
+          { action: 'OTHER' },
+        ],
+      },
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments`]: {
+      'POST': {},
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`]: {
+      'GET': {
+        version: 1
+      },
+      'PUT': {},
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/22`]: {
+      'GET': {
+        version: 1
+      },
+      'PUT': {},
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21?version=1`]: {
+      'DELETE': {},
+    },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/branches`]: {
       'GET': {
       isLastPage: true,
@@ -458,6 +480,17 @@ function generateServerResponses(endpoint) {
         { displayId: 'renovate/upgrade', id: 'refs/heads/renovate/upgrade' },
       ],
     },
+    },
+    [`${endpoint}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`]: {
+      'GET': {
+        isLastPage: true,
+        values: [
+          { key: 'context-1', state: 'SUCCESSFUL' },
+        ],
+      },
+    },
+    [`${endpoint}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`]: {
+      'POST': {}
     },
   }
 }
