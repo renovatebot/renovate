@@ -16,7 +16,7 @@ Mix is main Elixir build tool
 
 #### What type of package files and names does it use?
 
-Erlang: rebar.config
+mix.exs
 
 #### What [fileMatch](https://renovatebot.com/docs/configuration-options/#filematch) pattern(s) should be used?
 
