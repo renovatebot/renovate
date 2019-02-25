@@ -231,6 +231,8 @@ The primary use case for this option is if you are following a pre-release tag o
 
 ## github-actions
 
+**Important note**: For security reasons, GitHub has blocked integrations/apps from editing GitHub Actions workflow files in _any_ branch, so this only works on GitHub if using a Personal Access Token.
+
 Add to this configuration setting if you need to override any of the GitHub Actions default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
 
 ## gitlabci
