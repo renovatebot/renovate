@@ -105,6 +105,7 @@ dev_dependencies:
 #### List all the sources/syntaxes of dependencies that can be extracted:
 
 - [**SDK**](https://www.dartlang.org/tools/pub/dependencies#sdk)
+
   ```yaml
   dependencies:
     flutter_driver:
@@ -113,6 +114,7 @@ dev_dependencies:
   ```
 
 - [**Version constraints**](https://www.dartlang.org/tools/pub/dependencies#version-constraints)
+
   ```yaml
   dependencies:
     meta: '>=1.1.0 <2.0.0'
@@ -120,22 +122,26 @@ dev_dependencies:
   ```
 
 - [**Caret syntax**](https://www.dartlang.org/tools/pub/dependencies#caret-syntax)
+
   ```yaml
   dependencies:
     redux: ^3.0.0
   ```
 
 - [**Git packages**](https://www.dartlang.org/tools/pub/dependencies#git-packages)
+
   ```yaml
   dependencies:
     kittens:
       git: git://github.com/munificent/kittens.git
   ```
+
   ```yaml
   dependencies:
     kittens:
       git: git@github.com:munificent/kittens.git
   ```
+
   ```yaml
   dependencies:
     kittens:
@@ -143,6 +149,7 @@ dev_dependencies:
         url: git://github.com/munificent/kittens.git
         ref: some-branch
   ```
+
   ```yaml
   dependencies:
     kittens:
@@ -152,6 +159,7 @@ dev_dependencies:
   ```
 
 - [**Path packages**](https://www.dartlang.org/tools/pub/dependencies#path-packages)
+
   ```yaml
   dependencies:
     transmogrify:
@@ -273,5 +281,6 @@ Update 1 dependency is not supported by a command. The package needs to be chang
 The information here refers to the Flutter SDK package manager, which is built on top of Dart's `pub` package manager but differs in some ways.
 
 More info:
-  - https://www.dartlang.org/tools/pub
-  - https://flutter.dev/docs/development/packages-and-plugins/using-packages
+
+- https://www.dartlang.org/tools/pub
+- https://flutter.dev/docs/development/packages-and-plugins/using-packages
