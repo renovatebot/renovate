@@ -27,6 +27,7 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
+    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -124,6 +125,7 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
+    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -219,6 +221,7 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
+    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -318,6 +321,7 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
+    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -413,6 +417,7 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
+    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -512,6 +517,7 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
+    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -609,6 +615,7 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
+    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}} Docker tags",
@@ -706,6 +713,7 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
+    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}} Docker tags",

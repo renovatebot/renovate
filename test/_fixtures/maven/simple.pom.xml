@@ -23,6 +23,14 @@
     <url>http://example.org/</url>
   </issueManagement>
 
+  <properties>
+    <quuxGroup>org.example</quuxGroup>
+    <quuxId>quux</quuxId>
+    <quuxVersion>
+      1.2.3.4
+    </quuxVersion>
+  </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -83,9 +91,9 @@
       <version>0.0.1</version>
     </dependency>
     <dependency>
-      <groupId>org.example</groupId>
-      <artifactId>quux</artifactId>
-      <version>${resourceServerVersion}</version>
+      <groupId>${quuxGroup}</groupId>
+      <artifactId>${quuxId}</artifactId>
+      <version>${quuxVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.example</groupId>
@@ -96,6 +104,11 @@
       <groupId>org.example</groupId>
       <artifactId>quuuz</artifactId>
       <version>it's not a version</version>
+    </dependency>
+    <dependency>
+      <groupId>org.example</groupId>
+      <artifactId>hard-range</artifactId>
+      <version>[1.0.0]</version>
     </dependency>
   </dependencies>
 
