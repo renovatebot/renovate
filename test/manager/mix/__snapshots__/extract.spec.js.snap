@@ -33,6 +33,13 @@ Array [
     "lineNumber": 21,
     "organization": "acme",
   },
+  Object {
+    "currentValue": "~> 1.0",
+    "datasource": "hex",
+    "depName": "jason",
+    "depType": "hex",
+    "lineNumber": 22,
+  },
 ]
 `;
 

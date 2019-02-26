@@ -20,6 +20,8 @@ defmodule MyProject.MixProject do
       {:postgrex, "~> 0.8.1"},
       {:cowboy, github: "ninenines/cowboy"},
       {:secret, "~> 1.0", organization: "acme"},
+      {:jason, "~> 1.0", 
+        optional: true},
     ]
   end
 end
