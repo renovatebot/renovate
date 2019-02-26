@@ -10,7 +10,9 @@ const pomContent = fs.readFileSync(
   'utf8'
 );
 
-const findFn = ({ depName }) => depName === 'org.example:quuz';
+function selectDep(deps, name = 'org.example:quuz') {
+  return deps.find(dep => dep.depName === name);
+}
 
 describe('manager/maven', () => {
   describe('extractAllPackageFiles', () => {
@@ -43,10 +45,10 @@ describe('manager/maven', () => {
       const newValue = '9.9.9.9-final';
 
       const { deps } = extractDependencies(pomContent);
-      const dep = deps.find(findFn);
+      const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
-      const updatedDep = extractDependencies(updatedContent).deps.find(findFn);
+      const updatedDep = selectDep(extractDependencies(updatedContent).deps);
 
       expect(updatedDep.currentValue).toEqual(newValue);
     });
@@ -68,7 +70,7 @@ describe('manager/maven', () => {
       const newValue = '1.2.3';
 
       const { deps } = extractDependencies(pomContent);
-      const dep = deps.find(findFn);
+      const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
 
@@ -80,11 +82,35 @@ describe('manager/maven', () => {
       const newValue = '1.2.4';
 
       const { deps } = extractDependencies(pomContent);
-      const dep = deps.find(findFn);
+      const dep = selectDep(deps);
       const upgrade = { ...dep, currentValue, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
 
       expect(updatedContent).toBeNull();
+    });
+    it('should update ranges', () => {
+      const newValue = '[1.2.3]';
+      const select = depSet => selectDep(depSet.deps, 'org.example:hard-range');
+      const oldContent = extractDependencies(pomContent);
+      const dep = select(oldContent);
+      const upgrade = { ...dep, newValue };
+      const newContent = extractDependencies(
+        updateDependency(pomContent, upgrade)
+      );
+      const newDep = select(newContent);
+      expect(newDep.currentValue).toEqual(newValue);
+    });
+    it('should preserve ranges', () => {
+      const newValue = '[1.0.0]';
+      const select = depSet =>
+        depSet && depSet.deps
+          ? selectDep(depSet.deps, 'org.example:hard-range')
+          : null;
+      const oldContent = extractDependencies(pomContent);
+      const dep = select(oldContent);
+      expect(dep).not.toEqual(null);
+      const upgrade = { ...dep, newValue };
+      expect(updateDependency(pomContent, upgrade)).toEqual(pomContent);
     });
   });
 });

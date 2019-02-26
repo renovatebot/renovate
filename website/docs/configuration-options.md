@@ -116,9 +116,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 ## commitMessage
 
-The commit message is less important than branchName so you may override it if you wish.
-
-Example commit message: "chore(deps): Update dependency eslint to version 4.0.1"
+Editing of `commitMessage` directly is now deprecated and not recommended. Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
 
 ## commitMessageAction
 

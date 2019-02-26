@@ -1,6 +1,24 @@
 [
   {
-    "project": "telegram-images",
+    "project": "project1",
+    "repositories": [
+      "https://repo.maven.apache.org/maven2/"
+    ],
+    "dependencies": [
+      {
+        "name": "spring-boot-starter-jersey",
+        "group": "org.springframework.boot",
+        "version": null
+      },
+      {
+        "name": "cglib-nodep",
+        "group": "cglib",
+        "version": "3.1"
+      }
+    ]
+  },
+  {
+    "project": "project2",
     "repositories": [
       "https://repo.maven.apache.org/maven2/",
       "https://jitpack.io"
@@ -15,11 +33,6 @@
         "name": "spock-core",
         "group": "org.spockframework",
         "version": "1.0-groovy-2.4"
-      },
-      {
-        "name": "cglib-nodep",
-        "group": "cglib",
-        "version": "3.1"
       }
     ]
   }
