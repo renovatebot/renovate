@@ -7,6 +7,7 @@ const cargo = require('../../../lib/manager/cargo/artifacts');
 
 const config = {
   localDir: '/tmp/github/some/repo',
+  gitFs: true,
 };
 
 describe('.getArtifacts()', () => {
