@@ -87,6 +87,21 @@ Array [
     "remote": "https://github.com/bazelbuild/rules_sass.git",
   },
   Object {
+    "currentDigest": "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71",
+    "datasource": "github",
+    "def": "git_repository(
+    name = \\"com_github_bazelbuild_buildtools\\",
+    remote = \\"https://github.com/bazelbuild/buildtools.git\\",
+    # Note, this commit matches the version of buildifier in angular/ngcontainer
+    commit = \\"b3b620e8bcff18ed3378cd3f35ebeb7016d71f71\\",
+)
+",
+    "depName": "com_github_bazelbuild_buildtools",
+    "depType": "git_repository",
+    "lookupName": "bazelbuild/buildtools",
+    "remote": "https://github.com/bazelbuild/buildtools.git",
+  },
+  Object {
     "currentValue": "0.7.1",
     "datasource": "github",
     "def": "http_archive(
