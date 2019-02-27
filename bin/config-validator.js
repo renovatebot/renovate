@@ -4,7 +4,6 @@ const fs = require('fs-extra');
 const { validateConfig } = require('../lib/config/validation');
 const { massageConfig } = require('../lib/config/massage');
 const { initLogger } = require('../lib/logger');
-const { configFileNames } = require('../lib/config/app-strings');
 
 initLogger();
 
@@ -29,7 +28,12 @@ async function validate(desc, config, isPreset = false) {
 }
 
 (async () => {
-  for (const file of configFileNames.filter(name => name !== 'package.json')) {
+  const renovateConfigFiles = [
+    'renovate.json',
+    '.renovaterc',
+    '.renovaterc.json',
+  ];
+  for (const file of renovateConfigFiles) {
     try {
       const rawContent = fs.readFileSync(file, 'utf8');
       console.log(`Validating ${file}`);

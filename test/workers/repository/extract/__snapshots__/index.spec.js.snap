@@ -38,9 +38,6 @@ Object {
   "gradle": Array [
     Object {},
   ],
-  "gradle-wrapper": Array [
-    Object {},
-  ],
   "kubernetes": Array [
     Object {},
   ],

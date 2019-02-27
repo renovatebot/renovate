@@ -6,12 +6,8 @@ describe('lib/manager/nvm/extract', () => {
       const res = extractPackageFile('8.4.0\n');
       expect(res.deps).toMatchSnapshot();
     });
-    it('supports ranges', () => {
+    it('skips non-pinned', () => {
       const res = extractPackageFile('8.4\n');
-      expect(res.deps).toMatchSnapshot();
-    });
-    it('skips non ranges', () => {
-      const res = extractPackageFile('latestn');
       expect(res.deps).toMatchSnapshot();
     });
   });

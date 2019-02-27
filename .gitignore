@@ -10,6 +10,7 @@
 /.idea
 package-lock.json
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 *.pyc
 =======
@@ -22,3 +23,7 @@ package-lock.json
 *.pyc
 >>>>>>> upstream/v13
 >>>>>>> master
+=======
+
+*.pyc
+>>>>>>> parent of f6ee4b06... Merge branch 'master' into feat/newmanager

@@ -9,11 +9,6 @@ describe('logger/err-serializer', () => {
       response: {
         body: 'some response body',
       },
-      gotOptions: {
-        headers: {
-          authorization: 'Bearer abc',
-        },
-      },
     };
     expect(configSerializer(err)).toMatchSnapshot();
   });
