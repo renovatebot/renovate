@@ -8,8 +8,21 @@ const res1 = fs.readFileSync('test/_fixtures/pypi/azure-cli-monitor.json');
 
 describe('datasource/pypi', () => {
   describe('getPkgReleases', () => {
+    const OLD_ENV = process.env;
+
+    beforeEach(() => {
+      process.env = { ...OLD_ENV };
+      delete process.env.PIP_INDEX_URL;
+      global.repoCache = {};
+    });
+
+    afterEach(() => {
+      process.env = OLD_ENV;
+    });
+
     beforeEach(() => {
       jest.resetAllMocks();
+      global.repoCache = {};
     });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
@@ -48,6 +61,22 @@ describe('datasource/pypi', () => {
       await datasource.getPkgReleases('pkg:pypi/azure-cli-monitor');
       expect(got.mock.calls).toMatchSnapshot();
       process.env.PIP_INDEX_URL = pipIndexUrl;
+    });
+    it('supports multiple custom datasource urls', async () => {
+      got
+        .mockImplementationOnce(() => {
+          throw new Error();
+        })
+        .mockImplementationOnce(() => ({ body: JSON.parse(res1) }));
+      const config = {
+        registryUrls: [
+          'https://custom.pypi.net/foo',
+          'https://second-index/foo',
+          'https://third-index/foo',
+        ],
+      };
+      await datasource.getPkgReleases('pkg:pypi/azure-cli-monitor', config);
+      expect(got.mock.calls).toMatchSnapshot();
     });
     it('returns non-github home_page', async () => {
       got.mockReturnValueOnce({

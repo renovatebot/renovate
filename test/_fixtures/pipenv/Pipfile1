@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "http://example.com/private-pypi/"
+verify_ssl = false
+name = "private-pypi"
+
+[packages]
+some-package = "==0.3.1"
+some-other-package = "==1.0.0"
+"_invalid-package" = "==1.0.0"
+invalid-version = "==0 0"
+pytest-benchmark = {version = "==1.0.0", extras = ["histogram"]}
+
+[dev-packages]
+dev-package = "==0.1.0"
+
+[requires]
+python_version = "3.6"

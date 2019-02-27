@@ -9,5 +9,16 @@
 /.vscode
 /.idea
 package-lock.json
+<<<<<<< HEAD
 
 *.pyc
+=======
+<<<<<<< HEAD
+*.json
+*.json
+*.lock
+=======
+
+*.pyc
+>>>>>>> upstream/v13
+>>>>>>> master

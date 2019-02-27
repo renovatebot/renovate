@@ -1,5 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/onboarding/pr/errors-warnings getDepWarnings() returns warning text 1`] = `
+"
+---
+
+### :warning: Dependency Lookup Warnings :warning:
+
+Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.
+
+-   \`Warning 1\`
+-   \`Warning 2\`
+
+Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+
+"
+`;
+
 exports[`workers/repository/onboarding/pr/errors-warnings getErrors() returns error text 1`] = `
 "
 # Errors (1)

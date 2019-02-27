@@ -7,10 +7,9 @@ describe('manager/dockerfile/update', () => {
       const upgrade = {
         lineNumber: 1,
         depName: 'node',
-        newValue: '8',
+        newValue: '8.1-alpine',
         fromPrefix: 'FROM',
         fromSuffix: '',
-        tagSuffix: 'alpine',
         newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);

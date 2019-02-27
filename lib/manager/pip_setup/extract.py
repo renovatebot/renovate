@@ -2,7 +2,10 @@ from __future__ import print_function
 import sys
 import imp
 import json
+<<<<<<< HEAD
 import setuptools
+=======
+>>>>>>> master
 import distutils.core
 
 try:

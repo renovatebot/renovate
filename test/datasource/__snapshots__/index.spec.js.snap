@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/index adds changelogUrl 1`] = `
+Object {
+  "changelogUrl": "https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md",
+  "sourceUrl": "https://github.com/react-native-community/react-native-releases",
+}
+`;
+
+exports[`datasource/index adds sourceUrl 1`] = `
+Object {
+  "sourceUrl": "https://github.com/nodejs/node",
+}
+`;

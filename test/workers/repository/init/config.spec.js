@@ -66,6 +66,14 @@ describe('workers/repository/init/config', () => {
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
+    it('finds .github/renovate.json', async () => {
+      platform.getFileList.mockReturnValue([
+        'package.json',
+        '.github/renovate.json',
+      ]);
+      platform.getFile.mockReturnValue('{}');
+      await mergeRenovateConfig(config);
+    });
     it('finds .renovaterc.json', async () => {
       platform.getFileList.mockReturnValue([
         'package.json',

@@ -11,6 +11,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 - Docker Compose files
 - CircleCI config files
 - Kubernetes manifests
+- Ansible configuration iles
 
 ## How It Works
 
@@ -22,7 +23,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 Pinning your docker images to an exact digest is recommended for reasons of **immutability**. In short: so every time you `pull`, you get the same content.
 
-If your experience with dependency versioning comes from a place like javascript/npm, you might be used to knowing that exact versions are immutable, e.g. if you specify a version like `2.0.1` then you and your colleagues will always get the exact same "code". What you may not expect is that Docker's tags are not immutable versions even if they look like a version. e.g. you probably expect that `node:8` and `node:8.9` will change over time, but you might incorrectly assume that `node:8.9.0` would never change. Although it probably _shouldn't_, the reality is that it _can_.
+If your experience with dependency versioning comes from a place like javascript/npm, you might be used to exact versions being immutable, e.g. if you specify a version like `2.0.1` then you and your colleagues will always get the exact same "code". What you may not expect is that Docker's tags are not immutable versions even if they look like a version. e.g. you probably expect that `node:8` and `node:8.9` will change over time, but you might incorrectly assume that `node:8.9.0` would never change. Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
 Using a docker digest as the image's primary identifier instead of docker tag will achieve immutability but as a human it's quite inconvenient to deal with strings like `FROM node@sha256:552348163f074034ae75643c01e0ba301af936a898d778bb4fc16062917d0430`. The good news is that, as a human you no longer need to manually update such digests once you have Renovate on the job.
 
@@ -38,7 +39,7 @@ Instead, you will now receive these updates via Pull Requests, or perhaps commit
 
 ## Version Upgrading
 
-Renovate also supports _upgrading_ versions in Docker tags, e.g. from `node:8.9.0` to `node:8.9.1`. If your tags looks like a version, Renovate will upgrade it like a version.
+Renovate also supports _upgrading_ versions in Docker tags, e.g. from `node:8.9.0` to `node:8.9.1` or `node:8.9` to `node:8.10`. If your tags looks like a version, Renovate will upgrade it like a version.
 
 Thanks to this, you may wish to change the way you tag your image dependencies to be more specific, e.g. change from `node:8` to `node:8.9.1` so that every Renovate PR will be more human friendly, e.g. you can know that you are getting a PR because `node` upgraded from `8.9.1` to `8.9.2` and not because `8.9.1` somehow changed.
 

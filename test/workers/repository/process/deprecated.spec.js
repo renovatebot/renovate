@@ -4,15 +4,21 @@ const {
 
 describe('workers/repository/process/deprecated', () => {
   describe('raiseDeprecationWarnings()', () => {
+    it('returns if onboarding', async () => {
+      const config = {};
+      await raiseDeprecationWarnings(config, {});
+    });
     it('returns if disabled', async () => {
       const config = {
-        raiseDeprecationWarnings: false,
+        repoIsOnboarded: true,
+        suppressNotifications: ['deprecationWarningIssues'],
       };
       await raiseDeprecationWarnings(config, {});
     });
     it('raises deprecation warnings', async () => {
       const config = {
-        raiseDeprecationWarnings: true,
+        repoIsOnboarded: true,
+        suppressNotifications: [],
       };
       const packageFiles = {
         npm: [

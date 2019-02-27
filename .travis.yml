@@ -4,20 +4,22 @@ notifications:
 language: node_js
 
 node_js:
-  - "8.11.1"
+  - '8.11.1'
 
 sudo: false
 
 branches:
   only:
-  - master
-  - stable
+    - master
+    - stable
+    - v13
 
 if: tag IS blank
 
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$HOME/.yarn/bin:$PATH"
+  - python --version
 
 install:
   - yarn install --frozen-lockfile
@@ -26,9 +28,9 @@ install:
 cache:
   yarn: true
   directories:
-    - ".cache"
-    - ".eslintcache"
-    - "node_modules"
+    - '.cache'
+    - '.eslintcache'
+    - 'node_modules'
 
 script:
   - yarn prettier --list-different
@@ -40,7 +42,7 @@ after_success:
 
 deploy:
   provider: script
-  script: curl -X POST -d '{}' $NETLIFY_DEPLOY_WEBHOOK && yarn semantic-release
+  script: yarn semantic-release
   skip_cleanup: true
   on:
-    branch: master
+    branch: v13

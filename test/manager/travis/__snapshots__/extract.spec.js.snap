@@ -9,7 +9,6 @@ Object {
         8,
       ],
       "depName": "node",
-      "versionScheme": "semver",
     },
   ],
 }

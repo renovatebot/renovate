@@ -10,7 +10,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/php",
       "skipReason": "unsupported",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -18,7 +17,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/symfony/assetic-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -26,7 +24,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/symfony/monolog-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -34,21 +31,18 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/symfony/swiftmailer-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "2.1.*",
       "depName": "symfony/symfony",
       "depType": "require",
       "purl": "pkg:packagist/symfony/symfony",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "2.2.2",
       "depName": "doctrine/common",
       "depType": "require",
       "purl": "pkg:packagist/doctrine/common",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -56,7 +50,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/doctrine/doctrine-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -64,14 +57,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/doctrine/doctrine-fixtures-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "2.2.x-dev",
       "depName": "doctrine/orm",
       "depType": "require",
       "purl": "pkg:packagist/doctrine/orm",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -79,7 +70,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/exercise/elastica-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -87,7 +77,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/friendsofsymfony/rest-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -95,7 +84,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/friendsofsymfony/user-bundle",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -103,14 +91,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/fzaninotto/faker",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "1.0.1",
       "depName": "jms/di-extra-bundle",
       "depType": "require",
       "purl": "pkg:packagist/jms/di-extra-bundle",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -118,14 +104,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/jms/payment-core-bundle",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "1.1.0",
       "depName": "jms/security-extra-bundle",
       "depType": "require",
       "purl": "pkg:packagist/jms/security-extra-bundle",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -133,7 +117,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/knplabs/knp-menu-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -141,7 +124,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/knplabs/knp-paginator-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -149,7 +131,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/liip/imagine-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -157,7 +138,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/merk/dough-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -165,7 +145,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/sensio/distribution-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -173,7 +152,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/sensio/framework-extra-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -181,7 +159,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/sensio/generator-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -189,7 +166,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/simplethings/entity-audit-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -197,7 +173,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/stof/doctrine-extensions-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -205,14 +180,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/twig/extensions",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "2.3.*",
       "depName": "behat/behat",
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/behat",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -220,7 +193,6 @@ Object {
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/behat-bundle",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -228,7 +200,6 @@ Object {
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/mink-bundle",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -236,7 +207,6 @@ Object {
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/sahi-client",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -244,7 +214,6 @@ Object {
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/common-contexts",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
   ],
 }
@@ -260,7 +229,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/php",
       "skipReason": "unsupported",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -268,7 +236,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/symfony/assetic-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -276,7 +243,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/symfony/monolog-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -284,21 +250,18 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/symfony/swiftmailer-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "2.1.*",
       "depName": "symfony/symfony",
       "depType": "require",
       "purl": "pkg:packagist/symfony/symfony",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "2.2.2",
       "depName": "doctrine/common",
       "depType": "require",
       "purl": "pkg:packagist/doctrine/common",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -306,7 +269,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/doctrine/doctrine-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -314,14 +276,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/doctrine/doctrine-fixtures-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "2.2.x-dev",
       "depName": "doctrine/orm",
       "depType": "require",
       "purl": "pkg:packagist/doctrine/orm",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -329,7 +289,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/exercise/elastica-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -337,7 +296,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/friendsofsymfony/rest-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -345,7 +303,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/friendsofsymfony/user-bundle",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -353,14 +310,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/fzaninotto/faker",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "1.0.1",
       "depName": "jms/di-extra-bundle",
       "depType": "require",
       "purl": "pkg:packagist/jms/di-extra-bundle",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -368,14 +323,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/jms/payment-core-bundle",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "1.1.0",
       "depName": "jms/security-extra-bundle",
       "depType": "require",
       "purl": "pkg:packagist/jms/security-extra-bundle",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -383,7 +336,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/knplabs/knp-menu-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -391,7 +343,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/knplabs/knp-paginator-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -399,7 +350,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/liip/imagine-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -407,7 +357,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/merk/dough-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -415,7 +364,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/sensio/distribution-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -423,7 +371,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/sensio/framework-extra-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -431,7 +378,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/sensio/generator-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -439,7 +385,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/simplethings/entity-audit-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -447,7 +392,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/stof/doctrine-extensions-bundle",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-master",
@@ -455,14 +399,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/twig/extensions",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "2.3.*",
       "depName": "behat/behat",
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/behat",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -470,7 +412,6 @@ Object {
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/behat-bundle",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -478,7 +419,6 @@ Object {
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/mink-bundle",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -486,7 +426,6 @@ Object {
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/sahi-client",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -494,7 +433,6 @@ Object {
       "depType": "require-dev",
       "purl": "pkg:packagist/behat/common-contexts",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
   ],
 }
@@ -511,14 +449,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/php",
       "skipReason": "unsupported",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "~1.0.12",
       "depName": "composer/installers",
       "depType": "require",
       "purl": "pkg:packagist/composer/installers",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -526,21 +462,18 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/johnpbloch/wordpress",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "^2.0.1",
       "depName": "vlucas/phpdotenv",
       "depType": "require",
       "purl": "pkg:packagist/vlucas/phpdotenv",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "^1.0",
       "depName": "oscarotero/env",
       "depType": "require",
       "purl": "pkg:packagist/oscarotero/env",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -548,7 +481,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/wpackagist-plugin/tinymce-advanced",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -556,7 +488,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/wpackagist-plugin/acf-content-analysis-for-yoast-seo",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -564,7 +495,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/wpackagist-plugin/duplicate-post",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -572,7 +502,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/wpackagist-plugin/simple-image-sizes",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -580,7 +509,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/wpackagist-plugin/wordpress-seo",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -588,7 +516,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/wpackagist-plugin/timber-library",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -596,7 +523,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/wp-sync-db/wp-sync-db",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -604,7 +530,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/asha23/wp-seed-timber",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
   ],
   "registryUrls": Array [
@@ -650,7 +575,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/aws/aws-sdk-php",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "dev-trunk",
@@ -658,14 +582,12 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/wpackagist-plugin/akismet",
       "skipReason": "unsupported-constraint",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": ">=7.0.2",
       "depName": "wpackagist-plugin/wordpress-seo",
       "depType": "require",
       "purl": "pkg:packagist/wpackagist-plugin/wordpress-seo",
-      "versionScheme": "semverComposer",
     },
     Object {
       "currentValue": "*",
@@ -673,7 +595,6 @@ Object {
       "depType": "require",
       "purl": "pkg:packagist/wpackagist-theme/hueman",
       "skipReason": "any-version",
-      "versionScheme": "semverComposer",
     },
   ],
   "registryUrls": Array [

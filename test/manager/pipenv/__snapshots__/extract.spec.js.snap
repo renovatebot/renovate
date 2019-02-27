@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/pipenv/extract extractPackageFile() extracts dependencies 1`] = `
+Array [
+  Object {
+    "currentValue": "==0.3.1",
+    "depName": "some-package",
+    "depType": "packages",
+    "pipenvNestedVersion": false,
+    "purl": "pkg:pypi/some-package",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+      "http://example.com/private-pypi/",
+    ],
+  },
+  Object {
+    "currentValue": "==1.0.0",
+    "depName": "some-other-package",
+    "depType": "packages",
+    "pipenvNestedVersion": false,
+    "purl": "pkg:pypi/some-other-package",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+      "http://example.com/private-pypi/",
+    ],
+  },
+  Object {
+    "currentValue": "==1.0.0",
+    "depName": "pytest-benchmark",
+    "depType": "packages",
+    "pipenvNestedVersion": true,
+    "purl": "pkg:pypi/pytest-benchmark",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+      "http://example.com/private-pypi/",
+    ],
+  },
+  Object {
+    "currentValue": "==0.1.0",
+    "depName": "dev-package",
+    "depType": "dev-packages",
+    "pipenvNestedVersion": false,
+    "purl": "pkg:pypi/dev-package",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+      "http://example.com/private-pypi/",
+    ],
+  },
+]
+`;
+
+exports[`lib/manager/pipenv/extract extractPackageFile() extracts multiple dependencies 1`] = `
+Array [
+  Object {
+    "currentValue": "==1",
+    "depName": "Django",
+    "depType": "packages",
+    "pipenvNestedVersion": false,
+    "purl": "pkg:pypi/Django",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
+  },
+  Object {
+    "currentValue": "==0.6.27",
+    "depName": "distribute",
+    "depType": "packages",
+    "pipenvNestedVersion": false,
+    "purl": "pkg:pypi/distribute",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
+  },
+  Object {
+    "currentValue": "==0.2",
+    "depName": "dj-database-url",
+    "depType": "packages",
+    "pipenvNestedVersion": false,
+    "purl": "pkg:pypi/dj-database-url",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
+  },
+  Object {
+    "currentValue": "==2.4.5",
+    "depName": "psycopg2",
+    "depType": "packages",
+    "pipenvNestedVersion": false,
+    "purl": "pkg:pypi/psycopg2",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
+  },
+  Object {
+    "currentValue": "==0.1.2",
+    "depName": "wsgiref",
+    "depType": "packages",
+    "pipenvNestedVersion": false,
+    "purl": "pkg:pypi/wsgiref",
+    "registryUrls": Array [
+      "https://pypi.org/pypi/",
+    ],
+  },
+]
+`;
