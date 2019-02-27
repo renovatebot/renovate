@@ -333,9 +333,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
@@ -350,9 +356,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
@@ -367,6 +379,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
@@ -1308,9 +1323,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
@@ -1325,9 +1346,15 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
@@ -1342,6 +1369,9 @@ Array [
   ],
   Array [
     "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
