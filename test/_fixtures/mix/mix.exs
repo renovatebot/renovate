@@ -16,8 +16,8 @@ defmodule MyProject.MixProject do
 
   defp deps() do
     [
-      {:ecto, "~> 2.0.0"},
       {:postgrex, "~> 0.8.1"},
+      {:ecto, "~> 2.0.0"},
       {:cowboy, github: "ninenines/cowboy"},
       {:secret, "~> 1.0", organization: "acme"},
       {:jason, "~> 1.0", 
