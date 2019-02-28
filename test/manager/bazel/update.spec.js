@@ -43,13 +43,16 @@ describe('manager/bazel/update', () => {
 `,
         currentValue: 'v0.0.0',
         currentDigest: 'dec09d789f3dba190787f8b4454c7d3c936fed9e',
+        newDigest: 'aaa09d789f3dba190787f8b4454c7d3c936fe123',
         newValue: 'v1.0.3',
         updateType: 'major',
       };
       const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(content);
-      expect(res.includes('tag = "v1.0.3"')).toBe(true);
+      expect(
+        res.includes('"aaa09d789f3dba190787f8b4454c7d3c936fe123", # v1.0.3')
+      ).toBe(true);
     });
     it('updates http archive', async () => {
       const upgrade = {
