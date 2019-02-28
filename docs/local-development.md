@@ -58,6 +58,12 @@ You can run `yarn test` locally to test your code. We test all PRs using the sam
 
 You can run just the Jest unit tests by running `yarn jest`. You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`. If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end. e.g. `yarn jest composer -u` would update the saved Snapshots for _all_ tests in `test/manager/composer/*`.
 
+#### Prerequisites
+
+You need to have Python with `mock` installed for all tests to pass. Version 3.7 of Python includes `mock` so that approach is recommended.
+
+You also need to make sure that you don't have a local `.npmrc` file that overrides npm's default registry. 
+
 #### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
