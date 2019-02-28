@@ -38,6 +38,25 @@ describe('generateLockFile', () => {
     ]);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
+  it('detects yarnIntegrity', async () => {
+    getInstalledPath.mockReturnValueOnce('node_modules/yarn');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'package-lock-contents');
+    const config = {
+      upgrades: [{ yarnIntegrity: true }],
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+      { depName: 'some-dep', isLockfileUpdate: true },
+    ]);
+    expect(res.lockFile).toEqual('package-lock-contents');
+  });
   it('catches errors', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     exec.mockReturnValueOnce({
