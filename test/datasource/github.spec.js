@@ -32,6 +32,22 @@ describe('datasource/github', () => {
       );
       expect(res).toBe('abcdef');
     });
+    it('returns tagged digest', async () => {
+      ghGot.mockReturnValueOnce({ body: { object: { sha: 'ddd111' } } });
+      const res = await github.getDigest(
+        { depName: 'some-dep', lookupName: 'some/dep' },
+        'v1.2.0'
+      );
+      expect(res).toBe('ddd111');
+    });
+    it('returns null for missed tagged digest', async () => {
+      ghGot.mockReturnValueOnce({});
+      const res = await github.getDigest(
+        { depName: 'some-dep', lookupName: 'some/dep' },
+        'v1.2.0'
+      );
+      expect(res).toBe(null);
+    });
   });
   describe('getPreset()', () => {
     it('tries default then renovate', async () => {
