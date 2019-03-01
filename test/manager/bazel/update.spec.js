@@ -51,7 +51,7 @@ describe('manager/bazel/update', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(content);
       expect(
-        res.includes('"aaa09d789f3dba190787f8b4454c7d3c936fe123", # v1.0.3')
+        res.includes('"aaa09d789f3dba190787f8b4454c7d3c936fe123",  # v1.0.3')
       ).toBe(true);
     });
     it('updates http archive', async () => {
