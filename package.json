@@ -126,7 +126,7 @@
     "proxy-agent": "3.0.3",
     "registry-auth-token": "3.3.2",
     "root-require": "0.3.1",
-    "safe-regex": "2.0.1",
+    "safe-regex": "2.0.2",
     "semver": "5.6.0",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.4",
