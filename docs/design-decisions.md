@@ -5,7 +5,7 @@ This file documents the design choices as well as configuration options.
 #### Stateless
 
 No state storage is needed on `renovate` or the source code repository apart
-from what you see publicly (branches, Pull Requests). It therefore doesn't
+from what you see publicly (branches, Pull Requests). It, therefore, doesn't
 matter if you stop/restart the script and would even still work if you had it
 running from two different locations, as long as their configuration was the
 same.
@@ -21,7 +21,7 @@ all operations are performed via the API.
 The script current processes repositories, package files, and dependencies
 within them all synchronously.
 
-- Greatly reduces chance of hitting simultaneous API rate limits
+- Greatly reduces the chance of hitting simultaneous API rate limits
 - Simplifies logging
 
 Note: Initial queries to NPM are done in parallel.
@@ -35,17 +35,16 @@ token configured via environment variable and labels configured via target
 
 ## Cascading Configuration
 
-Configuration options applied per-package (e.g. with package rules) override those applied per
+Configuration options applied per-package (e.g. with package rules) overrides those applied per
 package-type, which override those per-repository, which override those which
 are global (all repositories).
 
 ## Automatic discovery of package.json locations
 
-Default behaviour is to auto-discover all `package.json` locations in a
+The default behaviour is to auto-discover all `package.json` locations in a
 repository and process them all. Doing so means that "monorepos" are supported
 by default. This can be overridden by the configuration option `includePaths`,
-where you list the file paths manually (e.g. limit to just `package.json` in
-root of repository).
+where you list the file paths manually (e.g. limit to just `package.json` in the root of the repository).
 
 ## Separate Branches per dependency
 
@@ -63,7 +62,7 @@ the value `All`) and then all dependency updates will be in the same branch/PR.
 ## Separate Minor and Major PRs
 
 `renovate` will create multiple branches/PRs if both major and minor branch upgrades
-are available. For example if the current example is 1.6.0 and upgrades to 1.7.0
+are available. For example, if the current example is 1.6.0 and upgrades to 1.7.0
 and 2.0.0 exist, then `renovate` will raise PRs for both the 1.x upgrade(s) and
 2.x upgrade(s).
 
@@ -90,7 +89,7 @@ Note: Branch names are configurable using string templates.
 ## Pull Request Recreation
 
 By default, the script does not create a new PR if it finds an identical one
-already closed. This allows users to close unwelcome upgrade PRs and worry about
+already closed. This allows users to close unwelcome upgrade PRs and not worry about
 them being recreated every run. Typically this is most useful for major
 upgrades. This option is configurable.
 
