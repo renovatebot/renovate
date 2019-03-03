@@ -35,7 +35,7 @@ token configured via environment variable and labels configured via target
 
 ## Cascading Configuration
 
-Configuration options applied per-package (e.g. with package rules) overrides those applied per
+Configuration options applied per-package (e.g. with package rules) override those applied per
 package-type, which override those per-repository, which override those which
 are global (all repositories).
 
