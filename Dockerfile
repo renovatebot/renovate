@@ -68,7 +68,9 @@ RUN chmod +x /usr/local/bin/composer
 
 # Go Modules
 
-ENV GOLANG_VERSION 1.11.1
+RUN apt-get update && apt-get install -y bzr && apt-get clean
+
+ENV GOLANG_VERSION 1.12
 
 RUN wget -q -O go.tgz "https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" && \
 	tar -C /usr/local -xzf go.tgz && \
@@ -87,7 +89,7 @@ ENV CGO_ENABLED=0
 RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && apt-get clean
 
 RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.7 /usr/bin/python3
-RUN ln /usr/bin/python3.7 /usr/bin/python
+RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
 
 # Pip
 
