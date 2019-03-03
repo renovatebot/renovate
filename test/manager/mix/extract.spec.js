@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/mix/extract');
+const { extractPackageFile } = require('../../../lib/manager/mix');
 
 const sample = fs.readFileSync('test/_fixtures/mix/mix.exs', 'utf8');
 
