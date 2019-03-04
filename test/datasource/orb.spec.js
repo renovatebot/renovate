@@ -32,11 +32,20 @@ describe('datasource/orb', () => {
       return global.renovateCache.rmAll();
     });
     it('returns null for empty result', async () => {
-      got.mockReturnValueOnce({ body: {} });
+      got.post.mockReturnValueOnce({ body: {} });
       expect(
         await datasource.getPkgReleases({
           datasource: 'orb',
           lookupName: 'hyper-expanse/library-release-workflows',
+        })
+      ).toBeNull();
+    });
+    it('returns null for missing orb', async () => {
+      got.post.mockReturnValueOnce({ body: { data: {} } });
+      expect(
+        await datasource.getPkgReleases({
+          datasource: 'orb',
+          lookupName: 'hyper-expanse/library-release-wonkflows',
         })
       ).toBeNull();
     });

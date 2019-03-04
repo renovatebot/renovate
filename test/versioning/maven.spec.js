@@ -1,4 +1,9 @@
-const { compare } = require('../../lib/versioning/maven/compare');
+const {
+  compare,
+  parseRange,
+  rangeToStr,
+  autoExtendMavenRange,
+} = require('../../lib/versioning/maven/compare');
 const {
   isVersion,
   isStable,
@@ -76,6 +81,137 @@ describe('versioning/maven/compare', () => {
     expect(compare('1-sp.1', '1-ga.1')).toEqual(1);
     expect(compare('1-ga-1', '1-sp-1')).toEqual(1);
     expect(compare('1', '1-cr1')).toEqual(1);
+  });
+
+  const invalidRanges = [
+    '1.2.3-SNAPSHOT', // versions should be handled separately
+    '[]',
+    '[,]',
+    '(',
+    '[',
+    ',',
+    '[1.0',
+    '1.0]',
+    '[1.0],',
+    ',[1.0]',
+    '(,1.1),(1.0,)',
+    '(0,1.1),(1.0,2.0)',
+    '(0,1.1),(,2.0)',
+    '(,1.0],,[1.2,)',
+    '(,1.0],[1.2,),',
+    '[1.5,]',
+    '[2.0,1.0)',
+    '[1.2,1.3],1.4',
+    '[1.2,,1.3]',
+    '[1.3,1.2]',
+    '[1,[2,3],4]',
+    '[,1.0]',
+  ];
+  it('filters out incorrect ranges', () => {
+    Object.keys(invalidRanges).forEach(rangeStr => {
+      const range = parseRange(rangeStr);
+      expect(range).toEqual(null);
+      expect(rangeToStr(range)).toEqual(null);
+    });
+  });
+  it('parses version ranges and translates them back to string', () => {
+    const presetRanges = {
+      ...invalidRanges.reduce((acc, str) => ({ ...acc, [str]: null }), {}),
+      '[1.0]': [
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.0',
+          rightType: 'INCLUDING_POINT',
+          rightValue: '1.0',
+        },
+      ],
+      '(,1.0]': [
+        {
+          leftType: 'EXCLUDING_POINT',
+          leftValue: null,
+          rightType: 'INCLUDING_POINT',
+          rightValue: '1.0',
+        },
+      ],
+      '[1.2,1.3]': [
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.2',
+          rightType: 'INCLUDING_POINT',
+          rightValue: '1.3',
+        },
+      ],
+      '[1.0,2.0)': [
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.0',
+          rightType: 'EXCLUDING_POINT',
+          rightValue: '2.0',
+        },
+      ],
+      '[1.5,)': [
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.5',
+          rightType: 'EXCLUDING_POINT',
+          rightValue: null,
+        },
+      ],
+      '(,1.0],[1.2,)': [
+        {
+          leftType: 'EXCLUDING_POINT',
+          leftValue: null,
+          rightType: 'INCLUDING_POINT',
+          rightValue: '1.0',
+        },
+        {
+          leftType: 'INCLUDING_POINT',
+          leftValue: '1.2',
+          rightType: 'EXCLUDING_POINT',
+          rightValue: null,
+        },
+      ],
+      '(,1.1),(1.1,)': [
+        {
+          leftType: 'EXCLUDING_POINT',
+          leftValue: null,
+          rightType: 'EXCLUDING_POINT',
+          rightValue: '1.1',
+        },
+        {
+          leftType: 'EXCLUDING_POINT',
+          leftValue: '1.1',
+          rightType: 'EXCLUDING_POINT',
+          rightValue: null,
+        },
+      ],
+    };
+    Object.keys(presetRanges).forEach(rangeStr => {
+      const presetValue = presetRanges[rangeStr];
+      const fullRange = parseRange(rangeStr);
+      expect(presetValue).toEqual(fullRange);
+      if (fullRange === null) {
+        expect(presetValue).toEqual(null);
+      } else {
+        expect(rangeToStr(fullRange)).toEqual(rangeStr);
+      }
+    });
+  });
+  it('extends ranges with new versions', () => {
+    const sample = [
+      ['[1.2.3]', '1.2.3', '[1.2.3]'],
+      ['[1.2.3]', '1.2.4', '[1.2.4]'],
+      ['[1.0.0,1.2.3]', '1.2.4', '[1.0.0,1.2.4]'],
+      ['[1.0.0,1.2.23]', '1.1.0', '[1.0.0,1.2.23]'],
+      ['(,1.0]', '2.0', '(,2.0]'],
+      ['(,1.0)', '2.0', '(,2.0)'],
+      ['[1.0,1.2],[1.3,1.5)', '1.2.4', '[1.0,1.2.4],[1.3,1.5)'],
+      ['[1.2.3,)', '1.2.4', '[1.2.4,)'],
+      ['[1.2.3,]', '1.2.4', '[1.2.3,]'], // invalid range
+    ];
+    sample.forEach(([oldRepr, newValue, newRepr]) => {
+      expect(autoExtendMavenRange(oldRepr, newValue)).toEqual(newRepr);
+    });
   });
 });
 

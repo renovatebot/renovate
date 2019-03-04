@@ -11,6 +11,10 @@ ENV LANG C.UTF-8
 
 RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar && apt-get clean -y
 
+## Gradle
+
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && apt-get clean -y
+
 ## Node.js
 
 # START copy Node.js from https://github.com/nodejs/docker-node/blob/master/10/jessie/Dockerfile
@@ -68,7 +72,9 @@ RUN chmod +x /usr/local/bin/composer
 
 # Go Modules
 
-ENV GOLANG_VERSION 1.11.1
+RUN apt-get update && apt-get install -y bzr && apt-get clean
+
+ENV GOLANG_VERSION 1.12
 
 RUN wget -q -O go.tgz "https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz" && \
 	tar -C /usr/local -xzf go.tgz && \
@@ -87,7 +93,7 @@ ENV CGO_ENABLED=0
 RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && apt-get clean
 
 RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.7 /usr/bin/python3
-RUN ln /usr/bin/python3.7 /usr/bin/python
+RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
 
 # Pip
 
@@ -99,6 +105,18 @@ RUN groupadd --gid 1000 ubuntu \
   && useradd --uid 1000 --gid ubuntu --shell /bin/bash --create-home ubuntu
 
 RUN chmod -R a+rw /usr
+
+# Docker client and group
+
+RUN groupadd -g 999 docker
+RUN usermod -aG docker ubuntu
+
+ENV DOCKER_VERSION=18.09.2
+
+RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
+  && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
+                 -C /usr/local/bin docker/docker \
+  && rm docker-${DOCKER_VERSION}.tgz
 
 USER ubuntu
 

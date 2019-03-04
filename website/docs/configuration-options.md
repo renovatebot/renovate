@@ -116,9 +116,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 ## commitMessage
 
-The commit message is less important than branchName so you may override it if you wish.
-
-Example commit message: "chore(deps): Update dependency eslint to version 4.0.1"
+Editing of `commitMessage` directly is now deprecated and not recommended. Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
 
 ## commitMessageAction
 
@@ -233,6 +231,8 @@ The primary use case for this option is if you are following a pre-release tag o
 
 ## github-actions
 
+**Important note**: For security reasons, GitHub has blocked integrations/apps from editing GitHub Actions workflow files in _any_ branch, so this only works on GitHub if using a Personal Access Token.
+
 Add to this configuration setting if you need to override any of the GitHub Actions default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
 
 ## gitlabci
@@ -311,6 +311,19 @@ There may be times where an `.npmrc` file in your repository causes problems, su
 ## ignorePaths
 
 Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
+
+## ignorePresets
+
+Use this if you are extending a complex preset but won't want to use every "sub preset" that it uses. For example, take this config:
+
+```json
+{
+  "extends": ["config:base"],
+  "ignorePresets": [":prHourlyLimit2"]
+}
+```
+
+It would take the entire "config:base" preset - which contains a lot of sub-presets - but ignore the ":prHourlyLimit2" rule.
 
 ## ignoreUnstable
 

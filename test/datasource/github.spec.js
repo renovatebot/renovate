@@ -1,9 +1,12 @@
 const datasource = require('../../lib/datasource');
 const github = require('../../lib/datasource/github');
 const ghGot = require('../../lib/platform/github/gh-got-wrapper');
+const got = require('../../lib/util/got');
+const hostRules = require('../../lib/util/host-rules');
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../lib/util/got');
+jest.mock('../../lib/util/host-rules');
 
 describe('datasource/github', () => {
   beforeEach(() => global.renovateCache.rmAll());
@@ -29,34 +32,62 @@ describe('datasource/github', () => {
       );
       expect(res).toBe('abcdef');
     });
+    it('returns tagged digest', async () => {
+      ghGot.mockReturnValueOnce({ body: { object: { sha: 'ddd111' } } });
+      const res = await github.getDigest(
+        { depName: 'some-dep', lookupName: 'some/dep' },
+        'v1.2.0'
+      );
+      expect(res).toBe('ddd111');
+    });
+    it('returns null for missed tagged digest', async () => {
+      ghGot.mockReturnValueOnce({});
+      const res = await github.getDigest(
+        { depName: 'some-dep', lookupName: 'some/dep' },
+        'v1.2.0'
+      );
+      expect(res).toBe(null);
+    });
   });
   describe('getPreset()', () => {
-    it('throws if non-default', async () => {
-      await expect(
-        github.getPreset('some/repo', 'non-default')
-      ).rejects.toThrow();
+    it('tries default then renovate', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error();
+      });
+      await expect(github.getPreset('some/repo')).rejects.toThrow();
     });
     it('throws if no content', async () => {
-      ghGot.mockImplementationOnce(() => ({
+      got.mockImplementationOnce(() => ({
         body: {},
       }));
       await expect(github.getPreset('some/repo')).rejects.toThrow();
     });
     it('throws if fails to parse', async () => {
-      ghGot.mockImplementationOnce(() => ({
+      got.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('not json').toString('base64'),
         },
       }));
       await expect(github.getPreset('some/repo')).rejects.toThrow();
     });
-    it('should return the preset', async () => {
-      ghGot.mockImplementationOnce(() => ({
+    it('should return default.json', async () => {
+      hostRules.find.mockReturnValueOnce({ token: 'abc' });
+      got.mockImplementationOnce(() => ({
         body: {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         },
       }));
       const content = await github.getPreset('some/repo');
+      expect(content).toEqual({ foo: 'bar' });
+    });
+    it('should return custom.json', async () => {
+      hostRules.find.mockReturnValueOnce({ token: 'abc' });
+      got.mockImplementationOnce(() => ({
+        body: {
+          content: Buffer.from('{"foo":"bar"}').toString('base64'),
+        },
+      }));
+      const content = await github.getPreset('some/repo', 'custom');
       expect(content).toEqual({ foo: 'bar' });
     });
   });

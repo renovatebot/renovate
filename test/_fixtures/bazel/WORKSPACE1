@@ -38,6 +38,13 @@ load("@build_bazel_rules_typescript//:defs.bzl", "ts_repositories")
 
 ts_repositories()
 
+http_archive(
+    name="distroless",
+    sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
+    strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",
+    urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]
+)
+
 local_repository(
     name = "angular",
     path = "node_modules/@angular/bazel",
@@ -79,6 +86,13 @@ http_archive(
         "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
         "https://github.com/bazelbuild/bazel-skylib/archive/0.5.0.tar.gz",
     ],
+)
+
+http_archive(
+    name="distroless",
+    sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
+    strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",
+    urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]
 )
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
