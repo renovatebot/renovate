@@ -115,6 +115,23 @@ describe('manager/gradle', () => {
       });
     });
 
+    it('should execute gradlew when available', async () => {
+      const configWithgitFs = {
+        gitFs: true,
+        ...config,
+      };
+
+      await manager.extractAllPackageFiles(configWithgitFs, ['build.gradle']);
+
+      expect(exec.mock.calls[0][0]).toBe(
+        'sh gradlew --init-script renovate-plugin.gradle renovate'
+      );
+      expect(exec.mock.calls[0][1]).toMatchObject({
+        cwd: 'localDir',
+        timeout: 20000,
+      });
+    });
+
     it('should return null and gradle should not be executed if no build.gradle', async () => {
       const packageFiles = ['foo/build.gradle'];
       expect(
@@ -159,6 +176,19 @@ describe('manager/gradle', () => {
     it('should use docker if required', async () => {
       const configWithDocker = {
         binarySource: 'docker',
+        ...config,
+      };
+      await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
+
+      expect(exec.mock.calls[0][0]).toBe(
+        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script renovate-plugin.gradle renovate'
+      );
+    });
+
+    it('should use dcoker even if gradlew is available', async () => {
+      const configWithDocker = {
+        binarySource: 'docker',
+        gitFs: true,
         ...config,
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);

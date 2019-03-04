@@ -628,5 +628,13 @@ Array [
     "depType": "require",
     "lineNumber": 7,
   },
+  Object {
+    "currentValue": "v25.1.0+incompatible",
+    "datasource": "go",
+    "depName": "github.com/Azure/azure-sdk-for-go",
+    "depNameShort": "Azure/azure-sdk-for-go",
+    "depType": "require",
+    "lineNumber": 8,
+  },
 ]
 `;
