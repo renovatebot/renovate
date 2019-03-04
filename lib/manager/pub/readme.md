@@ -210,7 +210,7 @@ Dev dependencies can always be pinned.
 
 #### Is a new datasource required? Provide details
 
-Not sure.
+We'll need to support the pub API as a new datasource. Example URL: `pub.dartlang.org/api/packages/url_launcher`
 
 ---
 
