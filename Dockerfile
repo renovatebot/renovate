@@ -11,6 +11,10 @@ ENV LANG C.UTF-8
 
 RUN apt-get update && apt-get install -y gpg curl wget unzip xz-utils git openssh-client bsdtar && apt-get clean -y
 
+## Gradle
+
+RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk gradle && apt-get clean -y
+
 ## Node.js
 
 # START copy Node.js from https://github.com/nodejs/docker-node/blob/master/10/jessie/Dockerfile
@@ -89,7 +93,7 @@ ENV CGO_ENABLED=0
 RUN apt-get update && apt-get install -y python3.7-dev python3-distutils && apt-get clean
 
 RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.7 /usr/bin/python3
-RUN ln /usr/bin/python3.7 /usr/bin/python
+RUN rm -rf /usr/bin/python && ln /usr/bin/python3.7 /usr/bin/python
 
 # Pip
 
