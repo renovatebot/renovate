@@ -73,7 +73,7 @@ Array [
     "remote": "https://github.com/bazelbuild/rules_typescript.git",
   },
   Object {
-    "currentValue": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
+    "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
     "datasource": "github",
     "def": "http_archive(
     name=\\"distroless\\",
@@ -152,7 +152,7 @@ Array [
     "repo": "bazelbuild/bazel-skylib",
   },
   Object {
-    "currentValue": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
+    "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
     "datasource": "github",
     "def": "http_archive(
     name=\\"distroless\\",
