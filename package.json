@@ -162,6 +162,9 @@
     "semantic-release": "15.13.3",
     "tmp-promise": "1.0.5"
   },
+  "resolutions": {
+    "lodash": ">= 4.17.11"
+  },
   "files": [
     "bin/config-validator.js",
     "bin/yarn-1.9.4.js",
