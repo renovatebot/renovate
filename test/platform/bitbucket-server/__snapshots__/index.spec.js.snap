@@ -16,7 +16,33 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with no path commitFilesToBranch() sends to gitFs 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with no path createPr() posts PR 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path createPr() posts PR 2`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests",
@@ -36,6 +62,379 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with no path createPr() posts PR default branch 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path createPr() posts PR default branch 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests",
+    Object {
+      "body": Object {
+        "description": "body",
+        "fromRef": Object {
+          "id": "refs/heads/branch",
+        },
+        "title": "title",
+        "toRef": Object {
+          "id": "refs/heads/master",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureComment() add comment if not found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureComment() add comment if not found 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureComment() add updates comment if necessary 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureComment() add updates comment if necessary 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureComment() does not throw 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/undefined/repos/undefined/pull-requests/3/activities?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureComment() skips comment 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureComment() skips comment 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() deletes comment if found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() deletes nothing 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() does not throw 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/undefined/repos/undefined/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path findPr() has no pr 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path findPr() has pr 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "createdAt": 1547853840016,
+  "number": 5,
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with no path findPr() has pr 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchPr() has no pr 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchPr() has pr 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": true,
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "isConflicted": false,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchPr() has pr 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchStatus() should be failed 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchStatus() should be pending 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchStatus() should be success 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchStatusCheck() should be failure 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchStatusCheck() should be null 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchStatusCheck() should be pending 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchStatusCheck() should be success 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with no path getPr() gets a PR 1`] = `
 Object {
   "body": "* Line 1
@@ -47,13 +446,116 @@ Object {
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
   "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
   "state": "open",
   "title": "title",
   "version": 1,
 }
 `;
 
+exports[`platform/bitbucket-server endpoint with no path getPr() gets a PR 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getPr() gets a closed PR 1`] = `
+Object {
+  "body": undefined,
+  "branchName": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #undefined",
+  "number": undefined,
+  "reviewers": Array [],
+  "state": "merged",
+  "title": undefined,
+  "version": 0,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getPr() gets a closed PR 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getPr() returns null for no prNo 1`] = `Array []`;
+
 exports[`platform/bitbucket-server endpoint with no path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`platform/bitbucket-server endpoint with no path getPrList() has pr 1`] = `
+Array [
+  Object {
+    "body": "* Line 1
+* Line 2",
+    "branchName": "userName1/pullRequest5",
+    "createdAt": 1547853840016,
+    "number": 5,
+    "state": "open",
+    "title": "title",
+    "version": 1,
+  },
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getPrList() has pr 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getRepos() returns repos 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path initRepo() no author 1`] = `
+Object {
+  "isFork": false,
+  "privateRepo": undefined,
+  "repoFullName": "repo",
+}
+`;
 
 exports[`platform/bitbucket-server endpoint with no path initRepo() works 1`] = `
 Object {
@@ -64,6 +566,125 @@ Object {
 `;
 
 exports[`platform/bitbucket-server endpoint with no path mergePr() posts Merge 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path mergePr() posts Merge 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path mergePr() throws conflicted 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path mergePr() throws conflicted 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path mergePr() throws not-found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/4",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path mergePr() throws not-found 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path mergePr() unknown error 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path mergePr() unknown error 2`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
@@ -82,7 +703,125 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with no path setBranchStatus() should be success 1`] = `
+Array [
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path setBranchStatus() should be success 2`] = `
+Array [
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "SUCCESSFUL",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "FAILED",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "FAILED",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "INPROGRESS",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "SUCCESSFUL",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with no path updatePr() puts PR 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path updatePr() puts PR 2`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -91,24 +830,140 @@ Array [
         "description": "body",
         "reviewers": Array [
           Object {
-            "approved": false,
-            "role": "REVIEWER",
-            "status": "UNAPPROVED",
             "user": Object {
-              "active": true,
-              "displayName": "Renovate bot 2",
-              "emailAddress": "userName2@renovatebot.com",
-              "id": 71155,
-              "links": Object {
-                "self": Array [
-                  Object {
-                    "href": "https://stash.renovatebot.com/users/userName2",
-                  },
-                ],
-              },
               "name": "userName2",
-              "slug": "userName2",
-              "type": "NORMAL",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path updatePr() throws 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path updatePr() throws 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path updatePr() throws not-found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/4",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path updatePr() throws not-found 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path updatePr() throws repository-changed 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path updatePr() throws repository-changed 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
             },
           },
         ],
@@ -136,7 +991,33 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with path commitFilesToBranch() sends to gitFs 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with path createPr() posts PR 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path createPr() posts PR 2`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests",
@@ -156,6 +1037,379 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with path createPr() posts PR default branch 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path createPr() posts PR default branch 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests",
+    Object {
+      "body": Object {
+        "description": "body",
+        "fromRef": Object {
+          "id": "refs/heads/branch",
+        },
+        "title": "title",
+        "toRef": Object {
+          "id": "refs/heads/master",
+        },
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureComment() add comment if not found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureComment() add comment if not found 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureComment() add updates comment if necessary 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureComment() add updates comment if necessary 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureComment() does not throw 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/undefined/repos/undefined/pull-requests/3/activities?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureComment() skips comment 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureComment() skips comment 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() deletes comment if found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() deletes nothing 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() does not throw 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/undefined/repos/undefined/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path findPr() has no pr 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path findPr() has pr 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "createdAt": 1547853840016,
+  "number": 5,
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with path findPr() has pr 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchPr() has no pr 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchPr() has pr 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": true,
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "isConflicted": false,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchPr() has pr 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchStatus() should be failed 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchStatus() should be pending 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchStatus() should be success 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchStatusCheck() should be failure 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchStatusCheck() should be null 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchStatusCheck() should be pending 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchStatusCheck() should be success 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with path getPr() gets a PR 1`] = `
 Object {
   "body": "* Line 1
@@ -167,13 +1421,116 @@ Object {
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
   "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
   "state": "open",
   "title": "title",
   "version": 1,
 }
 `;
 
+exports[`platform/bitbucket-server endpoint with path getPr() gets a PR 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getPr() gets a closed PR 1`] = `
+Object {
+  "body": undefined,
+  "branchName": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #undefined",
+  "number": undefined,
+  "reviewers": Array [],
+  "state": "merged",
+  "title": undefined,
+  "version": 0,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with path getPr() gets a closed PR 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getPr() returns null for no prNo 1`] = `Array []`;
+
 exports[`platform/bitbucket-server endpoint with path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`platform/bitbucket-server endpoint with path getPrList() has pr 1`] = `
+Array [
+  Object {
+    "body": "* Line 1
+* Line 2",
+    "branchName": "userName1/pullRequest5",
+    "createdAt": 1547853840016,
+    "number": 5,
+    "state": "open",
+    "title": "title",
+    "version": 1,
+  },
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getPrList() has pr 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path getRepos() returns repos 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE&limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path initRepo() no author 1`] = `
+Object {
+  "isFork": false,
+  "privateRepo": undefined,
+  "repoFullName": "repo",
+}
+`;
 
 exports[`platform/bitbucket-server endpoint with path initRepo() works 1`] = `
 Object {
@@ -184,6 +1541,125 @@ Object {
 `;
 
 exports[`platform/bitbucket-server endpoint with path mergePr() posts Merge 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path mergePr() posts Merge 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path mergePr() throws conflicted 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path mergePr() throws conflicted 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path mergePr() throws not-found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/4",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path mergePr() throws not-found 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path mergePr() unknown error 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path mergePr() unknown error 2`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
@@ -202,7 +1678,125 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with path setBranchStatus() should be success 1`] = `
+Array [
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path setBranchStatus() should be success 2`] = `
+Array [
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "SUCCESSFUL",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "FAILED",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "FAILED",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "INPROGRESS",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+  Array [
+    "./rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
+    Object {
+      "body": Object {
+        "description": null,
+        "key": "context-2",
+        "state": "SUCCESSFUL",
+        "url": "https://renovatebot.com",
+      },
+    },
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with path updatePr() puts PR 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": false,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path updatePr() puts PR 2`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -211,24 +1805,140 @@ Array [
         "description": "body",
         "reviewers": Array [
           Object {
-            "approved": false,
-            "role": "REVIEWER",
-            "status": "UNAPPROVED",
             "user": Object {
-              "active": true,
-              "displayName": "Renovate bot 2",
-              "emailAddress": "userName2@renovatebot.com",
-              "id": 71155,
-              "links": Object {
-                "self": Array [
-                  Object {
-                    "href": "https://stash.renovatebot.com/vcs/users/userName2",
-                  },
-                ],
-              },
               "name": "userName2",
-              "slug": "userName2",
-              "type": "NORMAL",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path updatePr() throws 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path updatePr() throws 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path updatePr() throws not-found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/4",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path updatePr() throws not-found 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path updatePr() throws repository-changed 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path updatePr() throws repository-changed 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": "body",
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
             },
           },
         ],

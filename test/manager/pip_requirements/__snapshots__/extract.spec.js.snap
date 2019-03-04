@@ -70,7 +70,7 @@ Array [
 exports[`lib/manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
 Array [
   Object {
-    "currentValue": "==1.2.7",
+    "currentValue": "==1.11.19",
     "datasource": "pypi",
     "depName": "Django",
     "lineNumber": 0,
@@ -106,7 +106,7 @@ Array [
 exports[`lib/manager/pip_requirements/extract extractPackageFile() handles extras 1`] = `
 Array [
   Object {
-    "currentValue": "==2.0.8",
+    "currentValue": "==2.0.12",
     "datasource": "pypi",
     "depName": "Django",
     "lineNumber": 0,
