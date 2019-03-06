@@ -64,5 +64,18 @@ describe('datasource/gradle', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
+
+    it('processes real data with credentials', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(allResponse),
+      });
+      const res = await datasource.getPkgReleases({
+        ...config,
+        username: 'username_placeholder',
+        password: 'passwor_placeholder',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
   });
 });
