@@ -291,18 +291,9 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
       },
     ],
     Array [
-      "https://https://registry.company.com/v2/",
+      "https://registry.company.com/v2/",
       Object {
         "throwHttpErrors": false,
-      },
-    ],
-    Array [
-      "https://https://registry.company.com/v2/library/node/manifests/1.0.0",
-      Object {
-        "headers": Object {
-          "accept": "application/vnd.docker.distribution.manifest.v2+json",
-        },
-        "timeout": 10000,
       },
     ],
   ],
@@ -326,16 +317,7 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
     },
     Object {
       "isThrow": false,
-      "value": Object {
-        "headers": Object {},
-      },
-    },
-    Object {
-      "isThrow": false,
-      "value": Object {
-        "body": Object {},
-        "headers": Object {},
-      },
+      "value": undefined,
     },
   ],
 }
@@ -354,6 +336,21 @@ Array [
     Object {
       "headers": Object {},
       "json": true,
+      "timeout": 10000,
+    },
+  ],
+  Array [
+    "https://registry.company.com/v2/",
+    Object {
+      "throwHttpErrors": false,
+    },
+  ],
+  Array [
+    "https://registry.company.com/v2/node/manifests/1.0.0",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      },
       "timeout": 10000,
     },
   ],
