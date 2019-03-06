@@ -106,6 +106,9 @@ describe('semver.matches()', () => {
   });
 });
 describe('semver.getNewValue()', () => {
+  it('returns pinned toVersion', () => {
+    expect(semver.getNewValue('~1.0', 'pin', '1.0', 'V1.1')).toEqual('V1.1');
+  });
   it('returns toVersion', () => {
     expect(semver.getNewValue('v1.0', 'replace', '1.0', '1.1')).toEqual('v1.1');
   });

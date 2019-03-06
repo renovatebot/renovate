@@ -5,7 +5,7 @@ description: How to edit Renovate's config templates
 
 # Config Template Editing
 
-Tnis document describes how you can edit the branch names, commit messages, or PR titles and content.
+This document describes how you can edit the branch names, commit messages, or PR titles and content.
 
 ## Branch Name
 
