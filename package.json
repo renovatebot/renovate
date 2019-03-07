@@ -190,7 +190,9 @@
     "setupFiles": [
       "./test/globals.js"
     ],
-    "setupTestFrameworkScriptFile": "./test/chai.js",
+    "setupFilesAfterEnv": [
+      "./test/chai.js"
+    ],
     "snapshotSerializers": [
       "./test/newline-snapshot-serializer.js"
     ]
