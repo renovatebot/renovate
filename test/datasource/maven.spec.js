@@ -33,6 +33,7 @@ const config = {
 
 describe('datasource/maven', () => {
   beforeEach(() => {
+    nock.disableNetConnect();
     nock('http://central.maven.org')
       .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(200, MYSQL_MAVEN_METADATA);
@@ -44,9 +45,16 @@ describe('datasource/maven', () => {
     nock('http://failed_repo')
       .get('/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(404, null);
+    nock('http://unauthorized_repo')
+      .get('/mysql/mysql-connector-java/maven-metadata.xml')
+      .reply(403, null);
     nock('http://empty_repo')
       .get('/mysql/mysql-connector-java/maven-metadata.xml')
       .reply(200, 'non-sense');
+  });
+
+  afterEach(() => {
+    nock.enableNetConnect();
   });
 
   describe('getPkgReleases', () => {
@@ -113,6 +121,7 @@ describe('datasource/maven', () => {
         registryUrls: [
           'http://central.maven.org/maven2/',
           'http://failed_repo/',
+          'http://unauthorized_repo/',
           'http://dns_error_repo',
           'http://empty_repo',
         ],

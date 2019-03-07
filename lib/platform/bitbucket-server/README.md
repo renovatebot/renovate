@@ -10,7 +10,6 @@ Bitbucket Server support is considered in "alpha" release status. There are no k
 ## Features awaiting implementation
 
 - Creating issues not implemented yet, used to alert users when there is a config error
-- Adding reviewers to PRs not implemented yet
 - Adding comments to PRs not implemented yet, e.g. when a PR has been edited or has a lockfile error
 
 ## Testing

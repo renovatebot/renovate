@@ -32,6 +32,36 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(3);
       expect(errors).toMatchSnapshot();
     });
+    it('included unsupported manager', async () => {
+      const config = {
+        packageRules: [
+          {
+            managers: ['foo'],
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
+    });
+    it('included managers of the wrong type', async () => {
+      const config = {
+        packageRules: [
+          {
+            managers: 'string not an array',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+      expect(errors).toMatchSnapshot();
+    });
     it('errors for all types', async () => {
       const config = {
         allowedVersions: 'foo',
