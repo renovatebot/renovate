@@ -44,7 +44,7 @@ Unlikely
 
 #### Can package files have "local" links to each other that need to be resolved?
 
-No
+There can be local links, but they don't need to be resolved.
 
 #### Is there reason why package files need to be parsed together (in serial) instead of independently?
 
@@ -96,7 +96,7 @@ Cocoapods supports dependencies from git source and local path.
 
 #### What versioning scheme do the package files use?
 
-Package file use semver 2.0
+Package file use [Ruby-compatible semver 2.0](https://guides.cocoapods.org/using/the-podfile.html#specifying-pod-versions)
 
 ---
 
@@ -139,7 +139,7 @@ Also, all podspec are stored in one [repo](https://github.com/CocoaPods/Specs)
 
 #### Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?
 
-User can specify a different location of the source. The official CocoaPods source is implicit. More details here
+User can specify a different location of the source. The official CocoaPods source is implicit.
 
 ```
 source 'https://github.com/artsy/Specs.git'
@@ -150,13 +150,13 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 #### Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?
 
-Cocoapods supports only mac platform.
+Cocoapods supports only mac platform but there can be different target OSes.
 
 ---
 
 #### Will users need the ability to configure language or other constraints using Renovate config?
 
-I would add an option to check dependencies with only specific swift version.
+No
 
 ## Artifacts
 
@@ -210,6 +210,8 @@ target 'MyApp' do
   pod 'SwiftyJSON', '~> 2.3'
 end
 ```
+
+[Syntax](https://guides.cocoapods.org/syntax/podspec.html#deployment_target)
 
 After that you can install dependencies in your project by runing `pod install`
 
