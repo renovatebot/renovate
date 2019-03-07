@@ -6,6 +6,12 @@
 
 ---
 
+#### Implementation status
+
+Beta
+
+---
+
 #### What language does this support?
 
 Rust

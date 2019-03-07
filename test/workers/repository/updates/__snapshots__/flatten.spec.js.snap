@@ -27,7 +27,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -44,6 +43,7 @@ Array [
     "npmrc": null,
     "packageFile": "package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -125,7 +125,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -142,6 +141,7 @@ Array [
     "npmrc": null,
     "packageFile": "package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -221,7 +221,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -237,6 +236,7 @@ Array [
     "npmrc": null,
     "packageFile": "package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -321,7 +321,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -338,6 +337,7 @@ Array [
     "npmrc": null,
     "packageFile": "backend/package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -417,7 +417,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -433,6 +432,7 @@ Array [
     "npmrc": null,
     "packageFile": "backend/package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -517,7 +517,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -534,6 +533,7 @@ Array [
     "npmrc": null,
     "packageFile": "frontend/package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -615,7 +615,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}} Docker tags",
@@ -632,6 +631,7 @@ Array [
     "npmrc": null,
     "packageFile": "Dockerfile",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -713,7 +713,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}} Docker tags",
@@ -730,6 +729,7 @@ Array [
     "npmrc": null,
     "packageFile": "Dockerfile",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",

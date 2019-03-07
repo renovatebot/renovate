@@ -247,8 +247,6 @@ Configuration added here applies for all Go-related updates, however currently t
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
-## gomodTidy
-
 ## gradle
 
 Configuration for Java gradle projects
@@ -669,6 +667,10 @@ Warning: `setup.py` support is currently in beta, so is not enabled by default. 
 Add configuration here to change pipenv settings, e.g. to change the file pattern for pipenv so that you can use filenames other than Pipfile.
 
 Warning: 'pipenv' support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}" to enable.
+
+## postUpdateOptions
+
+`gomodTidy`: Enable to run `go mod tidy` after Go module updates
 
 ## prBodyColumns
 
