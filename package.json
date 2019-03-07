@@ -86,7 +86,7 @@
     "chalk": "2.4.2",
     "changelog-filename-regex": "2.0.1",
     "child-process-promise": "2.2.1",
-    "clean-git-ref": "1.0.3",
+    "clean-git-ref": "2.0.1",
     "commander": "2.19.0",
     "compare-versions": "3.4.0",
     "conventional-commits-detector": "1.0.2",
