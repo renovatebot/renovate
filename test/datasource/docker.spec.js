@@ -198,6 +198,10 @@ describe('api/docker', () => {
         headers: {},
       });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const config = {
         datasource: 'docker',
         depName: 'node',
@@ -233,6 +237,10 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases({
         datasource: 'docker',
         depName: 'node',
@@ -250,6 +258,10 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases({
         datasource: 'docker',
         depName: 'docker.io/node',
@@ -267,6 +279,10 @@ describe('api/docker', () => {
       });
       got.mockReturnValueOnce({ headers: {}, body: { token: 'some-token ' } });
       got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      got.mockReturnValueOnce({
+        headers: {},
+      });
+      got.mockReturnValueOnce({ headers: {}, body: {} });
       const res = await getPkgReleases({
         datasource: 'docker',
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
