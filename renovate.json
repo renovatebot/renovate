@@ -9,7 +9,7 @@
     ":assignee(rarkins)"
   ],
   "postUpdateOptions": [
-    "yarnDedupeHighest
+    "yarnDedupeHighest"
   ],
   "semanticCommitScope": "deps",
   "docker": {
