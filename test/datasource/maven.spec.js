@@ -114,6 +114,17 @@ describe('datasource/maven', () => {
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
 
+    it('should return all versions of a specific library for http repositories when config included credentials', async () => {
+      const releases = await datasource.getPkgReleases({
+        ...config,
+        username: 'username_placeholder',
+        password: 'passwor_placeholder',
+        lookupName: 'mysql:mysql-connector-java',
+        registryUrls: ['http://central.maven.org/maven2/'],
+      });
+      expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
+    });
+
     it('should return all versions of a specific library if a repository fails', async () => {
       const releases = await datasource.getPkgReleases({
         ...config,
