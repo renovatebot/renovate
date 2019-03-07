@@ -121,6 +121,9 @@ Object {
   "patch": Object {
     "automerge": true,
   },
+  "postUpdateOptions": Array [
+    "gomodTidy",
+  ],
   "prTitle": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some pr title",
   "rangeStrategy": "bump",
   "schedule": "on the first day of the month",
