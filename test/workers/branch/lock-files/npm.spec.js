@@ -17,13 +17,18 @@ describe('generateLockFile', () => {
       stdout: '',
       stderror: '',
     });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
     fs.readFile = jest.fn(() => 'package-lock-contents');
     const skipInstalls = true;
+    const postUpdateOptions = ['npmDedupe'];
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
       'package-lock.json',
-      skipInstalls
+      { skipInstalls, postUpdateOptions }
     );
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.error).not.toBeDefined();
@@ -48,8 +53,7 @@ describe('generateLockFile', () => {
       'some-dir',
       {},
       'package-lock.json',
-      skipInstalls,
-      null,
+      { skipInstalls },
       updates
     );
     expect(fs.readFile.mock.calls.length).toEqual(1);
@@ -69,8 +73,7 @@ describe('generateLockFile', () => {
       'some-dir',
       {},
       'package-lock.json',
-      skipInstalls,
-      binarySource
+      { skipInstalls, binarySource }
     );
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.error).not.toBeDefined();

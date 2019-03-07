@@ -670,7 +670,10 @@ Warning: 'pipenv' support is currently in beta, so it is not enabled by default.
 
 ## postUpdateOptions
 
-`gomodTidy`: Enable to run `go mod tidy` after Go module updates
+`gomodTidy`: Run `go mod tidy` after Go module updates
+`npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
+`yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
+`yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
 
 ## prBodyColumns
 
