@@ -6,6 +6,12 @@ Cocoapods
 
 ---
 
+#### Implementation status
+
+Unimplemented
+
+---
+
 #### What language does this support?
 
 Swift, Objective-C
