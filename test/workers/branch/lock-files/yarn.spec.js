@@ -17,8 +17,20 @@ describe('generateLockFile', () => {
       stdout: '',
       stderror: '',
     });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const res = await yarnHelper.generateLockFile('some-dir');
+    const env = {};
+    const config = {
+      postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', env, config);
     expect(fs.readFile.mock.calls.length).toEqual(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });

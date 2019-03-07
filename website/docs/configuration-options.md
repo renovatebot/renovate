@@ -152,8 +152,6 @@ This is used to manually restrict which versions are possible to upgrade to base
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
-## dedupe
-
 ## description
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
@@ -672,7 +670,10 @@ Warning: 'pipenv' support is currently in beta, so it is not enabled by default.
 
 ## postUpdateOptions
 
-`gomodTidy`: Enable to run `go mod tidy` after Go module updates
+`gomodTidy`: Run `go mod tidy` after Go module updates
+`npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
+`yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
+`yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
 
 ## prBodyColumns
 
