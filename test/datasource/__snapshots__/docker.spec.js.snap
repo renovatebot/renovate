@@ -47,7 +47,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {
           "www-authenticate": "Bearer realm=\\"https://auth.docker.io/token\\",service=\\"registry.docker.io\\",scope=\\"repository:library/node:pull  \\"",
@@ -55,7 +55,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "token": "some-token ",
@@ -64,7 +64,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "tags": Array [
@@ -75,13 +75,13 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {},
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {},
         "headers": Object {},
@@ -138,7 +138,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {
           "www-authenticate": "Bearer realm=\\"https://auth.docker.io/token\\",service=\\"registry.docker.io\\",scope=\\"repository:library/node:pull  \\"",
@@ -146,7 +146,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "token": "some-token ",
@@ -155,7 +155,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "tags": Array [
@@ -166,13 +166,13 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {},
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {},
         "headers": Object {},
@@ -229,7 +229,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {
           "www-authenticate": "Bearer realm=\\"https://k8s.gcr.io/v2/token\\",service=\\"k8s.gcr.io\\"",
@@ -237,7 +237,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "token": "some-token ",
@@ -246,7 +246,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "tags": Array [
@@ -257,13 +257,13 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {},
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {},
         "headers": Object {},
@@ -299,13 +299,13 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {},
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "tags": Array [
@@ -316,7 +316,7 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": undefined,
     },
   ],
