@@ -8,9 +8,7 @@
     ":masterIssueApproval",
     ":assignee(rarkins)"
   ],
-  "postUpdateOptions": [
-    "yarnDedupeHighest"
-  ],
+  "postUpdateOptions": ["yarnDedupeHighest"],
   "semanticCommitScope": "deps",
   "docker": {
     "pinDigests": true,
