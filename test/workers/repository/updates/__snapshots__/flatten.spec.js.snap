@@ -52,7 +52,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -150,7 +150,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -245,7 +245,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -346,7 +346,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -441,7 +441,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -542,7 +542,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
