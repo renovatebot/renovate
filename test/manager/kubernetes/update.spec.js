@@ -27,8 +27,7 @@ describe('manager/kubernetes/update', () => {
     it('returns same', () => {
       const upgrade = {
         lineNumber: 46,
-        dockerRegistry: 'k8s.gcr.io',
-        depName: 'kube-proxy-amd64',
+        depName: 'k8s.gcr.io/kube-proxy-amd64',
         newValue: 'v1.11.1',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
@@ -49,8 +48,7 @@ describe('manager/kubernetes/update', () => {
     it('replaces image inside YAML array', () => {
       const upgrade = {
         lineNumber: 14,
-        dockerRegistry: 'quay.io',
-        depName: 'external_storage/local-volume-provisioner',
+        depName: 'quay.io/external_storage/local-volume-provisioner',
         newValue: 'v2.2.0',
       };
       const res = dcUpdate.updateDependency(arraySyntaxFile, upgrade);

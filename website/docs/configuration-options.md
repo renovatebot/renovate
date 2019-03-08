@@ -116,9 +116,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 ## commitMessage
 
-The commit message is less important than branchName so you may override it if you wish.
-
-Example commit message: "chore(deps): Update dependency eslint to version 4.0.1"
+Editing of `commitMessage` directly is now deprecated and not recommended. Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
 
 ## commitMessageAction
 
@@ -231,6 +229,12 @@ See https://renovatebot.com/docs/config-presets for details.
 
 The primary use case for this option is if you are following a pre-release tag of a certain dependency, e.g. `typescript` "insiders" build. When it's configured, Renovate bypasses its normal major/minor/patch logic and stable/unstable logic and simply raises a PR if the tag does not match your current version.
 
+## github-actions
+
+**Important note**: For security reasons, GitHub has blocked integrations/apps from editing GitHub Actions workflow files in _any_ branch, so this only works on GitHub if using a Personal Access Token.
+
+Add to this configuration setting if you need to override any of the GitHub Actions default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
+
 ## gitlabci
 
 Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
@@ -241,13 +245,15 @@ Configuration added here applies for all Go-related updates, however currently t
 
 ## gomod
 
-Configuration for Go Modules (`go mod`). Supercedes anything in the `go` config object.
+Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
 ## gradle
 
 Configuration for Java gradle projects
 
 ## gradle-wrapper
+
+Configuration for Gradle Wrapper updates. Changes here affect how Renovate updates the version of gradle in the wrapper, not how it uses the wrapper.
 
 ## group
 
@@ -302,17 +308,30 @@ There may be times where an `.npmrc` file in your repository causes problems, su
 
 ## ignorePaths
 
-Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want kept up to date.
+Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering. For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
+
+## ignorePresets
+
+Use this if you are extending a complex preset but won't want to use every "sub preset" that it uses. For example, take this config:
+
+```json
+{
+  "extends": ["config:base"],
+  "ignorePresets": [":prHourlyLimit2"]
+}
+```
+
+It would take the entire "config:base" preset - which contains a lot of sub-presets - but ignore the ":prHourlyLimit2" rule.
 
 ## ignoreUnstable
 
-By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same major.minor.patch and was _already_ unstable (e.g. it was already on `4.0.0-rc2`). Renovate will not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will upate you to `4.0.0` only. If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
+By default, Renovate won't update any package versions to unstable versions (e.g. `4.0.0-rc3`) unless the current version has the same major.minor.patch and was _already_ unstable (e.g. it was already on `4.0.0-rc2`). Renovate will not "jump" unstable versions automatically, e.g. if you are on `4.0.0-rc2` and newer versions `4.0.0` and `4.1.0-alpha.1` exist then Renovate will update you to `4.0.0` only. If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
 
 ## includeForks
 
-By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`.
+By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`. If you are using the hosted Renovate application then you need to add a `renovate.json` to your forked repo manually, and include `"includeForks": true` inside.
 
 ## includePaths
 
@@ -396,6 +415,8 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
 
+## maven
+
 ## meteor
 
 Set enabled to `true` to enable meteor package updating.
@@ -408,7 +429,7 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 Using this configuration option allows you to apply common configuration and policies across all Node.js version updates even if managed by different package managers (`npm`, `yarn`, etc.).
 
-Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehsneive explanation of how the `node` option can be used.
+Check out our [Node.js documentation](https://renovatebot.com/docs/node) for a comprehensive explanation of how the `node` option can be used.
 
 ## npm
 
@@ -483,7 +504,7 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
 
 ### allowedVersions
 
-Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could defined this to be `<= 1.5` or `< 1.6.0`:
+Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
 
 ```
   "packageRules": [{
@@ -518,7 +539,7 @@ Use this field if you want to have one or more package name patterns excluded in
 ```
   "packageRules": [{
     "packagePatterns": ["^eslint"],
-    "excludePackageNames": ["^eslint-foo"]
+    "excludePackagePatterns": ["^eslint-foo"]
   }]
 ```
 
@@ -571,7 +592,7 @@ Use this field if you want to have one or more package names patterns in your pa
 
 ```
   "packageRules": [{
-    "packageNames": ["^angular"],
+    "packagePatterns": ["^angular"],
     "rangeStrategy": "replace"
   }]
 ```
@@ -646,6 +667,13 @@ Warning: `setup.py` support is currently in beta, so is not enabled by default. 
 Add configuration here to change pipenv settings, e.g. to change the file pattern for pipenv so that you can use filenames other than Pipfile.
 
 Warning: 'pipenv' support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}" to enable.
+
+## postUpdateOptions
+
+`gomodTidy`: Run `go mod tidy` after Go module updates
+`npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
+`yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
+`yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
 
 ## prBodyColumns
 
@@ -758,6 +786,7 @@ Behaviour:
 - `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise 'replace' for updates out of range
 
 Renovate's "auto" strategy works like this for npm:
 
@@ -781,7 +810,7 @@ On GitHub it is possible to add a label to a PR to manually request Renovate to 
 
 ## rebaseStalePrs
 
-This field is defaulted to `null` because it has a potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
+This field defaults to `null` because it has the potential to create a lot of noise and additional builds to your repository. If you enable it to true, it means each Renovate branch will be updated whenever the base branch has changed. If enabled, this also means that whenever a Renovate PR is merged (whether by automerge or manually via GitHub web) then any other existing Renovate PRs will then need to get rebased and retested.
 
 If you set it to `false` then that will take precedence - it means Renovate will ignore if you have configured the repository for "Require branches to be up to date before merging" in Branch Protection. However if you have configured it to `false` _and_ configured `branch` automerge then Renovate will still rebase as necessary for that.
 

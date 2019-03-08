@@ -1,23 +1,9 @@
-{
-  "current": {
-    "dependencies": [
-    ],
-    "count": 0
-  },
-  "exceeded": {
-    "dependencies": [
-    ],
-    "count": 0
-  },
-  "outdated": {
-    "dependencies": [
-    ],
-    "count": 0
-  },
-  "unresolved": {
-    "dependencies": [
-    ],
-    "count": 0
-  },
-  "count": 0
-}
+[
+  {
+    "project": "telegram-images",
+    "repositories": [
+      "https://repo.maven.apache.org/maven2/",
+      "https://jitpack.io"
+    ]
+  }
+]

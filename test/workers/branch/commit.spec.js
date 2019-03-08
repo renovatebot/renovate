@@ -13,7 +13,7 @@ describe('workers/branch/automerge', () => {
         semanticCommitType: 'a',
         semanticCommitScope: 'b',
         updatedPackageFiles: [],
-        updatedLockFiles: [],
+        updatedArtifacts: [],
       };
       jest.resetAllMocks();
       platform.commitFilesToBranch.mockReturnValueOnce('created');

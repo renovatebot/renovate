@@ -2,9 +2,9 @@
 
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles content change 1`] = `
 Object {
-  "lockFileErrors": Array [],
+  "artifactErrors": Array [],
   "parentBranch": undefined,
-  "updatedLockFiles": Array [],
+  "updatedArtifacts": Array [],
   "updatedPackageFiles": Array [
     Object {
       "contents": "some new content",
@@ -16,23 +16,23 @@ Object {
 
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles empty 1`] = `
 Object {
-  "lockFileErrors": Array [],
+  "artifactErrors": Array [],
   "parentBranch": undefined,
-  "updatedLockFiles": Array [],
+  "updatedArtifacts": Array [],
   "updatedPackageFiles": Array [],
 }
 `;
 
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lock file errors 1`] = `
 Object {
-  "lockFileErrors": Array [
+  "artifactErrors": Array [
     Object {
       "name": "composer.lock",
       "stderr": "some error",
     },
   ],
   "parentBranch": undefined,
-  "updatedLockFiles": Array [],
+  "updatedArtifacts": Array [],
   "updatedPackageFiles": Array [
     Object {
       "contents": "some new content",
@@ -44,9 +44,9 @@ Object {
 
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lock files 1`] = `
 Object {
-  "lockFileErrors": Array [],
+  "artifactErrors": Array [],
   "parentBranch": undefined,
-  "updatedLockFiles": Array [
+  "updatedArtifacts": Array [
     Object {
       "contents": "some contents",
       "name": "composer.json",

@@ -26,6 +26,12 @@ describe('lib/manager/pipenv/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
+    it('ignores git dependencies', () => {
+      const content =
+        '[packages]\r\nflask = {git = "https://github.com/pallets/flask.git"}\r\nwerkzeug = ">=0.14"';
+      const res = extractPackageFile(content, config).deps;
+      expect(res).toHaveLength(1);
+    });
     it('ignores invalid package names', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\n_invalid = "==1.0.0"';
       const res = extractPackageFile(content, config).deps;
@@ -43,17 +49,6 @@ describe('lib/manager/pipenv/extract', () => {
         '[packages]\r\nfoo = "==1.0.0"\r\n';
       const res = extractPackageFile(content, config).deps;
       expect(res[0].registryUrls).toEqual(['source-url', 'other-source-url']);
-    });
-    it('converts simple-API URLs to JSON-API URLs', () => {
-      const content =
-        '[[source]]\r\nurl = "https://my-pypi/foo/simple/"\r\n' +
-        '[[source]]\r\nurl = "https://other-pypi/foo/simple"\r\n' +
-        '[packages]\r\nfoo = "==1.0.0"\r\n';
-      const res = extractPackageFile(content, config).deps;
-      expect(res[0].registryUrls).toEqual([
-        'https://my-pypi/foo/pypi/',
-        'https://other-pypi/foo/pypi/',
-      ]);
     });
   });
 });

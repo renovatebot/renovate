@@ -17,9 +17,56 @@ describe('generateLockFile', () => {
       stdout: '',
       stderror: '',
     });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
     fs.readFile = jest.fn(() => 'package-lock-contents');
-    const res = await yarnHelper.generateLockFile('some-dir');
+    const env = {};
+    const config = {
+      postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', env, config);
     expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(res.lockFile).toEqual('package-lock-contents');
+  });
+  it('performs lock file updates', async () => {
+    getInstalledPath.mockReturnValueOnce('node_modules/yarn');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'package-lock-contents');
+    const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
+      { depName: 'some-dep', isLockfileUpdate: true },
+    ]);
+    expect(res.lockFile).toEqual('package-lock-contents');
+  });
+  it('detects yarnIntegrity', async () => {
+    getInstalledPath.mockReturnValueOnce('node_modules/yarn');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'package-lock-contents');
+    const config = {
+      upgrades: [{ yarnIntegrity: true }],
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+      { depName: 'some-dep', isLockfileUpdate: true },
+    ]);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('catches errors', async () => {

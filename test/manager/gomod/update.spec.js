@@ -176,5 +176,16 @@ describe('manager/gomod/update', () => {
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).toBe(null);
     });
+    it('handles +incompatible tag', () => {
+      const upgrade = {
+        depName: 'github.com/Azure/azure-sdk-for-go',
+        lineNumber: 8,
+        newValue: 'v26.0.0',
+      };
+      const res = goUpdate.updateDependency(gomod1, upgrade);
+      expect(res).not.toEqual(gomod1);
+      // Assert that the version still contains +incompatible tag.
+      expect(res.includes(upgrade.newValue + '+incompatible')).toBe(true);
+    });
   });
 });

@@ -1,7 +1,7 @@
-const got = require('got');
+const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 
-jest.mock('got');
+jest.mock('../../lib/util/got');
 
 const orbData = {
   data: {
@@ -32,11 +32,21 @@ describe('datasource/orb', () => {
       return global.renovateCache.rmAll();
     });
     it('returns null for empty result', async () => {
-      got.mockReturnValueOnce({ body: {} });
+      got.post.mockReturnValueOnce({ body: {} });
       expect(
-        await datasource.getPkgReleases(
-          'pkg:orb/hyper-expanse/library-release-workflows'
-        )
+        await datasource.getPkgReleases({
+          datasource: 'orb',
+          lookupName: 'hyper-expanse/library-release-workflows',
+        })
+      ).toBeNull();
+    });
+    it('returns null for missing orb', async () => {
+      got.post.mockReturnValueOnce({ body: { data: {} } });
+      expect(
+        await datasource.getPkgReleases({
+          datasource: 'orb',
+          lookupName: 'hyper-expanse/library-release-wonkflows',
+        })
       ).toBeNull();
     });
     it('returns null for 404', async () => {
@@ -46,9 +56,10 @@ describe('datasource/orb', () => {
         })
       );
       expect(
-        await datasource.getPkgReleases(
-          'pkg:orb/hyper-expanse/library-release-workflows'
-        )
+        await datasource.getPkgReleases({
+          datasource: 'orb',
+          lookupName: 'hyper-expanse/library-release-workflows',
+        })
       ).toBeNull();
     });
     it('returns null for unknown error', async () => {
@@ -56,18 +67,20 @@ describe('datasource/orb', () => {
         throw new Error();
       });
       expect(
-        await datasource.getPkgReleases(
-          'pkg:orb/hyper-expanse/library-release-workflows'
-        )
+        await datasource.getPkgReleases({
+          datasource: 'orb',
+          lookupName: 'hyper-expanse/library-release-workflows',
+        })
       ).toBeNull();
     });
     it('processes real data', async () => {
       got.post.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:orb/hyper-expanse/library-release-workflows'
-      );
+      const res = await datasource.getPkgReleases({
+        datasource: 'orb',
+        lookupName: 'hyper-expanse/library-release-workflows',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
@@ -76,9 +89,10 @@ describe('datasource/orb', () => {
       got.post.mockReturnValueOnce({
         body: orbData,
       });
-      const res = await datasource.getPkgReleases(
-        'pkg:orb/hyper-expanse/library-release-workflows'
-      );
+      const res = await datasource.getPkgReleases({
+        datasource: 'orb',
+        lookupName: 'hyper-expanse/library-release-workflows',
+      });
       expect(res).toMatchSnapshot();
       expect(res.homepage).toEqual('https://google.com');
     });

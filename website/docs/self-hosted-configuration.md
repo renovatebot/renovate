@@ -14,6 +14,7 @@ Be cautious when using this option - it will run Renovate over _every_ repositor
 ## binarySource
 
 Set this to 'global' if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
+Set this to 'docker' instead to use docker-based binaries.
 
 ## dryRun
 
@@ -49,10 +50,6 @@ Set it to a string specifing the transport used by Git (`https`, `http` or `ssh`
 ## logFileLevel
 
 ## logLevel
-
-## mirrorMode
-
-You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
 
 ## onboarding
 

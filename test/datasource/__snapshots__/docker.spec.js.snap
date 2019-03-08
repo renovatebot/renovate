@@ -23,17 +23,31 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
       "https://index.docker.io/v2/library/node/tags/list?n=10000",
       Object {
         "headers": Object {
-          "Accept": "application/vnd.docker.distribution.manifest.v2+json",
           "Authorization": "Bearer some-token ",
         },
         "json": true,
         "timeout": 10000,
       },
     ],
+    Array [
+      "https://index.docker.io/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
+    Array [
+      "https://index.docker.io/v2/library/node/manifests/1.0.0",
+      Object {
+        "headers": Object {
+          "accept": "application/vnd.docker.distribution.manifest.v2+json",
+        },
+        "timeout": 10000,
+      },
+    ],
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {
           "www-authenticate": "Bearer realm=\\"https://auth.docker.io/token\\",service=\\"registry.docker.io\\",scope=\\"repository:library/node:pull  \\"",
@@ -41,7 +55,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "token": "some-token ",
@@ -50,13 +64,26 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "tags": Array [
             "1.0.0",
           ],
         },
+        "headers": Object {},
+      },
+    },
+    Object {
+      "type": "return",
+      "value": Object {
+        "headers": Object {},
+      },
+    },
+    Object {
+      "type": "return",
+      "value": Object {
+        "body": Object {},
         "headers": Object {},
       },
     },
@@ -87,17 +114,31 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
       "https://index.docker.io/v2/library/node/tags/list?n=10000",
       Object {
         "headers": Object {
-          "Accept": "application/vnd.docker.distribution.manifest.v2+json",
           "Authorization": "Bearer some-token ",
         },
         "json": true,
         "timeout": 10000,
       },
     ],
+    Array [
+      "https://index.docker.io/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
+    Array [
+      "https://index.docker.io/v2/library/node/manifests/1.0.0",
+      Object {
+        "headers": Object {
+          "accept": "application/vnd.docker.distribution.manifest.v2+json",
+        },
+        "timeout": 10000,
+      },
+    ],
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {
           "www-authenticate": "Bearer realm=\\"https://auth.docker.io/token\\",service=\\"registry.docker.io\\",scope=\\"repository:library/node:pull  \\"",
@@ -105,7 +146,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "token": "some-token ",
@@ -114,13 +155,26 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "tags": Array [
             "1.0.0",
           ],
         },
+        "headers": Object {},
+      },
+    },
+    Object {
+      "type": "return",
+      "value": Object {
+        "headers": Object {},
+      },
+    },
+    Object {
+      "type": "return",
+      "value": Object {
+        "body": Object {},
         "headers": Object {},
       },
     },
@@ -151,17 +205,31 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
       "https://k8s.gcr.io/v2/kubernetes-dashboard-amd64/tags/list?n=10000",
       Object {
         "headers": Object {
-          "Accept": "application/vnd.docker.distribution.manifest.v2+json",
           "Authorization": "Bearer some-token ",
         },
         "json": true,
         "timeout": 10000,
       },
     ],
+    Array [
+      "https://k8s.gcr.io/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
+    Array [
+      "https://k8s.gcr.io/v2/kubernetes-dashboard-amd64/manifests/1.0.0",
+      Object {
+        "headers": Object {
+          "accept": "application/vnd.docker.distribution.manifest.v2+json",
+        },
+        "timeout": 10000,
+      },
+    ],
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {
           "www-authenticate": "Bearer realm=\\"https://k8s.gcr.io/v2/token\\",service=\\"k8s.gcr.io\\"",
@@ -169,7 +237,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "token": "some-token ",
@@ -178,13 +246,26 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "tags": Array [
             "1.0.0",
           ],
         },
+        "headers": Object {},
+      },
+    },
+    Object {
+      "type": "return",
+      "value": Object {
+        "headers": Object {},
+      },
+    },
+    Object {
+      "type": "return",
+      "value": Object {
+        "body": Object {},
         "headers": Object {},
       },
     },
@@ -192,33 +273,39 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
 }
 `;
 
-exports[`api/docker getPkgReleases uses custom registry 1`] = `
+exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
-      "https://https://registry.company.com/v2/",
+      "https://registry.company.com/v2/",
       Object {
         "throwHttpErrors": false,
       },
     ],
     Array [
-      "https://https://registry.company.com/v2/library/node/tags/list?n=10000",
+      "https://registry.company.com/v2/node/tags/list?n=10000",
       Object {
         "headers": Object {},
         "json": true,
         "timeout": 10000,
       },
     ],
+    Array [
+      "https://registry.company.com/v2/",
+      Object {
+        "throwHttpErrors": false,
+      },
+    ],
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "headers": Object {},
       },
     },
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Object {
         "body": Object {
           "tags": Array [
@@ -228,6 +315,44 @@ exports[`api/docker getPkgReleases uses custom registry 1`] = `
         "headers": Object {},
       },
     },
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
   ],
 }
+`;
+
+exports[`api/docker getPkgReleases uses custom registry with registryUrls 1`] = `
+Array [
+  Array [
+    "https://registry.company.com/v2/",
+    Object {
+      "throwHttpErrors": false,
+    },
+  ],
+  Array [
+    "https://registry.company.com/v2/node/tags/list?n=10000",
+    Object {
+      "headers": Object {},
+      "json": true,
+      "timeout": 10000,
+    },
+  ],
+  Array [
+    "https://registry.company.com/v2/",
+    Object {
+      "throwHttpErrors": false,
+    },
+  ],
+  Array [
+    "https://registry.company.com/v2/node/manifests/1.0.0",
+    Object {
+      "headers": Object {
+        "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      },
+      "timeout": 10000,
+    },
+  ],
+]
 `;

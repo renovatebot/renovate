@@ -6,6 +6,12 @@
 
 ---
 
+#### Implementation status
+
+Implemented
+
+---
+
 #### What language does this support?
 
 PHP

@@ -11,7 +11,7 @@ If you will contribute to the project, you should first "fork" the main project 
 
 #### Node version
 
-Renovate supports node.js versions 8 and above. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
+Renovate supports Node.js `>= 10.13.0 <11.0.0`. Use a version manager like `nvm` or `n` if you'll need to switch between versions easily.
 
 #### Install dependencies
 
@@ -22,7 +22,7 @@ We use [yarn](https://github.com/yarnpkg/yarn) so run `yarn install` to install 
 Run `yarn start`. You should see this error:
 
 ```
-FATAL: Renovate fatal error: You need to supply a GitHub token.
+Fatal error: No authentication found for platform https://api.github.com/ (github)
 ```
 
 ## Platform Account Setup
@@ -37,7 +37,7 @@ e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing
 
 #### Generate platform token
 
-Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate.
+Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate. Select **repo** scope when generating the token.
 
 #### Export platform token
 
@@ -57,6 +57,12 @@ You can run `yarn test` locally to test your code. We test all PRs using the sam
 ## Jest
 
 You can run just the Jest unit tests by running `yarn jest`. You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`. If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end. e.g. `yarn jest composer -u` would update the saved Snapshots for _all_ tests in `test/manager/composer/*`.
+
+#### Prerequisites
+
+You need to have Python with `mock` installed for all tests to pass. Version 3.7 of Python includes `mock` so that approach is recommended.
+
+You also need to make sure that you don't have a local `.npmrc` file that overrides npm's default registry.
 
 #### Coverage
 
@@ -118,6 +124,6 @@ If you wish to add one, add it to `lib/config/definitions.js` and then add docum
 It's really easy to debug Renovate using Chrome's inspect tool. Try like this:
 
 1. Open `chrome://inspect` in Chrome, then click on "Open dedicated DevTools for Node"
-2. Run `yarn debug ...` instead of `yarn start ...`
-3. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+2. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+3. Run Renovate using `yarn debug ...` instead of `yarn start ...`
 4. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
