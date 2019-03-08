@@ -280,11 +280,13 @@ Example for configuring `docker` auth:
 
 ```json
 {
-  "hostRules": {
-    "platform": "docker",
-    "username": "<some-username>",
-    "password": "<some-password>"
-  }
+  "hostRules": [
+    {
+      "platform": "docker",
+      "username": "<some-username>",
+      "password": "<some-password>"
+    }
+  ]
 }
 ```
 
