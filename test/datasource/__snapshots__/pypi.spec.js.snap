@@ -181,6 +181,7 @@ Array [
     },
     Object {
       "json": true,
+      "platform": "pypi",
     },
   ],
 ]
@@ -205,6 +206,7 @@ Array [
     },
     Object {
       "json": true,
+      "platform": "pypi",
     },
   ],
 ]
@@ -229,6 +231,7 @@ Array [
     },
     Object {
       "json": true,
+      "platform": "pypi",
     },
   ],
   Array [
@@ -248,6 +251,7 @@ Array [
     },
     Object {
       "json": true,
+      "platform": "pypi",
     },
   ],
 ]
