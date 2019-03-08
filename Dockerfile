@@ -139,4 +139,4 @@ COPY lib lib
 COPY bin bin
 
 ENTRYPOINT ["node", "/usr/src/app/lib/renovate.js"]
-CMD ["--help"]
+CMD []
