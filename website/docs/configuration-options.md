@@ -172,6 +172,8 @@ Add configuration here if you want to enable or disable something in particular 
 
 Add configuration here if you want to enable or disable something in particular for `Dockerfile` files and override the default Docker settings.
 
+## dotnet
+
 ## enabled
 
 Renovate is enabled for all packages by default, but this setting allows you to disable Renovate for specific packages, dependency types, package files, or even for the whole repository.
