@@ -58,7 +58,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('supports lock file updates mixed with regular updates', async () => {
       config.currentValue = '^0.4.0';
-      config.rangeStrategy = 'lockfile-update';
+      config.rangeStrategy = 'update-lockfile';
       config.depName = 'q';
       config.datasource = 'npm';
       config.lockedVersion = '0.4.0';

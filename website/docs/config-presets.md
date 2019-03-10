@@ -5,13 +5,18 @@ description: Renovate's support for eslint-like shareable configs
 
 # Shareable Config Presets
 
-Renovate supports an `eslint`-like approach to shareable configs, which we usually refer to as "presets". These are added/configured via the `"extends"` field in any configuration object.
+Renovate's "config presets" are a convenient way to distribute config that is reused across multiple repositories. It is similar in design to `eslint`'s shareable configs, and can be used both for whole repository configs as well as for individual rules. They are defined using the `extends` array within config and may also be nested.
+
+In short:
+
+- Browse [Renovate's default presets](https://renovatebot.com/docs/presets-default/) to find any that are useful to you
+- Publish your own if you wish to reuse them across repositories
 
 ## Goals of Preset Configs
 
 The main reason for supporting preset configs is to decrease duplication:
 
-1.  You shouldn't need copy/paste config across all your repositories
+1.  You shouldn't need copy/paste the same config across all your repositories
 2.  You shouldn't need to reinvent any config "wheels" that others have invented before
 
 A further reason was to make Renovate configuration "self-documenting", by adding the `"description"` field to all preset configs.
@@ -20,17 +25,36 @@ A further reason was to make Renovate configuration "self-documenting", by addin
 
 In order to achieve the above goals, preset configs have been implemented to allow a very modular approach - preset configs may be as small as a partial package rule or as extensive as an entire configuration, like an `eslint` config.
 
+## Preset Hosting
+
+Presets can be defined using either npm packages, or with GitHub repositories. GitLab and Bitbucket-hosted presets are yet to be implemented.
+
+The following namespace is used:
+
+- `abc`: npm package `renovate-config-abc` and preset `default`
+- `@abc`: npm package `@abc/renovate-config` and preset `default`
+- `abc:xyz`: npm package `renovate-config-abc` and preset `xyz`
+- `@abc:xyz`: npm package `@abc/renovate-config` and preset `xyz`
+- `github>abc/foo`: github repository `https://github.com/abc/foo` and preset `default`
+- `github>abc/foo:xyz`: github repository `https://github.com/abc/foo` and preset `xyz`
+- `gitlab>abc/foo`: gitlab repository `https://github.com/abc/foo` and preset `default`
+- `gitlab>abc/foo:xyz`: gitlab repository `https://github.com/abc/foo` and preset `xyz`
+
+In general, GitHub or GitLab-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs. An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
+
 ## Example configs
 
-An example of a small rule is [":preserveSemverRanges"](https://github.com/singapore/renovate-config/blob/ad65548cd1612ce1d93b2139df7d0f53b3350c3a/packages/renovate-config-default/package.json#L32-L35), which has the description "Preserve (but continue to upgrade) any existing semver ranges". It simply sets the configuration option `rangeStrategy` to `replace`.
+An example of a small rule is [":preserveSemverRanges"](https://github.com/renovatebot/presets/blob/dda2282e5a53982daea09489d622eedc174243e2/packages/renovate-config-default/package.json#L44-L47), which has the description "Preserve (but continue to upgrade) any existing semver ranges". It simply sets the configuration option `rangeStrategy` to `replace`.
 
-An example of a full config is ["config:base"](https://github.com/singapore/renovate-config/blob/master/packages/renovate-config-config/package.json#L16-L32), which is Renovate's default configuration. It mostly uses Renovate config defaults but adds a few smart customisations such as grouping monorepo packages together.
+An example of a full config is ["config:base"](https://github.com/renovatebot/presets/blob/dda2282e5a53982daea09489d622eedc174243e2/packages/renovate-config-config/package.json#L16-L36), which is Renovate's default configuration. It mostly uses Renovate config defaults but adds a few smart customisations such as grouping monorepo packages together.
 
-Special note: the `:xyz` naming convention (with `:` prefix) is a special shorthand for the [default](https://github.com/singapore/renovate-config/tree/master/packages/renovate-config-default) presets. i.e. `:xyz` is equivalent to `default:xyz`.
+Special note: the `:xyz` naming convention (with `:` prefix) is a special shorthand for the [default](https://github.com/renovatebot/presets/blob/master/packages/renovate-config-default/package.json) presets. i.e. `:xyz` is equivalent to `default:xyz`.
 
 ## How to Use Preset Configs
 
-By default, the Renovate onboarding process will suggest `["config:base]"`. A typical onboarding `renovate.json` will therefore look like this:
+By default, the Renovate App's onboarding process will suggest `["config:base]"`. If you are self hosting then you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
+
+A typical onboarding `renovate.json` will then look like this:
 
 ```json
 {
@@ -46,7 +70,7 @@ Let's say you wish to modify that default behaviour, such as to schedule Renovat
 }
 ```
 
-This makes use of the [schedules](https://github.com/singapore/renovate-config/blob/master/packages/renovate-config-schedule/package.json) presets. To see all presets published by the Renovate team then browse [https://github.com/singapore/renovate-config/tree/master/packages](https://github.com/singapore/renovate-config/tree/master/packages)
+This makes use of the [schedules](https://github.com/renovatebot/presets/blob/master/packages/renovate-config-schedule/package.json) presets. To see all presets published by the Renovate team then browse [https://github.com/renovatebot/presets/blob/master/packages](https://github.com/renovatebot/presets/tree/master/packages)
 
 ## Preset Parameters
 
@@ -83,7 +107,7 @@ If you find that you are repeating config a lot, you might consider publishing o
 
 ## How to Publish Preset Configs
 
-If you manage multiple repositories (e.g. you're a GitHub org or an active private developer) and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository. That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
+If you manage multiple repositories using Renovate and want the same custom config across all or most of them, then you might want to consider publishing your own preset config so that you can "extend" it in every applicable repository. That way when you want to change your Renovate configuration you can make the change in one location rather than having to copy/paste it to every repository individually.
 
 Let's say that your username on npm and elsewhere is "fastcore". In that case, you can choose between publishing your preset config package as `@fastcore/renovate-config` or `renovate-config-fastcore`. Let's assume you choose `renovate-config-fastcore` as the package name:
 
@@ -144,7 +168,7 @@ To host your preset config on GitLab:
 
 Using your own preset config along with private npm modules can present a chicken and egg problem. You want to configure the encrypted token just once, which means in the preset. But you also probably want the preset to be private too, so how can the other repos reference it?
 
-The answer is to host your preset using GitHub not npmjs, and make sure you have added the preset's repo to Renovate too. GitHub will then permit Renovate to access the preset repo whenever it is processing any other repos within the same account/org.
+The answer is to host your preset using GitHub or GitLab - not npmjs - and make sure you have added the preset's repo to Renovate too. GitHub will then permit Renovate to access the preset repo whenever it is processing any other repos within the same account/org.
 
 ## Contributing to presets
 
