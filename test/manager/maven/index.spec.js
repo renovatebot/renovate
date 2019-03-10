@@ -38,6 +38,28 @@ describe('manager/maven', () => {
       expect(pkg.manager).toEqual('maven');
       expect(pkg.deps).not.toBeNull();
     });
+
+    it('should use defaultRepo from config', async () => {
+      platform.getFile.mockReturnValueOnce(pomContent);
+      const config = {
+        maven: { defaultRepo: 'https://mirror.example.org/maven2' },
+      };
+      const packages = await extractAllPackageFiles(config, ['random.pom.xml']);
+      expect(packages.length).toEqual(1);
+
+      const pkg = packages[0];
+      expect(pkg.packageFile).toEqual('random.pom.xml');
+      expect(pkg.manager).toEqual('maven');
+      expect(pkg.deps).not.toBeNull();
+
+      const dep = pkg.deps[0];
+      expect(dep).not.toBeNull();
+      expect(dep.registryUrls).not.toBeNull();
+      expect(dep.registryUrls.length).toBeGreaterThanOrEqual(1);
+
+      const registryUrl = dep.registryUrls[0];
+      expect(registryUrl).toEqual('https://mirror.example.org/maven2');
+    });
   });
 
   describe('updateDependency', () => {
