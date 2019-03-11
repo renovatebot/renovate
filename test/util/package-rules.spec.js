@@ -213,6 +213,38 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+  it('filters datasources with matching datasource', () => {
+    const config = {
+      packageRules: [
+        {
+          datasources: ['orb', 'docker'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      datasource: 'orb',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('filters datasources with non-matching datasource', () => {
+    const config = {
+      packageRules: [
+        {
+          datasources: ['orb'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      datasource: 'docker',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
   it('filters updateType', () => {
     const config = {
       packageRules: [
