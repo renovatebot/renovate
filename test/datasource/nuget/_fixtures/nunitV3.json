@@ -18,6 +18,7 @@
       "title": "NUnit",
       "iconUrl": "https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png",
       "licenseUrl": "https://raw.githubusercontent.com/nunit/nunit/master/LICENSE.txt",
+      "projectUrl": "https://github.com/nunit/nunit",
       "tags": [
         "nunit",
         "test",
@@ -30,9 +31,7 @@
         "plugin",
         "addin"
       ],
-      "authors": [
-        "Charlie Poole, Rob Prouse"
-      ],
+      "authors": ["Charlie Poole, Rob Prouse"],
       "totalDownloads": 34513003,
       "verified": true,
       "versions": [
