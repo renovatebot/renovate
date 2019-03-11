@@ -8,6 +8,5 @@
 /*.log
 /.vscode
 /.idea
-package-lock.json
 
 *.pyc
