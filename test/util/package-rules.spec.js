@@ -252,7 +252,7 @@ describe('applyPackageRules()', () => {
       packageRules: [
         {
           datasources: ['orb'],
-           x: 1,
+          x: 1,
         },
       ],
     };
@@ -262,7 +262,7 @@ describe('applyPackageRules()', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
-  }); 
+  });
   it('filters branches with non-matching branch', () => {
     const config = {
       packageRules: [
