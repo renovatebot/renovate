@@ -561,6 +561,18 @@ Use this field to restrict rules to a particular language. e.g.
   }]
 ```
 
+### baseBranchList
+
+Use this field to restrict rules to a particular branch. e.g.
+
+```
+  "packageRules": [{
+    "baseBranchList": ["master"],
+    "excludePackagePatterns": ["^eslint"],
+    "enabled": false
+  }]
+```
+
 ### managers
 
 Use this field to restrict rules to a particular package manager. e.g.
