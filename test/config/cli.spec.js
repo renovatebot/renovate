@@ -35,6 +35,13 @@ describe('config/cli', () => {
       argv.push('true');
       cli.getConfig(argv).should.eql({ recreateClosed: true });
     });
+    it('throws exception for invalid boolean value', async () => {
+      argv.push('--recreate-closed');
+      argv.push('badvalue');
+      await expect(cli.getConfig(argv)).rejects.toThrow(
+        "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'"
+      );
+    });
     it('supports boolean space false', () => {
       argv.push('--recreate-closed');
       argv.push('false');
