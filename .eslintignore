@@ -1,2 +1,2 @@
 test/_fixtures
-test/datasource/*/_fixtures
+test/datasource/**/_fixtures
