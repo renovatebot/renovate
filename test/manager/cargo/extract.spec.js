@@ -1,10 +1,22 @@
 const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/cargo/extract');
 
-const cargo1toml = fs.readFileSync('test/_fixtures/cargo/Cargo.1.toml', 'utf8');
-const cargo2toml = fs.readFileSync('test/_fixtures/cargo/Cargo.2.toml', 'utf8');
-const cargo3toml = fs.readFileSync('test/_fixtures/cargo/Cargo.3.toml', 'utf8');
-const cargo4toml = fs.readFileSync('test/_fixtures/cargo/Cargo.4.toml', 'utf8');
+const cargo1toml = fs.readFileSync(
+  'test/datasource/cargo/_fixtures/Cargo.1.toml',
+  'utf8'
+);
+const cargo2toml = fs.readFileSync(
+  'test/datasource/cargo/_fixtures/Cargo.2.toml',
+  'utf8'
+);
+const cargo3toml = fs.readFileSync(
+  'test/datasource/cargo/_fixtures/Cargo.3.toml',
+  'utf8'
+);
+const cargo4toml = fs.readFileSync(
+  'test/datasource/cargo/_fixtures/Cargo.4.toml',
+  'utf8'
+);
 
 describe('lib/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {

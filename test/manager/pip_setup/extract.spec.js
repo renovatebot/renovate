@@ -6,7 +6,7 @@ const {
   // extractSetupFile,
 } = require('../../../lib/manager/pip_setup/extract');
 
-const packageFile = 'test/_fixtures/pip_setup/setup.py';
+const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
 const content = fs.readFileSync(packageFile, 'utf8');
 const config = {
   localDir: '.',

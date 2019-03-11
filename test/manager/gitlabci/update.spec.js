@@ -2,7 +2,7 @@ const fs = require('fs');
 const dcUpdate = require('../../../lib/manager/gitlabci/update');
 
 const yamlFile = fs.readFileSync(
-  'test/_fixtures/gitlabci/gitlab-ci.yaml',
+  'test/manager/gitlabci/_fixtures/gitlab-ci.yaml',
   'utf8'
 );
 

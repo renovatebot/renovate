@@ -1,8 +1,14 @@
 const fs = require('fs');
 const dcUpdate = require('../../../lib/manager/ansible/update');
 
-const yamlFile1 = fs.readFileSync('test/_fixtures/ansible/main1.yaml', 'utf8');
-const yamlFile2 = fs.readFileSync('test/_fixtures/ansible/main2.yaml', 'utf8');
+const yamlFile1 = fs.readFileSync(
+  'test/manager/ansible/_fixtures/main1.yaml',
+  'utf8'
+);
+const yamlFile2 = fs.readFileSync(
+  'test/manager/ansible/_fixtures/main2.yaml',
+  'utf8'
+);
 
 describe('manager/ansible/update', () => {
   describe('updateDependency', () => {

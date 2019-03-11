@@ -4,22 +4,22 @@ const {
 } = require('../../../lib/manager/kubernetes/extract');
 
 const kubernetesImagesFile = fs.readFileSync(
-  'test/_fixtures/kubernetes/kubernetes.yaml',
+  'test/manager/kubernetes/_fixtures/kubernetes.yaml',
   'utf8'
 );
 
 const kubernetesConfigMapFile = fs.readFileSync(
-  'test/_fixtures/kubernetes/configmap.yaml',
+  'test/manager/kubernetes/_fixtures/configmap.yaml',
   'utf8'
 );
 
 const kubernetesArraySyntaxFile = fs.readFileSync(
-  'test/_fixtures/kubernetes/array-syntax.yaml',
+  'test/manager/kubernetes/_fixtures/array-syntax.yaml',
   'utf8'
 );
 
 const otherYamlFile = fs.readFileSync(
-  'test/_fixtures/kubernetes/gitlab-ci.yaml',
+  'test/manager/kubernetes/_fixtures/gitlab-ci.yaml',
   'utf8'
 );
 

@@ -2,7 +2,7 @@ const fs = require('fs');
 const dcUpdate = require('../../../lib/manager/docker-compose/update');
 
 const yamlFile = fs.readFileSync(
-  'test/_fixtures/docker-compose/docker-compose.1.yml',
+  'test/manager/docker-compose/_fixtures/docker-compose.1.yml',
   'utf8'
 );
 

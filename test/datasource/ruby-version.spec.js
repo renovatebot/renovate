@@ -5,7 +5,7 @@ const { getPkgReleases } = require('../../lib/datasource/ruby-version');
 jest.mock('../../lib/util/got');
 
 const rubyReleasesHtml = fs.readFileSync(
-  'test/_fixtures/ruby-version/releases.html',
+  'test/datasource/ruby-version/_fixtures/releases.html',
   'utf8'
 );
 

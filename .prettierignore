@@ -9,5 +9,5 @@
 .cache
 /*.log
 package.json
-test/_fixtures/
+test/**/**/_fixtures
 bin/yarn*

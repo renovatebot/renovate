@@ -1,7 +1,10 @@
 const fs = require('fs');
 const nugetUpdater = require('../../../lib/manager/nuget/update');
 
-const csProj = fs.readFileSync('test/_fixtures/nuget/sample.csproj', 'utf8');
+const csProj = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/sample.csproj',
+  'utf8'
+);
 
 describe('manager/nuget/update', () => {
   describe('updateDependency', () => {
