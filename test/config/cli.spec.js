@@ -1,5 +1,5 @@
 const cli = require('../../lib/config/cli.js');
-const getArgv = require('../_fixtures/config/argv');
+const getArgv = require('./config/_fixtures/argv');
 
 describe('config/cli', () => {
   let argv;

@@ -8,7 +8,7 @@ jest.mock('../../../../lib/workers/repository/process/extract-update');
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../../_fixtures/config');
+  config = require('../../../config/config/_fixtures');
 });
 
 describe('workers/repository/process/index', () => {
