@@ -13,11 +13,11 @@ describe('platform/github', () => {
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
-    'test/_fixtures/github/graphql/pullrequest-1.json',
+    'test/platform/github/_fixtures/graphql/pullrequest-1.json',
     'utf8'
   );
   const graphqlClosedPullrequests = fs.readFileSync(
-    'test/_fixtures/github/graphql/pullrequests-closed.json',
+    'test/platform/github/_fixtures/graphql/pullrequests-closed.json',
     'utf8'
   );
 
