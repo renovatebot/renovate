@@ -2,7 +2,7 @@ const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/gitlabci/extract');
 
 const yamlFile = fs.readFileSync(
-  'test/_fixtures/gitlabci/gitlab-ci.yaml',
+  'test/manager/gitlabci/_fixtures/gitlab-ci.yaml',
   'utf8'
 );
 
