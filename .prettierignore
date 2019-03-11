@@ -11,4 +11,5 @@
 package.json
 test/_fixtures/
 test/datasource/**/_fixtures
+test/manager/**/_fixtures
 bin/yarn*
