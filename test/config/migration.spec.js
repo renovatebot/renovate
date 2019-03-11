@@ -18,6 +18,7 @@ describe('config/migration', () => {
         automergeMajor: false,
         automergeMinor: true,
         automergePatch: true,
+        gomodTidy: true,
         upgradeInRange: true,
         automergeType: 'branch-push',
         baseBranch: 'next',
