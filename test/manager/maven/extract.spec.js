@@ -4,7 +4,7 @@ const path = require('path');
 const { extractDependencies } = require('../../../lib/manager/maven/extract');
 
 const simpleContent = fs.readFileSync(
-  path.resolve(__dirname, `../../_fixtures/maven/simple.pom.xml`),
+  path.resolve(__dirname, `./_fixtures/simple.pom.xml`),
   'utf8'
 );
 

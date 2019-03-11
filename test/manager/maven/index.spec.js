@@ -6,7 +6,7 @@ const {
 } = require('../../../lib/manager/maven/index');
 
 const pomContent = fs.readFileSync(
-  'test/_fixtures/maven/simple.pom.xml',
+  'test/manager/maven/_fixtures/simple.pom.xml',
   'utf8'
 );
 
