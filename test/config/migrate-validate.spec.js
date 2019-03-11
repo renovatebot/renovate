@@ -3,7 +3,7 @@ const { migrateAndValidate } = require('../../lib/config/migrate-validate');
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('../_fixtures/config') };
+  config = { ...require('./config/_fixtures') };
 });
 
 describe('config/migrate-validate', () => {

@@ -4,7 +4,7 @@ const {
 } = require('../../../lib/manager/docker-compose/extract');
 
 const yamlFile = fs.readFileSync(
-  'test/_fixtures/docker-compose/docker-compose.1.yml',
+  'test/manager/docker-compose/_fixtures/docker-compose.1.yml',
   'utf8'
 );
 

@@ -5,24 +5,30 @@ const datasource = require('../../lib/datasource');
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
-const pkgListV3 = fs.readFileSync('test/_fixtures/nuget/nunitV3.json', 'utf8');
+const pkgListV3 = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV3.json',
+  'utf8'
+);
 const pkgListV3WithoutProkjectUrl = fs.readFileSync(
-  'test/_fixtures/nuget/nunitV3_withoutProjectUrl.json',
+  'test/datasource/nuget/_fixtures/nunitV3_withoutProjectUrl.json',
   'utf8'
 );
 const pkgInfoV3FromNuget = fs.readFileSync(
-  'test/_fixtures/nuget/nunitv3_nuget-org.xml',
+  'test/datasource/nuget/_fixtures/nunitv3_nuget-org.xml',
   'utf8'
 );
 
-const pkgListV2 = fs.readFileSync('test/_fixtures/nuget/nunitV2.xml', 'utf8');
+const pkgListV2 = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV2.xml',
+  'utf8'
+);
 const pkgListV2WithoutProjectUrl = fs.readFileSync(
-  'test/_fixtures/nuget/nunitV2_withoutProjectUrl.xml',
+  'test/datasource/nuget/_fixtures/nunitV2_withoutProjectUrl.xml',
   'utf8'
 );
 
 const nugetIndexV3 = fs.readFileSync(
-  'test/_fixtures/nuget/indexV3.json',
+  'test/datasource/nuget/_fixtures/indexV3.json',
   'utf8'
 );
 

@@ -3,7 +3,7 @@ const {
   extractPackageFile,
 } = require('../../../lib/manager/terraform/extract');
 
-const tf1 = fs.readFileSync('test/_fixtures/terraform/1.tf', 'utf8');
+const tf1 = fs.readFileSync('test/datasource/terraform/_fixtures/1.tf', 'utf8');
 const tf2 = `module "relative" {
   source = "../../modules/fe"
 }

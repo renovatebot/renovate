@@ -2,7 +2,7 @@ const fs = require('fs');
 const { updateDependency } = require('../../../lib/manager/bundler/update');
 
 const railsGemfile = fs.readFileSync(
-  'test/_fixtures/bundler/Gemfile.rails',
+  'test/manager/bundler/_fixtures/Gemfile.rails',
   'utf8'
 );
 

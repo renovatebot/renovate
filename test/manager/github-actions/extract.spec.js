@@ -4,7 +4,7 @@ const {
 } = require('../../../lib/manager/github-actions/extract');
 
 const workflow1 = fs.readFileSync(
-  'test/_fixtures/github-actions/main.workflow.1',
+  'test/manager/github-actions/_fixtures/main.workflow.1',
   'utf8'
 );
 

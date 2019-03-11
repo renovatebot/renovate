@@ -1,5 +1,5 @@
 const URL = require('url');
-const responses = require('../../_fixtures/bitbucket/responses');
+const responses = require('./_fixtures/responses');
 
 describe('platform/bitbucket', () => {
   let bitbucket;

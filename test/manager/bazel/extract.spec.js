@@ -2,7 +2,7 @@ const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/bazel/extract');
 
 const workspaceFile = fs.readFileSync(
-  'test/_fixtures/bazel/WORKSPACE1',
+  'test/manager/bazel/_fixtures/WORKSPACE1',
   'utf8'
 );
 

@@ -6,10 +6,14 @@ const hostRules = require('../../lib/util/host-rules');
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
-const includesJson = fs.readFileSync('test/_fixtures/packagist/includes.json');
-const beytJson = fs.readFileSync('test/_fixtures/packagist/1beyt.json');
+const includesJson = fs.readFileSync(
+  'test/datasource/packagist/_fixtures/includes.json'
+);
+const beytJson = fs.readFileSync(
+  'test/datasource/packagist/_fixtures/1beyt.json'
+);
 const mailchimpJson = fs.readFileSync(
-  'test/_fixtures/packagist/mailchimp-api.json'
+  'test/datasource/packagist/_fixtures/mailchimp-api.json'
 );
 
 describe('datasource/packagist', () => {

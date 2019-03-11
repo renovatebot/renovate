@@ -1,7 +1,10 @@
 const fs = require('fs');
 const { updateDependency } = require('../../../lib/manager/pipenv/update');
 
-const pipfile = fs.readFileSync('test/_fixtures/pipenv/Pipfile1', 'utf8');
+const pipfile = fs.readFileSync(
+  'test/manager/pipenv/_fixtures/Pipfile1',
+  'utf8'
+);
 
 describe('manager/pipenv/update', () => {
   describe('updateDependency', () => {
