@@ -4,7 +4,7 @@ const { extractPackageFile } = require('../../../lib/manager/meteor/extract');
 
 function readFixture(fixture) {
   return fs.readFileSync(
-    path.resolve(__dirname, `../../_fixtures/meteor/${fixture}`),
+    path.resolve(__dirname, `./_fixtures/${fixture}`),
     'utf8'
   );
 }
