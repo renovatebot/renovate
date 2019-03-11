@@ -14,5 +14,5 @@ test/datasource/**/_fixtures
 test/manager/**/_fixtures
 test/platform/**/_fixtures
 test/config/**/_fixtures
-
+test/workers/**/_fixtures
 bin/yarn*
