@@ -1,7 +1,7 @@
-const argv = require('../_fixtures/config/argv');
+const argv = require('./config/_fixtures/argv');
 const defaultConfig = require('../../lib/config/defaults').getConfig();
 const npm = require('../../lib/datasource/npm');
-const presetDefaults = require('../_fixtures/npm/renovate-config-default');
+const presetDefaults = require('./npm/_fixtures/renovate-config-default');
 
 npm.getPkgReleases = jest.fn(() => ({
   'renovate-config':

@@ -12,7 +12,7 @@ describe('workers/repository/process/fetch', () => {
     let config;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = require('../../../_fixtures/config');
+      config = require('../../../config/config/_fixtures');
     });
     it('handles empty deps', async () => {
       const packageFiles = {

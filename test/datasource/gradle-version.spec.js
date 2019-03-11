@@ -4,7 +4,9 @@ const datasource = require('../../lib/datasource');
 
 jest.mock('../../lib/util/got');
 
-const allResponse = fs.readFileSync('test/_fixtures/gradle-wrapper/all.json');
+const allResponse = fs.readFileSync(
+  'test/datasource/gradle-wrapper/_fixtures/all.json'
+);
 
 let config = {};
 

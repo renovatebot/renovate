@@ -10,7 +10,7 @@ describe('workers/repository/extract/index', () => {
     let config;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = { ...require('../../../_fixtures/config') };
+      config = { ...require('../../../config/config/_fixtures') };
     });
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockReturnValue([{}]);

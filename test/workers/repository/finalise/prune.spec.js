@@ -3,7 +3,7 @@ const cleanup = require('../../../../lib/workers/repository/finalise/prune');
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../../_fixtures/config');
+  config = require('../../../config/config/_fixtures');
   config.platform = 'github';
   config.errors = [];
   config.warnings = [];

@@ -3,7 +3,10 @@ const {
   extractPackageFile,
 } = require('../../../lib/manager/dockerfile/extract');
 
-const d1 = fs.readFileSync('test/_fixtures/docker/Dockerfile1', 'utf8');
+const d1 = fs.readFileSync(
+  'test/manager/dockerfile/_fixtures/Dockerfile1',
+  'utf8'
+);
 
 describe('lib/manager/dockerfile/extract', () => {
   describe('extractPackageFile()', () => {

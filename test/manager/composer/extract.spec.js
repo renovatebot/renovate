@@ -2,15 +2,15 @@ const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/composer/extract');
 
 const requirements1 = fs.readFileSync(
-  'test/_fixtures/composer/composer1.json',
+  'test/manager/composer/_fixtures/composer1.json',
   'utf8'
 );
 const requirements2 = fs.readFileSync(
-  'test/_fixtures/composer/composer2.json',
+  'test/manager/composer/_fixtures/composer2.json',
   'utf8'
 );
 const requirements3 = fs.readFileSync(
-  'test/_fixtures/composer/composer3.json',
+  'test/manager/composer/_fixtures/composer3.json',
   'utf8'
 );
 

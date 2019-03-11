@@ -19,7 +19,7 @@ const config = {
 };
 
 const updatesDependenciesReport = fsReal.readFileSync(
-  'test/_fixtures/gradle/updatesReport.json',
+  'test/datasource/gradle/_fixtures/updatesReport.json',
   'utf8'
 );
 
@@ -45,7 +45,7 @@ describe('manager/gradle', () => {
     it('should return empty if there are no dependencies', async () => {
       fs.readFile.mockReturnValue(
         fsReal.readFileSync(
-          'test/_fixtures/gradle/updatesReportEmpty.json',
+          'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
           'utf8'
         )
       );
@@ -92,7 +92,7 @@ describe('manager/gradle', () => {
 
     it('should use repositories only for current project', async () => {
       const multiProjectUpdatesReport = fsReal.readFileSync(
-        'test/_fixtures/gradle/MultiProjectUpdatesReport.json',
+        'test/datasource/gradle/_fixtures/MultiProjectUpdatesReport.json',
         'utf8'
       );
       fs.readFile.mockReturnValue(multiProjectUpdatesReport);
@@ -202,7 +202,7 @@ describe('manager/gradle', () => {
   describe('updateDependency', () => {
     it('should update an existing dependency', () => {
       const buildGradleContent = fsReal.readFileSync(
-        'test/_fixtures/gradle/build.gradle.example1',
+        'test/datasource/gradle/_fixtures/build.gradle.example1',
         'utf8'
       );
       // prettier-ignore

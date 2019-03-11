@@ -5,7 +5,7 @@ const datasource = require('../../lib/datasource');
 jest.mock('../../lib/util/got');
 
 const consulData = fs.readFileSync(
-  'test/_fixtures/terraform/registry-consul.json'
+  'test/datasource/terraform/_fixtures/registry-consul.json'
 );
 
 describe('datasource/terraform', () => {

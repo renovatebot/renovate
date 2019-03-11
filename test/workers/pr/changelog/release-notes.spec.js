@@ -7,16 +7,16 @@ const {
 } = require('../../../../lib/workers/pr/changelog/release-notes');
 
 const angularJsChangelogMd = fs.readFileSync(
-  'test/_fixtures/changelog-md/angular.js.md',
+  'test/workers/pr/_fixtures/angular.js.md',
   'utf8'
 );
 const jestChangelogMd = fs.readFileSync(
-  'test/_fixtures/changelog-md/jest.md',
+  'test/workers/pr/_fixtures/jest.md',
   'utf8'
 );
 
 const jsYamlChangelogMd = fs.readFileSync(
-  'test/_fixtures/changelog-md/js-yaml.md',
+  'test/workers/pr/_fixtures/js-yaml.md',
   'utf8'
 );
 

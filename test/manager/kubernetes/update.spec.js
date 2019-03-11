@@ -2,12 +2,12 @@ const fs = require('fs');
 const dcUpdate = require('../../../lib/manager/kubernetes/update');
 
 const yamlFile = fs.readFileSync(
-  'test/_fixtures/kubernetes/kubernetes.yaml',
+  'test/manager/kubernetes/_fixtures/kubernetes.yaml',
   'utf8'
 );
 
 const arraySyntaxFile = fs.readFileSync(
-  'test/_fixtures/kubernetes/array-syntax.yaml',
+  'test/manager/kubernetes/_fixtures/array-syntax.yaml',
   'utf8'
 );
 

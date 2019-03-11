@@ -2,16 +2,16 @@ const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/bundler/extract');
 
 const railsGemfile = fs.readFileSync(
-  'test/_fixtures/bundler/Gemfile.rails',
+  'test/manager/bundler/_fixtures/Gemfile.rails',
   'utf8'
 );
 const railsGemfileLock = fs.readFileSync(
-  'test/_fixtures/bundler/Gemfile.rails.lock',
+  'test/manager/bundler/_fixtures/Gemfile.rails.lock',
   'utf8'
 );
 
 const sourceGroupGemfile = fs.readFileSync(
-  'test/_fixtures/bundler/Gemfile.sourceGroup',
+  'test/manager/bundler/_fixtures/Gemfile.sourceGroup',
   'utf8'
 );
 
