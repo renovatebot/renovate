@@ -3,7 +3,7 @@ const path = require('path');
 const nodefile = require('../../../lib/manager/travis/update');
 
 const content = fs.readFileSync(
-  path.resolve('test/_fixtures/node/travis.yml'),
+  path.resolve('test/manager/travis/_fixtures/travis.yml'),
   'utf8'
 );
 
