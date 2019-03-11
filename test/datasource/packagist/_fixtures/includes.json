@@ -1,0 +1,2521 @@
+{
+  "packages": {
+    "guzzlehttp/guzzle": {
+      "v3.0.0": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.0.0",
+        "version_normalized": "3.0.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "d0fc839abd2e411df908c6fd0ed1379db691b1b0"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/d0fc839abd2e411df908c6fd0ed1379db691b1b0",
+          "reference": "d0fc839abd2e411df908c6fd0ed1379db691b1b0",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": "2.1.*"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2012-10-16T04:57:15+00:00",
+        "type": "library",
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.0.0",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.0.1": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.0.1",
+        "version_normalized": "3.0.1.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "993e8eb4905026bd79821d1faafca1798f7a78f3"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/993e8eb4905026bd79821d1faafca1798f7a78f3",
+          "reference": "993e8eb4905026bd79821d1faafca1798f7a78f3",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": "2.1.*"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2012-10-22T20:20:55+00:00",
+        "type": "library",
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.0.1",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.0.2": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.0.2",
+        "version_normalized": "3.0.2.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "2fdcd68fce2f3fd7cebb0d61739a41483ad557e2"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/2fdcd68fce2f3fd7cebb0d61739a41483ad557e2",
+          "reference": "2fdcd68fce2f3fd7cebb0d61739a41483ad557e2",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": "2.1.*"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2012-10-25T04:55:19+00:00",
+        "type": "library",
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.0.2",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.0.3": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.0.3",
+        "version_normalized": "3.0.3.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "20190c51e7eaec7d061afa59fb9605c02dc8bb24"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/20190c51e7eaec7d061afa59fb9605c02dc8bb24",
+          "reference": "20190c51e7eaec7d061afa59fb9605c02dc8bb24",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": "2.1.*"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2012-11-04T20:31:03+00:00",
+        "type": "library",
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.0.3",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.0.4": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.0.4",
+        "version_normalized": "3.0.4.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "d54dce1c53219c1bf17c0095e1cac04a28e3a2a6"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/d54dce1c53219c1bf17c0095e1cac04a28e3a2a6",
+          "reference": "d54dce1c53219c1bf17c0095e1cac04a28e3a2a6",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": "2.1.*"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2012-11-12T00:00:24+00:00",
+        "type": "library",
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.0.4",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.0.5": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.0.5",
+        "version_normalized": "3.0.5.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "184407e254ec806d632416a264a7d6bf5b417f4b"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/184407e254ec806d632416a264a7d6bf5b417f4b",
+          "reference": "184407e254ec806d632416a264a7d6bf5b417f4b",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": "2.1.*"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2012-11-19T00:15:33+00:00",
+        "type": "library",
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.0.5",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.0.6": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.0.6",
+        "version_normalized": "3.0.6.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "09c2a09584c455a3e049210ee7dc92f7b65f6210"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/09c2a09584c455a3e049210ee7dc92f7b65f6210",
+          "reference": "09c2a09584c455a3e049210ee7dc92f7b65f6210",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2012-12-10T05:25:04+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.0-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.0.6",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.0.7": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.0.7",
+        "version_normalized": "3.0.7.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "f31f35d1669382936861533bd0217fcf830dc9a9"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/f31f35d1669382936861533bd0217fcf830dc9a9",
+          "reference": "f31f35d1669382936861533bd0217fcf830dc9a9",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2012-12-19T23:06:35+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.0-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.0.7",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.1.0": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.1.0",
+        "version_normalized": "3.1.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "5baae799e136d399246cbf14055deed2a55d687f"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/5baae799e136d399246cbf14055deed2a55d687f",
+          "reference": "5baae799e136d399246cbf14055deed2a55d687f",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-01-14T05:09:07+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.0-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.1.0",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.1.1": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.1.1",
+        "version_normalized": "3.1.1.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "d295578db8e580ce9f7d0734535406d95123f3d6"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/d295578db8e580ce9f7d0734535406d95123f3d6",
+          "reference": "d295578db8e580ce9f7d0734535406d95123f3d6",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-01-21T05:46:09+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.1-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.1.1",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.1.2": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.1.2",
+        "version_normalized": "3.1.2.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "7901ea7d27373d0cc85eac6f6694e4c2ced90a26"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/7901ea7d27373d0cc85eac6f6694e4c2ced90a26",
+          "reference": "7901ea7d27373d0cc85eac6f6694e4c2ced90a26",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-01-28T00:07:40+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.1-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.1.2",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.2.0": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.2.0",
+        "version_normalized": "3.2.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "3a3fa1c5af3ac29b5dcb216b708ee3c48b52325e"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/3a3fa1c5af3ac29b5dcb216b708ee3c48b52325e",
+          "reference": "3a3fa1c5af3ac29b5dcb216b708ee3c48b52325e",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/common": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-02-15T01:33:10+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.1-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.2.0",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.3.0": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.3.0",
+        "version_normalized": "3.3.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "d8f28e9f48d2566e28c80ce9be67cb9c3e1449a6"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/d8f28e9f48d2566e28c80ce9be67cb9c3e1449a6",
+          "reference": "d8f28e9f48d2566e28c80ce9be67cb9c3e1449a6",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-03-04T00:41:45+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.2-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.3.0",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.3.1": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.3.1",
+        "version_normalized": "3.3.1.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "0657f36c7780fb0f95cf117da3aab15cb580fb66"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/0657f36c7780fb0f95cf117da3aab15cb580fb66",
+          "reference": "0657f36c7780fb0f95cf117da3aab15cb580fb66",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-03-10T23:05:38+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.3-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.3.1",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.4.0": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.4.0",
+        "version_normalized": "3.4.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "76f16a154659afae37a411a868e6aafc19133466"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/76f16a154659afae37a411a868e6aafc19133466",
+          "reference": "76f16a154659afae37a411a868e6aafc19133466",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-04-12T05:58:15+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.3-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.4.0",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.4.1": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.4.1",
+        "version_normalized": "3.4.1.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "938e2075f4870857f24dc3b206235dd3e0f969ae"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/938e2075f4870857f24dc3b206235dd3e0f969ae",
+          "reference": "938e2075f4870857f24dc3b206235dd3e0f969ae",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-04-16T20:56:26+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.3-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.4.1",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.4.2": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.4.2",
+        "version_normalized": "3.4.2.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "bee77d3bfdf7fa73b465a77beadde9b919f79782"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/bee77d3bfdf7fa73b465a77beadde9b919f79782",
+          "reference": "bee77d3bfdf7fa73b465a77beadde9b919f79782",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-04-29T23:55:30+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.4-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.4.2",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.4.3": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.4.3",
+        "version_normalized": "3.4.3.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "5896a1475d245993b693434bc77a33e92c7feaf5"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/5896a1475d245993b693434bc77a33e92c7feaf5",
+          "reference": "5896a1475d245993b693434bc77a33e92c7feaf5",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zend/zend-cache1": "1.12",
+          "zend/zend-log1": "1.12",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-04-30T20:31:38+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.4-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.4.3",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.5.0": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.5.0",
+        "version_normalized": "3.5.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "e97207d07d0385eac269a976628b7a5f9eeb4e07"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/e97207d07d0385eac269a976628b7a5f9eeb4e07",
+          "reference": "e97207d07d0385eac269a976628b7a5f9eeb4e07",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-05-13T20:17:47+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.5-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.5.0",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.6.0": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.6.0",
+        "version_normalized": "3.6.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "b550d534c9b668c767b6a532bd686d0942505f7a"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/b550d534c9b668c767b6a532bd686d0942505f7a",
+          "reference": "b550d534c9b668c767b6a532bd686d0942505f7a",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-05-30T07:01:25+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.6-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.6.0",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.7.0": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.7.0",
+        "version_normalized": "3.7.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "0f2aad252b9c9120743dd475b383b1b6fb54c2f3"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/0f2aad252b9c9120743dd475b383b1b6fb54c2f3",
+          "reference": "0f2aad252b9c9120743dd475b383b1b6fb54c2f3",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-06-11T00:24:07+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.7-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.7.0",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.7.1": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.7.1",
+        "version_normalized": "3.7.1.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "aa68be2fa33896c0a0a7638d5b8e3f9e1a41bfab"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/aa68be2fa33896c0a0a7638d5b8e3f9e1a41bfab",
+          "reference": "aa68be2fa33896c0a0a7638d5b8e3f9e1a41bfab",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-07-05T20:17:54+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.7-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.7.1",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.7.2": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.7.2",
+        "version_normalized": "3.7.2.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "eaef90d27bb1d682e1f6ab2d77606dc0159049e6"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/eaef90d27bb1d682e1f6ab2d77606dc0159049e6",
+          "reference": "eaef90d27bb1d682e1f6ab2d77606dc0159049e6",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-08-02T18:31:05+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.7-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.7.2",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.7.3": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.7.3",
+        "version_normalized": "3.7.3.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "0f16aad385528b5cf790392cb4a4d16cf600e944"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/0f16aad385528b5cf790392cb4a4d16cf600e944",
+          "reference": "0f16aad385528b5cf790392cb4a4d16cf600e944",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.2",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-09-08T21:09:18+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.7-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.7.3",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.7.4": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.7.4",
+        "version_normalized": "3.7.4.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "b170b028c6bb5799640e46c8803015b0f9a45ed9"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/b170b028c6bb5799640e46c8803015b0f9a45ed9",
+          "reference": "b170b028c6bb5799640e46c8803015b0f9a45ed9",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.3",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-10-02T20:47:00+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.7-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.7.4",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.8.0": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.8.0",
+        "version_normalized": "3.8.0.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "b4a3ce8c05e777fa18b802956d5d0e38ad338a69"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/b4a3ce8c05e777fa18b802956d5d0e38ad338a69",
+          "reference": "b4a3ce8c05e777fa18b802956d5d0e38ad338a69",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.3",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zendframework/zend-cache": "2.0.*",
+          "zendframework/zend-log": "2.0.*"
+        },
+        "time": "2013-12-05T23:39:20+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.8-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle\\Tests": "tests/",
+            "Guzzle": "src/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.8.0",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      },
+      "v3.8.1": {
+        "name": "guzzlehttp/guzzle",
+        "version": "v3.8.1",
+        "version_normalized": "3.8.1.0",
+        "source": {
+          "type": "git",
+          "url": "https://github.com/guzzle/guzzle.git",
+          "reference": "4de0618a01b34aa1c8c33a3f13f396dcd3882eba"
+        },
+        "dist": {
+          "type": "zip",
+          "url": "https://api.github.com/repos/guzzle/guzzle/zipball/4de0618a01b34aa1c8c33a3f13f396dcd3882eba",
+          "reference": "4de0618a01b34aa1c8c33a3f13f396dcd3882eba",
+          "shasum": ""
+        },
+        "require": {
+          "ext-curl": "*",
+          "php": ">=5.3.3",
+          "symfony/event-dispatcher": ">=2.1"
+        },
+        "replace": {
+          "guzzle/batch": "self.version",
+          "guzzle/cache": "self.version",
+          "guzzle/common": "self.version",
+          "guzzle/http": "self.version",
+          "guzzle/inflection": "self.version",
+          "guzzle/iterator": "self.version",
+          "guzzle/log": "self.version",
+          "guzzle/parser": "self.version",
+          "guzzle/plugin": "self.version",
+          "guzzle/plugin-async": "self.version",
+          "guzzle/plugin-backoff": "self.version",
+          "guzzle/plugin-cache": "self.version",
+          "guzzle/plugin-cookie": "self.version",
+          "guzzle/plugin-curlauth": "self.version",
+          "guzzle/plugin-error-response": "self.version",
+          "guzzle/plugin-history": "self.version",
+          "guzzle/plugin-log": "self.version",
+          "guzzle/plugin-md5": "self.version",
+          "guzzle/plugin-mock": "self.version",
+          "guzzle/plugin-oauth": "self.version",
+          "guzzle/service": "self.version",
+          "guzzle/stream": "self.version"
+        },
+        "require-dev": {
+          "doctrine/cache": "*",
+          "monolog/monolog": "1.*",
+          "phpunit/phpunit": "3.7.*",
+          "psr/log": "1.0.*",
+          "symfony/class-loader": "*",
+          "zendframework/zend-cache": "<2.3",
+          "zendframework/zend-log": "<2.3"
+        },
+        "time": "2014-01-28T22:29:15+00:00",
+        "type": "library",
+        "extra": {
+          "branch-alias": {
+            "dev-master": "3.8-dev"
+          }
+        },
+        "autoload": {
+          "psr-0": {
+            "Guzzle": "src/",
+            "Guzzle\\Tests": "tests/"
+          }
+        },
+        "license": ["MIT"],
+        "authors": [
+          {
+            "name": "Michael Dowling",
+            "email": "mtdowling@gmail.com",
+            "homepage": "https://github.com/mtdowling"
+          },
+          {
+            "name": "Guzzle Community",
+            "homepage": "https://github.com/guzzle/guzzle/contributors"
+          }
+        ],
+        "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+        "homepage": "http://guzzlephp.org/",
+        "keywords": [
+          "HTTP client",
+          "client",
+          "curl",
+          "framework",
+          "http",
+          "rest",
+          "web service"
+        ],
+        "support": {
+          "source": "https://github.com/guzzle/guzzle/tree/v3.8.1",
+          "issues": "https://github.com/guzzle/guzzle/issues"
+        }
+      }
+    }
+  }
+}
