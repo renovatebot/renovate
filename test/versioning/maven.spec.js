@@ -226,6 +226,10 @@ describe('versioning/maven/index', () => {
     expect(isVersion('x1.0.0')).toEqual(true);
     expect(isVersion('2.1.1.RELEASE')).toEqual(true);
     expect(isVersion('Greenwich.SR1')).toEqual(true);
+    expect(isVersion('.1')).toEqual(false);
+    expect(isVersion('1.')).toEqual(false);
+    expect(isVersion('-1')).toEqual(false);
+    expect(isVersion('1-')).toEqual(false);
   });
   it('checks if version is stable', () => {
     expect(isStable('')).toEqual(null);
