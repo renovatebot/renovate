@@ -1,4 +1,3 @@
-
 const pr = {
   id: 5,
   source: { branch: { name: 'branch' } },
@@ -36,12 +35,12 @@ module.exports = {
     username: 'nobody',
   },
   '/2.0/repositories/some/repo': repo,
-  '/2.0/repositories/some/empty': {...repo, full_name : 'some/empty'},
+  '/2.0/repositories/some/empty': { ...repo, full_name: 'some/empty' },
   '/2.0/repositories/some/empty/issues': {
     values: [],
   },
   '/2.0/repositories/some/repo/issues': {
-    values: [issue, {...issue, id:26}],
+    values: [issue, { ...issue, id: 26 }],
   },
   '/2.0/repositories/some/repo/pullrequests': {
     values: [pr],
@@ -129,9 +128,9 @@ module.exports = {
   '/2.0/repositories/some/repo/commit/master_hash/statuses': {
     values: [
       {
-        "key": "foo",
-        "state": "FAILED",
-      }
-    ]
+        key: 'foo',
+        state: 'FAILED',
+      },
+    ],
   },
 };

@@ -1,3 +1,4 @@
 test/_fixtures
 test/datasource/**/_fixtures
 test/manager/**/_fixtures
+test/platform/**/_fixtures
