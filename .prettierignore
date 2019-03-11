@@ -9,11 +9,5 @@
 .cache
 /*.log
 package.json
-test/_fixtures/
-test/datasource/**/_fixtures
-test/manager/**/_fixtures
-test/platform/**/_fixtures
-test/config/**/_fixtures
-test/workers/**/_fixtures
-test/logger/**/_fixtures
+test/**/**/_fixtures
 bin/yarn*
