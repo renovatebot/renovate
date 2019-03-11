@@ -2521,10 +2521,10 @@ extsprintf@^1.2.0:
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
   integrity sha1-4mifjzVvrWLMplo6kcXfX5VRaS8=
 
-fast-clone@1.5.8:
-  version "1.5.8"
-  resolved "https://registry.yarnpkg.com/fast-clone/-/fast-clone-1.5.8.tgz#87ed8f6bc1e5cd8738eaf9d189991be9b3291684"
-  integrity sha512-E15CBWWjMIw4hknPTemU/Pbm/0U8rPavQ30BYP/q8iQLWSRblnHClvWC/UVs17470d/6Z4uJ9EAGVAdcJVInNw==
+fast-clone@1.5.13:
+  version "1.5.13"
+  resolved "https://registry.yarnpkg.com/fast-clone/-/fast-clone-1.5.13.tgz#7fe17542ae1c872e71bf80d177d00c11f51c2ea7"
+  integrity sha512-0ez7coyFBQFjZtId+RJqJ+EQs61w9xARfqjqK0AD9vIUkSxWD4HvPt80+5evebZ1tTnv1GYKrPTipx7kOW5ipA==
 
 fast-deep-equal@^2.0.1:
   version "2.0.1"
