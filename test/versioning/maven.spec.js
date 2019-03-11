@@ -223,12 +223,13 @@ describe('versioning/maven/index', () => {
     expect(isVersion('0.1-2-sp')).toEqual(true);
     expect(isVersion('1-final')).toEqual(true);
     expect(isVersion('v1.0.0')).toEqual(true);
-    expect(isVersion('x1.0.0')).toEqual(false);
+    expect(isVersion('x1.0.0')).toEqual(true);
     expect(isVersion('2.1.1.RELEASE')).toEqual(true);
+    expect(isVersion('Greenwich.SR1')).toEqual(true);
   });
   it('checks if version is stable', () => {
     expect(isStable('')).toEqual(null);
-    expect(isStable('foobar')).toEqual(null);
+    expect(isStable('foobar')).toEqual(false);
     expect(isStable('1')).toEqual(true);
     expect(isStable('1.2')).toEqual(true);
     expect(isStable('1.2.3')).toEqual(true);
