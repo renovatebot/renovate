@@ -2,15 +2,15 @@ const fs = require('fs');
 const bkUpdate = require('../../../lib/manager/buildkite/update');
 
 const pipeline1 = fs.readFileSync(
-  'test/_fixtures/buildkite/pipeline1.yml',
+  'test/manager/buildkite/_fixtures/pipeline1.yml',
   'utf8'
 );
 const pipeline2 = fs.readFileSync(
-  'test/_fixtures/buildkite/pipeline2.yml',
+  'test/manager/buildkite/_fixtures/pipeline2.yml',
   'utf8'
 );
 const pipeline4 = fs.readFileSync(
-  'test/_fixtures/buildkite/pipeline4.yml',
+  'test/manager/buildkite/_fixtures/pipeline4.yml',
   'utf8'
 );
 

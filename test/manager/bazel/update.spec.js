@@ -6,7 +6,7 @@ const bazelfile = require('../../../lib/manager/bazel/update');
 jest.mock('got');
 
 const content = fs.readFileSync(
-  path.resolve('test/_fixtures/bazel/WORKSPACE1'),
+  path.resolve('test/manager/bazel/_fixtures/WORKSPACE1'),
   'utf8'
 );
 
