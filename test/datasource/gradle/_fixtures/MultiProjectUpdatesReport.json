@@ -1,9 +1,7 @@
 [
   {
     "project": "project1",
-    "repositories": [
-      "https://repo.maven.apache.org/maven2/"
-    ],
+    "repositories": ["https://repo.maven.apache.org/maven2/"],
     "dependencies": [
       {
         "name": "spring-boot-starter-jersey",

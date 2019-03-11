@@ -17,12 +17,12 @@ const MYSQL_VERSIONS = [
 ];
 
 const MYSQL_MAVEN_METADATA = fs.readFileSync(
-  'test/_fixtures/gradle/maven/repo1.maven.org/maven2/mysql/mysql-connector-java/maven-metadata.xml',
+  'test/datasource/gradle/_fixtures/maven/repo1.maven.org/maven2/mysql/mysql-connector-java/maven-metadata.xml',
   'utf8'
 );
 
 const MYSQL_MAVEN_MYSQL_POM = fs.readFileSync(
-  'test/_fixtures/gradle/maven/repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom',
+  'test/datasource/gradle/_fixtures/maven/repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom',
   'utf8'
 );
 
@@ -63,7 +63,7 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'unknown:unknown',
         registryUrls: [
-          'file://test/_fixtures/gradle/maven/repo1.maven.org/maven2/',
+          'file://test/datasource/gradle/_fixtures/maven/repo1.maven.org/maven2/',
         ],
       });
       expect(releases).toBeNull();
@@ -74,8 +74,8 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'org.hamcrest:hamcrest-core',
         registryUrls: [
-          'file://test/_fixtures/gradle/maven/repo1.maven.org/maven2/',
-          'file://test/_fixtures/gradle/maven/custom_maven_repo/maven2/',
+          'file://test/datasource/gradle/_fixtures/maven/repo1.maven.org/maven2/',
+          'file://test/datasource/gradle/_fixtures/maven/custom_maven_repo/maven2/',
         ],
       });
       expect(releases.releases).toEqual(
@@ -96,8 +96,8 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'mysql:mysql-connector-java',
         registryUrls: [
-          'file://test/_fixtures/gradle/maven/repo1.maven.org/maven2/',
-          'file://test/_fixtures/gradle/maven/custom_maven_repo/maven2/',
+          'file://test/datasource/gradle/_fixtures/maven/repo1.maven.org/maven2/',
+          'file://test/datasource/gradle/_fixtures/maven/custom_maven_repo/maven2/',
         ],
       });
       expect(releases.releases).toEqual(
