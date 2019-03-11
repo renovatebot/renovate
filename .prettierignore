@@ -10,4 +10,5 @@
 /*.log
 package.json
 test/_fixtures/
+test/datasource/*/_fixtures
 bin/yarn*

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const tfUpdate = require('../../../lib/manager/terraform/update');
 
-const tf1 = fs.readFileSync('test/_fixtures/terraform/1.tf', 'utf8');
+const tf1 = fs.readFileSync('test/datasource/terraform/_fixtures/1.tf', 'utf8');
 
 describe('manager/terraform/update', () => {
   describe('updateDependency', () => {
