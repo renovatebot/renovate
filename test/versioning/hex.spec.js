@@ -83,4 +83,9 @@ describe('lib/versioning/hex', () => {
       semver.getNewValue('>= 1.0.0 and <= 2.0.0', 'widen', '1.2.3', '2.0.7')
     ).toEqual('>= 1.0.0 and <= 2.0.7');
   });
+  it('handles or', () => {
+    expect(
+      semver.getNewValue('>= 1.0.0 or <= 2.0.0', 'widen', '1.2.3', '2.0.7')
+    ).toEqual('>= 1.0.0 or <= 2.0.7');
+  });
 });
