@@ -585,6 +585,17 @@ Use this field to restrict rules to a particular package manager. e.g.
   }]
 ```
 
+### datasources
+
+Use this field to restrict rules to a particular datasource. e.g.
+
+```
+  "packageRules": [{
+    "datasources": ["orb"],
+    "labels": ["circleci-orb!!"]
+  }]
+```
+
 ### matchCurrentVersion
 
 `matchCurrentVersion` can be an exact semver version or a semver range.
