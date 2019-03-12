@@ -38,7 +38,13 @@ describe('config/cli', () => {
     it('throws exception for invalid boolean value', async () => {
       argv.push('--recreate-closed');
       argv.push('badvalue');
-      await expect(cli.getConfig(argv)).rejects.toThrow(
+      let e;
+      try {
+        cli.getConfig(argv);
+      } catch (err) {
+        e = err;
+      }
+      expect(e.message).toEqual(
         "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'"
       );
     });
