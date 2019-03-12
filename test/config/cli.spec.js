@@ -35,7 +35,7 @@ describe('config/cli', () => {
       argv.push('true');
       cli.getConfig(argv).should.eql({ recreateClosed: true });
     });
-    it('throws exception for invalid boolean value', async () => {
+    it('throws exception for invalid boolean value', () => {
       argv.push('--recreate-closed');
       argv.push('badvalue');
       let e;
