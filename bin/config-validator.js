@@ -4,10 +4,14 @@ const fs = require('fs-extra');
 const { validateConfig } = require('../lib/config/validation');
 const { massageConfig } = require('../lib/config/massage');
 const { initLogger } = require('../lib/logger');
+const cache = require('../lib/workers/global/cache');
 const { configFileNames } = require('../lib/config/app-strings');
 
 initLogger();
-
+// istanbul ignore if
+if (!global.renovateCache) {
+  cache.init();
+}
 /* eslint-disable no-console */
 
 let returnVal = 0;
