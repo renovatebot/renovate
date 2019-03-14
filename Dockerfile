@@ -1,4 +1,4 @@
-FROM amd64/ubuntu:18.04@sha256:be159ff0e12a38fd2208022484bee14412680727ec992680b66cdead1ba76d19
+FROM amd64/ubuntu:18.04@sha256:f2557f94cac1cc4509d0483cb6e302da841ecd6f82eb2e91dc7ba6cfd0c580ab
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
