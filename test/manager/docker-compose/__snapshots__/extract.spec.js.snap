@@ -9,6 +9,7 @@ Array [
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
+    "depType": "stage",
     "lineNumber": 4,
   },
   Object {
@@ -19,6 +20,7 @@ Array [
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
+    "depType": "stage",
     "lineNumber": 18,
   },
   Object {
@@ -28,6 +30,7 @@ Array [
     "currentValue": "9.4.0",
     "datasource": "docker",
     "depName": "postgres",
+    "depType": "stage",
     "lineNumber": 21,
   },
   Object {
@@ -37,6 +40,7 @@ Array [
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_vote",
+    "depType": "stage",
     "lineNumber": 31,
   },
   Object {
@@ -46,6 +50,7 @@ Array [
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_result",
+    "depType": "stage",
     "lineNumber": 46,
   },
   Object {
@@ -55,6 +60,7 @@ Array [
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_worker",
+    "depType": "stage",
     "lineNumber": 62,
   },
   Object {
@@ -64,11 +70,13 @@ Array [
     "currentValue": "stable",
     "datasource": "docker",
     "depName": "dockersamples/visualizer",
+    "depType": "stage",
     "lineNumber": 79,
   },
   Object {
     "currentFrom": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "datasource": "docker",
+    "depType": "stage",
     "lineNumber": 90,
     "skipReason": "contains-variable",
   },

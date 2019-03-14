@@ -9,6 +9,7 @@ Array [
     "currentValue": "v2.1.0",
     "datasource": "docker",
     "depName": "quay.io/external_storage/local-volume-provisioner",
+    "depType": "stage",
     "lineNumber": 14,
   },
 ]
@@ -23,6 +24,7 @@ Array [
     "currentValue": "1.7.9",
     "datasource": "docker",
     "depName": "nginx",
+    "depType": "stage",
     "lineNumber": 18,
   },
   Object {
@@ -32,6 +34,7 @@ Array [
     "currentValue": "v1.11.1",
     "datasource": "docker",
     "depName": "k8s.gcr.io/kube-proxy-amd64",
+    "depType": "stage",
     "lineNumber": 46,
   },
 ]
