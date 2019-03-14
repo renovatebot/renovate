@@ -265,6 +265,30 @@ describe('workers/repository/updates/generate', () => {
         'chore(package): update dependency some-dep to v1.2.0'
       );
     });
+    it('scopes monorepo commits', () => {
+      const branch = [
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          packageFile: 'foo/package.json',
+          semanticCommits: true,
+          semanticCommitType: 'chore',
+          semanticCommitScope: '{{parentDir}}',
+          lazyGrouping: true,
+          newValue: '1.2.0',
+          isSingleVersion: true,
+          toVersion: '1.2.0',
+          foo: 1,
+          group: {
+            foo: 2,
+          },
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toEqual(
+        'chore(foo): update dependency some-dep to v1.2.0'
+      );
+    });
     it('adds commit message body', () => {
       const branch = [
         {
