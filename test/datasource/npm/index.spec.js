@@ -17,7 +17,6 @@ describe('api/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     global.repoCache = {};
-    delete global.testNpmRetries;
     global.trustLevel = 'low';
     npm.resetCache();
     npmResponse = {
@@ -52,10 +51,6 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, missingVersions);
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, missingVersions);
-    global.testNpmRetries = 1;
     const res = await npm.getPkgReleases({ lookupName: 'foobar' });
     expect(res).toBe(null);
   });
@@ -273,12 +268,8 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, 'oops');
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, 'oops');
     let e;
     try {
-      global.testNpmRetries = 1;
       await npm.getPkgReleases({ lookupName: 'foobar' });
     } catch (err) {
       e = err;
@@ -294,7 +285,6 @@ describe('api/npm', () => {
       .reply(429);
     let e;
     try {
-      global.testNpmRetries = 1;
       await npm.getPkgReleases({ lookupName: 'foobar' });
     } catch (err) {
       e = err;
@@ -307,7 +297,6 @@ describe('api/npm', () => {
       .reply(503);
     let e;
     try {
-      global.testNpmRetries = 0;
       await npm.getPkgReleases({ lookupName: 'foobar' });
     } catch (err) {
       e = err;
@@ -320,7 +309,6 @@ describe('api/npm', () => {
       .reply(408);
     let e;
     try {
-      global.testNpmRetries = 0;
       await npm.getPkgReleases({ lookupName: 'foobar' });
     } catch (err) {
       e = err;
@@ -337,7 +325,6 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200);
-    global.testNpmRetries = 2;
     const res = await npm.getPkgReleases({ lookupName: 'foobar' });
     expect(res).toMatchSnapshot();
   });
