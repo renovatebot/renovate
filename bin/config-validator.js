@@ -41,7 +41,7 @@ async function validate(desc, config, isPreset = false) {
         const jsonContent = JSON.parse(rawContent);
         await validate(file, jsonContent);
       } catch (err) {
-        console.log(`${file} is not valid JSON`);
+        console.log(`${file} is not valid Renovate config`);
         returnVal = 1;
       }
     } catch (err) {
