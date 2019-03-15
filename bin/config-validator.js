@@ -3,6 +3,7 @@
 const fs = require('fs-extra');
 const { validateConfig } = require('../lib/config/validation');
 const { massageConfig } = require('../lib/config/massage');
+const { getConfig } = require('../lib/config/file');
 const { initLogger } = require('../lib/logger');
 const cache = require('../lib/workers/global/cache');
 const { configFileNames } = require('../lib/config/app-strings');
@@ -59,6 +60,18 @@ async function validate(desc, config, isPreset = false) {
       for (const presetConfig of Object.values(pkgJson['renovate-config'])) {
         await validate('package.json > renovate-config', presetConfig, true);
       }
+    }
+  } catch (err) {
+    // ignore
+  }
+  try {
+    const fileConfig = getConfig(process.env);
+    console.log(`Validating config.js`);
+    try {
+      await validate('config.js', fileConfig);
+    } catch (err) {
+      console.log(`config.js is not valid Renovate config`);
+      returnVal = 1;
     }
   } catch (err) {
     // ignore
