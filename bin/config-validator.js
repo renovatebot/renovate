@@ -4,10 +4,14 @@ const fs = require('fs-extra');
 const { validateConfig } = require('../lib/config/validation');
 const { massageConfig } = require('../lib/config/massage');
 const { initLogger } = require('../lib/logger');
+const cache = require('../lib/workers/global/cache');
 const { configFileNames } = require('../lib/config/app-strings');
 
 initLogger();
-
+// istanbul ignore if
+if (!global.renovateCache) {
+  cache.init();
+}
 /* eslint-disable no-console */
 
 let returnVal = 0;
@@ -37,7 +41,7 @@ async function validate(desc, config, isPreset = false) {
         const jsonContent = JSON.parse(rawContent);
         await validate(file, jsonContent);
       } catch (err) {
-        console.log(`${file} is not valid JSON`);
+        console.log(`${file} is not valid Renovate config`);
         returnVal = 1;
       }
     } catch (err) {
