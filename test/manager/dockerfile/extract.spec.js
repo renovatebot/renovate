@@ -137,6 +137,21 @@ describe('lib/manager/dockerfile/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
+    it('detects ["stage"] and ["final"] deps of docker multi-stage build.', () => {
+      const res = extractPackageFile(
+        'FROM node:8.15.1-alpine as skippedfrom\nFROM golang:1.7.3 as builder\n\n# comment\nWORKDIR /go/src/github.com/alexellis/href-counter/\nRUN go get -d -v golang.org/x/net/html  \nCOPY app.go    .\nRUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .\n\nFROM alpine:latest  \nRUN apk --no-cache add ca-certificates\nWORKDIR /root/\nCOPY --from=builder /go/src/github.com/alexellis/href-counter/app .\nCMD ["./app"]\n',
+        config
+      ).deps;
+      expect(res).toMatchSnapshot();
+      const passed = [
+        res[2].depType === 'final',
+        res[1].depType === 'stage',
+        res[0].depType === 'stage',
+        res[2].lineNumber > res[1].lineNumber,
+        res[2].lineNumber > res[0].lineNumber,
+      ].every(Boolean);
+      expect(passed).toBe(true);
+    });
     it('extracts images on adjacent lines', () => {
       const res = extractPackageFile(d1, config).deps;
       expect(res).toMatchSnapshot();
