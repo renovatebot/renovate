@@ -42,48 +42,6 @@ Array [
 ]
 `;
 
-exports[`lib/manager/dockerfile/extract extractPackageFile() detects stage and final deps of docker multi-stage build 1`] = `
-Array [
-  Object {
-    "commitMessageTopic": "Node.js",
-    "currentDepTag": "node:8.15.1-alpine",
-    "currentDigest": undefined,
-    "currentFrom": "node:8.15.1-alpine",
-    "currentValue": "8.15.1-alpine",
-    "datasource": "docker",
-    "depName": "node",
-    "depType": "stage",
-    "fromPrefix": "FROM",
-    "fromSuffix": "as skippedfrom",
-    "lineNumber": 0,
-  },
-  Object {
-    "currentDepTag": "golang:1.7.3",
-    "currentDigest": undefined,
-    "currentFrom": "golang:1.7.3",
-    "currentValue": "1.7.3",
-    "datasource": "docker",
-    "depName": "golang",
-    "depType": "stage",
-    "fromPrefix": "FROM",
-    "fromSuffix": "as builder",
-    "lineNumber": 1,
-  },
-  Object {
-    "currentDepTag": "alpine:latest",
-    "currentDigest": undefined,
-    "currentFrom": "alpine:latest",
-    "currentValue": "latest",
-    "datasource": "docker",
-    "depName": "alpine",
-    "depType": "final",
-    "fromPrefix": "FROM",
-    "fromSuffix": "",
-    "lineNumber": 9,
-  },
-]
-`;
-
 exports[`lib/manager/dockerfile/extract extractPackageFile() extracts images on adjacent lines 1`] = `
 Array [
   Object {
