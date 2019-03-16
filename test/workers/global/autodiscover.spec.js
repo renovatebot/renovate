@@ -57,6 +57,6 @@ describe('lib/workers/global/autodiscover', () => {
       'another-project/another-repo',
     ]);
     const res = await autodiscoverRepositories(config);
-    expect(res.repositories).toEqual([]);
+    expect(res).toEqual(config);
   });
 });
