@@ -9,7 +9,11 @@ The below configuration options are applicable only if you are running your own 
 
 ## autodiscover
 
-Be cautious when using this option - it will run Renovate over _every_ repository that the bot account has access to.
+Be cautious when using this option - it will run Renovate over _every_ repository that the bot account has access to. To filter this list, use `autodiscoverFilter`.
+
+## autodiscoverFilter
+
+A [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern for filtering `autodiscover`ed repositories. Ex: `project/*`
 
 ## binarySource
 

@@ -34,4 +34,15 @@ describe('lib/workers/global/autodiscover', () => {
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toHaveLength(2);
   });
+  it('filters autodiscovered github repos', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = 'project/re*';
+    config.platform = 'github';
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() => ['project/repo', 'project/another-repo']);
+    const res = await autodiscoverRepositories(config);
+    expect(res.repositories).toEqual(['project/repo']);
+  });
 });
