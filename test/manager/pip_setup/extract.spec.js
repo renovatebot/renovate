@@ -49,7 +49,7 @@ describe('lib/manager/pip_setup/extract', () => {
     });
   });
   describe('getPythonAlias', () => {
-    it('returns major and minor version numbers', async () => {
+    it('returns the python alias to use', async () => {
       expect(pythonVersions.includes(await getPythonAlias())).toBeTruthy();
     });
   });
