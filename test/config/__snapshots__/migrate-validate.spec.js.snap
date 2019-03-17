@@ -12,7 +12,7 @@ Object {
   "errors": Array [
     Object {
       "depName": "Configuration Error",
-      "message": "Invalid configuration option: \`foo\`",
+      "message": "Invalid configuration option: foo",
     },
   ],
   "foo": "none",

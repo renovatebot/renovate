@@ -4,7 +4,7 @@ const meteorUpdater = require('../../../lib/manager/meteor/update');
 
 function readFixture(fixture) {
   return fs.readFileSync(
-    path.resolve(__dirname, `../../_fixtures/meteor/${fixture}`),
+    path.resolve(__dirname, `./_fixtures/${fixture}`),
     'utf8'
   );
 }

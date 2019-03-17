@@ -99,4 +99,19 @@ describe('.getArtifacts()', () => {
       await composer.getArtifacts('composer.json', [], '{}', config)
     ).toMatchSnapshot();
   });
+  it('throws for disk space', async () => {
+    platform.getFile.mockReturnValueOnce('Current composer.lock');
+    fs.outputFile = jest.fn(() => {
+      throw new Error(
+        'vendor/composer/07fe2366/sebastianbergmann-php-code-coverage-c896779/src/Report/Html/Renderer/Template/js/d3.min.js:  write error (disk full?).  Continue? (y/n/^C) '
+      );
+    });
+    let e;
+    try {
+      await composer.getArtifacts('composer.json', [], '{}', config);
+    } catch (err) {
+      e = err;
+    }
+    expect(e).toBeDefined();
+  });
 });

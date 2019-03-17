@@ -213,6 +213,72 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
+  it('filters datasources with matching datasource', () => {
+    const config = {
+      packageRules: [
+        {
+          datasources: ['orb', 'docker'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      datasource: 'orb',
+      baseBranch: 'master',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('filters branches with matching branch', () => {
+    const config = {
+      packageRules: [
+        {
+          baseBranchList: ['master', 'staging'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      datasource: 'orb',
+      baseBranch: 'master',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+  it('filters datasources with non-matching datasource', () => {
+    const config = {
+      packageRules: [
+        {
+          datasources: ['orb'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      baseBranch: 'staging',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+  it('filters branches with non-matching branch', () => {
+    const config = {
+      packageRules: [
+        {
+          baseBranchList: ['master'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      baseBranch: 'staging',
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
   it('filters updateType', () => {
     const config = {
       packageRules: [

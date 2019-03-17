@@ -4,11 +4,11 @@ const {
 } = require('../../../lib/manager/gradle-wrapper/extract');
 
 const propertiesFile1 = fs.readFileSync(
-  'test/_fixtures/gradle-wrapper/gradle-wrapper-1.properties',
+  'test/datasource/gradle-wrapper/_fixtures/gradle-wrapper-1.properties',
   'utf8'
 );
 const propertiesFile2 = fs.readFileSync(
-  'test/_fixtures/gradle-wrapper/gradle-wrapper-2.properties',
+  'test/datasource/gradle-wrapper/_fixtures/gradle-wrapper-2.properties',
   'utf8'
 );
 

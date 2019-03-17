@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 const URL = require('url');
 // eslint-disable-next-line no-unused-vars
-const responses = require('../../_fixtures/bitbucket-server/responses');
+const responses = require('./_fixtures/responses');
 
 describe('platform/bitbucket-server', () => {
   Object.entries(responses).forEach(([scenarioName, mockResponses]) => {

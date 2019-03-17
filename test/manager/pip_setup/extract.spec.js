@@ -3,10 +3,13 @@ const tmp = require('tmp-promise');
 const { relative } = require('path');
 const {
   extractPackageFile,
+  parsePythonVersion,
+  getPythonAlias,
+  pythonVersions,
   // extractSetupFile,
 } = require('../../../lib/manager/pip_setup/extract');
 
-const packageFile = 'test/_fixtures/pip_setup/setup.py';
+const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
 const content = fs.readFileSync(packageFile, 'utf8');
 const config = {
   localDir: '.',
@@ -37,6 +40,17 @@ describe('lib/manager/pip_setup/extract', () => {
           config
         )
       ).toBe(null);
+    });
+  });
+
+  describe('parsePythonVersion', () => {
+    it('returns major and minor version numbers', () => {
+      expect(parsePythonVersion('Python 2.7.15rc1')).toEqual([2, 7]);
+    });
+  });
+  describe('getPythonAlias', () => {
+    it('returns the python alias to use', async () => {
+      expect(pythonVersions.includes(await getPythonAlias())).toBeTruthy();
     });
   });
   /*

@@ -1,8 +1,14 @@
 const fs = require('fs');
 const { updateDependency } = require('../../../lib/manager/cargo/update');
 
-const cargo1toml = fs.readFileSync('test/_fixtures/cargo/Cargo.1.toml', 'utf8');
-const cargo4toml = fs.readFileSync('test/_fixtures/cargo/Cargo.4.toml', 'utf8');
+const cargo1toml = fs.readFileSync(
+  'test/datasource/cargo/_fixtures/Cargo.1.toml',
+  'utf8'
+);
+const cargo4toml = fs.readFileSync(
+  'test/datasource/cargo/_fixtures/Cargo.4.toml',
+  'utf8'
+);
 
 describe('lib/manager/cargo/update', () => {
   describe('updateDependency()', () => {

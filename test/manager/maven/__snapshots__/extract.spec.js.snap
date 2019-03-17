@@ -129,7 +129,5 @@ Object {
       ],
     },
   ],
-  "homepage": "http://example.org/index.html",
-  "sourceUrl": "http://example.org/src.git",
 }
 `;

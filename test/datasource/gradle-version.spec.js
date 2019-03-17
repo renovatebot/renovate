@@ -4,7 +4,9 @@ const datasource = require('../../lib/datasource');
 
 jest.mock('../../lib/util/got');
 
-const allResponse = fs.readFileSync('test/_fixtures/gradle-wrapper/all.json');
+const allResponse = fs.readFileSync(
+  'test/datasource/gradle-wrapper/_fixtures/all.json'
+);
 
 let config = {};
 
@@ -23,13 +25,17 @@ describe('datasource/gradle', () => {
       return global.renovateCache.rmAll();
     });
 
-    it('returns null for empty result', async () => {
+    it('throws for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
-      expect(
+      let e;
+      try {
         await datasource.getPkgReleases({
           ...config,
-        })
-      ).toBeNull();
+        });
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
 
     it('throws for 404', async () => {
@@ -49,11 +55,19 @@ describe('datasource/gradle', () => {
       expect(e).toBeDefined();
     });
 
-    it('returns null for unknown error', async () => {
+    it('throws for unknown error', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      expect(await datasource.getPkgReleases(config)).toBeNull();
+      let e;
+      try {
+        await datasource.getPkgReleases({
+          ...config,
+        });
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
 
     it('processes real data', async () => {

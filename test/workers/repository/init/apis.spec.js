@@ -7,7 +7,7 @@ describe('workers/repository/init/apis', () => {
   describe('initApis', () => {
     let config;
     beforeEach(() => {
-      config = require('../../../_fixtures/config');
+      config = require('../../../config/config/_fixtures');
       config.errors = [];
       config.warnings = [];
       config.token = 'some-token';

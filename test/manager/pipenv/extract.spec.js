@@ -1,8 +1,14 @@
 const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/pipenv/extract');
 
-const pipfile1 = fs.readFileSync('test/_fixtures/pipenv/Pipfile1', 'utf8');
-const pipfile2 = fs.readFileSync('test/_fixtures/pipenv/Pipfile2', 'utf8');
+const pipfile1 = fs.readFileSync(
+  'test/manager/pipenv/_fixtures/Pipfile1',
+  'utf8'
+);
+const pipfile2 = fs.readFileSync(
+  'test/manager/pipenv/_fixtures/Pipfile2',
+  'utf8'
+);
 
 describe('lib/manager/pipenv/extract', () => {
   describe('extractPackageFile()', () => {
