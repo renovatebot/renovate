@@ -3,6 +3,9 @@ const tmp = require('tmp-promise');
 const { relative } = require('path');
 const {
   extractPackageFile,
+  parsePythonVersion,
+  getPythonAlias,
+  pythonVersions,
   // extractSetupFile,
 } = require('../../../lib/manager/pip_setup/extract');
 
@@ -37,6 +40,17 @@ describe('lib/manager/pip_setup/extract', () => {
           config
         )
       ).toBe(null);
+    });
+  });
+
+  describe('parsePythonVersion', () => {
+    it('returns major and minor version numbers', () => {
+      expect(parsePythonVersion('Python 2.7.15rc1')).toEqual([2, 7]);
+    });
+  });
+  describe('getPythonAlias', () => {
+    it('returns major and minor version numbers', async () => {
+      expect(pythonVersions.includes(await getPythonAlias())).toBeTruthy();
     });
   });
   /*
