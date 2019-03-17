@@ -28,7 +28,7 @@ Array [
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid configuration option: \`packageRules[1].foo\`",
+    "message": "Invalid configuration option: packageRules[1].foo",
   },
   Object {
     "depName": "Configuration Error",
@@ -105,11 +105,11 @@ exports[`config/validation validateConfig(config) returns nested errors 1`] = `
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid configuration option: \`foo\`",
+    "message": "Invalid configuration option: foo",
   },
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid configuration option: \`lockFileMaintenance.bar\`",
+    "message": "Invalid configuration option: lockFileMaintenance.bar",
   },
   Object {
     "depName": "Configuration Error",
