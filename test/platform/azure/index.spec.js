@@ -335,6 +335,9 @@ describe('platform/azure', () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       azureApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [{ pullRequestId: 1234 }]),
+        getPullRequestLabels: jest.fn(() => [
+          { active: true, name: 'renovate' },
+        ]),
       }));
       azureHelper.getRenovatePRFormat.mockImplementation(() => ({
         pullRequestId: 1234,
