@@ -3,13 +3,13 @@
   "description": "Automated dependency updates. Flexible so you don't need to be.",
   "version": "0.0.0-semantic-release",
   "bin": {
-    "renovate": "lib/renovate.js",
+    "renovate": "dist/renovate.js",
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
-    "debug": "node --inspect-brk lib/renovate",
+    "debug": "tsc && node --inspect-brk dist/renovate",
     "eslint": "eslint lib test",
     "eslint-fix": "eslint --fix lib test",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
@@ -17,9 +17,9 @@
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
     "lint": "yarn eslint && yarn prettier",
     "lint-fix": "yarn eslint-fix && yarn prettier-fix",
-    "prettier": "prettier --list-different \"**/*.{js,json,md}\"",
-    "prettier-fix": "prettier --write \"**/*.{js,json,md}\"",
-    "start": "node lib/renovate",
+    "prettier": "prettier --list-different \"**/*.{ts, js,json,md}\"",
+    "prettier-fix": "prettier --write \"**/*.{ts, js,json,md}\"",
+    "start": "tsc && node dist/renovate",
     "test-dirty": "git diff --exit-code",
     "test-schema": "bash test/json-schema.sh",
     "test": "yarn lint && yarn test-schema && yarn jest"
@@ -139,6 +139,7 @@
     "toml": "3.0.0",
     "tomlify-j0.4": "3.0.0",
     "traverse": "0.6.6",
+    "typescript": "3.3.4000",
     "upath": "1.1.2",
     "validate-npm-package-name": "3.0.0",
     "validator": "10.11.0",
@@ -147,6 +148,9 @@
     "yarn": "1.15.2"
   },
   "devDependencies": {
+    "@types/bunyan": "^1.8.6",
+    "@types/jest": "24.0.11",
+    "@types/node": "11.11.6",
     "babel-plugin-transform-object-rest-spread": "7.0.0-beta.3",
     "chai": "4.2.0",
     "codecov": "3.3.0",
@@ -164,7 +168,8 @@
     "prettier": "1.17.0",
     "pretty-quick": "1.10.0",
     "semantic-release": "15.13.3",
-    "tmp-promise": "1.0.5"
+    "tmp-promise": "1.0.5",
+    "ts-jest": "24.0.0"
   },
   "resolutions": {
     "lodash": ">= 4.17.11"
@@ -203,7 +208,8 @@
     ],
     "snapshotSerializers": [
       "./test/newline-snapshot-serializer.js"
-    ]
+    ],
+    "preset": "ts-jest/presets/js-with-ts"
   },
   "publishConfig": {
     "tag": "latest"

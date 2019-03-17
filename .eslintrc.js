@@ -21,4 +21,12 @@ module.exports = {
     'promise/no-callback-in-promise': 'warn',
     'promise/avoid-new': 'warn',
   },
+  settings: {
+    'import/resolver': {
+      node: {
+        paths: ['lib'],
+        extensions: ['.js', '.ts'],
+      },
+    },
+  },
 };
