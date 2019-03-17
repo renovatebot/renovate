@@ -20,6 +20,6 @@ Hex versioning should support all range strategies - pin, replace, bump, extend.
 
 ## Implementation plan/status
 
-- [] Add hex2npm functions to leverage existing npm semver logic
-- [] Exact version support
-- [] Range support
+- [x] Add hex2npm functions to leverage existing npm semver logic
+- [x] Exact version support
+- [x] Range support

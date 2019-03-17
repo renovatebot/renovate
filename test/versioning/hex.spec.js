@@ -73,19 +73,43 @@ describe('lib/versioning/hex', () => {
       expect(semver.getNewValue('~> 1.2', 'replace', '1.2.3', '2.0.7')).toEqual(
         '~> 2.0'
       );
+      expect(semver.getNewValue('~> 1.2', 'pin', '1.2.3', '2.0.7')).toEqual(
+        '2.0.7'
+      );
+      expect(semver.getNewValue('~> 1.2', 'bump', '1.2.3', '2.0.7')).toEqual(
+        '~> 2'
+      );
       expect(
         semver.getNewValue('~> 1.2.0', 'replace', '1.2.3', '2.0.7')
       ).toEqual('~> 2.0.0');
+      expect(semver.getNewValue('~> 1.2.0', 'pin', '1.2.3', '2.0.7')).toEqual(
+        '2.0.7'
+      );
+      expect(semver.getNewValue('~> 1.2.0', 'bump', '1.2.3', '2.0.7')).toEqual(
+        '~> 2.0.7'
+      );
     });
   });
   it('handles and', () => {
     expect(
       semver.getNewValue('>= 1.0.0 and <= 2.0.0', 'widen', '1.2.3', '2.0.7')
     ).toEqual('>= 1.0.0 and <= 2.0.7');
+    expect(
+      semver.getNewValue('>= 1.0.0 and <= 2.0.0', 'replace', '1.2.3', '2.0.7')
+    ).toEqual('<= 2.0.7');
+    expect(
+      semver.getNewValue('>= 1.0.0 and <= 2.0.0', 'pin', '1.2.3', '2.0.7')
+    ).toEqual('2.0.7');
   });
   it('handles or', () => {
     expect(
       semver.getNewValue('>= 1.0.0 or <= 2.0.0', 'widen', '1.2.3', '2.0.7')
     ).toEqual('>= 1.0.0 or <= 2.0.7');
+    expect(
+      semver.getNewValue('>= 1.0.0 or <= 2.0.0', 'replace', '1.2.3', '2.0.7')
+    ).toEqual('<= 2.0.7');
+    expect(
+      semver.getNewValue('>= 1.0.0 or <= 2.0.0', 'pin', '1.2.3', '2.0.7')
+    ).toEqual('2.0.7');
   });
 });
