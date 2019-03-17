@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "outDir": "./dist",
+    "target": "es2018",
+    "allowJs": true,
+    "checkJs": false,
+    "module": "commonjs"
+  },
+  "include": ["./lib/**/*"],
+  "exclude": ["node_modules"]
+}
