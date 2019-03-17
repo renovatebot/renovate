@@ -16,6 +16,14 @@ Object {
 }
 `;
 
+exports[`platform/azure deleteLabel() Should delete a label 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
 exports[`platform/azure ensureComment add comment 1`] = `
 Array [
   Array [],

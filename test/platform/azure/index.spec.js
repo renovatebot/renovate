@@ -511,4 +511,15 @@ describe('platform/azure', () => {
       expect(res).toHaveLength(0);
     });
   });
+
+  describe('deleteLabel()', () => {
+    it('Should delete a label', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      azureApi.gitApi.mockImplementationOnce(() => ({
+        deletePullRequestLabels: jest.fn(),
+      }));
+      await azure.deleteLabel(1234, 'rebase');
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+    });
+  });
 });
