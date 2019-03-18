@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { exec } = require('child-process-promise');
 const tmp = require('tmp-promise');
 const { relative } = require('path');
 const {
@@ -51,6 +52,27 @@ describe('lib/manager/pip_setup/extract', () => {
   describe('getPythonAlias', () => {
     it('returns the python alias to use', async () => {
       expect(pythonVersions.includes(await getPythonAlias())).toBeTruthy();
+    });
+  });
+  describe('Test for presence of mock lib', () => {
+    it('should test if python mock lib is installed', async () => {
+      let isMockInstalled = true;
+      // when binarysource === docker
+      try {
+        await exec(`python -c "import mock"`);
+      } catch (err) {
+        isMockInstalled = false;
+      }
+      if (!isMockInstalled) {
+        try {
+          const pythonAlias = await getPythonAlias();
+          await exec(`${pythonAlias} -c "from unittest import mock"`);
+          isMockInstalled = true;
+        } catch (err) {
+          isMockInstalled = false;
+        }
+      }
+      expect(isMockInstalled).toBeTruthy();
     });
   });
   /*
