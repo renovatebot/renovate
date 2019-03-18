@@ -59,7 +59,7 @@ describe('lib/manager/pip_setup/extract', () => {
       let isMockInstalled = true;
       // when binarysource === docker
       try {
-        await exec(`python -c "from unittest import mock"`);
+        await exec(`python -c "import mock"`);
       } catch (err) {
         isMockInstalled = false;
       }
