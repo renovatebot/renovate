@@ -56,12 +56,21 @@ describe('lib/manager/pip_setup/extract', () => {
   });
   describe('Test for presence of mock lib', () => {
     it('should test if python mock lib is installed', async () => {
-      const pythonAlias = await getPythonAlias();
       let isMockInstalled = true;
+      // when binarysource === docker
       try {
-        await exec(`${pythonAlias} -c "from unittest import mock"`);
+        await exec(`python -c "from unittest import mock"`);
       } catch (err) {
         isMockInstalled = false;
+      }
+      if (!isMockInstalled) {
+        try {
+          const pythonAlias = await getPythonAlias();
+          await exec(`${pythonAlias} -c "from unittest import mock"`);
+          isMockInstalled = true;
+        } catch (err) {
+          isMockInstalled = false;
+        }
       }
       expect(isMockInstalled).toBeTruthy();
     });
