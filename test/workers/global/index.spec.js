@@ -25,6 +25,7 @@ describe('lib/workers/global', () => {
   });
   it('processes repositories', async () => {
     configParser.parseConfigs.mockReturnValueOnce({
+      gitAuthor: 'a@b.com',
       enabled: true,
       repositories: ['a', 'b'],
     });

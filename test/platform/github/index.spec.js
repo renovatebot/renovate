@@ -10,6 +10,7 @@ describe('platform/github', () => {
     jest.mock('../../../lib/platform/github/gh-got-wrapper');
     get = require('../../../lib/platform/github/gh-got-wrapper');
     github = require('../../../lib/platform/github');
+    delete global.gitAuthor;
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
@@ -1399,10 +1400,13 @@ describe('platform/github', () => {
       expect(pr).toBe(null);
     });
     it('should return PR from graphql result', async () => {
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovateapp.com',
+      };
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-        gitAuthor: 'bot@renovateapp.com',
       });
       get.post.mockImplementationOnce(() => ({
         body: graphqlOpenPullRequests,
@@ -1588,10 +1592,13 @@ describe('platform/github', () => {
       expect(pr).toMatchSnapshot();
     });
     it('should return a rebaseable PR if gitAuthor matches 1 commit', async () => {
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovateapp.com',
+      };
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -1626,10 +1633,13 @@ describe('platform/github', () => {
       expect(pr).toMatchSnapshot();
     });
     it('should return a not rebaseable PR if gitAuthor does not match 1 commit', async () => {
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovateapp.com',
+      };
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -2052,10 +2062,13 @@ describe('platform/github', () => {
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
     beforeEach(async () => {
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovatebot.com',
+      };
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-        gitAuthor: 'Renovate Bot <bot@renovatebot.com>',
       });
 
       // getBranchCommit
@@ -2163,6 +2176,10 @@ describe('platform/github', () => {
           contents: 'hello world',
         },
       ];
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovatebot.com',
+      };
       await github.commitFilesToBranch(
         'the-branch',
         files,
