@@ -13,11 +13,11 @@ describe('platform/github', () => {
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
-    'test/_fixtures/github/graphql/pullrequest-1.json',
+    'test/platform/github/_fixtures/graphql/pullrequest-1.json',
     'utf8'
   );
   const graphqlClosedPullrequests = fs.readFileSync(
-    'test/_fixtures/github/graphql/pullrequests-closed.json',
+    'test/platform/github/_fixtures/graphql/pullrequests-closed.json',
     'utf8'
   );
 
@@ -375,7 +375,14 @@ describe('platform/github', () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-      }); // getBranchCommit
+      });
+      get.mockImplementationOnce(() => ({
+        body: {
+          truncated: true,
+          tree: [],
+        },
+      }));
+      // getBranchCommit
       get.mockImplementationOnce(() => ({
         body: {
           object: {
@@ -394,12 +401,17 @@ describe('platform/github', () => {
         token: 'token',
       });
     });
-    it('returns empty array if error', async () => {
+    it('throws if error', async () => {
       get.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      const files = await github.getFileList('error-branch');
-      expect(files).toEqual([]);
+      let e;
+      try {
+        await github.getFileList('error-branch');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
     it('warns if truncated result', async () => {
       get.mockImplementationOnce(() => ({

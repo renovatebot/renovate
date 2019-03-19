@@ -4,10 +4,14 @@ const datasource = require('../../lib/datasource');
 
 jest.mock('../../lib/util/got');
 
-const res1 = fs.readFileSync('test/_fixtures/pypi/azure-cli-monitor.json');
-const htmlResponse = fs.readFileSync('test/_fixtures/pypi/versions-html.html');
+const res1 = fs.readFileSync(
+  'test/datasource/pypi/_fixtures/azure-cli-monitor.json'
+);
+const htmlResponse = fs.readFileSync(
+  'test/datasource/pypi/_fixtures/versions-html.html'
+);
 const badResponse = fs.readFileSync(
-  'test/_fixtures/pypi/versions-html-badfile.html'
+  'test/datasource/pypi/_fixtures/versions-html-badfile.html'
 );
 
 describe('datasource/pypi', () => {

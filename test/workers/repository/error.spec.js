@@ -5,7 +5,7 @@ jest.mock('../../../lib/workers/repository/error-config');
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../_fixtures/config');
+  config = require('../../config/config/_fixtures');
 });
 
 describe('workers/repository/error', () => {
@@ -33,6 +33,7 @@ describe('workers/repository/error', () => {
       'cannot-fork',
       'integration-unauthorized',
       'authentication-error',
+      'temporary-error',
     ];
     errors.forEach(err => {
       it(`errors ${err}`, async () => {

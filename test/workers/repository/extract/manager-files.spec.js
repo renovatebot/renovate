@@ -12,7 +12,7 @@ describe('workers/repository/extract/manager-files', () => {
     let config;
     beforeEach(() => {
       jest.resetAllMocks();
-      config = { ...require('../../../_fixtures/config') };
+      config = { ...require('../../../config/config/_fixtures') };
     });
     it('returns empty of manager is disabled', async () => {
       const managerConfig = { manager: 'travis', enabled: false };

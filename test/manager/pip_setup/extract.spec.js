@@ -1,12 +1,16 @@
 const fs = require('fs');
+const { exec } = require('child-process-promise');
 const tmp = require('tmp-promise');
 const { relative } = require('path');
 const {
   extractPackageFile,
+  parsePythonVersion,
+  getPythonAlias,
+  pythonVersions,
   // extractSetupFile,
 } = require('../../../lib/manager/pip_setup/extract');
 
-const packageFile = 'test/_fixtures/pip_setup/setup.py';
+const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
 const content = fs.readFileSync(packageFile, 'utf8');
 const config = {
   localDir: '.',
@@ -37,6 +41,38 @@ describe('lib/manager/pip_setup/extract', () => {
           config
         )
       ).toBe(null);
+    });
+  });
+
+  describe('parsePythonVersion', () => {
+    it('returns major and minor version numbers', () => {
+      expect(parsePythonVersion('Python 2.7.15rc1')).toEqual([2, 7]);
+    });
+  });
+  describe('getPythonAlias', () => {
+    it('returns the python alias to use', async () => {
+      expect(pythonVersions.includes(await getPythonAlias())).toBeTruthy();
+    });
+  });
+  describe('Test for presence of mock lib', () => {
+    it('should test if python mock lib is installed', async () => {
+      let isMockInstalled = true;
+      // when binarysource === docker
+      try {
+        await exec(`python -c "import mock"`);
+      } catch (err) {
+        isMockInstalled = false;
+      }
+      if (!isMockInstalled) {
+        try {
+          const pythonAlias = await getPythonAlias();
+          await exec(`${pythonAlias} -c "from unittest import mock"`);
+          isMockInstalled = true;
+        } catch (err) {
+          isMockInstalled = false;
+        }
+      }
+      expect(isMockInstalled).toBeTruthy();
     });
   });
   /*

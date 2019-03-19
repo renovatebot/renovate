@@ -1,7 +1,7 @@
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../../_fixtures/config');
+  config = require('../../../config/config/_fixtures');
   config.errors = [];
   config.warnings = [];
 });

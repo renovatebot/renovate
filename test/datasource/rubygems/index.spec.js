@@ -1,6 +1,6 @@
 const got = require('../../../lib/util/got');
-const railsInfo = require('../../_fixtures/rubygems/rails/info.json');
-const railsVersions = require('../../_fixtures/rubygems/rails/versions.json');
+const railsInfo = require('./_fixtures/rails/info.json');
+const railsVersions = require('./_fixtures/rails/versions.json');
 const rubygems = require('../../../lib/datasource/rubygems/index.js');
 
 jest.mock('../../../lib/util/got');

@@ -27,7 +27,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -44,6 +43,7 @@ Array [
     "npmrc": null,
     "packageFile": "package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -52,7 +52,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -95,6 +95,7 @@ Array [
       "enabled": true,
       "groupName": null,
       "masterIssueApproval": false,
+      "rangeStrategy": "update-lockfile",
       "schedule": Array [],
     },
     "warnings": Array [],
@@ -125,7 +126,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -142,6 +142,7 @@ Array [
     "npmrc": null,
     "packageFile": "package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -150,7 +151,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -193,6 +194,7 @@ Array [
       "enabled": true,
       "groupName": null,
       "masterIssueApproval": false,
+      "rangeStrategy": "update-lockfile",
       "schedule": Array [],
     },
     "warnings": Array [],
@@ -221,7 +223,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -237,6 +238,7 @@ Array [
     "npmrc": null,
     "packageFile": "package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -245,7 +247,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -291,6 +293,7 @@ Array [
       "enabled": true,
       "groupName": null,
       "masterIssueApproval": false,
+      "rangeStrategy": "update-lockfile",
       "schedule": Array [],
     },
     "warnings": Array [],
@@ -321,7 +324,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -338,6 +340,7 @@ Array [
     "npmrc": null,
     "packageFile": "backend/package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -346,7 +349,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -389,6 +392,7 @@ Array [
       "enabled": true,
       "groupName": null,
       "masterIssueApproval": false,
+      "rangeStrategy": "update-lockfile",
       "schedule": Array [],
     },
     "warnings": Array [],
@@ -417,7 +421,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -433,6 +436,7 @@ Array [
     "npmrc": null,
     "packageFile": "backend/package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -441,7 +445,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -487,6 +491,7 @@ Array [
       "enabled": true,
       "groupName": null,
       "masterIssueApproval": false,
+      "rangeStrategy": "update-lockfile",
       "schedule": Array [],
     },
     "warnings": Array [],
@@ -517,7 +522,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}}",
@@ -534,6 +538,7 @@ Array [
     "npmrc": null,
     "packageFile": "frontend/package.json",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -542,7 +547,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "[{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -585,6 +590,7 @@ Array [
       "enabled": true,
       "groupName": null,
       "masterIssueApproval": false,
+      "rangeStrategy": "update-lockfile",
       "schedule": Array [],
     },
     "warnings": Array [],
@@ -615,7 +621,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}} Docker tags",
@@ -632,6 +637,7 @@ Array [
     "npmrc": null,
     "packageFile": "Dockerfile",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -683,6 +689,7 @@ Array [
       "enabled": true,
       "groupName": null,
       "masterIssueApproval": false,
+      "rangeStrategy": "update-lockfile",
       "schedule": Array [],
     },
     "warnings": Array [],
@@ -713,7 +720,6 @@ Array [
     "gitAuthor": null,
     "gitFs": null,
     "gitPrivateKey": null,
-    "gomodTidy": false,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
       "commitMessageTopic": "{{{groupName}}} Docker tags",
@@ -730,6 +736,7 @@ Array [
     "npmrc": null,
     "packageFile": "Dockerfile",
     "platform": "github",
+    "postUpdateOptions": Array [],
     "prBodyColumns": Array [
       "Package",
       "Type",
@@ -781,6 +788,7 @@ Array [
       "enabled": true,
       "groupName": null,
       "masterIssueApproval": false,
+      "rangeStrategy": "update-lockfile",
       "schedule": Array [],
     },
     "warnings": Array [],
