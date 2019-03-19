@@ -55,15 +55,6 @@ describe('workers/repository/onboarding/branch', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
-    it('detects repo is onboarded via PR and merged', async () => {
-      config.requireConfig = true;
-      platform.findPr.mockReturnValue(true);
-      platform.getPrList.mockReturnValueOnce([
-        { branchName: 'renovate/something', state: 'merged' },
-      ]);
-      const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
-    });
     it('throws if no required config', async () => {
       config.requireConfig = true;
       platform.findPr.mockReturnValue(true);
