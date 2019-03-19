@@ -44,15 +44,15 @@ describe('platform/git/storage', () => {
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
     tmpDir = await tmp.dir({ unsafeCleanup: true });
+    global.gitAuthor = {
+      name: 'test',
+      email: 'test@example.com',
+    };
     await git.initRepo({
       localDir: tmpDir.path,
       platform: 'github',
       repository: 'owner/repo-name',
       url: origin.path,
-      gitAuthor: {
-        name: 'test',
-        address: 'test@example.com',
-      },
     });
   });
 
