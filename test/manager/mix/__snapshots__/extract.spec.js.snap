@@ -10,7 +10,7 @@ Array [
     "lineNumber": 18,
   },
   Object {
-    "currentValue": "~> 2.0.0",
+    "currentValue": ">2.1.0 or <=3.0.0",
     "datasource": "hex",
     "depName": "ecto",
     "depType": "hex",
@@ -34,11 +34,25 @@ Array [
     "organization": "acme",
   },
   Object {
+    "currentValue": ">2.1.0 and <=3.0.0",
+    "datasource": "hex",
+    "depName": "ex_doc",
+    "depType": "hex",
+    "lineNumber": 22,
+  },
+  Object {
+    "currentValue": ">= 1.0.0",
+    "datasource": "hex",
+    "depName": "jason",
+    "depType": "hex",
+    "lineNumber": 24,
+  },
+  Object {
     "currentValue": "~> 1.0",
     "datasource": "hex",
     "depName": "jason",
     "depType": "hex",
-    "lineNumber": 22,
+    "lineNumber": 24,
   },
 ]
 `;

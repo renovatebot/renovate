@@ -1,7 +1,11 @@
 const fs = require('fs');
+const path = require('path');
 const { extractPackageFile } = require('../../../lib/manager/mix');
 
-const sample = fs.readFileSync('test/_fixtures/mix/mix.exs', 'utf8');
+const sample = fs.readFileSync(
+  path.resolve(__dirname, './_fixtures/mix.exs'),
+  'utf-8'
+);
 
 describe('lib/manager/mix/extract', () => {
   describe('extractPackageFile()', () => {
