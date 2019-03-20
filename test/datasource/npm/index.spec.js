@@ -17,7 +17,6 @@ describe('api/npm', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     global.repoCache = {};
-    delete global.testNpmRetries;
     global.trustLevel = 'low';
     npm.resetCache();
     npmResponse = {
@@ -52,10 +51,6 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, missingVersions);
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, missingVersions);
-    global.testNpmRetries = 1;
     const res = await npm.getPkgReleases({ lookupName: 'foobar' });
     expect(res).toBe(null);
   });
@@ -170,6 +165,32 @@ describe('api/npm', () => {
     const res = await npm.getPreset('foobar', 'default');
     expect(res).toMatchSnapshot();
   });
+  it('should parse repo url', async () => {
+    const pkg = {
+      name: 'foobar',
+      versions: {
+        '0.0.1': {
+          foo: 1,
+        },
+      },
+      repository: {
+        type: 'git',
+        url: 'git:github.com/renovateapp/dummy',
+      },
+      'dist-tags': {
+        latest: '0.0.1',
+      },
+      time: {
+        '0.0.1': '2018-05-06T07:21:53+02:00',
+      },
+    };
+    nock('https://registry.npmjs.org')
+      .get('/foobar')
+      .reply(200, pkg);
+    const res = await npm.getPkgReleases({ lookupName: 'foobar' });
+    expect(res).toMatchSnapshot();
+    expect(res.sourceUrl).toBeDefined();
+  });
   it('should return deprecated', async () => {
     const deprecatedPackage = {
       name: 'foobar',
@@ -247,12 +268,8 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, 'oops');
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200, 'oops');
     let e;
     try {
-      global.testNpmRetries = 1;
       await npm.getPkgReleases({ lookupName: 'foobar' });
     } catch (err) {
       e = err;
@@ -268,7 +285,6 @@ describe('api/npm', () => {
       .reply(429);
     let e;
     try {
-      global.testNpmRetries = 1;
       await npm.getPkgReleases({ lookupName: 'foobar' });
     } catch (err) {
       e = err;
@@ -281,7 +297,6 @@ describe('api/npm', () => {
       .reply(503);
     let e;
     try {
-      global.testNpmRetries = 0;
       await npm.getPkgReleases({ lookupName: 'foobar' });
     } catch (err) {
       e = err;
@@ -294,7 +309,6 @@ describe('api/npm', () => {
       .reply(408);
     let e;
     try {
-      global.testNpmRetries = 0;
       await npm.getPkgReleases({ lookupName: 'foobar' });
     } catch (err) {
       e = err;
@@ -311,7 +325,6 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200);
-    global.testNpmRetries = 2;
     const res = await npm.getPkgReleases({ lookupName: 'foobar' });
     expect(res).toMatchSnapshot();
   });

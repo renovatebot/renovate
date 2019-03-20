@@ -1,12 +1,12 @@
 const nock = require('nock');
 const lookup = require('../../../../../lib/workers/repository/process/lookup');
-const qJson = require('../../../../_fixtures/npm/01.json');
-const helmetJson = require('../../../../_fixtures/npm/02.json');
-const coffeelintJson = require('../../../../_fixtures/npm/coffeelint.json');
-const webpackJson = require('../../../../_fixtures/npm/webpack.json');
-const nextJson = require('../../../../_fixtures/npm/next.json');
-const vueJson = require('../../../../_fixtures/npm/vue.json');
-const typescriptJson = require('../../../../_fixtures/npm/typescript.json');
+const qJson = require('../../../../config/npm/_fixtures/01.json');
+const helmetJson = require('../../../../config/npm/_fixtures/02.json');
+const coffeelintJson = require('../../../../config/npm/_fixtures/coffeelint.json');
+const webpackJson = require('../../../../config/npm/_fixtures/webpack.json');
+const nextJson = require('../../../../config/npm/_fixtures/next.json');
+const vueJson = require('../../../../config/npm/_fixtures/vue.json');
+const typescriptJson = require('../../../../config/npm/_fixtures/typescript.json');
 const docker = require('../../../../../lib/datasource/docker');
 
 jest.mock('../../../../../lib/datasource/docker');
@@ -58,7 +58,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('supports lock file updates mixed with regular updates', async () => {
       config.currentValue = '^0.4.0';
-      config.rangeStrategy = 'lockfile-update';
+      config.rangeStrategy = 'update-lockfile';
       config.depName = 'q';
       config.datasource = 'npm';
       config.lockedVersion = '0.4.0';

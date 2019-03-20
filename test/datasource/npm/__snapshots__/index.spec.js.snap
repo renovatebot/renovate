@@ -110,6 +110,27 @@ Object {
 }
 `;
 
+exports[`api/npm should parse repo url 1`] = `
+Object {
+  "homepage": undefined,
+  "latestVersion": "0.0.1",
+  "name": "foobar",
+  "releases": Array [
+    Object {
+      "canBeUnpublished": false,
+      "gitRef": undefined,
+      "releaseTimestamp": "2018-05-06T07:21:53+02:00",
+      "version": "0.0.1",
+    },
+  ],
+  "sourceUrl": "https://github.com/renovateapp/dummy",
+  "tags": Object {
+    "latest": "0.0.1",
+  },
+  "versions": Object {},
+}
+`;
+
 exports[`api/npm should replace any environment variable in npmrc 1`] = `
 Object {
   "homepage": undefined,

@@ -1,12 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`cargo.getArtifacts() catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": undefined,
-      "stderr": "Cannot read property 'replace' of undefined",
-    },
+exports[`.getArtifacts() catches errors 1`] = `
+Object {
+  "lockFileError": Object {
+    "lockFile": "Cargo.lock",
+    "stderr": "not found",
   },
-]
+}
 `;

@@ -1,7 +1,7 @@
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = { ...require('../../../_fixtures/config') };
+  config = { ...require('../../../config/config/_fixtures') };
   config.errors = [];
   config.warnings = [];
 });
@@ -210,7 +210,7 @@ describe('workers/repository/updates/branchify', () => {
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name : 4' },
-          expectedBranchName: 'renovate/bad-branch-name--4',
+          expectedBranchName: 'renovate/bad-branch-name---4',
         },
         {
           upgrade: { branchName: 'renovate/bad-branch-name5/' },

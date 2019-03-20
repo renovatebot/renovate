@@ -4,20 +4,20 @@ const {
 } = require('../../../lib/manager/pip_requirements/extract');
 
 const requirements1 = fs.readFileSync(
-  'test/_fixtures/pip_requirements/requirements1.txt',
+  'test/manager/pip_requirements/_fixtures/requirements1.txt',
   'utf8'
 );
 const requirements2 = fs.readFileSync(
-  'test/_fixtures/pip_requirements/requirements2.txt',
+  'test/manager/pip_requirements/_fixtures/requirements2.txt',
   'utf8'
 );
 const requirements3 = fs.readFileSync(
-  'test/_fixtures/pip_requirements/requirements3.txt',
+  'test/manager/pip_requirements/_fixtures/requirements3.txt',
   'utf8'
 );
 
 const requirements4 = fs.readFileSync(
-  'test/_fixtures/pip_requirements/requirements4.txt',
+  'test/manager/pip_requirements/_fixtures/requirements4.txt',
   'utf8'
 );
 

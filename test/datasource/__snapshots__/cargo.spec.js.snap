@@ -143,12 +143,14 @@ Object {
       "version": "0.1.12",
     },
     Object {
+      "isDeprecated": true,
       "version": "0.1.11",
     },
     Object {
       "version": "0.1.10",
     },
     Object {
+      "isDeprecated": true,
       "version": "0.1.9",
     },
     Object {

@@ -3,7 +3,7 @@ const cleanup = require('../../../../lib/workers/repository/finalise/prune');
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
-  config = require('../../../_fixtures/config');
+  config = require('../../../config/config/_fixtures');
   config.platform = 'github';
   config.errors = [];
   config.warnings = [];
@@ -33,7 +33,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.getAllRenovateBranches.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.findPr.mockReturnValueOnce({});
+      platform.findPr.mockReturnValueOnce({ title: 'foo' });
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(1);
       expect(platform.deleteBranch.mock.calls).toHaveLength(1);

@@ -10,7 +10,7 @@ describe('workers/repository', () => {
   describe('renovateRepository()', () => {
     let config;
     beforeEach(() => {
-      config = require('../../_fixtures/config');
+      config = require('../../config/config/_fixtures');
     });
     it('runs', async () => {
       process.processRepo = jest.fn(() => ({}));

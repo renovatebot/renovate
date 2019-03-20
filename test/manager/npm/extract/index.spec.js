@@ -5,7 +5,7 @@ const defaultConfig = require('../../../../lib/config/defaults').getConfig();
 
 function readFixture(fixture) {
   return fs.readFileSync(
-    path.resolve(__dirname, `../../../_fixtures/package-json/${fixture}`),
+    path.resolve(__dirname, `../_fixtures/${fixture}`),
     'utf8'
   );
 }

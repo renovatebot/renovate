@@ -172,6 +172,8 @@ Add configuration here if you want to enable or disable something in particular 
 
 Add configuration here if you want to enable or disable something in particular for `Dockerfile` files and override the default Docker settings.
 
+## dotnet
+
 ## enabled
 
 Renovate is enabled for all packages by default, but this setting allows you to disable Renovate for specific packages, dependency types, package files, or even for the whole repository.
@@ -247,8 +249,6 @@ Configuration added here applies for all Go-related updates, however currently t
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
-## gomodTidy
-
 ## gradle
 
 Configuration for Java gradle projects
@@ -282,11 +282,13 @@ Example for configuring `docker` auth:
 
 ```json
 {
-  "hostRules": {
-    "platform": "docker",
-    "username": "<some-username>",
-    "password": "<some-password>"
-  }
+  "hostRules": [
+    {
+      "platform": "docker",
+      "username": "<some-username>",
+      "password": "<some-password>"
+    }
+  ]
 }
 ```
 
@@ -559,6 +561,18 @@ Use this field to restrict rules to a particular language. e.g.
   }]
 ```
 
+### baseBranchList
+
+Use this field to restrict rules to a particular branch. e.g.
+
+```
+  "packageRules": [{
+    "baseBranchList": ["master"],
+    "excludePackagePatterns": ["^eslint"],
+    "enabled": false
+  }]
+```
+
 ### managers
 
 Use this field to restrict rules to a particular package manager. e.g.
@@ -568,6 +582,17 @@ Use this field to restrict rules to a particular package manager. e.g.
     "packageNames": ["node"],
     "managers": ["dockerfile"],
     "enabled": false
+  }]
+```
+
+### datasources
+
+Use this field to restrict rules to a particular datasource. e.g.
+
+```
+  "packageRules": [{
+    "datasources": ["orb"],
+    "labels": ["circleci-orb!!"]
   }]
 ```
 
@@ -669,6 +694,13 @@ Warning: `setup.py` support is currently in beta, so is not enabled by default. 
 Add configuration here to change pipenv settings, e.g. to change the file pattern for pipenv so that you can use filenames other than Pipfile.
 
 Warning: 'pipenv' support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}" to enable.
+
+## postUpdateOptions
+
+`gomodTidy`: Run `go mod tidy` after Go module updates
+`npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
+`yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
+`yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
 
 ## prBodyColumns
 
@@ -886,7 +918,7 @@ Technical details: We mostly rely on the text parsing of the library [later](htt
 
 ## semanticCommitScope
 
-By default you will see angular-style commit prefixes like "chore(deps):". If you wish to change it to something else like "package" then it will look like "chore(package):".
+By default you will see angular-style commit prefixes like "chore(deps):". If you wish to change it to something else like "package" then it will look like "chore(package):". You can also use `parentDir` or `baseDir` to namespace your commits for monorepos e.g. "{{parentDir}}".
 
 ## semanticCommitType
 

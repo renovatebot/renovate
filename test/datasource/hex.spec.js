@@ -3,7 +3,10 @@ const got = require('../../lib/util/got');
 const hostRules = require('../../lib/util/host-rules');
 const { getPkgReleases } = require('../../lib/datasource/hex');
 
-let res1 = fs.readFileSync('test/_fixtures/hex/certifi.json', 'utf8');
+let res1 = fs.readFileSync(
+  'test/datasource/hex/_fixtures/certifi.json',
+  'utf8'
+);
 res1 = JSON.parse(res1);
 
 jest.mock('../../lib/util/got');

@@ -1,29 +1,34 @@
 const fs = require('fs');
 const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
-const hostRules = require('../../lib/util/host-rules');
 
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
-const pkgListV3 = fs.readFileSync('test/_fixtures/nuget/nunitV3.json', 'utf8');
+const pkgListV3 = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV3.json',
+  'utf8'
+);
 const pkgListV3WithoutProkjectUrl = fs.readFileSync(
-  'test/_fixtures/nuget/nunitV3_withoutProjectUrl.json',
+  'test/datasource/nuget/_fixtures/nunitV3_withoutProjectUrl.json',
   'utf8'
 );
 const pkgInfoV3FromNuget = fs.readFileSync(
-  'test/_fixtures/nuget/nunitv3_nuget-org.xml',
+  'test/datasource/nuget/_fixtures/nunitv3_nuget-org.xml',
   'utf8'
 );
 
-const pkgListV2 = fs.readFileSync('test/_fixtures/nuget/nunitV2.xml', 'utf8');
+const pkgListV2 = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV2.xml',
+  'utf8'
+);
 const pkgListV2WithoutProjectUrl = fs.readFileSync(
-  'test/_fixtures/nuget/nunitV2_withoutProjectUrl.xml',
+  'test/datasource/nuget/_fixtures/nunitV2_withoutProjectUrl.xml',
   'utf8'
 );
 
 const nugetIndexV3 = fs.readFileSync(
-  'test/_fixtures/nuget/indexV3.json',
+  'test/datasource/nuget/_fixtures/indexV3.json',
   'utf8'
 );
 
@@ -78,30 +83,6 @@ describe('datasource/nuget', () => {
           ...config,
         })
       ).toBeNull();
-    });
-
-    it('supports basic authentication', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(nugetIndexV3),
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: JSON.parse('{"totalHits": 0}'),
-        statusCode: 200,
-      });
-
-      hostRules.find.mockReturnValue({
-        username: 'some-username',
-        password: 'some-password',
-      });
-
-      await datasource.getPkgReleases({
-        ...configV3,
-      });
-
-      expect(got.mock.calls[0][1].headers.Authorization).toBe(
-        'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
-      );
     });
 
     it('queries the default nuget feed if no registries are supplied', async () => {

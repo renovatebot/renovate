@@ -19,7 +19,7 @@ const config = {
 };
 
 const updatesDependenciesReport = fsReal.readFileSync(
-  'test/_fixtures/gradle/updatesReport.json',
+  'test/datasource/gradle/_fixtures/updatesReport.json',
   'utf8'
 );
 
@@ -45,7 +45,7 @@ describe('manager/gradle', () => {
     it('should return empty if there are no dependencies', async () => {
       fs.readFile.mockReturnValue(
         fsReal.readFileSync(
-          'test/_fixtures/gradle/updatesReportEmpty.json',
+          'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
           'utf8'
         )
       );
@@ -92,7 +92,7 @@ describe('manager/gradle', () => {
 
     it('should use repositories only for current project', async () => {
       const multiProjectUpdatesReport = fsReal.readFileSync(
-        'test/_fixtures/gradle/MultiProjectUpdatesReport.json',
+        'test/datasource/gradle/_fixtures/MultiProjectUpdatesReport.json',
         'utf8'
       );
       fs.readFile.mockReturnValue(multiProjectUpdatesReport);
@@ -108,6 +108,23 @@ describe('manager/gradle', () => {
 
       expect(exec.mock.calls[0][0]).toBe(
         'gradle --init-script renovate-plugin.gradle renovate'
+      );
+      expect(exec.mock.calls[0][1]).toMatchObject({
+        cwd: 'localDir',
+        timeout: 20000,
+      });
+    });
+
+    it('should execute gradlew when available', async () => {
+      const configWithgitFs = {
+        gitFs: true,
+        ...config,
+      };
+
+      await manager.extractAllPackageFiles(configWithgitFs, ['build.gradle']);
+
+      expect(exec.mock.calls[0][0]).toBe(
+        'sh gradlew --init-script renovate-plugin.gradle renovate'
       );
       expect(exec.mock.calls[0][1]).toMatchObject({
         cwd: 'localDir',
@@ -167,12 +184,25 @@ describe('manager/gradle', () => {
         'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script renovate-plugin.gradle renovate'
       );
     });
+
+    it('should use dcoker even if gradlew is available', async () => {
+      const configWithDocker = {
+        binarySource: 'docker',
+        gitFs: true,
+        ...config,
+      };
+      await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
+
+      expect(exec.mock.calls[0][0]).toBe(
+        'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script renovate-plugin.gradle renovate'
+      );
+    });
   });
 
   describe('updateDependency', () => {
     it('should update an existing dependency', () => {
       const buildGradleContent = fsReal.readFileSync(
-        'test/_fixtures/gradle/build.gradle.example1',
+        'test/datasource/gradle/_fixtures/build.gradle.example1',
         'utf8'
       );
       // prettier-ignore

@@ -10,7 +10,7 @@ describe('manager/npm/extract/npm', () => {
     });
     it('extracts', async () => {
       const plocktest1Lock = fs.readFileSync(
-        'test/_fixtures/npm/plocktest1/package-lock.json'
+        'test/config/npm/_fixtures/plocktest1/package-lock.json'
       );
       platform.getFile.mockReturnValueOnce(plocktest1Lock);
       const res = await getNpmLock('package.json');

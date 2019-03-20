@@ -10,14 +10,15 @@ describe('platform/github', () => {
     jest.mock('../../../lib/platform/github/gh-got-wrapper');
     get = require('../../../lib/platform/github/gh-got-wrapper');
     github = require('../../../lib/platform/github');
+    delete global.gitAuthor;
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
-    'test/_fixtures/github/graphql/pullrequest-1.json',
+    'test/platform/github/_fixtures/graphql/pullrequest-1.json',
     'utf8'
   );
   const graphqlClosedPullrequests = fs.readFileSync(
-    'test/_fixtures/github/graphql/pullrequests-closed.json',
+    'test/platform/github/_fixtures/graphql/pullrequests-closed.json',
     'utf8'
   );
 
@@ -375,7 +376,14 @@ describe('platform/github', () => {
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-      }); // getBranchCommit
+      });
+      get.mockImplementationOnce(() => ({
+        body: {
+          truncated: true,
+          tree: [],
+        },
+      }));
+      // getBranchCommit
       get.mockImplementationOnce(() => ({
         body: {
           object: {
@@ -394,12 +402,17 @@ describe('platform/github', () => {
         token: 'token',
       });
     });
-    it('returns empty array if error', async () => {
+    it('throws if error', async () => {
       get.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      const files = await github.getFileList('error-branch');
-      expect(files).toEqual([]);
+      let e;
+      try {
+        await github.getFileList('error-branch');
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
     });
     it('warns if truncated result', async () => {
       get.mockImplementationOnce(() => ({
@@ -1387,10 +1400,13 @@ describe('platform/github', () => {
       expect(pr).toBe(null);
     });
     it('should return PR from graphql result', async () => {
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovateapp.com',
+      };
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-        gitAuthor: 'bot@renovateapp.com',
       });
       get.post.mockImplementationOnce(() => ({
         body: graphqlOpenPullRequests,
@@ -1576,10 +1592,13 @@ describe('platform/github', () => {
       expect(pr).toMatchSnapshot();
     });
     it('should return a rebaseable PR if gitAuthor matches 1 commit', async () => {
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovateapp.com',
+      };
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -1614,10 +1633,13 @@ describe('platform/github', () => {
       expect(pr).toMatchSnapshot();
     });
     it('should return a not rebaseable PR if gitAuthor does not match 1 commit', async () => {
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovateapp.com',
+      };
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-        gitAuthor: 'Renovate Bot <bot@renovateapp.com>',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -2040,10 +2062,13 @@ describe('platform/github', () => {
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
     beforeEach(async () => {
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovatebot.com',
+      };
       await initRepo({
         repository: 'some/repo',
         token: 'token',
-        gitAuthor: 'Renovate Bot <bot@renovatebot.com>',
       });
 
       // getBranchCommit
@@ -2151,6 +2176,10 @@ describe('platform/github', () => {
           contents: 'hello world',
         },
       ];
+      global.gitAuthor = {
+        name: 'Renovate Bot',
+        email: 'bot@renovatebot.com',
+      };
       await github.commitFilesToBranch(
         'the-branch',
         files,
