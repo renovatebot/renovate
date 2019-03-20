@@ -33,7 +33,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.getAllRenovateBranches.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.findPr.mockReturnValueOnce({});
+      platform.findPr.mockReturnValueOnce({ title: 'foo' });
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(1);
       expect(platform.deleteBranch.mock.calls).toHaveLength(1);
