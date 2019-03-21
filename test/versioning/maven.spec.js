@@ -287,7 +287,11 @@ describe('versioning/maven/index', () => {
     expect(matches('1', '(1,)')).toEqual(false);
     expect(matches('1', '(,1),(1,)')).toEqual(false);
     expect(matches('1', '(0,1),(1,2)')).toEqual(false);
-    expect(matches('1.0.0.RC9.2', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toEqual(false);
-    expect(matches('1.0.0-RC14', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toEqual(true);
+    expect(matches('1.0.0.RC9.2', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toEqual(
+      false
+    );
+    expect(matches('1.0.0-RC14', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toEqual(
+      true
+    );
   });
 });
