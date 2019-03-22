@@ -19,21 +19,36 @@ const schema = {
 const options = getOptions();
 const properties = {};
 
+function createSingleConfig(option) {
+  const temp = {};
+  temp.type = types[option.type];
+  if (temp.type === 'object') {
+    temp.$ref = '#';
+  }
+  if (temp.type === 'array' && option.subType) {
+    temp.items = {
+      type: types[option.subType],
+    };
+  }
+  if (option.format) {
+    temp.format = option.format;
+  }
+  if (option.description) {
+    temp.description = option.description;
+  }
+  if (option.default) {
+    temp.default = option.default;
+  }
+  if (option.allowedValues) {
+    temp.enum = option.allowedValues;
+  }
+  return temp;
+}
+
 function createSchemaForParentConfigs() {
   for (const option of options) {
     if (!option.parent) {
-      const temp = {};
-      temp.type = types[option.type];
-      if (option.description) {
-        temp.description = option.description;
-      }
-      if (option.default) {
-        temp.default = option.default;
-      }
-      if (option.allowedValues) {
-        temp.enum = option.allowedValues;
-      }
-      properties[option.name] = temp;
+      properties[option.name] = createSingleConfig(option);
     }
   }
 }
@@ -56,18 +71,9 @@ function addChildrenArrayInParents() {
 function createSchemaForChildConfigs() {
   for (const option of options) {
     if (option.parent) {
-      const temp = {};
-      temp.type = types[option.type];
-      if (option.description) {
-        temp.description = option.description;
-      }
-      if (option.default) {
-        temp.default = option.default;
-      }
-      if (option.allowedValues) {
-        temp.enum = option.allowedValues;
-      }
-      properties[option.parent].items.allOf[0].properties[option.name] = temp;
+      properties[option.parent].items.allOf[0].properties[
+        option.name
+      ] = createSingleConfig(option);
     }
   }
 }

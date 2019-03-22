@@ -5,14 +5,23 @@
   "properties": {
     "extends": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Configuration presets to use/extend. Note: does not work if configured in config.js"
     },
     "ignorePresets": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "A list of presets to ignore, including nested ones inside `extends`"
     },
     "description": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Plain text description for a config or preset"
     },
     "enabled": {
@@ -21,6 +30,7 @@
     },
     "force": {
       "type": "object",
+      "$ref": "#",
       "description": "Any configuration defined within this object will force override existing settings"
     },
     "forceCli": {
@@ -60,6 +70,7 @@
     },
     "onboardingConfig": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration to use in onboarding PRs",
       "default": {}
     },
@@ -81,6 +92,7 @@
     },
     "encrypted": {
       "type": "object",
+      "$ref": "#",
       "description": "A configuration object containing configuration encrypted with project key."
     },
     "timezone": {
@@ -89,6 +101,9 @@
     },
     "schedule": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Times of day/week to limit branch creation to",
       "default": "at any time"
     },
@@ -191,6 +206,7 @@
     },
     "engines": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration specifically for `package.json`>`engines`",
       "default": {}
     },
@@ -231,38 +247,65 @@
             "properties": {
               "languages": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "List of languages to match (e.g. [\"python\"]). Valid only within `packageRules` object"
               },
               "baseBranchList": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "List of branches to match (e.g. [\"master\"]). Valid only within `packageRules` object"
               },
               "managers": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "List of package managers to match (e.g. [\"pipenv\"]). Valid only within `packageRules` object"
               },
               "datasources": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "List of datasources to match (e.g. [\"orb\"]). Valid only within `packageRules` object"
               },
               "depTypeList": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "List of depTypes to match (e.g. [`peerDependencies`]). Valid only within `packageRules` object"
               },
               "packageNames": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "Package names to match. Valid only within `packageRules` object"
               },
               "excludePackageNames": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "Package names to exclude. Valid only within `packageRules` object"
               },
               "packagePatterns": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "Package name patterns to match. Valid only within `packageRules` object."
               },
               "excludePackagePatterns": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "Package name patterns to exclude. Valid only within `packageRules` object."
               },
               "matchCurrentVersion": {
@@ -271,10 +314,16 @@
               },
               "sourceUrlPrefixes": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "A list of source URL prefixes to match against, commonly used for grouping of monorepos or packages from the same organization."
               },
               "updateTypes": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object."
               },
               "paths": {
@@ -317,6 +366,7 @@
     },
     "unstablePattern": {
       "type": "string",
+      "format": "regex",
       "description": "Regex for identifying unstable versions (docker only)"
     },
     "followTag": {
@@ -344,21 +394,25 @@
     },
     "major": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration to apply when an update type is major",
       "default": {}
     },
     "minor": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration to apply when an update type is minor",
       "default": {}
     },
     "patch": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration to apply when an update type is patch. Only applies if `separateMinorPatch` is set to true",
       "default": {}
     },
     "pin": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration to apply when an update type is pin.",
       "default": {
         "unpublishSafe": false,
@@ -374,6 +428,7 @@
     },
     "digest": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration to apply when updating a digest (no change in tag/version)",
       "default": {
         "branchTopic": "{{{depNameSanitized}}}-digest",
@@ -461,6 +516,7 @@
     },
     "vulnerabilityAlerts": {
       "type": "object",
+      "$ref": "#",
       "description": "Config to apply when a PR is necessary due to vulnerability of existing package version.",
       "default": {
         "enabled": true,
@@ -528,6 +584,7 @@
     },
     "lockFileMaintenance": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration for lock file maintenance",
       "default": {
         "enabled": false,
@@ -556,6 +613,7 @@
     },
     "group": {
       "type": "object",
+      "$ref": "#",
       "description": "Config if groupName is enabled",
       "default": {
         "branchTopic": "{{{groupSlug}}}",
@@ -576,15 +634,21 @@
     },
     "fileMatch": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "format": "regex",
       "description": "JS RegExp pattern for matching manager files"
     },
     "js": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for javascript language",
       "default": {}
     },
     "npm": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for npm package.json renovation",
       "default": {
         "fileMatch": ["(^|/)package.json$"],
@@ -597,6 +661,7 @@
     },
     "meteor": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for meteor package.js renovation",
       "default": {
         "fileMatch": ["(^|/)package.js$"]
@@ -604,6 +669,7 @@
     },
     "bazel": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for bazel WORKSPACE renovation",
       "default": {
         "fileMatch": ["(^|/)WORKSPACE$"],
@@ -614,6 +680,7 @@
     },
     "buildkite": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for buildkite pipeline renovation",
       "default": {
         "fileMatch": ["buildkite\\.ya?ml", "\\.buildkite/.+\\.ya?ml$"],
@@ -624,6 +691,7 @@
     },
     "golang": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Go language",
       "default": {
         "commitMessageTopic": "module {{depNameShort}}"
@@ -631,6 +699,7 @@
     },
     "gomod": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Go modules renovation",
       "default": {
         "fileMatch": ["(^|/)go.mod$"]
@@ -644,11 +713,13 @@
     },
     "ruby": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for ruby language",
       "default": {}
     },
     "bundler": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for bundler Gemfiles",
       "default": {
         "enabled": false,
@@ -658,6 +729,7 @@
     },
     "terraform": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Terraform module renovation",
       "default": {
         "commitMessageTopic": "Terraform module {{depNameShort}}",
@@ -667,11 +739,13 @@
     },
     "rust": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration option for Rust package management.",
       "default": {}
     },
     "cargo": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Cargo crate renovation.",
       "default": {
         "enabled": false,
@@ -682,10 +756,14 @@
     },
     "supportPolicy": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)"
     },
     "node": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for node version renovation",
       "default": {
         "commitMessageTopic": "Node.js",
@@ -696,6 +774,7 @@
     },
     "travis": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for .travis.yml node version renovation",
       "default": {
         "enabled": false,
@@ -705,6 +784,7 @@
     },
     "nvm": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for .nvmrc files",
       "default": {
         "fileMatch": ["^.nvmrc$"],
@@ -713,6 +793,7 @@
     },
     "docker": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Docker language",
       "default": {
         "versionScheme": "docker",
@@ -746,6 +827,7 @@
     },
     "docker-compose": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Docker Compose renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["(^|/)docker-compose[^/]*\\.ya?ml$"]
@@ -753,6 +835,7 @@
     },
     "dockerfile": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Dockerfile renovation",
       "default": {
         "fileMatch": ["(^|/)Dockerfile$"]
@@ -760,6 +843,7 @@
     },
     "kubernetes": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Kubernetes renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": []
@@ -767,6 +851,7 @@
     },
     "circleci": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["(^|/).circleci/config.yml$"]
@@ -774,6 +859,7 @@
     },
     "ansible": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Ansible yaml renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["(^|/)tasks/[^/]+\\.ya?ml$"]
@@ -781,6 +867,7 @@
     },
     "github-actions": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for GitHub Actions workflow renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["^\\.github/main.workflow$"],
@@ -789,6 +876,7 @@
     },
     "composer": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for composer.json files",
       "default": {
         "fileMatch": ["(^|/)([\\w-]*)composer.json$"],
@@ -797,11 +885,13 @@
     },
     "php": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for php",
       "default": {}
     },
     "pip_requirements": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for requirements.txt files",
       "default": {
         "fileMatch": ["(^|/)([\\w-]*)requirements.(txt|pip)$"]
@@ -809,6 +899,7 @@
     },
     "pip_setup": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for setup.py files",
       "default": {
         "fileMatch": ["(^|/)setup.py$"]
@@ -816,6 +907,7 @@
     },
     "pipenv": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for Pipfile files",
       "default": {
         "enabled": false,
@@ -824,6 +916,7 @@
     },
     "python": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for python",
       "default": {
         "versionScheme": "pep440"
@@ -831,16 +924,19 @@
     },
     "compatibility": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for compatibility",
       "default": {}
     },
     "java": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for all Java package managers",
       "default": {}
     },
     "gradle": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for build.gradle files",
       "default": {
         "enabled": false,
@@ -851,6 +947,7 @@
     },
     "gradle-wrapper": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for gradle-wrapper.properties files",
       "default": {
         "fileMatch": ["(^|/)gradle/wrapper/gradle-wrapper.properties$"]
@@ -858,6 +955,7 @@
     },
     "maven": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for when renovating Maven pom.xml files",
       "default": {
         "enabled": false,
@@ -867,6 +965,7 @@
     },
     "gitlabci": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for GitLab CI yml renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["^\\.gitlab-ci\\.yml$"]
@@ -874,11 +973,13 @@
     },
     "dotnet": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for .NET language",
       "default": {}
     },
     "nuget": {
       "type": "object",
+      "$ref": "#",
       "description": "Configuration object for C#/Nuget",
       "default": {
         "fileMatch": ["\\.csproj$"]
@@ -890,6 +991,7 @@
     },
     "prBodyDefinitions": {
       "type": "object",
+      "$ref": "#",
       "description": "Table column definitions for use in PR tables",
       "default": {
         "Package": "{{{depName}}}",
@@ -909,6 +1011,9 @@
     },
     "prBodyNotes": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "List of additional notes/templates to be included in the Pull Request bodies.",
       "default": []
     },
