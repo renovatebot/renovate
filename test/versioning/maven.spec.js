@@ -10,6 +10,7 @@ const {
   getMajor,
   getMinor,
   getPatch,
+  matches,
 } = require('../../lib/versioning/maven/index');
 
 describe('versioning/maven/compare', () => {
@@ -272,5 +273,25 @@ describe('versioning/maven/index', () => {
     expect(getPatch('1.2.3.4')).toEqual(3);
     expect(getPatch('1-rc10')).toEqual(0);
     expect(getPatch('1-rc42-1')).toEqual(0);
+  });
+  it('matches against maven ranges', () => {
+    expect(matches('0', '[0,1]')).toEqual(true);
+    expect(matches('1', '[0,1]')).toEqual(true);
+    expect(matches('0', '(0,1)')).toEqual(false);
+    expect(matches('1', '(0,1)')).toEqual(false);
+    expect(matches('1', '(0,2)')).toEqual(true);
+    expect(matches('1', '[0,2]')).toEqual(true);
+    expect(matches('1', '(,1]')).toEqual(true);
+    expect(matches('1', '(,1)')).toEqual(false);
+    expect(matches('1', '[1,)')).toEqual(true);
+    expect(matches('1', '(1,)')).toEqual(false);
+    expect(matches('1', '(,1),(1,)')).toEqual(false);
+    expect(matches('1', '(0,1),(1,2)')).toEqual(false);
+    expect(matches('1.0.0.RC9.2', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toEqual(
+      false
+    );
+    expect(matches('1.0.0-RC14', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toEqual(
+      true
+    );
   });
 });
