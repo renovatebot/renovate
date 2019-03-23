@@ -3,17 +3,17 @@ const semverRuby = require('../../lib/versioning/ruby');
 describe('semverRuby', () => {
   describe('.equals', () => {
     it('returns true when versions are equal', () => {
-      expect(semverRuby.equals('1.0.0', '1')).toBe(true);
-      expect(semverRuby.equals('1.2.0', '1.2')).toBe(true);
-      expect(semverRuby.equals('1.2.0', '1.2.0')).toBe(true);
-      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc1')).toBe(true);
+      expect(semverRuby.equals('1.0.0', '1')).toBeTruthy();
+      expect(semverRuby.equals('1.2.0', '1.2')).toBeTruthy();
+      expect(semverRuby.equals('1.2.0', '1.2.0')).toBeTruthy();
+      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc1')).toBeTruthy();
     });
 
     it('returns false when versions are different', () => {
-      expect(semverRuby.equals('1.2.0', '2')).toBe(false);
-      expect(semverRuby.equals('1.2.0', '1.1')).toBe(false);
-      expect(semverRuby.equals('1.2.0', '1.2.1')).toBe(false);
-      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc2')).toBe(false);
+      expect(semverRuby.equals('1.2.0', '2')).toBeFalsy();
+      expect(semverRuby.equals('1.2.0', '1.1')).toBeFalsy();
+      expect(semverRuby.equals('1.2.0', '1.2.1')).toBeFalsy();
+      expect(semverRuby.equals('1.0.0.rc1', '1.0.0.rc2')).toBeFalsy();
     });
   });
 
@@ -34,7 +34,7 @@ describe('semverRuby', () => {
     });
 
     it('returns null when minor segment absent', () => {
-      expect(semverRuby.getMinor('1')).toEqual(null);
+      expect(semverRuby.getMinor('1')).toBeNull();
     });
   });
 
@@ -45,8 +45,8 @@ describe('semverRuby', () => {
     });
 
     it('returns null when patch segment absent', () => {
-      expect(semverRuby.getPatch('1')).toEqual(null);
-      expect(semverRuby.getPatch('1.2')).toEqual(null);
+      expect(semverRuby.getPatch('1')).toBeNull();
+      expect(semverRuby.getPatch('1.2')).toBeNull();
     });
   });
 
@@ -193,7 +193,7 @@ describe('semverRuby', () => {
     it('returns null if version that matches range absent', () => {
       expect(
         semverRuby.minSatisfyingVersion(['1.2.3', '1.2.4'], '>= 3.5.0')
-      ).toEqual(null);
+      ).toBeNull();
     });
   });
 
@@ -232,7 +232,7 @@ describe('semverRuby', () => {
     it('returns null if version that matches range absent', () => {
       expect(
         semverRuby.maxSatisfyingVersion(['1.2.3', '1.2.4'], '>= 3.5.0')
-      ).toEqual(null);
+      ).toBeNull();
     });
   });
 
