@@ -8,6 +8,7 @@
   },
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
+    "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "node --inspect-brk lib/renovate",
     "eslint": "eslint lib test",
     "eslint-fix": "eslint --fix lib test",
