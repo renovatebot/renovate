@@ -26,9 +26,6 @@ function createSingleConfig(option) {
     temp.description = option.description;
   }
   temp.type = types[option.type];
-  if (temp.type === 'object') {
-    temp.$ref = '#';
-  }
   if (temp.type === 'array' && option.subType) {
     temp.items = {
       type: types[option.subType],
@@ -45,6 +42,9 @@ function createSingleConfig(option) {
   }
   if (option.allowedValues) {
     temp.enum = option.allowedValues;
+  }
+  if (temp.type === 'object') {
+    temp.$ref = '#';
   }
   return temp;
 }
