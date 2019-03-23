@@ -121,8 +121,8 @@
     "gitFs": {
       "description": "Use git for FS operations instead of API. GitHub only.",
       "type": "string",
-      "default": null,
-      "enum": ["https", "http", "ssh"]
+      "enum": ["https", "http", "ssh"],
+      "default": null
     },
     "trustLevel": {
       "description": "Set this to \"high\" if the bot should trust the repository owners/contents",
@@ -240,7 +240,6 @@
     "versionScheme": {
       "description": "Version scheme to use for filtering and comparisons",
       "type": "string",
-      "default": "semver",
       "enum": [
         "cargo",
         "composer",
@@ -254,7 +253,8 @@
         "pep440",
         "ruby",
         "semver"
-      ]
+      ],
+      "default": "semver"
     },
     "ignoreDeps": {
       "description": "Dependencies to ignore",
@@ -414,8 +414,8 @@
     "rangeStrategy": {
       "description": "Policy for how to modify/update existing ranges.",
       "type": "string",
-      "default": "replace",
-      "enum": ["auto", "pin", "bump", "replace", "widen", "update-lockfile"]
+      "enum": ["auto", "pin", "bump", "replace", "widen", "update-lockfile"],
+      "default": "replace"
     },
     "branchPrefix": {
       "description": "Prefix to use for all branch names",
@@ -767,8 +767,7 @@
     "postUpdateOptions": {
       "description": "Enable post-update options to be run after package/artifact updating",
       "type": "array",
-      "default": [],
-      "enum": ["gomodTidy", "npmDedupe", "yarnDedupeFewer", "yarnDedupeHighest"]
+      "default": []
     },
     "ruby": {
       "description": "Configuration object for ruby language",
@@ -1079,16 +1078,7 @@
     "suppressNotifications": {
       "description": "Options to suppress various types of warnings and other notifications",
       "type": "array",
-      "default": [],
-      "enum": [
-        "prIgnoreNotification",
-        "prEditNotification",
-        "branchAutomergeFailure",
-        "lockFileErrors",
-        "artifactErrors",
-        "deprecationWarningIssues",
-        "onboardingClose"
-      ]
+      "default": []
     }
   }
 }
