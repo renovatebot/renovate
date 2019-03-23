@@ -351,7 +351,17 @@
                 "description": "Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.",
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "type": "string",
+                  "enum": [
+                    "major",
+                    "minor",
+                    "patch",
+                    "pin",
+                    "digest",
+                    "lockFileMaintenance",
+                    "rollback",
+                    "bump"
+                  ]
                 }
               },
               "paths": {
@@ -424,7 +434,8 @@
     },
     "bumpVersion": {
       "description": "Bump the version in the package.json being updated",
-      "type": "string"
+      "type": "string",
+      "enum": ["major", "minor", "patch"]
     },
     "major": {
       "description": "Configuration to apply when an update type is major",
@@ -519,8 +530,9 @@
       "default": false
     },
     "prCreation": {
-      "description": "When to create the PR for a branch. Values: immediate, not-pending, status-success.",
+      "description": "When to create the PR for a branch.",
       "type": "string",
+      "enum": ["immediate", "not-pending", "status-success"],
       "default": "immediate"
     },
     "prNotPendingHours": {
@@ -544,8 +556,9 @@
       "default": false
     },
     "automergeType": {
-      "description": "How to automerge - \"branch\", \"pr\", or \"pr-comment\". Branch support is GitHub-only",
+      "description": "How to automerge, if enabled.",
       "type": "string",
+      "enum": ["branch", "pr", "pr-comment"],
       "default": "pr"
     },
     "automergeComment": {
