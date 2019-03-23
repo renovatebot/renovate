@@ -30,8 +30,11 @@ function createSingleConfig(option) {
     temp.items = {
       type: types[option.subType],
     };
+    if (option.format) {
+      temp.items.format = option.format;
+    }
   }
-  if (option.format) {
+  if (option.format && temp.type !== 'array') {
     temp.format = option.format;
   }
   if (option.description) {
