@@ -209,11 +209,17 @@
     },
     "includePaths": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Include package files only within these defined paths",
       "default": []
     },
     "ignorePaths": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Skip any package.json whose path matches one of these. Can be string or glob pattern",
       "default": ["**/node_modules/**", "**/bower_components/**"]
     },
@@ -225,6 +231,9 @@
     },
     "registryUrls": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "List of URLs to try for dependency lookup. Package manager-specific",
       "default": null
     },
@@ -249,6 +258,9 @@
     },
     "ignoreDeps": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Dependencies to ignore"
     },
     "packageRules": {
@@ -342,6 +354,9 @@
               },
               "paths": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "List of strings or glob patterns to match against package files. Applicable inside packageRules only"
               },
               "allowedVersions": {
@@ -538,6 +553,9 @@
     },
     "requiredStatusChecks": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "List of status checks that must pass before automerging. Set to null to enable automerging without tests."
     },
     "vulnerabilityAlerts": {
@@ -652,14 +670,23 @@
     },
     "labels": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Labels to add to Pull Request"
     },
     "assignees": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Assignees for Pull Request (username in GitHub/GitLab, email address in Azure DevOps)"
     },
     "reviewers": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab, email or username in Azure DevOps)"
     },
     "fileMatch": {
