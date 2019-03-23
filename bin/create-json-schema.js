@@ -26,22 +26,28 @@ function createSingleConfig(option) {
     temp.description = option.description;
   }
   temp.type = types[option.type];
-  if (temp.type === 'array' && option.subType) {
-    temp.items = {
-      type: types[option.subType],
-    };
-    if (option.format) {
-      temp.items.format = option.format;
+  if (temp.type === 'array') {
+    if (option.subType) {
+      temp.items = {
+        type: types[option.subType],
+      };
+      if (option.format) {
+        temp.items.format = option.format;
+      }
+      if (option.allowedValues) {
+        temp.items.enum = option.allowedValues;
+      }
     }
-  }
-  if (option.format && temp.type !== 'array') {
-    temp.format = option.format;
+  } else {
+    if (option.format) {
+      temp.format = option.format;
+    }
+    if (option.allowedValues) {
+      temp.enum = option.allowedValues;
+    }
   }
   if (option.default !== undefined) {
     temp.default = option.default;
-  }
-  if (option.allowedValues) {
-    temp.enum = option.allowedValues;
   }
   if (temp.type === 'object') {
     temp.$ref = '#';
