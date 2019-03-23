@@ -8,6 +8,7 @@
   },
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
+    "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "node --inspect-brk lib/renovate",
     "eslint": "eslint lib test",
     "eslint-fix": "eslint --fix lib test",
@@ -20,7 +21,8 @@
     "prettier-fix": "prettier --write \"**/*.{js,json,md}\"",
     "start": "node lib/renovate",
     "test-dirty": "git diff --exit-code",
-    "test": "yarn lint && yarn jest"
+    "test-schema": "bash test/json-schema.sh",
+    "test": "yarn lint && yarn test-schema && yarn jest"
   },
   "repository": {
     "type": "git",

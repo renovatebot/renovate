@@ -35,15 +35,18 @@
     },
     "forceCli": {
       "type": "boolean",
-      "description": "Whether CLI configuration options should be moved to the `force` config section"
+      "description": "Whether CLI configuration options should be moved to the `force` config section",
+      "default": false
     },
     "dryRun": {
       "type": "boolean",
-      "description": "If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs"
+      "description": "If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs",
+      "default": false
     },
     "printConfig": {
       "type": "boolean",
-      "description": "If enabled, log the full resolved config for each repo, including resolved presets"
+      "description": "If enabled, log the full resolved config for each repo, including resolved presets",
+      "default": false
     },
     "binarySource": {
       "type": "string",
@@ -76,15 +79,18 @@
     },
     "includeForks": {
       "type": "boolean",
-      "description": "Whether to process forked repositories or not. By default, all forked repositories are skipped over."
+      "description": "Whether to process forked repositories or not. By default, all forked repositories are skipped over.",
+      "default": false
     },
     "forkMode": {
       "type": "boolean",
-      "description": "Set to true to fork the source repository and create branches there instead"
+      "description": "Set to true to fork the source repository and create branches there instead",
+      "default": false
     },
     "requireConfig": {
       "type": "boolean",
-      "description": "Set to true if repositories must have a config to activate."
+      "description": "Set to true if repositories must have a config to activate.",
+      "default": false
     },
     "privateKey": {
       "type": "string",
@@ -93,7 +99,8 @@
     "encrypted": {
       "type": "object",
       "$ref": "#",
-      "description": "A configuration object containing configuration encrypted with project key."
+      "description": "A configuration object containing configuration encrypted with project key.",
+      "default": null
     },
     "timezone": {
       "type": "string",
@@ -114,6 +121,7 @@
     "gitFs": {
       "type": "string",
       "description": "Use git for FS operations instead of API. GitHub only.",
+      "default": null,
       "enum": ["https", "http", "ssh"]
     },
     "trustLevel": {
@@ -128,7 +136,8 @@
     },
     "endpoint": {
       "type": "string",
-      "description": "Custom endpoint to use"
+      "description": "Custom endpoint to use",
+      "default": null
     },
     "token": {
       "type": "string",
@@ -160,19 +169,23 @@
     },
     "skipInstalls": {
       "type": "boolean",
-      "description": "Skip installing modules/dependencies if lock file updating is possible alone"
+      "description": "Skip installing modules/dependencies if lock file updating is possible alone",
+      "default": null
     },
     "ignoreNpmrcFile": {
       "type": "boolean",
-      "description": "Whether to ignore any .npmrc file found in repository"
+      "description": "Whether to ignore any .npmrc file found in repository",
+      "default": false
     },
     "autodiscover": {
       "type": "boolean",
-      "description": "Autodiscover all repositories"
+      "description": "Autodiscover all repositories",
+      "default": false
     },
     "autodiscoverFilter": {
       "type": "string",
-      "description": "Filter the list of autodiscovered repositories"
+      "description": "Filter the list of autodiscovered repositories",
+      "default": null
     },
     "repositories": {
       "type": "array",
@@ -196,11 +209,17 @@
     },
     "includePaths": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Include package files only within these defined paths",
       "default": []
     },
     "ignorePaths": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Skip any package.json whose path matches one of these. Can be string or glob pattern",
       "default": ["**/node_modules/**", "**/bower_components/**"]
     },
@@ -212,7 +231,11 @@
     },
     "registryUrls": {
       "type": "array",
-      "description": "List of URLs to try for dependency lookup. Package manager-specific"
+      "items": {
+        "type": "string"
+      },
+      "description": "List of URLs to try for dependency lookup. Package manager-specific",
+      "default": null
     },
     "versionScheme": {
       "type": "string",
@@ -235,6 +258,9 @@
     },
     "ignoreDeps": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Dependencies to ignore"
     },
     "packageRules": {
@@ -328,6 +354,9 @@
               },
               "paths": {
                 "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "List of strings or glob patterns to match against package files. Applicable inside packageRules only"
               },
               "allowedVersions": {
@@ -341,7 +370,8 @@
     },
     "pinDigests": {
       "type": "boolean",
-      "description": "Whether to add digests to Dockerfile source images"
+      "description": "Whether to add digests to Dockerfile source images",
+      "default": false
     },
     "separateMajorMinor": {
       "type": "boolean",
@@ -349,11 +379,13 @@
     },
     "separateMultipleMajor": {
       "type": "boolean",
-      "description": "If set to true, PRs will be raised separately for each available major upgrade version"
+      "description": "If set to true, PRs will be raised separately for each available major upgrade version",
+      "default": false
     },
     "separateMinorPatch": {
       "type": "boolean",
-      "description": "If set to true, it will separate minor and patch updates into separate branches"
+      "description": "If set to true, it will separate minor and patch updates into separate branches",
+      "default": false
     },
     "ignoreUnstable": {
       "type": "boolean",
@@ -441,7 +473,8 @@
     },
     "semanticCommits": {
       "type": "boolean",
-      "description": "Enable semantic commit prefixes for commits and PR titles"
+      "description": "Enable semantic commit prefixes for commits and PR titles",
+      "default": null
     },
     "semanticCommitType": {
       "type": "string",
@@ -455,15 +488,18 @@
     },
     "rollbackPrs": {
       "type": "boolean",
-      "description": "Create PRs to roll back versions if the current version is not found in the registry"
+      "description": "Create PRs to roll back versions if the current version is not found in the registry",
+      "default": false
     },
     "recreateClosed": {
       "type": "boolean",
-      "description": "Recreate PRs even if same ones were closed previously"
+      "description": "Recreate PRs even if same ones were closed previously",
+      "default": false
     },
     "rebaseStalePrs": {
       "type": "boolean",
-      "description": "Rebase stale PRs (GitHub only)"
+      "description": "Rebase stale PRs (GitHub only)",
+      "default": null
     },
     "rebaseLabel": {
       "type": "string",
@@ -472,11 +508,13 @@
     },
     "statusCheckVerify": {
       "type": "boolean",
-      "description": "Set a verify status check for all PRs"
+      "description": "Set a verify status check for all PRs",
+      "default": false
     },
     "unpublishSafe": {
       "type": "boolean",
-      "description": "Set a status check for unpublish-safe upgrades"
+      "description": "Set a status check for unpublish-safe upgrades",
+      "default": false
     },
     "prCreation": {
       "type": "string",
@@ -490,15 +528,18 @@
     },
     "prHourlyLimit": {
       "type": "integer",
-      "description": "Rate limit PRs to maximum x created per hour. 0 (default) means no limit."
+      "description": "Rate limit PRs to maximum x created per hour. 0 (default) means no limit.",
+      "default": 0
     },
     "prConcurrentLimit": {
       "type": "integer",
-      "description": "Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit."
+      "description": "Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.",
+      "default": 0
     },
     "automerge": {
       "type": "boolean",
-      "description": "Whether to automerge branches/PRs automatically, without human intervention"
+      "description": "Whether to automerge branches/PRs automatically, without human intervention",
+      "default": false
     },
     "automergeType": {
       "type": "string",
@@ -512,6 +553,9 @@
     },
     "requiredStatusChecks": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "List of status checks that must pass before automerging. Set to null to enable automerging without tests."
     },
     "vulnerabilityAlerts": {
@@ -534,7 +578,8 @@
     },
     "managerBranchPrefix": {
       "type": "string",
-      "description": "Branch manager prefix"
+      "description": "Branch manager prefix",
+      "default": ""
     },
     "branchTopic": {
       "type": "string",
@@ -575,7 +620,8 @@
     },
     "prTitle": {
       "type": "string",
-      "description": "Pull Request title template (deprecated). Now uses commitMessage."
+      "description": "Pull Request title template (deprecated). Now uses commitMessage.",
+      "default": null
     },
     "prFooter": {
       "type": "string",
@@ -605,11 +651,13 @@
     },
     "groupName": {
       "type": "string",
-      "description": "Human understandable name for the dependency group"
+      "description": "Human understandable name for the dependency group",
+      "default": null
     },
     "groupSlug": {
       "type": "string",
-      "description": "Slug to use for group (e.g. in branch name). Will be calculated from groupName if null"
+      "description": "Slug to use for group (e.g. in branch name). Will be calculated from groupName if null",
+      "default": null
     },
     "group": {
       "type": "object",
@@ -622,14 +670,23 @@
     },
     "labels": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Labels to add to Pull Request"
     },
     "assignees": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Assignees for Pull Request (username in GitHub/GitLab, email address in Azure DevOps)"
     },
     "reviewers": {
       "type": "array",
+      "items": {
+        "type": "string"
+      },
       "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab, email or username in Azure DevOps)"
     },
     "fileMatch": {
