@@ -22,6 +22,9 @@ const properties = {};
 
 function createSingleConfig(option) {
   const temp = {};
+  if (option.description) {
+    temp.description = option.description;
+  }
   temp.type = types[option.type];
   if (temp.type === 'object') {
     temp.$ref = '#';
@@ -36,9 +39,6 @@ function createSingleConfig(option) {
   }
   if (option.format && temp.type !== 'array') {
     temp.format = option.format;
-  }
-  if (option.description) {
-    temp.description = option.description;
   }
   if (option.default !== undefined) {
     temp.default = option.default;
