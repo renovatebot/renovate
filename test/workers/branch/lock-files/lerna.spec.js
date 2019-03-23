@@ -6,7 +6,7 @@ jest.mock('child-process-promise');
 describe('generateLockFiles()', () => {
   it('returns if no lernaClient', async () => {
     const res = await lernaHelper.generateLockFiles(undefined, 'some-dir', {});
-    expect(res.error).toBe(false);
+    expect(res.error).toBeFalsy();
   });
   it('generates package-lock.json files', async () => {
     platform.getFile.mockReturnValueOnce(
@@ -20,7 +20,7 @@ describe('generateLockFiles()', () => {
       {},
       skipInstalls
     );
-    expect(res.error).toBe(false);
+    expect(res.error).toBeFalsy();
   });
   it('performs full npm install', async () => {
     platform.getFile.mockReturnValueOnce(
@@ -36,7 +36,7 @@ describe('generateLockFiles()', () => {
       skipInstalls,
       binarySource
     );
-    expect(res.error).toBe(false);
+    expect(res.error).toBeFalsy();
   });
   it('generates yarn.lock files', async () => {
     platform.getFile.mockReturnValueOnce(
@@ -44,12 +44,12 @@ describe('generateLockFiles()', () => {
     );
     exec.mockReturnValueOnce({});
     const res = await lernaHelper.generateLockFiles('yarn', 'some-dir', {});
-    expect(res.error).toBe(false);
+    expect(res.error).toBeFalsy();
   });
   it('defaults to latest', async () => {
     platform.getFile.mockReturnValueOnce(undefined);
     exec.mockReturnValueOnce({});
     const res = await lernaHelper.generateLockFiles('npm', 'some-dir', {});
-    expect(res.error).toBe(false);
+    expect(res.error).toBeFalsy();
   });
 });

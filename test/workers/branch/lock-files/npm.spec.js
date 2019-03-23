@@ -30,8 +30,8 @@ describe('generateLockFile', () => {
       'package-lock.json',
       { skipInstalls, postUpdateOptions }
     );
-    expect(fs.readFile.mock.calls.length).toEqual(1);
-    expect(res.error).not.toBeDefined();
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('performs lock file updates', async () => {
@@ -56,8 +56,8 @@ describe('generateLockFile', () => {
       { skipInstalls },
       updates
     );
-    expect(fs.readFile.mock.calls.length).toEqual(1);
-    expect(res.error).not.toBeDefined();
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('performs full install', async () => {
@@ -75,8 +75,8 @@ describe('generateLockFile', () => {
       'package-lock.json',
       { skipInstalls, binarySource }
     );
-    expect(fs.readFile.mock.calls.length).toEqual(1);
-    expect(res.error).not.toBeDefined();
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeUndefined();
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('catches errors', async () => {
@@ -93,8 +93,8 @@ describe('generateLockFile', () => {
       {},
       'package-lock.json'
     );
-    expect(fs.readFile.mock.calls.length).toEqual(1);
-    expect(res.error).toBe(true);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeTruthy();
     expect(res.lockFile).not.toBeDefined();
   });
   it('finds npm embedded in renovate', async () => {
@@ -115,7 +115,7 @@ describe('generateLockFile', () => {
       {},
       'package-lock.json'
     );
-    expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('finds npm globally', async () => {
@@ -137,7 +137,7 @@ describe('generateLockFile', () => {
       {},
       'package-lock.json'
     );
-    expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('uses fallback npm', async () => {
@@ -161,7 +161,7 @@ describe('generateLockFile', () => {
       {},
       'package-lock.json'
     );
-    expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
 });

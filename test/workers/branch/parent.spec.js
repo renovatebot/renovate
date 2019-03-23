@@ -15,7 +15,7 @@ describe('workers/branch/parent', () => {
     it('returns undefined if branch does not exist', async () => {
       platform.branchExists.mockReturnValue(false);
       const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(undefined);
+      expect(res.parentBranch).toBeUndefined();
     });
     it('returns branchName if no PR', async () => {
       platform.branchExists.mockReturnValue(true);
@@ -46,7 +46,7 @@ describe('workers/branch/parent', () => {
         title: 'rebase!Update foo to v4',
       });
       const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(undefined);
+      expect(res.parentBranch).toBeUndefined();
     });
     it('returns undefined if PR body check rebase', async () => {
       platform.branchExists.mockReturnValue(true);
@@ -55,7 +55,7 @@ describe('workers/branch/parent', () => {
         body: 'blah\nblah\n- [x] <!-- renovate-rebase -->foo\n',
       });
       const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(undefined);
+      expect(res.parentBranch).toBeUndefined();
     });
     it('returns undefined if manual rebase by label', async () => {
       platform.branchExists.mockReturnValue(true);
@@ -64,7 +64,7 @@ describe('workers/branch/parent', () => {
         labels: ['rebase'],
       });
       const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(undefined);
+      expect(res.parentBranch).toBeUndefined();
     });
     it('returns undefined if unmergeable and can rebase', async () => {
       platform.branchExists.mockReturnValue(true);
@@ -73,7 +73,7 @@ describe('workers/branch/parent', () => {
         canRebase: true,
       });
       const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(undefined);
+      expect(res.parentBranch).toBeUndefined();
     });
     it('returns undefined if unmergeable and can rebase (gitlab)', async () => {
       config.isGitLab = true;
@@ -83,8 +83,8 @@ describe('workers/branch/parent', () => {
         canRebase: true,
       });
       const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(undefined);
-      expect(platform.deleteBranch.mock.calls.length).toBe(1);
+      expect(res.parentBranch).toBeUndefined();
+      expect(platform.deleteBranch).toHaveBeenCalledTimes(1);
     });
     it('returns branchName if automerge branch and not stale', async () => {
       config.automerge = true;
@@ -99,7 +99,7 @@ describe('workers/branch/parent', () => {
       platform.branchExists.mockReturnValue(true);
       platform.isBranchStale.mockReturnValueOnce(true);
       const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(undefined);
+      expect(res.parentBranch).toBeUndefined();
     });
     it('returns branch if rebaseStalePrs enabled but cannot rebase', async () => {
       config.rebaseStalePrs = true;
@@ -110,7 +110,7 @@ describe('workers/branch/parent', () => {
         canRebase: false,
       });
       const res = await getParentBranch(config);
-      expect(res.parentBranch).not.toBe(undefined);
+      expect(res.parentBranch).not.toBeUndefined();
     });
   });
 });
