@@ -37,7 +37,7 @@ function createSingleConfig(option) {
   if (option.description) {
     temp.description = option.description;
   }
-  if (option.default) {
+  if (option.default !== undefined) {
     temp.default = option.default;
   }
   if (option.allowedValues) {
