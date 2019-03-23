@@ -6,6 +6,6 @@ renovateWorker.start = jest.fn();
 describe('renovate', () => {
   it('starts', () => {
     require('../lib/renovate');
-    expect(renovateWorker.start.mock.calls).toHaveLength(1);
+    expect(renovateWorker.start).toHaveBeenCalledTimes(1);
   });
 });
