@@ -7,64 +7,64 @@ describe('semver.getPatch(input)', () => {
 });
 describe('semver.equals(a, b)', () => {
   it('should pad short version', () => {
-    expect(semver.equals('1.2.0', 'v1.2')).toBe(true);
+    expect(semver.equals('1.2.0', 'v1.2')).toBeTruthy();
   });
   it('should pad really short version', () => {
-    expect(semver.equals('v1.0.0', '1')).toBe(true);
+    expect(semver.equals('v1.0.0', '1')).toBeTruthy();
   });
 });
 describe('semver.isGreaterThan(a, b)', () => {
   it('should pad short version', () => {
-    expect(semver.isGreaterThan('1.2.0', 'v1.2')).toBe(false);
+    expect(semver.isGreaterThan('1.2.0', 'v1.2')).toBeFalsy();
   });
   it('should pad really short version', () => {
-    expect(semver.isGreaterThan('v1.0.1', '1')).toBe(true);
+    expect(semver.isGreaterThan('v1.0.1', '1')).toBeTruthy();
   });
   it('should pad both versions', () => {
-    expect(semver.isGreaterThan('1', '1.1')).toBe(false);
+    expect(semver.isGreaterThan('1', '1.1')).toBeFalsy();
   });
 });
 describe('semver.isSingleVersion(input)', () => {
   it('should pad short version', () => {
-    expect(!!semver.isSingleVersion('v1.2')).toBe(true);
+    expect(Boolean(semver.isSingleVersion('v1.2'))).toBeTruthy();
   });
 });
 describe('semver.isStable(input)', () => {
   it('should pad short version', () => {
-    expect(!!semver.isStable('v1.2')).toBe(true);
+    expect(Boolean(semver.isStable('v1.2'))).toBeTruthy();
   });
 });
 describe('semver.isValid(input)', () => {
   it('should support simple semver', () => {
-    expect(!!semver.isValid('1.2.3')).toBe(true);
+    expect(Boolean(semver.isValid('1.2.3'))).toBeTruthy();
   });
   it('should support semver with dash', () => {
-    expect(!!semver.isValid('1.2.3-foo')).toBe(true);
+    expect(Boolean(semver.isValid('1.2.3-foo'))).toBeTruthy();
   });
   it('should reject semver without dash', () => {
-    expect(!!semver.isValid('1.2.3foo')).toBe(false);
+    expect(Boolean(semver.isValid('1.2.3foo'))).toBeFalsy();
   });
   it('should support ranges', () => {
-    expect(!!semver.isValid('~1.2.3')).toBe(true);
-    expect(!!semver.isValid('^1.2.3')).toBe(true);
-    expect(!!semver.isValid('>1.2.3')).toBe(true);
+    expect(Boolean(semver.isValid('~1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isValid('^1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isValid('>1.2.3'))).toBeTruthy();
   });
 });
 describe('semver.isVersion(input)', () => {
   it('should support simple semver', () => {
-    expect(!!semver.isValid('1.2.3')).toBe(true);
+    expect(Boolean(semver.isValid('1.2.3'))).toBeTruthy();
   });
   it('should support shortened version', () => {
-    expect(!!semver.isValid('2.5')).toBe(true);
+    expect(Boolean(semver.isValid('2.5'))).toBeTruthy();
   });
   it('should support shortened v version', () => {
-    expect(!!semver.isValid('v2.5')).toBe(true);
+    expect(Boolean(semver.isValid('v2.5'))).toBeTruthy();
   });
 });
 describe('semver.isLessThanRange()', () => {
   it('handles massaged tilde', () => {
-    expect(semver.isLessThanRange('0.3.1', '~0.4')).toBe(true);
-    expect(semver.isLessThanRange('0.5.1', '~0.4')).toBe(false);
+    expect(semver.isLessThanRange('0.3.1', '~0.4')).toBeTruthy();
+    expect(semver.isLessThanRange('0.5.1', '~0.4')).toBeFalsy();
   });
 });
 describe('semver.maxSatisfyingVersion()', () => {
@@ -101,8 +101,8 @@ describe('semver.minSatisfyingVersion()', () => {
 });
 describe('semver.matches()', () => {
   it('handles massaged tilde', () => {
-    expect(semver.matches('0.3.1', '~0.4')).toBe(false);
-    expect(semver.matches('0.5.1', '~0.4')).toBe(true);
+    expect(semver.matches('0.3.1', '~0.4')).toBeFalsy();
+    expect(semver.matches('0.5.1', '~0.4')).toBeTruthy();
   });
 });
 describe('semver.getNewValue()', () => {

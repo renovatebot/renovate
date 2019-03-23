@@ -2,11 +2,11 @@ const semver = require('../../lib/versioning/cargo');
 
 describe('semver.matches()', () => {
   it('handles comma', () => {
-    expect(semver.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(true);
-    expect(semver.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBe(false);
-    expect(semver.matches('4.2.0', '4.2.0, < 4.2.4')).toBe(true);
-    expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
-    expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
+    expect(semver.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBeTruthy();
+    expect(semver.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBeFalsy();
+    expect(semver.matches('4.2.0', '4.2.0, < 4.2.4')).toBeTruthy();
+    expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBeFalsy();
+    expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBeFalsy();
   });
 });
 describe('semver.maxSatisfyingVersion()', () => {
@@ -27,28 +27,30 @@ describe('semver.maxSatisfyingVersion()', () => {
 });
 describe('semver.isValid()', () => {
   it('simple constraints are valid', () => {
-    expect(!!semver.isValid('1')).toBe(true);
-    expect(!!semver.isValid('1.2')).toBe(true);
-    expect(!!semver.isValid('1.2.3')).toBe(true);
-    expect(!!semver.isValid('^1.2.3')).toBe(true);
-    expect(!!semver.isValid('~1.2.3')).toBe(true);
-    expect(!!semver.isValid('1.2.*')).toBe(true);
+    expect(Boolean(semver.isValid('1'))).toBeTruthy();
+    expect(Boolean(semver.isValid('1.2'))).toBeTruthy();
+    expect(Boolean(semver.isValid('1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isValid('^1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isValid('~1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isValid('1.2.*'))).toBeTruthy();
   });
   it('handles comma', () => {
-    expect(!!semver.isValid('< 3.0, >= 1.0.0 <= 2.0.0')).toBe(true);
-    expect(!!semver.isValid('< 3.0, >= 1.0.0 <= 2.0.0, = 5.1.2')).toBe(true);
+    expect(Boolean(semver.isValid('< 3.0, >= 1.0.0 <= 2.0.0'))).toBeTruthy();
+    expect(
+      Boolean(semver.isValid('< 3.0, >= 1.0.0 <= 2.0.0, = 5.1.2'))
+    ).toBeTruthy();
   });
 });
 describe('semver.isVersion()', () => {
   it('handles comma', () => {
-    expect(!!semver.isVersion('1.2.3')).toBe(true);
-    expect(!!semver.isValid('1.2')).toBe(true);
+    expect(Boolean(semver.isVersion('1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isValid('1.2'))).toBeTruthy();
   });
 });
 describe('semver.isLessThanRange()', () => {
   it('handles comma', () => {
-    expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 <= 2.0.0')).toBe(true);
-    expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 <= 2.0.0')).toBe(false);
+    expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 <= 2.0.0')).toBeTruthy();
+    expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 <= 2.0.0')).toBeFalsy();
   });
 });
 describe('semver.minSatisfyingVersion()', () => {
@@ -67,7 +69,7 @@ describe('semver.minSatisfyingVersion()', () => {
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
         '4.0.0, = 0.5.0'
       )
-    ).toBe(null);
+    ).toBeNull();
     expect(
       semver.minSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
@@ -79,27 +81,27 @@ describe('semver.minSatisfyingVersion()', () => {
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
         '6.2.0, 3.*'
       )
-    ).toBe(null);
+    ).toBeNull();
   });
 });
 describe('semver.isSingleVersion()', () => {
   it('returns false if naked version', () => {
-    expect(!!semver.isSingleVersion('1.2.3')).toBe(false);
-    expect(!!semver.isSingleVersion('1.2.3-alpha.1')).toBe(false);
+    expect(Boolean(semver.isSingleVersion('1.2.3'))).toBeFalsy();
+    expect(Boolean(semver.isSingleVersion('1.2.3-alpha.1'))).toBeFalsy();
   });
   it('returns true if equals', () => {
-    expect(!!semver.isSingleVersion('=1.2.3')).toBe(true);
-    expect(!!semver.isSingleVersion('= 1.2.3')).toBe(true);
-    expect(!!semver.isSingleVersion('  = 1.2.3')).toBe(true);
+    expect(Boolean(semver.isSingleVersion('=1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isSingleVersion('= 1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isSingleVersion('  = 1.2.3'))).toBeTruthy();
   });
   it('returns false for partial versions', () => {
-    expect(!!semver.isSingleVersion('1')).toBe(false);
-    expect(!!semver.isSingleVersion('1.2')).toBe(false);
+    expect(Boolean(semver.isSingleVersion('1'))).toBeFalsy();
+    expect(Boolean(semver.isSingleVersion('1.2'))).toBeFalsy();
   });
   it('returns false for wildcard constraints', () => {
-    expect(!!semver.isSingleVersion('*')).toBe(false);
-    expect(!!semver.isSingleVersion('1.*')).toBe(false);
-    expect(!!semver.isSingleVersion('1.2.*')).toBe(false);
+    expect(Boolean(semver.isSingleVersion('*'))).toBeFalsy();
+    expect(Boolean(semver.isSingleVersion('1.*'))).toBeFalsy();
+    expect(Boolean(semver.isSingleVersion('1.2.*'))).toBeFalsy();
   });
 });
 describe('semver.getNewValue()', () => {

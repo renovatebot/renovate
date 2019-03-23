@@ -111,8 +111,8 @@ describe('versioning/maven/compare', () => {
   it('filters out incorrect ranges', () => {
     Object.keys(invalidRanges).forEach(rangeStr => {
       const range = parseRange(rangeStr);
-      expect(range).toEqual(null);
-      expect(rangeToStr(range)).toEqual(null);
+      expect(range).toBeNull();
+      expect(rangeToStr(range)).toBeNull();
     });
   });
   it('parses version ranges and translates them back to string', () => {
@@ -192,7 +192,7 @@ describe('versioning/maven/compare', () => {
       const fullRange = parseRange(rangeStr);
       expect(presetValue).toEqual(fullRange);
       if (fullRange === null) {
-        expect(presetValue).toEqual(null);
+        expect(presetValue).toBeNull();
       } else {
         expect(rangeToStr(fullRange)).toEqual(rangeStr);
       }
@@ -218,37 +218,37 @@ describe('versioning/maven/compare', () => {
 
 describe('versioning/maven/index', () => {
   it('validates version string', () => {
-    expect(isVersion('')).toEqual(false);
-    expect(isVersion('1.0.0')).toEqual(true);
-    expect(isVersion('0')).toEqual(true);
-    expect(isVersion('0.1-2-sp')).toEqual(true);
-    expect(isVersion('1-final')).toEqual(true);
-    expect(isVersion('v1.0.0')).toEqual(true);
-    expect(isVersion('x1.0.0')).toEqual(true);
-    expect(isVersion('2.1.1.RELEASE')).toEqual(true);
-    expect(isVersion('Greenwich.SR1')).toEqual(true);
-    expect(isVersion('.1')).toEqual(false);
-    expect(isVersion('1.')).toEqual(false);
-    expect(isVersion('-1')).toEqual(false);
-    expect(isVersion('1-')).toEqual(false);
+    expect(isVersion('')).toBeFalsy();
+    expect(isVersion('1.0.0')).toBeTruthy();
+    expect(isVersion('0')).toBeTruthy();
+    expect(isVersion('0.1-2-sp')).toBeTruthy();
+    expect(isVersion('1-final')).toBeTruthy();
+    expect(isVersion('v1.0.0')).toBeTruthy();
+    expect(isVersion('x1.0.0')).toBeTruthy();
+    expect(isVersion('2.1.1.RELEASE')).toBeTruthy();
+    expect(isVersion('Greenwich.SR1')).toBeTruthy();
+    expect(isVersion('.1')).toBeFalsy();
+    expect(isVersion('1.')).toBeFalsy();
+    expect(isVersion('-1')).toBeFalsy();
+    expect(isVersion('1-')).toBeFalsy();
   });
   it('checks if version is stable', () => {
-    expect(isStable('')).toEqual(null);
-    expect(isStable('foobar')).toEqual(false);
-    expect(isStable('1')).toEqual(true);
-    expect(isStable('1.2')).toEqual(true);
-    expect(isStable('1.2.3')).toEqual(true);
-    expect(isStable('1.2.3.4')).toEqual(true);
-    expect(isStable('v1.2.3.4')).toEqual(true);
-    expect(isStable('1-alpha-1')).toEqual(false);
-    expect(isStable('1-b1')).toEqual(false);
-    expect(isStable('1.final')).toEqual(true);
-    expect(isStable('1.0milestone1')).toEqual(false);
-    expect(isStable('1-sp')).toEqual(true);
-    expect(isStable('1-ga-1')).toEqual(true);
+    expect(isStable('')).toBeNull();
+    expect(isStable('foobar')).toBeFalsy();
+    expect(isStable('1')).toBeTruthy();
+    expect(isStable('1.2')).toBeTruthy();
+    expect(isStable('1.2.3')).toBeTruthy();
+    expect(isStable('1.2.3.4')).toBeTruthy();
+    expect(isStable('v1.2.3.4')).toBeTruthy();
+    expect(isStable('1-alpha-1')).toBeFalsy();
+    expect(isStable('1-b1')).toBeFalsy();
+    expect(isStable('1.final')).toBeTruthy();
+    expect(isStable('1.0milestone1')).toBeFalsy();
+    expect(isStable('1-sp')).toBeTruthy();
+    expect(isStable('1-ga-1')).toBeTruthy();
   });
   it('returns major version', () => {
-    expect(getMajor('')).toEqual(null);
+    expect(getMajor('')).toBeNull();
     expect(getMajor('1')).toEqual(1);
     expect(getMajor('1.2')).toEqual(1);
     expect(getMajor('1.2.3')).toEqual(1);
@@ -256,7 +256,7 @@ describe('versioning/maven/index', () => {
     expect(getMajor('1rc42')).toEqual(1);
   });
   it('returns minor version', () => {
-    expect(getMinor('')).toEqual(null);
+    expect(getMinor('')).toBeNull();
     expect(getMinor('1')).toEqual(0);
     expect(getMinor('1.2')).toEqual(2);
     expect(getMinor('1.2.3')).toEqual(2);
@@ -265,7 +265,7 @@ describe('versioning/maven/index', () => {
     expect(getMinor('1-rc42')).toEqual(0);
   });
   it('returns patch version', () => {
-    expect(getPatch('')).toEqual(null);
+    expect(getPatch('')).toBeNull();
     expect(getPatch('1')).toEqual(0);
     expect(getPatch('1.2')).toEqual(0);
     expect(getPatch('1.2.3')).toEqual(3);
@@ -275,23 +275,19 @@ describe('versioning/maven/index', () => {
     expect(getPatch('1-rc42-1')).toEqual(0);
   });
   it('matches against maven ranges', () => {
-    expect(matches('0', '[0,1]')).toEqual(true);
-    expect(matches('1', '[0,1]')).toEqual(true);
-    expect(matches('0', '(0,1)')).toEqual(false);
-    expect(matches('1', '(0,1)')).toEqual(false);
-    expect(matches('1', '(0,2)')).toEqual(true);
-    expect(matches('1', '[0,2]')).toEqual(true);
-    expect(matches('1', '(,1]')).toEqual(true);
-    expect(matches('1', '(,1)')).toEqual(false);
-    expect(matches('1', '[1,)')).toEqual(true);
-    expect(matches('1', '(1,)')).toEqual(false);
-    expect(matches('1', '(,1),(1,)')).toEqual(false);
-    expect(matches('1', '(0,1),(1,2)')).toEqual(false);
-    expect(matches('1.0.0.RC9.2', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toEqual(
-      false
-    );
-    expect(matches('1.0.0-RC14', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toEqual(
-      true
-    );
+    expect(matches('0', '[0,1]')).toBeTruthy();
+    expect(matches('1', '[0,1]')).toBeTruthy();
+    expect(matches('0', '(0,1)')).toBeFalsy();
+    expect(matches('1', '(0,1)')).toBeFalsy();
+    expect(matches('1', '(0,2)')).toBeTruthy();
+    expect(matches('1', '[0,2]')).toBeTruthy();
+    expect(matches('1', '(,1]')).toBeTruthy();
+    expect(matches('1', '(,1)')).toBeFalsy();
+    expect(matches('1', '[1,)')).toBeTruthy();
+    expect(matches('1', '(1,)')).toBeFalsy();
+    expect(matches('1', '(,1),(1,)')).toBeFalsy();
+    expect(matches('1', '(0,1),(1,2)')).toBeFalsy();
+    expect(matches('1.0.0.RC9.2', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toBeFalsy();
+    expect(matches('1.0.0-RC14', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toBeTruthy();
   });
 });

@@ -4,12 +4,12 @@ const semver = require('../../lib/versioning/semver');
 describe('docker.', () => {
   describe('isValid(version)', () => {
     it('should support all versions length', () => {
-      expect(docker.isValid(null)).toBe(null);
+      expect(docker.isValid(null)).toBeNull();
       expect(docker.isValid('1.2.3')).toBe('1.2.3');
       expect(docker.isValid('18.04')).toBe('18.04');
       expect(docker.isValid('10.1')).toBe('10.1');
       expect(docker.isValid('3')).toBe('3');
-      expect(docker.isValid('foo')).toBe(null);
+      expect(docker.isValid('foo')).toBeNull();
     });
   });
   describe('getMajor(version)', () => {
@@ -18,7 +18,7 @@ describe('docker.', () => {
       expect(docker.getMajor('18.04')).toBe(18);
       expect(docker.getMajor('10.1')).toBe(10);
       expect(docker.getMajor('3')).toBe(3);
-      expect(docker.getMajor('foo')).toBe(null);
+      expect(docker.getMajor('foo')).toBeNull();
     });
   });
   describe('getMinor(version)', () => {
@@ -26,54 +26,54 @@ describe('docker.', () => {
       expect(docker.getMinor('1.2.3')).toBe(2);
       expect(docker.getMinor('18.04')).toBe(4);
       expect(docker.getMinor('10.1')).toBe(1);
-      expect(docker.getMinor('3')).toBe(null);
-      expect(docker.getMinor('foo')).toBe(null);
+      expect(docker.getMinor('3')).toBeNull();
+      expect(docker.getMinor('foo')).toBeNull();
     });
   });
   describe('getPatch(version)', () => {
     it('should support all versions length', () => {
       expect(docker.getPatch('1.2.3')).toBe(3);
-      expect(docker.getPatch('18.04')).toBe(null);
-      expect(docker.getPatch('10.1')).toBe(null);
-      expect(docker.getPatch('3')).toBe(null);
-      expect(docker.getPatch('foo')).toBe(null);
+      expect(docker.getPatch('18.04')).toBeNull();
+      expect(docker.getPatch('10.1')).toBeNull();
+      expect(docker.getPatch('3')).toBeNull();
+      expect(docker.getPatch('foo')).toBeNull();
     });
   });
 
   describe('isGreaterThan(version, other)', () => {
     it('should support all versions length', () => {
-      expect(docker.isGreaterThan('1.2.3', '1.2')).toBe(false);
-      expect(docker.isGreaterThan('18.04', '18.1')).toBe(true);
-      expect(docker.isGreaterThan('10.1', '10.1.2')).toBe(true);
-      expect(docker.isGreaterThan('3', '2')).toBe(true);
-      expect(docker.isGreaterThan('1.2.3', '1.2.3')).toBe(false);
+      expect(docker.isGreaterThan('1.2.3', '1.2')).toBeFalsy();
+      expect(docker.isGreaterThan('18.04', '18.1')).toBeTruthy();
+      expect(docker.isGreaterThan('10.1', '10.1.2')).toBeTruthy();
+      expect(docker.isGreaterThan('3', '2')).toBeTruthy();
+      expect(docker.isGreaterThan('1.2.3', '1.2.3')).toBeFalsy();
     });
   });
   describe('isLessThanRange(version, range)', () => {
     it('should support all versions length', () => {
-      expect(docker.isLessThanRange('1.2.3', '2.0')).toBe(true);
-      expect(docker.isLessThanRange('18.04', '18.1')).toBe(false);
-      expect(docker.isLessThanRange('10.1', '10.0.4')).toBe(false);
-      expect(docker.isLessThanRange('3', '4.0')).toBe(true);
-      expect(docker.isLessThanRange('1.2', '1.3.4')).toBe(true);
+      expect(docker.isLessThanRange('1.2.3', '2.0')).toBeTruthy();
+      expect(docker.isLessThanRange('18.04', '18.1')).toBeFalsy();
+      expect(docker.isLessThanRange('10.1', '10.0.4')).toBeFalsy();
+      expect(docker.isLessThanRange('3', '4.0')).toBeTruthy();
+      expect(docker.isLessThanRange('1.2', '1.3.4')).toBeTruthy();
     });
   });
   describe('equals(version, other)', () => {
     it('should support all versions length', () => {
-      expect(docker.equals('1.2.3', '1.2.3')).toBe(true);
-      expect(docker.equals('18.04', '18.4')).toBe(true);
-      expect(docker.equals('10.0', '10.0.4')).toBe(false);
-      expect(docker.equals('3', '4.0')).toBe(false);
-      expect(docker.equals('1.2', '1.2.3')).toBe(false);
+      expect(docker.equals('1.2.3', '1.2.3')).toBeTruthy();
+      expect(docker.equals('18.04', '18.4')).toBeTruthy();
+      expect(docker.equals('10.0', '10.0.4')).toBeFalsy();
+      expect(docker.equals('3', '4.0')).toBeFalsy();
+      expect(docker.equals('1.2', '1.2.3')).toBeFalsy();
     });
   });
   describe('equals(version, other)', () => {
     it('should support all versions length', () => {
-      expect(docker.equals('1.2.3', '1.2.3')).toBe(true);
-      expect(docker.equals('18.04', '18.4')).toBe(true);
-      expect(docker.equals('10.0', '10.0.4')).toBe(false);
-      expect(docker.equals('3', '4.0')).toBe(false);
-      expect(docker.equals('1.2', '1.2.3')).toBe(false);
+      expect(docker.equals('1.2.3', '1.2.3')).toBeTruthy();
+      expect(docker.equals('18.04', '18.4')).toBeTruthy();
+      expect(docker.equals('10.0', '10.0.4')).toBeFalsy();
+      expect(docker.equals('3', '4.0')).toBeFalsy();
+      expect(docker.equals('1.2', '1.2.3')).toBeFalsy();
     });
   });
   describe('maxSatisfyingVersion(versions, range)', () => {
@@ -96,8 +96,8 @@ describe('docker.', () => {
           expect(max(versions, '1.2')).toBe('1.2');
           expect(max(versions, '1')).toBe('1');
           // return null if not found
-          expect(max(versions, '1.3')).toBe(null);
-          expect(max(versions, '0.9')).toBe(null);
+          expect(max(versions, '1.3')).toBeNull();
+          expect(max(versions, '0.9')).toBeNull();
         }
       );
     });

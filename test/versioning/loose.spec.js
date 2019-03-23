@@ -19,17 +19,17 @@ describe('loose.', () => {
         expect(loose.isValid(version)).toBe(version);
       });
       ['foo', '1.2.3.4.5.6.7'].forEach(version => {
-        expect(loose.isValid(version)).toBe(null);
+        expect(loose.isValid(version)).toBeNull();
       });
     });
   });
   describe('isGreaterThan(version)', () => {
     it('it should compare using release number than suffix', () => {
-      expect(loose.isGreaterThan('2.4.0', '2.4')).toBe(true);
-      expect(loose.isGreaterThan('2.4.2', '2.4.1')).toBe(true);
-      expect(loose.isGreaterThan('2.4.beta', '2.4.alpha')).toBe(true);
-      expect(loose.isGreaterThan('1.9', '2')).toBe(false);
-      expect(loose.isGreaterThan('1.9', '1.9.1')).toBe(false);
+      expect(loose.isGreaterThan('2.4.0', '2.4')).toBeTruthy();
+      expect(loose.isGreaterThan('2.4.2', '2.4.1')).toBeTruthy();
+      expect(loose.isGreaterThan('2.4.beta', '2.4.alpha')).toBeTruthy();
+      expect(loose.isGreaterThan('1.9', '2')).toBeFalsy();
+      expect(loose.isGreaterThan('1.9', '1.9.1')).toBeFalsy();
     });
   });
 });
