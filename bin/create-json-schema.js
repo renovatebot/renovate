@@ -1,4 +1,5 @@
 const fs = require('fs');
+const upath = require('upath');
 const { getOptions } = require('../lib/config/definitions');
 
 const types = {
@@ -84,7 +85,7 @@ function generateSchema() {
   createSchemaForChildConfigs();
   schema.properties = properties;
   fs.writeFileSync(
-    'renovate-schema.json',
+    upath.join(__dirname, '../renovate-schema.json'),
     JSON.stringify(schema, null, 2),
     'utf-8'
   );
