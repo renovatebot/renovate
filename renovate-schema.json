@@ -323,14 +323,16 @@
               "packagePatterns": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "type": "string",
+                  "format": "regex"
                 },
                 "description": "Package name patterns to match. Valid only within `packageRules` object."
               },
               "excludePackagePatterns": {
                 "type": "array",
                 "items": {
-                  "type": "string"
+                  "type": "string",
+                  "format": "regex"
                 },
                 "description": "Package name patterns to exclude. Valid only within `packageRules` object."
               },
@@ -692,9 +694,9 @@
     "fileMatch": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "format": "regex"
       },
-      "format": "regex",
       "description": "JS RegExp pattern for matching manager files"
     },
     "js": {
