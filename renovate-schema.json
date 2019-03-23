@@ -74,8 +74,8 @@
     "onboardingConfig": {
       "description": "Configuration to use in onboarding PRs",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "includeForks": {
       "description": "Whether to process forked repositories or not. By default, all forked repositories are skipped over.",
@@ -99,8 +99,8 @@
     "encrypted": {
       "description": "A configuration object containing configuration encrypted with project key.",
       "type": "object",
-      "$ref": "#",
-      "default": null
+      "default": null,
+      "$ref": "#"
     },
     "timezone": {
       "description": "[IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)",
@@ -226,8 +226,8 @@
     "engines": {
       "description": "Configuration specifically for `package.json`>`engines`",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "registryUrls": {
       "description": "List of URLs to try for dependency lookup. Package manager-specific",
@@ -429,25 +429,24 @@
     "major": {
       "description": "Configuration to apply when an update type is major",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "minor": {
       "description": "Configuration to apply when an update type is minor",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "patch": {
       "description": "Configuration to apply when an update type is patch. Only applies if `separateMinorPatch` is set to true",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "pin": {
       "description": "Configuration to apply when an update type is pin.",
       "type": "object",
-      "$ref": "#",
       "default": {
         "unpublishSafe": false,
         "recreateClosed": true,
@@ -458,12 +457,12 @@
           "commitMessageTopic": "dependencies",
           "commitMessageExtra": ""
         }
-      }
+      },
+      "$ref": "#"
     },
     "digest": {
       "description": "Configuration to apply when updating a digest (no change in tag/version)",
       "type": "object",
-      "$ref": "#",
       "default": {
         "branchTopic": "{{{depNameSanitized}}}-digest",
         "commitMessageExtra": "to {{newDigestShort}}",
@@ -471,7 +470,8 @@
         "prBodyDefinitions": {
           "Change": "`{{{currentValue}}}` -> `{{{newDigestShort}}}`"
         }
-      }
+      },
+      "$ref": "#"
     },
     "semanticCommits": {
       "description": "Enable semantic commit prefixes for commits and PR titles",
@@ -563,7 +563,6 @@
     "vulnerabilityAlerts": {
       "description": "Config to apply when a PR is necessary due to vulnerability of existing package version.",
       "type": "object",
-      "$ref": "#",
       "default": {
         "enabled": true,
         "groupName": null,
@@ -571,7 +570,8 @@
         "masterIssueApproval": false,
         "rangeStrategy": "update-lockfile",
         "commitMessageSuffix": "[SECURITY]"
-      }
+      },
+      "$ref": "#"
     },
     "branchName": {
       "description": "Branch name template",
@@ -633,7 +633,6 @@
     "lockFileMaintenance": {
       "description": "Configuration for lock file maintenance",
       "type": "object",
-      "$ref": "#",
       "default": {
         "enabled": false,
         "recreateClosed": true,
@@ -644,7 +643,8 @@
         "commitMessageExtra": null,
         "schedule": ["before 5am on monday"],
         "groupName": null
-      }
+      },
+      "$ref": "#"
     },
     "lazyGrouping": {
       "description": "Use group names only when multiple dependencies upgraded",
@@ -664,11 +664,11 @@
     "group": {
       "description": "Config if groupName is enabled",
       "type": "object",
-      "$ref": "#",
       "default": {
         "branchTopic": "{{{groupSlug}}}",
         "commitMessageTopic": "{{{groupName}}}"
-      }
+      },
+      "$ref": "#"
     },
     "labels": {
       "description": "Labels to add to Pull Request",
@@ -702,13 +702,12 @@
     "js": {
       "description": "Configuration object for javascript language",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "npm": {
       "description": "Configuration object for npm package.json renovation",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)package.json$"],
         "rollbackPrs": true,
@@ -716,53 +715,54 @@
         "prBodyDefinitions": {
           "Change": "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})"
         }
-      }
+      },
+      "$ref": "#"
     },
     "meteor": {
       "description": "Configuration object for meteor package.js renovation",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)package.js$"]
-      }
+      },
+      "$ref": "#"
     },
     "bazel": {
       "description": "Configuration object for bazel WORKSPACE renovation",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)WORKSPACE$"],
         "prBodyDefinitions": {
           "Change": "{{#if currentDigestShort}}`{{{currentDigestShort}}}` -> {{#if isDigest}}`{{{newDigestShort}}}`{{else}}`{{{newVersion}}}`{{/if}}{{else}}`{{{currentValue}}}` -> `{{{newValue}}}`{{/if}}"
         }
-      }
+      },
+      "$ref": "#"
     },
     "buildkite": {
       "description": "Configuration object for buildkite pipeline renovation",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["buildkite\\.ya?ml", "\\.buildkite/.+\\.ya?ml$"],
         "commitMessageTopic": "buildkite plugin {{depName}}",
         "commitMessageExtra": "to {{#if isMajor}}v{{{newMajor}}}{{else}}{{{newValue}}}{{/if}}",
         "managerBranchPrefix": "buildkite-"
-      }
+      },
+      "$ref": "#"
     },
     "golang": {
       "description": "Configuration object for Go language",
       "type": "object",
-      "$ref": "#",
       "default": {
         "commitMessageTopic": "module {{depNameShort}}"
-      }
+      },
+      "$ref": "#"
     },
     "gomod": {
       "description": "Configuration object for Go modules renovation",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)go.mod$"]
-      }
+      },
+      "$ref": "#"
     },
     "postUpdateOptions": {
       "description": "Enable post-update options to be run after package/artifact updating",
@@ -773,45 +773,45 @@
     "ruby": {
       "description": "Configuration object for ruby language",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "bundler": {
       "description": "Configuration object for bundler Gemfiles",
       "type": "object",
-      "$ref": "#",
       "default": {
         "enabled": false,
         "fileMatch": ["(^|/)Gemfile$"],
         "versionScheme": "ruby"
-      }
+      },
+      "$ref": "#"
     },
     "terraform": {
       "description": "Configuration object for Terraform module renovation",
       "type": "object",
-      "$ref": "#",
       "default": {
         "commitMessageTopic": "Terraform module {{depNameShort}}",
         "fileMatch": ["\\.tf$"],
         "versionScheme": "hashicorp"
-      }
+      },
+      "$ref": "#"
     },
     "rust": {
       "description": "Configuration option for Rust package management.",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "cargo": {
       "description": "Configuration object for Cargo crate renovation.",
       "type": "object",
-      "$ref": "#",
       "default": {
         "enabled": false,
         "commitMessageTopic": "Rust crate {{depName}}",
         "managerBranchPrefix": "rust-",
         "fileMatch": ["(^|/)Cargo.toml$"]
-      }
+      },
+      "$ref": "#"
     },
     "supportPolicy": {
       "description": "Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)",
@@ -823,37 +823,36 @@
     "node": {
       "description": "Configuration object for node version renovation",
       "type": "object",
-      "$ref": "#",
       "default": {
         "commitMessageTopic": "Node.js",
         "major": {
           "enabled": false
         }
-      }
+      },
+      "$ref": "#"
     },
     "travis": {
       "description": "Configuration object for .travis.yml node version renovation",
       "type": "object",
-      "$ref": "#",
       "default": {
         "enabled": false,
         "fileMatch": ["^.travis.yml$"],
         "versionScheme": "node"
-      }
+      },
+      "$ref": "#"
     },
     "nvm": {
       "description": "Configuration object for .nvmrc files",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["^.nvmrc$"],
         "versionScheme": "node"
-      }
+      },
+      "$ref": "#"
     },
     "docker": {
       "description": "Configuration object for Docker language",
       "type": "object",
-      "$ref": "#",
       "default": {
         "versionScheme": "docker",
         "managerBranchPrefix": "docker-",
@@ -882,167 +881,168 @@
         "group": {
           "commitMessageTopic": "{{{groupName}}} Docker tags"
         }
-      }
+      },
+      "$ref": "#"
     },
     "docker-compose": {
       "description": "Configuration object for Docker Compose renovation. Also inherits settings from `docker` object.",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)docker-compose[^/]*\\.ya?ml$"]
-      }
+      },
+      "$ref": "#"
     },
     "dockerfile": {
       "description": "Configuration object for Dockerfile renovation",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)Dockerfile$"]
-      }
+      },
+      "$ref": "#"
     },
     "kubernetes": {
       "description": "Configuration object for Kubernetes renovation. Also inherits settings from `docker` object.",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": []
-      }
+      },
+      "$ref": "#"
     },
     "circleci": {
       "description": "Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/).circleci/config.yml$"]
-      }
+      },
+      "$ref": "#"
     },
     "ansible": {
       "description": "Configuration object for Ansible yaml renovation. Also inherits settings from `docker` object.",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)tasks/[^/]+\\.ya?ml$"]
-      }
+      },
+      "$ref": "#"
     },
     "github-actions": {
       "description": "Configuration object for GitHub Actions workflow renovation. Also inherits settings from `docker` object.",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["^\\.github/main.workflow$"],
         "pinDigests": true
-      }
+      },
+      "$ref": "#"
     },
     "composer": {
       "description": "Configuration object for composer.json files",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)([\\w-]*)composer.json$"],
         "versionScheme": "composer"
-      }
+      },
+      "$ref": "#"
     },
     "php": {
       "description": "Configuration object for php",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "pip_requirements": {
       "description": "Configuration object for requirements.txt files",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)([\\w-]*)requirements.(txt|pip)$"]
-      }
+      },
+      "$ref": "#"
     },
     "pip_setup": {
       "description": "Configuration object for setup.py files",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)setup.py$"]
-      }
+      },
+      "$ref": "#"
     },
     "pipenv": {
       "description": "Configuration object for Pipfile files",
       "type": "object",
-      "$ref": "#",
       "default": {
         "enabled": false,
         "fileMatch": ["(^|/)Pipfile$"]
-      }
+      },
+      "$ref": "#"
     },
     "python": {
       "description": "Configuration object for python",
       "type": "object",
-      "$ref": "#",
       "default": {
         "versionScheme": "pep440"
-      }
+      },
+      "$ref": "#"
     },
     "compatibility": {
       "description": "Configuration object for compatibility",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "java": {
       "description": "Configuration object for all Java package managers",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "gradle": {
       "description": "Configuration object for build.gradle files",
       "type": "object",
-      "$ref": "#",
       "default": {
         "enabled": false,
         "fileMatch": ["\\.gradle$", "(^|/)gradle.properties$"],
         "timeout": 300,
         "versionScheme": "maven"
-      }
+      },
+      "$ref": "#"
     },
     "gradle-wrapper": {
       "description": "Configuration object for gradle-wrapper.properties files",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["(^|/)gradle/wrapper/gradle-wrapper.properties$"]
-      }
+      },
+      "$ref": "#"
     },
     "maven": {
       "description": "Configuration object for when renovating Maven pom.xml files",
       "type": "object",
-      "$ref": "#",
       "default": {
         "enabled": false,
         "fileMatch": ["\\.pom.xml$", "(^|/)pom.xml$"],
         "versionScheme": "maven"
-      }
+      },
+      "$ref": "#"
     },
     "gitlabci": {
       "description": "Configuration object for GitLab CI yml renovation. Also inherits settings from `docker` object.",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["^\\.gitlab-ci\\.yml$"]
-      }
+      },
+      "$ref": "#"
     },
     "dotnet": {
       "description": "Configuration object for .NET language",
       "type": "object",
-      "$ref": "#",
-      "default": {}
+      "default": {},
+      "$ref": "#"
     },
     "nuget": {
       "description": "Configuration object for C#/Nuget",
       "type": "object",
-      "$ref": "#",
       "default": {
         "fileMatch": ["\\.csproj$"]
-      }
+      },
+      "$ref": "#"
     },
     "hostRules": {
       "description": "Host rules/configuration including credentials",
@@ -1051,7 +1051,6 @@
     "prBodyDefinitions": {
       "description": "Table column definitions for use in PR tables",
       "type": "object",
-      "$ref": "#",
       "default": {
         "Package": "{{{depName}}}",
         "Type": "{{{depType}}}",
@@ -1061,7 +1060,8 @@
         "Change": "{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}",
         "References": "{{{references}}}",
         "Package file": "{{{packageFile}}}"
-      }
+      },
+      "$ref": "#"
     },
     "prBodyColumns": {
       "description": "List of columns to use in PR bodies",
