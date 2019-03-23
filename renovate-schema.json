@@ -4,242 +4,242 @@
   "type": "object",
   "properties": {
     "extends": {
+      "description": "Configuration presets to use/extend. Note: does not work if configured in config.js",
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Configuration presets to use/extend. Note: does not work if configured in config.js"
+      }
     },
     "ignorePresets": {
+      "description": "A list of presets to ignore, including nested ones inside `extends`",
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "A list of presets to ignore, including nested ones inside `extends`"
+      }
     },
     "description": {
+      "description": "Plain text description for a config or preset",
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Plain text description for a config or preset"
+      }
     },
     "enabled": {
-      "type": "boolean",
-      "description": "Enable or disable Renovate"
+      "description": "Enable or disable Renovate",
+      "type": "boolean"
     },
     "force": {
+      "description": "Any configuration defined within this object will force override existing settings",
       "type": "object",
-      "$ref": "#",
-      "description": "Any configuration defined within this object will force override existing settings"
+      "$ref": "#"
     },
     "forceCli": {
-      "type": "boolean",
       "description": "Whether CLI configuration options should be moved to the `force` config section",
+      "type": "boolean",
       "default": false
     },
     "dryRun": {
-      "type": "boolean",
       "description": "If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs",
+      "type": "boolean",
       "default": false
     },
     "printConfig": {
-      "type": "boolean",
       "description": "If enabled, log the full resolved config for each repo, including resolved presets",
+      "type": "boolean",
       "default": false
     },
     "binarySource": {
-      "type": "string",
       "description": "Where to source binaries like `npm` and `yarn` from, choices are `bundled`, `global` and `docker`",
+      "type": "string",
       "default": "bundled"
     },
     "logLevel": {
-      "type": "string",
       "description": "Logging level",
+      "type": "string",
       "default": "info"
     },
     "logFile": {
-      "type": "string",
-      "description": "Log file path"
+      "description": "Log file path",
+      "type": "string"
     },
     "logFileLevel": {
-      "type": "string",
       "description": "Log file log level",
+      "type": "string",
       "default": "debug"
     },
     "onboarding": {
-      "type": "boolean",
-      "description": "Require a Configuration PR first"
+      "description": "Require a Configuration PR first",
+      "type": "boolean"
     },
     "onboardingConfig": {
+      "description": "Configuration to use in onboarding PRs",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration to use in onboarding PRs",
       "default": {}
     },
     "includeForks": {
-      "type": "boolean",
       "description": "Whether to process forked repositories or not. By default, all forked repositories are skipped over.",
+      "type": "boolean",
       "default": false
     },
     "forkMode": {
-      "type": "boolean",
       "description": "Set to true to fork the source repository and create branches there instead",
+      "type": "boolean",
       "default": false
     },
     "requireConfig": {
-      "type": "boolean",
       "description": "Set to true if repositories must have a config to activate.",
+      "type": "boolean",
       "default": false
     },
     "privateKey": {
-      "type": "string",
-      "description": "Server-side private key"
+      "description": "Server-side private key",
+      "type": "string"
     },
     "encrypted": {
+      "description": "A configuration object containing configuration encrypted with project key.",
       "type": "object",
       "$ref": "#",
-      "description": "A configuration object containing configuration encrypted with project key.",
       "default": null
     },
     "timezone": {
-      "type": "string",
-      "description": "[IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)"
+      "description": "[IANA Time Zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)",
+      "type": "string"
     },
     "schedule": {
+      "description": "Times of day/week to limit branch creation to",
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Times of day/week to limit branch creation to",
       "default": "at any time"
     },
     "updateNotScheduled": {
-      "type": "boolean",
-      "description": "Whether to update (but not create) branches when not scheduled"
+      "description": "Whether to update (but not create) branches when not scheduled",
+      "type": "boolean"
     },
     "gitFs": {
-      "type": "string",
       "description": "Use git for FS operations instead of API. GitHub only.",
+      "type": "string",
       "default": null,
       "enum": ["https", "http", "ssh"]
     },
     "trustLevel": {
-      "type": "string",
       "description": "Set this to \"high\" if the bot should trust the repository owners/contents",
+      "type": "string",
       "default": "low"
     },
     "platform": {
-      "type": "string",
       "description": "Platform type of repository",
+      "type": "string",
       "default": "github"
     },
     "endpoint": {
-      "type": "string",
       "description": "Custom endpoint to use",
+      "type": "string",
       "default": null
     },
     "token": {
-      "type": "string",
-      "description": "Repository Auth Token"
+      "description": "Repository Auth Token",
+      "type": "string"
     },
     "username": {
-      "type": "string",
-      "description": "Username for authentication. Currently Bitbucket only"
+      "description": "Username for authentication. Currently Bitbucket only",
+      "type": "string"
     },
     "password": {
-      "type": "string",
-      "description": "Password for authentication. Currently Bitbucket only (AppPassword)."
+      "description": "Password for authentication. Currently Bitbucket only (AppPassword).",
+      "type": "string"
     },
     "npmrc": {
-      "type": "string",
-      "description": "String copy of npmrc file. Use \\n instead of line breaks"
+      "description": "String copy of npmrc file. Use \\n instead of line breaks",
+      "type": "string"
     },
     "npmToken": {
-      "type": "string",
-      "description": "npm token used for authenticating with the default registry"
+      "description": "npm token used for authenticating with the default registry",
+      "type": "string"
     },
     "yarnrc": {
-      "type": "string",
-      "description": "String copy of yarnrc file. Use \\n instead of line breaks"
+      "description": "String copy of yarnrc file. Use \\n instead of line breaks",
+      "type": "string"
     },
     "updateLockFiles": {
-      "type": "boolean",
-      "description": "Set to false to disable lock file updating"
+      "description": "Set to false to disable lock file updating",
+      "type": "boolean"
     },
     "skipInstalls": {
-      "type": "boolean",
       "description": "Skip installing modules/dependencies if lock file updating is possible alone",
+      "type": "boolean",
       "default": null
     },
     "ignoreNpmrcFile": {
-      "type": "boolean",
       "description": "Whether to ignore any .npmrc file found in repository",
+      "type": "boolean",
       "default": false
     },
     "autodiscover": {
-      "type": "boolean",
       "description": "Autodiscover all repositories",
+      "type": "boolean",
       "default": false
     },
     "autodiscoverFilter": {
-      "type": "string",
       "description": "Filter the list of autodiscovered repositories",
+      "type": "string",
       "default": null
     },
     "repositories": {
-      "type": "array",
-      "description": "List of Repositories"
+      "description": "List of Repositories",
+      "type": "array"
     },
     "baseBranches": {
-      "type": "array",
-      "description": "An array of one or more custom base branches to be processed. If left empty, the default branch will be chosen"
+      "description": "An array of one or more custom base branches to be processed. If left empty, the default branch will be chosen",
+      "type": "array"
     },
     "gitAuthor": {
-      "type": "string",
-      "description": "Author to use for git commits. RFC5322"
+      "description": "Author to use for git commits. RFC5322",
+      "type": "string"
     },
     "gitPrivateKey": {
-      "type": "string",
-      "description": "PGP key to use for signing git commits"
+      "description": "PGP key to use for signing git commits",
+      "type": "string"
     },
     "enabledManagers": {
-      "type": "array",
-      "description": "A list of package managers to enable. If defined, then all managers not on the list are disabled."
+      "description": "A list of package managers to enable. If defined, then all managers not on the list are disabled.",
+      "type": "array"
     },
     "includePaths": {
+      "description": "Include package files only within these defined paths",
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Include package files only within these defined paths",
       "default": []
     },
     "ignorePaths": {
+      "description": "Skip any package.json whose path matches one of these. Can be string or glob pattern",
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Skip any package.json whose path matches one of these. Can be string or glob pattern",
       "default": ["**/node_modules/**", "**/bower_components/**"]
     },
     "engines": {
+      "description": "Configuration specifically for `package.json`>`engines`",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration specifically for `package.json`>`engines`",
       "default": {}
     },
     "registryUrls": {
+      "description": "List of URLs to try for dependency lookup. Package manager-specific",
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "List of URLs to try for dependency lookup. Package manager-specific",
       "default": null
     },
     "versionScheme": {
-      "type": "string",
       "description": "Version scheme to use for filtering and comparisons",
+      "type": "string",
       "default": "semver",
       "enum": [
         "cargo",
@@ -257,113 +257,113 @@
       ]
     },
     "ignoreDeps": {
+      "description": "Dependencies to ignore",
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Dependencies to ignore"
+      }
     },
     "packageRules": {
-      "type": "array",
       "description": "Rules for matching package names",
+      "type": "array",
       "items": {
         "allOf": [
           {
             "type": "object",
             "properties": {
               "languages": {
+                "description": "List of languages to match (e.g. [\"python\"]). Valid only within `packageRules` object",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "List of languages to match (e.g. [\"python\"]). Valid only within `packageRules` object"
+                }
               },
               "baseBranchList": {
+                "description": "List of branches to match (e.g. [\"master\"]). Valid only within `packageRules` object",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "List of branches to match (e.g. [\"master\"]). Valid only within `packageRules` object"
+                }
               },
               "managers": {
+                "description": "List of package managers to match (e.g. [\"pipenv\"]). Valid only within `packageRules` object",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "List of package managers to match (e.g. [\"pipenv\"]). Valid only within `packageRules` object"
+                }
               },
               "datasources": {
+                "description": "List of datasources to match (e.g. [\"orb\"]). Valid only within `packageRules` object",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "List of datasources to match (e.g. [\"orb\"]). Valid only within `packageRules` object"
+                }
               },
               "depTypeList": {
+                "description": "List of depTypes to match (e.g. [`peerDependencies`]). Valid only within `packageRules` object",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "List of depTypes to match (e.g. [`peerDependencies`]). Valid only within `packageRules` object"
+                }
               },
               "packageNames": {
+                "description": "Package names to match. Valid only within `packageRules` object",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "Package names to match. Valid only within `packageRules` object"
+                }
               },
               "excludePackageNames": {
+                "description": "Package names to exclude. Valid only within `packageRules` object",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "Package names to exclude. Valid only within `packageRules` object"
+                }
               },
               "packagePatterns": {
+                "description": "Package name patterns to match. Valid only within `packageRules` object.",
                 "type": "array",
                 "items": {
                   "type": "string",
                   "format": "regex"
-                },
-                "description": "Package name patterns to match. Valid only within `packageRules` object."
+                }
               },
               "excludePackagePatterns": {
+                "description": "Package name patterns to exclude. Valid only within `packageRules` object.",
                 "type": "array",
                 "items": {
                   "type": "string",
                   "format": "regex"
-                },
-                "description": "Package name patterns to exclude. Valid only within `packageRules` object."
+                }
               },
               "matchCurrentVersion": {
-                "type": "string",
-                "description": "A version or version range to match against the current version of a package. Valid only within `packageRules` object"
+                "description": "A version or version range to match against the current version of a package. Valid only within `packageRules` object",
+                "type": "string"
               },
               "sourceUrlPrefixes": {
+                "description": "A list of source URL prefixes to match against, commonly used for grouping of monorepos or packages from the same organization.",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "A list of source URL prefixes to match against, commonly used for grouping of monorepos or packages from the same organization."
+                }
               },
               "updateTypes": {
+                "description": "Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object."
+                }
               },
               "paths": {
+                "description": "List of strings or glob patterns to match against package files. Applicable inside packageRules only",
                 "type": "array",
                 "items": {
                   "type": "string"
-                },
-                "description": "List of strings or glob patterns to match against package files. Applicable inside packageRules only"
+                }
               },
               "allowedVersions": {
-                "type": "string",
-                "description": "A semver range defining allowed versions for dependencies"
+                "description": "A semver range defining allowed versions for dependencies",
+                "type": "string"
               }
             }
           }
@@ -371,83 +371,83 @@
       }
     },
     "pinDigests": {
-      "type": "boolean",
       "description": "Whether to add digests to Dockerfile source images",
+      "type": "boolean",
       "default": false
     },
     "separateMajorMinor": {
-      "type": "boolean",
-      "description": "If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches"
+      "description": "If set to false, it will upgrade dependencies to latest release only, and not separate major/minor branches",
+      "type": "boolean"
     },
     "separateMultipleMajor": {
-      "type": "boolean",
       "description": "If set to true, PRs will be raised separately for each available major upgrade version",
+      "type": "boolean",
       "default": false
     },
     "separateMinorPatch": {
-      "type": "boolean",
       "description": "If set to true, it will separate minor and patch updates into separate branches",
+      "type": "boolean",
       "default": false
     },
     "ignoreUnstable": {
-      "type": "boolean",
-      "description": "Ignore versions with unstable semver"
+      "description": "Ignore versions with unstable semver",
+      "type": "boolean"
     },
     "ignoreDeprecated": {
-      "type": "boolean",
       "description": "Ignore deprecated versions unless the current version is deprecated",
+      "type": "boolean",
       "default": true
     },
     "unstablePattern": {
+      "description": "Regex for identifying unstable versions (docker only)",
       "type": "string",
-      "format": "regex",
-      "description": "Regex for identifying unstable versions (docker only)"
+      "format": "regex"
     },
     "followTag": {
-      "type": "string",
-      "description": "If defined, packages will follow this release tag exactly."
+      "description": "If defined, packages will follow this release tag exactly.",
+      "type": "string"
     },
     "respectLatest": {
-      "type": "boolean",
-      "description": "Ignore versions newer than npm \"latest\" version"
+      "description": "Ignore versions newer than npm \"latest\" version",
+      "type": "boolean"
     },
     "rangeStrategy": {
-      "type": "string",
       "description": "Policy for how to modify/update existing ranges.",
+      "type": "string",
       "default": "replace",
       "enum": ["auto", "pin", "bump", "replace", "widen", "update-lockfile"]
     },
     "branchPrefix": {
-      "type": "string",
       "description": "Prefix to use for all branch names",
+      "type": "string",
       "default": "renovate/"
     },
     "bumpVersion": {
-      "type": "string",
-      "description": "Bump the version in the package.json being updated"
+      "description": "Bump the version in the package.json being updated",
+      "type": "string"
     },
     "major": {
+      "description": "Configuration to apply when an update type is major",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration to apply when an update type is major",
       "default": {}
     },
     "minor": {
+      "description": "Configuration to apply when an update type is minor",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration to apply when an update type is minor",
       "default": {}
     },
     "patch": {
+      "description": "Configuration to apply when an update type is patch. Only applies if `separateMinorPatch` is set to true",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration to apply when an update type is patch. Only applies if `separateMinorPatch` is set to true",
       "default": {}
     },
     "pin": {
+      "description": "Configuration to apply when an update type is pin.",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration to apply when an update type is pin.",
       "default": {
         "unpublishSafe": false,
         "recreateClosed": true,
@@ -461,9 +461,9 @@
       }
     },
     "digest": {
+      "description": "Configuration to apply when updating a digest (no change in tag/version)",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration to apply when updating a digest (no change in tag/version)",
       "default": {
         "branchTopic": "{{{depNameSanitized}}}-digest",
         "commitMessageExtra": "to {{newDigestShort}}",
@@ -474,96 +474,96 @@
       }
     },
     "semanticCommits": {
-      "type": "boolean",
       "description": "Enable semantic commit prefixes for commits and PR titles",
+      "type": "boolean",
       "default": null
     },
     "semanticCommitType": {
-      "type": "string",
       "description": "Commit type to use if semantic commits is enabled",
+      "type": "string",
       "default": "chore"
     },
     "semanticCommitScope": {
-      "type": "string",
       "description": "Commit scope to use if semantic commits are enabled",
+      "type": "string",
       "default": "deps"
     },
     "rollbackPrs": {
-      "type": "boolean",
       "description": "Create PRs to roll back versions if the current version is not found in the registry",
+      "type": "boolean",
       "default": false
     },
     "recreateClosed": {
-      "type": "boolean",
       "description": "Recreate PRs even if same ones were closed previously",
+      "type": "boolean",
       "default": false
     },
     "rebaseStalePrs": {
-      "type": "boolean",
       "description": "Rebase stale PRs (GitHub only)",
+      "type": "boolean",
       "default": null
     },
     "rebaseLabel": {
-      "type": "string",
       "description": "Label to use to request the bot to rebase a PR manually (GitHub only)",
+      "type": "string",
       "default": "rebase"
     },
     "statusCheckVerify": {
-      "type": "boolean",
       "description": "Set a verify status check for all PRs",
+      "type": "boolean",
       "default": false
     },
     "unpublishSafe": {
-      "type": "boolean",
       "description": "Set a status check for unpublish-safe upgrades",
+      "type": "boolean",
       "default": false
     },
     "prCreation": {
-      "type": "string",
       "description": "When to create the PR for a branch. Values: immediate, not-pending, status-success.",
+      "type": "string",
       "default": "immediate"
     },
     "prNotPendingHours": {
-      "type": "integer",
       "description": "Timeout in hours for when prCreation=not-pending",
+      "type": "integer",
       "default": 25
     },
     "prHourlyLimit": {
-      "type": "integer",
       "description": "Rate limit PRs to maximum x created per hour. 0 (default) means no limit.",
+      "type": "integer",
       "default": 0
     },
     "prConcurrentLimit": {
-      "type": "integer",
       "description": "Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.",
+      "type": "integer",
       "default": 0
     },
     "automerge": {
-      "type": "boolean",
       "description": "Whether to automerge branches/PRs automatically, without human intervention",
+      "type": "boolean",
       "default": false
     },
     "automergeType": {
-      "type": "string",
       "description": "How to automerge - \"branch\", \"pr\", or \"pr-comment\". Branch support is GitHub-only",
+      "type": "string",
       "default": "pr"
     },
     "automergeComment": {
-      "type": "string",
       "description": "PR comment to add to trigger automerge. Used only if automergeType=pr-comment",
+      "type": "string",
       "default": "automergeComment"
     },
     "requiredStatusChecks": {
+      "description": "List of status checks that must pass before automerging. Set to null to enable automerging without tests.",
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "List of status checks that must pass before automerging. Set to null to enable automerging without tests."
+      }
     },
     "vulnerabilityAlerts": {
+      "description": "Config to apply when a PR is necessary due to vulnerability of existing package version.",
       "type": "object",
       "$ref": "#",
-      "description": "Config to apply when a PR is necessary due to vulnerability of existing package version.",
       "default": {
         "enabled": true,
         "groupName": null,
@@ -574,66 +574,66 @@
       }
     },
     "branchName": {
-      "type": "string",
       "description": "Branch name template",
+      "type": "string",
       "default": "{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}"
     },
     "managerBranchPrefix": {
-      "type": "string",
       "description": "Branch manager prefix",
+      "type": "string",
       "default": ""
     },
     "branchTopic": {
-      "type": "string",
       "description": "Branch topic",
+      "type": "string",
       "default": "{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}"
     },
     "commitMessage": {
-      "type": "string",
       "description": "Message to use for commit messages and pull request titles",
+      "type": "string",
       "default": "{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}"
     },
     "commitBody": {
-      "type": "string",
-      "description": "Commit message body template. Will be appended to commit message, separated by two line returns."
+      "description": "Commit message body template. Will be appended to commit message, separated by two line returns.",
+      "type": "string"
     },
     "commitMessagePrefix": {
-      "type": "string",
-      "description": "Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if semanticCommits enabled"
+      "description": "Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if semanticCommits enabled",
+      "type": "string"
     },
     "commitMessageAction": {
-      "type": "string",
       "description": "Action verb to use in commit messages and PR titles",
+      "type": "string",
       "default": "Update"
     },
     "commitMessageTopic": {
-      "type": "string",
       "description": "The upgrade topic/noun used in commit messages and PR titles",
+      "type": "string",
       "default": "dependency {{depName}}"
     },
     "commitMessageExtra": {
-      "type": "string",
       "description": "Extra description used after the commit message topic - typically the version",
+      "type": "string",
       "default": "to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}"
     },
     "commitMessageSuffix": {
-      "type": "string",
-      "description": "Suffix to add to end of commit messages and PR titles."
+      "description": "Suffix to add to end of commit messages and PR titles.",
+      "type": "string"
     },
     "prTitle": {
-      "type": "string",
       "description": "Pull Request title template (deprecated). Now uses commitMessage.",
+      "type": "string",
       "default": null
     },
     "prFooter": {
-      "type": "string",
       "description": "Pull Request footer template",
+      "type": "string",
       "default": "This PR has been generated by [Renovate Bot](https://renovatebot.com)."
     },
     "lockFileMaintenance": {
+      "description": "Configuration for lock file maintenance",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration for lock file maintenance",
       "default": {
         "enabled": false,
         "recreateClosed": true,
@@ -647,68 +647,68 @@
       }
     },
     "lazyGrouping": {
-      "type": "boolean",
       "description": "Use group names only when multiple dependencies upgraded",
+      "type": "boolean",
       "default": true
     },
     "groupName": {
-      "type": "string",
       "description": "Human understandable name for the dependency group",
+      "type": "string",
       "default": null
     },
     "groupSlug": {
-      "type": "string",
       "description": "Slug to use for group (e.g. in branch name). Will be calculated from groupName if null",
+      "type": "string",
       "default": null
     },
     "group": {
+      "description": "Config if groupName is enabled",
       "type": "object",
       "$ref": "#",
-      "description": "Config if groupName is enabled",
       "default": {
         "branchTopic": "{{{groupSlug}}}",
         "commitMessageTopic": "{{{groupName}}}"
       }
     },
     "labels": {
+      "description": "Labels to add to Pull Request",
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Labels to add to Pull Request"
+      }
     },
     "assignees": {
+      "description": "Assignees for Pull Request (username in GitHub/GitLab, email address in Azure DevOps)",
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Assignees for Pull Request (username in GitHub/GitLab, email address in Azure DevOps)"
+      }
     },
     "reviewers": {
+      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab, email or username in Azure DevOps)",
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab, email or username in Azure DevOps)"
+      }
     },
     "fileMatch": {
+      "description": "JS RegExp pattern for matching manager files",
       "type": "array",
       "items": {
         "type": "string",
         "format": "regex"
-      },
-      "description": "JS RegExp pattern for matching manager files"
+      }
     },
     "js": {
+      "description": "Configuration object for javascript language",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for javascript language",
       "default": {}
     },
     "npm": {
+      "description": "Configuration object for npm package.json renovation",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for npm package.json renovation",
       "default": {
         "fileMatch": ["(^|/)package.json$"],
         "rollbackPrs": true,
@@ -719,17 +719,17 @@
       }
     },
     "meteor": {
+      "description": "Configuration object for meteor package.js renovation",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for meteor package.js renovation",
       "default": {
         "fileMatch": ["(^|/)package.js$"]
       }
     },
     "bazel": {
+      "description": "Configuration object for bazel WORKSPACE renovation",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for bazel WORKSPACE renovation",
       "default": {
         "fileMatch": ["(^|/)WORKSPACE$"],
         "prBodyDefinitions": {
@@ -738,9 +738,9 @@
       }
     },
     "buildkite": {
+      "description": "Configuration object for buildkite pipeline renovation",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for buildkite pipeline renovation",
       "default": {
         "fileMatch": ["buildkite\\.ya?ml", "\\.buildkite/.+\\.ya?ml$"],
         "commitMessageTopic": "buildkite plugin {{depName}}",
@@ -749,37 +749,37 @@
       }
     },
     "golang": {
+      "description": "Configuration object for Go language",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Go language",
       "default": {
         "commitMessageTopic": "module {{depNameShort}}"
       }
     },
     "gomod": {
+      "description": "Configuration object for Go modules renovation",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Go modules renovation",
       "default": {
         "fileMatch": ["(^|/)go.mod$"]
       }
     },
     "postUpdateOptions": {
-      "type": "array",
       "description": "Enable post-update options to be run after package/artifact updating",
+      "type": "array",
       "default": [],
       "enum": ["gomodTidy", "npmDedupe", "yarnDedupeFewer", "yarnDedupeHighest"]
     },
     "ruby": {
+      "description": "Configuration object for ruby language",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for ruby language",
       "default": {}
     },
     "bundler": {
+      "description": "Configuration object for bundler Gemfiles",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for bundler Gemfiles",
       "default": {
         "enabled": false,
         "fileMatch": ["(^|/)Gemfile$"],
@@ -787,9 +787,9 @@
       }
     },
     "terraform": {
+      "description": "Configuration object for Terraform module renovation",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Terraform module renovation",
       "default": {
         "commitMessageTopic": "Terraform module {{depNameShort}}",
         "fileMatch": ["\\.tf$"],
@@ -797,15 +797,15 @@
       }
     },
     "rust": {
+      "description": "Configuration option for Rust package management.",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration option for Rust package management.",
       "default": {}
     },
     "cargo": {
+      "description": "Configuration object for Cargo crate renovation.",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Cargo crate renovation.",
       "default": {
         "enabled": false,
         "commitMessageTopic": "Rust crate {{depName}}",
@@ -814,16 +814,16 @@
       }
     },
     "supportPolicy": {
+      "description": "Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)",
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Dependency support policy, e.g. used for LTS vs non-LTS etc (node-only)"
+      }
     },
     "node": {
+      "description": "Configuration object for node version renovation",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for node version renovation",
       "default": {
         "commitMessageTopic": "Node.js",
         "major": {
@@ -832,9 +832,9 @@
       }
     },
     "travis": {
+      "description": "Configuration object for .travis.yml node version renovation",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for .travis.yml node version renovation",
       "default": {
         "enabled": false,
         "fileMatch": ["^.travis.yml$"],
@@ -842,18 +842,18 @@
       }
     },
     "nvm": {
+      "description": "Configuration object for .nvmrc files",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for .nvmrc files",
       "default": {
         "fileMatch": ["^.nvmrc$"],
         "versionScheme": "node"
       }
     },
     "docker": {
+      "description": "Configuration object for Docker language",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Docker language",
       "default": {
         "versionScheme": "docker",
         "managerBranchPrefix": "docker-",
@@ -885,118 +885,118 @@
       }
     },
     "docker-compose": {
+      "description": "Configuration object for Docker Compose renovation. Also inherits settings from `docker` object.",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Docker Compose renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["(^|/)docker-compose[^/]*\\.ya?ml$"]
       }
     },
     "dockerfile": {
+      "description": "Configuration object for Dockerfile renovation",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Dockerfile renovation",
       "default": {
         "fileMatch": ["(^|/)Dockerfile$"]
       }
     },
     "kubernetes": {
+      "description": "Configuration object for Kubernetes renovation. Also inherits settings from `docker` object.",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Kubernetes renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": []
       }
     },
     "circleci": {
+      "description": "Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["(^|/).circleci/config.yml$"]
       }
     },
     "ansible": {
+      "description": "Configuration object for Ansible yaml renovation. Also inherits settings from `docker` object.",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Ansible yaml renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["(^|/)tasks/[^/]+\\.ya?ml$"]
       }
     },
     "github-actions": {
+      "description": "Configuration object for GitHub Actions workflow renovation. Also inherits settings from `docker` object.",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for GitHub Actions workflow renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["^\\.github/main.workflow$"],
         "pinDigests": true
       }
     },
     "composer": {
+      "description": "Configuration object for composer.json files",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for composer.json files",
       "default": {
         "fileMatch": ["(^|/)([\\w-]*)composer.json$"],
         "versionScheme": "composer"
       }
     },
     "php": {
+      "description": "Configuration object for php",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for php",
       "default": {}
     },
     "pip_requirements": {
+      "description": "Configuration object for requirements.txt files",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for requirements.txt files",
       "default": {
         "fileMatch": ["(^|/)([\\w-]*)requirements.(txt|pip)$"]
       }
     },
     "pip_setup": {
+      "description": "Configuration object for setup.py files",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for setup.py files",
       "default": {
         "fileMatch": ["(^|/)setup.py$"]
       }
     },
     "pipenv": {
+      "description": "Configuration object for Pipfile files",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for Pipfile files",
       "default": {
         "enabled": false,
         "fileMatch": ["(^|/)Pipfile$"]
       }
     },
     "python": {
+      "description": "Configuration object for python",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for python",
       "default": {
         "versionScheme": "pep440"
       }
     },
     "compatibility": {
+      "description": "Configuration object for compatibility",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for compatibility",
       "default": {}
     },
     "java": {
+      "description": "Configuration object for all Java package managers",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for all Java package managers",
       "default": {}
     },
     "gradle": {
+      "description": "Configuration object for build.gradle files",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for build.gradle files",
       "default": {
         "enabled": false,
         "fileMatch": ["\\.gradle$", "(^|/)gradle.properties$"],
@@ -1005,17 +1005,17 @@
       }
     },
     "gradle-wrapper": {
+      "description": "Configuration object for gradle-wrapper.properties files",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for gradle-wrapper.properties files",
       "default": {
         "fileMatch": ["(^|/)gradle/wrapper/gradle-wrapper.properties$"]
       }
     },
     "maven": {
+      "description": "Configuration object for when renovating Maven pom.xml files",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for when renovating Maven pom.xml files",
       "default": {
         "enabled": false,
         "fileMatch": ["\\.pom.xml$", "(^|/)pom.xml$"],
@@ -1023,35 +1023,35 @@
       }
     },
     "gitlabci": {
+      "description": "Configuration object for GitLab CI yml renovation. Also inherits settings from `docker` object.",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for GitLab CI yml renovation. Also inherits settings from `docker` object.",
       "default": {
         "fileMatch": ["^\\.gitlab-ci\\.yml$"]
       }
     },
     "dotnet": {
+      "description": "Configuration object for .NET language",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for .NET language",
       "default": {}
     },
     "nuget": {
+      "description": "Configuration object for C#/Nuget",
       "type": "object",
       "$ref": "#",
-      "description": "Configuration object for C#/Nuget",
       "default": {
         "fileMatch": ["\\.csproj$"]
       }
     },
     "hostRules": {
-      "type": "array",
-      "description": "Host rules/configuration including credentials"
+      "description": "Host rules/configuration including credentials",
+      "type": "array"
     },
     "prBodyDefinitions": {
+      "description": "Table column definitions for use in PR tables",
       "type": "object",
       "$ref": "#",
-      "description": "Table column definitions for use in PR tables",
       "default": {
         "Package": "{{{depName}}}",
         "Type": "{{{depType}}}",
@@ -1064,21 +1064,21 @@
       }
     },
     "prBodyColumns": {
-      "type": "array",
       "description": "List of columns to use in PR bodies",
+      "type": "array",
       "default": ["Package", "Type", "Update", "Change", "References"]
     },
     "prBodyNotes": {
+      "description": "List of additional notes/templates to be included in the Pull Request bodies.",
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "List of additional notes/templates to be included in the Pull Request bodies.",
       "default": []
     },
     "suppressNotifications": {
-      "type": "array",
       "description": "Options to suppress various types of warnings and other notifications",
+      "type": "array",
       "default": [],
       "enum": [
         "prIgnoreNotification",
