@@ -8,6 +8,7 @@ description: Configuration Options usable in renovate.json or package.json
 This document describes all the configuration options you may configure in a Renovate configuration file. Any config you define applies to the whole repository (e.g. if you have a monorepo).
 
 You can store your Renovate configuration file in one of the following locations:
+
 - `.github/renovate.json`
 - `.renovaterc.json`
 - `renovate.json`
