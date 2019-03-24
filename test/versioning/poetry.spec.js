@@ -1,6 +1,5 @@
 const semver = require('../../lib/versioning/poetry');
 
-// TODO: Add tests for multiple requirements
 describe('semver.isValid(input)', () => {
   it('should return null for irregular versions', () => {
     expect(!!semver.isValid('17.04.0')).toBe(false);
@@ -11,7 +10,6 @@ describe('semver.isValid(input)', () => {
   it('should support semver with dash', () => {
     expect(!!semver.isValid('1.2.3-foo')).toBe(true);
   });
-  // TODO: Check if poetry requires this.
   it('should reject semver without dash', () => {
     expect(!!semver.isValid('1.2.3foo')).toBe(false);
   });
