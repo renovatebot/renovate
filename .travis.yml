@@ -35,6 +35,7 @@ cache:
 script:
   - yarn prettier --list-different
   - yarn lint
+  - yarn test-schema
   - yarn jest --maxWorkers=4
 
 after_success:
