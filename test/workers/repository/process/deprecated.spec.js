@@ -54,7 +54,7 @@ describe('workers/repository/process/deprecated', () => {
       };
       await raiseDeprecationWarnings(config, packageFiles);
       expect(platform.ensureIssue.mock.calls).toMatchSnapshot();
-      expect(platform.ensureIssue.mock.calls).toHaveLength(1);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
     });
   });
 });

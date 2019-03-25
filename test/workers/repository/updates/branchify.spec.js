@@ -34,9 +34,9 @@ describe('workers/repository/updates/branchify', () => {
       ]);
       config.repoIsOnboarded = true;
       const res = await branchifyUpgrades(config);
-      expect(Object.keys(res.branches).length).toBe(1);
-      expect(res.branches[0].isMinor).toBe(true);
-      expect(res.branches[0].upgrades[0].isMinor).toBe(true);
+      expect(Object.keys(res.branches)).toHaveLength(1);
+      expect(res.branches[0].isMinor).toBeTruthy();
+      expect(res.branches[0].upgrades[0].isMinor).toBeTruthy();
     });
     it('uses major/minor/patch slugs', async () => {
       flattenUpdates.mockReturnValueOnce([
@@ -87,14 +87,14 @@ describe('workers/repository/updates/branchify', () => {
       ]);
       config.repoIsOnboarded = true;
       const res = await branchifyUpgrades(config);
-      expect(Object.keys(res.branches).length).toBe(4);
-      expect(res.branches[0].isMajor).toBe(true);
+      expect(Object.keys(res.branches)).toHaveLength(4);
+      expect(res.branches[0].isMajor).toBeTruthy();
       expect(res.branches[0].groupSlug).toBe(`major-some-packages`);
-      expect(res.branches[1].isMinor).toBe(true);
+      expect(res.branches[1].isMinor).toBeTruthy();
       expect(res.branches[1].groupSlug).toBe(`some-packages`);
-      expect(res.branches[2].isPatch).toBe(true);
+      expect(res.branches[2].isPatch).toBeTruthy();
       expect(res.branches[2].groupSlug).toBe(`patch-some-packages`);
-      expect(res.branches[3].isMajor).toBe(true);
+      expect(res.branches[3].isMajor).toBeTruthy();
       expect(res.branches[3].groupSlug).toBe(`major-2-other-packages`);
     });
     it('does not group if different compiled branch names', async () => {
@@ -119,7 +119,7 @@ describe('workers/repository/updates/branchify', () => {
         },
       ]);
       const res = await branchifyUpgrades(config);
-      expect(Object.keys(res.branches).length).toBe(3);
+      expect(Object.keys(res.branches)).toHaveLength(3);
     });
     it('groups if same compiled branch names', async () => {
       flattenUpdates.mockReturnValueOnce([
@@ -143,7 +143,7 @@ describe('workers/repository/updates/branchify', () => {
         },
       ]);
       const res = await branchifyUpgrades(config);
-      expect(Object.keys(res.branches).length).toBe(2);
+      expect(Object.keys(res.branches)).toHaveLength(2);
     });
     it('groups if same compiled group name', async () => {
       flattenUpdates.mockReturnValueOnce([
@@ -171,7 +171,7 @@ describe('workers/repository/updates/branchify', () => {
         },
       ]);
       const res = await branchifyUpgrades(config);
-      expect(Object.keys(res.branches).length).toBe(2);
+      expect(Object.keys(res.branches)).toHaveLength(2);
     });
     it('enforces valid git branch name', async () => {
       const fixtures = [

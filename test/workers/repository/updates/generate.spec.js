@@ -120,8 +120,8 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
-      expect(res.canBeUnpublished).toBe(true);
-      expect(res.automerge).toBe(false);
+      expect(res.canBeUnpublished).toBeTruthy();
+      expect(res.automerge).toBeFalsy();
     });
     it('groups multiple upgrades different version', () => {
       const branch = [
@@ -161,7 +161,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBe(true);
+      expect(res.recreateClosed).toBeTruthy();
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toEqual('2017-02-08T20:01:41+00:00');
     });
@@ -200,7 +200,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBe(true);
+      expect(res.recreateClosed).toBeTruthy();
       expect(res.groupName).toBeDefined();
     });
     it('fixes different messages', () => {
@@ -422,7 +422,7 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.commitMessage).toMatchSnapshot();
-      expect(res.commitMessage.includes('\n')).toBe(true);
+      expect(res.commitMessage.includes('\n')).toBeTruthy();
     });
     it('supports manual prTitle', () => {
       const branch = [
@@ -458,7 +458,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.recreateClosed).toBe(false);
+      expect(res.recreateClosed).toBeFalsy();
       expect(res.groupName).toBeUndefined();
     });
     it('overrides schedule for pin PRs', () => {
