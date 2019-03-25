@@ -103,8 +103,7 @@ describe('platform/bitbucket-server', () => {
         it('always return false, since bitbucket does not support force rebase', () => {
           expect.assertions(1);
           const actual = bitbucket.getRepoForceRebase();
-          const expected = false;
-          expect(actual).toBe(expected);
+          expect(actual).toBeFalsy();
         });
       });
 
@@ -388,7 +387,7 @@ describe('platform/bitbucket-server', () => {
       describe('getPr()', () => {
         it('returns null for no prNo', async () => {
           expect.assertions(2);
-          expect(await bitbucket.getPr()).toBe(null);
+          expect(await bitbucket.getPr()).toBeNull();
           expect(api.get.mock.calls).toMatchSnapshot();
         });
         it('gets a PR', async () => {

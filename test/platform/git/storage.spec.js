@@ -84,10 +84,10 @@ describe('platform/git/storage', () => {
   });
   describe('branchExists(branchName)', () => {
     it('should return true if found', async () => {
-      expect(await git.branchExists('renovate/future_branch')).toBe(true);
+      expect(await git.branchExists('renovate/future_branch')).toBeTruthy();
     });
     it('should return false if not found', async () => {
-      expect(await git.branchExists('not_found')).toBe(false);
+      expect(await git.branchExists('not_found')).toBeFalsy();
     });
   });
   describe('getAllRenovateBranches()', () => {
@@ -100,10 +100,10 @@ describe('platform/git/storage', () => {
   });
   describe('isBranchStale()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
+      expect(await git.isBranchStale('renovate/future_branch')).toBeFalsy();
     });
     it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
+      expect(await git.isBranchStale('renovate/past_branch')).toBeTruthy();
     });
   });
 
@@ -168,7 +168,7 @@ describe('platform/git/storage', () => {
     });
     it('short cuts 404', async () => {
       const res = await git.getFile('some-missing-path');
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null for 404', async () => {
       let e;
