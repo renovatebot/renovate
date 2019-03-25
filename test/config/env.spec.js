@@ -7,15 +7,15 @@ describe('config/env', () => {
     });
     it('supports boolean true', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'true' };
-      expect(env.getConfig(envParam).recreateClosed).toBe(true);
+      expect(env.getConfig(envParam).recreateClosed).toBeTruthy();
     });
     it('supports boolean false', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'false' };
-      expect(env.getConfig(envParam).recreateClosed).toBe(false);
+      expect(env.getConfig(envParam).recreateClosed).toBeFalsy();
     });
     it('supports boolean nonsense as false', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'foo' };
-      expect(env.getConfig(envParam).recreateClosed).toBe(false);
+      expect(env.getConfig(envParam).recreateClosed).toBeFalsy();
     });
     delete process.env.RENOVATE_RECREATE_CLOSED;
     it('supports list single', () => {
