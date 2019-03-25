@@ -37,23 +37,23 @@ describe('workers/repository/onboarding/branch', () => {
     it('detects onboarding is skipped', async () => {
       config.onboarding = false;
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTruthy();
     });
     it('detects repo is onboarded via file', async () => {
       platform.getFileList.mockReturnValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTruthy();
     });
     it('detects repo is onboarded via package.json config', async () => {
       platform.getFileList.mockReturnValueOnce(['package.json']);
       platform.getFile.mockReturnValueOnce('{"renovate":{}}');
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTruthy();
     });
     it('detects repo is onboarded via PR', async () => {
       platform.findPr.mockReturnValue(true);
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTruthy();
     });
     it('detects repo is onboarded via PR and merged', async () => {
       config.requireConfig = true;
@@ -62,7 +62,7 @@ describe('workers/repository/onboarding/branch', () => {
         { branchName: 'renovate/something', state: 'merged' },
       ]);
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
+      expect(res.repoIsOnboarded).toBeTruthy();
     });
     it('throws if no required config', async () => {
       config.requireConfig = true;
@@ -100,10 +100,10 @@ describe('workers/repository/onboarding/branch', () => {
       platform.findPr.mockReturnValueOnce(null);
       platform.getBranchPr.mockReturnValueOnce({});
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(false);
+      expect(res.repoIsOnboarded).toBeFalsy();
       expect(res.branchList).toEqual(['renovate/configure']);
-      expect(platform.setBaseBranch.mock.calls).toHaveLength(1);
-      expect(platform.commitFilesToBranch.mock.calls).toHaveLength(0);
+      expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
+      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
     });
   });
 });
