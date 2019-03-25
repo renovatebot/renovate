@@ -341,6 +341,7 @@ describe('platform/azure', () => {
       }));
       azureHelper.getRenovatePRFormat.mockImplementation(() => ({
         pullRequestId: 1234,
+        labels: ['renovate'],
       }));
       const pr = await azure.getPr(1234);
       expect(pr).toMatchSnapshot();
