@@ -56,6 +56,14 @@
     "logLevel": {
       "description": "Logging level",
       "type": "string",
+      "enum": [
+        "fatal",
+        "error",
+        "warn",
+        "info",
+        "debug",
+        "trace"
+      ],
       "default": "info"
     },
     "logFile": {
