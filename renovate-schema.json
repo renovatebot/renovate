@@ -809,6 +809,16 @@
       },
       "$ref": "#"
     },
+    "mix": {
+      "description": "Configuration object for Mix module renovation",
+      "type": "object",
+      "default": {
+        "commitMessageTopic": "Mix module {{depNameShort}}",
+        "fileMatch": ["mix.exs$"],
+        "versionScheme": "hex"
+      },
+      "$ref": "#"
+    },
     "rust": {
       "description": "Configuration option for Rust package management.",
       "type": "object",
