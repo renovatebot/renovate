@@ -13,9 +13,6 @@ describe('logger', () => {
   it('sets levels', () => {
     logger.levels('stdout', 'DEBUG');
   });
-  it('sets meta', () => {
-    // logger.setMeta({ some: 'meta', and: 'more' });
-  });
   it('adds stream', () => {
     logger.addStream({
       name: 'logfile',
