@@ -5,9 +5,6 @@ const { toUnix } = require('upath');
 const fs = require('fs-extra');
 const fsReal = require('fs');
 const { exec } = require('child-process-promise');
-const { initLogger } = require('../../../lib/logger');
-
-initLogger();
 
 const manager = require('../../../lib/manager/gradle/index');
 
