@@ -5,7 +5,15 @@ description: Configuration Options usable in renovate.json or package.json
 
 # Configuration Options
 
-This document describes all the configuration options you may configure in a `renovate.json` file or within a `"renovate"` section of your `package.json`. Any config you define applies to the whole repository (e.g. if you have a monorepo).
+This document describes all the configuration options you may configure in a Renovate configuration file. Any config you define applies to the whole repository (e.g. if you have a monorepo).
+
+You can store your Renovate configuration file in one of the following locations:
+
+- `.github/renovate.json`
+- `.renovaterc.json`
+- `renovate.json`
+- `.renovaterc`
+- `package.json` _(within a `"renovate"` section)_
 
 Also, be sure to check out Renovate's [shareable config presets](./config-presets/) to save yourself from reinventing any wheels.
 
