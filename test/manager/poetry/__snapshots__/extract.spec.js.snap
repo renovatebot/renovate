@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/poetry/extract extractPackageFile() extracts multiple dependencies 1`] = `
+Array [
+  Object {
+    "currentValue": "*",
+    "datasource": "pypi",
+    "depName": "dep1",
+  },
+  Object {
+    "currentValue": "^0.6.0",
+    "datasource": "pypi",
+    "depName": "dep2",
+  },
+  Object {
+    "currentValue": "^0.33.6",
+    "datasource": "pypi",
+    "depName": "dep3",
+  },
+  Object {
+    "currentValue": "^3.0",
+    "datasource": "pypi",
+    "depName": "dev_dep1",
+  },
+  Object {
+    "currentValue": "Invalid version.",
+    "datasource": "pypi",
+    "depName": "dev_dep2",
+    "skipReason": "unknown-version",
+  },
+  Object {
+    "currentValue": "^0.8.3",
+    "datasource": "pypi",
+    "depName": "extra_dep1",
+  },
+  Object {
+    "currentValue": "^0.9.4",
+    "datasource": "pypi",
+    "depName": "extra_dep2",
+  },
+  Object {
+    "currentValue": "^0.4.0",
+    "datasource": "pypi",
+    "depName": "extra_dep3",
+  },
+]
+`;
