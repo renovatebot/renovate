@@ -128,7 +128,7 @@ RUN pip install --user pipenv
 
 # Yarn
 
-ENV YARN_VERSION=1.13.0
+ENV YARN_VERSION=1.15.2
 
 RUN npm i -g yarn@${YARN_VERSION}
 
