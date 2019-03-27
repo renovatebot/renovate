@@ -5,15 +5,15 @@ describe('pep440.isValid(input)', () => {
     expect(Boolean(pep440.isValid('17.04.0'))).toBeFalsy();
   });
   it('should support simple pep440', () => {
-    expect(Boolean(pep440.isValid('==1.2.3'))).toBeTruthy();
+    expect(Boolean(pep440.isValid('==1.2.3'))).toBe(true);
   });
   it('should support pep440 with RC', () => {
-    expect(Boolean(pep440.isValid('==1.2.3rc0'))).toBeTruthy();
+    expect(Boolean(pep440.isValid('==1.2.3rc0'))).toBe(true);
   });
   it('should support ranges', () => {
-    expect(Boolean(pep440.isValid('~=1.2.3'))).toBeTruthy();
-    expect(Boolean(pep440.isValid('==1.2.*'))).toBeTruthy();
-    expect(Boolean(pep440.isValid('>1.2.3'))).toBeTruthy();
+    expect(Boolean(pep440.isValid('~=1.2.3'))).toBe(true);
+    expect(Boolean(pep440.isValid('==1.2.*'))).toBe(true);
+    expect(Boolean(pep440.isValid('>1.2.3'))).toBe(true);
   });
   it('should reject github repositories', () => {
     expect(Boolean(pep440.isValid('renovatebot/renovate'))).toBeFalsy();
@@ -26,7 +26,7 @@ describe('pep440.isValid(input)', () => {
 
 describe('pep440.isStable(version)', () => {
   it('returns correct value', () => {
-    expect(pep440.isStable('1.2.3')).toBeTruthy();
+    expect(pep440.isStable('1.2.3')).toBe(true);
     expect(pep440.isStable('1.2.3rc0')).toBeFalsy();
   });
   it('returns false when version invalid', () => {
@@ -36,13 +36,13 @@ describe('pep440.isStable(version)', () => {
 
 describe('pep440.isSingleVersion()', () => {
   it('returns true if naked version', () => {
-    expect(Boolean(pep440.isSingleVersion('1.2.3'))).toBeTruthy();
-    expect(Boolean(pep440.isSingleVersion('1.2.3rc0'))).toBeTruthy();
+    expect(Boolean(pep440.isSingleVersion('1.2.3'))).toBe(true);
+    expect(Boolean(pep440.isSingleVersion('1.2.3rc0'))).toBe(true);
   });
   it('returns true if double equals', () => {
-    expect(Boolean(pep440.isSingleVersion('==1.2.3'))).toBeTruthy();
-    expect(Boolean(pep440.isSingleVersion('==1.2'))).toBeTruthy();
-    expect(Boolean(pep440.isSingleVersion('== 1.2.3'))).toBeTruthy();
+    expect(Boolean(pep440.isSingleVersion('==1.2.3'))).toBe(true);
+    expect(Boolean(pep440.isSingleVersion('==1.2'))).toBe(true);
+    expect(Boolean(pep440.isSingleVersion('== 1.2.3'))).toBe(true);
   });
   it('returns false when not version', () => {
     expect(Boolean(pep440.isSingleVersion('==1.*'))).toBeFalsy();

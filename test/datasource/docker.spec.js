@@ -210,9 +210,9 @@ describe('api/docker', () => {
       const res = await getPkgReleases(config);
       expect(res.releases).toHaveLength(1);
       expect(got.mock.calls).toMatchSnapshot();
-      expect(
-        got.mock.calls[0][0].startsWith(config.registryUrls[0])
-      ).toBeTruthy();
+      expect(got.mock.calls[0][0].startsWith(config.registryUrls[0])).toBe(
+        true
+      );
     });
     it('uses custom registry in depName', async () => {
       const tags = ['1.0.0'];

@@ -14,7 +14,7 @@ describe('manager/gomod/update', () => {
       };
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).not.toEqual(gomod1);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('replaces two values in one file', () => {
       const upgrade1 = {
@@ -24,7 +24,7 @@ describe('manager/gomod/update', () => {
       };
       const res1 = goUpdate.updateDependency(gomod1, upgrade1);
       expect(res1).not.toEqual(gomod1);
-      expect(res1.includes(upgrade1.newValue)).toBeTruthy();
+      expect(res1.includes(upgrade1.newValue)).toBe(true);
       const upgrade2 = {
         depName: 'github.com/aws/aws-sdk-go',
         lineNumber: 3,
@@ -54,8 +54,8 @@ describe('manager/gomod/update', () => {
       };
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).not.toEqual(gomod2);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
-      expect(res.includes('github.com/pkg/errors/v2')).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes('github.com/pkg/errors/v2')).toBe(true);
     });
     it('replaces major gopkg.in updates', () => {
       const upgrade = {
@@ -69,9 +69,9 @@ describe('manager/gomod/update', () => {
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(gomod2);
-      expect(
-        res.includes('gopkg.in/russross/blackfriday.v2 v2.0.0')
-      ).toBeTruthy();
+      expect(res.includes('gopkg.in/russross/blackfriday.v2 v2.0.0')).toBe(
+        true
+      );
     });
     it('returns null if mismatch', () => {
       const upgrade = {
@@ -95,7 +95,7 @@ describe('manager/gomod/update', () => {
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('replaces quoted multiline', () => {
       const upgrade = {
@@ -107,7 +107,7 @@ describe('manager/gomod/update', () => {
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(gomod2);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('replaces major multiline', () => {
       const upgrade = {
@@ -121,8 +121,8 @@ describe('manager/gomod/update', () => {
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
-      expect(res.includes('github.com/emirpasic/gods/v2')).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes('github.com/emirpasic/gods/v2')).toBe(true);
     });
     it('bumps major multiline', () => {
       const upgrade = {
@@ -136,8 +136,8 @@ describe('manager/gomod/update', () => {
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
-      expect(res.includes('github.com/src-d/gcfg/v3')).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes('github.com/src-d/gcfg/v3')).toBe(true);
     });
     it('update multiline digest', () => {
       const upgrade = {
@@ -152,7 +152,7 @@ describe('manager/gomod/update', () => {
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
       expect(res.includes(upgrade.newDigest)).toBeFalsy();
-      expect(res.includes(upgrade.newDigest.substring(0, 12))).toBeTruthy();
+      expect(res.includes(upgrade.newDigest.substring(0, 12))).toBe(true);
     });
     it('skips already-updated multiline digest', () => {
       const upgrade = {
@@ -185,7 +185,7 @@ describe('manager/gomod/update', () => {
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).not.toEqual(gomod1);
       // Assert that the version still contains +incompatible tag.
-      expect(res.includes(upgrade.newValue + '+incompatible')).toBeTruthy();
+      expect(res.includes(upgrade.newValue + '+incompatible')).toBe(true);
     });
   });
 });

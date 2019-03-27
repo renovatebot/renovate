@@ -147,7 +147,7 @@ describe('config/presets', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
-      expect(rule.automerge).toBeTruthy();
+      expect(rule.automerge).toBe(true);
       expect(rule.packageNames).toHaveLength(1);
       expect(rule.packagePatterns).toHaveLength(2);
     });
@@ -156,7 +156,7 @@ describe('config/presets', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.automerge).not.toBeDefined();
-      expect(res.minor.automerge).toBeTruthy();
+      expect(res.minor.automerge).toBe(true);
     });
   });
   describe('replaceArgs', () => {

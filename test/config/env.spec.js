@@ -7,7 +7,7 @@ describe('config/env', () => {
     });
     it('supports boolean true', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'true' };
-      expect(env.getConfig(envParam).recreateClosed).toBeTruthy();
+      expect(env.getConfig(envParam).recreateClosed).toBe(true);
     });
     it('supports boolean false', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'false' };

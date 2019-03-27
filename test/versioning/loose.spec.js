@@ -25,9 +25,9 @@ describe('loose.', () => {
   });
   describe('isGreaterThan(version)', () => {
     it('it should compare using release number than suffix', () => {
-      expect(loose.isGreaterThan('2.4.0', '2.4')).toBeTruthy();
-      expect(loose.isGreaterThan('2.4.2', '2.4.1')).toBeTruthy();
-      expect(loose.isGreaterThan('2.4.beta', '2.4.alpha')).toBeTruthy();
+      expect(loose.isGreaterThan('2.4.0', '2.4')).toBe(true);
+      expect(loose.isGreaterThan('2.4.2', '2.4.1')).toBe(true);
+      expect(loose.isGreaterThan('2.4.beta', '2.4.alpha')).toBe(true);
       expect(loose.isGreaterThan('1.9', '2')).toBeFalsy();
       expect(loose.isGreaterThan('1.9', '1.9.1')).toBeFalsy();
     });

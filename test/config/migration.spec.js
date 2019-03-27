@@ -95,7 +95,7 @@ describe('config/migration', () => {
         parentConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.automerge).toEqual(false);
       expect(migratedConfig.packageRules).toHaveLength(7);
@@ -115,7 +115,7 @@ describe('config/migration', () => {
         parentConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig.major.schedule.length).toBe(2);
       expect(migratedConfig.major.schedule[0]).toEqual('after 10pm');
       expect(migratedConfig.major.schedule[1]).toEqual('before 7am');
@@ -137,7 +137,7 @@ describe('config/migration', () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig.schedule).toEqual('on friday');
     });
     it('migrates semantic prefix with no scope', () => {
@@ -149,7 +149,7 @@ describe('config/migration', () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig.semanticCommitScope).toBeNull();
     });
     it('does not migrate every weekday', () => {
@@ -203,7 +203,7 @@ describe('config/migration', () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
     });
     it('it overrides existing automerge setting', () => {
@@ -221,7 +221,7 @@ describe('config/migration', () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.packageRules[0].minor.automerge).toBeFalsy();
     });
@@ -253,7 +253,7 @@ describe('config/migration', () => {
         config,
         defaultConfig
       );
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.lockFileMaintenance.packageRules).toHaveLength(1);
       expect(
@@ -273,9 +273,9 @@ describe('config/migration', () => {
         defaultConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig.node.enabled).toBeUndefined();
-      expect(migratedConfig.travis.enabled).toBeTruthy();
+      expect(migratedConfig.travis.enabled).toBe(true);
       expect(migratedConfig.node.supportPolicy).toBeDefined();
     });
     it('it migrates packageFiles', () => {
@@ -296,7 +296,7 @@ describe('config/migration', () => {
         defaultConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig.includePaths).toHaveLength(4);
       expect(migratedConfig.packageFiles).toBeUndefined();
       expect(migratedConfig.packageRules).toHaveLength(4);
@@ -326,7 +326,7 @@ describe('config/migration', () => {
         defaultConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBeTruthy();
+      expect(isMigrated).toBe(true);
       expect(migratedConfig.includePaths).toHaveLength(1);
       expect(migratedConfig.packageFiles).toBeUndefined();
       expect(migratedConfig.packageRules).toHaveLength(2);

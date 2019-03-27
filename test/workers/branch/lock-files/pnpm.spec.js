@@ -33,7 +33,7 @@ describe('generateLockFile', () => {
     });
     const res = await pnpmHelper.generateLockFile('some-dir');
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeTruthy();
+    expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
   });
   it('finds pnpm embedded in renovate', async () => {

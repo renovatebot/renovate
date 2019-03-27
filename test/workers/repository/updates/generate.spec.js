@@ -120,7 +120,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
-      expect(res.canBeUnpublished).toBeTruthy();
+      expect(res.canBeUnpublished).toBe(true);
       expect(res.automerge).toBeFalsy();
     });
     it('groups multiple upgrades different version', () => {
@@ -161,7 +161,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBeTruthy();
+      expect(res.recreateClosed).toBe(true);
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toEqual('2017-02-08T20:01:41+00:00');
     });
@@ -200,7 +200,7 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBeTruthy();
+      expect(res.recreateClosed).toBe(true);
       expect(res.groupName).toBeDefined();
     });
     it('fixes different messages', () => {
@@ -422,7 +422,7 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.commitMessage).toMatchSnapshot();
-      expect(res.commitMessage.includes('\n')).toBeTruthy();
+      expect(res.commitMessage.includes('\n')).toBe(true);
     });
     it('supports manual prTitle', () => {
       const branch = [

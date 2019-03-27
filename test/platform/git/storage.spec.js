@@ -84,7 +84,7 @@ describe('platform/git/storage', () => {
   });
   describe('branchExists(branchName)', () => {
     it('should return true if found', async () => {
-      expect(await git.branchExists('renovate/future_branch')).toBeTruthy();
+      expect(await git.branchExists('renovate/future_branch')).toBe(true);
     });
     it('should return false if not found', async () => {
       expect(await git.branchExists('not_found')).toBeFalsy();
@@ -103,7 +103,7 @@ describe('platform/git/storage', () => {
       expect(await git.isBranchStale('renovate/future_branch')).toBeFalsy();
     });
     it('should return true if SHA different from master', async () => {
-      expect(await git.isBranchStale('renovate/past_branch')).toBeTruthy();
+      expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
     });
   });
 

@@ -7,7 +7,7 @@ describe('workers/branch/schedule', () => {
       expect(schedule.hasValidTimezone('Asia')[0]).toBeFalsy();
     });
     it('returns true for valid timezone', () => {
-      expect(schedule.hasValidTimezone('Asia/Singapore')[0]).toBeTruthy();
+      expect(schedule.hasValidTimezone('Asia/Singapore')[0]).toBe(true);
     });
   });
   describe('hasValidSchedule(schedule)', () => {
@@ -15,10 +15,10 @@ describe('workers/branch/schedule', () => {
       jest.resetAllMocks();
     });
     it('returns true for null', () => {
-      expect(schedule.hasValidSchedule(null)[0]).toBeTruthy();
+      expect(schedule.hasValidSchedule(null)[0]).toBe(true);
     });
     it('returns true for at any time', () => {
-      expect(schedule.hasValidSchedule('at any time')[0]).toBeTruthy();
+      expect(schedule.hasValidSchedule('at any time')[0]).toBe(true);
     });
     it('returns false for invalid schedule', () => {
       expect(schedule.hasValidSchedule(['foo'])[0]).toBeFalsy();
@@ -43,45 +43,45 @@ describe('workers/branch/schedule', () => {
       expect(schedule.hasValidSchedule(['every friday'])[0]).toBeFalsy();
     });
     it('returns true if schedule has days of week', () => {
-      expect(
-        schedule.hasValidSchedule(['on friday and saturday'])[0]
-      ).toBeTruthy();
+      expect(schedule.hasValidSchedule(['on friday and saturday'])[0]).toBe(
+        true
+      );
     });
     it('returns true for multi day schedules', () => {
       expect(
         schedule.hasValidSchedule(['after 5:00pm on wednesday and thursday'])[0]
-      ).toBeTruthy();
+      ).toBe(true);
     });
     it('returns true if schedule has a start time', () => {
-      expect(schedule.hasValidSchedule(['after 8:00pm'])[0]).toBeTruthy();
+      expect(schedule.hasValidSchedule(['after 8:00pm'])[0]).toBe(true);
     });
     it('returns true for first day of the month', () => {
       expect(
         schedule.hasValidSchedule(['on the first day of the month'])[0]
-      ).toBeTruthy();
+      ).toBe(true);
     });
     it('returns true if schedule has an end time', () => {
-      expect(schedule.hasValidSchedule(['before 6:00am'])[0]).toBeTruthy();
+      expect(schedule.hasValidSchedule(['before 6:00am'])[0]).toBe(true);
     });
     it('returns true if schedule has a start and end time', () => {
       expect(
         schedule.hasValidSchedule(['after 11:00pm and before 6:00am'])[0]
-      ).toBeTruthy();
+      ).toBe(true);
     });
     it('returns true if schedule has days and a start and end time', () => {
       expect(
         schedule.hasValidSchedule([
           'after 11:00pm and before 6:00am every weekday',
         ])[0]
-      ).toBeTruthy();
+      ).toBe(true);
     });
     it('massages schedules', () => {
       expect(
         schedule.hasValidSchedule([
           'before 3am on the first day of the month',
         ])[0]
-      ).toBeTruthy();
-      expect(schedule.hasValidSchedule(['every month'])[0]).toBeTruthy();
+      ).toBe(true);
+      expect(schedule.hasValidSchedule(['every month'])[0]).toBe(true);
     });
     it('supports hours shorthand', () => {
       const [res] = schedule.hasValidSchedule([
@@ -94,7 +94,7 @@ describe('workers/branch/schedule', () => {
         'before 5am every weekday',
         'every weekend',
       ]);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
   });
   describe('isScheduledNow(config)', () => {
@@ -106,33 +106,33 @@ describe('workers/branch/schedule', () => {
     });
     it('returns true if no schedule', () => {
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('returns true if at any time', () => {
       config.schedule = 'at any time';
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('returns true if at any time array', () => {
       config.schedule = ['at any time'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('returns true if invalid schedule', () => {
       config.schedule = ['every 15 minutes'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('returns true if invalid timezone', () => {
       config.schedule = ['after 4:00pm'];
       config.timezone = 'Asia';
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('supports before hours true', () => {
       config.schedule = ['before 4:00pm'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('supports before hours false', () => {
       config.schedule = ['before 4:00am'];
@@ -154,17 +154,17 @@ describe('workers/branch/schedule', () => {
       config.timezone = 'Asia/Singapore';
       mockDate.set('2017-06-30T10:50:00.000Z'); // Globally 2017-06-30 10:50am
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('supports multiple schedules', () => {
       config.schedule = ['after 4:00pm', 'before 11:00am'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('supports day match', () => {
       config.schedule = ['on friday and saturday'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('supports day mismatch', () => {
       config.schedule = ['on monday and tuesday'];
@@ -174,7 +174,7 @@ describe('workers/branch/schedule', () => {
     it('supports every weekday', () => {
       config.schedule = ['every weekday'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('supports every weekday', () => {
       config.schedule = ['every weekend'];
@@ -184,12 +184,12 @@ describe('workers/branch/schedule', () => {
     it('supports every weekday', () => {
       config.schedule = ['before 11:00am every weekday'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('supports o every weekday', () => {
       config.schedule = ['before 11:00am on inevery weekday'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('rejects first day of the month', () => {
       config.schedule = ['before 11am on the first day of the month'];
@@ -200,7 +200,7 @@ describe('workers/branch/schedule', () => {
       config.schedule = ['before 11am on the first day of the month'];
       mockDate.set('2017-10-01T05:26:06.000'); // Locally Sunday, 1 October 2017 05:26:06
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
   });
 });

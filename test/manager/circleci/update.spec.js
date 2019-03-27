@@ -22,7 +22,7 @@ describe('manager/circleci/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(upgrade.newDigest)).toBeTruthy();
+      expect(res.includes(upgrade.newDigest)).toBe(true);
     });
     it('returns same', () => {
       const upgrade = {
@@ -58,7 +58,7 @@ describe('manager/circleci/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);
       expect(res).not.toEqual(yamlFile2);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('returns same orb', () => {
       const upgrade = {

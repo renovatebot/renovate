@@ -197,9 +197,9 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      expect(
-        platform.createPr.mock.calls[0][2].includes('this Pin PR')
-      ).toBeTruthy();
+      expect(platform.createPr.mock.calls[0][2].includes('this Pin PR')).toBe(
+        true
+      );
     });
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');

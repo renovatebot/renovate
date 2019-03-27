@@ -16,7 +16,7 @@ describe('manager/github-actions/update', () => {
       };
       const res = dcUpdate.updateDependency(workflow1, upgrade);
       expect(res).not.toEqual(workflow1);
-      expect(res.includes(upgrade.newDigest)).toBeTruthy();
+      expect(res.includes(upgrade.newDigest)).toBe(true);
     });
     it('returns same', () => {
       const upgrade = {

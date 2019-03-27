@@ -224,7 +224,7 @@ describe('platform/gitlab', () => {
     it('should return true if 200 OK', async () => {
       get.mockImplementationOnce(() => ({ statusCode: 200 }));
       const branchExists = await gitlab.branchExists('foo');
-      expect(branchExists).toBeTruthy();
+      expect(branchExists).toBe(true);
     });
     it('should return false if not 200 OK', async () => {
       get.mockImplementationOnce(() => ({ statusCode: 500 }));
@@ -315,7 +315,7 @@ describe('platform/gitlab', () => {
           },
         },
       }));
-      expect(await gitlab.isBranchStale('thebranchname')).toBeTruthy();
+      expect(await gitlab.isBranchStale('thebranchname')).toBe(true);
     });
   });
   describe('getBranchPr(branchName)', () => {

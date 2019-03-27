@@ -72,7 +72,7 @@ describe('workers/branch/package-json', () => {
       });
       const res = npmUpdater.updateDependency(input, upgrade);
       expect(res).toMatchSnapshot();
-      expect(res.includes('v1.1.0')).toBeTruthy();
+      expect(res.includes('v1.1.0')).toBe(true);
     });
     it('updates resolutions too', () => {
       const upgrade = {

@@ -150,7 +150,7 @@ describe('lib/manager/dockerfile/extract', () => {
         res[2].lineNumber > res[1].lineNumber,
         res[2].lineNumber > res[0].lineNumber,
       ].every(Boolean);
-      expect(passed).toBeTruthy();
+      expect(passed).toBe(true);
     });
     it('extracts images on adjacent lines', () => {
       const res = extractPackageFile(d1, config).deps;

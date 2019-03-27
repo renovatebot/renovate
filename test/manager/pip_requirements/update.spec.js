@@ -44,7 +44,7 @@ describe('manager/pip_requirements/update', () => {
       const res = updateDependency(requirements3, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(requirements3);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
 
     it('replaces existing value with extras', () => {
@@ -56,7 +56,7 @@ describe('manager/pip_requirements/update', () => {
       const res = updateDependency(requirements4, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(requirements4);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
   });
 });

@@ -2,7 +2,7 @@ const semver = require('../../lib/versioning/hashicorp');
 
 describe('semver.matches()', () => {
   it('handles tilde greater than', () => {
-    expect(semver.matches('4.2.0', '~> 4.0')).toBeTruthy();
+    expect(semver.matches('4.2.0', '~> 4.0')).toBe(true);
     expect(semver.matches('4.2.0', '~> 4.0.0')).toBeFalsy();
   });
 });
@@ -29,7 +29,7 @@ describe('semver.isValid()', () => {
 });
 describe('semver.isLessThanRange()', () => {
   it('handles comma', () => {
-    expect(semver.isLessThanRange('0.9.0', '>= 1.0.0, <= 2.0.0')).toBeTruthy();
+    expect(semver.isLessThanRange('0.9.0', '>= 1.0.0, <= 2.0.0')).toBe(true);
     expect(semver.isLessThanRange('1.9.0', '>= 1.0.0, <= 2.0.0')).toBeFalsy();
   });
 });

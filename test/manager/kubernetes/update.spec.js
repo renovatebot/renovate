@@ -22,7 +22,7 @@ describe('manager/kubernetes/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(upgrade.newDigest)).toBeTruthy();
+      expect(res.includes(upgrade.newDigest)).toBe(true);
     });
     it('returns same', () => {
       const upgrade = {

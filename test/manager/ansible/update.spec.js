@@ -21,7 +21,7 @@ describe('manager/ansible/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile1, upgrade);
       expect(res).not.toEqual(yamlFile1);
-      expect(res.includes(upgrade.newDigest)).toBeTruthy();
+      expect(res.includes(upgrade.newDigest)).toBe(true);
     });
     it('replaces existing value from docker_service', () => {
       const upgrade = {
@@ -32,7 +32,7 @@ describe('manager/ansible/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);
       expect(res).not.toEqual(yamlFile2);
-      expect(res.includes(upgrade.newDigest)).toBeTruthy();
+      expect(res.includes(upgrade.newDigest)).toBe(true);
     });
     it('returns same', () => {
       const upgrade = {

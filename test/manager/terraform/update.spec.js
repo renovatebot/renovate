@@ -15,7 +15,7 @@ describe('manager/terraform/update', () => {
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
       expect(res).not.toEqual(tf1);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('returns same', () => {
       const upgrade = {
@@ -53,7 +53,7 @@ describe('manager/terraform/update', () => {
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
       expect(res).not.toEqual(tf1);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
     it('skips terraform versions wrong line', () => {
       const upgrade = {
@@ -82,7 +82,7 @@ describe('manager/terraform/update', () => {
       };
       const res = tfUpdate.updateDependency(tf1, upgrade);
       expect(res).not.toEqual(tf1);
-      expect(res.includes(upgrade.newValue)).toBeTruthy();
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
   });
 });

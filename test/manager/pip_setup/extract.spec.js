@@ -51,7 +51,7 @@ describe('lib/manager/pip_setup/extract', () => {
   });
   describe('getPythonAlias', () => {
     it('returns the python alias to use', async () => {
-      expect(pythonVersions.includes(await getPythonAlias())).toBeTruthy();
+      expect(pythonVersions.includes(await getPythonAlias())).toBe(true);
     });
   });
   describe('Test for presence of mock lib', () => {
@@ -72,7 +72,7 @@ describe('lib/manager/pip_setup/extract', () => {
           isMockInstalled = false;
         }
       }
-      expect(isMockInstalled).toBeTruthy();
+      expect(isMockInstalled).toBe(true);
     });
   });
   /*

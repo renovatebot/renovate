@@ -40,8 +40,8 @@ describe('manager/gradle-wrapper/update', () => {
         res.includes(
           'https\\://services.gradle.org/distributions/gradle-5.0-all.zip'
         )
-      ).toBeTruthy();
-      expect(res.includes(checksum)).toBeTruthy();
+      ).toBe(true);
+      expect(res.includes(checksum)).toBe(true);
     });
 
     it('returns same', async () => {

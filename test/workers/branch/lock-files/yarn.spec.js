@@ -80,7 +80,7 @@ describe('generateLockFile', () => {
     });
     const res = await yarnHelper.generateLockFile('some-dir');
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeTruthy();
+    expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
   });
   it('finds yarn embedded in renovate', async () => {

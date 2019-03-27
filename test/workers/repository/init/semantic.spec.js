@@ -15,7 +15,7 @@ describe('workers/repository/init/semantic', () => {
     it('returns config if already set', async () => {
       config.semanticCommits = true;
       const res = await detectSemanticCommits(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('detects false if unknown', async () => {
       config.semanticCommits = null;
@@ -27,7 +27,7 @@ describe('workers/repository/init/semantic', () => {
       config.semanticCommits = null;
       platform.getCommitMessages.mockReturnValue(['fix: foo', 'refactor: bar']);
       const res = await detectSemanticCommits(config);
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
   });
 });

@@ -336,7 +336,7 @@ describe('platform/github', () => {
         },
       }));
       const res = await github.getRepoForceRebase();
-      expect(res).toBeTruthy();
+      expect(res).toBe(true);
     });
     it('should handle 404', async () => {
       get.mockImplementationOnce(() =>
@@ -469,7 +469,7 @@ describe('platform/github', () => {
         ],
       }));
       const exists = await github.branchExists('thebranchname');
-      expect(exists).toBeTruthy();
+      expect(exists).toBe(true);
     });
   });
   describe('getAllRenovateBranches()', () => {
@@ -558,7 +558,7 @@ describe('platform/github', () => {
           },
         },
       }));
-      expect(await github.isBranchStale('thebranchname')).toBeTruthy();
+      expect(await github.isBranchStale('thebranchname')).toBe(true);
     });
   });
   describe('getBranchPr(branchName)', () => {
@@ -1588,7 +1588,7 @@ describe('platform/github', () => {
         },
       }));
       const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBeTruthy();
+      expect(pr.canRebase).toBe(true);
       expect(pr).toMatchSnapshot();
     });
     it('should return a rebaseable PR if gitAuthor matches 1 commit', async () => {
@@ -1629,7 +1629,7 @@ describe('platform/github', () => {
         },
       }));
       const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBeTruthy();
+      expect(pr.canRebase).toBe(true);
       expect(pr).toMatchSnapshot();
     });
     it('should return a not rebaseable PR if gitAuthor does not match 1 commit', async () => {
@@ -1715,7 +1715,7 @@ describe('platform/github', () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr)).toBeTruthy();
+      expect(await github.mergePr(pr)).toBe(true);
       expect(get.put).toHaveBeenCalledTimes(1);
       expect(get.delete).toHaveBeenCalledTimes(1);
       expect(get).toHaveBeenCalledTimes(1);
@@ -1802,7 +1802,7 @@ describe('platform/github', () => {
           ref: 'someref',
         },
       };
-      expect(await github.mergePr(pr)).toBeTruthy();
+      expect(await github.mergePr(pr)).toBe(true);
       expect(get.put).toHaveBeenCalledTimes(1);
       expect(get.delete).toHaveBeenCalledTimes(1);
     });
@@ -1833,7 +1833,7 @@ describe('platform/github', () => {
       get.put.mockImplementationOnce(() => {
         throw new Error('no squashing allowed');
       });
-      expect(await github.mergePr(pr)).toBeTruthy();
+      expect(await github.mergePr(pr)).toBe(true);
       expect(get.put).toHaveBeenCalledTimes(3);
       expect(get.delete).toHaveBeenCalledTimes(1);
     });

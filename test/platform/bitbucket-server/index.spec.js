@@ -224,18 +224,16 @@ describe('platform/bitbucket-server', () => {
           await initRepo();
           api.get.mockClear();
 
-          expect(
-            await bitbucket.ensureComment(5, 'topic', 'content')
-          ).toBeTruthy();
+          expect(await bitbucket.ensureComment(5, 'topic', 'content')).toBe(
+            true
+          );
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toHaveLength(1);
 
           api.get.mockClear();
           api.post.mockClear();
 
-          expect(
-            await bitbucket.ensureComment(5, null, 'content')
-          ).toBeTruthy();
+          expect(await bitbucket.ensureComment(5, null, 'content')).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toHaveLength(1);
         });
@@ -247,7 +245,7 @@ describe('platform/bitbucket-server', () => {
 
           expect(
             await bitbucket.ensureComment(5, 'some-subject', 'some\ncontent')
-          ).toBeTruthy();
+          ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toHaveLength(0);
           expect(api.put.mock.calls).toHaveLength(1);
@@ -255,9 +253,9 @@ describe('platform/bitbucket-server', () => {
           api.get.mockClear();
           api.put.mockClear();
 
-          expect(
-            await bitbucket.ensureComment(5, null, 'some\ncontent')
-          ).toBeTruthy();
+          expect(await bitbucket.ensureComment(5, null, 'some\ncontent')).toBe(
+            true
+          );
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toHaveLength(1);
           expect(api.put.mock.calls).toHaveLength(0);
@@ -270,14 +268,14 @@ describe('platform/bitbucket-server', () => {
 
           expect(
             await bitbucket.ensureComment(5, 'some-subject', 'blablabla')
-          ).toBeTruthy();
+          ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.put.mock.calls).toHaveLength(0);
 
           api.get.mockClear();
           api.put.mockClear();
 
-          expect(await bitbucket.ensureComment(5, null, '!merge')).toBeTruthy();
+          expect(await bitbucket.ensureComment(5, null, '!merge')).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.put.mock.calls).toHaveLength(0);
         });
@@ -489,7 +487,7 @@ describe('platform/bitbucket-server', () => {
         it('posts Merge', async () => {
           expect.assertions(3);
           await initRepo();
-          expect(await bitbucket.mergePr(5, 'branch')).toBeTruthy();
+          expect(await bitbucket.mergePr(5, 'branch')).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
         });

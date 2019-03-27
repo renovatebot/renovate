@@ -3,9 +3,9 @@ const semver = require('../../lib/versioning/hex');
 describe('lib/versioning/hex', () => {
   describe('semver.matches()', () => {
     it('handles tilde greater than', () => {
-      expect(semver.matches('4.2.0', '~> 4.0')).toBeTruthy();
+      expect(semver.matches('4.2.0', '~> 4.0')).toBe(true);
       expect(semver.matches('2.1.0', '~> 2.0.0')).toBeFalsy();
-      expect(semver.matches('2.0.0', '>= 2.0.0 and < 2.1.0')).toBeTruthy();
+      expect(semver.matches('2.0.0', '>= 2.0.0 and < 2.1.0')).toBe(true);
       expect(semver.matches('2.1.0', '== 2.0.0 or < 2.1.0')).toBeFalsy();
     });
   });
@@ -36,17 +36,17 @@ describe('lib/versioning/hex', () => {
   });
   describe('semver.isLessThanRange()', () => {
     it('handles and', () => {
-      expect(
-        semver.isLessThanRange('0.1.0', '>= 1.0.0 and <= 2.0.0')
-      ).toBeTruthy();
+      expect(semver.isLessThanRange('0.1.0', '>= 1.0.0 and <= 2.0.0')).toBe(
+        true
+      );
       expect(
         semver.isLessThanRange('1.9.0', '>= 1.0.0 and <= 2.0.0')
       ).toBeFalsy();
     });
     it('handles or', () => {
-      expect(
-        semver.isLessThanRange('0.9.0', '>= 1.0.0 or >= 2.0.0')
-      ).toBeTruthy();
+      expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 or >= 2.0.0')).toBe(
+        true
+      );
       expect(
         semver.isLessThanRange('1.9.0', '>= 1.0.0 or >= 2.0.0')
       ).toBeFalsy();
