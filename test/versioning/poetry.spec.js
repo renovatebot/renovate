@@ -2,57 +2,57 @@ const semver = require('../../lib/versioning/poetry');
 
 describe('semver.isValid(input)', () => {
   it('should return null for irregular versions', () => {
-    expect(!!semver.isValid('17.04.0')).toBe(false);
+    expect(Boolean(semver.isValid('17.04.0'))).toBeFalsy();
   });
   it('should support simple semver', () => {
-    expect(!!semver.isValid('1.2.3')).toBe(true);
+    expect(Boolean(semver.isValid('1.2.3'))).toBeTruthy();
   });
   it('should support semver with dash', () => {
-    expect(!!semver.isValid('1.2.3-foo')).toBe(true);
+    expect(Boolean(semver.isValid('1.2.3-foo'))).toBeTruthy();
   });
   it('should reject semver without dash', () => {
-    expect(!!semver.isValid('1.2.3foo')).toBe(false);
+    expect(Boolean(semver.isValid('1.2.3foo'))).toBeFalsy();
   });
   it('should support ranges', () => {
-    expect(!!semver.isValid('~1.2.3')).toBe(true);
-    expect(!!semver.isValid('^1.2.3')).toBe(true);
-    expect(!!semver.isValid('>1.2.3')).toBe(true);
+    expect(Boolean(semver.isValid('~1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isValid('^1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isValid('>1.2.3'))).toBeTruthy();
   });
   it('should reject github repositories', () => {
-    expect(!!semver.isValid('renovatebot/renovate')).toBe(false);
-    expect(!!semver.isValid('renovatebot/renovate#master')).toBe(false);
+    expect(Boolean(semver.isValid('renovatebot/renovate'))).toBeFalsy();
+    expect(Boolean(semver.isValid('renovatebot/renovate#master'))).toBeFalsy();
     expect(
-      !!semver.isValid('https://github.com/renovatebot/renovate.git')
-    ).toBe(false);
+      Boolean(semver.isValid('https://github.com/renovatebot/renovate.git'))
+    ).toBeFalsy();
   });
 });
 describe('semver.isSingleVersion()', () => {
   it('returns true if naked version', () => {
-    expect(!!semver.isSingleVersion('1.2.3')).toBe(true);
-    expect(!!semver.isSingleVersion('1.2.3-alpha.1')).toBe(true);
+    expect(Boolean(semver.isSingleVersion('1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isSingleVersion('1.2.3-alpha.1'))).toBeTruthy();
   });
   it('returns true if equals', () => {
-    expect(!!semver.isSingleVersion('=1.2.3')).toBe(true);
-    expect(!!semver.isSingleVersion('= 1.2.3')).toBe(true);
+    expect(Boolean(semver.isSingleVersion('=1.2.3'))).toBeTruthy();
+    expect(Boolean(semver.isSingleVersion('= 1.2.3'))).toBeTruthy();
   });
   it('returns false when not version', () => {
-    expect(!!semver.isSingleVersion('1.*')).toBe(false);
+    expect(Boolean(semver.isSingleVersion('1.*'))).toBeFalsy();
   });
 });
 describe('semver.matches()', () => {
   it('handles comma', () => {
-    expect(semver.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(true);
-    expect(semver.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBe(false);
-    expect(semver.matches('4.2.2', '4.2.0, < 4.2.4')).toBe(false);
-    expect(semver.matches('4.2.2', '^4.2.0, < 4.2.4')).toBe(true);
-    expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
-    expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
+    expect(semver.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBeTruthy();
+    expect(semver.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBeFalsy();
+    expect(semver.matches('4.2.2', '4.2.0, < 4.2.4')).toBeFalsy();
+    expect(semver.matches('4.2.2', '^4.2.0, < 4.2.4')).toBeTruthy();
+    expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBeFalsy();
+    expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBeFalsy();
   });
 });
 describe('semver.isLessThanRange()', () => {
   it('handles comma', () => {
-    expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 <= 2.0.0')).toBe(true);
-    expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 <= 2.0.0')).toBe(false);
+    expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 <= 2.0.0')).toBeTruthy();
+    expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 <= 2.0.0')).toBeFalsy();
   });
 });
 describe('semver.minSatisfyingVersion()', () => {
@@ -74,7 +74,7 @@ describe('semver.minSatisfyingVersion()', () => {
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
         '^4.0.0, = 0.5.0'
       )
-    ).toBe(null);
+    ).toBeNull();
     expect(
       semver.minSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
@@ -86,7 +86,7 @@ describe('semver.minSatisfyingVersion()', () => {
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
         '^6.2.0, 3.*'
       )
-    ).toBe(null);
+    ).toBeNull();
   });
 });
 describe('semver.maxSatisfyingVersion()', () => {
