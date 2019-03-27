@@ -17,7 +17,7 @@ describe('manager/docker-compose/update', () => {
       };
       const res = updateDependency(railsGemfile, upgrade);
       expect(res).not.toEqual(railsGemfile);
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBeTruthy();
     });
     it('returns same', () => {
       // gem "rack-cache", "~> 1.2"
@@ -37,11 +37,11 @@ describe('manager/docker-compose/update', () => {
         newValue: '~> 1.3',
       };
       const res = updateDependency(railsGemfile, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

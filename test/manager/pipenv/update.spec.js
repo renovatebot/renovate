@@ -16,7 +16,7 @@ describe('manager/pipenv/update', () => {
       };
       const res = updateDependency(pipfile, upgrade);
       expect(res).not.toEqual(pipfile);
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBeTruthy();
       expect(res).toMatchSnapshot();
     });
     it('handles already replace values', () => {
@@ -37,7 +37,7 @@ describe('manager/pipenv/update', () => {
       };
       const res = updateDependency(pipfile, upgrade);
       expect(res).not.toEqual(pipfile);
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBeTruthy();
       expect(res).toMatchSnapshot();
     });
     it('upgrades dev packages', () => {
@@ -48,12 +48,12 @@ describe('manager/pipenv/update', () => {
       };
       const res = updateDependency(pipfile, upgrade);
       expect(res).not.toEqual(pipfile);
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBeTruthy();
       expect(res).toMatchSnapshot();
     });
     it('returns null if error', () => {
       const res = updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

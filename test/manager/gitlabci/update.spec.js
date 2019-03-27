@@ -18,7 +18,7 @@ describe('manager/gitlabci/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(upgrade.newDigest)).toBe(true);
+      expect(res.includes(upgrade.newDigest)).toBeTruthy();
     });
     it('returns same', () => {
       const upgrade = {
@@ -39,7 +39,7 @@ describe('manager/gitlabci/update', () => {
         newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('replaces service-image update', () => {
       const upgrade = {
@@ -51,7 +51,7 @@ describe('manager/gitlabci/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(upgrade.newDigest)).toBe(true);
+      expect(res.includes(upgrade.newDigest)).toBeTruthy();
     });
     it('returns null if service-image mismatch', () => {
       const upgrade = {
@@ -62,7 +62,7 @@ describe('manager/gitlabci/update', () => {
         newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns service-image same', () => {
       const upgrade = {
@@ -76,7 +76,7 @@ describe('manager/gitlabci/update', () => {
     });
     it('returns null if error', () => {
       const res = dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

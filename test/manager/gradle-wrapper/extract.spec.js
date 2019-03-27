@@ -21,7 +21,7 @@ describe('lib/manager/gradle-wrapper/extract', () => {
     });
 
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
 
     it('extracts bin version line', () => {

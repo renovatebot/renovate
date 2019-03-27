@@ -33,7 +33,7 @@ describe('manager/pip_requirements/update', () => {
     });
     it('returns null if error', () => {
       const res = updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('replaces existing value with comment', () => {
       const upgrade = {
@@ -44,7 +44,7 @@ describe('manager/pip_requirements/update', () => {
       const res = updateDependency(requirements3, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(requirements3);
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBeTruthy();
     });
 
     it('replaces existing value with extras', () => {
@@ -56,7 +56,7 @@ describe('manager/pip_requirements/update', () => {
       const res = updateDependency(requirements4, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(requirements4);
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBeTruthy();
     });
   });
 });

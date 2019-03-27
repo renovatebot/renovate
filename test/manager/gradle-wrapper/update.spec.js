@@ -40,8 +40,8 @@ describe('manager/gradle-wrapper/update', () => {
         res.includes(
           'https\\://services.gradle.org/distributions/gradle-5.0-all.zip'
         )
-      ).toBe(true);
-      expect(res.includes(checksum)).toBe(true);
+      ).toBeTruthy();
+      expect(res.includes(checksum)).toBeTruthy();
     });
 
     it('returns same', async () => {
@@ -104,7 +104,7 @@ describe('manager/gradle-wrapper/update', () => {
 
     it('returns null if error', async () => {
       const res = await dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

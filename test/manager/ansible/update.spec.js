@@ -21,7 +21,7 @@ describe('manager/ansible/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile1, upgrade);
       expect(res).not.toEqual(yamlFile1);
-      expect(res.includes(upgrade.newDigest)).toBe(true);
+      expect(res.includes(upgrade.newDigest)).toBeTruthy();
     });
     it('replaces existing value from docker_service', () => {
       const upgrade = {
@@ -32,7 +32,7 @@ describe('manager/ansible/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);
       expect(res).not.toEqual(yamlFile2);
-      expect(res.includes(upgrade.newDigest)).toBe(true);
+      expect(res.includes(upgrade.newDigest)).toBeTruthy();
     });
     it('returns same', () => {
       const upgrade = {
@@ -49,11 +49,11 @@ describe('manager/ansible/update', () => {
         newFrom: 'registry:2.6.2@sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

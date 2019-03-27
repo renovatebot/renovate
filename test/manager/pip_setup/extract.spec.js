@@ -31,7 +31,7 @@ describe('lib/manager/pip_setup/extract', () => {
     it('should return null for invalid file', async () => {
       expect(
         await extractPackageFile('raise Exception()', await tmpFile(), config)
-      ).toBe(null);
+      ).toBeNull();
     });
     it('should return null for no deps file', async () => {
       expect(
@@ -40,7 +40,7 @@ describe('lib/manager/pip_setup/extract', () => {
           await tmpFile(),
           config
         )
-      ).toBe(null);
+      ).toBeNull();
     });
   });
 

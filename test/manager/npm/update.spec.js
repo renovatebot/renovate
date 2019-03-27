@@ -72,7 +72,7 @@ describe('workers/branch/package-json', () => {
       });
       const res = npmUpdater.updateDependency(input, upgrade);
       expect(res).toMatchSnapshot();
-      expect(res.includes('v1.1.0')).toBe(true);
+      expect(res.includes('v1.1.0')).toBeTruthy();
     });
     it('updates resolutions too', () => {
       const upgrade = {
@@ -135,7 +135,7 @@ describe('workers/branch/package-json', () => {
         newValue: '1.5.8',
       };
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
-      expect(testContent).toBe(null);
+      expect(testContent).toBeNull();
     });
   });
   describe('.bumpPackageVersion()', () => {

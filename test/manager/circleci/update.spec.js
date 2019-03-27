@@ -22,7 +22,7 @@ describe('manager/circleci/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(upgrade.newDigest)).toBe(true);
+      expect(res.includes(upgrade.newDigest)).toBeTruthy();
     });
     it('returns same', () => {
       const upgrade = {
@@ -42,11 +42,11 @@ describe('manager/circleci/update', () => {
         newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('replaces orbs', () => {
       const upgrade = {
@@ -58,7 +58,7 @@ describe('manager/circleci/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);
       expect(res).not.toEqual(yamlFile2);
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBeTruthy();
     });
     it('returns same orb', () => {
       const upgrade = {

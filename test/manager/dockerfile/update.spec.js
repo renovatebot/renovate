@@ -55,7 +55,7 @@ describe('manager/dockerfile/update', () => {
         newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns unchanged', () => {
       const fileContent =
@@ -81,7 +81,7 @@ describe('manager/dockerfile/update', () => {
         newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('handles similar FROM', () => {
       const fileContent =
@@ -105,7 +105,7 @@ describe('manager/dockerfile/update', () => {
       let res = dockerfile.updateDependency(fileContent, upgrade1);
       res = dockerfile.updateDependency(res, upgrade2);
       expect(res).toMatchSnapshot();
-      expect(res.includes('as stage-1')).toBe(true);
+      expect(res.includes('as stage-1')).toBeTruthy();
     });
     it('replaces COPY --from', () => {
       const fileContent =
@@ -119,7 +119,7 @@ describe('manager/dockerfile/update', () => {
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
       expect(res).toMatchSnapshot();
-      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes(upgrade.newValue)).toBeTruthy();
     });
   });
 });

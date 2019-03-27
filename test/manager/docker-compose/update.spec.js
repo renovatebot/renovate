@@ -17,7 +17,7 @@ describe('manager/docker-compose/update', () => {
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
-      expect(res.includes(upgrade.newDigest)).toBe(true);
+      expect(res.includes(upgrade.newDigest)).toBeTruthy();
     });
     it('returns same', () => {
       const upgrade = {
@@ -34,11 +34,11 @@ describe('manager/docker-compose/update', () => {
         newFrom: 'postgres:9.6.8@sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });
