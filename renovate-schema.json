@@ -241,6 +241,7 @@
       "description": "Version scheme to use for filtering and comparisons",
       "type": "string",
       "enum": [
+        "poetry",
         "cargo",
         "composer",
         "docker",
@@ -984,6 +985,15 @@
         "fileMatch": ["(^|/)Pipfile$"]
       },
       "$ref": "#"
+    },
+    "poetry": {
+      "description": "Configuration object for pyproject.toml files",
+      "default": {
+        "enabled": false,
+        "commitMessageTopic": "Poetry package {{depName}}",
+        "managerBranchPrefix": "poetry-",
+        "fileMatch": ["(^|/)pyproject.toml"]
+      }
     },
     "python": {
       "description": "Configuration object for python",
