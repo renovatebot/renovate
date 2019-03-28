@@ -16,6 +16,11 @@ const pyproject3toml = fs.readFileSync(
   'utf8'
 );
 
+const pyproject4toml = fs.readFileSync(
+  'test/datasource/poetry/_fixtures/pyproject.4.toml',
+  'utf8'
+);
+
 describe('lib/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let config;
@@ -30,15 +35,20 @@ describe('lib/manager/poetry/extract', () => {
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(8);
     });
-    it('extracts multiple dependencies', () => {
+    it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', () => {
       const res = extractPackageFile(pyproject2toml, config);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(6);
+      expect(res.deps).toHaveLength(7);
     });
     it('handles case with no dependencies', () => {
       const res = extractPackageFile(pyproject3toml, config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(0);
+    });
+    it('handles multiple constraint dependencies', () => {
+      const res = extractPackageFile(pyproject4toml, config);
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(1);
     });
   });
 });

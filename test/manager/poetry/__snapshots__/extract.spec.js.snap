@@ -1,5 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/poetry/extract extractPackageFile() extracts multiple dependencies (with dep = {version = "1.2.3"} case) 1`] = `
+Array [
+  Object {
+    "currentValue": "*",
+    "datasource": "pypi",
+    "depName": "dep1",
+  },
+  Object {
+    "currentValue": "^0.6.0",
+    "datasource": "pypi",
+    "depName": "dep2",
+  },
+  Object {
+    "currentValue": "^0.33.6",
+    "datasource": "pypi",
+    "depName": "dep3",
+  },
+  Object {
+    "currentValue": "",
+    "datasource": "pypi",
+    "depName": "dep4",
+    "skipReason": "path-dependency",
+  },
+  Object {
+    "currentValue": "^0.8.3",
+    "datasource": "pypi",
+    "depName": "extra_dep1",
+    "skipReason": "path-dependency",
+  },
+  Object {
+    "currentValue": "^0.9.4",
+    "datasource": "pypi",
+    "depName": "extra_dep2",
+    "skipReason": "path-dependency",
+  },
+  Object {
+    "currentValue": "^0.4.0",
+    "datasource": "pypi",
+    "depName": "extra_dep3",
+    "skipReason": "path-dependency",
+  },
+]
+`;
+
 exports[`lib/manager/poetry/extract extractPackageFile() extracts multiple dependencies 1`] = `
 Array [
   Object {
@@ -46,40 +90,15 @@ Array [
 ]
 `;
 
-exports[`lib/manager/poetry/extract extractPackageFile() extracts multiple dependencies 2`] = `
+exports[`lib/manager/poetry/extract extractPackageFile() handles case with no dependencies 1`] = `Array []`;
+
+exports[`lib/manager/poetry/extract extractPackageFile() handles multiple constraint dependencies 1`] = `
 Array [
   Object {
-    "currentValue": "*",
+    "currentValue": "",
     "datasource": "pypi",
-    "depName": "dep1",
-  },
-  Object {
-    "currentValue": "^0.6.0",
-    "datasource": "pypi",
-    "depName": "dep2",
-  },
-  Object {
-    "currentValue": "^0.33.6",
-    "datasource": "pypi",
-    "depName": "dep3",
-    "skipReason": "path-dependency",
-  },
-  Object {
-    "currentValue": "^0.8.3",
-    "datasource": "pypi",
-    "depName": "extra_dep1",
-  },
-  Object {
-    "currentValue": "^0.9.4",
-    "datasource": "pypi",
-    "depName": "extra_dep2",
-  },
-  Object {
-    "currentValue": "^0.4.0",
-    "datasource": "pypi",
-    "depName": "extra_dep3",
+    "depName": "foo",
+    "skipReason": "multiple-constraint-dep",
   },
 ]
 `;
-
-exports[`lib/manager/poetry/extract extractPackageFile() handles case with no dependencies 1`] = `Array []`;
