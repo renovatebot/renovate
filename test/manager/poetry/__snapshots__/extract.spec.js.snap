@@ -45,3 +45,41 @@ Array [
   },
 ]
 `;
+
+exports[`lib/manager/poetry/extract extractPackageFile() extracts multiple dependencies 2`] = `
+Array [
+  Object {
+    "currentValue": "*",
+    "datasource": "pypi",
+    "depName": "dep1",
+  },
+  Object {
+    "currentValue": "^0.6.0",
+    "datasource": "pypi",
+    "depName": "dep2",
+  },
+  Object {
+    "currentValue": "^0.33.6",
+    "datasource": "pypi",
+    "depName": "dep3",
+    "skipReason": "path-dependency",
+  },
+  Object {
+    "currentValue": "^0.8.3",
+    "datasource": "pypi",
+    "depName": "extra_dep1",
+  },
+  Object {
+    "currentValue": "^0.9.4",
+    "datasource": "pypi",
+    "depName": "extra_dep2",
+  },
+  Object {
+    "currentValue": "^0.4.0",
+    "datasource": "pypi",
+    "depName": "extra_dep3",
+  },
+]
+`;
+
+exports[`lib/manager/poetry/extract extractPackageFile() handles case with no dependencies 1`] = `Array []`;
