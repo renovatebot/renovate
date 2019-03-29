@@ -73,6 +73,9 @@ Another option might be to use ScalaJS. I don't know it but it has same syntax a
 
 If we can use Scala or ScalaJS, the idea would be to execute the `build.sbt` or `plugins.sbt` file and work on the `libraryDependencies` or `dependencyOverrides` variables.
 
+_Update (thanks to @ChristianMurphy)_: https://github.com/scalameta/scalameta running on http://www.scala-js.org could be a way to parse Scala without depending on a JDK.
+E.G. https://astexplorer.net/#/gist/027dce11e6927b4ad39ea097ce6289b9/ea4d1048f32063a71d727d01178ae6d01087a62f
+
 ---
 
 #### Does the package file structure distinguish between different "types" of dependencies? e.g. production dependencies, dev dependencies, etc?
@@ -164,6 +167,8 @@ Ivy (https://ant.apache.org/ivy/history/2.3.0/ivyfile/dependency.html#revision).
 
 Yes. With syntax like `[1.0,2.0]`. See https://ant.apache.org/ivy/history/2.3.0/ivyfile/dependency.html#revision.
 
+Maven version ranges are supported as well (https://www.scala-sbt.org/1.x/docs/Library-Dependencies.html#Ivy+revisions).
+
 ---
 
 #### Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?
@@ -180,7 +185,7 @@ Don't know. Someone more experienced with sbt should answer to this.
 
 #### Is a new datasource required? Provide details
 
-Don't know.
+It could leverage the maven datasource.
 
 ---
 
