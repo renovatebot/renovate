@@ -2,22 +2,22 @@ const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/poetry/extract');
 
 const pyproject1toml = fs.readFileSync(
-  'test/datasource/poetry/_fixtures/pyproject.1.toml',
+  'test/manager/poetry/_fixtures/pyproject.1.toml',
   'utf8'
 );
 
 const pyproject2toml = fs.readFileSync(
-  'test/datasource/poetry/_fixtures/pyproject.2.toml',
+  'test/manager/poetry/_fixtures/pyproject.2.toml',
   'utf8'
 );
 
 const pyproject3toml = fs.readFileSync(
-  'test/datasource/poetry/_fixtures/pyproject.3.toml',
+  'test/manager/poetry/_fixtures/pyproject.3.toml',
   'utf8'
 );
 
 const pyproject4toml = fs.readFileSync(
-  'test/datasource/poetry/_fixtures/pyproject.4.toml',
+  'test/manager/poetry/_fixtures/pyproject.4.toml',
   'utf8'
 );
 
