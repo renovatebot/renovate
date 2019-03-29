@@ -335,9 +335,13 @@ describe('platform/azure', () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       azureApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [{ pullRequestId: 1234 }]),
+        getPullRequestLabels: jest.fn(() => [
+          { active: true, name: 'renovate' },
+        ]),
       }));
       azureHelper.getRenovatePRFormat.mockImplementation(() => ({
         pullRequestId: 1234,
+        labels: ['renovate'],
       }));
       const pr = await azure.getPr(1234);
       expect(pr).toMatchSnapshot();
@@ -509,6 +513,17 @@ describe('platform/azure', () => {
     it('returns empty', async () => {
       const res = await azure.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
+    });
+  });
+
+  describe('deleteLabel()', () => {
+    it('Should delete a label', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      azureApi.gitApi.mockImplementationOnce(() => ({
+        deletePullRequestLabels: jest.fn(),
+      }));
+      await azure.deleteLabel(1234, 'rebase');
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
     });
   });
 });
