@@ -93,8 +93,10 @@ Renovate shouldn't care of scopes: they should be kept as is but they don't have
 Most common syntaxes:
 
 ```scala
-// For Scala dependency (notice the double %%)
+// For Scala dependency with Scala version inferred (notice the double %%)
 libraryDependencies += "com.typesafe.play" %% "play-ws" % "2.6.10"
+// For Scala dependency without Scala version (2.12) inferred (single %)
+libraryDependencies += "com.typesafe.play" % "play-ws_2.12" % "2.6.10"
 // For Java dependency
 libraryDependencies += "org.mockito" % "mockito-all" % "1.10.18"
 
