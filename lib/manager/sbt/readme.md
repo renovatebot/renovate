@@ -107,7 +107,7 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-all" % "1.10.18"
 )
 
-// Defining some dependency overriding (same as for build.sbt)
+// Defining some dependency overriding
 dependencyOverrides += "com.google.guava" % "guava" % "23.0"
 // Multiple at once
 dependencyOverrides ++= Seq(
@@ -116,7 +116,9 @@ dependencyOverrides ++= Seq(
 )
 ```
 
-There is two variables to look for `libraryDependencies` and `dependencyOverrides`.
+There is two variables to look for `libraryDependencies` and `dependencyOverrides` (https://www.scala-sbt.org/1.x/docs/Library-Management.html#Overriding+a+version).
+
+ `dependencyOverrides` behaves like "Dependency Management" in Maven: if two dependencies declared in `libraryDependencies` depends on the same library (let's say 'C') but with different version, `dependencyOverrides` is a way to force a specific version of 'C' instead of letting sbt choose (it would choose the highest).
 
 More custom syntaxes with plain Scala code:
 
