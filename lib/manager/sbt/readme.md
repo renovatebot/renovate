@@ -109,6 +109,21 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-all" % "1.10.18"
 )
 
+// Latest versions
+libraryDependencies += "org.mockito" % "mockito-all" % "latest.integration"
+libraryDependencies += "org.mockito" % "mockito-all" % "latest.milestone"
+libraryDependencies += "org.mockito" % "mockito-all" % "latest.release"
+libraryDependencies += "org.mockito" % "mockito-all" % "1.10.+" // Latest 1.10.x
+// Range versions (mathemetical notation)
+libraryDependencies += "org.mockito" % "mockito-all" % "[1.0,2.0]"
+libraryDependencies += "org.mockito" % "mockito-all" % "[1.0,2.0["
+libraryDependencies += "org.mockito" % "mockito-all" % "]1.0,2.0]"
+libraryDependencies += "org.mockito" % "mockito-all" % "]1.0,2.0["
+libraryDependencies += "org.mockito" % "mockito-all" % "[1.0,)"
+libraryDependencies += "org.mockito" % "mockito-all" % "]1.0,)"
+libraryDependencies += "org.mockito" % "mockito-all" % "(,2.0]"
+libraryDependencies += "org.mockito" % "mockito-all" % "(,2.0["
+
 // Defining some dependency overriding
 dependencyOverrides += "com.google.guava" % "guava" % "23.0"
 // Multiple at once
@@ -170,8 +185,6 @@ Ivy (https://ant.apache.org/ivy/history/2.3.0/ivyfile/dependency.html#revision).
 #### Does this versioning scheme support range constraints, e.g. `^1.0.0` or `1.x`?
 
 Yes. With syntax like `[1.0,2.0]`. See https://ant.apache.org/ivy/history/2.3.0/ivyfile/dependency.html#revision.
-
-Maven version ranges are supported as well (https://www.scala-sbt.org/1.x/docs/Library-Dependencies.html#Ivy+revisions).
 
 ---
 
