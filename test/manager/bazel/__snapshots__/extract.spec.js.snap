@@ -39,105 +39,6 @@ Array [
 exports[`lib/manager/bazel/extract extractPackageFile() extracts multiple types of dependencies 1`] = `
 Array [
   Object {
-    "currentValue": "v1.0.5",
-    "datasource": "go",
-    "def": "go_repository(
-    name = \\"com_github_bitly_go-nsq\\",
-    importpath = \\"github.com/bitly/go-nsq\\",
-    tag = \\"v1.0.5\\"
-)
-",
-    "depName": "com_github_bitly_go-nsq",
-    "depType": "go_repository",
-    "lookupName": "github.com/bitly/go-nsq",
-  },
-  Object {
-    "currentDigest": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
-    "currentDigestShort": "dec09d7",
-    "currentValue": "v0.0.0",
-    "datasource": "go",
-    "def": "go_repository(
-   name = \\"com_github_google_uuid\\",
-   importpath = \\"github.com/google/uuid\\",
-   commit = \\"dec09d789f3dba190787f8b4454c7d3c936fed9e\\"
-)
-",
-    "depName": "com_github_google_uuid",
-    "depType": "go_repository",
-    "digestOneAndOnly": true,
-    "lookupName": "github.com/google/uuid",
-  },
-  Object {
-    "currentValue": "v2",
-    "datasource": "go",
-    "def": "go_repository(
-    name = \\"com_gopkgin_mgo_v2\\",
-    importpath = \\"gopkg.in/mgo.v2\\",
-    tag = \\"v2\\"
-)
-",
-    "depName": "com_gopkgin_mgo_v2",
-    "depType": "go_repository",
-    "lookupName": "gopkg.in/mgo.v2",
-  },
-  Object {
-    "currentValue": "0.3.1",
-    "datasource": "github",
-    "def": "git_repository(
-    name = \\"build_bazel_rules_nodejs\\",
-    remote = \\"https://github.com/bazelbuild/rules_nodejs.git\\",
-    tag = \\"0.3.1\\",
-)
-",
-    "depName": "build_bazel_rules_nodejs",
-    "depType": "git_repository",
-    "lookupName": "bazelbuild/rules_nodejs",
-    "remote": "https://github.com/bazelbuild/rules_nodejs.git",
-  },
-  Object {
-    "currentValue": "0.6.1",
-    "datasource": "github",
-    "def": "git_repository(
-    name = \\"build_bazel_rules_typescript\\",
-    remote = \\"https://github.com/bazelbuild/rules_typescript.git\\",
-    tag = \\"0.6.1\\",
-)
-",
-    "depName": "build_bazel_rules_typescript",
-    "depType": "git_repository",
-    "lookupName": "bazelbuild/rules_typescript",
-    "remote": "https://github.com/bazelbuild/rules_typescript.git",
-  },
-  Object {
-    "currentValue": "0.0.3",
-    "datasource": "github",
-    "def": "git_repository(
-    name = \\"io_bazel_rules_sass\\",
-    remote = \\"https://github.com/bazelbuild/rules_sass.git\\",
-    tag = \\"0.0.3\\",
-)
-",
-    "depName": "io_bazel_rules_sass",
-    "depType": "git_repository",
-    "lookupName": "bazelbuild/rules_sass",
-    "remote": "https://github.com/bazelbuild/rules_sass.git",
-  },
-  Object {
-    "currentDigest": "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71",
-    "datasource": "github",
-    "def": "git_repository(
-    name = \\"com_github_bazelbuild_buildtools\\",
-    remote = \\"https://github.com/bazelbuild/buildtools.git\\",
-    # Note, this commit matches the version of buildifier in angular/ngcontainer
-    commit = \\"b3b620e8bcff18ed3378cd3f35ebeb7016d71f71\\",
-)
-",
-    "depName": "com_github_bazelbuild_buildtools",
-    "depType": "git_repository",
-    "lookupName": "bazelbuild/buildtools",
-    "remote": "https://github.com/bazelbuild/buildtools.git",
-  },
-  Object {
     "currentDigest": "446923c3756ceeaa75888f52fcbdd48bb314fbf8",
     "datasource": "github",
     "def": "http_archive(
@@ -216,6 +117,98 @@ Array [
     "lookupName": "GoogleContainerTools/distroless",
     "lookupType": "releases",
     "repo": "GoogleContainerTools/distroless",
+  },
+  Object {
+    "currentValue": "v1.0.5",
+    "datasource": "go",
+    "def": "go_repository(
+    name = \\"com_github_bitly_go-nsq\\",
+    importpath = \\"github.com/bitly/go-nsq\\",
+    tag = \\"v1.0.5\\"
+)",
+    "depName": "com_github_bitly_go-nsq",
+    "depType": "go_repository",
+    "lookupName": "github.com/bitly/go-nsq",
+  },
+  Object {
+    "currentDigest": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
+    "currentDigestShort": "dec09d7",
+    "currentValue": "v0.0.0",
+    "datasource": "go",
+    "def": "go_repository(
+   name = \\"com_github_google_uuid\\",
+   importpath = \\"github.com/google/uuid\\",
+   commit = \\"dec09d789f3dba190787f8b4454c7d3c936fed9e\\"
+)",
+    "depName": "com_github_google_uuid",
+    "depType": "go_repository",
+    "digestOneAndOnly": true,
+    "lookupName": "github.com/google/uuid",
+  },
+  Object {
+    "currentValue": "v2",
+    "datasource": "go",
+    "def": "go_repository(
+    name = \\"com_gopkgin_mgo_v2\\",
+    importpath = \\"gopkg.in/mgo.v2\\",
+    tag = \\"v2\\"
+)",
+    "depName": "com_gopkgin_mgo_v2",
+    "depType": "go_repository",
+    "lookupName": "gopkg.in/mgo.v2",
+  },
+  Object {
+    "currentValue": "0.3.1",
+    "datasource": "github",
+    "def": "git_repository(
+    name = \\"build_bazel_rules_nodejs\\",
+    remote = \\"https://github.com/bazelbuild/rules_nodejs.git\\",
+    tag = \\"0.3.1\\",
+)",
+    "depName": "build_bazel_rules_nodejs",
+    "depType": "git_repository",
+    "lookupName": "bazelbuild/rules_nodejs",
+    "remote": "https://github.com/bazelbuild/rules_nodejs.git",
+  },
+  Object {
+    "currentValue": "0.6.1",
+    "datasource": "github",
+    "def": "git_repository(
+    name = \\"build_bazel_rules_typescript\\",
+    remote = \\"https://github.com/bazelbuild/rules_typescript.git\\",
+    tag = \\"0.6.1\\",
+)",
+    "depName": "build_bazel_rules_typescript",
+    "depType": "git_repository",
+    "lookupName": "bazelbuild/rules_typescript",
+    "remote": "https://github.com/bazelbuild/rules_typescript.git",
+  },
+  Object {
+    "currentValue": "0.0.3",
+    "datasource": "github",
+    "def": "git_repository(
+    name = \\"io_bazel_rules_sass\\",
+    remote = \\"https://github.com/bazelbuild/rules_sass.git\\",
+    tag = \\"0.0.3\\",
+)",
+    "depName": "io_bazel_rules_sass",
+    "depType": "git_repository",
+    "lookupName": "bazelbuild/rules_sass",
+    "remote": "https://github.com/bazelbuild/rules_sass.git",
+  },
+  Object {
+    "currentDigest": "b3b620e8bcff18ed3378cd3f35ebeb7016d71f71",
+    "datasource": "github",
+    "def": "git_repository(
+    name = \\"com_github_bazelbuild_buildtools\\",
+    remote = \\"https://github.com/bazelbuild/buildtools.git\\",
+    # Note, this commit matches the version of buildifier in angular/ngcontainer
+    commit = \\"b3b620e8bcff18ed3378cd3f35ebeb7016d71f71\\",
+)",
+    "depName": "com_github_bazelbuild_buildtools",
+    "depType": "git_repository",
+    "lookupName": "bazelbuild/buildtools",
+    "remote": "https://github.com/bazelbuild/buildtools.git",
   },
 ]
 `;
