@@ -218,7 +218,7 @@ describe('versioning/maven/compare', () => {
 
 describe('versioning/maven/index', () => {
   it('validates version string', () => {
-    expect(isVersion('')).toBeFalsy();
+    expect(isVersion('')).toBe(false);
     expect(isVersion('1.0.0')).toBe(true);
     expect(isVersion('0')).toBe(true);
     expect(isVersion('0.1-2-sp')).toBe(true);
@@ -227,23 +227,23 @@ describe('versioning/maven/index', () => {
     expect(isVersion('x1.0.0')).toBe(true);
     expect(isVersion('2.1.1.RELEASE')).toBe(true);
     expect(isVersion('Greenwich.SR1')).toBe(true);
-    expect(isVersion('.1')).toBeFalsy();
-    expect(isVersion('1.')).toBeFalsy();
-    expect(isVersion('-1')).toBeFalsy();
-    expect(isVersion('1-')).toBeFalsy();
+    expect(isVersion('.1')).toBe(false);
+    expect(isVersion('1.')).toBe(false);
+    expect(isVersion('-1')).toBe(false);
+    expect(isVersion('1-')).toBe(false);
   });
   it('checks if version is stable', () => {
     expect(isStable('')).toBeNull();
-    expect(isStable('foobar')).toBeFalsy();
+    expect(isStable('foobar')).toBe(false);
     expect(isStable('1')).toBe(true);
     expect(isStable('1.2')).toBe(true);
     expect(isStable('1.2.3')).toBe(true);
     expect(isStable('1.2.3.4')).toBe(true);
     expect(isStable('v1.2.3.4')).toBe(true);
-    expect(isStable('1-alpha-1')).toBeFalsy();
-    expect(isStable('1-b1')).toBeFalsy();
+    expect(isStable('1-alpha-1')).toBe(false);
+    expect(isStable('1-b1')).toBe(false);
     expect(isStable('1.final')).toBe(true);
-    expect(isStable('1.0milestone1')).toBeFalsy();
+    expect(isStable('1.0milestone1')).toBe(false);
     expect(isStable('1-sp')).toBe(true);
     expect(isStable('1-ga-1')).toBe(true);
   });
@@ -277,17 +277,17 @@ describe('versioning/maven/index', () => {
   it('matches against maven ranges', () => {
     expect(matches('0', '[0,1]')).toBe(true);
     expect(matches('1', '[0,1]')).toBe(true);
-    expect(matches('0', '(0,1)')).toBeFalsy();
-    expect(matches('1', '(0,1)')).toBeFalsy();
+    expect(matches('0', '(0,1)')).toBe(false);
+    expect(matches('1', '(0,1)')).toBe(false);
     expect(matches('1', '(0,2)')).toBe(true);
     expect(matches('1', '[0,2]')).toBe(true);
     expect(matches('1', '(,1]')).toBe(true);
-    expect(matches('1', '(,1)')).toBeFalsy();
+    expect(matches('1', '(,1)')).toBe(false);
     expect(matches('1', '[1,)')).toBe(true);
-    expect(matches('1', '(1,)')).toBeFalsy();
-    expect(matches('1', '(,1),(1,)')).toBeFalsy();
-    expect(matches('1', '(0,1),(1,2)')).toBeFalsy();
-    expect(matches('1.0.0.RC9.2', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toBeFalsy();
+    expect(matches('1', '(1,)')).toBe(false);
+    expect(matches('1', '(,1),(1,)')).toBe(false);
+    expect(matches('1', '(0,1),(1,2)')).toBe(false);
+    expect(matches('1.0.0.RC9.2', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toBe(false);
     expect(matches('1.0.0-RC14', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toBe(true);
   });
 });

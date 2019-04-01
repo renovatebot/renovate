@@ -87,7 +87,7 @@ describe('platform/git/storage', () => {
       expect(await git.branchExists('renovate/future_branch')).toBe(true);
     });
     it('should return false if not found', async () => {
-      expect(await git.branchExists('not_found')).toBeFalsy();
+      expect(await git.branchExists('not_found')).toBe(false);
     });
   });
   describe('getAllRenovateBranches()', () => {
@@ -100,7 +100,7 @@ describe('platform/git/storage', () => {
   });
   describe('isBranchStale()', () => {
     it('should return false if same SHA as master', async () => {
-      expect(await git.isBranchStale('renovate/future_branch')).toBeFalsy();
+      expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
     });
     it('should return true if SHA different from master', async () => {
       expect(await git.isBranchStale('renovate/past_branch')).toBe(true);

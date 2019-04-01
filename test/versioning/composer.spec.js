@@ -15,13 +15,13 @@ describe('semver.equals(a, b)', () => {
 });
 describe('semver.isGreaterThan(a, b)', () => {
   it('should pad short version', () => {
-    expect(semver.isGreaterThan('1.2.0', 'v1.2')).toBeFalsy();
+    expect(semver.isGreaterThan('1.2.0', 'v1.2')).toBe(false);
   });
   it('should pad really short version', () => {
     expect(semver.isGreaterThan('v1.0.1', '1')).toBe(true);
   });
   it('should pad both versions', () => {
-    expect(semver.isGreaterThan('1', '1.1')).toBeFalsy();
+    expect(semver.isGreaterThan('1', '1.1')).toBe(false);
   });
 });
 describe('semver.isSingleVersion(input)', () => {
@@ -42,7 +42,7 @@ describe('semver.isValid(input)', () => {
     expect(Boolean(semver.isValid('1.2.3-foo'))).toBe(true);
   });
   it('should reject semver without dash', () => {
-    expect(Boolean(semver.isValid('1.2.3foo'))).toBeFalsy();
+    expect(Boolean(semver.isValid('1.2.3foo'))).toBe(false);
   });
   it('should support ranges', () => {
     expect(Boolean(semver.isValid('~1.2.3'))).toBe(true);
@@ -64,7 +64,7 @@ describe('semver.isVersion(input)', () => {
 describe('semver.isLessThanRange()', () => {
   it('handles massaged tilde', () => {
     expect(semver.isLessThanRange('0.3.1', '~0.4')).toBe(true);
-    expect(semver.isLessThanRange('0.5.1', '~0.4')).toBeFalsy();
+    expect(semver.isLessThanRange('0.5.1', '~0.4')).toBe(false);
   });
 });
 describe('semver.maxSatisfyingVersion()', () => {
@@ -101,7 +101,7 @@ describe('semver.minSatisfyingVersion()', () => {
 });
 describe('semver.matches()', () => {
   it('handles massaged tilde', () => {
-    expect(semver.matches('0.3.1', '~0.4')).toBeFalsy();
+    expect(semver.matches('0.3.1', '~0.4')).toBe(false);
     expect(semver.matches('0.5.1', '~0.4')).toBe(true);
   });
 });

@@ -345,7 +345,7 @@ describe('platform/github', () => {
         })
       );
       const res = await github.getRepoForceRebase();
-      expect(res).toBeFalsy();
+      expect(res).toBe(false);
     });
     it('should handle 403', async () => {
       get.mockImplementationOnce(() =>
@@ -354,7 +354,7 @@ describe('platform/github', () => {
         })
       );
       const res = await github.getRepoForceRebase();
-      expect(res).toBeFalsy();
+      expect(res).toBe(false);
     });
     it('should throw 401', async () => {
       get.mockImplementationOnce(() =>
@@ -526,7 +526,7 @@ describe('platform/github', () => {
           },
         },
       }));
-      expect(await github.isBranchStale('thebranchname')).toBeFalsy();
+      expect(await github.isBranchStale('thebranchname')).toBe(false);
     });
     it('should return true if SHA different from master', async () => {
       await initRepo({
@@ -1670,7 +1670,7 @@ describe('platform/github', () => {
         },
       }));
       const pr = await github.getPr(1234);
-      expect(pr.canRebase).toBeFalsy();
+      expect(pr.canRebase).toBe(false);
       expect(pr).toMatchSnapshot();
     });
   });
@@ -1731,7 +1731,7 @@ describe('platform/github', () => {
       get.put.mockImplementationOnce(() => {
         throw new Error('merge error');
       });
-      expect(await github.mergePr(pr)).toBeFalsy();
+      expect(await github.mergePr(pr)).toBe(false);
       expect(get.put).toHaveBeenCalledTimes(1);
       expect(get.delete).toHaveBeenCalledTimes(0);
       expect(get).toHaveBeenCalledTimes(1);
@@ -1853,7 +1853,7 @@ describe('platform/github', () => {
       get.put.mockImplementationOnce(() => {
         throw new Error('no merging allowed');
       });
-      expect(await github.mergePr(pr)).toBeFalsy();
+      expect(await github.mergePr(pr)).toBe(false);
       expect(get.put).toHaveBeenCalledTimes(3);
       expect(get.delete).toHaveBeenCalledTimes(0);
     });

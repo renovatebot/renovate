@@ -4,9 +4,9 @@ describe('lib/versioning/hex', () => {
   describe('semver.matches()', () => {
     it('handles tilde greater than', () => {
       expect(semver.matches('4.2.0', '~> 4.0')).toBe(true);
-      expect(semver.matches('2.1.0', '~> 2.0.0')).toBeFalsy();
+      expect(semver.matches('2.1.0', '~> 2.0.0')).toBe(false);
       expect(semver.matches('2.0.0', '>= 2.0.0 and < 2.1.0')).toBe(true);
-      expect(semver.matches('2.1.0', '== 2.0.0 or < 2.1.0')).toBeFalsy();
+      expect(semver.matches('2.1.0', '== 2.0.0 or < 2.1.0')).toBe(false);
     });
   });
   it('handles tilde greater than', () => {
@@ -39,17 +39,17 @@ describe('lib/versioning/hex', () => {
       expect(semver.isLessThanRange('0.1.0', '>= 1.0.0 and <= 2.0.0')).toBe(
         true
       );
-      expect(
-        semver.isLessThanRange('1.9.0', '>= 1.0.0 and <= 2.0.0')
-      ).toBeFalsy();
+      expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 and <= 2.0.0')).toBe(
+        false
+      );
     });
     it('handles or', () => {
       expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 or >= 2.0.0')).toBe(
         true
       );
-      expect(
-        semver.isLessThanRange('1.9.0', '>= 1.0.0 or >= 2.0.0')
-      ).toBeFalsy();
+      expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 or >= 2.0.0')).toBe(
+        false
+      );
     });
   });
   describe('semver.minSatisfyingVersion()', () => {

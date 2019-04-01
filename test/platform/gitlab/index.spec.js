@@ -170,7 +170,7 @@ describe('platform/gitlab', () => {
   });
   describe('getRepoForceRebase', () => {
     it('should return false', () => {
-      expect(gitlab.getRepoForceRebase()).toBeFalsy();
+      expect(gitlab.getRepoForceRebase()).toBe(false);
     });
   });
   describe('setBaseBranch(branchName)', () => {
@@ -229,7 +229,7 @@ describe('platform/gitlab', () => {
     it('should return false if not 200 OK', async () => {
       get.mockImplementationOnce(() => ({ statusCode: 500 }));
       const branchExists = await gitlab.branchExists('foo');
-      expect(branchExists).toBeFalsy();
+      expect(branchExists).toBe(false);
     });
     it('should return false if 404 error received', async () => {
       get.mockImplementationOnce(() =>
@@ -238,7 +238,7 @@ describe('platform/gitlab', () => {
         })
       );
       const branchExists = await gitlab.branchExists('foo');
-      expect(branchExists).toBeFalsy();
+      expect(branchExists).toBe(false);
     });
     it('should return error if non-404 error thrown', async () => {
       get.mockImplementationOnce(() =>
@@ -296,7 +296,7 @@ describe('platform/gitlab', () => {
           },
         },
       }));
-      expect(await gitlab.isBranchStale('thebranchname')).toBeFalsy();
+      expect(await gitlab.isBranchStale('thebranchname')).toBe(false);
     });
     it('should return true if SHA different from master', async () => {
       // getBranchDetails - different from master

@@ -42,18 +42,18 @@ describe('docker.', () => {
 
   describe('isGreaterThan(version, other)', () => {
     it('should support all versions length', () => {
-      expect(docker.isGreaterThan('1.2.3', '1.2')).toBeFalsy();
+      expect(docker.isGreaterThan('1.2.3', '1.2')).toBe(false);
       expect(docker.isGreaterThan('18.04', '18.1')).toBe(true);
       expect(docker.isGreaterThan('10.1', '10.1.2')).toBe(true);
       expect(docker.isGreaterThan('3', '2')).toBe(true);
-      expect(docker.isGreaterThan('1.2.3', '1.2.3')).toBeFalsy();
+      expect(docker.isGreaterThan('1.2.3', '1.2.3')).toBe(false);
     });
   });
   describe('isLessThanRange(version, range)', () => {
     it('should support all versions length', () => {
       expect(docker.isLessThanRange('1.2.3', '2.0')).toBe(true);
-      expect(docker.isLessThanRange('18.04', '18.1')).toBeFalsy();
-      expect(docker.isLessThanRange('10.1', '10.0.4')).toBeFalsy();
+      expect(docker.isLessThanRange('18.04', '18.1')).toBe(false);
+      expect(docker.isLessThanRange('10.1', '10.0.4')).toBe(false);
       expect(docker.isLessThanRange('3', '4.0')).toBe(true);
       expect(docker.isLessThanRange('1.2', '1.3.4')).toBe(true);
     });
@@ -62,18 +62,18 @@ describe('docker.', () => {
     it('should support all versions length', () => {
       expect(docker.equals('1.2.3', '1.2.3')).toBe(true);
       expect(docker.equals('18.04', '18.4')).toBe(true);
-      expect(docker.equals('10.0', '10.0.4')).toBeFalsy();
-      expect(docker.equals('3', '4.0')).toBeFalsy();
-      expect(docker.equals('1.2', '1.2.3')).toBeFalsy();
+      expect(docker.equals('10.0', '10.0.4')).toBe(false);
+      expect(docker.equals('3', '4.0')).toBe(false);
+      expect(docker.equals('1.2', '1.2.3')).toBe(false);
     });
   });
   describe('equals(version, other)', () => {
     it('should support all versions length', () => {
       expect(docker.equals('1.2.3', '1.2.3')).toBe(true);
       expect(docker.equals('18.04', '18.4')).toBe(true);
-      expect(docker.equals('10.0', '10.0.4')).toBeFalsy();
-      expect(docker.equals('3', '4.0')).toBeFalsy();
-      expect(docker.equals('1.2', '1.2.3')).toBeFalsy();
+      expect(docker.equals('10.0', '10.0.4')).toBe(false);
+      expect(docker.equals('3', '4.0')).toBe(false);
+      expect(docker.equals('1.2', '1.2.3')).toBe(false);
     });
   });
   describe('maxSatisfyingVersion(versions, range)', () => {
