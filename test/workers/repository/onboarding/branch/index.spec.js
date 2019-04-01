@@ -100,7 +100,7 @@ describe('workers/repository/onboarding/branch', () => {
       platform.findPr.mockReturnValueOnce(null);
       platform.getBranchPr.mockReturnValueOnce({});
       const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBeFalsy();
+      expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
       expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);

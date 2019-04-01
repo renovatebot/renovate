@@ -121,7 +121,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
       expect(res.canBeUnpublished).toBe(true);
-      expect(res.automerge).toBeFalsy();
+      expect(res.automerge).toBe(false);
     });
     it('groups multiple upgrades different version', () => {
       const branch = [
@@ -458,7 +458,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.recreateClosed).toBeFalsy();
+      expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
     });
     it('overrides schedule for pin PRs', () => {

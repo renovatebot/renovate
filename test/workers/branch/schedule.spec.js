@@ -4,7 +4,7 @@ const schedule = require('../../../lib/workers/branch/schedule');
 describe('workers/branch/schedule', () => {
   describe('hasValidTimezone(schedule)', () => {
     it('returns false for invalid timezone', () => {
-      expect(schedule.hasValidTimezone('Asia')[0]).toBeFalsy();
+      expect(schedule.hasValidTimezone('Asia')[0]).toBe(false);
     });
     it('returns true for valid timezone', () => {
       expect(schedule.hasValidTimezone('Asia/Singapore')[0]).toBe(true);
@@ -21,26 +21,26 @@ describe('workers/branch/schedule', () => {
       expect(schedule.hasValidSchedule('at any time')[0]).toBe(true);
     });
     it('returns false for invalid schedule', () => {
-      expect(schedule.hasValidSchedule(['foo'])[0]).toBeFalsy();
+      expect(schedule.hasValidSchedule(['foo'])[0]).toBe(false);
     });
     it('returns false if any schedule fails to parse', () => {
-      expect(schedule.hasValidSchedule(['after 5:00pm', 'foo'])[0]).toBeFalsy();
+      expect(schedule.hasValidSchedule(['after 5:00pm', 'foo'])[0]).toBe(false);
     });
     it('returns false if using minutes', () => {
       expect(
         schedule.hasValidSchedule(['every 15 mins every weekday'])[0]
-      ).toBeFalsy();
+      ).toBe(false);
     });
     it('returns false if schedules have no days or time range', () => {
-      expect(schedule.hasValidSchedule(['at 5:00pm'])[0]).toBeFalsy();
+      expect(schedule.hasValidSchedule(['at 5:00pm'])[0]).toBe(false);
     });
     it('returns false if any schedule has no days or time range', () => {
-      expect(
-        schedule.hasValidSchedule(['at 5:00pm', 'on saturday'])[0]
-      ).toBeFalsy();
+      expect(schedule.hasValidSchedule(['at 5:00pm', 'on saturday'])[0]).toBe(
+        false
+      );
     });
     it('returns false for every xday', () => {
-      expect(schedule.hasValidSchedule(['every friday'])[0]).toBeFalsy();
+      expect(schedule.hasValidSchedule(['every friday'])[0]).toBe(false);
     });
     it('returns true if schedule has days of week', () => {
       expect(schedule.hasValidSchedule(['on friday and saturday'])[0]).toBe(
@@ -137,17 +137,17 @@ describe('workers/branch/schedule', () => {
     it('supports before hours false', () => {
       config.schedule = ['before 4:00am'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeFalsy();
+      expect(res).toBe(false);
     });
     it('massages string', () => {
       config.schedule = 'before 4:00am';
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeFalsy();
+      expect(res).toBe(false);
     });
     it('supports outside hours', () => {
       config.schedule = ['after 4:00pm'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeFalsy();
+      expect(res).toBe(false);
     });
     it('supports timezone', () => {
       config.schedule = ['after 4:00pm'];
@@ -169,7 +169,7 @@ describe('workers/branch/schedule', () => {
     it('supports day mismatch', () => {
       config.schedule = ['on monday and tuesday'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeFalsy();
+      expect(res).toBe(false);
     });
     it('supports every weekday', () => {
       config.schedule = ['every weekday'];
@@ -179,7 +179,7 @@ describe('workers/branch/schedule', () => {
     it('supports every weekday', () => {
       config.schedule = ['every weekend'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeFalsy();
+      expect(res).toBe(false);
     });
     it('supports every weekday', () => {
       config.schedule = ['before 11:00am every weekday'];
@@ -194,7 +194,7 @@ describe('workers/branch/schedule', () => {
     it('rejects first day of the month', () => {
       config.schedule = ['before 11am on the first day of the month'];
       const res = schedule.isScheduledNow(config);
-      expect(res).toBeFalsy();
+      expect(res).toBe(false);
     });
     it('approves first day of the month', () => {
       config.schedule = ['before 11am on the first day of the month'];

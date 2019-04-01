@@ -282,7 +282,7 @@ describe('manager/npm/post-update', () => {
       config.upgrades = [];
       await writeUpdatedPackageFiles(config);
       expect(fs.outputFile).toHaveBeenCalledTimes(2);
-      expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBeFalsy();
+      expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
     });
   });
   describe('getAdditionalFiles', () => {

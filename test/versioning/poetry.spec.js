@@ -2,7 +2,7 @@ const semver = require('../../lib/versioning/poetry');
 
 describe('semver.isValid(input)', () => {
   it('should return null for irregular versions', () => {
-    expect(Boolean(semver.isValid('17.04.0'))).toBeFalsy();
+    expect(Boolean(semver.isValid('17.04.0'))).toBe(false);
   });
   it('should support simple semver', () => {
     expect(Boolean(semver.isValid('1.2.3'))).toBe(true);
@@ -11,7 +11,7 @@ describe('semver.isValid(input)', () => {
     expect(Boolean(semver.isValid('1.2.3-foo'))).toBe(true);
   });
   it('should reject semver without dash', () => {
-    expect(Boolean(semver.isValid('1.2.3foo'))).toBeFalsy();
+    expect(Boolean(semver.isValid('1.2.3foo'))).toBe(false);
   });
   it('should support ranges', () => {
     expect(Boolean(semver.isValid('~1.2.3'))).toBe(true);
@@ -19,11 +19,11 @@ describe('semver.isValid(input)', () => {
     expect(Boolean(semver.isValid('>1.2.3'))).toBe(true);
   });
   it('should reject github repositories', () => {
-    expect(Boolean(semver.isValid('renovatebot/renovate'))).toBeFalsy();
-    expect(Boolean(semver.isValid('renovatebot/renovate#master'))).toBeFalsy();
+    expect(Boolean(semver.isValid('renovatebot/renovate'))).toBe(false);
+    expect(Boolean(semver.isValid('renovatebot/renovate#master'))).toBe(false);
     expect(
       Boolean(semver.isValid('https://github.com/renovatebot/renovate.git'))
-    ).toBeFalsy();
+    ).toBe(false);
   });
 });
 describe('semver.isSingleVersion()', () => {
@@ -36,23 +36,23 @@ describe('semver.isSingleVersion()', () => {
     expect(Boolean(semver.isSingleVersion('= 1.2.3'))).toBe(true);
   });
   it('returns false when not version', () => {
-    expect(Boolean(semver.isSingleVersion('1.*'))).toBeFalsy();
+    expect(Boolean(semver.isSingleVersion('1.*'))).toBe(false);
   });
 });
 describe('semver.matches()', () => {
   it('handles comma', () => {
     expect(semver.matches('4.2.0', '4.2, >= 3.0, < 5.0.0')).toBe(true);
-    expect(semver.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBeFalsy();
-    expect(semver.matches('4.2.2', '4.2.0, < 4.2.4')).toBeFalsy();
+    expect(semver.matches('4.2.0', '2.0, >= 3.0, < 5.0.0')).toBe(false);
+    expect(semver.matches('4.2.2', '4.2.0, < 4.2.4')).toBe(false);
     expect(semver.matches('4.2.2', '^4.2.0, < 4.2.4')).toBe(true);
-    expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBeFalsy();
-    expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBeFalsy();
+    expect(semver.matches('4.2.0', '4.3.0, 3.0.0')).toBe(false);
+    expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
   });
 });
 describe('semver.isLessThanRange()', () => {
   it('handles comma', () => {
     expect(semver.isLessThanRange('0.9.0', '>= 1.0.0 <= 2.0.0')).toBe(true);
-    expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 <= 2.0.0')).toBeFalsy();
+    expect(semver.isLessThanRange('1.9.0', '>= 1.0.0 <= 2.0.0')).toBe(false);
   });
 });
 describe('semver.minSatisfyingVersion()', () => {
