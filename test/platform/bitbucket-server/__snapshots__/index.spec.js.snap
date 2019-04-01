@@ -510,6 +510,21 @@ exports[`platform/bitbucket-server endpoint with no path getPr() returns null fo
 
 exports[`platform/bitbucket-server endpoint with no path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
+exports[`platform/bitbucket-server endpoint with no path getPrFiles() returns one file 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/changes?withComments=false&limit=100",
+    undefined,
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with no path getPrList() has pr 1`] = `
 Array [
   Object {
@@ -1484,6 +1499,21 @@ Array [
 exports[`platform/bitbucket-server endpoint with path getPr() returns null for no prNo 1`] = `Array []`;
 
 exports[`platform/bitbucket-server endpoint with path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+
+exports[`platform/bitbucket-server endpoint with path getPrFiles() returns one file 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/changes?withComments=false&limit=100",
+    undefined,
+  ],
+]
+`;
 
 exports[`platform/bitbucket-server endpoint with path getPrList() has pr 1`] = `
 Array [

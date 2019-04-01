@@ -126,11 +126,19 @@ ENV PATH="/home/ubuntu/.local/bin:$PATH"
 
 RUN pip install --user pipenv
 
+# npm
+
+ENV NPM_VERSION=6.9.0
+
+RUN npm install -g npm@$NPM_VERSION
+
 # Yarn
 
 ENV YARN_VERSION=1.15.2
 
-RUN npm i -g yarn@${YARN_VERSION}
+RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
+
+ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.bin:$PATH"
 
 COPY package.json .
 COPY yarn.lock .

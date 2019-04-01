@@ -2,15 +2,6 @@ const fs = require('fs');
 const upath = require('upath');
 const { getOptions } = require('../lib/config/definitions');
 
-const types = {
-  list: 'array',
-  json: 'object',
-  object: 'object',
-  integer: 'integer',
-  string: 'string',
-  boolean: 'boolean',
-};
-
 const schema = {
   title: 'JSON schema for Renovate config files (https://renovatebot.com/)',
   $schema: 'http://json-schema.org/draft-04/schema#',
@@ -25,11 +16,11 @@ function createSingleConfig(option) {
   if (option.description) {
     temp.description = option.description;
   }
-  temp.type = types[option.type];
+  temp.type = option.type;
   if (temp.type === 'array') {
     if (option.subType) {
       temp.items = {
-        type: types[option.subType],
+        type: option.subType,
       };
       if (option.format) {
         temp.items.format = option.format;
@@ -49,7 +40,7 @@ function createSingleConfig(option) {
   if (option.default !== undefined) {
     temp.default = option.default;
   }
-  if (temp.type === 'object') {
+  if (temp.type === 'object' && !option.freeChoice) {
     temp.$ref = '#';
   }
   return temp;
