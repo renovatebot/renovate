@@ -151,7 +151,7 @@ describe('manager/gomod/update', () => {
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
-      expect(res.includes(upgrade.newDigest)).toBeFalsy();
+      expect(res.includes(upgrade.newDigest)).toBe(false);
       expect(res.includes(upgrade.newDigest.substring(0, 12))).toBe(true);
     });
     it('skips already-updated multiline digest', () => {

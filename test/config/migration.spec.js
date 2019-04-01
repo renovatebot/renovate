@@ -161,7 +161,7 @@ describe('config/migration', () => {
         config,
         parentConfig
       );
-      expect(isMigrated).toBeFalsy();
+      expect(isMigrated).toBe(false);
       expect(migratedConfig.schedule).toEqual(config.schedule);
     });
     it('does not migrate multi days', () => {
@@ -174,7 +174,7 @@ describe('config/migration', () => {
         parentConfig
       );
       expect(migratedConfig).toMatchSnapshot();
-      expect(isMigrated).toBeFalsy();
+      expect(isMigrated).toBe(false);
       expect(migratedConfig.schedule).toEqual(config.schedule);
     });
     it('does not migrate hour range', () => {
@@ -187,7 +187,7 @@ describe('config/migration', () => {
         parentConfig
       );
       expect(migratedConfig.schedule).toEqual(config.schedule);
-      expect(isMigrated).toBeFalsy();
+      expect(isMigrated).toBe(false);
     });
     it('it migrates packages', () => {
       const config = {
@@ -223,7 +223,7 @@ describe('config/migration', () => {
       );
       expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
-      expect(migratedConfig.packageRules[0].minor.automerge).toBeFalsy();
+      expect(migratedConfig.packageRules[0].minor.automerge).toBe(false);
     });
     it('it does not migrate config', () => {
       const config = {
@@ -234,7 +234,7 @@ describe('config/migration', () => {
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
         config
       );
-      expect(isMigrated).toBeFalsy();
+      expect(isMigrated).toBe(false);
       expect(migratedConfig).toMatchObject(config);
     });
     it('it migrates subconfig', () => {
@@ -258,7 +258,7 @@ describe('config/migration', () => {
       expect(migratedConfig.lockFileMaintenance.packageRules).toHaveLength(1);
       expect(
         migratedConfig.lockFileMaintenance.packageRules[0].respectLatest
-      ).toBeFalsy();
+      ).toBe(false);
     });
     it('it migrates node to travis', () => {
       const config = {

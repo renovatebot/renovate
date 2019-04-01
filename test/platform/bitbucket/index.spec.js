@@ -96,7 +96,7 @@ describe('platform/bitbucket', () => {
   describe('getRepoForceRebase()', () => {
     it('always return false, since bitbucket does not support force rebase', () => {
       const actual = bitbucket.getRepoForceRebase();
-      expect(actual).toBeFalsy();
+      expect(actual).toBe(false);
     });
   });
 

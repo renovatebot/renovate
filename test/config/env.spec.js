@@ -11,11 +11,11 @@ describe('config/env', () => {
     });
     it('supports boolean false', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'false' };
-      expect(env.getConfig(envParam).recreateClosed).toBeFalsy();
+      expect(env.getConfig(envParam).recreateClosed).toBe(false);
     });
     it('supports boolean nonsense as false', () => {
       const envParam = { RENOVATE_RECREATE_CLOSED: 'foo' };
-      expect(env.getConfig(envParam).recreateClosed).toBeFalsy();
+      expect(env.getConfig(envParam).recreateClosed).toBe(false);
     });
     delete process.env.RENOVATE_RECREATE_CLOSED;
     it('supports list single', () => {

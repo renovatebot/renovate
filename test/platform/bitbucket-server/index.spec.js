@@ -103,7 +103,7 @@ describe('platform/bitbucket-server', () => {
         it('always return false, since bitbucket does not support force rebase', () => {
           expect.assertions(1);
           const actual = bitbucket.getRepoForceRebase();
-          expect(actual).toBeFalsy();
+          expect(actual).toBe(false);
         });
       });
 
@@ -213,9 +213,9 @@ describe('platform/bitbucket-server', () => {
       describe('ensureComment()', () => {
         it('does not throw', async () => {
           expect.assertions(2);
-          expect(
-            await bitbucket.ensureComment(3, 'topic', 'content')
-          ).toBeFalsy();
+          expect(await bitbucket.ensureComment(3, 'topic', 'content')).toBe(
+            false
+          );
           expect(api.get.mock.calls).toMatchSnapshot();
         });
 
@@ -539,7 +539,7 @@ describe('platform/bitbucket-server', () => {
               statusCode: 405,
             })
           );
-          await expect(bitbucket.mergePr(5, 'branch')).resolves.toBeFalsy();
+          await expect(bitbucket.mergePr(5, 'branch')).resolves.toBe(false);
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
         });

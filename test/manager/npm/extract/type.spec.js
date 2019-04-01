@@ -6,11 +6,11 @@ describe('manager/npm/extract/type', () => {
   describe('.mightBeABrowserLibrary()', () => {
     it('is not a library if private', () => {
       const isLibrary = mightBeABrowserLibrary({ private: true });
-      expect(isLibrary).toBeFalsy();
+      expect(isLibrary).toBe(false);
     });
     it('is not a library if no main', () => {
       const isLibrary = mightBeABrowserLibrary({});
-      expect(isLibrary).toBeFalsy();
+      expect(isLibrary).toBe(false);
     });
     it('is a library if has a main', () => {
       const isLibrary = mightBeABrowserLibrary({ main: 'index.js ' });

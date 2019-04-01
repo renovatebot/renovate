@@ -146,7 +146,7 @@ describe('platform/azure', () => {
 
   describe('getRepoForceRebase', () => {
     it('should return false', () => {
-      expect(azure.getRepoForceRebase()).toBeFalsy();
+      expect(azure.getRepoForceRebase()).toBe(false);
     });
   });
 
