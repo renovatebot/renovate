@@ -126,6 +126,12 @@ ENV PATH="/home/ubuntu/.local/bin:$PATH"
 
 RUN pip install --user pipenv
 
+# npm
+
+ENV NPM_VERSION=6.9.0
+
+RUN npm install -g npm@$NPM_VERSION
+
 # Yarn
 
 ENV YARN_VERSION=1.15.2

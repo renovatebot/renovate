@@ -416,6 +416,56 @@ function generateServerResponses(endpoint) {
         truncated: false,
       },
     },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/changes?withComments=false&limit=100`]: {
+      GET: {
+        "size": 1,
+        "limit": 25,
+        "isLastPage": true,
+        "values": [
+            {
+                "contentId": "5c279d6c7a3a053a145905aa9682ce02c16449e9",
+                "fromContentId": "7b86ad1a05b4259b8fa54497a8be0bd359a405bd",
+                "path": {
+                    "components": [
+                        "path",
+                        "to",
+                        "unreviewed",
+                        "file.txt"
+                    ],
+                    "parent": "path/to/unreviewed",
+                    "name": "file.txt",
+                    "extension": "txt",
+                    "toString": "path/to/unreviewed/file.txt"
+                },
+                "executable": false,
+                "percentUnchanged": 98,
+                "type": "MOVE",
+                "nodeType": "FILE",
+                "srcPath": {
+                    "components": [
+                        "path",
+                        "to",
+                        "file.txt"
+                    ],
+                    "parent": "path/to",
+                    "name": "file.txt",
+                    "extension": "txt",
+                    "toString": "path/to/file.txt"
+                },
+                "srcExecutable": false,
+                "links": {
+                    "self": [
+                        null
+                    ]
+                },
+                "properties": {
+                    "unreviewedCommits": 1
+                }
+            }
+        ],
+        "start": 0
+      },
+    },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits`]: {
       GET: {
         values: [{}],

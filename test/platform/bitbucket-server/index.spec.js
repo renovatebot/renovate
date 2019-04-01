@@ -415,7 +415,14 @@ describe('platform/bitbucket-server', () => {
       describe('getPrFiles()', () => {
         it('returns empty files', async () => {
           expect.assertions(1);
-          expect(await bitbucket.getPrFiles(5)).toHaveLength(0);
+          expect(await bitbucket.getPrFiles(null)).toHaveLength(0);
+        });
+
+        it('returns one file', async () => {
+          expect.assertions(2);
+          await initRepo();
+          expect(await bitbucket.getPrFiles(5)).toHaveLength(1);
+          expect(api.get.mock.calls).toMatchSnapshot();
         });
       });
 
