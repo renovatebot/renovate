@@ -582,7 +582,7 @@ describe('workers/repository/process/lookup', () => {
     });
     it('upgrades equal minor ranges', async () => {
       config.rangeStrategy = 'replace';
-      config.currentValue = '==1.3';
+      config.currentValue = '=1.3.1';
       config.depName = 'q';
       config.datasource = 'npm';
       nock('https://registry.npmjs.org')
