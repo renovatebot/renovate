@@ -43,6 +43,11 @@ describe('lib/manager/pipenv/extract', () => {
       const res = extractPackageFile(content, config).deps;
       expect(res).toHaveLength(1);
     });
+    it('ignores relative path dependencies', () => {
+      const content = '[packages]\r\nfoo = "==1.0.0"\r\ntest = {path = "."}';
+      const res = extractPackageFile(content, config).deps;
+      expect(res).toHaveLength(1);
+    });
     it('ignores invalid versions', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\nsome-package = "==0 0"';
       const res = extractPackageFile(content, config).deps;
