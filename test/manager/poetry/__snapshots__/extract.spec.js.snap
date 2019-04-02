@@ -118,8 +118,6 @@ Array [
 ]
 `;
 
-exports[`lib/manager/poetry/extract extractPackageFile() handles case with no dependencies 1`] = `Array []`;
-
 exports[`lib/manager/poetry/extract extractPackageFile() handles multiple constraint dependencies 1`] = `
 Array [
   Object {

@@ -42,8 +42,7 @@ describe('lib/manager/poetry/extract', () => {
     });
     it('handles case with no dependencies', () => {
       const res = extractPackageFile(pyproject3toml, config);
-      expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(0);
+      expect(res).toBeNull();
     });
     it('handles multiple constraint dependencies', () => {
       const res = extractPackageFile(pyproject4toml, config);
