@@ -49,11 +49,11 @@ describe('manager/ansible/update', () => {
         newFrom: 'registry:2.6.2@sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

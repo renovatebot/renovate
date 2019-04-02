@@ -184,7 +184,7 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates.length).toBe(2);
+      expect(res.updates).toHaveLength(2);
       expect(res.updates[0].updateType).not.toEqual('patch');
       expect(res.updates[1].updateType).not.toEqual('patch');
     });
@@ -573,6 +573,16 @@ describe('workers/repository/process/lookup', () => {
     it('upgrades less than equal minor ranges', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '<= 1.3';
+      config.depName = 'q';
+      config.datasource = 'npm';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
+    it('upgrades equal minor ranges', async () => {
+      config.rangeStrategy = 'replace';
+      config.currentValue = '=1.3.1';
       config.depName = 'q';
       config.datasource = 'npm';
       nock('https://registry.npmjs.org')

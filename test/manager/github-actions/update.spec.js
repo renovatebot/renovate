@@ -32,11 +32,11 @@ describe('manager/github-actions/update', () => {
         newFrom: 'registry:2.6.2@sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(workflow1, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

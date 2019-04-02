@@ -55,7 +55,7 @@ describe('manager/dockerfile/update', () => {
         newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns unchanged', () => {
       const fileContent =
@@ -81,7 +81,7 @@ describe('manager/dockerfile/update', () => {
         newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dockerfile.updateDependency(fileContent, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('handles similar FROM', () => {
       const fileContent =
