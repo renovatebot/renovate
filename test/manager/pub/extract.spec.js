@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { extractAllPackageFiles } = require('../../../lib/manager/pub');
+const { extractPackageFile } = require('../../../lib/manager/pub');
 
 const brokenYaml = fs.readFileSync(
   'test/manager/pub/_fixtures/update.yaml',
@@ -12,25 +12,17 @@ const packageFile = fs.readFileSync(
 );
 
 describe('manager/pub', () => {
-  describe('extractAllPackageFiles', () => {
-    it('should return empty if package has no content', async () => {
-      platform.getFile.mockReturnValueOnce(null);
-      const res = await extractAllPackageFiles({}, ['random.yaml']);
-      expect(res).toEqual([]);
+  describe('extractPackageFile', () => {
+    it('should return null if package does not contain any deps', () => {
+      const res = extractPackageFile('foo: bar', 'pubspec.yaml');
+      expect(res).toEqual(null);
     });
-    it('should return empty if package is invalid', async () => {
-      platform.getFile.mockReturnValueOnce(brokenYaml);
-      const res = await extractAllPackageFiles({}, ['random.yaml']);
-      expect(res).toEqual([]);
+    it('should return null if package is invalid', () => {
+      const res = extractPackageFile(brokenYaml, 'pubspec.yaml');
+      expect(res).toEqual(null);
     });
-    it('should return something if deps is not null', async () => {
-      platform.getFile.mockReturnValueOnce('foo: bar');
-      const res = await extractAllPackageFiles({}, ['random.yaml']);
-      expect(res.length).toEqual(1);
-    });
-    it('should return valid dependencies', async () => {
-      platform.getFile.mockReturnValueOnce(packageFile);
-      const res = await extractAllPackageFiles({}, ['random.yaml']);
+    it('should return valid dependencies', () => {
+      const res = extractPackageFile(packageFile, 'pubspec.yaml');
       expect(res).toMatchSnapshot();
     });
   });
