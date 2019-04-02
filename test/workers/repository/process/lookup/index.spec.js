@@ -580,6 +580,16 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
+    it('upgrades equal minor ranges', async () => {
+      config.rangeStrategy = 'replace';
+      config.currentValue = '=1.3.1';
+      config.depName = 'q';
+      config.datasource = 'npm';
+      nock('https://registry.npmjs.org')
+        .get('/q')
+        .reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
+    });
     it('upgrades less than equal major ranges', async () => {
       config.rangeStrategy = 'replace';
       config.respectLatest = false;
