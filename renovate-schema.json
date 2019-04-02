@@ -36,7 +36,7 @@
     "forceCli": {
       "description": "Whether CLI configuration options should be moved to the `force` config section",
       "type": "boolean",
-      "default": true
+      "default": false
     },
     "dryRun": {
       "description": "If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs",
