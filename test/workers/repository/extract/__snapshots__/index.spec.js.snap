@@ -71,6 +71,9 @@ Object {
   "pipenv": Array [
     Object {},
   ],
+  "pub": Array [
+    Object {},
+  ],
   "terraform": Array [
     Object {},
   ],
