@@ -17,10 +17,10 @@ describe('lib/manager/pipenv/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('[packages]\r\n', config)).toBe(null);
+      expect(extractPackageFile('[packages]\r\n', config)).toBeNull();
     });
     it('returns null for invalid toml file', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts dependencies', () => {
       const res = extractPackageFile(pipfile1, config).deps;
@@ -40,6 +40,11 @@ describe('lib/manager/pipenv/extract', () => {
     });
     it('ignores invalid package names', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\n_invalid = "==1.0.0"';
+      const res = extractPackageFile(content, config).deps;
+      expect(res).toHaveLength(1);
+    });
+    it('ignores relative path dependencies', () => {
+      const content = '[packages]\r\nfoo = "==1.0.0"\r\ntest = {path = "."}';
       const res = extractPackageFile(content, config).deps;
       expect(res).toHaveLength(1);
     });
