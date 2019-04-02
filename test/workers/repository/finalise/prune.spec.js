@@ -14,7 +14,7 @@ describe('workers/repository/finalise/prune', () => {
     it('returns if no branchList', async () => {
       delete config.branchList;
       await cleanup.pruneStaleBranches(config, config.branchList);
-      expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(0);
+      expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(0);
     });
     it('returns if no renovate branches', async () => {
       config.branchList = [];
@@ -25,8 +25,8 @@ describe('workers/repository/finalise/prune', () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       platform.getAllRenovateBranches.mockReturnValueOnce(config.branchList);
       await cleanup.pruneStaleBranches(config, config.branchList);
-      expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(1);
-      expect(platform.deleteBranch.mock.calls).toHaveLength(0);
+      expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
+      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
     });
     it('renames deletes remaining branch', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
@@ -35,9 +35,9 @@ describe('workers/repository/finalise/prune', () => {
       );
       platform.findPr.mockReturnValueOnce({ title: 'foo' });
       await cleanup.pruneStaleBranches(config, config.branchList);
-      expect(platform.getAllRenovateBranches.mock.calls).toHaveLength(1);
-      expect(platform.deleteBranch.mock.calls).toHaveLength(1);
-      expect(platform.updatePr.mock.calls).toHaveLength(1);
+      expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
+      expect(platform.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
   });
 });

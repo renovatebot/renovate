@@ -39,11 +39,11 @@ describe('manager/kubernetes/update', () => {
         newFrom: 'k8s.gcr.io/kube-proxy-amd64:v1.11.1',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('replaces image inside YAML array', () => {
       const upgrade = {

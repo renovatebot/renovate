@@ -23,7 +23,7 @@ describe('api/docker', () => {
         { lookupName: 'some-dep' },
         'some-new-value'
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if errored', async () => {
       got.mockReturnValueOnce({ body: { token: 'some-token' } });
@@ -31,7 +31,7 @@ describe('api/docker', () => {
         { lookupName: 'some-dep' },
         'some-new-value'
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns digest', async () => {
       got.mockReturnValueOnce({
@@ -190,7 +190,7 @@ describe('api/docker', () => {
         datasource: 'docker',
         depName: 'node',
       });
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('uses custom registry with registryUrls', async () => {
       const tags = ['1.0.0'];
@@ -295,7 +295,7 @@ describe('api/docker', () => {
       const res = await docker.getPkgReleases({
         lookupName: 'my/node',
       });
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

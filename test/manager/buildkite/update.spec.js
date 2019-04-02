@@ -64,11 +64,11 @@ describe('manager/buildkite/update', () => {
         newValue: 'v2.2.0',
       };
       const res = bkUpdate.updateDependency(pipeline1, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = bkUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

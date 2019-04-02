@@ -20,7 +20,7 @@ describe('workers/repository/write', () => {
       const branches = [{ updateType: 'pin' }, { blockedByPin: true }, {}];
       const res = await writeUpdates(config, packageFiles, branches);
       expect(res).toEqual('done');
-      expect(branchWorker.processBranch.mock.calls).toHaveLength(2);
+      expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
     });
     it('stops after automerge', async () => {
       const branches = [{}, {}, {}, {}];
@@ -29,7 +29,7 @@ describe('workers/repository/write', () => {
       branchWorker.processBranch.mockReturnValueOnce('automerged');
       const res = await writeUpdates(config, packageFiles, branches);
       expect(res).toEqual('automerged');
-      expect(branchWorker.processBranch.mock.calls).toHaveLength(3);
+      expect(branchWorker.processBranch).toHaveBeenCalledTimes(3);
     });
   });
 });

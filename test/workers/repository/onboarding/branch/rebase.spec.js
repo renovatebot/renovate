@@ -17,7 +17,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         canRebase: false,
       });
       await rebaseOnboardingBranch(config);
-      expect(platform.commitFilesToBranch.mock.calls).toHaveLength(0);
+      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
     });
     it('does nothing if branch is up to date', async () => {
       const contents =
@@ -29,7 +29,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         isStale: false,
       });
       await rebaseOnboardingBranch(config);
-      expect(platform.commitFilesToBranch.mock.calls).toHaveLength(0);
+      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
     });
     it('rebases onboarding branch', async () => {
       platform.getBranchPr.mockReturnValueOnce({
@@ -37,7 +37,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         canRebase: true,
       });
       await rebaseOnboardingBranch(config);
-      expect(platform.commitFilesToBranch.mock.calls).toHaveLength(1);
+      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(1);
     });
   });
 });

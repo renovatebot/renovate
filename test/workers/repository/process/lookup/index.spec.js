@@ -184,7 +184,7 @@ describe('workers/repository/process/lookup', () => {
         .reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates.length).toBe(2);
+      expect(res.updates).toHaveLength(2);
       expect(res.updates[0].updateType).not.toEqual('patch');
       expect(res.updates[1].updateType).not.toEqual('patch');
     });

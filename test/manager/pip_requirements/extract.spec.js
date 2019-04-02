@@ -28,7 +28,7 @@ describe('lib/manager/pip_requirements/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts dependencies', () => {
       const res = extractPackageFile(requirements1, config).deps;

@@ -53,7 +53,7 @@ describe('platform/gh-got-wrapper', () => {
     });
     const res = await get('some-url', { paginate: true });
     expect(res.body).toEqual(['a', 'b', 'c', 'd']);
-    expect(ghGot.mock.calls).toHaveLength(3);
+    expect(ghGot).toHaveBeenCalledTimes(3);
   });
   it('attempts to paginate', async () => {
     ghGot.mockReturnValueOnce({
@@ -69,7 +69,7 @@ describe('platform/gh-got-wrapper', () => {
     });
     const res = await get('some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
-    expect(ghGot.mock.calls).toHaveLength(1);
+    expect(ghGot).toHaveBeenCalledTimes(1);
   });
   it('should throw rate limit exceeded', async () => {
     ghGot.mockImplementationOnce(() =>
@@ -198,7 +198,7 @@ describe('platform/gh-got-wrapper', () => {
       body,
     }));
     const res = await get('some-url');
-    expect(ghGot.mock.calls).toHaveLength(3);
+    expect(ghGot).toHaveBeenCalledTimes(3);
     expect(res.body).toEqual(body);
   });
   it('should retry until failure', async () => {

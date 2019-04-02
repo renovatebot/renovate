@@ -17,10 +17,10 @@ describe('lib/manager/pipenv/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('[packages]\r\n', config)).toBe(null);
+      expect(extractPackageFile('[packages]\r\n', config)).toBeNull();
     });
     it('returns null for invalid toml file', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts dependencies', () => {
       const res = extractPackageFile(pipfile1, config).deps;
