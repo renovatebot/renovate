@@ -1083,8 +1083,7 @@
         "Change": "{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}",
         "References": "{{{references}}}",
         "Package file": "{{{packageFile}}}"
-      },
-      "$ref": "#"
+      }
     },
     "prBodyColumns": {
       "description": "List of columns to use in PR bodies",
