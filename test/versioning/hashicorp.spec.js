@@ -46,7 +46,7 @@ describe('semver.minSatisfyingVersion()', () => {
         ['0.4.0', '0.5.0', '4.2.0', '5.0.0'],
         '~> 4.0.0'
       )
-    ).toBe(null);
+    ).toBeNull();
   });
 });
 describe('semver.getNewValue()', () => {

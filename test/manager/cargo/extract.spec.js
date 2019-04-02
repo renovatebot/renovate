@@ -25,7 +25,7 @@ describe('lib/manager/cargo/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(cargo1toml, config);

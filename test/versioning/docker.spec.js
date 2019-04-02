@@ -4,12 +4,12 @@ const semver = require('../../lib/versioning/semver');
 describe('docker.', () => {
   describe('isValid(version)', () => {
     it('should support all versions length', () => {
-      expect(docker.isValid(null)).toBe(null);
+      expect(docker.isValid(null)).toBeNull();
       expect(docker.isValid('1.2.3')).toBe('1.2.3');
       expect(docker.isValid('18.04')).toBe('18.04');
       expect(docker.isValid('10.1')).toBe('10.1');
       expect(docker.isValid('3')).toBe('3');
-      expect(docker.isValid('foo')).toBe(null);
+      expect(docker.isValid('foo')).toBeNull();
     });
   });
   describe('getMajor(version)', () => {
@@ -18,7 +18,7 @@ describe('docker.', () => {
       expect(docker.getMajor('18.04')).toBe(18);
       expect(docker.getMajor('10.1')).toBe(10);
       expect(docker.getMajor('3')).toBe(3);
-      expect(docker.getMajor('foo')).toBe(null);
+      expect(docker.getMajor('foo')).toBeNull();
     });
   });
   describe('getMinor(version)', () => {
@@ -26,17 +26,17 @@ describe('docker.', () => {
       expect(docker.getMinor('1.2.3')).toBe(2);
       expect(docker.getMinor('18.04')).toBe(4);
       expect(docker.getMinor('10.1')).toBe(1);
-      expect(docker.getMinor('3')).toBe(null);
-      expect(docker.getMinor('foo')).toBe(null);
+      expect(docker.getMinor('3')).toBeNull();
+      expect(docker.getMinor('foo')).toBeNull();
     });
   });
   describe('getPatch(version)', () => {
     it('should support all versions length', () => {
       expect(docker.getPatch('1.2.3')).toBe(3);
-      expect(docker.getPatch('18.04')).toBe(null);
-      expect(docker.getPatch('10.1')).toBe(null);
-      expect(docker.getPatch('3')).toBe(null);
-      expect(docker.getPatch('foo')).toBe(null);
+      expect(docker.getPatch('18.04')).toBeNull();
+      expect(docker.getPatch('10.1')).toBeNull();
+      expect(docker.getPatch('3')).toBeNull();
+      expect(docker.getPatch('foo')).toBeNull();
     });
   });
 
@@ -96,8 +96,8 @@ describe('docker.', () => {
           expect(max(versions, '1.2')).toBe('1.2');
           expect(max(versions, '1')).toBe('1');
           // return null if not found
-          expect(max(versions, '1.3')).toBe(null);
-          expect(max(versions, '0.9')).toBe(null);
+          expect(max(versions, '1.3')).toBeNull();
+          expect(max(versions, '0.9')).toBeNull();
         }
       );
     });

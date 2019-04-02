@@ -192,16 +192,16 @@ describe('platform/gitlab', () => {
         body: [],
       }));
       const files = await gitlab.getFileList();
-      expect(files.length).toBe(0);
+      expect(files).toHaveLength(0);
     });
     it('caches the result', async () => {
       get.mockImplementationOnce(() => ({
         body: [],
       }));
       let files = await gitlab.getFileList();
-      expect(files.length).toBe(0);
+      expect(files).toHaveLength(0);
       files = await gitlab.getFileList();
-      expect(files.length).toBe(0);
+      expect(files).toHaveLength(0);
     });
     it('should return the files matching the fileName', async () => {
       get.mockImplementationOnce(() => ({
@@ -322,7 +322,7 @@ describe('platform/gitlab', () => {
     it('should return null if branch does not exist', async () => {
       get.mockReturnValueOnce({ statusCode: 500 }); // branchExists
       const pr = await gitlab.getBranchPr('somebranch');
-      expect(pr).toBe(null);
+      expect(pr).toBeNull();
     });
     it('should return null if no PR exists', async () => {
       get.mockReturnValueOnce({ statusCode: 200 }); // branchExists
@@ -331,7 +331,7 @@ describe('platform/gitlab', () => {
         body: [],
       });
       const pr = await gitlab.getBranchPr('somebranch');
-      expect(pr).toBe(null);
+      expect(pr).toBeNull();
     });
     it('should return the PR object', async () => {
       get.mockReturnValueOnce({ statusCode: 200 }); // branchExists
@@ -437,7 +437,7 @@ describe('platform/gitlab', () => {
         'somebranch',
         'some-context'
       );
-      expect(res).toEqual(null);
+      expect(res).toBeNull();
     });
     it('returns null if no matching results', async () => {
       get.mockReturnValueOnce({
@@ -447,7 +447,7 @@ describe('platform/gitlab', () => {
         'somebranch',
         'some-context'
       );
-      expect(res).toEqual(null);
+      expect(res).toBeNull();
     });
     it('returns status if name found', async () => {
       get.mockReturnValueOnce({
@@ -481,7 +481,7 @@ describe('platform/gitlab', () => {
         'some-state',
         'some-url'
       );
-      expect(get.post.mock.calls).toHaveLength(1);
+      expect(get.post).toHaveBeenCalledTimes(1);
     });
   });
   describe('mergeBranch(branchName)', () => {
@@ -526,13 +526,13 @@ describe('platform/gitlab', () => {
     it('should send delete', async () => {
       get.delete = jest.fn();
       await gitlab.deleteBranch('some-branch');
-      expect(get.delete.mock.calls.length).toBe(1);
+      expect(get.delete).toHaveBeenCalledTimes(1);
     });
     it('should close PR', async () => {
       get.delete = jest.fn();
       get.mockReturnValueOnce({ body: [] }); // getBranchPr
       await gitlab.deleteBranch('some-branch', true);
-      expect(get.delete.mock.calls.length).toBe(1);
+      expect(get.delete).toHaveBeenCalledTimes(1);
     });
   });
   describe('getBranchLastCommitTime', () => {
@@ -662,7 +662,7 @@ describe('platform/gitlab', () => {
       });
       get.mockReturnValueOnce({ body: { description: 'newer-content' } });
       const res = await gitlab.ensureIssue('title-2', 'newer-content');
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
   describe('ensureIssueClosing()', () => {
@@ -700,7 +700,7 @@ describe('platform/gitlab', () => {
     it('should swallow error', async () => {
       get.mockImplementationOnce({});
       await gitlab.addAssignees(42, ['someuser', 'someotheruser']);
-      expect(get.put.mock.calls).toHaveLength(0);
+      expect(get.put).toHaveBeenCalledTimes(0);
     });
   });
   describe('addReviewers(issueNo, reviewers)', () => {
@@ -713,7 +713,7 @@ describe('platform/gitlab', () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       get.mockReturnValueOnce({ body: [] });
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(1);
+      expect(get.post).toHaveBeenCalledTimes(1);
       expect(get.post.mock.calls).toMatchSnapshot();
     });
     it('add updates comment if necessary', async () => {
@@ -722,8 +722,8 @@ describe('platform/gitlab', () => {
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       });
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(0);
-      expect(get.put.mock.calls).toHaveLength(1);
+      expect(get.post).toHaveBeenCalledTimes(0);
+      expect(get.put).toHaveBeenCalledTimes(1);
       expect(get.put.mock.calls).toMatchSnapshot();
     });
     it('skips comment', async () => {
@@ -732,15 +732,15 @@ describe('platform/gitlab', () => {
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
       });
       await gitlab.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(0);
-      expect(get.put.mock.calls).toHaveLength(0);
+      expect(get.post).toHaveBeenCalledTimes(0);
+      expect(get.put).toHaveBeenCalledTimes(0);
     });
     it('handles comment with no description', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
       await gitlab.ensureComment(42, null, '!merge');
-      expect(get.post.mock.calls).toHaveLength(0);
-      expect(get.put.mock.calls).toHaveLength(0);
+      expect(get.post).toHaveBeenCalledTimes(0);
+      expect(get.put).toHaveBeenCalledTimes(0);
     });
   });
   describe('ensureCommentRemoval', () => {
@@ -750,7 +750,7 @@ describe('platform/gitlab', () => {
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       });
       await gitlab.ensureCommentRemoval(42, 'some-subject');
-      expect(get.delete.mock.calls).toHaveLength(1);
+      expect(get.delete).toHaveBeenCalledTimes(1);
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
@@ -964,12 +964,12 @@ These updates have all been created already. Click a checkbox below to force a r
     });
     it('short cuts 404', async () => {
       const res = await gitlab.getFile('some-missing-path');
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null for 404', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
       const res = await gitlab.getFile('some-path', 'some-branch');
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('throws error for non-404', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 403 }));
@@ -1005,7 +1005,7 @@ These updates have all been created already. Click a checkbox below to force a r
         'Create something'
       );
       expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toHaveLength(1);
+      expect(get.post).toHaveBeenCalledTimes(1);
     });
     it('updates multiple files', async () => {
       // Two files exist
@@ -1042,7 +1042,7 @@ These updates have all been created already. Click a checkbox below to force a r
         'Update something'
       );
       expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toHaveLength(1);
+      expect(get.post).toHaveBeenCalledTimes(1);
     });
   });
   describe('getCommitMessages()', () => {
