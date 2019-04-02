@@ -150,7 +150,7 @@ describe('config/migration', () => {
         parentConfig
       );
       expect(isMigrated).toBe(true);
-      expect(migratedConfig.semanticCommitScope).toBe(null);
+      expect(migratedConfig.semanticCommitScope).toBeNull();
     });
     it('does not migrate every weekday', () => {
       const config = {

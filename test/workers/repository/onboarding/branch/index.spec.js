@@ -102,8 +102,8 @@ describe('workers/repository/onboarding/branch', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
-      expect(platform.setBaseBranch.mock.calls).toHaveLength(1);
-      expect(platform.commitFilesToBranch.mock.calls).toHaveLength(0);
+      expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
+      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
     });
   });
 });

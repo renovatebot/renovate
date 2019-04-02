@@ -76,7 +76,7 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('handles files mismatch', async () => {
       ghGot.mockReturnValueOnce({
@@ -88,7 +88,7 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('handles wrong format', async () => {
       ghGot
@@ -104,7 +104,7 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('handles bad markdown', async () => {
       ghGot
@@ -120,7 +120,7 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('parses angular.js', async () => {
       ghGot
@@ -136,7 +136,7 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
-      expect(res).not.toBe(null);
+      expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
     it('parses jest', async () => {
@@ -153,7 +153,7 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
-      expect(res).not.toBe(null);
+      expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
     it('parses js-yaml', async () => {
@@ -170,7 +170,7 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
-      expect(res).not.toBe(null);
+      expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
   });

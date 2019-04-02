@@ -16,7 +16,7 @@ describe('lib/manager/dockerfile/extract', () => {
     });
     it('handles no FROM', () => {
       const res = extractPackageFile('no from!', config);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('handles naked dep', () => {
       const res = extractPackageFile('FROM node\n', config).deps;
@@ -104,7 +104,7 @@ describe('lib/manager/dockerfile/extract', () => {
     });
     it('skips scratchs', () => {
       const res = extractPackageFile('FROM scratch\nADD foo\n', config);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('skips named multistage FROM tags', () => {
       const res = extractPackageFile(

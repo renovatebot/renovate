@@ -20,7 +20,7 @@ describe('workers/branch/automerge', () => {
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
-      expect(platform.commitFilesToBranch.mock.calls.length).toBe(0);
+      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
     });
     it('commits files', async () => {
       config.updatedPackageFiles.push({
@@ -28,7 +28,7 @@ describe('workers/branch/automerge', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(platform.commitFilesToBranch.mock.calls.length).toBe(1);
+      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(1);
       expect(platform.commitFilesToBranch.mock.calls).toMatchSnapshot();
     });
     it('dry runs', async () => {
@@ -38,7 +38,7 @@ describe('workers/branch/automerge', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(platform.commitFilesToBranch.mock.calls.length).toBe(0);
+      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
     });
   });
 });

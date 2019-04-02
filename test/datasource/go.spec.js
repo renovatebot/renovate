@@ -119,7 +119,7 @@ describe('datasource/go', () => {
         github.getPkgReleases.mockReturnValueOnce(githubRes);
         expect(await go.getPkgReleases(pkg)).toEqual(githubRes);
       }
-      expect(got.mock.calls).toHaveLength(0);
+      expect(got).toHaveBeenCalledTimes(0);
       expect(github.getPkgReleases.mock.calls).toMatchSnapshot();
     });
   });
