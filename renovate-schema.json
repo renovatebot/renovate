@@ -989,10 +989,12 @@
     },
     "poetry": {
       "description": "Configuration object for pyproject.toml files",
+      "type": "toml",
       "default": {
         "enabled": false,
         "commitMessageTopic": "Poetry package {{depName}}",
         "managerBranchPrefix": "poetry-",
+        "versionScheme": "poetry",
         "fileMatch": ["(^|/)pyproject.toml"]
       }
     },
