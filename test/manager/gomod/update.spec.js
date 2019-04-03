@@ -80,11 +80,11 @@ describe('manager/gomod/update', () => {
         newValue: 'v1.15.36',
       };
       const res = goUpdate.updateDependency(gomod1, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = goUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('replaces multiline', () => {
       const upgrade = {
@@ -174,7 +174,7 @@ describe('manager/gomod/update', () => {
         newValue: 'v1.8.0',
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('handles +incompatible tag', () => {
       const upgrade = {

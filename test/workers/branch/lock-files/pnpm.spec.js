@@ -19,7 +19,7 @@ describe('generateLockFile', () => {
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir');
-    expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('catches errors', async () => {
@@ -32,7 +32,7 @@ describe('generateLockFile', () => {
       throw new Error('not found');
     });
     const res = await pnpmHelper.generateLockFile('some-dir');
-    expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
   });
@@ -50,7 +50,7 @@ describe('generateLockFile', () => {
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir');
-    expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('finds pnpm globally', async () => {
@@ -68,7 +68,7 @@ describe('generateLockFile', () => {
     });
     fs.readFile = jest.fn(() => 'package-lock-contents');
     const res = await pnpmHelper.generateLockFile('some-dir');
-    expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
   it('uses fallback pnpm', async () => {
@@ -92,7 +92,7 @@ describe('generateLockFile', () => {
       undefined,
       'global'
     );
-    expect(fs.readFile.mock.calls.length).toEqual(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
   });
 });

@@ -26,7 +26,7 @@ describe('manager/nuget/update', () => {
     });
     it('returns null on errors', () => {
       const res = nugetUpdater.updateDependency(csProj, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

@@ -36,7 +36,7 @@
     "forceCli": {
       "description": "Whether CLI configuration options should be moved to the `force` config section",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "dryRun": {
       "description": "If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs",
@@ -1073,8 +1073,7 @@
         "Change": "{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}",
         "References": "{{{references}}}",
         "Package file": "{{{packageFile}}}"
-      },
-      "$ref": "#"
+      }
     },
     "prBodyColumns": {
       "description": "List of columns to use in PR bodies",

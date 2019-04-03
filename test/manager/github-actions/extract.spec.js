@@ -15,7 +15,7 @@ describe('lib/manager/github-actions/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts multiple image lines from docker_container', () => {
       const res = extractPackageFile(workflow1, config);

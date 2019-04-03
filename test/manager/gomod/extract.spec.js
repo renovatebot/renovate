@@ -11,19 +11,19 @@ describe('lib/manager/gomod/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts single-line requires', () => {
       const res = extractPackageFile(gomod1, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(7);
-      expect(res.filter(e => e.skipReason).length).toBe(1);
+      expect(res.filter(e => e.skipReason)).toHaveLength(1);
     });
     it('extracts multi-line requires', () => {
       const res = extractPackageFile(gomod2, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(58);
-      expect(res.filter(e => e.skipReason).length).toBe(0);
+      expect(res.filter(e => e.skipReason)).toHaveLength(0);
     });
   });
 });

@@ -260,7 +260,7 @@ describe('platform/azure', () => {
         }),
       }));
       const pr = await azure.getBranchPr('somebranch');
-      expect(pr).toBe(null);
+      expect(pr).toBeNull();
     });
     it('should return the pr', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -321,7 +321,7 @@ describe('platform/azure', () => {
   describe('getPr(prNo)', () => {
     it('should return null if no prNo is passed', async () => {
       const pr = await azure.getPr(null);
-      expect(pr).toBe(null);
+      expect(pr).toBeNull();
     });
     it('should return null if no PR is returned from azure', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -329,15 +329,19 @@ describe('platform/azure', () => {
         getPullRequests: jest.fn(() => []),
       }));
       const pr = await azure.getPr(1234);
-      expect(pr).toBe(null);
+      expect(pr).toBeNull();
     });
     it('should return a pr in the right format', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       azureApi.gitApi.mockImplementationOnce(() => ({
         getPullRequests: jest.fn(() => [{ pullRequestId: 1234 }]),
+        getPullRequestLabels: jest.fn(() => [
+          { active: true, name: 'renovate' },
+        ]),
       }));
       azureHelper.getRenovatePRFormat.mockImplementation(() => ({
         pullRequestId: 1234,
+        labels: ['renovate'],
       }));
       const pr = await azure.getPr(1234);
       expect(pr).toMatchSnapshot();
@@ -431,11 +435,11 @@ describe('platform/azure', () => {
         updateThread: jest.fn(),
       }));
       await azure.ensureCommentRemoval(42, 'some-subject');
-      expect(azureApi.gitApi.mock.calls.length).toBe(3);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
     it('nothing should happen, no number', async () => {
       await azure.ensureCommentRemoval();
-      expect(azureApi.gitApi.mock.calls.length).toBe(0);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(0);
     });
     it('comment not found', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -446,7 +450,7 @@ describe('platform/azure', () => {
         updateThread: jest.fn(),
       }));
       await azure.ensureCommentRemoval(42, 'some-subject');
-      expect(azureApi.gitApi.mock.calls.length).toBe(3);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -457,7 +461,7 @@ describe('platform/azure', () => {
         createThread: jest.fn(() => [{ id: 123 }]),
       }));
       await azure.addAssignees(123, ['test@bonjour.fr']);
-      expect(azureApi.gitApi.mock.calls.length).toBe(3);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -475,7 +479,7 @@ describe('platform/azure', () => {
         ]),
       }));
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc']);
-      expect(azureApi.gitApi.mock.calls.length).toBe(3);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -501,7 +505,7 @@ describe('platform/azure', () => {
     // to become async?
     it('getPrFiles', () => {
       const res = azure.getPrFiles(46);
-      expect(res.length).toBe(0);
+      expect(res).toHaveLength(0);
     });
   });
 
@@ -509,6 +513,17 @@ describe('platform/azure', () => {
     it('returns empty', async () => {
       const res = await azure.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
+    });
+  });
+
+  describe('deleteLabel()', () => {
+    it('Should delete a label', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      azureApi.gitApi.mockImplementationOnce(() => ({
+        deletePullRequestLabels: jest.fn(),
+      }));
+      await azure.deleteLabel(1234, 'rebase');
+      expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
     });
   });
 });

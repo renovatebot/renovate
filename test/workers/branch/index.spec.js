@@ -81,7 +81,7 @@ describe('workers/branch', () => {
         state: 'closed',
       });
       await branchWorker.processBranch(config);
-      expect(parent.getParentBranch.mock.calls.length).toBe(0);
+      expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
     });
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -92,7 +92,7 @@ describe('workers/branch', () => {
         state: 'closed',
       });
       await branchWorker.processBranch(config);
-      expect(parent.getParentBranch.mock.calls.length).toBe(0);
+      expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
     });
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -102,7 +102,7 @@ describe('workers/branch', () => {
         state: 'closed',
       });
       await branchWorker.processBranch(config);
-      expect(parent.getParentBranch.mock.calls.length).toBe(0);
+      expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
     });
     it('skips branch if merged PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -112,7 +112,7 @@ describe('workers/branch', () => {
         state: 'merged',
       });
       await branchWorker.processBranch(config);
-      expect(parent.getParentBranch.mock.calls.length).toBe(0);
+      expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
     });
     it('throws error if closed PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -181,9 +181,9 @@ describe('workers/branch', () => {
       platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce('automerged');
       await branchWorker.processBranch(config);
-      expect(statusChecks.setUnpublishable.mock.calls).toHaveLength(1);
-      expect(automerge.tryBranchAutomerge.mock.calls).toHaveLength(1);
-      expect(prWorker.ensurePr.mock.calls).toHaveLength(0);
+      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
     it('ensures PR and tries automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
@@ -198,9 +198,9 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
-      expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
-      expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(1);
-      expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
+      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(1);
     });
     it('ensures PR and adds lock file error comment if no releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
@@ -215,10 +215,10 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
-      expect(platform.ensureComment.mock.calls).toHaveLength(1);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
-      expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
-      expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
     it('ensures PR and adds lock file error comment if old releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
@@ -234,10 +234,10 @@ describe('workers/branch', () => {
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
       await branchWorker.processBranch(config);
-      expect(platform.ensureComment.mock.calls).toHaveLength(1);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
-      expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
-      expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
     it('ensures PR and adds lock file error comment if new releaseTimestamp and branch exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
@@ -253,10 +253,10 @@ describe('workers/branch', () => {
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
       await branchWorker.processBranch(config);
-      expect(platform.ensureComment.mock.calls).toHaveLength(1);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
-      expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
-      expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
     it('throws error if lock file errors and new releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
@@ -293,10 +293,10 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       await branchWorker.processBranch(config);
-      expect(platform.ensureComment.mock.calls).toHaveLength(1);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
-      expect(prWorker.ensurePr.mock.calls).toHaveLength(1);
-      expect(prWorker.checkAutoMerge.mock.calls).toHaveLength(0);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
     it('swallows branch errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockImplementationOnce(() => {

@@ -28,6 +28,6 @@ describe('accumulateValues()', () => {
     });
     const res = await utils.accumulateValues('some-url', 'get', null, 10);
     expect(res).toHaveLength(25);
-    expect(got.get.mock.calls).toHaveLength(3);
+    expect(got.get).toHaveBeenCalledTimes(3);
   });
 });
