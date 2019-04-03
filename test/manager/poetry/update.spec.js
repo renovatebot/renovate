@@ -28,7 +28,7 @@ describe('manager/poetry/update', () => {
       const upgrade = {
         depName: 'dep1',
         depType: 'dependencies',
-        newValue: '*',
+        newValue: '0.0.0',
       };
       const res = updateDependency(pyproject1toml, upgrade);
       expect(res).toEqual(pyproject1toml);

@@ -59,7 +59,14 @@ Array [
 exports[`lib/manager/poetry/extract extractPackageFile() extracts multiple dependencies 1`] = `
 Array [
   Object {
-    "currentValue": "*",
+    "currentValue": "0.0.0",
+    "datasource": "pypi",
+    "depName": "dep1_",
+    "depType": "dependencies",
+    "nestedVersion": false,
+  },
+  Object {
+    "currentValue": "0.0.0",
     "datasource": "pypi",
     "depName": "dep1",
     "depType": "dependencies",
