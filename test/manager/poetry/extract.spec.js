@@ -49,5 +49,41 @@ describe('lib/manager/poetry/extract', () => {
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
+    it('skips git dependencies', () => {
+      const content =
+        '[tool.poetry.dependencies]\r\nflask = {git = "https://github.com/pallets/flask.git"}\r\nwerkzeug = ">=0.14"';
+      const res = extractPackageFile(content, config).deps;
+      expect(res[0].depName).toBe('flask');
+      expect(res[0].currentValue).toBe('');
+      expect(res[0].skipReason).toBe('git-dependency');
+      expect(res).toHaveLength(2);
+    });
+    it('skips git dependencies', () => {
+      const content =
+        '[tool.poetry.dependencies]\r\nflask = {git = "https://github.com/pallets/flask.git", version="1.2.3"}\r\nwerkzeug = ">=0.14"';
+      const res = extractPackageFile(content, config).deps;
+      expect(res[0].depName).toBe('flask');
+      expect(res[0].currentValue).toBe('1.2.3');
+      expect(res[0].skipReason).toBe('git-dependency');
+      expect(res).toHaveLength(2);
+    });
+    it('skips path dependencies', () => {
+      const content =
+        '[tool.poetry.dependencies]\r\nflask = {path = "/some/path/"}\r\nwerkzeug = ">=0.14"';
+      const res = extractPackageFile(content, config).deps;
+      expect(res[0].depName).toBe('flask');
+      expect(res[0].currentValue).toBe('');
+      expect(res[0].skipReason).toBe('path-dependency');
+      expect(res).toHaveLength(2);
+    });
+    it('skips path dependencies', () => {
+      const content =
+        '[tool.poetry.dependencies]\r\nflask = {path = "/some/path/", version = "1.2.3"}\r\nwerkzeug = ">=0.14"';
+      const res = extractPackageFile(content, config).deps;
+      expect(res[0].depName).toBe('flask');
+      expect(res[0].currentValue).toBe('1.2.3');
+      expect(res[0].skipReason).toBe('path-dependency');
+      expect(res).toHaveLength(2);
+    });
   });
 });
