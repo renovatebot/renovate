@@ -31,7 +31,7 @@ describe('manager/maven', () => {
     it('should return package files info', async () => {
       platform.getFile.mockReturnValueOnce(pomContent);
       const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
-      expect(packages.length).toEqual(1);
+      expect(packages).toHaveLength(1);
 
       const pkg = packages[0];
       expect(pkg.packageFile).toEqual('random.pom.xml');

@@ -42,11 +42,11 @@ describe('manager/circleci/update', () => {
         newDigest: 'sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if error', () => {
       const res = dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('replaces orbs', () => {
       const upgrade = {

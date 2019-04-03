@@ -255,7 +255,7 @@ describe('manager/npm/post-update', () => {
     it('returns if no updated packageFiles', async () => {
       delete config.updatedPackageFiles;
       await writeUpdatedPackageFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(0);
+      expect(fs.outputFile).toHaveBeenCalledTimes(0);
     });
     it('returns if no updated packageFiles are package.json', async () => {
       config.updatedPackageFiles = [
@@ -265,7 +265,7 @@ describe('manager/npm/post-update', () => {
         },
       ];
       await writeUpdatedPackageFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(0);
+      expect(fs.outputFile).toHaveBeenCalledTimes(0);
     });
     it('writes updated packageFiles', async () => {
       config.updatedPackageFiles = [
@@ -281,7 +281,7 @@ describe('manager/npm/post-update', () => {
       ];
       config.upgrades = [];
       await writeUpdatedPackageFiles(config);
-      expect(fs.outputFile.mock.calls).toHaveLength(2);
+      expect(fs.outputFile).toHaveBeenCalledTimes(2);
       expect(fs.outputFile.mock.calls[1][1].includes('"engines"')).toBe(false);
     });
   });

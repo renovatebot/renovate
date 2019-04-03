@@ -31,7 +31,7 @@ describe('manager/travis/update', () => {
         newValue: '6',
       };
       const res = nodefile.updateDependency(content, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

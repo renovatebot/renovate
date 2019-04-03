@@ -32,7 +32,7 @@ describe('lib/manager/kubernetes/extract', () => {
       };
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile(kubernetesConfigMapFile, config)).toBe(null);
+      expect(extractPackageFile(kubernetesConfigMapFile, config)).toBeNull();
     });
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(kubernetesImagesFile, config);
@@ -45,7 +45,7 @@ describe('lib/manager/kubernetes/extract', () => {
       expect(res.deps).toHaveLength(1);
     });
     it('ignores non-Kubernetes YAML files', () => {
-      expect(extractPackageFile(otherYamlFile, config)).toBe(null);
+      expect(extractPackageFile(otherYamlFile, config)).toBeNull();
     });
   });
 });
