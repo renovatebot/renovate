@@ -992,10 +992,8 @@
       "type": "toml",
       "default": {
         "enabled": false,
-        "commitMessageTopic": "Poetry package {{depName}}",
-        "managerBranchPrefix": "poetry-",
         "versionScheme": "poetry",
-        "fileMatch": ["(^|/)pyproject.toml"]
+        "fileMatch": ["(^|/)pyproject.toml$"]
       }
     },
     "python": {
