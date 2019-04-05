@@ -5328,10 +5328,10 @@ node-gyp@^3.8.0:
     tar "^2.0.0"
     which "1"
 
-node-html-parser@1.1.13:
-  version "1.1.13"
-  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-1.1.13.tgz#517377c205d663fcb23063b13628b9fc9a93eef8"
-  integrity sha512-g8H73/DHTFH17N0dukN1XkCdJm9TF9cpsaElT/4PeIQR+hBR2T3rmheO1EeFBOqg4ot2s1530XPD1/dsVk8MNQ==
+node-html-parser@1.1.14:
+  version "1.1.14"
+  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-1.1.14.tgz#2e5b44c830fc75ba0c828105d823be81026c5347"
+  integrity sha512-UcvX5vo3vqlDUpOVvy67Qdp8um0cYc30blTI1yLArF7g8SD3Ci1xomIkPBg1+AKZ8LgrYixvOQ9G2PkOFk2AEg==
   dependencies:
     he "1.1.1"
 
