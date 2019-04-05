@@ -6,6 +6,11 @@ const workspaceFile = fs.readFileSync(
   'utf8'
 );
 
+const fileWithBzlExtension = fs.readFileSync(
+  'test/manager/bazel/_fixtures/repositories.bzl',
+  'utf8'
+);
+
 describe('lib/manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {
     let config;
@@ -22,6 +27,10 @@ describe('lib/manager/bazel/extract', () => {
     });
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(workspaceFile, config);
+      expect(res.deps).toMatchSnapshot();
+    });
+    it('extracts dependencies from *.bzl files', () => {
+      const res = extractPackageFile(fileWithBzlExtension, config);
       expect(res.deps).toMatchSnapshot();
     });
     it('check remote option in go_repository', () => {
