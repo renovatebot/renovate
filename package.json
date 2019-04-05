@@ -117,7 +117,7 @@
     "minimatch": "3.0.4",
     "moment": "2.24.0",
     "moment-timezone": "0.5.23",
-    "node-html-parser": "1.1.13",
+    "node-html-parser": "1.1.14",
     "npm": "6.9.0",
     "openpgp": "2.6.2",
     "p-all": "2.0.0",
