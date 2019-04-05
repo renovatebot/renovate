@@ -6,7 +6,7 @@ Mix
 
 #### Implementation status
 
-Work in pogress
+Implemented
 
 #### What language does this support?
 
@@ -87,7 +87,10 @@ There are only modules that can be used as apps and libs
 
 #### If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?
 
-TODO
+Supported following ranges of hex datasource:
+
+- ~> 1.0.0/ ~>1.0
+- and/or ranges
 
 ## Lookup
 
@@ -97,7 +100,11 @@ Implemented ([here]https://github.com/renovatebot/renovate/issues/3043())
 
 #### Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?
 
-I dont think that it is necessary. Package file is always in root directory.
+Mix supports dependencies hosted as git repositories:
+
+```
+ {:cowboy, github: "ninenines/cowboy"},
+```
 
 #### Do the package files contain any "constraints" on the parent language (e.g. supports only v3.x of Python) or platform (Linux, Windows, etc) that should be used in the lookup procedure?
 
@@ -111,7 +118,7 @@ No
 
 #### Are lock files or checksum files used? Mandatory?
 
-Lock files are mix.lock/rebar.lock and they are mandatory
+Lock files are mix.lock and they are mandatory
 
 #### If so, what tool and exact commands should be used if updating 1 or more package versions in a dependency file?
 
@@ -119,9 +126,12 @@ Lock files are mix.lock/rebar.lock and they are mandatory
 
 #### If applicable, describe how the tool maintains a cache and if it can be controlled via CLI or env? Do you recommend the cache be kept or disabled/ignored?
 
----
+Mix doesn't cache deps only put compiled files via mix deps.compile. Build files can be deleted via mix deps.clean --build
 
 #### If applicable, what command should be used to generate a lock file from scratch if you already have a package file? This will be used for "lock file maintenance".
+
+mix deps.get - gets dependencies and creates/updates .lock file
+mix deps.uplock (--all) - deletes dependency in .lock file
 
 ## Other
 

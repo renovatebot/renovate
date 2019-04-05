@@ -23,7 +23,7 @@ Array [
     "depType": "github",
     "lineNumber": 20,
     "lookupName": "ninenines/cowboy",
-    "skipReason": "unsupported-version",
+    "skipReason": "non-hex depTypes",
   },
   Object {
     "currentValue": "~> 1.0",

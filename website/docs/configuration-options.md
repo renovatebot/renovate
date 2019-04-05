@@ -439,7 +439,7 @@ Add to this object if you wish to define rules that apply only to minor updates.
 
 ## mix
 
-Warning: Elixir mix support is in pre-alpha stage
+Warning: Elixir mix support is in alpha stage
 
 ## node
 
