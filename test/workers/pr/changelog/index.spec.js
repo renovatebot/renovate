@@ -47,8 +47,8 @@ describe('workers/pr/changelog', () => {
           ...upgrade,
           fromVersion: null,
         })
-      ).toBe(null);
-      expect(ghGot.mock.calls).toHaveLength(0);
+      ).toBeNull();
+      expect(ghGot).toHaveBeenCalledTimes(0);
     });
     it('returns null if no fromVersion', async () => {
       expect(
@@ -56,8 +56,8 @@ describe('workers/pr/changelog', () => {
           ...upgrade,
           sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         })
-      ).toBe(null);
-      expect(ghGot.mock.calls).toHaveLength(0);
+      ).toBeNull();
+      expect(ghGot).toHaveBeenCalledTimes(0);
     });
     it('returns null if fromVersion equals toVersion', async () => {
       expect(
@@ -66,8 +66,8 @@ describe('workers/pr/changelog', () => {
           fromVersion: '1.0.0',
           toVersion: '1.0.0',
         })
-      ).toBe(null);
-      expect(ghGot.mock.calls).toHaveLength(0);
+      ).toBeNull();
+      expect(ghGot).toHaveBeenCalledTimes(0);
     });
     it('skips invalid repos', async () => {
       expect(
@@ -75,7 +75,7 @@ describe('workers/pr/changelog', () => {
           ...upgrade,
           sourceUrl: 'https://github.com/about',
         })
-      ).toBe(null);
+      ).toBeNull();
     });
     it('works without Github', async () => {
       expect(
@@ -128,7 +128,7 @@ describe('workers/pr/changelog', () => {
           ...upgrade,
           sourceUrl: undefined,
         })
-      ).toBe(null);
+      ).toBeNull();
     });
     it('handles invalid sourceUrl', async () => {
       expect(
@@ -136,7 +136,7 @@ describe('workers/pr/changelog', () => {
           ...upgrade,
           sourceUrl: 'http://example.com',
         })
-      ).toBe(null);
+      ).toBeNull();
     });
     it('handles no releases', async () => {
       expect(
@@ -144,7 +144,7 @@ describe('workers/pr/changelog', () => {
           ...upgrade,
           releases: [],
         })
-      ).toBe(null);
+      ).toBeNull();
     });
     it('handles not enough releases', async () => {
       expect(
@@ -152,7 +152,7 @@ describe('workers/pr/changelog', () => {
           ...upgrade,
           releases: [{ version: '0.9.0' }],
         })
-      ).toBe(null);
+      ).toBeNull();
     });
     it('supports github enterprise and github.com changelog', async () => {
       hostRules.update({

@@ -168,7 +168,7 @@ describe('platform/git/storage', () => {
     });
     it('short cuts 404', async () => {
       const res = await git.getFile('some-missing-path');
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null for 404', async () => {
       let e;

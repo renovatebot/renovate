@@ -19,7 +19,7 @@ describe('lib/manager/meteor/extract', () => {
     });
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n', config);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns results', () => {
       const res = extractPackageFile(input01Content, config);

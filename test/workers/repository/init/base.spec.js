@@ -22,7 +22,7 @@ describe('workers/repository/init/base', () => {
       platform.branchExists.mockReturnValue(true);
       const res = await checkBaseBranch(config);
       expect(res.errors).toHaveLength(0);
-      expect(platform.setBaseBranch.mock.calls).toHaveLength(1);
+      expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
     });
   });
 });

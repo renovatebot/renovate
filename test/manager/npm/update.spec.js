@@ -135,7 +135,7 @@ describe('workers/branch/package-json', () => {
         newValue: '1.5.8',
       };
       const testContent = npmUpdater.updateDependency(input01Content, upgrade);
-      expect(testContent).toBe(null);
+      expect(testContent).toBeNull();
     });
   });
   describe('.bumpPackageVersion()', () => {

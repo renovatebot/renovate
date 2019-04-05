@@ -32,7 +32,7 @@ In practice, it is implemented by converting the `force` configuration into a `p
 
 ## forceCli
 
-This is set to true by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
+This is set to true by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories. It will also override any settings in `packageRules`.
 
 ## forkMode
 

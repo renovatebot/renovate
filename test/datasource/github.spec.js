@@ -22,7 +22,7 @@ describe('datasource/github', () => {
         { depName: 'some-dep', githubRepo: 'some/dep' },
         null
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns digest', async () => {
       ghGot.mockReturnValueOnce({ body: [{ sha: 'abcdef' }] });
@@ -46,7 +46,7 @@ describe('datasource/github', () => {
         { depName: 'some-dep', lookupName: 'some/dep' },
         'v1.2.0'
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
   describe('getPreset()', () => {

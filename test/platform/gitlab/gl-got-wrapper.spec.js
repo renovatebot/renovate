@@ -27,7 +27,7 @@ describe('platform/gl-got-wrapper', () => {
     });
     const res = await get('some-url', { paginate: true });
     expect(res.body).toHaveLength(4);
-    expect(glGot.mock.calls).toHaveLength(3);
+    expect(glGot).toHaveBeenCalledTimes(3);
   });
   it('attempts to paginate', async () => {
     glGot.mockReturnValueOnce({
@@ -43,7 +43,7 @@ describe('platform/gl-got-wrapper', () => {
     });
     const res = await get('some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
-    expect(glGot.mock.calls).toHaveLength(1);
+    expect(glGot).toHaveBeenCalledTimes(1);
   });
   it('posts', async () => {
     glGot.mockImplementationOnce(() => ({

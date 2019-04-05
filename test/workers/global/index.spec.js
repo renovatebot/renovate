@@ -30,7 +30,7 @@ describe('lib/workers/global', () => {
       repositories: ['a', 'b'],
     });
     await globalWorker.start();
-    expect(configParser.parseConfigs.mock.calls.length).toBe(1);
-    expect(repositoryWorker.renovateRepository.mock.calls.length).toBe(2);
+    expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+    expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(2);
   });
 });
