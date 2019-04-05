@@ -106,7 +106,7 @@
     "got": "9.6.0",
     "handlebars": "4.1.1",
     "ini": "1.3.5",
-    "js-yaml": "3.13.0",
+    "js-yaml": "3.13.1",
     "json-dup-key-validator": "1.0.2",
     "json-stringify-pretty-compact": "2.0.0",
     "later": "1.2.0",
