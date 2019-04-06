@@ -867,8 +867,8 @@
       "description": "Configuration object for when renovating Dart pubspec files",
       "type": "json",
       "default": {
-        "enabled": true,
-        "fileMatch": ["(^|/)pubspec.ya?ml$"],
+        "enabled": false,
+        "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
         "versionScheme": "npm"
       }
     },
