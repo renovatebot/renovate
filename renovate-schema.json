@@ -745,7 +745,7 @@
       "description": "Configuration object for bazel WORKSPACE renovation",
       "type": "object",
       "default": {
-        "fileMatch": ["(^|/)WORKSPACE$"],
+        "fileMatch": ["(^|/)WORKSPACE$", "\\.bzl$"],
         "prBodyDefinitions": {
           "Change": "{{#if currentDigestShort}}`{{{currentDigestShort}}}` -> {{#if isDigest}}`{{{newDigestShort}}}`{{else}}`{{{newVersion}}}`{{/if}}{{else}}`{{{currentValue}}}` -> `{{{newValue}}}`{{/if}}"
         }
@@ -1040,7 +1040,7 @@
       "type": "object",
       "default": {
         "enabled": false,
-        "fileMatch": ["\\.pom.xml$", "(^|/)pom.xml$"],
+        "fileMatch": ["\\.pom\\.xml$", "(^|/)pom\\.xml$"],
         "versionScheme": "maven"
       },
       "$ref": "#"

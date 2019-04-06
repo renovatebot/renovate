@@ -10,6 +10,11 @@ const content = fs.readFileSync(
   'utf8'
 );
 
+const fileWithBzlExtension = fs.readFileSync(
+  'test/manager/bazel/_fixtures/repositories.bzl',
+  'utf8'
+);
+
 /*
 git_repository(
     name = "build_bazel_rules_nodejs",
@@ -67,6 +72,28 @@ describe('manager/bazel/update', () => {
       const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
       expect(res.indexOf('0.8.1')).not.toBe(-1);
+    });
+    it('updates http archive with content other then WORKSPACE', async () => {
+      const upgrade = {
+        depName: 'bazel_skylib',
+        depType: 'http_archive',
+        repo: 'bazelbuild/bazel-skylib',
+        def: `http_archive(
+            name = "bazel_skylib",
+            sha256 = "eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867",
+            strip_prefix = "bazel-skylib-0.6.0",
+            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz"],
+          )`,
+        currentValue: '0.6.0',
+        newValue: '0.8.0',
+      };
+      got.mockReturnValueOnce({ body: '' });
+      const res = await bazelfile.updateDependency(
+        fileWithBzlExtension,
+        upgrade
+      );
+      expect(res).not.toEqual(fileWithBzlExtension);
+      expect(res.indexOf('0.8.0')).not.toBe(-1);
     });
     it('updates commit-based http archive', async () => {
       const upgrade = {
