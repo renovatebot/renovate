@@ -1030,7 +1030,7 @@
       "type": "object",
       "default": {
         "enabled": false,
-        "fileMatch": ["\\.pom.xml$", "(^|/)pom.xml$"],
+        "fileMatch": ["\\.pom\\.xml$", "(^|/)pom\\.xml$"],
         "versionScheme": "maven"
       },
       "$ref": "#"
