@@ -1,6 +1,6 @@
-# Bitbucket platform
+# Bitbucket Cloud
 
-Bitbucket support is considered in "beta" release status.
+Bitbucket Cloud support is considered in "beta" release status. Mostly, it just needs more feedback/testing. If you have been using it and think it's reliable, please let us know.
 
 ## Unsupported platform features/concepts
 

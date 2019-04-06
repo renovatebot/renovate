@@ -33,6 +33,7 @@ describe('platform/bitbucket-server', () => {
         jest.spyOn(api, 'delete');
         bitbucket = require('../../../lib/platform/bitbucket-server');
         GitStorage = require('../../../lib/platform/git/storage');
+        jest.spyOn(GitStorage, 'getUrl');
         GitStorage.mockImplementation(() => ({
           initRepo: jest.fn(),
           cleanRepo: jest.fn(),
@@ -58,8 +59,8 @@ describe('platform/bitbucket-server', () => {
         hostRules.update({
           platform: 'bitbucket-server',
           token: 'token',
-          username: 'username',
-          password: 'password',
+          username: 'user@ame',
+          password: 'passw:rd',
           endpoint: mockResponses.baseURL,
         });
       });
@@ -96,6 +97,19 @@ describe('platform/bitbucket-server', () => {
             repository: 'SOME/repo',
           });
           expect(res).toMatchSnapshot();
+        });
+
+        it('sends the username and password encoded', async () => {
+          expect.assertions(2);
+          GitStorage.getUrl.mockClear();
+          await bitbucket.initRepo({
+            repository: 'SOME/repo',
+          });
+          expect(GitStorage.getUrl).toHaveBeenCalledTimes(1);
+          expect(GitStorage.getUrl.mock.calls[0][0]).toHaveProperty(
+            'auth',
+            'user%40ame:passw%3Ard'
+          );
         });
       });
 
