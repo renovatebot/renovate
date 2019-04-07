@@ -16,7 +16,7 @@ describe('lib/manager/terraform/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts', () => {
       const res = extractPackageFile(tf1);
@@ -25,7 +25,7 @@ describe('lib/manager/terraform/extract', () => {
       expect(res.deps.filter(dep => dep.skipReason)).toHaveLength(5);
     });
     it('returns null if only local deps', () => {
-      expect(extractPackageFile(tf2, config)).toBe(null);
+      expect(extractPackageFile(tf2, config)).toBeNull();
     });
   });
 });

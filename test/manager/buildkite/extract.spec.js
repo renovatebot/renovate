@@ -27,7 +27,7 @@ describe('lib/manager/buildkite/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts simple single plugin', () => {
       const res = extractPackageFile(pipeline1, config).deps;

@@ -26,7 +26,7 @@ describe('manager/npm/extract', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('catches invalid names', async () => {
       const res = await npmExtract.extractPackageFile(
@@ -42,7 +42,7 @@ describe('manager/npm/extract', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('throws error if non-root renovate config', async () => {
       let e;
@@ -63,7 +63,7 @@ describe('manager/npm/extract', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('handles invalid', async () => {
       const res = await npmExtract.extractPackageFile(
@@ -71,7 +71,7 @@ describe('manager/npm/extract', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns an array of dependencies', async () => {
       const res = await npmExtract.extractPackageFile(

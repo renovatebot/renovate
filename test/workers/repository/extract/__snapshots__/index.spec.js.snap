@@ -74,6 +74,9 @@ Object {
   "pipenv": Array [
     Object {},
   ],
+  "poetry": Array [
+    Object {},
+  ],
   "terraform": Array [
     Object {},
   ],

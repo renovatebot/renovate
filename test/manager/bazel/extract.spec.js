@@ -6,6 +6,11 @@ const workspaceFile = fs.readFileSync(
   'utf8'
 );
 
+const fileWithBzlExtension = fs.readFileSync(
+  'test/manager/bazel/_fixtures/repositories.bzl',
+  'utf8'
+);
+
 describe('lib/manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {
     let config;
@@ -14,14 +19,18 @@ describe('lib/manager/bazel/extract', () => {
     });
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n', config);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns empty if cannot parse dependency', () => {
       const res = extractPackageFile('git_repository(\n  nothing\n)\n', config);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(workspaceFile, config);
+      expect(res.deps).toMatchSnapshot();
+    });
+    it('extracts dependencies from *.bzl files', () => {
+      const res = extractPackageFile(fileWithBzlExtension, config);
       expect(res.deps).toMatchSnapshot();
     });
     it('check remote option in go_repository', () => {

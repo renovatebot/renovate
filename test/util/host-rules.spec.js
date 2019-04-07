@@ -41,7 +41,7 @@ describe('util/host-rules', () => {
       expect(
         find({ platform: 'github', host: 'api.github.com' })
       ).toMatchSnapshot();
-      expect(find({ platform: 'github', host: 'example.com' })).toBe(null);
+      expect(find({ platform: 'github', host: 'example.com' })).toBeNull();
     });
   });
   describe('find()', () => {

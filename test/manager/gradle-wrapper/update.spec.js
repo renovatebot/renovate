@@ -104,7 +104,7 @@ describe('manager/gradle-wrapper/update', () => {
 
     it('returns null if error', async () => {
       const res = await dcUpdate.updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

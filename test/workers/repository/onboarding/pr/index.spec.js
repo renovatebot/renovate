@@ -29,7 +29,7 @@ describe('workers/repository/onboarding/pr', () => {
     });
     it('creates PR', async () => {
       await ensureOnboardingPr(config, packageFiles, branches);
-      expect(platform.createPr.mock.calls).toHaveLength(1);
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
       createPrBody = platform.createPr.mock.calls[0][2];
     });
     it('returns if PR does not need updating', async () => {
@@ -39,8 +39,8 @@ describe('workers/repository/onboarding/pr', () => {
         canRebase: true,
       });
       await ensureOnboardingPr(config, packageFiles, branches);
-      expect(platform.createPr.mock.calls).toHaveLength(0);
-      expect(platform.updatePr.mock.calls).toHaveLength(0);
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
     it('updates PR', async () => {
       config.baseBranch = 'some-branch';
@@ -50,8 +50,8 @@ describe('workers/repository/onboarding/pr', () => {
         isConflicted: true,
       });
       await ensureOnboardingPr(config, [], branches);
-      expect(platform.createPr.mock.calls).toHaveLength(0);
-      expect(platform.updatePr.mock.calls).toHaveLength(1);
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
     it('updates PR', async () => {
       config.baseBranch = 'some-branch';
@@ -60,8 +60,8 @@ describe('workers/repository/onboarding/pr', () => {
         body: createPrBody,
       });
       await ensureOnboardingPr(config, [], branches);
-      expect(platform.createPr.mock.calls).toHaveLength(0);
-      expect(platform.updatePr.mock.calls).toHaveLength(1);
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
   });
 });

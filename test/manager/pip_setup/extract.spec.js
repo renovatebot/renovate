@@ -31,7 +31,7 @@ describe('lib/manager/pip_setup/extract', () => {
     it('should return null for invalid file', async () => {
       expect(
         await extractPackageFile('raise Exception()', await tmpFile(), config)
-      ).toBe(null);
+      ).toBeNull();
     });
     it('should return null for no deps file', async () => {
       expect(
@@ -40,7 +40,7 @@ describe('lib/manager/pip_setup/extract', () => {
           await tmpFile(),
           config
         )
-      ).toBe(null);
+      ).toBeNull();
     });
   });
 
@@ -51,7 +51,7 @@ describe('lib/manager/pip_setup/extract', () => {
   });
   describe('getPythonAlias', () => {
     it('returns the python alias to use', async () => {
-      expect(pythonVersions.includes(await getPythonAlias())).toBeTruthy();
+      expect(pythonVersions.includes(await getPythonAlias())).toBe(true);
     });
   });
   describe('Test for presence of mock lib', () => {
@@ -72,7 +72,7 @@ describe('lib/manager/pip_setup/extract', () => {
           isMockInstalled = false;
         }
       }
-      expect(isMockInstalled).toBeTruthy();
+      expect(isMockInstalled).toBe(true);
     });
   });
   /*

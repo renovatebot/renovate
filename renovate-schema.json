@@ -36,7 +36,7 @@
     "forceCli": {
       "description": "Whether CLI configuration options should be moved to the `force` config section",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "dryRun": {
       "description": "If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs",
@@ -252,6 +252,7 @@
         "node",
         "npm",
         "pep440",
+        "poetry",
         "ruby",
         "semver"
       ],
@@ -744,7 +745,7 @@
       "description": "Configuration object for bazel WORKSPACE renovation",
       "type": "object",
       "default": {
-        "fileMatch": ["(^|/)WORKSPACE$"],
+        "fileMatch": ["(^|/)WORKSPACE$", "\\.bzl$"],
         "prBodyDefinitions": {
           "Change": "{{#if currentDigestShort}}`{{{currentDigestShort}}}` -> {{#if isDigest}}`{{{newDigestShort}}}`{{else}}`{{{newVersion}}}`{{/if}}{{else}}`{{{currentValue}}}` -> `{{{newValue}}}`{{/if}}"
         }
@@ -997,6 +998,15 @@
       },
       "$ref": "#"
     },
+    "poetry": {
+      "description": "Configuration object for pyproject.toml files",
+      "type": "toml",
+      "default": {
+        "enabled": false,
+        "versionScheme": "poetry",
+        "fileMatch": ["(^|/)pyproject\\.toml$"]
+      }
+    },
     "python": {
       "description": "Configuration object for python",
       "type": "object",
@@ -1041,7 +1051,7 @@
       "type": "object",
       "default": {
         "enabled": false,
-        "fileMatch": ["\\.pom.xml$", "(^|/)pom.xml$"],
+        "fileMatch": ["\\.pom\\.xml$", "(^|/)pom\\.xml$"],
         "versionScheme": "maven"
       },
       "$ref": "#"
@@ -1084,8 +1094,7 @@
         "Change": "{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}",
         "References": "{{{references}}}",
         "Package file": "{{{packageFile}}}"
-      },
-      "$ref": "#"
+      }
     },
     "prBodyColumns": {
       "description": "List of columns to use in PR bodies",
