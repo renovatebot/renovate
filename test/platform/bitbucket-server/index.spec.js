@@ -111,6 +111,19 @@ describe('platform/bitbucket-server', () => {
             'user%40ame:passw%3Ard'
           );
         });
+
+        it('sends the host as the endpoint option', async () => {
+          expect.assertions(2);
+          GitStorage.getUrl.mockClear();
+          await bitbucket.initRepo({
+            repository: 'SOME/repo',
+          });
+          expect(GitStorage.getUrl).toHaveBeenCalledTimes(1);
+          expect(GitStorage.getUrl.mock.calls[0][0]).toHaveProperty(
+            'host',
+            `${mockResponses.baseURL.replace('https://', '')}/scm`
+          );
+        });
       });
 
       describe('repoForceRebase()', () => {
