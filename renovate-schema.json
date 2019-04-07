@@ -813,8 +813,9 @@
       "description": "Configuration object for Mix module renovation",
       "type": "object",
       "default": {
-        "commitMessageTopic": "Mix module {{depNameShort}}",
-        "fileMatch": ["mix.exs$"],
+        "enabled": false,
+        "commitMessageTopic": "Hex module {{depNameShort}}",
+        "fileMatch": ["^mix.exs$"],
         "versionScheme": "hex"
       },
       "$ref": "#"
