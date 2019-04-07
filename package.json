@@ -120,7 +120,7 @@
     "node-html-parser": "1.1.14",
     "npm": "6.9.0",
     "openpgp": "2.6.2",
-    "p-all": "2.0.0",
+    "p-all": "2.1.0",
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
     "pnpm": "3.0.1",
