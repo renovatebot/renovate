@@ -242,7 +242,6 @@
       "description": "Version scheme to use for filtering and comparisons",
       "type": "string",
       "enum": [
-        "poetry",
         "cargo",
         "composer",
         "docker",
@@ -253,6 +252,7 @@
         "node",
         "npm",
         "pep440",
+        "poetry",
         "ruby",
         "semver"
       ],
@@ -993,7 +993,7 @@
       "default": {
         "enabled": false,
         "versionScheme": "poetry",
-        "fileMatch": ["(^|/)pyproject.toml$"]
+        "fileMatch": ["(^|/)pyproject\\.toml$"]
       }
     },
     "python": {
