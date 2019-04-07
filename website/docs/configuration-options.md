@@ -703,6 +703,8 @@ Add configuration here to change pipenv settings, e.g. to change the file patter
 
 Warning: 'pipenv' support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}" to enable.
 
+## poetry
+
 ## postUpdateOptions
 
 `gomodTidy`: Run `go mod tidy` after Go module updates
