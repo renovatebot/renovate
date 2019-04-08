@@ -323,8 +323,13 @@ describe('platform/bitbucket', () => {
       api.post.mockReturnValueOnce({
         body: { id: 5 },
       });
-      const { id } = await bitbucket.createPr('branch', 'title', 'body');
+      const { id, number } = await bitbucket.createPr(
+        'branch',
+        'title',
+        'body'
+      );
       expect(id).toBe(5);
+      expect(number).toBe(5);
       expect(api.post.mock.calls).toMatchSnapshot();
     });
   });
