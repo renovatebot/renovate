@@ -26,37 +26,42 @@ describe('lib/manager/cargo/update', () => {
     it('updates normal dependency', () => {
       const upgrade = {
         depName: 'libc',
-        lineNumber: 16,
-        depType: 'normal',
+        depType: 'dependencies',
+        nestedVersion: false,
         newValue: '0.3.0',
       };
+      expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo1toml, upgrade)).not.toBe(cargo1toml);
       expect(updateDependency(cargo1toml, upgrade)).toMatchSnapshot();
     });
-    it('updates inline table dependency', () => {
+    it('updates nested version dependency', () => {
       const upgrade = {
         depName: 'pcap-sys',
-        lineNumber: 18,
-        depType: 'inlineTable',
+        depType: 'dependencies',
+        nestedVersion: true,
         newValue: '0.2.0',
       };
+      expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo1toml, upgrade)).not.toBe(cargo1toml);
       expect(updateDependency(cargo1toml, upgrade)).toMatchSnapshot();
     });
-    it('updates standard table dependency', () => {
+    it('updates platform specific dependency', () => {
       const upgrade = {
         depName: 'winapi',
-        lineNumber: 21,
-        versionLineNumber: 22,
-        depType: 'standardTable',
+        platform: 'cfg(windows)',
+        depType: 'dependencies',
+        nestedVersion: true,
         newValue: '0.4.0',
       };
+      expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo1toml, upgrade)).not.toBe(cargo1toml);
       expect(updateDependency(cargo1toml, upgrade)).toMatchSnapshot();
     });
     it('handles invalid standard tables gracefully', () => {
       const upgrade = {
         depName: 'dep5',
-        lineNumber: 28,
-        versionLineNumber: 29,
-        depType: 'standardTable',
+        nestedVersion: true,
+        depType: 'dependencies',
         newValue: '2.0.0',
       };
       expect(updateDependency(cargo4toml, upgrade)).toEqual(cargo4toml);
@@ -64,27 +69,36 @@ describe('lib/manager/cargo/update', () => {
     it('does not update in case of error', () => {
       const upgrade = {
         depName: 'libc',
-        lineNumber: 13, // Wrong lineNumber
-        depType: 'normal',
+        devType: 'dev-dependencies', // Wrong devType
+        nestedVersion: false,
         newValue: '0.3.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo1toml);
     });
-    it('does not update commented out standard table dependencies', () => {
+    it('does not update in case of error', () => {
       const upgrade = {
-        depName: 'dep6',
-        lineNumber: 33,
-        versionLineNumber: 34,
-        depType: 'standardTable',
-        newValue: '4.0.0',
+        depName: 'libc',
+        devType: 'dependencies',
+        nestedVersion: true, // Should be false
+        newValue: '0.3.0',
       };
-      expect(updateDependency(cargo4toml, upgrade)).toEqual(cargo4toml);
+      expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo1toml);
+    });
+    it('does not update in case of error', () => {
+      const upgrade = {
+        depName: 'pcap-sys',
+        devType: 'dependencies',
+        nestedVersion: false, // Should be true
+        newValue: '0.3.0',
+      };
+      expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo1toml);
     });
     it('updates platform specific normal dependency', () => {
       const upgrade = {
         depName: 'wasm-bindgen',
-        lineNumber: 7,
-        depType: 'normal',
+        depType: 'dependencies',
+        nestedVersion: false,
+        platform: 'cfg(target_arch = "wasm32")',
         newValue: '0.3.0',
       };
       expect(updateDependency(cargo5toml, upgrade)).not.toBeNull();
@@ -93,9 +107,9 @@ describe('lib/manager/cargo/update', () => {
     it('updates platform specific table dependency', () => {
       const upgrade = {
         depName: 'web-sys',
-        lineNumber: 11,
-        versionLineNumber: 12,
-        depType: 'standardTable',
+        nestedVersion: true,
+        depType: 'dependencies',
+        platform: 'cfg(target_arch = "wasm32")',
         newValue: '0.4.0',
       };
       expect(updateDependency(cargo5toml, upgrade)).not.toBeNull();
