@@ -14,7 +14,7 @@ As a general guide:
 
 Status: beta
 
-Bitbucket Cloud support (i.e. [https://bitbucket.org](https://bitbucket.org)) is still missing some nice-to-have features (reviewers, issues, etc) but none of these have to hold it back from being considered GA. Mostly, we'd just like to get some more feedback from users who have been testing it.
+Bitbucket Cloud support (i.e. [https://bitbucket.org](https://bitbucket.org)) is still missing some nice-to-have features (issues, etc) but none of these have to hold it back from being considered GA. Mostly, we'd just like to get some more feedback from users who have been testing it.
 
 Note: we plan to add support for Bitbucket.org to the _hosted_ Renovate Bot _service_ that already supports GitHub.com and GitLab.com, so you won't need to run your own bot unless you want to.
 
