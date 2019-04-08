@@ -17,6 +17,10 @@ const cargo4toml = fs.readFileSync(
   'test/datasource/cargo/_fixtures/Cargo.4.toml',
   'utf8'
 );
+const cargo5toml = fs.readFileSync(
+  'test/datasource/cargo/_fixtures/Cargo.5.toml',
+  'utf8'
+);
 
 describe('lib/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
@@ -46,6 +50,11 @@ describe('lib/manager/cargo/extract', () => {
       const res = extractPackageFile(cargo4toml, config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(5);
+    });
+    it('extracts platform specific dependencies', () => {
+      const res = extractPackageFile(cargo5toml, config);
+      // expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(4);
     });
   });
 });
