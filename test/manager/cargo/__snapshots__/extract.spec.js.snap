@@ -49,8 +49,8 @@ Array [
     "depName": "winapi",
     "depType": "dependencies",
     "nestedVersion": true,
-    "platform": "cfg(windows)",
     "purl": "pkg:cargo/winapi",
+    "target": "cfg(windows)",
   },
   Object {
     "currentValue": "0.2.37",
@@ -58,8 +58,8 @@ Array [
     "depName": "wasm-bindgen",
     "depType": "dependencies",
     "nestedVersion": false,
-    "platform": "cfg(target_arch = \\"wasm32\\")",
     "purl": "pkg:cargo/wasm-bindgen",
+    "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
     "currentValue": "0.3.14",
@@ -67,8 +67,8 @@ Array [
     "depName": "js-sys",
     "depType": "dependencies",
     "nestedVersion": false,
-    "platform": "cfg(target_arch = \\"wasm32\\")",
     "purl": "pkg:cargo/js-sys",
+    "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
     "currentValue": "",
@@ -76,9 +76,9 @@ Array [
     "depName": "js_relative_import",
     "depType": "dependencies",
     "nestedVersion": false,
-    "platform": "cfg(target_arch = \\"wasm32\\")",
     "purl": "pkg:cargo/js_relative_import",
     "skipReason": "path-dependency",
+    "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
     "currentValue": "0.3.14",
@@ -86,8 +86,8 @@ Array [
     "depName": "web-sys",
     "depType": "dependencies",
     "nestedVersion": true,
-    "platform": "cfg(target_arch = \\"wasm32\\")",
     "purl": "pkg:cargo/web-sys",
+    "target": "cfg(target_arch = \\"wasm32\\")",
   },
 ]
 `;
@@ -317,8 +317,8 @@ Array [
     "depName": "wasm-bindgen",
     "depType": "dependencies",
     "nestedVersion": false,
-    "platform": "cfg(target_arch = \\"wasm32\\")",
     "purl": "pkg:cargo/wasm-bindgen",
+    "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
     "currentValue": "0.3.14",
@@ -326,8 +326,8 @@ Array [
     "depName": "js-sys",
     "depType": "dependencies",
     "nestedVersion": false,
-    "platform": "cfg(target_arch = \\"wasm32\\")",
     "purl": "pkg:cargo/js-sys",
+    "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
     "currentValue": "",
@@ -335,9 +335,9 @@ Array [
     "depName": "js_relative_import",
     "depType": "dependencies",
     "nestedVersion": false,
-    "platform": "cfg(target_arch = \\"wasm32\\")",
     "purl": "pkg:cargo/js_relative_import",
     "skipReason": "path-dependency",
+    "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
     "currentValue": "0.3.14",
@@ -345,8 +345,8 @@ Array [
     "depName": "web-sys",
     "depType": "dependencies",
     "nestedVersion": true,
-    "platform": "cfg(target_arch = \\"wasm32\\")",
     "purl": "pkg:cargo/web-sys",
+    "target": "cfg(target_arch = \\"wasm32\\")",
   },
 ]
 `;

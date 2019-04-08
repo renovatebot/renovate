@@ -48,7 +48,7 @@ describe('lib/manager/cargo/update', () => {
     it('updates platform specific dependency', () => {
       const upgrade = {
         depName: 'winapi',
-        platform: 'cfg(windows)',
+        target: 'cfg(windows)',
         depType: 'dependencies',
         nestedVersion: true,
         newValue: '0.4.0',
@@ -98,7 +98,7 @@ describe('lib/manager/cargo/update', () => {
         depName: 'wasm-bindgen',
         depType: 'dependencies',
         nestedVersion: false,
-        platform: 'cfg(target_arch = "wasm32")',
+        target: 'cfg(target_arch = "wasm32")',
         newValue: '0.3.0',
       };
       expect(updateDependency(cargo5toml, upgrade)).not.toBeNull();
@@ -109,7 +109,7 @@ describe('lib/manager/cargo/update', () => {
         depName: 'web-sys',
         nestedVersion: true,
         depType: 'dependencies',
-        platform: 'cfg(target_arch = "wasm32")',
+        target: 'cfg(target_arch = "wasm32")',
         newValue: '0.4.0',
       };
       expect(updateDependency(cargo5toml, upgrade)).not.toBeNull();
