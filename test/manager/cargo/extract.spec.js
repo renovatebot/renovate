@@ -28,13 +28,25 @@ describe('lib/manager/cargo/extract', () => {
     beforeEach(() => {
       config = {};
     });
+    it('returns null for invalid toml', () => {
+      expect(extractPackageFile('invalid toml', config)).toBeNull();
+    });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBeNull();
+      const cargotoml = '[dependencies]\n';
+      expect(extractPackageFile(cargotoml, config)).toBeNull();
+    });
+    it('returns null for empty', () => {
+      const cargotoml = '[dev-dependencies]\n';
+      expect(extractPackageFile(cargotoml, config)).toBeNull();
+    });
+    it('returns null for empty', () => {
+      const cargotoml = '[target."foo".dependencies]\n';
+      expect(extractPackageFile(cargotoml, config)).toBeNull();
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(cargo1toml, config);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(10);
+      expect(res.deps).toHaveLength(12);
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(cargo2toml, config);
