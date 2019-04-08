@@ -20,8 +20,62 @@ describe('lib/manager/cargo/update', () => {
     beforeEach(() => {
       config = {};
     });
-    it('returns same', () => {
-      expect(updateDependency('abc', config)).toEqual('abc');
+    it('returns same for invalid toml', () => {
+      const cargotoml = 'invalid toml !#$#';
+      expect(updateDependency(cargotoml, config)).toEqual(cargotoml);
+    });
+    it('returns same for null upgrade', () => {
+      const cargotoml = '[dependencies]\n';
+      expect(updateDependency(cargotoml, null)).toEqual(cargotoml);
+    });
+    it('returns same if version has not changed', () => {
+      const cargotoml = '[dependencies]\n';
+      expect(updateDependency(cargotoml, null)).toEqual(cargotoml);
+      const upgrade = {
+        depName: 'libc',
+        depType: 'dependencies',
+        nestedVersion: false,
+        newValue: '=0.2.43',
+      };
+      expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo1toml, upgrade)).toBe(cargo1toml);
+    });
+    it('returns same for invalid target', () => {
+      const cargotoml = '[dependencies]\n';
+      expect(updateDependency(cargotoml, null)).toEqual(cargotoml);
+      const upgrade = {
+        depName: 'platform-specific-dep',
+        depType: 'dependencies',
+        nestedVersion: false,
+        target: 'foobar',
+        newValue: '1.2.3',
+      };
+      expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo1toml, upgrade)).toBe(cargo1toml);
+    });
+    it('returns same for invalid depType', () => {
+      const cargotoml = '[dependencies]\n';
+      expect(updateDependency(cargotoml, null)).toEqual(cargotoml);
+      const upgrade = {
+        depName: 'libc',
+        depType: 'foobar',
+        nestedVersion: false,
+        newValue: '1.2.3',
+      };
+      expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo1toml, upgrade)).toBe(cargo1toml);
+    });
+    it('returns same for invalid depName', () => {
+      const cargotoml = '[dependencies]\n';
+      expect(updateDependency(cargotoml, null)).toEqual(cargotoml);
+      const upgrade = {
+        depName: 'does not exist',
+        depType: 'dependencies',
+        nestedVersion: false,
+        newValue: '1.2.3',
+      };
+      expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo1toml, upgrade)).toBe(cargo1toml);
     });
     it('updates normal dependency', () => {
       const upgrade = {
@@ -29,6 +83,17 @@ describe('lib/manager/cargo/update', () => {
         depType: 'dependencies',
         nestedVersion: false,
         newValue: '0.3.0',
+      };
+      expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo1toml, upgrade)).not.toBe(cargo1toml);
+      expect(updateDependency(cargo1toml, upgrade)).toMatchSnapshot();
+    });
+    it('updates normal dependency with mismatch on first try', () => {
+      const upgrade = {
+        depName: 'same_version_1',
+        depType: 'dependencies',
+        nestedVersion: false,
+        newValue: '1.2.3',
       };
       expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
       expect(updateDependency(cargo1toml, upgrade)).not.toBe(cargo1toml);
