@@ -1,4 +1,5 @@
 const upath = require('upath');
+const os = require('os');
 
 jest.mock('gh-got');
 jest.mock('gl-got');
