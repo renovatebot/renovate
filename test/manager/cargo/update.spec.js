@@ -9,6 +9,10 @@ const cargo4toml = fs.readFileSync(
   'test/datasource/cargo/_fixtures/Cargo.4.toml',
   'utf8'
 );
+const cargo5toml = fs.readFileSync(
+  'test/datasource/cargo/_fixtures/Cargo.5.toml',
+  'utf8'
+);
 
 describe('lib/manager/cargo/update', () => {
   describe('updateDependency()', () => {
@@ -75,6 +79,27 @@ describe('lib/manager/cargo/update', () => {
         newValue: '4.0.0',
       };
       expect(updateDependency(cargo4toml, upgrade)).toEqual(cargo4toml);
+    });
+    it('updates platform specific normal dependency', () => {
+      const upgrade = {
+        depName: 'wasm-bindgen',
+        lineNumber: 7,
+        depType: 'normal',
+        newValue: '0.3.0',
+      };
+      expect(updateDependency(cargo5toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo5toml, upgrade)).not.toBe(cargo5toml);
+    });
+    it('updates platform specific table dependency', () => {
+      const upgrade = {
+        depName: 'web-sys',
+        lineNumber: 11,
+        versionLineNumber: 12,
+        depType: 'standardTable',
+        newValue: '0.4.0',
+      };
+      expect(updateDependency(cargo5toml, upgrade)).not.toBeNull();
+      expect(updateDependency(cargo5toml, upgrade)).not.toBe(cargo5toml);
     });
   });
 });
