@@ -11,7 +11,7 @@ global.logger = require('./logger/_fixtures');
 global.renovateUsername = 'renovate-testing';
 global.repoCache = {};
 
-const tmpDir = process.env.RENOVATE_TMPDIR || process.env.TMPDIR;
+const tmpDir = process.env.RENOVATE_TMPDIR || process.env.TMPDIR || os.tmpdir();
 const cacheDir = upath.join(tmpDir, './renovate/cache/renovate');
 
 cache.init(cacheDir);
