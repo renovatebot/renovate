@@ -2,23 +2,23 @@ const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/cargo/extract');
 
 const cargo1toml = fs.readFileSync(
-  'test/datasource/cargo/_fixtures/Cargo.1.toml',
+  'test/manager/cargo/_fixtures/Cargo.1.toml',
   'utf8'
 );
 const cargo2toml = fs.readFileSync(
-  'test/datasource/cargo/_fixtures/Cargo.2.toml',
+  'test/manager/cargo/_fixtures/Cargo.2.toml',
   'utf8'
 );
 const cargo3toml = fs.readFileSync(
-  'test/datasource/cargo/_fixtures/Cargo.3.toml',
+  'test/manager/cargo/_fixtures/Cargo.3.toml',
   'utf8'
 );
 const cargo4toml = fs.readFileSync(
-  'test/datasource/cargo/_fixtures/Cargo.4.toml',
+  'test/manager/cargo/_fixtures/Cargo.4.toml',
   'utf8'
 );
 const cargo5toml = fs.readFileSync(
-  'test/datasource/cargo/_fixtures/Cargo.5.toml',
+  'test/manager/cargo/_fixtures/Cargo.5.toml',
   'utf8'
 );
 
