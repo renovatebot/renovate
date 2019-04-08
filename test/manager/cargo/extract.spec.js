@@ -34,7 +34,7 @@ describe('lib/manager/cargo/extract', () => {
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(cargo1toml, config);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(6);
+      expect(res.deps).toHaveLength(10);
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(cargo2toml, config);
@@ -44,16 +44,16 @@ describe('lib/manager/cargo/extract', () => {
     it('handles inline tables', () => {
       const res = extractPackageFile(cargo3toml, config);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(7);
+      expect(res.deps).toHaveLength(8);
     });
     it('handles standard tables', () => {
       const res = extractPackageFile(cargo4toml, config);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(5);
+      expect(res.deps).toHaveLength(6);
     });
     it('extracts platform specific dependencies', () => {
       const res = extractPackageFile(cargo5toml, config);
-      // expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(4);
     });
   });
