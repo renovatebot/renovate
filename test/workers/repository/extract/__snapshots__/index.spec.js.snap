@@ -71,6 +71,9 @@ Object {
   "pipenv": Array [
     Object {},
   ],
+  "poetry": Array [
+    Object {},
+  ],
   "pub": Array [
     Object {},
   ],

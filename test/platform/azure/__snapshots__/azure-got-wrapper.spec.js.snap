@@ -12,12 +12,14 @@ WebApi {
   "rest": RestClient {
     "client": HttpClient {
       "_allowRedirects": true,
+      "_allowRetries": false,
       "_certConfig": undefined,
       "_disposed": false,
       "_httpProxy": undefined,
       "_ignoreSslError": false,
       "_keepAlive": false,
       "_maxRedirects": 50,
+      "_maxRetries": 1,
       "_socketTimeout": undefined,
       "handlers": Array [
         PersonalAccessTokenCredentialHandler {
@@ -38,12 +40,14 @@ WebApi {
     "restClient": RestClient {
       "client": HttpClient {
         "_allowRedirects": true,
+        "_allowRetries": false,
         "_certConfig": undefined,
         "_disposed": false,
         "_httpProxy": undefined,
         "_ignoreSslError": false,
         "_keepAlive": false,
         "_maxRedirects": 50,
+        "_maxRetries": 1,
         "_socketTimeout": undefined,
         "handlers": Array [
           PersonalAccessTokenCredentialHandler {

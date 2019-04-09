@@ -252,6 +252,7 @@
         "node",
         "npm",
         "pep440",
+        "poetry",
         "ruby",
         "semver"
       ],
@@ -744,7 +745,7 @@
       "description": "Configuration object for bazel WORKSPACE renovation",
       "type": "object",
       "default": {
-        "fileMatch": ["(^|/)WORKSPACE$"],
+        "fileMatch": ["(^|/)WORKSPACE$", "\\.bzl$"],
         "prBodyDefinitions": {
           "Change": "{{#if currentDigestShort}}`{{{currentDigestShort}}}` -> {{#if isDigest}}`{{{newDigestShort}}}`{{else}}`{{{newVersion}}}`{{/if}}{{else}}`{{{currentValue}}}` -> `{{{newValue}}}`{{/if}}"
         }
@@ -995,6 +996,15 @@
       },
       "$ref": "#"
     },
+    "poetry": {
+      "description": "Configuration object for pyproject.toml files",
+      "type": "toml",
+      "default": {
+        "enabled": false,
+        "versionScheme": "poetry",
+        "fileMatch": ["(^|/)pyproject\\.toml$"]
+      }
+    },
     "python": {
       "description": "Configuration object for python",
       "type": "object",
@@ -1039,7 +1049,7 @@
       "type": "object",
       "default": {
         "enabled": false,
-        "fileMatch": ["\\.pom.xml$", "(^|/)pom.xml$"],
+        "fileMatch": ["\\.pom\\.xml$", "(^|/)pom\\.xml$"],
         "versionScheme": "maven"
       },
       "$ref": "#"

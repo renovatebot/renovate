@@ -114,6 +114,9 @@ describe('semver.getNewValue()', () => {
     expect(semver.getNewValue('   1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
       '1.1.0'
     );
+    expect(semver.getNewValue('1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
+      '1.1.0'
+    );
   });
   it('bumps equals', () => {
     expect(semver.getNewValue('=1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
@@ -137,17 +140,12 @@ describe('semver.getNewValue()', () => {
       '=1.1.0'
     );
   });
-  it('bumps version range', () => {
-    expect(semver.getNewValue('1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
-      '1.1.0'
-    );
-  });
   it('bumps short caret to same', () => {
     expect(semver.getNewValue('^1.0', 'bump', '1.0.0', '1.0.7')).toEqual(
       '^1.0'
     );
   });
-  it('replaces with newer', () => {
+  it('replaces caret with newer', () => {
     expect(semver.getNewValue('^1.0.0', 'replace', '1.0.0', '2.0.7')).toEqual(
       '^2.0.0'
     );
@@ -162,7 +160,7 @@ describe('semver.getNewValue()', () => {
       '^2.0.7'
     );
   });
-  it('updates naked caret', () => {
+  it('bumps naked caret', () => {
     expect(semver.getNewValue('^1', 'bump', '1.0.0', '2.1.7')).toEqual('^2');
   });
   it('bumps naked tilde', () => {
@@ -238,5 +236,17 @@ describe('semver.getNewValue()', () => {
     expect(
       semver.getNewValue('<=   1.3.4', 'replace', '1.2.3', '1.5.0')
     ).toEqual('<= 1.5.0');
+  });
+  it('handles replacing short caret versions', () => {
+    expect(semver.getNewValue('^1.2', 'replace', '1.2.3', '2.0.0')).toEqual(
+      '^2.0'
+    );
+    expect(semver.getNewValue('^1', 'replace', '1.2.3', '2.0.0')).toEqual('^2');
+  });
+  it('handles replacing short tilde versions', () => {
+    expect(semver.getNewValue('~1.2', 'replace', '1.2.3', '2.0.0')).toEqual(
+      '~2.0'
+    );
+    expect(semver.getNewValue('~1', 'replace', '1.2.3', '2.0.0')).toEqual('~2');
   });
 });

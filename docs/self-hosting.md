@@ -135,6 +135,22 @@ Don't forget to configure `platform=azure` somewhere in config.
 
 If you are running on any platform except github.com, it's important to also configure `GITHUB_COM_TOKEN` containing a personal access token for github.com. This account can actually be _any_ account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit.
 
+## gitFs
+
+`gitFs` is the recommended way to perform file operations using Renovate. Using `gitFs` means Renovate does a shallow clone to read and subsequently write files for each repository, instead of using platform-specific APIs to read/write files. Platform APIs are still used for things like Issues and Pull Requests regardless.
+
+`gitFs` is supported for all platforms, and is the only approach for Bitbucket Cloud, Bitbucket Server, and Azure DevOps. It's optional for GitHub and GitLab. In the case of GitLab, it is necessary to set `gitFs=ssh` because GitLab does not support write options via git/https when using a Personal Access Token. In this case you need to make sure that Renovate has access to the SSH private key which is associated with its account.
+
+### Identification and Authorization
+
+`gitFs` means Git is used, which means that commits need a username/email combination. If one is not set for the system that Renovate is run on then you should configure one using the `gitAuthor` configuration option.
+
+It's also possible to sign git commits, but for this you need to set up the GPG key and setting out of band. In short:
+
+- Make sure the private key is added via GPG
+- Tell git about the private key (e.g. `git config --global user.signingkey AABBCCDDEEFF`)
+- Configure git to sign all commits (`git config --global commit.gpgsign true`)
+
 ## Usage
 
 The following example uses the Renovate CLI tool, which can be installed by running `npm i -g renovate`.
