@@ -1,5 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/bitbucket addReviewers should add the given reviewers to the PR 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/pullrequests/5",
+    Object {
+      "body": Object {
+        "reviewers": Array [
+          Object {
+            "username": "someuser",
+          },
+          Object {
+            "username": "someotheruser",
+          },
+        ],
+        "title": "title",
+      },
+    },
+  ],
+]
+`;
+
 exports[`platform/bitbucket createPr() posts PR 1`] = `
 Array [
   Array [

@@ -700,7 +700,7 @@
       }
     },
     "reviewers": {
-      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab, email or username in Azure DevOps)",
+      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab/Bitbucket, email or username in Azure DevOps)",
       "type": "array",
       "items": {
         "type": "string"

@@ -288,8 +288,12 @@ describe('platform/bitbucket', () => {
   });
 
   describe('addReviewers', () => {
-    it('does not throw', async () => {
-      await bitbucket.addReviewers(5, ['some']);
+    it('should add the given reviewers to the PR', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.addReviewers(5, ['someuser', 'someotheruser']);
+        expect(api.put.mock.calls).toMatchSnapshot();
+      });
     });
   });
 
