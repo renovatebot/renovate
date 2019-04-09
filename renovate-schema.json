@@ -252,6 +252,7 @@
         "node",
         "npm",
         "pep440",
+        "poetry",
         "ruby",
         "semver"
       ],
@@ -985,6 +986,15 @@
         "fileMatch": ["(^|/)Pipfile$"]
       },
       "$ref": "#"
+    },
+    "poetry": {
+      "description": "Configuration object for pyproject.toml files",
+      "type": "toml",
+      "default": {
+        "enabled": false,
+        "versionScheme": "poetry",
+        "fileMatch": ["(^|/)pyproject\\.toml$"]
+      }
     },
     "python": {
       "description": "Configuration object for python",
