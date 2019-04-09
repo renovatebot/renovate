@@ -15,10 +15,18 @@ Be cautious when using this option - it will run Renovate over _every_ repositor
 
 A [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern for filtering `autodiscover`ed repositories. Ex: `project/*`
 
+## baseDir
+
+Configure this directory if you want to change which directory Renovate uses for storing data. If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/`.
+
 ## binarySource
 
 Set this to 'global' if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
 Set this to 'docker' instead to use docker-based binaries.
+
+## cacheDir
+
+Configure this directory if you want to change which directory Renovate uses for storing cache data. If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/cache/`. If you configure this to be different to the `baseDir`, it means you can have one location for repo data and another for cache data.
 
 ## dryRun
 
@@ -62,6 +70,10 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 ## onboardingConfig
 
 ## password
+
+## persistRepoData
+
+Set this to true if you wish for Renovate to persist repo data between runs. The intention is that this is used in combination with `gitFs`, allowing Renovate to do a faster `git fetch` between runs rather than `git clone`. It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
 ## platform
 
