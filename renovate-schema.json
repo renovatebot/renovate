@@ -816,7 +816,7 @@
     "ruby-version": {
       "type": "object",
       "default": {
-        "fileMatch": ["^.ruby-version$"],
+        "fileMatch": ["(^|/)\\.ruby-version$"],
         "versionScheme": "ruby"
       },
       "$ref": "#"
