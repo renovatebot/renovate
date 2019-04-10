@@ -6,7 +6,6 @@ Array [
     "currentValue": "8.4.0",
     "datasource": "rubyVersion",
     "depName": "ruby",
-    "purl": "pkg:ruby-version",
   },
 ]
 `;
@@ -17,7 +16,6 @@ Array [
     "currentValue": "latestn",
     "datasource": "rubyVersion",
     "depName": "ruby",
-    "purl": "pkg:ruby-version",
     "skipReason": "unsupported-version",
   },
 ]
@@ -29,7 +27,6 @@ Array [
     "currentValue": "8.4",
     "datasource": "rubyVersion",
     "depName": "ruby",
-    "purl": "pkg:ruby-version",
   },
 ]
 `;
