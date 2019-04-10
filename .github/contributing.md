@@ -6,11 +6,11 @@ If you think you've found a **security issue**, please do not mention it in this
 
 ## Support
 
-If you have a **configuration question**, please create an issue in https://github.com/renovateapp/config-help
+If you have a **configuration question**, please create an issue in https://github.com/renovatebot/config-help
 
 ## Bug Reports and Feature Requests
 
-If you've found a **bug** or have a **feature request** then please create an issue here (but search first in case it already exists).
+If you've found a **bug** or have a **feature request** then please create an issue in this repository (but search first in case a similar issue already exists).
 
 ## Code
 
@@ -22,6 +22,12 @@ agree on what to change and how, and you can hopefully get a quick merge
 afterwards. Also, let the maintainers know that you plan to work on a particular issue so that no one else starts any duplicate work.
 
 Pull Requests can only be merged once all status checks are green, which means `yarn test` passes, and coverage is 100%.
+
+## Slack collaboration with maintainers
+
+We won't lie - sometimes the codebase can be a challenge to navigate. We don't want you spending an hour trying to work out something that might take us a minute to explain.
+
+For that reason, we host a Slack channel dedicated to helping anyone who's working on PRs for Renovate. It's strictly developers-only and not intended for general support, so please email support@renovatebot.com to ask to be added.
 
 ## Legal
 
