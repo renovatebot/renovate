@@ -813,6 +813,14 @@
       },
       "$ref": "#"
     },
+    "ruby-version": {
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)\\.ruby-version$"],
+        "versionScheme": "ruby"
+      },
+      "$ref": "#"
+    },
     "terraform": {
       "description": "Configuration object for Terraform module renovation",
       "type": "object",
