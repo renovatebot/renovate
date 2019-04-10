@@ -21,6 +21,7 @@ replace github.com/pkg/errors => ../errors
 
 const config = {
   localDir: '/tmp/github/some/repo',
+  cacheDir: '/tmp/renovate/cache',
 };
 
 describe('.getArtifacts()', () => {

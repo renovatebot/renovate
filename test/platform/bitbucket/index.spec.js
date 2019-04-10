@@ -288,8 +288,12 @@ describe('platform/bitbucket', () => {
   });
 
   describe('addReviewers', () => {
-    it('does not throw', async () => {
-      await bitbucket.addReviewers(5, ['some']);
+    it('should add the given reviewers to the PR', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.addReviewers(5, ['someuser', 'someotheruser']);
+        expect(api.put.mock.calls).toMatchSnapshot();
+      });
     });
   });
 
@@ -323,8 +327,8 @@ describe('platform/bitbucket', () => {
       api.post.mockReturnValueOnce({
         body: { id: 5 },
       });
-      const { id } = await bitbucket.createPr('branch', 'title', 'body');
-      expect(id).toBe(5);
+      const { number } = await bitbucket.createPr('branch', 'title', 'body');
+      expect(number).toBe(5);
       expect(api.post.mock.calls).toMatchSnapshot();
     });
   });
