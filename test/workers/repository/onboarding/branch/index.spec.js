@@ -34,10 +34,28 @@ describe('workers/repository/onboarding/branch', () => {
       }
       expect(e).toBeDefined();
     });
-    it('detects onboarding is skipped', async () => {
+    it('handles skipped onboarding combined with requireConfig = false', async () => {
+      config.requireConfig = false;
       config.onboarding = false;
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
+    });
+    it('handles skipped onboarding, requireConfig=true, and a config file', async () => {
+      config.requireConfig = true;
+      config.onboarding = false;
+      platform.getFileList.mockReturnValueOnce(['renovate.json']);
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(true);
+    });
+    it('handles skipped onboarding, requireConfig=true, and no config file', async () => {
+      config.requireConfig = true;
+      config.onboarding = false;
+      platform.getFileList.mockReturnValueOnce(['package.json']);
+      platform.getFile.mockReturnValueOnce('{}');
+      platform.findPr.mockReturnValueOnce(null);
+      platform.getBranchPr.mockReturnValueOnce({});
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBe(false);
     });
     it('detects repo is onboarded via file', async () => {
       platform.getFileList.mockReturnValueOnce(['renovate.json']);
