@@ -135,11 +135,25 @@ Don't forget to configure `platform=azure` somewhere in config.
 
 If you are running on any platform except github.com, it's important to also configure `GITHUB_COM_TOKEN` containing a personal access token for github.com. This account can actually be _any_ account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit.
 
+## File/directory usage
+
+By default, Renovate will store all files within a `renovate/` subdirectory of the operating system's tempororary directory, e.g. `/tmp/renovate/`.
+
+Repository data will be copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
+
+Cache data - such as Renovate's own cache as well as that for npm, yarn, composer, etc - will be stored in `/tmp/renovate/cache`.
+
+If you wish to override the base directory to be used (e.g. instead of `/tmp/renovate/`) then configure a value for `baseDir` in `config.js`, or via env (`RENOVATE_BASE_DIR`) or via CLI (`--base-dir=`).
+
+If you wish to override the cache location specifically then configure a value for `cacheDir` instead.
+
 ## gitFs
 
 `gitFs` is the recommended way to perform file operations using Renovate. Using `gitFs` means Renovate does a shallow clone to read and subsequently write files for each repository, instead of using platform-specific APIs to read/write files. Platform APIs are still used for things like Issues and Pull Requests regardless.
 
 `gitFs` is supported for all platforms, and is the only approach for Bitbucket Cloud, Bitbucket Server, and Azure DevOps. It's optional for GitHub and GitLab. In the case of GitLab, it is necessary to set `gitFs=ssh` because GitLab does not support write options via git/https when using a Personal Access Token. In this case you need to make sure that Renovate has access to the SSH private key which is associated with its account.
+
+If you wish for git data to be preserved between Renovate runs, then configure `preserveRepoData` to `true` in your bot config. Doing so means that Renovate needs to do only a `git fetch` each time rather than `git clone`. You can control where this data is stored using the `baseDir` config option mentioned above.
 
 ### Identification and Authorization
 

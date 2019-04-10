@@ -19,6 +19,8 @@ describe('lib/workers/global', () => {
   });
   it('handles zero repos', async () => {
     configParser.parseConfigs.mockReturnValueOnce({
+      baseDir: '/tmp/base',
+      cacheDir: '/tmp/cache',
       repositories: [],
     });
     await globalWorker.start();
