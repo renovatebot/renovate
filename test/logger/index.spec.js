@@ -1,20 +1,29 @@
-const { logger } = require('../../lib/logger');
+const { initLogger } = require('../../lib/logger');
 
 describe('logger', () => {
+  it('inits', () => {
+    delete global.logger;
+    delete process.env.LOG_LEVEL;
+    initLogger();
+    expect(global.logger).toBeDefined();
+  });
   it('supports logging with metadata', () => {
-    logger.debug({ some: 'meta' }, 'some meta');
+    global.logger.debug({ some: 'meta' }, 'some meta');
   });
   it('supports logging with only metadata', () => {
-    logger.debug({ some: 'meta' });
+    global.logger.debug({ some: 'meta' });
   });
   it('supports logging without metadata', () => {
-    logger.debug('some meta');
+    global.logger.debug('some meta');
   });
   it('sets levels', () => {
-    logger.levels('stdout', 'DEBUG');
+    global.logger.levels('stdout', 'DEBUG');
+  });
+  it('sets meta', () => {
+    global.logger.setMeta({ some: 'meta', and: 'more' });
   });
   it('adds stream', () => {
-    logger.addStream({
+    global.logger.addStream({
       name: 'logfile',
       path: 'fatal.log',
       level: 'fatal',

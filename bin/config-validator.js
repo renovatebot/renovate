@@ -5,9 +5,11 @@ const os = require('os');
 const { validateConfig } = require('../lib/config/validation');
 const { massageConfig } = require('../lib/config/massage');
 const { getConfig } = require('../lib/config/file');
+const { initLogger } = require('../lib/logger');
 const cache = require('../lib/workers/global/cache');
 const { configFileNames } = require('../lib/config/app-strings');
 
+initLogger();
 // istanbul ignore if
 if (!global.renovateCache) {
   cache.init(os.tmpdir());

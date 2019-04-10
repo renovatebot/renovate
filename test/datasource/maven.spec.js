@@ -2,6 +2,9 @@ const nock = require('nock');
 const fs = require('fs');
 
 const datasource = require('../../lib/datasource');
+const { initLogger } = require('../../lib/logger');
+
+initLogger();
 
 const MYSQL_VERSIONS = [
   '6.0.5',
