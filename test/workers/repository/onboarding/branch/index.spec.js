@@ -52,10 +52,8 @@ describe('workers/repository/onboarding/branch', () => {
       config.onboarding = false;
       platform.getFileList.mockReturnValueOnce(['package.json']);
       platform.getFile.mockReturnValueOnce('{}');
-      platform.findPr.mockReturnValueOnce(null);
-      platform.getBranchPr.mockReturnValueOnce({});
-      const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(false);
+      const onboardingResult = checkOnboardingBranch(config);
+      await expect(onboardingResult).rejects.toThrow('disabled');
     });
     it('detects repo is onboarded via file', async () => {
       platform.getFileList.mockReturnValueOnce(['renovate.json']);
