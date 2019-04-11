@@ -33,7 +33,7 @@ describe('config/index', () => {
       expect(err.message).toBe('Unsupported platform: foo.');
     });
     it('throws for no GitHub token', async () => {
-      const env = {};
+      const env = { RENOVATE_CONFIG_FILE: '/tmp/does-not-exist' };
       let err;
       try {
         await configParser.parseConfigs(env, defaultArgv);
@@ -45,7 +45,10 @@ describe('config/index', () => {
       );
     });
     it('throws for no GitLab token', async () => {
-      const env = { RENOVATE_PLATFORM: 'gitlab' };
+      const env = {
+        RENOVATE_CONFIG_FILE: '/tmp/does-not-exist',
+        RENOVATE_PLATFORM: 'gitlab',
+      };
       let err;
       try {
         await configParser.parseConfigs(env, defaultArgv);
@@ -57,7 +60,10 @@ describe('config/index', () => {
       );
     });
     it('throws for no Azure DevOps token', async () => {
-      const env = { RENOVATE_PLATFORM: 'azure' };
+      const env = {
+        RENOVATE_CONFIG_FILE: '/tmp/does-not-exist',
+        RENOVATE_PLATFORM: 'azure',
+      };
       let err;
       try {
         await configParser.parseConfigs(env, defaultArgv);
