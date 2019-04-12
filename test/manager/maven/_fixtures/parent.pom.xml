@@ -10,5 +10,6 @@
     <quuxVersion>
       1.2.3.4
     </quuxVersion>
+    <repoUrl>http://example.com/</repoUrl>
   </properties>
 </project>

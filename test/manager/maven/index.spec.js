@@ -82,6 +82,7 @@ describe('manager/maven', () => {
       ]);
       const updatedDep = updatedPkg.deps.find(finder);
 
+      expect(updatedDep.registryUrls.pop()).toEqual('http://example.com/');
       expect(updatedDep.currentValue).toEqual(newValue);
     });
 

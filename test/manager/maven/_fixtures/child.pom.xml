@@ -135,7 +135,7 @@
     <repository>
       <id>atlassian</id>
       <name>Atlassian Repository</name>
-      <url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+      <url>${repoUrl}</url>
     </repository>
     <repository>
       <id>nonsense</id>
