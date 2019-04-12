@@ -53,7 +53,6 @@ Object {
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
-      "skipReason": "name-placeholder",
     },
     Object {
       "currentValue": "0.0.1",
@@ -64,13 +63,12 @@ Object {
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
-      "skipReason": "name-placeholder",
     },
     Object {
-      "currentValue": "1.2.3.4",
+      "currentValue": "\${quuxVersion}",
       "datasource": "maven",
-      "depName": "org.example:quux",
-      "fileReplacePosition": 698,
+      "depName": "\${quuxGroup}:\${quuxId}",
+      "fileReplacePosition": 2525,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
@@ -95,7 +93,6 @@ Object {
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
-      "skipReason": "not-a-version",
     },
     Object {
       "currentValue": "[1.0.0]",
@@ -116,7 +113,6 @@ Object {
         "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
-      "skipReason": "version-placeholder",
     },
     Object {
       "currentValue": "2.17",
@@ -129,5 +125,23 @@ Object {
       ],
     },
   ],
+  "mavenProps": Object {
+    "quuxGroup": Object {
+      "fileReplacePosition": 631,
+      "packageFile": null,
+      "val": "org.example",
+    },
+    "quuxId": Object {
+      "fileReplacePosition": 667,
+      "packageFile": null,
+      "val": "quux",
+    },
+    "quuxVersion": Object {
+      "fileReplacePosition": 698,
+      "packageFile": null,
+      "val": "1.2.3.4",
+    },
+  },
+  "packageFile": null,
 }
 `;
