@@ -10,6 +10,11 @@ const content = fs.readFileSync(
   'utf8'
 );
 
+const contentContainerPull = fs.readFileSync(
+  path.resolve('test/manager/bazel/_fixtures/container_pull'),
+  'utf8'
+);
+
 const fileWithBzlExtension = fs.readFileSync(
   'test/manager/bazel/_fixtures/repositories.bzl',
   'utf8'
@@ -36,6 +41,35 @@ describe('manager/bazel/update', () => {
       const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
     });
+
+    it('updates container_pull deptype and prserves comment', async () => {
+      const upgrade = {
+        depName: 'hasura',
+        depType: 'container_pull',
+        def: `container_pull(
+          name="hasura",
+          registry="index.docker.io",
+          repository="hasura/graphql-engine",
+          # v1.0.0-alpha31.cli-migrations 11/28
+          digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
+          tag="v1.0.0-alpha31.cli-migrations"
+      )`,
+        currentValue: 'v1.0.0-alpha31.cli-migrations',
+        currentDigest:
+          'sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548',
+        newDigest:
+          'sha256:2c29ba015faef92a3f55b37632fc373a7fbc2c9fddd31e317bf07113391c640b',
+        newValue: 'v1.0.0-alpha42.cli-migrations',
+      };
+      const res = await bazelfile.updateDependency(
+        contentContainerPull,
+        upgrade
+      );
+      expect(res).toMatchSnapshot();
+      expect(res).not.toEqual(contentContainerPull);
+      expect(res.includes('# v1.0.0-alpha31.cli-migrations 11/28')).toBe(true);
+    });
+
     it('updates commit to tag', async () => {
       const upgrade = {
         depName: 'com_github_google_uuid',
