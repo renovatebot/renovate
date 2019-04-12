@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/homebrew/extract extractPackageFile() extracts "archive" github dependency 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v0.8.2",
+      "depName": "Ibazel",
+      "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() extracts "releases" github dependency 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v0.16.1",
+      "depName": "Aide",
+      "url": "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() skips github dependency with wrong format 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": null,
+      "depName": "Acmetool",
+      "skipReason": "unsupported-url",
+      "url": "https://github.com/hlandau/acme.git",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() skips sourceforge dependency 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": null,
+      "depName": "Aalib",
+      "skipReason": "unsupported-url",
+      "url": "https://downloads.sourceforge.net/aa-project/aalib-1.4rc5.tar.gz",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() skips sourceforge dependency 2`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": null,
+      "depName": "Aap",
+      "skipReason": "unsupported-url",
+      "url": "https://downloads.sourceforge.net/project/a-a-p/aap-1.094.zip",
+    },
+  ],
+}
+`;
