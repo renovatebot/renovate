@@ -885,6 +885,8 @@ Set this to false either globally, per-language, or per-package if you want to d
 
 ## ruby
 
+## ruby-version
+
 ## schedule
 
 The `schedule` option allows you to define times of week or month for Renovate updates. Running Renovate around the clock may seem too "noisy" for some projects and therefore `schedule` is a good way to reduce the noise by reducing the timeframe in which Renovate will operate on your repository.

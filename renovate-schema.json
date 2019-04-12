@@ -53,6 +53,14 @@
       "type": "string",
       "default": "bundled"
     },
+    "baseDir": {
+      "description": "The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.",
+      "type": "string"
+    },
+    "cacheDir": {
+      "description": "The directory for Renovate for storing caches. If left empty, Renovate will create a subdirectory within `baseDir` to use.",
+      "type": "string"
+    },
     "logLevel": {
       "description": "Logging level",
       "type": "string",
@@ -124,6 +132,11 @@
       "type": "string",
       "enum": ["https", "http", "ssh"],
       "default": null
+    },
+    "persistRepoData": {
+      "description": "If set to false, repository data will preserved between runs instead of deleted.",
+      "type": "boolean",
+      "default": false
     },
     "trustLevel": {
       "description": "Set this to \"high\" if the bot should trust the repository owners/contents",
@@ -700,7 +713,7 @@
       }
     },
     "reviewers": {
-      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab, email or username in Azure DevOps)",
+      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab/Bitbucket, email or username in Azure DevOps)",
       "type": "array",
       "items": {
         "type": "string"
@@ -796,6 +809,14 @@
       "default": {
         "enabled": false,
         "fileMatch": ["(^|/)Gemfile$"],
+        "versionScheme": "ruby"
+      },
+      "$ref": "#"
+    },
+    "ruby-version": {
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)\\.ruby-version$"],
         "versionScheme": "ruby"
       },
       "$ref": "#"

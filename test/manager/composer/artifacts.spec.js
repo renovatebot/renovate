@@ -9,6 +9,7 @@ const hostRules = require('../../../lib/util/host-rules');
 
 const config = {
   localDir: '/tmp/github/some/repo',
+  cacheDir: '/tmp/renovate/cache',
 };
 
 describe('.getArtifacts()', () => {
