@@ -21,8 +21,8 @@ Configure this directory if you want to change which directory Renovate uses for
 
 ## binarySource
 
-Set this to 'global' if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
-Set this to 'docker' instead to use docker-based binaries.
+Set this to `global` if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
+Set this to `docker` instead to use docker-based binaries.
 
 ## cacheDir
 
@@ -97,7 +97,7 @@ By default, Renovate will use the most efficient approach to updating package fi
 
 ## trustLevel
 
-Setting trustLevel to "high" can make sense in many self-hosted cases where the bot operator trusts the content in each repository.
+Setting trustLevel to `"high"` can make sense in many self-hosted cases where the bot operator trusts the content in each repository.
 
 Setting trustLevel=high means:
 

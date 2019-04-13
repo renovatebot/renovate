@@ -115,7 +115,7 @@ Bundler is now in alpha stage and ready for testing! [Details](https://renovateb
 
 ## commitBody
 
-This is used whenever a commit "body" is needed, e.g. for adding `[skip ci]` or DCO signoff.
+This is used whenever a commit `"body"` is needed, e.g. for adding `[skip ci]` or DCO signoff.
 
 For example, To add `[skip ci]` to every commit you could configure:
 
@@ -826,7 +826,7 @@ Behaviour:
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
 - `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range
 
-Renovate's `auto` strategy works like this for npm:
+Renovate's `"auto"` strategy works like this for npm:
 
 1.  Always pin `devDependencies`
 2.  Pin `dependencies` if we detect that it's an app and not a library
@@ -844,7 +844,7 @@ This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0
 
 ## rebaseLabel
 
-On GitHub it is possible to add a label to a PR to manually request Renovate to recreate/rebase it. By default this label is `rebase` however you can configure it to anything you want by changing this `rebaseLabel` field.
+On GitHub it is possible to add a label to a PR to manually request Renovate to recreate/rebase it. By default this label is `"rebase"` however you can configure it to anything you want by changing this `rebaseLabel` field.
 
 ## rebaseStalePrs
 
@@ -1031,7 +1031,7 @@ This defaults to true, meaning that Renovate will perform certain "desirable" up
 
 ## versionScheme
 
-Usually, each language or package manager has a specific type of "version scheme". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as `docker` to address the most common way people tag versions using Docker, and `loose` as a fallback that tries semver first but otherwise just does its best to sort and compare.
+Usually, each language or package manager has a specific type of "version scheme". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries semver first but otherwise just does its best to sort and compare.
 
 By exposing `versionScheme` to config, it allows you to override the default version scheme for a package manager if you really need. In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
 
