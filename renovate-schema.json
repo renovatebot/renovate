@@ -260,6 +260,7 @@
         "docker",
         "hashicorp",
         "hex",
+        "ivy",
         "loose",
         "maven",
         "node",
