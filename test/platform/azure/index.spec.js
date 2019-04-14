@@ -473,9 +473,9 @@ describe('platform/azure', () => {
         createPullRequestReviewer: jest.fn(),
       }));
       azureApi.getCoreApi.mockImplementation(() => ({
-        getTeams: jest.fn(() => [{ id: 3 }, { id: 4 }]),
-        getTeamMembers: jest.fn(() => [
-          { displayName: 'jyc', uniqueName: 'jyc', id: 123 },
+        getTeams: jest.fn(() => [{ id: 3, name: 'a' }, { id: 4, name: 'b' }]),
+        getTeamMembersWithExtendedProperties: jest.fn(() => [
+          { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
         ]),
       }));
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc']);
