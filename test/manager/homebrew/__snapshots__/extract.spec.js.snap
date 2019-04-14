@@ -6,6 +6,7 @@ Object {
     Object {
       "currentValue": "v0.8.2",
       "depName": "Ibazel",
+      "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
       "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz",
     },
   ],
@@ -18,6 +19,7 @@ Object {
     Object {
       "currentValue": "v0.16.1",
       "depName": "Aide",
+      "sha256": "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7",
       "url": "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz",
     },
   ],
@@ -30,6 +32,7 @@ Object {
     Object {
       "currentValue": null,
       "depName": "Acmetool",
+      "sha256": "6f2cf5cfb987a2df2f791c162209039804fd8fd12692da69f52153ec9668e9ca",
       "skipReason": "unsupported-url",
       "url": "https://github.com/hlandau/acme.git",
     },
@@ -43,6 +46,7 @@ Object {
     Object {
       "currentValue": null,
       "depName": "Aalib",
+      "sha256": "fbddda9230cf6ee2a4f5706b4b11e2190ae45f5eda1f0409dc4f99b35e0a70ee",
       "skipReason": "unsupported-url",
       "url": "https://downloads.sourceforge.net/aa-project/aalib-1.4rc5.tar.gz",
     },
@@ -56,6 +60,7 @@ Object {
     Object {
       "currentValue": null,
       "depName": "Aap",
+      "sha256": "3f53b2fc277756042449416150acc477f29de93692944f8a77e8cef285a1efd8",
       "skipReason": "unsupported-url",
       "url": "https://downloads.sourceforge.net/project/a-a-p/aap-1.094.zip",
     },
