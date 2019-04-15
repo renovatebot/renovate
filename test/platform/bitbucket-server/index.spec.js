@@ -241,14 +241,14 @@ describe('platform/bitbucket-server', () => {
             true
           );
           expect(api.get.mock.calls).toMatchSnapshot();
-          expect(api.post.mock.calls).toHaveLength(1);
+          expect(api.post).toHaveBeenCalledTimes(1);
 
           api.get.mockClear();
           api.post.mockClear();
 
           expect(await bitbucket.ensureComment(5, null, 'content')).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
-          expect(api.post.mock.calls).toHaveLength(1);
+          expect(api.post).toHaveBeenCalledTimes(1);
         });
 
         it('add updates comment if necessary', async () => {
@@ -260,8 +260,8 @@ describe('platform/bitbucket-server', () => {
             await bitbucket.ensureComment(5, 'some-subject', 'some\ncontent')
           ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
-          expect(api.post.mock.calls).toHaveLength(0);
-          expect(api.put.mock.calls).toHaveLength(1);
+          expect(api.post).toHaveBeenCalledTimes(0);
+          expect(api.put).toHaveBeenCalledTimes(1);
 
           api.get.mockClear();
           api.put.mockClear();
@@ -270,8 +270,8 @@ describe('platform/bitbucket-server', () => {
             true
           );
           expect(api.get.mock.calls).toMatchSnapshot();
-          expect(api.post.mock.calls).toHaveLength(1);
-          expect(api.put.mock.calls).toHaveLength(0);
+          expect(api.post).toHaveBeenCalledTimes(1);
+          expect(api.put).toHaveBeenCalledTimes(0);
         });
 
         it('skips comment', async () => {
@@ -283,14 +283,14 @@ describe('platform/bitbucket-server', () => {
             await bitbucket.ensureComment(5, 'some-subject', 'blablabla')
           ).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
-          expect(api.put.mock.calls).toHaveLength(0);
+          expect(api.put).toHaveBeenCalledTimes(0);
 
           api.get.mockClear();
           api.put.mockClear();
 
           expect(await bitbucket.ensureComment(5, null, '!merge')).toBe(true);
           expect(api.get.mock.calls).toMatchSnapshot();
-          expect(api.put.mock.calls).toHaveLength(0);
+          expect(api.put).toHaveBeenCalledTimes(0);
         });
       });
 
@@ -308,7 +308,7 @@ describe('platform/bitbucket-server', () => {
 
           await bitbucket.ensureCommentRemoval(5, 'some-subject');
           expect(api.get.mock.calls).toMatchSnapshot();
-          expect(api.delete.mock.calls).toHaveLength(1);
+          expect(api.delete).toHaveBeenCalledTimes(1);
         });
 
         it('deletes nothing', async () => {
@@ -318,7 +318,7 @@ describe('platform/bitbucket-server', () => {
 
           await bitbucket.ensureCommentRemoval(5, 'topic');
           expect(api.get.mock.calls).toMatchSnapshot();
-          expect(api.delete.mock.calls).toHaveLength(0);
+          expect(api.delete).toHaveBeenCalledTimes(0);
         });
       });
 

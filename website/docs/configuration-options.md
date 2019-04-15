@@ -43,9 +43,10 @@ Usually you won't want to automerge _all_ PRs, for example most people would wan
 Also note that this option can be combined with other nested settings, such as dependency type. So for example you could elect to automerge all `devDependencies` only this way:
 
 ```json
-  "devDependencies": {
+  "packageRules": [{
+    "depTypeList": ["devDependencies"],
     "automerge": true
-  }
+  }]
 ```
 
 Warning: GitHub currently has a bug where automerge won't work if a GitHub Organization has protected their master branch, and there is no way to configure around this. Hence, automerging will try and fail in such situations. This doc will be updated once that bug/limitation is fixed by GitHub.

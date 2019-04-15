@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.example</groupId>
+  <artifactId>ExamplePomParent</artifactId>
+
+  <properties>
+    <quuxGroup>org.example</quuxGroup>
+    <quuxId>quux</quuxId>
+    <quuxVersion>
+      1.2.3.4
+    </quuxVersion>
+    <repoUrl>http://example.com/</repoUrl>
+  </properties>
+</project>
