@@ -1088,6 +1088,15 @@
       },
       "$ref": "#"
     },
+    "homebrew": {
+      "description": "Configuration object for homebrew",
+      "type": "object",
+      "default": {
+        "enabled": false,
+        "fileMatch": ["^Formula/[^/]+[.]rb$"]
+      },
+      "$ref": "#"
+    },
     "hostRules": {
       "description": "Host rules/configuration including credentials",
       "type": "array"
