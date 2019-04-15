@@ -9,6 +9,10 @@ const pipfile2 = fs.readFileSync(
   'test/manager/pipenv/_fixtures/Pipfile2',
   'utf8'
 );
+const pipfile3 = fs.readFileSync(
+  'test/manager/pipenv/_fixtures/Pipfile3',
+  'utf8'
+);
 
 describe('lib/manager/pipenv/extract', () => {
   describe('extractPackageFile()', () => {
@@ -26,6 +30,20 @@ describe('lib/manager/pipenv/extract', () => {
       const res = extractPackageFile(pipfile1, config).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
+    });
+    it('returns null for packages with "extras" ', () => {
+      expect(
+        extractPackageFile(pipfile3, {
+          extends: ['config:base'],
+          pipenv: {
+            enabled: true,
+          },
+          pip_setup: {
+            enabled: true,
+          },
+          labels: ['dependencies'],
+        })
+      ).toBeNull();
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(pipfile2, config).deps;
