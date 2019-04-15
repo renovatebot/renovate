@@ -107,7 +107,7 @@ This field is combined with `branchPrefix` and `managerBranchPrefix` to form the
 
 ## bumpVersion
 
-Set this value to 'patch', 'minor' or 'major' to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, set this to `patch`.
+Set this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited `package.json`. e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, set this to `"patch"`.
 
 You can also set this field to `"mirror:x"` where `x` is the name of a package in the `package.json`. Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on. Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
@@ -119,7 +119,7 @@ Bundler is now in alpha stage and ready for testing! [Details](https://renovateb
 
 ## commitBody
 
-This is used whenever a commit "body" is needed, e.g. for adding [skip ci] or DCO signoff.
+This is used whenever a commit `"body"` is needed, e.g. for adding `[skip ci]` or DCO signoff.
 
 For example, To add `[skip ci]` to every commit you could configure:
 
@@ -133,7 +133,7 @@ Editing of `commitMessage` directly is now deprecated and not recommended. Pleas
 
 ## commitMessageAction
 
-This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. Actions may be like 'Update', 'Pin', 'Roll back', 'Refresh', etc.
+This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. Actions may be like `Update`, `Pin`, `Roll back`, `Refresh`, etc.
 
 ## commitMessageExtra
 
@@ -149,7 +149,7 @@ This is used to add a suffix to commit messages. Usually left empty except for i
 
 ## commitMessageTopic
 
-This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. "dependency react".
+This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
 
 ## compatibility
 
@@ -338,7 +338,7 @@ Use this if you are extending a complex preset but won't want to use every "sub 
 }
 ```
 
-It would take the entire "config:base" preset - which contains a lot of sub-presets - but ignore the ":prHourlyLimit2" rule.
+It would take the entire `"config:base"` preset - which contains a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
 
 ## ignoreUnstable
 
@@ -348,7 +348,7 @@ Also check out the `followTag` configuration option above if you wish Renovate t
 
 ## includeForks
 
-By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `includeForks: true` to your config or run the CLI command with `--include-forks`. If you are using the hosted Renovate application then you need to add a `renovate.json` to your forked repo manually, and include `"includeForks": true` inside.
+By default, the bot will skip over any repositories that are forked, even if they contain a config file, because that config may have been from the source repository anyway. To enable processing of a forked repository, you need to add `"includeForks": true` to your config or run the CLI command with `--include-forks`. If you are using the hosted Renovate application then you need to add a `renovate.json` to your forked repo manually, and include `"includeForks": true` inside.
 
 ## includePaths
 
@@ -402,7 +402,7 @@ Or if it's just a single file then something like this:
 
 ## labels
 
-Add an array of 1 or more strings to `labels` and Renovate will apply these labels to any PR its created. Usually these will be a per-repository setting like "renovate", or "ready", or "dependencies", however you can configure them right down to per-package level.
+Add an array of 1 or more strings to `labels` and Renovate will apply these labels to any PR its created. Usually these will be a per-repository setting like `"renovate"`, or `"ready"`, or `"dependencies"`, however you can configure them right down to per-package level.
 
 ## lazyGrouping
 
@@ -460,7 +460,7 @@ See https://renovatebot.com/docs/private-modules for details on how this is used
 
 ## nuget
 
-The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style .csproj's, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj` format in order to be detected and supported by Renovate.
+The `nuget` configuration object is used to control settings for the NuGet package manager. The NuGet package manager supports SDK-style `.csproj` format, as described [here](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/). This means that .NET Core projects are all supported but any .NET Framework projects need to be updated to the new `.csproj` format in order to be detected and supported by Renovate.
 
 ## nvm
 
@@ -700,13 +700,13 @@ Add configuration here to specifically override settings for `pip` requirements 
 
 Add configuration here to specifically override settings for `setup.py` files.
 
-Warning: `setup.py` support is currently in beta, so is not enabled by default. You will need to configure `{ "pip_setup": { "enabled": true }}" to enable.
+Warning: `setup.py` support is currently in beta, so is not enabled by default. You will need to configure `{ "pip_setup": { "enabled": true }}` to enable.
 
 ## pipenv
 
 Add configuration here to change pipenv settings, e.g. to change the file pattern for pipenv so that you can use filenames other than Pipfile.
 
-Warning: 'pipenv' support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}" to enable.
+Warning: `pipenv` support is currently in beta, so it is not enabled by default. You will need to configure `{ "pipenv": { "enabled": true }}` to enable.
 
 ## poetry
 
@@ -742,7 +742,7 @@ Note: "Package file" is predefined in the default `prBodyDefinitions` object so 
 
 You can configure this object to either (a) modify the template for an existing table column in PR bodies, or (b) you wish to _add_ a definition for a new/additional column.
 
-Here is an example of modifying the default value for the "Package" column to put it inside a `<code></code>` block:
+Here is an example of modifying the default value for the `"Package"` column to put it inside a `<code></code>` block:
 
 ```json
   "prBodyDefinitions": {
@@ -750,7 +750,7 @@ Here is an example of modifying the default value for the "Package" column to pu
   }
 ```
 
-Here is an example of adding a custom "Sourcegraph" column definition:
+Here is an example of adding a custom `"Sourcegraph"` column definition:
 
 ```json
 {
@@ -828,9 +828,9 @@ Behaviour:
 - `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise 'replace' for updates out of range
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range
 
-Renovate's "auto" strategy works like this for npm:
+Renovate's `"auto"` strategy works like this for npm:
 
 1.  Always pin `devDependencies`
 2.  Pin `dependencies` if we detect that it's an app and not a library
@@ -848,7 +848,7 @@ This feature supports simple caret (`^`) and tilde (`~`) ranges only, like `^1.0
 
 ## rebaseLabel
 
-On GitHub it is possible to add a label to a PR to manually request Renovate to recreate/rebase it. By default this label is "rebase" however you can configure it to anything you want by changing this `rebaseLabel` field.
+On GitHub it is possible to add a label to a PR to manually request Renovate to recreate/rebase it. By default this label is `"rebase"` however you can configure it to anything you want by changing this `rebaseLabel` field.
 
 ## rebaseStalePrs
 
@@ -935,11 +935,11 @@ Technical details: We mostly rely on the text parsing of the library [later](htt
 
 ## semanticCommitScope
 
-By default you will see angular-style commit prefixes like "chore(deps):". If you wish to change it to something else like "package" then it will look like "chore(package):". You can also use `parentDir` or `baseDir` to namespace your commits for monorepos e.g. "{{parentDir}}".
+By default you will see angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like `"package"` then it will look like `"chore(package):"`. You can also use `parentDir` or `baseDir` to namespace your commits for monorepos e.g. `"{{parentDir}}"`.
 
 ## semanticCommitType
 
-By default you will see angular-style commit prefixes like "chore(deps):". If you wish to change it to something else like "ci" then it will look like "ci(deps):".
+By default you will see angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like "ci" then it will look like `"ci(deps):"`.
 
 ## semanticCommits
 
@@ -1035,7 +1035,7 @@ This defaults to true, meaning that Renovate will perform certain "desirable" up
 
 ## versionScheme
 
-Usually, each language or package manager has a specific type of "version scheme". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as "docker" to address the most common way people tag versions using Docker, and "loose" as a fallback that tries semver first but otherwise just does its best to sort and compare.
+Usually, each language or package manager has a specific type of "version scheme". e.g. JavaScript uses npm's semver implementation, Python uses pep440, etc. At Renovate we have also implemented some of our own, such as `"docker"` to address the most common way people tag versions using Docker, and `"loose"` as a fallback that tries semver first but otherwise just does its best to sort and compare.
 
 By exposing `versionScheme` to config, it allows you to override the default version scheme for a package manager if you really need. In most cases it would not be recommended, but there are some cases such as Docker or Gradle where versioning is not strictly defined and you may need to specify the versioning type per-package.
 
