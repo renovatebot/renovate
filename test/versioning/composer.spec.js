@@ -26,39 +26,39 @@ describe('semver.isGreaterThan(a, b)', () => {
 });
 describe('semver.isSingleVersion(input)', () => {
   it('should pad short version', () => {
-    expect(Boolean(semver.isSingleVersion('v1.2'))).toBe(true);
+    expect(semver.isSingleVersion('v1.2')).toBeTruthy();
   });
 });
 describe('semver.isStable(input)', () => {
   it('should pad short version', () => {
-    expect(Boolean(semver.isStable('v1.2'))).toBe(true);
+    expect(semver.isStable('v1.2')).toBeTruthy();
   });
 });
 describe('semver.isValid(input)', () => {
   it('should support simple semver', () => {
-    expect(Boolean(semver.isValid('1.2.3'))).toBe(true);
+    expect(semver.isValid('1.2.3')).toBeTruthy();
   });
   it('should support semver with dash', () => {
-    expect(Boolean(semver.isValid('1.2.3-foo'))).toBe(true);
+    expect(semver.isValid('1.2.3-foo')).toBeTruthy();
   });
   it('should reject semver without dash', () => {
-    expect(Boolean(semver.isValid('1.2.3foo'))).toBe(false);
+    expect(semver.isValid('1.2.3foo')).toBeFalsy();
   });
   it('should support ranges', () => {
-    expect(Boolean(semver.isValid('~1.2.3'))).toBe(true);
-    expect(Boolean(semver.isValid('^1.2.3'))).toBe(true);
-    expect(Boolean(semver.isValid('>1.2.3'))).toBe(true);
+    expect(semver.isValid('~1.2.3')).toBeTruthy();
+    expect(semver.isValid('^1.2.3')).toBeTruthy();
+    expect(semver.isValid('>1.2.3')).toBeTruthy();
   });
 });
 describe('semver.isVersion(input)', () => {
   it('should support simple semver', () => {
-    expect(Boolean(semver.isValid('1.2.3'))).toBe(true);
+    expect(semver.isValid('1.2.3')).toBeTruthy();
   });
   it('should support shortened version', () => {
-    expect(Boolean(semver.isValid('2.5'))).toBe(true);
+    expect(semver.isValid('2.5')).toBeTruthy();
   });
   it('should support shortened v version', () => {
-    expect(Boolean(semver.isValid('v2.5'))).toBe(true);
+    expect(semver.isValid('v2.5')).toBeTruthy();
   });
 });
 describe('semver.isLessThanRange()', () => {

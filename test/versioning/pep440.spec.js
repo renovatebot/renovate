@@ -2,50 +2,50 @@ const pep440 = require('../../lib/versioning/pep440');
 
 describe('pep440.isValid(input)', () => {
   it('should return null for irregular versions', () => {
-    expect(Boolean(pep440.isValid('17.04.0'))).toBe(false);
+    expect(pep440.isValid('17.04.0')).toBeFalsy();
   });
   it('should support simple pep440', () => {
-    expect(Boolean(pep440.isValid('==1.2.3'))).toBe(true);
+    expect(pep440.isValid('==1.2.3')).toBeTruthy();
   });
   it('should support pep440 with RC', () => {
-    expect(Boolean(pep440.isValid('==1.2.3rc0'))).toBe(true);
+    expect(pep440.isValid('==1.2.3rc0')).toBeTruthy();
   });
   it('should support ranges', () => {
-    expect(Boolean(pep440.isValid('~=1.2.3'))).toBe(true);
-    expect(Boolean(pep440.isValid('==1.2.*'))).toBe(true);
-    expect(Boolean(pep440.isValid('>1.2.3'))).toBe(true);
+    expect(pep440.isValid('~=1.2.3')).toBeTruthy();
+    expect(pep440.isValid('==1.2.*')).toBeTruthy();
+    expect(pep440.isValid('>1.2.3')).toBeTruthy();
   });
   it('should reject github repositories', () => {
-    expect(Boolean(pep440.isValid('renovatebot/renovate'))).toBe(false);
-    expect(Boolean(pep440.isValid('renovatebot/renovate#master'))).toBe(false);
+    expect(pep440.isValid('renovatebot/renovate')).toBeFalsy();
+    expect(pep440.isValid('renovatebot/renovate#master')).toBeFalsy();
     expect(
-      Boolean(pep440.isValid('https://github.com/renovatebot/renovate.git'))
-    ).toBe(false);
+      pep440.isValid('https://github.com/renovatebot/renovate.git')
+    ).toBeFalsy();
   });
 });
 
 describe('pep440.isStable(version)', () => {
   it('returns correct value', () => {
-    expect(pep440.isStable('1.2.3')).toBe(true);
-    expect(pep440.isStable('1.2.3rc0')).toBe(false);
+    expect(pep440.isStable('1.2.3')).toBeTruthy();
+    expect(pep440.isStable('1.2.3rc0')).toBeFalsy();
   });
   it('returns false when version invalid', () => {
-    expect(pep440.isStable('not_version')).toBe(false);
+    expect(pep440.isStable('not_version')).toBeFalsy();
   });
 });
 
 describe('pep440.isSingleVersion()', () => {
   it('returns true if naked version', () => {
-    expect(Boolean(pep440.isSingleVersion('1.2.3'))).toBe(true);
-    expect(Boolean(pep440.isSingleVersion('1.2.3rc0'))).toBe(true);
+    expect(pep440.isSingleVersion('1.2.3')).toBeTruthy();
+    expect(pep440.isSingleVersion('1.2.3rc0')).toBeTruthy();
   });
   it('returns true if double equals', () => {
-    expect(Boolean(pep440.isSingleVersion('==1.2.3'))).toBe(true);
-    expect(Boolean(pep440.isSingleVersion('==1.2'))).toBe(true);
-    expect(Boolean(pep440.isSingleVersion('== 1.2.3'))).toBe(true);
+    expect(pep440.isSingleVersion('==1.2.3')).toBeTruthy();
+    expect(pep440.isSingleVersion('==1.2')).toBeTruthy();
+    expect(pep440.isSingleVersion('== 1.2.3')).toBeTruthy();
   });
   it('returns false when not version', () => {
-    expect(Boolean(pep440.isSingleVersion('==1.*'))).toBe(false);
+    expect(pep440.isSingleVersion('==1.*')).toBeFalsy();
   });
 });
 

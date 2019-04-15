@@ -271,6 +271,11 @@
       ],
       "default": "semver"
     },
+    "azureWorkItemId": {
+      "description": "The id of an existing work item on Azure Boards to link to each PR",
+      "type": "integer",
+      "default": 0
+    },
     "ignoreDeps": {
       "description": "Dependencies to ignore",
       "type": "array",
@@ -884,6 +889,15 @@
         "versionScheme": "node"
       },
       "$ref": "#"
+    },
+    "pub": {
+      "description": "Configuration object for when renovating Dart pubspec files",
+      "type": "json",
+      "default": {
+        "enabled": false,
+        "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
+        "versionScheme": "npm"
+      }
     },
     "docker": {
       "description": "Configuration object for Docker language",

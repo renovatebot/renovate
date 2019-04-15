@@ -74,6 +74,9 @@ Object {
   "poetry": Array [
     Object {},
   ],
+  "pub": Array [
+    Object {},
+  ],
   "ruby-version": Array [
     Object {},
   ],
