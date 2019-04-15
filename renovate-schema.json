@@ -890,6 +890,15 @@
       },
       "$ref": "#"
     },
+    "pub": {
+      "description": "Configuration object for when renovating Dart pubspec files",
+      "type": "json",
+      "default": {
+        "enabled": false,
+        "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
+        "versionScheme": "npm"
+      }
+    },
     "docker": {
       "description": "Configuration object for Docker language",
       "type": "object",
