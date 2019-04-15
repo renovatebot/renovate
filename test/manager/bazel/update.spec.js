@@ -195,7 +195,7 @@ http_archive(
         throw new Error('some error');
       });
       const res = await bazelfile.updateDependency(content, upgrade);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

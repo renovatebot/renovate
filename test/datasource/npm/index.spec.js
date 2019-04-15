@@ -52,7 +52,7 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, missingVersions);
     const res = await npm.getPkgReleases({ lookupName: 'foobar' });
-    expect(res).toBe(null);
+    expect(res).toBeNull();
   });
   it('should fetch package info from npm', async () => {
     nock('https://registry.npmjs.org')
@@ -381,7 +381,7 @@ describe('api/npm', () => {
     const npmrc = '//registry.npmjs.org/:_authToken=abcdefghijklmnopqrstuvwxyz';
     const res1 = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
     const res2 = await npm.getPkgReleases({ lookupName: 'foobar', npmrc });
-    expect(res1).not.toBe(null);
+    expect(res1).not.toBeNull();
     expect(res1).toEqual(res2);
   });
   it('should use global cache', async () => {
