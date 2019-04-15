@@ -271,6 +271,11 @@
       ],
       "default": "semver"
     },
+    "azureWorkItemId": {
+      "description": "The id of an existing work item on Azure Boards to link to each PR",
+      "type": "integer",
+      "default": 0
+    },
     "ignoreDeps": {
       "description": "Dependencies to ignore",
       "type": "array",
