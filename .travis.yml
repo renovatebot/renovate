@@ -4,7 +4,8 @@ notifications:
 language: node_js
 
 node_js:
-  - '10.15.0'
+  - 'lts/dubnium'
+  - '11'
 
 sudo: false
 
