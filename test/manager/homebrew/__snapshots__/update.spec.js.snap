@@ -16,9 +16,9 @@ exports[`manager/homebrew/update updates "archive" github dependency 1`] = `
 # limitations under the License.
 
 =begin
-  url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+  url \\"https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz\\"
 =end
-# url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+# url \\"https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz\\"
 
 class Ibazel < Formula
   desc 'IBazel is a tool for building Bazel targets when source files change.'
@@ -50,9 +50,9 @@ end
 
 exports[`manager/homebrew/update updates "releases" github dependency 1`] = `
 "=begin
-  url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+  url \\"https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz\\"
 =end
-# url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+# url \\"https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz\\"
 class Aide < Formula
   desc \\"File and directory integrity checker\\"
   homepage \\"https://aide.github.io/\\"
