@@ -473,12 +473,15 @@ describe('platform/azure', () => {
         createPullRequestReviewer: jest.fn(),
       }));
       azureApi.getCoreApi.mockImplementation(() => ({
-        getTeams: jest.fn(() => [{ id: 3 }, { id: 4 }]),
-        getTeamMembers: jest.fn(() => [
-          { displayName: 'jyc', uniqueName: 'jyc', id: 123 },
+        getTeams: jest.fn(() => [
+          { id: 3, name: 'abc' },
+          { id: 4, name: 'def' },
+        ]),
+        getTeamMembersWithExtendedProperties: jest.fn(() => [
+          { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
         ]),
       }));
-      await azure.addReviewers(123, ['test@bonjour.fr', 'jyc']);
+      await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
