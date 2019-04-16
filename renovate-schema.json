@@ -99,7 +99,7 @@
     "requireConfig": {
       "description": "Set to true if repositories must have a config to activate.",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "privateKey": {
       "description": "Server-side private key",
