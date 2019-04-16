@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+=begin
+  url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+=end
+# url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+
 class Ibazel < Formula
   desc 'IBazel is a tool for building Bazel targets when source files change.'
   homepage 'https://github.com/bazelbuild/bazel-watcher'

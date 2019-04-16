@@ -1,5 +1,10 @@
 require "language/go"
 
+=begin
+  url "https://github.com/hlandau/acme.git",
+=end
+# url "https://github.com/hlandau/acme.git",
+
 class Acmetool < Formula
   desc "Automatic certificate acquisition tool for ACME (Let's Encrypt)"
   homepage "https://github.com/hlandau/acme"
