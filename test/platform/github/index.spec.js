@@ -39,13 +39,9 @@ describe('platform/github', () => {
 
   describe('getRepos', () => {
     it('should throw an error if no token is provided', async () => {
-      let err;
-      try {
-        await github.getRepos();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('No token found for getRepos');
+      await expect(github.getRepos()).rejects.toEqual(
+        Error('No token found for getRepos')
+      );
     });
     it('should return an array of repos', async () => {
       const repos = await getRepos('sometoken');
@@ -95,14 +91,10 @@ describe('platform/github', () => {
       });
     });
     it('should throw an error if no token is provided', async () => {
-      let err;
-      try {
-        await github.initRepo({ repository: 'some/repo' });
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe(
-        'No token found for GitHub repository some/repo'
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toEqual(
+        Error('No token found for GitHub repository some/repo')
       );
     });
     it('should rebase', async () => {
@@ -281,16 +273,12 @@ describe('platform/github', () => {
           owner: {},
         },
       });
-      let e;
-      try {
-        await github.initRepo({
+      await expect(
+        github.initRepo({
           repository: 'some/repo',
           token: 'token',
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+        })
+      ).rejects.toThrow();
     });
     it('throws not-found', async () => {
       get.mockImplementationOnce(() =>
@@ -298,16 +286,12 @@ describe('platform/github', () => {
           statusCode: 404,
         })
       );
-      let e;
-      try {
-        await github.initRepo({
+      await expect(
+        github.initRepo({
           repository: 'some/repo',
           token: 'token',
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+        })
+      ).rejects.toThrow();
     });
   });
   describe('getRepoForceRebase', () => {
@@ -362,13 +346,9 @@ describe('platform/github', () => {
           statusCode: 401,
         })
       );
-      let e;
-      try {
-        await github.getRepoForceRebase();
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(github.getRepoForceRebase()).rejects.toEqual({
+        statusCode: 401,
+      });
     });
   });
   describe('setBaseBranch(branchName)', () => {
@@ -406,13 +386,7 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      let e;
-      try {
-        await github.getFileList('error-branch');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(github.getFileList('error-branch')).rejects.toThrow();
     });
     it('warns if truncated result', async () => {
       get.mockImplementationOnce(() => ({
@@ -956,13 +930,9 @@ describe('platform/github', () => {
       get.patch.mockImplementationOnce(() => {
         throw new Error('3 of 3 required status checks are expected.');
       });
-      let e;
-      try {
-        await github.mergeBranch('thebranchname', 'branch');
-      } catch (err) {
-        e = err;
-      }
-      expect(e.message).toEqual('not ready');
+      await expect(
+        github.mergeBranch('thebranchname', 'branch')
+      ).rejects.toEqual(Error('not ready'));
     });
   });
   describe('getBranchLastCommitTime', () => {
@@ -2001,13 +1971,10 @@ describe('platform/github', () => {
           tree: [],
         },
       }));
-      let e;
-      try {
-        await github.getFile('package-lock.json');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(github.getFile('package-lock.json')).rejects.toEqual({
+        statusCode: 403,
+        message: 'This API returns blobs up to 1 MB in size, OK?',
+      });
     });
     it('should return null if getFile returns nothing', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -2051,13 +2018,9 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => {
         throw new Error('Something went wrong');
       });
-      let err;
-      try {
-        await github.getFile('package.json');
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('Something went wrong');
+      await expect(github.getFile('package.json')).rejects.toEqual(
+        Error('Something went wrong')
+      );
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {

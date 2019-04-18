@@ -298,14 +298,10 @@ describe('platform/azure/helpers', () => {
       const res = await azureHelper.getProjectAndRepo('prjName/myRepoName');
       expect(res).toMatchSnapshot();
     });
-    it('should return an error', async () => {
-      let err;
-      try {
-        await azureHelper.getProjectAndRepo('prjName/myRepoName/blalba');
-      } catch (error) {
-        err = error;
-      }
-      expect(err.message).toBe(
+    it('should return an error', () => {
+      expect(() =>
+        azureHelper.getProjectAndRepo('prjName/myRepoName/blalba')
+      ).toThrow(
         `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
       );
     });

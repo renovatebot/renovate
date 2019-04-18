@@ -135,13 +135,7 @@ describe('platform/git/storage', () => {
       expect(merged.all).toContain('renovate/future_branch');
     });
     it('should throw if branch merge throws', async () => {
-      let e;
-      try {
-        await git.mergeBranch('not_found');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toMatchSnapshot();
+      await expect(git.mergeBranch('not_found')).rejects.toMatchSnapshot();
     });
   });
   describe('deleteBranch(branchName)', () => {
@@ -171,13 +165,9 @@ describe('platform/git/storage', () => {
       expect(res).toBeNull();
     });
     it('returns null for 404', async () => {
-      let e;
-      try {
-        await git.getFile('some-path', 'some-branch');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toMatchSnapshot();
+      await expect(
+        git.getFile('some-path', 'some-branch')
+      ).rejects.toMatchSnapshot();
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {

@@ -79,13 +79,7 @@ describe('platform/gh-got-wrapper', () => {
           'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
       })
     );
-    let e;
-    try {
-      await get('some-url');
-    } catch (err) {
-      e = err;
-    }
-    expect(e).toBeDefined();
+    await expect(get('some-url')).rejects.toThrow();
   });
   it('should throw Bad credentials', async () => {
     ghGot.mockImplementationOnce(() =>
@@ -230,13 +224,9 @@ describe('platform/gh-got-wrapper', () => {
         statusCode: 404,
       })
     );
-    let err;
-    try {
-      await get('some-url');
-    } catch (e) {
-      err = e;
-    }
-    expect(err.statusCode).toBe(404);
+    await expect(get('some-url')).rejects.toEqual({
+      statusCode: 404,
+    });
   });
   it('should give up after 5 retries', async () => {
     ghGot.mockImplementationOnce(() =>
@@ -270,13 +260,10 @@ describe('platform/gh-got-wrapper', () => {
         message: 'Bad bot.',
       })
     );
-    let err;
-    try {
-      await get('some-url');
-    } catch (e) {
-      err = e;
-    }
-    expect(err.statusCode).toBe(403);
+    await expect(get('some-url')).rejects.toEqual({
+      statusCode: 403,
+      message: 'Bad bot.',
+    });
   });
   it('should retry posts', async () => {
     ghGot.mockImplementationOnce(() =>
