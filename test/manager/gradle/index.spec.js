@@ -60,13 +60,9 @@ describe('manager/gradle', () => {
       exec.mockImplementation(() => {
         throw new Error();
       });
-      let e;
-      try {
-        await manager.extractAllPackageFiles(config, ['build.gradle']);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toMatchSnapshot();
+      await expect(
+        manager.extractAllPackageFiles(config, ['build.gradle'])
+      ).rejects.toMatchSnapshot();
     });
 
     it('should return empty if there is no dependency report', async () => {
