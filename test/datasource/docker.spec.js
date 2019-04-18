@@ -159,23 +159,15 @@ describe('api/docker', () => {
     });
     it('should throw error for 429', async () => {
       got.mockRejectedValueOnce({ statusCode: 429 });
-      let e;
-      try {
-        await docker.getDigest({ lookupName: 'some-dep' }, 'latest');
-      } catch (err) {
-        e = err;
-      }
-      expect(e.message).toBe('registry-failure');
+      await expect(
+        docker.getDigest({ lookupName: 'some-dep' }, 'latest')
+      ).rejects.toEqual(Error('registry-failure'));
     });
     it('should throw error for 5xx', async () => {
       got.mockRejectedValueOnce({ statusCode: 503 });
-      let e;
-      try {
-        await docker.getDigest({ lookupName: 'some-dep' }, 'latest');
-      } catch (err) {
-        e = err;
-      }
-      expect(e.message).toBe('registry-failure');
+      await expect(
+        docker.getDigest({ lookupName: 'some-dep' }, 'latest')
+      ).rejects.toEqual(Error('registry-failure'));
     });
   });
   describe('getPkgReleases', () => {
