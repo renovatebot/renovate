@@ -271,13 +271,9 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
-      let e;
-      try {
-        await branchWorker.processBranch(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e.message).toEqual('lockfile-error');
+      await expect(branchWorker.processBranch(config)).rejects.toEqual(
+        Error('lockfile-error')
+      );
     });
     it('ensures PR and adds lock file error comment recreate closed', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
