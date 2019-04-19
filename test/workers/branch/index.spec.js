@@ -271,7 +271,7 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockReturnValueOnce({});
       prWorker.checkAutoMerge.mockReturnValueOnce(true);
       config.releaseTimestamp = new Date().toISOString();
-      await expect(branchWorker.processBranch(config)).rejects.toEqual(
+      await expect(branchWorker.processBranch(config)).rejects.toThrow(
         Error('lockfile-error')
       );
     });

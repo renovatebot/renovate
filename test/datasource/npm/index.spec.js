@@ -287,7 +287,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(503);
-    await expect(npm.getPkgReleases({ lookupName: 'foobar' })).rejects.toEqual(
+    await expect(npm.getPkgReleases({ lookupName: 'foobar' })).rejects.toThrow(
       Error('registry-failure')
     );
   });
@@ -295,7 +295,7 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(408);
-    await expect(npm.getPkgReleases({ lookupName: 'foobar' })).rejects.toEqual(
+    await expect(npm.getPkgReleases({ lookupName: 'foobar' })).rejects.toThrow(
       Error('registry-failure')
     );
   });
@@ -395,7 +395,7 @@ describe('api/npm', () => {
     global.trustLevel = 'high';
     // eslint-disable-next-line no-template-curly-in-string
     expect(() => npm.setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
-      'env-replace'
+      Error('env-replace')
     );
   });
 });

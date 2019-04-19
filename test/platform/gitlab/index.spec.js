@@ -30,7 +30,7 @@ describe('platform/gitlab', () => {
       return gitlab.getRepos(...args);
     }
     it('should throw an error if no token is provided', async () => {
-      await expect(gitlab.getRepos()).rejects.toEqual(
+      await expect(gitlab.getRepos()).rejects.toThrow(
         Error('No token found for getRepos')
       );
     });
@@ -38,7 +38,7 @@ describe('platform/gitlab', () => {
       get.mockImplementation(() => {
         throw new Error('getRepos error');
       });
-      await expect(gitlab.getRepos('sometoken')).rejects.toEqual(
+      await expect(gitlab.getRepos('sometoken')).rejects.toThrow(
         Error('getRepos error')
       );
     });
@@ -119,7 +119,7 @@ describe('platform/gitlab', () => {
     it('should throw an error if no token is provided', async () => {
       await expect(
         gitlab.initRepo({ repository: 'some/repo' })
-      ).rejects.toEqual(
+      ).rejects.toThrow(
         Error('No token found for GitLab repository some/repo')
       );
     });
@@ -129,19 +129,19 @@ describe('platform/gitlab', () => {
       });
       await expect(
         gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' })
-      ).rejects.toEqual(Error('always error'));
+      ).rejects.toThrow(Error('always error'));
     });
     it('should throw an error if repository is archived', async () => {
       get.mockReturnValue({ body: { archived: true } });
       await expect(
         gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' })
-      ).rejects.toEqual(Error('archived'));
+      ).rejects.toThrow(Error('archived'));
     });
     it('should throw an error if repository is empty', async () => {
       get.mockReturnValue({ body: { default_branch: null } });
       await expect(
         gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' })
-      ).rejects.toEqual(Error('empty'));
+      ).rejects.toThrow(Error('empty'));
     });
   });
   describe('getRepoForceRebase', () => {

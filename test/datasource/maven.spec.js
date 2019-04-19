@@ -142,7 +142,7 @@ describe('datasource/maven', () => {
           lookupName: 'org:artifact',
           registryUrls: ['http://central.maven.org/maven2/'],
         })
-      ).rejects.toEqual(Error('registry-failure'));
+      ).rejects.toThrow(Error('registry-failure'));
     });
 
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {

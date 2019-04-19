@@ -161,13 +161,13 @@ describe('api/docker', () => {
       got.mockRejectedValueOnce({ statusCode: 429 });
       await expect(
         docker.getDigest({ lookupName: 'some-dep' }, 'latest')
-      ).rejects.toEqual(Error('registry-failure'));
+      ).rejects.toThrow(Error('registry-failure'));
     });
     it('should throw error for 5xx', async () => {
       got.mockRejectedValueOnce({ statusCode: 503 });
       await expect(
         docker.getDigest({ lookupName: 'some-dep' }, 'latest')
-      ).rejects.toEqual(Error('registry-failure'));
+      ).rejects.toThrow(Error('registry-failure'));
     });
   });
   describe('getPkgReleases', () => {

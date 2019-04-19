@@ -39,7 +39,7 @@ describe('platform/github', () => {
 
   describe('getRepos', () => {
     it('should throw an error if no token is provided', async () => {
-      await expect(github.getRepos()).rejects.toEqual(
+      await expect(github.getRepos()).rejects.toThrow(
         Error('No token found for getRepos')
       );
     });
@@ -93,7 +93,7 @@ describe('platform/github', () => {
     it('should throw an error if no token is provided', async () => {
       await expect(
         github.initRepo({ repository: 'some/repo' })
-      ).rejects.toEqual(
+      ).rejects.toThrow(
         Error('No token found for GitHub repository some/repo')
       );
     });
@@ -932,7 +932,7 @@ describe('platform/github', () => {
       });
       await expect(
         github.mergeBranch('thebranchname', 'branch')
-      ).rejects.toEqual(Error('not ready'));
+      ).rejects.toThrow(Error('not ready'));
     });
   });
   describe('getBranchLastCommitTime', () => {
@@ -2018,7 +2018,7 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => {
         throw new Error('Something went wrong');
       });
-      await expect(github.getFile('package.json')).rejects.toEqual(
+      await expect(github.getFile('package.json')).rejects.toThrow(
         Error('Something went wrong')
       );
     });

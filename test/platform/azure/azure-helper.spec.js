@@ -302,7 +302,9 @@ describe('platform/azure/helpers', () => {
       expect(() =>
         azureHelper.getProjectAndRepo('prjName/myRepoName/blalba')
       ).toThrow(
-        `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
+        Error(
+          `prjName/myRepoName/blalba can be only structured this way : 'repository' or 'projectName/repository'!`
+        )
       );
     });
   });

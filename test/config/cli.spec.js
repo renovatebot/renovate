@@ -39,7 +39,9 @@ describe('config/cli', () => {
       argv.push('--recreate-closed');
       argv.push('badvalue');
       expect(() => cli.getConfig(argv)).toThrow(
-        "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'"
+        Error(
+          "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'"
+        )
       );
     });
     it('supports boolean space false', () => {
