@@ -1,7 +1,11 @@
 =begin
   url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+  sha256 "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
 =end
 # url "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
+# sha256 "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
+
+$sha256 = "0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7"
 class Aide < Formula
   desc "File and directory integrity checker"
   homepage "https://aide.github.io/"
