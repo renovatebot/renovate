@@ -45,17 +45,13 @@ describe('manager/npm/extract', () => {
       expect(res).toBeNull();
     });
     it('throws error if non-root renovate config', async () => {
-      let e;
-      try {
-        await npmExtract.extractPackageFile(
+      await expect(
+        npmExtract.extractPackageFile(
           '{ "renovate": {} }',
           'backend/package.json',
           defaultConfig
-        );
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+        )
+      ).rejects.toThrow();
     });
     it('returns null if no deps', async () => {
       const res = await npmExtract.extractPackageFile(

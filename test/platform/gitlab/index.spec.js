@@ -30,25 +30,17 @@ describe('platform/gitlab', () => {
       return gitlab.getRepos(...args);
     }
     it('should throw an error if no token is provided', async () => {
-      let err;
-      try {
-        await gitlab.getRepos();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('No token found for getRepos');
+      await expect(gitlab.getRepos()).rejects.toThrow(
+        Error('No token found for getRepos')
+      );
     });
     it('should throw an error if it receives an error', async () => {
       get.mockImplementation(() => {
         throw new Error('getRepos error');
       });
-      let err;
-      try {
-        await gitlab.getRepos('sometoken');
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('getRepos error');
+      await expect(gitlab.getRepos('sometoken')).rejects.toThrow(
+        Error('getRepos error')
+      );
     });
     it('should return an array of repos', async () => {
       const repos = await getRepos('sometoken');
@@ -125,47 +117,31 @@ describe('platform/gitlab', () => {
       expect(get.mock.calls).toMatchSnapshot();
     });
     it('should throw an error if no token is provided', async () => {
-      let err;
-      try {
-        await gitlab.initRepo({ repository: 'some/repo' });
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe(
-        'No token found for GitLab repository some/repo'
+      await expect(
+        gitlab.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(
+        Error('No token found for GitLab repository some/repo')
       );
     });
     it('should throw an error if receiving an error', async () => {
       get.mockImplementation(() => {
         throw new Error('always error');
       });
-      let err;
-      try {
-        await gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' });
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('always error');
+      await expect(
+        gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' })
+      ).rejects.toThrow(Error('always error'));
     });
     it('should throw an error if repository is archived', async () => {
       get.mockReturnValue({ body: { archived: true } });
-      let err;
-      try {
-        await gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' });
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('archived');
+      await expect(
+        gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' })
+      ).rejects.toThrow(Error('archived'));
     });
     it('should throw an error if repository is empty', async () => {
       get.mockReturnValue({ body: { default_branch: null } });
-      let err;
-      try {
-        await gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' });
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('empty');
+      await expect(
+        gitlab.initRepo({ repository: 'some/repo', token: 'sometoken' })
+      ).rejects.toThrow(Error('empty'));
     });
   });
   describe('getRepoForceRebase', () => {
@@ -246,13 +222,9 @@ describe('platform/gitlab', () => {
           statusCode: 500,
         })
       );
-      let e;
-      try {
-        await gitlab.branchExists('foo');
-      } catch (err) {
-        e = err;
-      }
-      expect(e.statusCode).toBe(500);
+      await expect(gitlab.branchExists('foo')).rejects.toEqual({
+        statusCode: 500,
+      });
     });
   });
   describe('getAllRenovateBranches()', () => {
@@ -507,17 +479,14 @@ describe('platform/gitlab', () => {
       get.post.mockImplementationOnce(() => {
         throw new Error('branch-push failed');
       });
-      let e;
-      try {
-        await gitlab.mergeBranch('thebranchname');
-      } catch (err) {
-        e = err;
-      }
+
+      await expect(
+        gitlab.mergeBranch('thebranchname')
+      ).rejects.toMatchSnapshot();
 
       // deleteBranch
       get.delete.mockImplementationOnce();
 
-      expect(e).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();
       expect(get.delete.mock.calls).toMatchSnapshot();
     });
@@ -973,13 +942,10 @@ These updates have all been created already. Click a checkbox below to force a r
     });
     it('throws error for non-404', async () => {
       get.mockImplementationOnce(() => Promise.reject({ statusCode: 403 }));
-      let e;
-      try {
-        await gitlab.getFile('some-path', 'some-branch');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toMatchSnapshot();
+
+      await expect(
+        gitlab.getFile('some-path', 'some-branch')
+      ).rejects.toMatchSnapshot();
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {

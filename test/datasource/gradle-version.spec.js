@@ -27,15 +27,11 @@ describe('datasource/gradle', () => {
 
     it('throws for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
-      let e;
-      try {
-        await datasource.getPkgReleases({
+      await expect(
+        datasource.getPkgReleases({
           ...config,
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+        })
+      ).rejects.toThrow();
     });
 
     it('throws for 404', async () => {
@@ -44,30 +40,22 @@ describe('datasource/gradle', () => {
           statusCode: 404,
         })
       );
-      let e;
-      try {
-        await datasource.getPkgReleases({
+      await expect(
+        datasource.getPkgReleases({
           ...config,
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+        })
+      ).rejects.toThrow();
     });
 
     it('throws for unknown error', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      let e;
-      try {
-        await datasource.getPkgReleases({
+      await expect(
+        datasource.getPkgReleases({
           ...config,
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+        })
+      ).rejects.toThrow();
     });
 
     it('processes real data', async () => {
