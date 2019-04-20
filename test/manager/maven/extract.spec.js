@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 const fs = require('fs');
 const path = require('path');
-const { extractDependencies } = require('../../../lib/manager/maven/extract');
+const { extractPackage } = require('../../../lib/manager/maven/extract');
 
 const simpleContent = fs.readFileSync(
   path.resolve(__dirname, `./_fixtures/simple.pom.xml`),
@@ -11,14 +11,14 @@ const simpleContent = fs.readFileSync(
 describe('manager/maven/extract', () => {
   describe('extractDependencies', () => {
     it('returns null for invalid XML', () => {
-      expect(extractDependencies()).toBeNull();
-      expect(extractDependencies('invalid xml content')).toBeNull();
-      expect(extractDependencies('<foobar></foobar>')).toBeNull();
-      expect(extractDependencies('<project></project>')).toBeNull();
+      expect(extractPackage()).toBeNull();
+      expect(extractPackage('invalid xml content')).toBeNull();
+      expect(extractPackage('<foobar></foobar>')).toBeNull();
+      expect(extractPackage('<project></project>')).toBeNull();
     });
 
     it('extract dependencies from any XML position', () => {
-      const res = extractDependencies(simpleContent);
+      const res = extractPackage(simpleContent);
       expect(res).toMatchSnapshot();
     });
   });

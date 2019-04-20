@@ -15,25 +15,13 @@ describe('workers/repository/configured', () => {
     });
     it('throws if disabled', () => {
       config.enabled = false;
-      let e;
-      try {
-        checkIfConfigured(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      expect(() => checkIfConfigured(config)).toThrow();
     });
     it('throws if unconfigured fork', () => {
       config.enabled = true;
       config.isFork = true;
       config.renovateJsonPresent = false;
-      let e;
-      try {
-        checkIfConfigured(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      expect(() => checkIfConfigured(config)).toThrow();
     });
   });
 });

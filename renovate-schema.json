@@ -53,6 +53,14 @@
       "type": "string",
       "default": "bundled"
     },
+    "baseDir": {
+      "description": "The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.",
+      "type": "string"
+    },
+    "cacheDir": {
+      "description": "The directory for Renovate for storing caches. If left empty, Renovate will create a subdirectory within `baseDir` to use.",
+      "type": "string"
+    },
     "logLevel": {
       "description": "Logging level",
       "type": "string",
@@ -91,7 +99,7 @@
     "requireConfig": {
       "description": "Set to true if repositories must have a config to activate.",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "privateKey": {
       "description": "Server-side private key",
@@ -124,6 +132,11 @@
       "type": "string",
       "enum": ["https", "http", "ssh"],
       "default": null
+    },
+    "persistRepoData": {
+      "description": "If set to false, repository data will preserved between runs instead of deleted.",
+      "type": "boolean",
+      "default": false
     },
     "trustLevel": {
       "description": "Set this to \"high\" if the bot should trust the repository owners/contents",
@@ -257,6 +270,11 @@
         "semver"
       ],
       "default": "semver"
+    },
+    "azureWorkItemId": {
+      "description": "The id of an existing work item on Azure Boards to link to each PR",
+      "type": "integer",
+      "default": 0
     },
     "ignoreDeps": {
       "description": "Dependencies to ignore",
@@ -700,7 +718,7 @@
       }
     },
     "reviewers": {
-      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab, email or username in Azure DevOps)",
+      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab/Bitbucket, email or username in Azure DevOps)",
       "type": "array",
       "items": {
         "type": "string"
@@ -800,6 +818,14 @@
       },
       "$ref": "#"
     },
+    "ruby-version": {
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)\\.ruby-version$"],
+        "versionScheme": "ruby"
+      },
+      "$ref": "#"
+    },
     "terraform": {
       "description": "Configuration object for Terraform module renovation",
       "type": "object",
@@ -873,6 +899,15 @@
         "versionScheme": "node"
       },
       "$ref": "#"
+    },
+    "pub": {
+      "description": "Configuration object for when renovating Dart pubspec files",
+      "type": "json",
+      "default": {
+        "enabled": false,
+        "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
+        "versionScheme": "npm"
+      }
     },
     "docker": {
       "description": "Configuration object for Docker language",

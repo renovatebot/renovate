@@ -1,3 +1,6 @@
+const upath = require('upath');
+const os = require('os');
+
 jest.mock('gh-got');
 jest.mock('gl-got');
 
@@ -9,4 +12,7 @@ global.logger = require('./logger/_fixtures');
 global.renovateUsername = 'renovate-testing';
 global.repoCache = {};
 
-cache.init();
+const tmpDir = process.env.RENOVATE_TMPDIR || process.env.TMPDIR || os.tmpdir();
+const cacheDir = upath.join(tmpDir, './renovate/cache/renovate');
+
+cache.init(cacheDir);

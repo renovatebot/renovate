@@ -1,0 +1,19 @@
+[package]
+name = "platform-specific-dep-example"
+version = "0.1.2"
+
+# --- Web dependencies
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2.37"
+js-sys = "0.3.14"
+js_relative_import = { path = "../../common/js_relative_import" }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
+version = "0.3.14"
+features = [
+    "AudioBuffer",
+    "AudioBufferSourceNode",
+    "AudioContext",
+    "AudioDestinationNode",
+    "AudioNode",
+]

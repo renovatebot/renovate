@@ -8,6 +8,7 @@ const pipenv = require('../../../lib/manager/pipenv/artifacts');
 
 const config = {
   localDir: '/tmp/github/some/repo',
+  cacheDir: '/tmp/renovate/cache',
 };
 
 describe('.getArtifacts()', () => {
