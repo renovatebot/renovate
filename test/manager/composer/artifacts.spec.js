@@ -107,12 +107,8 @@ describe('.getArtifacts()', () => {
         'vendor/composer/07fe2366/sebastianbergmann-php-code-coverage-c896779/src/Report/Html/Renderer/Template/js/d3.min.js:  write error (disk full?).  Continue? (y/n/^C) '
       );
     });
-    let e;
-    try {
-      await composer.getArtifacts('composer.json', [], '{}', config);
-    } catch (err) {
-      e = err;
-    }
-    expect(e).toBeDefined();
+    await expect(
+      composer.getArtifacts('composer.json', [], '{}', config)
+    ).rejects.toThrow();
   });
 });

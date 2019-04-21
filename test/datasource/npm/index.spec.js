@@ -268,13 +268,9 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(200, 'oops');
-    let e;
-    try {
-      await npm.getPkgReleases({ lookupName: 'foobar' });
-    } catch (err) {
-      e = err;
-    }
-    expect(e).toBeDefined();
+    await expect(
+      npm.getPkgReleases({ lookupName: 'foobar' })
+    ).rejects.toThrow();
   });
   it('should throw error for 429', async () => {
     nock('https://registry.npmjs.org')
@@ -283,37 +279,25 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(429);
-    let e;
-    try {
-      await npm.getPkgReleases({ lookupName: 'foobar' });
-    } catch (err) {
-      e = err;
-    }
-    expect(e).toBeDefined();
+    await expect(
+      npm.getPkgReleases({ lookupName: 'foobar' })
+    ).rejects.toThrow();
   });
   it('should throw error for 5xx', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(503);
-    let e;
-    try {
-      await npm.getPkgReleases({ lookupName: 'foobar' });
-    } catch (err) {
-      e = err;
-    }
-    expect(e.message).toBe('registry-failure');
+    await expect(npm.getPkgReleases({ lookupName: 'foobar' })).rejects.toThrow(
+      Error('registry-failure')
+    );
   });
   it('should throw error for 408', async () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(408);
-    let e;
-    try {
-      await npm.getPkgReleases({ lookupName: 'foobar' });
-    } catch (err) {
-      e = err;
-    }
-    expect(e.message).toBe('registry-failure');
+    await expect(npm.getPkgReleases({ lookupName: 'foobar' })).rejects.toThrow(
+      Error('registry-failure')
+    );
   });
   it('should retry when 408 or 5xx', async () => {
     nock('https://registry.npmjs.org')
@@ -332,13 +316,9 @@ describe('api/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/foobar')
       .reply(451);
-    let e;
-    try {
-      await npm.getPkgReleases({ lookupName: 'foobar' });
-    } catch (err) {
-      e = err;
-    }
-    expect(e).toBeDefined();
+    await expect(
+      npm.getPkgReleases({ lookupName: 'foobar' })
+    ).rejects.toThrow();
   });
   it('should send an authorization header if provided', async () => {
     registryAuthToken.mockImplementation(() => ({
@@ -412,14 +392,10 @@ describe('api/npm', () => {
     expect(res).toMatchSnapshot();
   });
   it('should throw error if necessary env var is not present', () => {
-    let e;
-    try {
-      global.trustLevel = 'high';
-      // eslint-disable-next-line no-template-curly-in-string
-      npm.setNpmrc('registry=${REGISTRY_MISSING}');
-    } catch (err) {
-      e = err;
-    }
-    expect(e.message).toBe('env-replace');
+    global.trustLevel = 'high';
+    // eslint-disable-next-line no-template-curly-in-string
+    expect(() => npm.setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
+      Error('env-replace')
+    );
   });
 });
