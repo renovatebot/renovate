@@ -9,6 +9,10 @@ const pipfile2 = fs.readFileSync(
   'test/manager/pipenv/_fixtures/Pipfile2',
   'utf8'
 );
+const pipfile3 = fs.readFileSync(
+  'test/manager/pipenv/_fixtures/Pipfile3',
+  'utf8'
+);
 
 describe('lib/manager/pipenv/extract', () => {
   describe('extractPackageFile()', () => {
@@ -27,6 +31,16 @@ describe('lib/manager/pipenv/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(4);
     });
+    it('marks packages with "extras" as skipReason === any-version', () => {
+      const res = extractPackageFile(pipfile3, {
+        extends: ['config:base'],
+        pipenv: { enabled: true },
+        pip_setup: { enabled: true },
+        labels: ['dependencies'],
+      }).deps;
+      expect(res.filter(r => !r.skipReason)).toHaveLength(0);
+      expect(res.filter(r => r.skipReason)).toHaveLength(6);
+    });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(pipfile2, config).deps;
       expect(res).toMatchSnapshot();
@@ -36,7 +50,7 @@ describe('lib/manager/pipenv/extract', () => {
       const content =
         '[packages]\r\nflask = {git = "https://github.com/pallets/flask.git"}\r\nwerkzeug = ">=0.14"';
       const res = extractPackageFile(content, config).deps;
-      expect(res).toHaveLength(1);
+      expect(res.filter(r => !r.skipReason)).toHaveLength(1);
     });
     it('ignores invalid package names', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\n_invalid = "==1.0.0"';
@@ -46,7 +60,7 @@ describe('lib/manager/pipenv/extract', () => {
     it('ignores relative path dependencies', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\ntest = {path = "."}';
       const res = extractPackageFile(content, config).deps;
-      expect(res).toHaveLength(1);
+      expect(res.filter(r => !r.skipReason)).toHaveLength(1);
     });
     it('ignores invalid versions', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\nsome-package = "==0 0"';
