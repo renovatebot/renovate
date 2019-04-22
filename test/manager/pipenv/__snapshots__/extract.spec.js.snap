@@ -7,7 +7,6 @@ Array [
     "datasource": "pypi",
     "depName": "some-package",
     "depType": "packages",
-    "pipenvNestedVersion": false,
     "registryUrls": Array [
       "https://pypi.org/simple",
       "http://example.com/private-pypi/",
@@ -18,11 +17,30 @@ Array [
     "datasource": "pypi",
     "depName": "some-other-package",
     "depType": "packages",
-    "pipenvNestedVersion": false,
     "registryUrls": Array [
       "https://pypi.org/simple",
       "http://example.com/private-pypi/",
     ],
+  },
+  Object {
+    "currentValue": "==1.0.0",
+    "depName": "_invalid-package",
+    "depType": "packages",
+    "registryUrls": Array [
+      "https://pypi.org/simple",
+      "http://example.com/private-pypi/",
+    ],
+    "skipReason": "invalid-name",
+  },
+  Object {
+    "currentValue": "==0 0",
+    "depName": "invalid-version",
+    "depType": "packages",
+    "registryUrls": Array [
+      "https://pypi.org/simple",
+      "http://example.com/private-pypi/",
+    ],
+    "skipReason": "invalid-version",
   },
   Object {
     "currentValue": "==1.0.0",
@@ -40,13 +58,89 @@ Array [
     "datasource": "pypi",
     "depName": "dev-package",
     "depType": "dev-packages",
-    "pipenvNestedVersion": false,
     "registryUrls": Array [
       "https://pypi.org/simple",
       "http://example.com/private-pypi/",
     ],
   },
 ]
+`;
+
+exports[`lib/manager/pipenv/extract extractPackageFile() extracts example pipfile 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "depName": "requests",
+      "depType": "packages",
+      "registryUrls": Array [
+        "https://pypi.python.org/simple",
+      ],
+      "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": ">0.5.0",
+      "datasource": "pypi",
+      "depName": "records",
+      "depType": "packages",
+      "registryUrls": Array [
+        "https://pypi.python.org/simple",
+      ],
+    },
+    Object {
+      "depName": "django",
+      "depType": "packages",
+      "registryUrls": Array [
+        "https://pypi.python.org/simple",
+      ],
+      "skipReason": "git-dependency",
+    },
+    Object {
+      "depName": "e682b37",
+      "depType": "packages",
+      "registryUrls": Array [
+        "https://pypi.python.org/simple",
+      ],
+      "skipReason": "file-dependency",
+    },
+    Object {
+      "depName": "e1839a8",
+      "depType": "packages",
+      "registryUrls": Array [
+        "https://pypi.python.org/simple",
+      ],
+      "skipReason": "local-dependency",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "pywinusb",
+      "depType": "packages",
+      "pipenvNestedVersion": true,
+      "registryUrls": Array [
+        "https://pypi.python.org/simple",
+      ],
+      "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": "*",
+      "depName": "nose",
+      "depType": "dev-packages",
+      "registryUrls": Array [
+        "https://pypi.python.org/simple",
+      ],
+      "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": ">=1.0,<3.0",
+      "datasource": "pypi",
+      "depName": "unittest2",
+      "depType": "dev-packages",
+      "pipenvNestedVersion": true,
+      "registryUrls": Array [
+        "https://pypi.python.org/simple",
+      ],
+    },
+  ],
+}
 `;
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts multiple dependencies 1`] = `
@@ -56,7 +150,6 @@ Array [
     "datasource": "pypi",
     "depName": "Django",
     "depType": "packages",
-    "pipenvNestedVersion": false,
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],
@@ -66,7 +159,6 @@ Array [
     "datasource": "pypi",
     "depName": "distribute",
     "depType": "packages",
-    "pipenvNestedVersion": false,
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],
@@ -76,7 +168,6 @@ Array [
     "datasource": "pypi",
     "depName": "dj-database-url",
     "depType": "packages",
-    "pipenvNestedVersion": false,
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],
@@ -86,7 +177,6 @@ Array [
     "datasource": "pypi",
     "depName": "psycopg2",
     "depType": "packages",
-    "pipenvNestedVersion": false,
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],
@@ -96,7 +186,6 @@ Array [
     "datasource": "pypi",
     "depName": "wsgiref",
     "depType": "packages",
-    "pipenvNestedVersion": false,
     "registryUrls": Array [
       "https://pypi.org/simple",
     ],

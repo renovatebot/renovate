@@ -13,6 +13,10 @@ const pipfile3 = fs.readFileSync(
   'test/manager/pipenv/_fixtures/Pipfile3',
   'utf8'
 );
+const pipfile4 = fs.readFileSync(
+  'test/manager/pipenv/_fixtures/Pipfile4',
+  'utf8'
+);
 
 describe('lib/manager/pipenv/extract', () => {
   describe('extractPackageFile()', () => {
@@ -29,7 +33,8 @@ describe('lib/manager/pipenv/extract', () => {
     it('extracts dependencies', () => {
       const res = extractPackageFile(pipfile1, config).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(4);
+      expect(res).toHaveLength(6);
+      expect(res.filter(dep => !dep.skipReason)).toHaveLength(4);
     });
     it('marks packages with "extras" as skipReason === any-version', () => {
       const res = extractPackageFile(pipfile3, {
@@ -55,7 +60,8 @@ describe('lib/manager/pipenv/extract', () => {
     it('ignores invalid package names', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\n_invalid = "==1.0.0"';
       const res = extractPackageFile(content, config).deps;
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
+      expect(res.filter(dep => !dep.skipReason)).toHaveLength(1);
     });
     it('ignores relative path dependencies', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\ntest = {path = "."}';
@@ -65,7 +71,8 @@ describe('lib/manager/pipenv/extract', () => {
     it('ignores invalid versions', () => {
       const content = '[packages]\r\nfoo = "==1.0.0"\r\nsome-package = "==0 0"';
       const res = extractPackageFile(content, config).deps;
-      expect(res).toHaveLength(1);
+      expect(res).toHaveLength(2);
+      expect(res.filter(dep => !dep.skipReason)).toHaveLength(1);
     });
     it('extracts all sources', () => {
       const content =
@@ -74,6 +81,10 @@ describe('lib/manager/pipenv/extract', () => {
         '[packages]\r\nfoo = "==1.0.0"\r\n';
       const res = extractPackageFile(content, config).deps;
       expect(res[0].registryUrls).toEqual(['source-url', 'other-source-url']);
+    });
+    it('extracts example pipfile', () => {
+      const res = extractPackageFile(pipfile4, config);
+      expect(res).toMatchSnapshot();
     });
   });
 });
