@@ -65,6 +65,7 @@ const configV3NotNugetOrg = {
 };
 
 describe('datasource/nuget', () => {
+  beforeEach(() => global.renovateCache.rmAll());
   describe('getPkgReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
