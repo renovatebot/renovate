@@ -6,6 +6,10 @@ sbt
 
 ---
 
+#### Implementation status
+
+Unimplemented
+
 #### What language does this support?
 
 Scala
@@ -21,6 +25,7 @@ Maven
 #### What type of package files and names does it use?
 
 As far as I know, there is 2 package files:
+
 - One for main dependencies and some configurations (https://www.scala-sbt.org/1.0/docs/Basic-Def.html)
 - One for plugin dependencies and plugin configurations (https://www.scala-sbt.org/1.0/docs/Plugins.html)
 
@@ -135,7 +140,7 @@ dependencyOverrides ++= Seq(
 
 There is two variables to look for `libraryDependencies` and `dependencyOverrides` (https://www.scala-sbt.org/1.x/docs/Library-Management.html#Overriding+a+version).
 
- `dependencyOverrides` behaves like "Dependency Management" in Maven: if two dependencies declared in `libraryDependencies` depends on the same library (let's say 'C') but with different version, `dependencyOverrides` is a way to force a specific version of 'C' instead of letting sbt choose (it would choose the highest).
+`dependencyOverrides` behaves like "Dependency Management" in Maven: if two dependencies declared in `libraryDependencies` depends on the same library (let's say 'C') but with different version, `dependencyOverrides` is a way to force a specific version of 'C' instead of letting sbt choose (it would choose the highest).
 
 More custom syntaxes with plain Scala code:
 
