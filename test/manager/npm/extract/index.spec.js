@@ -202,6 +202,22 @@ describe('manager/npm/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('extracts npm package alias', async () => {
+      const pJson = {
+        dependencies: {
+          a: 'npm:foo@1',
+          b: 'npm:@foo/bar@1.2.3',
+          c: 'npm:foo',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('.postExtract()', () => {
     it('runs', async () => {

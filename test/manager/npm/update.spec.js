@@ -41,6 +41,23 @@ describe('workers/branch/package-json', () => {
       const res = npmUpdater.updateDependency(input, upgrade);
       expect(res).toMatchSnapshot();
     });
+    it('replaces a npm package alias', () => {
+      const upgrade = {
+        depType: 'dependencies',
+        depName: 'hapi',
+        npmPackageAlias: true,
+        lookupName: '@hapi/hapi',
+        currentValue: '18.3.0',
+        newValue: '18.3.1',
+      };
+      const input = JSON.stringify({
+        dependencies: {
+          hapi: 'npm:@hapi/hapi@18.3.0',
+        },
+      });
+      const res = npmUpdater.updateDependency(input, upgrade);
+      expect(res).toMatchSnapshot();
+    });
     it('replaces a github short hash', () => {
       const upgrade = {
         depType: 'dependencies',
