@@ -122,68 +122,86 @@ describe('versioning/maven/compare', () => {
         {
           leftType: 'INCLUDING_POINT',
           leftValue: '1.0',
+          leftBracket: '[',
           rightType: 'INCLUDING_POINT',
           rightValue: '1.0',
+          rightBracket: ']',
         },
       ],
       '(,1.0]': [
         {
           leftType: 'EXCLUDING_POINT',
           leftValue: null,
+          leftBracket: '(',
           rightType: 'INCLUDING_POINT',
           rightValue: '1.0',
+          rightBracket: ']',
         },
       ],
       '[1.2,1.3]': [
         {
           leftType: 'INCLUDING_POINT',
           leftValue: '1.2',
+          leftBracket: '[',
           rightType: 'INCLUDING_POINT',
           rightValue: '1.3',
+          rightBracket: ']',
         },
       ],
       '[1.0,2.0)': [
         {
           leftType: 'INCLUDING_POINT',
           leftValue: '1.0',
+          leftBracket: '[',
           rightType: 'EXCLUDING_POINT',
           rightValue: '2.0',
+          rightBracket: ')',
         },
       ],
       '[1.5,)': [
         {
           leftType: 'INCLUDING_POINT',
           leftValue: '1.5',
+          leftBracket: '[',
           rightType: 'EXCLUDING_POINT',
           rightValue: null,
+          rightBracket: ')',
         },
       ],
       '(,1.0],[1.2,)': [
         {
           leftType: 'EXCLUDING_POINT',
           leftValue: null,
+          leftBracket: '(',
           rightType: 'INCLUDING_POINT',
           rightValue: '1.0',
+          rightBracket: ']',
         },
         {
           leftType: 'INCLUDING_POINT',
           leftValue: '1.2',
+          leftBracket: '[',
           rightType: 'EXCLUDING_POINT',
           rightValue: null,
+          rightBracket: ')',
         },
       ],
       '(,1.1),(1.1,)': [
         {
           leftType: 'EXCLUDING_POINT',
           leftValue: null,
+          leftBracket: '(',
           rightType: 'EXCLUDING_POINT',
           rightValue: '1.1',
+          rightBracket: ')',
         },
         {
           leftType: 'EXCLUDING_POINT',
           leftValue: '1.1',
+          leftBracket: '(',
           rightType: 'EXCLUDING_POINT',
           rightValue: null,
+          rightBracket: ')',
         },
       ],
     };
@@ -205,9 +223,13 @@ describe('versioning/maven/compare', () => {
       ['[1.0.0,1.2.3]', '1.2.4', '[1.0.0,1.2.4]'],
       ['[1.0.0,1.2.23]', '1.1.0', '[1.0.0,1.2.23]'],
       ['(,1.0]', '2.0', '(,2.0]'],
+      ['],1.0]', '2.0', '],2.0]'],
       ['(,1.0)', '2.0', '(,2.0)'],
+      ['],1.0[', '2.0', '],2.0['],
       ['[1.0,1.2],[1.3,1.5)', '1.2.4', '[1.0,1.2.4],[1.3,1.5)'],
+      ['[1.0,1.2],[1.3,1.5[', '1.2.4', '[1.0,1.2.4],[1.3,1.5['],
       ['[1.2.3,)', '1.2.4', '[1.2.4,)'],
+      ['[1.2.3,[', '1.2.4', '[1.2.4,['],
       ['[1.2.3,]', '1.2.4', '[1.2.3,]'], // invalid range
     ];
     sample.forEach(([oldRepr, newValue, newRepr]) => {
