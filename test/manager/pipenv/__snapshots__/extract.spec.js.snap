@@ -1,69 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts dependencies 1`] = `
-Array [
-  Object {
-    "currentValue": "==0.3.1",
-    "datasource": "pypi",
-    "depName": "some-package",
-    "depType": "packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-      "http://example.com/private-pypi/",
-    ],
-  },
-  Object {
-    "currentValue": "==1.0.0",
-    "datasource": "pypi",
-    "depName": "some-other-package",
-    "depType": "packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-      "http://example.com/private-pypi/",
-    ],
-  },
-  Object {
-    "currentValue": "==1.0.0",
-    "depName": "_invalid-package",
-    "depType": "packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-      "http://example.com/private-pypi/",
-    ],
-    "skipReason": "invalid-name",
-  },
-  Object {
-    "currentValue": "==0 0",
-    "depName": "invalid-version",
-    "depType": "packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-      "http://example.com/private-pypi/",
-    ],
-    "skipReason": "invalid-version",
-  },
-  Object {
-    "currentValue": "==1.0.0",
-    "datasource": "pypi",
-    "depName": "pytest-benchmark",
-    "depType": "packages",
-    "pipenvNestedVersion": true,
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-      "http://example.com/private-pypi/",
-    ],
-  },
-  Object {
-    "currentValue": "==0.1.0",
-    "datasource": "pypi",
-    "depName": "dev-package",
-    "depType": "dev-packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-      "http://example.com/private-pypi/",
-    ],
-  },
-]
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "==0.3.1",
+      "datasource": "pypi",
+      "depName": "some-package",
+      "depType": "packages",
+    },
+    Object {
+      "currentValue": "==1.0.0",
+      "datasource": "pypi",
+      "depName": "some-other-package",
+      "depType": "packages",
+    },
+    Object {
+      "currentValue": "==1.0.0",
+      "depName": "_invalid-package",
+      "depType": "packages",
+      "skipReason": "invalid-name",
+    },
+    Object {
+      "currentValue": "==0 0",
+      "depName": "invalid-version",
+      "depType": "packages",
+      "skipReason": "invalid-version",
+    },
+    Object {
+      "currentValue": "==1.0.0",
+      "datasource": "pypi",
+      "depName": "pytest-benchmark",
+      "depType": "packages",
+      "pipenvNestedVersion": true,
+    },
+    Object {
+      "currentValue": "==0.1.0",
+      "datasource": "pypi",
+      "depName": "dev-package",
+      "depType": "dev-packages",
+    },
+  ],
+  "registryUrls": Array [
+    "https://pypi.org/simple",
+    "http://example.com/private-pypi/",
+  ],
+}
 `;
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts example pipfile 1`] = `
@@ -72,9 +54,6 @@ Object {
     Object {
       "depName": "requests",
       "depType": "packages",
-      "registryUrls": Array [
-        "https://pypi.python.org/simple",
-      ],
       "skipReason": "any-version",
     },
     Object {
@@ -82,32 +61,20 @@ Object {
       "datasource": "pypi",
       "depName": "records",
       "depType": "packages",
-      "registryUrls": Array [
-        "https://pypi.python.org/simple",
-      ],
     },
     Object {
       "depName": "django",
       "depType": "packages",
-      "registryUrls": Array [
-        "https://pypi.python.org/simple",
-      ],
       "skipReason": "git-dependency",
     },
     Object {
       "depName": "e682b37",
       "depType": "packages",
-      "registryUrls": Array [
-        "https://pypi.python.org/simple",
-      ],
       "skipReason": "file-dependency",
     },
     Object {
       "depName": "e1839a8",
       "depType": "packages",
-      "registryUrls": Array [
-        "https://pypi.python.org/simple",
-      ],
       "skipReason": "local-dependency",
     },
     Object {
@@ -115,18 +82,12 @@ Object {
       "depName": "pywinusb",
       "depType": "packages",
       "pipenvNestedVersion": true,
-      "registryUrls": Array [
-        "https://pypi.python.org/simple",
-      ],
       "skipReason": "any-version",
     },
     Object {
       "currentValue": "*",
       "depName": "nose",
       "depType": "dev-packages",
-      "registryUrls": Array [
-        "https://pypi.python.org/simple",
-      ],
       "skipReason": "any-version",
     },
     Object {
@@ -135,60 +96,50 @@ Object {
       "depName": "unittest2",
       "depType": "dev-packages",
       "pipenvNestedVersion": true,
-      "registryUrls": Array [
-        "https://pypi.python.org/simple",
-      ],
     },
+  ],
+  "registryUrls": Array [
+    "https://pypi.python.org/simple",
   ],
 }
 `;
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts multiple dependencies 1`] = `
-Array [
-  Object {
-    "currentValue": "==1",
-    "datasource": "pypi",
-    "depName": "Django",
-    "depType": "packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-    ],
-  },
-  Object {
-    "currentValue": "==0.6.27",
-    "datasource": "pypi",
-    "depName": "distribute",
-    "depType": "packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-    ],
-  },
-  Object {
-    "currentValue": "==0.2",
-    "datasource": "pypi",
-    "depName": "dj-database-url",
-    "depType": "packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-    ],
-  },
-  Object {
-    "currentValue": "==2.4.5",
-    "datasource": "pypi",
-    "depName": "psycopg2",
-    "depType": "packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-    ],
-  },
-  Object {
-    "currentValue": "==0.1.2",
-    "datasource": "pypi",
-    "depName": "wsgiref",
-    "depType": "packages",
-    "registryUrls": Array [
-      "https://pypi.org/simple",
-    ],
-  },
-]
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "==1",
+      "datasource": "pypi",
+      "depName": "Django",
+      "depType": "packages",
+    },
+    Object {
+      "currentValue": "==0.6.27",
+      "datasource": "pypi",
+      "depName": "distribute",
+      "depType": "packages",
+    },
+    Object {
+      "currentValue": "==0.2",
+      "datasource": "pypi",
+      "depName": "dj-database-url",
+      "depType": "packages",
+    },
+    Object {
+      "currentValue": "==2.4.5",
+      "datasource": "pypi",
+      "depName": "psycopg2",
+      "depType": "packages",
+    },
+    Object {
+      "currentValue": "==0.1.2",
+      "datasource": "pypi",
+      "depName": "wsgiref",
+      "depType": "packages",
+    },
+  ],
+  "registryUrls": Array [
+    "https://pypi.org/simple",
+  ],
+}
 `;
