@@ -19,7 +19,7 @@ describe('loose.', () => {
         expect(loose.isValid(version)).toBe(version);
       });
       ['foo', '1.2.3.4.5.6.7'].forEach(version => {
-        expect(loose.isValid(version)).toBe(null);
+        expect(loose.isValid(version)).toBeNull();
       });
     });
   });

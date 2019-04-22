@@ -1,6 +1,6 @@
-# Bitbucket platform
+# Bitbucket Cloud
 
-Bitbucket support is considered in "beta" release status.
+Bitbucket Cloud support is considered in "beta" release status. Mostly, it just needs more feedback/testing. If you have been using it and think it's reliable, please let us know.
 
 ## Unsupported platform features/concepts
 
@@ -9,5 +9,4 @@ Bitbucket support is considered in "beta" release status.
 ## Features requiring implementation
 
 - Creating issues not implemented yet, e.g. when there is a config error
-- Adding reviewers to PRs not implemented yet
 - Adding comments to PRs not implemented yet, e.g. when a PR has been edited or has a lockfile error

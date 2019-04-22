@@ -33,7 +33,7 @@ describe('manager/pip_requirements/update', () => {
     });
     it('returns null if error', () => {
       const res = updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('replaces existing value with comment', () => {
       const upgrade = {

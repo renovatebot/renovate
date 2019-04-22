@@ -16,6 +16,14 @@ Object {
 }
 `;
 
+exports[`platform/azure deleteLabel() Should delete a label 1`] = `
+Array [
+  Array [],
+  Array [],
+  Array [],
+]
+`;
+
 exports[`platform/azure ensureComment add comment 1`] = `
 Array [
   Array [],
@@ -72,6 +80,9 @@ exports[`platform/azure getBranchPr(branchName) should return the pr 1`] = `null
 
 exports[`platform/azure getPr(prNo) should return a pr in the right format 1`] = `
 Object {
+  "labels": Array [
+    "renovate",
+  ],
   "pullRequestId": 1234,
 }
 `;

@@ -13,7 +13,7 @@ describe('lib/manager/gitlabci/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(yamlFile, config);

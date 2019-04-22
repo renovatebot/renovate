@@ -27,7 +27,7 @@ In order to achieve the above goals, preset configs have been implemented to all
 
 ## Preset Hosting
 
-Presets can be defined using either npm packages, or with GitHub repositories. GitLab and Bitbucket-hosted presets are yet to be implemented.
+Presets can be defined using either npm packages, or with GitHub/GitLab repositories. Bitbucket-hosted presets are yet to be implemented.
 
 The following namespace is used:
 
@@ -147,12 +147,14 @@ It is also possible to host your preset config using just a regular GitHub repos
 To host your preset config on GitHub:
 
 - Create a new repository. Normally you'd call it renovate-config but it can be named anything
-- Add a renovate.json to this new repo containing the preset config. No other files are necessary.
-- In other repos, reference it in an extends array like "github>owner/name", e.g. "github>rarkins/renovate-config"
+- Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked first and then `renovate.json`. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
+- In other repos, reference it in an extends array like "github>owner/name", for example:
+
+  ```json
+    "extends": ["github>rarkins/renovate-config"]
+  ```
 
 From then on Renovate will use the renovate config from the preset repo's default branch. You do not need to add it as a devDependency or add any other files to the preset repo.
-
-Note: Unlike npmjs-hosted presets, GitHub-hosted ones can contain only one config.
 
 ## GitLab-hosted Presets
 
@@ -163,6 +165,8 @@ To host your preset config on GitLab:
 - Create a new repository on GitLab. Normally you'd call it renovate-config but it can be named anything
 - Add a renovate.json to this new repo containing the preset config. No other files are necessary.
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
+
+Note: Unlike npmjs-hosted presets, GitLab-hosted ones can contain only one config.
 
 ## Presets and Private Modules
 

@@ -53,7 +53,7 @@ describe('manager/pipenv/update', () => {
     });
     it('returns null if error', () => {
       const res = updateDependency(null, null);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

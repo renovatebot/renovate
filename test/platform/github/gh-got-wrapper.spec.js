@@ -53,7 +53,7 @@ describe('platform/gh-got-wrapper', () => {
     });
     const res = await get('some-url', { paginate: true });
     expect(res.body).toEqual(['a', 'b', 'c', 'd']);
-    expect(ghGot.mock.calls).toHaveLength(3);
+    expect(ghGot).toHaveBeenCalledTimes(3);
   });
   it('attempts to paginate', async () => {
     ghGot.mockReturnValueOnce({
@@ -69,7 +69,7 @@ describe('platform/gh-got-wrapper', () => {
     });
     const res = await get('some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
-    expect(ghGot.mock.calls).toHaveLength(1);
+    expect(ghGot).toHaveBeenCalledTimes(1);
   });
   it('should throw rate limit exceeded', async () => {
     ghGot.mockImplementationOnce(() =>
@@ -79,13 +79,7 @@ describe('platform/gh-got-wrapper', () => {
           'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
       })
     );
-    let e;
-    try {
-      await get('some-url');
-    } catch (err) {
-      e = err;
-    }
-    expect(e).toBeDefined();
+    await expect(get('some-url')).rejects.toThrow();
   });
   it('should throw Bad credentials', async () => {
     ghGot.mockImplementationOnce(() =>
@@ -198,7 +192,7 @@ describe('platform/gh-got-wrapper', () => {
       body,
     }));
     const res = await get('some-url');
-    expect(ghGot.mock.calls).toHaveLength(3);
+    expect(ghGot).toHaveBeenCalledTimes(3);
     expect(res.body).toEqual(body);
   });
   it('should retry until failure', async () => {
@@ -230,13 +224,9 @@ describe('platform/gh-got-wrapper', () => {
         statusCode: 404,
       })
     );
-    let err;
-    try {
-      await get('some-url');
-    } catch (e) {
-      err = e;
-    }
-    expect(err.statusCode).toBe(404);
+    await expect(get('some-url')).rejects.toEqual({
+      statusCode: 404,
+    });
   });
   it('should give up after 5 retries', async () => {
     ghGot.mockImplementationOnce(() =>
@@ -270,13 +260,10 @@ describe('platform/gh-got-wrapper', () => {
         message: 'Bad bot.',
       })
     );
-    let err;
-    try {
-      await get('some-url');
-    } catch (e) {
-      err = e;
-    }
-    expect(err.statusCode).toBe(403);
+    await expect(get('some-url')).rejects.toEqual({
+      statusCode: 403,
+      message: 'Bad bot.',
+    });
   });
   it('should retry posts', async () => {
     ghGot.mockImplementationOnce(() =>

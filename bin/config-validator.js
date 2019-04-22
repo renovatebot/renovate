@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs-extra');
+const os = require('os');
 const { validateConfig } = require('../lib/config/validation');
 const { massageConfig } = require('../lib/config/massage');
 const { getConfig } = require('../lib/config/file');
@@ -11,7 +12,7 @@ const { configFileNames } = require('../lib/config/app-strings');
 initLogger();
 // istanbul ignore if
 if (!global.renovateCache) {
-  cache.init();
+  cache.init(os.tmpdir());
 }
 /* eslint-disable no-console */
 

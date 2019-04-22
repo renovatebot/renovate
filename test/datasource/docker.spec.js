@@ -23,7 +23,7 @@ describe('api/docker', () => {
         { lookupName: 'some-dep' },
         'some-new-value'
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns null if errored', async () => {
       got.mockReturnValueOnce({ body: { token: 'some-token' } });
@@ -31,7 +31,7 @@ describe('api/docker', () => {
         { lookupName: 'some-dep' },
         'some-new-value'
       );
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns digest', async () => {
       got.mockReturnValueOnce({
@@ -159,23 +159,15 @@ describe('api/docker', () => {
     });
     it('should throw error for 429', async () => {
       got.mockRejectedValueOnce({ statusCode: 429 });
-      let e;
-      try {
-        await docker.getDigest({ lookupName: 'some-dep' }, 'latest');
-      } catch (err) {
-        e = err;
-      }
-      expect(e.message).toBe('registry-failure');
+      await expect(
+        docker.getDigest({ lookupName: 'some-dep' }, 'latest')
+      ).rejects.toThrow(Error('registry-failure'));
     });
     it('should throw error for 5xx', async () => {
       got.mockRejectedValueOnce({ statusCode: 503 });
-      let e;
-      try {
-        await docker.getDigest({ lookupName: 'some-dep' }, 'latest');
-      } catch (err) {
-        e = err;
-      }
-      expect(e.message).toBe('registry-failure');
+      await expect(
+        docker.getDigest({ lookupName: 'some-dep' }, 'latest')
+      ).rejects.toThrow(Error('registry-failure'));
     });
   });
   describe('getPkgReleases', () => {
@@ -190,7 +182,7 @@ describe('api/docker', () => {
         datasource: 'docker',
         depName: 'node',
       });
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('uses custom registry with registryUrls', async () => {
       const tags = ['1.0.0'];
@@ -295,7 +287,7 @@ describe('api/docker', () => {
       const res = await docker.getPkgReleases({
         lookupName: 'my/node',
       });
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
 });

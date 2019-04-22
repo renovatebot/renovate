@@ -14,19 +14,11 @@ As a general guide:
 
 Status: beta
 
-Bitbucket Cloud support (i.e. [https://bitbucket.org](https://bitbucket.org)) is still missing some nice-to-have features (reviewers, issues, etc) but none of these have to hold it back from being considered GA. Mostly, we'd just like to get some more feedback from users who have been testing it.
+Bitbucket Cloud support (i.e. [https://bitbucket.org](https://bitbucket.org)) is still missing some nice-to-have features (issues, etc) but none of these have to hold it back from being considered GA. Mostly, we'd just like to get some more feedback from users who have been testing it.
 
 Note: we plan to add support for Bitbucket.org to the _hosted_ Renovate Bot _service_ that already supports GitHub.com and GitLab.com, so you won't need to run your own bot unless you want to.
 
 How to use: run your own bot from npm, Docker or clone the repository. Follow the instructions from: [https://github.com/renovatebot/renovate/blob/master/docs/self-hosting.md#bitbucket-cloud](https://github.com/renovatebot/renovate/blob/master/docs/self-hosting.md#bitbucket-cloud).
-
-### Bitbucket Server
-
-Status: beta
-
-Bitbucket Server (i.e. self-hosted Bitbucket) came after Bitbucket Cloud but has already had perhaps more testing than Cloud and may make GA first. Once we get a few more thumbs-ups from users testing it on "real" repositories we will elevate this to GA.
-
-How to use: run your own bot from npm, Docker or clone the repository. Follow the instructions from [https://github.com/renovatebot/renovate/blob/master/lib/platform/bitbucket-server/README.md](https://github.com/renovatebot/renovate/blob/master/lib/platform/bitbucket-server/README.md).
 
 ### Bundler
 

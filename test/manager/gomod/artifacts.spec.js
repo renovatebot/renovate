@@ -1,9 +1,11 @@
 jest.mock('fs-extra');
 jest.mock('child-process-promise');
+jest.mock('../../../lib/util/host-rules');
 
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
 const gomod = require('../../../lib/manager/gomod/artifacts');
+const hostRules = require('../../../lib/util/host-rules');
 
 const gomod1 = `module github.com/renovate-tests/gomod1
 
@@ -19,6 +21,7 @@ replace github.com/pkg/errors => ../errors
 
 const config = {
   localDir: '/tmp/github/some/repo',
+  cacheDir: '/tmp/renovate/cache',
 };
 
 describe('.getArtifacts()', () => {
@@ -48,7 +51,24 @@ describe('.getArtifacts()', () => {
       await gomod.getArtifacts('go.mod', [], gomod1, config)
     ).not.toBeNull();
   });
-  it('supports docker mode', async () => {
+  it('supports docker mode without credentials', async () => {
+    platform.getFile.mockReturnValueOnce('Current go.sum');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'New go.sum');
+    expect(
+      await gomod.getArtifacts('go.mod', [], gomod1, {
+        ...config,
+        binarySource: 'docker',
+      })
+    ).not.toBeNull();
+  });
+  it('supports docker mode with credentials', async () => {
+    hostRules.find.mockReturnValue({
+      token: 'some-token',
+    });
     platform.getFile.mockReturnValueOnce('Current go.sum');
     exec.mockReturnValueOnce({
       stdout: '',

@@ -21,10 +21,10 @@ describe('lib/manager/composer/extract', () => {
       packageFile = 'composer.json';
     });
     it('returns null for invalid json', async () => {
-      expect(await extractPackageFile('nothing here', packageFile)).toBe(null);
+      expect(await extractPackageFile('nothing here', packageFile)).toBeNull();
     });
     it('returns null for empty deps', async () => {
-      expect(await extractPackageFile('{}', packageFile)).toBe(null);
+      expect(await extractPackageFile('{}', packageFile)).toBeNull();
     });
     it('extracts dependencies with no lock file', async () => {
       const res = await extractPackageFile(requirements1, packageFile);

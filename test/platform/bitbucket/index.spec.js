@@ -96,8 +96,7 @@ describe('platform/bitbucket', () => {
   describe('getRepoForceRebase()', () => {
     it('always return false, since bitbucket does not support force rebase', () => {
       const actual = bitbucket.getRepoForceRebase();
-      const expected = false;
-      expect(actual).toBe(expected);
+      expect(actual).toBe(false);
     });
   });
 
@@ -148,7 +147,7 @@ describe('platform/bitbucket', () => {
     });
     it('returns null if no PR for branch', async () => {
       await initRepo();
-      expect(await getBranchPr('branch_without_pr')).toBe(null);
+      expect(await getBranchPr('branch_without_pr')).toBeNull();
     });
   });
 
@@ -167,9 +166,9 @@ describe('platform/bitbucket', () => {
     const getBranchStatusCheck = wrap('getBranchStatusCheck');
     it('works', async () => {
       await initRepo();
-      expect(await getBranchStatusCheck('master', null)).toBe(null);
+      expect(await getBranchStatusCheck('master', null)).toBeNull();
       expect(await getBranchStatusCheck('master', 'foo')).toBe('failed');
-      expect(await getBranchStatusCheck('master', 'bar')).toBe(null);
+      expect(await getBranchStatusCheck('master', 'bar')).toBeNull();
     });
   });
 
@@ -266,7 +265,7 @@ describe('platform/bitbucket', () => {
       await mocked(async () => {
         await bitbucket.ensureIssue('title', 'content\n');
         expect(api.get.mock.calls).toMatchSnapshot();
-        expect(api.post.mock.calls).toHaveLength(0);
+        expect(api.post).toHaveBeenCalledTimes(0);
       });
     });
   });
@@ -289,8 +288,12 @@ describe('platform/bitbucket', () => {
   });
 
   describe('addReviewers', () => {
-    it('does not throw', async () => {
-      await bitbucket.addReviewers(5, ['some']);
+    it('should add the given reviewers to the PR', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.addReviewers(5, ['someuser', 'someotheruser']);
+        expect(api.put.mock.calls).toMatchSnapshot();
+      });
     });
   });
 
@@ -324,8 +327,8 @@ describe('platform/bitbucket', () => {
       api.post.mockReturnValueOnce({
         body: { id: 5 },
       });
-      const { id } = await bitbucket.createPr('branch', 'title', 'body');
-      expect(id).toBe(5);
+      const { number } = await bitbucket.createPr('branch', 'title', 'body');
+      expect(number).toBe(5);
       expect(api.post.mock.calls).toMatchSnapshot();
     });
   });

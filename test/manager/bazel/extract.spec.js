@@ -6,6 +6,11 @@ const workspaceFile = fs.readFileSync(
   'utf8'
 );
 
+const fileWithBzlExtension = fs.readFileSync(
+  'test/manager/bazel/_fixtures/repositories.bzl',
+  'utf8'
+);
+
 describe('lib/manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {
     let config;
@@ -14,16 +19,37 @@ describe('lib/manager/bazel/extract', () => {
     });
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n', config);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns empty if cannot parse dependency', () => {
       const res = extractPackageFile('git_repository(\n  nothing\n)\n', config);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('extracts multiple types of dependencies', () => {
       const res = extractPackageFile(workspaceFile, config);
       expect(res.deps).toMatchSnapshot();
     });
+    it('extracts dependencies from *.bzl files', () => {
+      const res = extractPackageFile(fileWithBzlExtension, config);
+      expect(res.deps).toMatchSnapshot();
+    });
+
+    it('extracts dependencies for container_pull deptype', () => {
+      const res = extractPackageFile(
+        `
+        container_pull(
+          name="hasura",
+          registry="index.docker.io",
+          repository="hasura/graphql-engine",
+          # v1.0.0-alpha31.cli-migrations 11/28
+          digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
+          tag="v1.0.0-alpha31.cli-migrations"
+        )`,
+        config
+      );
+      expect(res.deps).toMatchSnapshot();
+    });
+
     it('check remote option in go_repository', () => {
       const successStory = extractPackageFile(
         `

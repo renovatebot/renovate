@@ -1,5 +1,8 @@
 const fs = require('fs');
-const { extractDependencies } = require('../../../lib/manager/maven/extract');
+const {
+  extractPackage,
+  resolveProps,
+} = require('../../../lib/manager/maven/extract');
 const {
   extractAllPackageFiles,
   updateDependency,
@@ -7,6 +10,14 @@ const {
 
 const pomContent = fs.readFileSync(
   'test/manager/maven/_fixtures/simple.pom.xml',
+  'utf8'
+);
+const pomParent = fs.readFileSync(
+  'test/manager/maven/_fixtures/parent.pom.xml',
+  'utf8'
+);
+const pomChild = fs.readFileSync(
+  'test/manager/maven/_fixtures/child.pom.xml',
   'utf8'
 );
 
@@ -31,11 +42,11 @@ describe('manager/maven', () => {
     it('should return package files info', async () => {
       platform.getFile.mockReturnValueOnce(pomContent);
       const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
-      expect(packages.length).toEqual(1);
+      expect(packages).toHaveLength(1);
 
       const pkg = packages[0];
       expect(pkg.packageFile).toEqual('random.pom.xml');
-      expect(pkg.manager).toEqual('maven');
+      expect(pkg.datasource).toEqual('maven');
       expect(pkg.deps).not.toBeNull();
     });
   });
@@ -44,11 +55,11 @@ describe('manager/maven', () => {
     it('should update an existing dependency', () => {
       const newValue = '9.9.9.9-final';
 
-      const { deps } = extractDependencies(pomContent);
+      const { deps } = extractPackage(pomContent);
       const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
-      const updatedDep = selectDep(extractDependencies(updatedContent).deps);
+      const updatedDep = selectDep(extractPackage(updatedContent).deps);
 
       expect(updatedDep.currentValue).toEqual(newValue);
     });
@@ -57,19 +68,28 @@ describe('manager/maven', () => {
       const finder = ({ depName }) => depName === 'org.example:quux';
       const newValue = '9.9.9.9-final';
 
-      const { deps } = extractDependencies(pomContent);
+      const packages = resolveProps([
+        extractPackage(pomParent, 'parent.pom.xml'),
+        extractPackage(pomChild, 'child.pom.xml'),
+      ]);
+      const [{ deps }] = packages;
       const dep = deps.find(finder);
       const upgrade = { ...dep, newValue };
-      const updatedContent = updateDependency(pomContent, upgrade);
-      const updatedDep = extractDependencies(updatedContent).deps.find(finder);
+      const updatedContent = updateDependency(pomParent, upgrade);
+      const [updatedPkg] = resolveProps([
+        extractPackage(updatedContent, 'parent.pom.xml'),
+        extractPackage(pomChild, 'child.pom.xml'),
+      ]);
+      const updatedDep = updatedPkg.deps.find(finder);
 
+      expect(updatedDep.registryUrls.pop()).toEqual('http://example.com/');
       expect(updatedDep.currentValue).toEqual(newValue);
     });
 
     it('should not touch content if new and old versions are equal', () => {
       const newValue = '1.2.3';
 
-      const { deps } = extractDependencies(pomContent);
+      const { deps } = extractPackage(pomContent);
       const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
@@ -81,7 +101,7 @@ describe('manager/maven', () => {
       const currentValue = '1.2.2';
       const newValue = '1.2.4';
 
-      const { deps } = extractDependencies(pomContent);
+      const { deps } = extractPackage(pomContent);
       const dep = selectDep(deps);
       const upgrade = { ...dep, currentValue, newValue };
       const updatedContent = updateDependency(pomContent, upgrade);
@@ -91,12 +111,10 @@ describe('manager/maven', () => {
     it('should update ranges', () => {
       const newValue = '[1.2.3]';
       const select = depSet => selectDep(depSet.deps, 'org.example:hard-range');
-      const oldContent = extractDependencies(pomContent);
+      const oldContent = extractPackage(pomContent);
       const dep = select(oldContent);
       const upgrade = { ...dep, newValue };
-      const newContent = extractDependencies(
-        updateDependency(pomContent, upgrade)
-      );
+      const newContent = extractPackage(updateDependency(pomContent, upgrade));
       const newDep = select(newContent);
       expect(newDep.currentValue).toEqual(newValue);
     });
@@ -106,7 +124,7 @@ describe('manager/maven', () => {
         depSet && depSet.deps
           ? selectDep(depSet.deps, 'org.example:hard-range')
           : null;
-      const oldContent = extractDependencies(pomContent);
+      const oldContent = extractPackage(pomContent);
       const dep = select(oldContent);
       expect(dep).not.toEqual(null);
       const upgrade = { ...dep, newValue };

@@ -36,7 +36,7 @@
     "forceCli": {
       "description": "Whether CLI configuration options should be moved to the `force` config section",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "dryRun": {
       "description": "If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs",
@@ -52,6 +52,14 @@
       "description": "Where to source binaries like `npm` and `yarn` from, choices are `bundled`, `global` and `docker`",
       "type": "string",
       "default": "bundled"
+    },
+    "baseDir": {
+      "description": "The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.",
+      "type": "string"
+    },
+    "cacheDir": {
+      "description": "The directory for Renovate for storing caches. If left empty, Renovate will create a subdirectory within `baseDir` to use.",
+      "type": "string"
     },
     "logLevel": {
       "description": "Logging level",
@@ -91,7 +99,7 @@
     "requireConfig": {
       "description": "Set to true if repositories must have a config to activate.",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "privateKey": {
       "description": "Server-side private key",
@@ -124,6 +132,11 @@
       "type": "string",
       "enum": ["https", "http", "ssh"],
       "default": null
+    },
+    "persistRepoData": {
+      "description": "If set to false, repository data will preserved between runs instead of deleted.",
+      "type": "boolean",
+      "default": false
     },
     "trustLevel": {
       "description": "Set this to \"high\" if the bot should trust the repository owners/contents",
@@ -252,10 +265,16 @@
         "node",
         "npm",
         "pep440",
+        "poetry",
         "ruby",
         "semver"
       ],
       "default": "semver"
+    },
+    "azureWorkItemId": {
+      "description": "The id of an existing work item on Azure Boards to link to each PR",
+      "type": "integer",
+      "default": 0
     },
     "ignoreDeps": {
       "description": "Dependencies to ignore",
@@ -699,7 +718,7 @@
       }
     },
     "reviewers": {
-      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab, email or username in Azure DevOps)",
+      "description": "Requested reviewers for Pull Requests (username in GitHub/GitLab/Bitbucket, email or username in Azure DevOps)",
       "type": "array",
       "items": {
         "type": "string"
@@ -744,7 +763,7 @@
       "description": "Configuration object for bazel WORKSPACE renovation",
       "type": "object",
       "default": {
-        "fileMatch": ["(^|/)WORKSPACE$"],
+        "fileMatch": ["(^|/)WORKSPACE$", "\\.bzl$"],
         "prBodyDefinitions": {
           "Change": "{{#if currentDigestShort}}`{{{currentDigestShort}}}` -> {{#if isDigest}}`{{{newDigestShort}}}`{{else}}`{{{newVersion}}}`{{/if}}{{else}}`{{{currentValue}}}` -> `{{{newValue}}}`{{/if}}"
         }
@@ -795,6 +814,14 @@
       "default": {
         "enabled": false,
         "fileMatch": ["(^|/)Gemfile$"],
+        "versionScheme": "ruby"
+      },
+      "$ref": "#"
+    },
+    "ruby-version": {
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)\\.ruby-version$"],
         "versionScheme": "ruby"
       },
       "$ref": "#"
@@ -862,6 +889,15 @@
         "versionScheme": "node"
       },
       "$ref": "#"
+    },
+    "pub": {
+      "description": "Configuration object for when renovating Dart pubspec files",
+      "type": "json",
+      "default": {
+        "enabled": false,
+        "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
+        "versionScheme": "npm"
+      }
     },
     "docker": {
       "description": "Configuration object for Docker language",
@@ -986,6 +1022,15 @@
       },
       "$ref": "#"
     },
+    "poetry": {
+      "description": "Configuration object for pyproject.toml files",
+      "type": "toml",
+      "default": {
+        "enabled": false,
+        "versionScheme": "poetry",
+        "fileMatch": ["(^|/)pyproject\\.toml$"]
+      }
+    },
     "python": {
       "description": "Configuration object for python",
       "type": "object",
@@ -1030,7 +1075,7 @@
       "type": "object",
       "default": {
         "enabled": false,
-        "fileMatch": ["\\.pom.xml$", "(^|/)pom.xml$"],
+        "fileMatch": ["\\.pom\\.xml$", "(^|/)pom\\.xml$"],
         "versionScheme": "maven"
       },
       "$ref": "#"
@@ -1073,8 +1118,7 @@
         "Change": "{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}",
         "References": "{{{references}}}",
         "Package file": "{{{packageFile}}}"
-      },
-      "$ref": "#"
+      }
     },
     "prBodyColumns": {
       "description": "List of columns to use in PR bodies",

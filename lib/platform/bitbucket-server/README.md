@@ -1,7 +1,5 @@
 # Bitbucket Server Support
 
-Bitbucket Server support is considered in "alpha" release status. There are no known problems or limitations other than what is documented below, but we want to wait for a little more feedback and ideally 1-2 or the mising features below before moving it to beta and then GA.
-
 ## Unsupported platform features/concepts
 
 - Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
@@ -10,7 +8,6 @@ Bitbucket Server support is considered in "alpha" release status. There are no k
 ## Features awaiting implementation
 
 - Creating issues not implemented yet, used to alert users when there is a config error
-- Adding comments to PRs not implemented yet, e.g. when a PR has been edited or has a lockfile error
 
 ## Testing
 

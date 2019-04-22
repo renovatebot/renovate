@@ -24,48 +24,36 @@ describe('config/index', () => {
     it('throws for invalid platform', async () => {
       const env = {};
       defaultArgv.push('--platform=foo');
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('Unsupported platform: foo.');
+      await expect(configParser.parseConfigs(env, defaultArgv)).rejects.toThrow(
+        Error('Unsupported platform: foo.')
+      );
     });
     it('throws for no GitHub token', async () => {
-      const env = {};
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe(
-        'No authentication found for platform https://api.github.com/ (github)'
+      const env = { RENOVATE_CONFIG_FILE: '/tmp/does-not-exist' };
+      await expect(configParser.parseConfigs(env, defaultArgv)).rejects.toThrow(
+        Error(
+          'No authentication found for platform https://api.github.com/ (github)'
+        )
       );
     });
     it('throws for no GitLab token', async () => {
-      const env = { RENOVATE_PLATFORM: 'gitlab' };
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe(
-        'No authentication found for platform https://gitlab.com/api/v4/ (gitlab)'
+      const env = {
+        RENOVATE_CONFIG_FILE: '/tmp/does-not-exist',
+        RENOVATE_PLATFORM: 'gitlab',
+      };
+      await expect(configParser.parseConfigs(env, defaultArgv)).rejects.toThrow(
+        Error(
+          'No authentication found for platform https://gitlab.com/api/v4/ (gitlab)'
+        )
       );
     });
     it('throws for no Azure DevOps token', async () => {
-      const env = { RENOVATE_PLATFORM: 'azure' };
-      let err;
-      try {
-        await configParser.parseConfigs(env, defaultArgv);
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe(
-        'No authentication found for platform undefined (azure)'
+      const env = {
+        RENOVATE_CONFIG_FILE: '/tmp/does-not-exist',
+        RENOVATE_PLATFORM: 'azure',
+      };
+      await expect(configParser.parseConfigs(env, defaultArgv)).rejects.toThrow(
+        Error('No authentication found for platform undefined (azure)')
       );
     });
     it('supports token in env', async () => {

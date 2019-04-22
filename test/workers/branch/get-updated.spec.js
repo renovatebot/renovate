@@ -26,13 +26,7 @@ describe('workers/branch/get-updated', () => {
       config.upgrades.push({
         manager: 'npm',
       });
-      let e;
-      try {
-        await getUpdatedPackageFiles(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
     it('handles content change', async () => {
       config.parentBranch = 'some-branch';

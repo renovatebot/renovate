@@ -39,13 +39,9 @@ describe('platform/github', () => {
 
   describe('getRepos', () => {
     it('should throw an error if no token is provided', async () => {
-      let err;
-      try {
-        await github.getRepos();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('No token found for getRepos');
+      await expect(github.getRepos()).rejects.toThrow(
+        Error('No token found for getRepos')
+      );
     });
     it('should return an array of repos', async () => {
       const repos = await getRepos('sometoken');
@@ -95,14 +91,10 @@ describe('platform/github', () => {
       });
     });
     it('should throw an error if no token is provided', async () => {
-      let err;
-      try {
-        await github.initRepo({ repository: 'some/repo' });
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe(
-        'No token found for GitHub repository some/repo'
+      await expect(
+        github.initRepo({ repository: 'some/repo' })
+      ).rejects.toThrow(
+        Error('No token found for GitHub repository some/repo')
       );
     });
     it('should rebase', async () => {
@@ -281,16 +273,12 @@ describe('platform/github', () => {
           owner: {},
         },
       });
-      let e;
-      try {
-        await github.initRepo({
+      await expect(
+        github.initRepo({
           repository: 'some/repo',
           token: 'token',
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+        })
+      ).rejects.toThrow();
     });
     it('throws not-found', async () => {
       get.mockImplementationOnce(() =>
@@ -298,16 +286,12 @@ describe('platform/github', () => {
           statusCode: 404,
         })
       );
-      let e;
-      try {
-        await github.initRepo({
+      await expect(
+        github.initRepo({
           repository: 'some/repo',
           token: 'token',
-        });
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+        })
+      ).rejects.toThrow();
     });
   });
   describe('getRepoForceRebase', () => {
@@ -362,13 +346,9 @@ describe('platform/github', () => {
           statusCode: 401,
         })
       );
-      let e;
-      try {
-        await github.getRepoForceRebase();
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(github.getRepoForceRebase()).rejects.toEqual({
+        statusCode: 401,
+      });
     });
   });
   describe('setBaseBranch(branchName)', () => {
@@ -406,13 +386,7 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => {
         throw new Error('some error');
       });
-      let e;
-      try {
-        await github.getFileList('error-branch');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(github.getFileList('error-branch')).rejects.toThrow();
     });
     it('warns if truncated result', async () => {
       get.mockImplementationOnce(() => ({
@@ -422,7 +396,7 @@ describe('platform/github', () => {
         },
       }));
       const files = await github.getFileList('truncated-branch');
-      expect(files.length).toBe(0);
+      expect(files).toHaveLength(0);
     });
     it('caches the result', async () => {
       get.mockImplementationOnce(() => ({
@@ -432,9 +406,9 @@ describe('platform/github', () => {
         },
       }));
       let files = await github.getFileList('cached-branch');
-      expect(files.length).toBe(0);
+      expect(files).toHaveLength(0);
       files = await github.getFileList('cached-branch');
-      expect(files.length).toBe(0);
+      expect(files).toHaveLength(0);
     });
     it('should return the files matching the fileName', async () => {
       get.mockImplementationOnce(() => ({
@@ -571,7 +545,7 @@ describe('platform/github', () => {
         body: [],
       }));
       const pr = await github.getBranchPr('somebranch');
-      expect(pr).toBe(null);
+      expect(pr).toBeNull();
     });
     it('should return the PR object', async () => {
       await initRepo({
@@ -801,7 +775,7 @@ describe('platform/github', () => {
         ],
       }));
       const res = await github.getBranchStatusCheck('somebranch', 'context-4');
-      expect(res).toEqual(null);
+      expect(res).toBeNull();
     });
   });
   describe('setBranchStatus', () => {
@@ -833,7 +807,7 @@ describe('platform/github', () => {
         'some-state',
         'some-url'
       );
-      expect(get.post.mock.calls).toHaveLength(0);
+      expect(get.post).toHaveBeenCalledTimes(0);
     });
     it('sets branch status', async () => {
       await initRepo({
@@ -879,7 +853,7 @@ describe('platform/github', () => {
         'some-state',
         'some-url'
       );
-      expect(get.post.mock.calls).toHaveLength(1);
+      expect(get.post).toHaveBeenCalledTimes(1);
     });
   });
   describe('mergeBranch(branchName)', () => {
@@ -956,13 +930,9 @@ describe('platform/github', () => {
       get.patch.mockImplementationOnce(() => {
         throw new Error('3 of 3 required status checks are expected.');
       });
-      let e;
-      try {
-        await github.mergeBranch('thebranchname', 'branch');
-      } catch (err) {
-        e = err;
-      }
-      expect(e.message).toEqual('not ready');
+      await expect(
+        github.mergeBranch('thebranchname', 'branch')
+      ).rejects.toThrow(Error('not ready'));
     });
   });
   describe('getBranchLastCommitTime', () => {
@@ -1069,7 +1039,7 @@ describe('platform/github', () => {
         ],
       }));
       const res = await github.ensureIssue('title-1', 'new-content');
-      expect(res).toEqual(null);
+      expect(res).toBeNull();
     });
     it('does not create issue if ensuring only once', async () => {
       get.mockImplementationOnce(() => ({
@@ -1088,7 +1058,7 @@ describe('platform/github', () => {
       }));
       const once = true;
       const res = await github.ensureIssue('title-1', 'new-content', once);
-      expect(res).toEqual(null);
+      expect(res).toBeNull();
     });
     it('closes others if ensuring only once', async () => {
       get.mockImplementationOnce(() => ({
@@ -1112,7 +1082,7 @@ describe('platform/github', () => {
       }));
       const once = true;
       const res = await github.ensureIssue('title-1', 'new-content', once);
-      expect(res).toEqual(null);
+      expect(res).toBeNull();
     });
     it('updates issue', async () => {
       get.mockReturnValueOnce({
@@ -1150,7 +1120,7 @@ describe('platform/github', () => {
       });
       get.mockReturnValueOnce({ body: { body: 'newer-content' } });
       const res = await github.ensureIssue('title-2', 'newer-content');
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('deletes if duplicate', async () => {
       get.mockReturnValueOnce({
@@ -1169,7 +1139,7 @@ describe('platform/github', () => {
       });
       get.mockReturnValueOnce({ body: { body: 'newer-content' } });
       const res = await github.ensureIssue('title-1', 'newer-content');
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
   });
   describe('ensureIssueClosing()', () => {
@@ -1230,7 +1200,7 @@ describe('platform/github', () => {
       });
       get.mockReturnValueOnce({ body: [] });
       await github.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(2);
+      expect(get.post).toHaveBeenCalledTimes(2);
       expect(get.post.mock.calls[1]).toMatchSnapshot();
     });
     it('adds comment if found in closed PR list', async () => {
@@ -1242,8 +1212,8 @@ describe('platform/github', () => {
         body: graphqlClosedPullrequests,
       }));
       await github.ensureComment(2499, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(2);
-      expect(get.patch.mock.calls).toHaveLength(0);
+      expect(get.post).toHaveBeenCalledTimes(2);
+      expect(get.patch).toHaveBeenCalledTimes(0);
     });
     it('add updates comment if necessary', async () => {
       await initRepo({
@@ -1254,8 +1224,8 @@ describe('platform/github', () => {
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       });
       await github.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(1);
-      expect(get.patch.mock.calls).toHaveLength(1);
+      expect(get.post).toHaveBeenCalledTimes(1);
+      expect(get.patch).toHaveBeenCalledTimes(1);
       expect(get.patch.mock.calls).toMatchSnapshot();
     });
     it('skips comment', async () => {
@@ -1267,8 +1237,8 @@ describe('platform/github', () => {
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
       });
       await github.ensureComment(42, 'some-subject', 'some\ncontent');
-      expect(get.post.mock.calls).toHaveLength(1);
-      expect(get.patch.mock.calls).toHaveLength(0);
+      expect(get.post).toHaveBeenCalledTimes(1);
+      expect(get.patch).toHaveBeenCalledTimes(0);
     });
     it('handles comment with no description', async () => {
       await initRepo({
@@ -1277,8 +1247,8 @@ describe('platform/github', () => {
       });
       get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
       await github.ensureComment(42, null, '!merge');
-      expect(get.post.mock.calls).toHaveLength(1);
-      expect(get.patch.mock.calls).toHaveLength(0);
+      expect(get.post).toHaveBeenCalledTimes(1);
+      expect(get.patch).toHaveBeenCalledTimes(0);
     });
   });
   describe('ensureCommentRemoval', () => {
@@ -1288,7 +1258,7 @@ describe('platform/github', () => {
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
       });
       await github.ensureCommentRemoval(42, 'some-subject');
-      expect(get.delete.mock.calls).toHaveLength(1);
+      expect(get.delete).toHaveBeenCalledTimes(1);
     });
   });
   describe('findPr(branchName, prTitle, state)', () => {
@@ -1397,7 +1367,7 @@ describe('platform/github', () => {
   describe('getPr(prNo)', () => {
     it('should return null if no prNo is passed', async () => {
       const pr = await github.getPr(null);
-      expect(pr).toBe(null);
+      expect(pr).toBeNull();
     });
     it('should return PR from graphql result', async () => {
       global.gitAuthor = {
@@ -1444,7 +1414,7 @@ describe('platform/github', () => {
         body: null,
       }));
       const pr = await github.getPr(1234);
-      expect(pr).toBe(null);
+      expect(pr).toBeNull();
     });
     [
       { number: 1, state: 'closed', base: { sha: '1234' }, mergeable: true },
@@ -1716,9 +1686,9 @@ describe('platform/github', () => {
         },
       };
       expect(await github.mergePr(pr)).toBe(true);
-      expect(get.put.mock.calls).toHaveLength(1);
-      expect(get.delete.mock.calls).toHaveLength(1);
-      expect(get.mock.calls).toHaveLength(1);
+      expect(get.put).toHaveBeenCalledTimes(1);
+      expect(get.delete).toHaveBeenCalledTimes(1);
+      expect(get).toHaveBeenCalledTimes(1);
     });
     it('should handle merge error', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -1732,9 +1702,9 @@ describe('platform/github', () => {
         throw new Error('merge error');
       });
       expect(await github.mergePr(pr)).toBe(false);
-      expect(get.put.mock.calls).toHaveLength(1);
-      expect(get.delete.mock.calls).toHaveLength(0);
-      expect(get.mock.calls).toHaveLength(1);
+      expect(get.put).toHaveBeenCalledTimes(1);
+      expect(get.delete).toHaveBeenCalledTimes(0);
+      expect(get).toHaveBeenCalledTimes(1);
     });
   });
   describe('getPrBody(input)', () => {
@@ -1803,8 +1773,8 @@ describe('platform/github', () => {
         },
       };
       expect(await github.mergePr(pr)).toBe(true);
-      expect(get.put.mock.calls).toHaveLength(1);
-      expect(get.delete.mock.calls).toHaveLength(1);
+      expect(get.put).toHaveBeenCalledTimes(1);
+      expect(get.delete).toHaveBeenCalledTimes(1);
     });
     it('should try squash after rebase', async () => {
       const pr = {
@@ -1817,8 +1787,8 @@ describe('platform/github', () => {
         throw new Error('no rebasing allowed');
       });
       await github.mergePr(pr);
-      expect(get.put.mock.calls).toHaveLength(2);
-      expect(get.delete.mock.calls).toHaveLength(1);
+      expect(get.put).toHaveBeenCalledTimes(2);
+      expect(get.delete).toHaveBeenCalledTimes(1);
     });
     it('should try merge after squash', async () => {
       const pr = {
@@ -1834,8 +1804,8 @@ describe('platform/github', () => {
         throw new Error('no squashing allowed');
       });
       expect(await github.mergePr(pr)).toBe(true);
-      expect(get.put.mock.calls).toHaveLength(3);
-      expect(get.delete.mock.calls).toHaveLength(1);
+      expect(get.put).toHaveBeenCalledTimes(3);
+      expect(get.delete).toHaveBeenCalledTimes(1);
     });
     it('should give up', async () => {
       const pr = {
@@ -1854,8 +1824,8 @@ describe('platform/github', () => {
         throw new Error('no merging allowed');
       });
       expect(await github.mergePr(pr)).toBe(false);
-      expect(get.put.mock.calls).toHaveLength(3);
-      expect(get.delete.mock.calls).toHaveLength(0);
+      expect(get.put).toHaveBeenCalledTimes(3);
+      expect(get.delete).toHaveBeenCalledTimes(0);
     });
   });
   describe('getFile()', () => {
@@ -1903,7 +1873,7 @@ describe('platform/github', () => {
         },
       }));
       const content = await github.getFile('.npmrc');
-      expect(content).toBe(null);
+      expect(content).toBeNull();
     });
     it('should return null if GitHub returns a 404', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -1929,7 +1899,7 @@ describe('platform/github', () => {
       );
       const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
-      expect(content).toBe(null);
+      expect(content).toBeNull();
     });
     it('should return large file via git API', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -2001,13 +1971,10 @@ describe('platform/github', () => {
           tree: [],
         },
       }));
-      let e;
-      try {
-        await github.getFile('package-lock.json');
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(github.getFile('package-lock.json')).rejects.toEqual({
+        statusCode: 403,
+        message: 'This API returns blobs up to 1 MB in size, OK?',
+      });
     });
     it('should return null if getFile returns nothing', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -2029,7 +1996,7 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => ({}));
       const content = await github.getFile('package.json');
       expect(get.mock.calls).toMatchSnapshot();
-      expect(content).toBe(null);
+      expect(content).toBeNull();
     });
     it('should return propagate unknown errors', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -2051,13 +2018,9 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => {
         throw new Error('Something went wrong');
       });
-      let err;
-      try {
-        await github.getFile('package.json');
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message).toBe('Something went wrong');
+      await expect(github.getFile('package.json')).rejects.toThrow(
+        Error('Something went wrong')
+      );
     });
   });
   describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
@@ -2134,8 +2097,8 @@ describe('platform/github', () => {
         'my commit message'
       );
       expect(get.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toHaveLength(3);
-      expect(get.patch.mock.calls).toHaveLength(1);
+      expect(get.post).toHaveBeenCalledTimes(3);
+      expect(get.patch).toHaveBeenCalledTimes(1);
     });
     it('should add a commit to a new branch if the branch does not already exist', async () => {
       // branchExists
@@ -2158,8 +2121,8 @@ describe('platform/github', () => {
         'my other commit message'
       );
       expect(get.mock.calls).toMatchSnapshot();
-      expect(get.post.mock.calls).toHaveLength(4);
-      expect(get.patch.mock.calls).toHaveLength(0);
+      expect(get.post).toHaveBeenCalledTimes(4);
+      expect(get.patch).toHaveBeenCalledTimes(0);
     });
     it('should parse valid gitAuthor', async () => {
       // branchExists

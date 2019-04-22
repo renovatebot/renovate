@@ -71,6 +71,15 @@ Object {
   "pipenv": Array [
     Object {},
   ],
+  "poetry": Array [
+    Object {},
+  ],
+  "pub": Array [
+    Object {},
+  ],
+  "ruby-version": Array [
+    Object {},
+  ],
   "terraform": Array [
     Object {},
   ],

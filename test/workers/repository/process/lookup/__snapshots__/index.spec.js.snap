@@ -1349,6 +1349,23 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup .lookupUpdates() upgrades equal minor ranges 1`] = `
+Array [
+  Object {
+    "canBeUnpublished": false,
+    "fromVersion": "1.3.1",
+    "isRange": true,
+    "isSingleVersion": true,
+    "newMajor": 1,
+    "newMinor": 4,
+    "newValue": "=1.4.1",
+    "releaseTimestamp": "2015-05-17T04:25:07.299Z",
+    "toVersion": "1.4.1",
+    "updateType": "minor",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup .lookupUpdates() upgrades less than equal major ranges 1`] = `
 Array [
   Object {

@@ -60,13 +60,9 @@ describe('manager/gradle', () => {
       exec.mockImplementation(() => {
         throw new Error();
       });
-      let e;
-      try {
-        await manager.extractAllPackageFiles(config, ['build.gradle']);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toMatchSnapshot();
+      await expect(
+        manager.extractAllPackageFiles(config, ['build.gradle'])
+      ).rejects.toMatchSnapshot();
     });
 
     it('should return empty if there is no dependency report', async () => {
@@ -138,7 +134,7 @@ describe('manager/gradle', () => {
         await manager.extractAllPackageFiles(config, packageFiles)
       ).toBeNull();
 
-      expect(exec.mock.calls.length).toBe(0);
+      expect(exec).toHaveBeenCalledTimes(0);
     });
 
     it('should write files before extracting', async () => {
@@ -162,7 +158,7 @@ describe('manager/gradle', () => {
       const packageFiles = ['build.gradle', 'foo/build.gradle'];
       await manager.extractAllPackageFiles(configWithgitFs, packageFiles);
 
-      expect(fs.outputFile.mock.calls.length).toBe(0);
+      expect(fs.outputFile).toHaveBeenCalledTimes(0);
     });
 
     it('should configure the renovate report plugin', async () => {
