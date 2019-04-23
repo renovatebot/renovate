@@ -215,24 +215,6 @@
   },
   "release": {
     "branch": "master",
-    "tagFormat": "${version}",
-    "analyzeCommits": {
-      "preset": "angular",
-      "releaseRules": [
-        {
-          "type": "docs",
-          "scope": "readme.md",
-          "release": "patch"
-        },
-        {
-          "type": "refactor",
-          "release": "patch"
-        },
-        {
-          "type": "build",
-          "release": "patch"
-        }
-      ]
-    }
+    "tagFormat": "${version}"
   }
 }
