@@ -847,7 +847,6 @@
       "description": "Configuration object for Cargo crate renovation.",
       "type": "object",
       "default": {
-        "enabled": false,
         "commitMessageTopic": "Rust crate {{depName}}",
         "managerBranchPrefix": "rust-",
         "fileMatch": ["(^|/)Cargo.toml$"]
@@ -895,7 +894,6 @@
       "description": "Configuration object for when renovating Dart pubspec files",
       "type": "json",
       "default": {
-        "enabled": false,
         "fileMatch": ["(^|/)pubspec\\.ya?ml$"],
         "versionScheme": "npm"
       }
@@ -1018,7 +1016,6 @@
       "description": "Configuration object for Pipfile files",
       "type": "object",
       "default": {
-        "enabled": false,
         "fileMatch": ["(^|/)Pipfile$"]
       },
       "$ref": "#"
@@ -1027,7 +1024,6 @@
       "description": "Configuration object for pyproject.toml files",
       "type": "toml",
       "default": {
-        "enabled": false,
         "versionScheme": "poetry",
         "fileMatch": ["(^|/)pyproject\\.toml$"]
       }
@@ -1056,7 +1052,6 @@
       "description": "Configuration object for build.gradle files",
       "type": "object",
       "default": {
-        "enabled": false,
         "fileMatch": ["\\.gradle$", "(^|/)gradle.properties$"],
         "timeout": 300,
         "versionScheme": "maven"
@@ -1075,7 +1070,6 @@
       "description": "Configuration object for when renovating Maven pom.xml files",
       "type": "object",
       "default": {
-        "enabled": false,
         "fileMatch": ["\\.pom\\.xml$", "(^|/)pom\\.xml$"],
         "versionScheme": "maven"
       },

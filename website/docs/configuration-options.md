@@ -115,6 +115,8 @@ You can also set this field to `"mirror:x"` where `x` is the name of a package i
 
 Bundler is now in alpha stage and ready for testing! [Details](https://renovatebot.com/blog/ruby-bundler-support)
 
+## cargo
+
 ## circleci
 
 ## commitBody
