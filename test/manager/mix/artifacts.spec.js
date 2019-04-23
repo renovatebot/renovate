@@ -25,6 +25,21 @@ describe('.getArtifacts()', () => {
       await mix.getArtifacts('mix.exs', updatedDeps, '', config)
     ).toBeNull();
   });
+  it('returns null if no local directory found', async () => {
+    const updatedDeps = [
+      {
+        depName: 'plug',
+        currentValue: '1.6.0',
+      },
+    ];
+    const noLocalDirConfig = {
+      localDir: null,
+      gitFs: true,
+    };
+    expect(
+      await mix.getArtifacts('mix.exs', updatedDeps, '', noLocalDirConfig)
+    ).toBeNull();
+  });
   it('returns null if updatedDeps is empty', async () => {
     expect(await mix.getArtifacts('mix.exs', [], '', config)).toBeNull();
   });
@@ -68,7 +83,7 @@ describe('.getArtifacts()', () => {
   });
   it('returns updated mix.lock', async () => {
     platform.getFile.mockReturnValueOnce('Old mix.lock');
-    exec.mockReturnValueOnce({
+    exec.mockReturnValue({
       stdout: '',
       stderror: '',
     });
