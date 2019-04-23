@@ -356,6 +356,7 @@ describe('platform/azure', () => {
           pullRequestId: 456,
           displayNumber: `Pull Request #456`,
         })),
+        createPullRequestLabel: jest.fn(() => ({})),
       }));
       azureHelper.getRenovatePRFormat.mockImplementation(() => ({
         displayNumber: 'Pull Request #456',
@@ -377,6 +378,7 @@ describe('platform/azure', () => {
           pullRequestId: 456,
           displayNumber: `Pull Request #456`,
         })),
+        createPullRequestLabel: jest.fn(() => ({})),
       }));
       azureHelper.getRenovatePRFormat.mockImplementation(() => ({
         displayNumber: 'Pull Request #456',
