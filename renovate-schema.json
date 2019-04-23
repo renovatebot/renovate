@@ -101,6 +101,26 @@
       "type": "boolean",
       "default": true
     },
+    "masterIssue": {
+      "description": "Whether to create a \"Master Issue\" within the repository.",
+      "type": "boolean",
+      "default": false
+    },
+    "masterIssueApproval": {
+      "description": "Whether updates should require manual approval from within the Master Issue before creation.",
+      "type": "boolean",
+      "default": false
+    },
+    "masterIssueAutoclose": {
+      "description": "Set to `true` and Renovate will autoclose the Master Issue if there are no updates.",
+      "type": "boolean",
+      "default": false
+    },
+    "masterIssueTitle": {
+      "description": "Title to use for the Master Issue",
+      "type": "string",
+      "default": "Update Dependencies (Renovate Bot)"
+    },
     "privateKey": {
       "description": "Server-side private key",
       "type": "string"
