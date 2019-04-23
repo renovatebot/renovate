@@ -115,6 +115,8 @@ You can also set this field to `"mirror:x"` where `x` is the name of a package i
 
 Bundler is now in alpha stage and ready for testing! [Details](https://renovatebot.com/blog/ruby-bundler-support)
 
+## cargo
+
 ## circleci
 
 ## commitBody
@@ -431,6 +433,35 @@ Add to this object if you wish to define rules that apply only to major updates.
 ## managerBranchPrefix
 
 This value defaults to empty string, as historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`.
+
+## masterIssue
+
+Configuration `masterIssue` to `true` will lead to the creation of a "Master Issue" within the repository. This Master Issue is akin to a mini dashboard and contains a list of all PRs pending, open, closed (unmerged) or in error.
+
+Examples of what having a master issue will allow you to do:
+
+- View all PRs in one place, rather than having to filter PRs by author
+- Rebase/retry multiple PRs without having to open each individually
+- Override any rate limiting (e.g. concurrent PRs) or scheduling to force Renovate to create a PR that would otherwise be suppressed
+- Recreate an unmerged PR (e.g. for a major update that you put off by closing the original PR)
+
+Note: Enabling the Master Issue does not itself change any of the "flow" of Renovate, e.g. it will otherwise still create and manage PRs exactly as it always has. The Master Issue therefore provides visibility as well as additional control.
+
+## masterIssueApproval
+
+Setting `masterIssueApproval` to `true` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Master Issue.
+
+In this case, the Master Issue _does_ change the flow of Renovate, because PRs will stop appearing until you approve them within the issue. Instead of enabling this repository-wide, you may instead with to use package rules to enable it selectively, e.g. for major updates only, or for certain package managers, etc. i.e. it is possible to require approval for only certain types of updates only.
+
+Note: Enabling Master Issue Approval implicitly enables `masterIssue` too, so it is not necessary to set both to `true`.
+
+## masterIssueAutoclose
+
+You can set this to `true` if you prefer Renovate to autoclose its Master Issue whenever there are no outstanding PRs left.
+
+## masterIssueTitle
+
+Set this option if you prefer a different title for the Master Issue.
 
 ## maven
 

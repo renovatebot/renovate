@@ -287,6 +287,52 @@ Object {
 }
 `;
 
+exports[`manager/npm/extract .extractPackageFile() extracts npm package alias 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1",
+      "datasource": "npm",
+      "depName": "a",
+      "depType": "dependencies",
+      "lookupName": "foo",
+      "npmPackageAlias": true,
+      "prettyDepType": "dependency",
+    },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "npm",
+      "depName": "b",
+      "depType": "dependencies",
+      "lookupName": "@foo/bar",
+      "npmPackageAlias": true,
+      "prettyDepType": "dependency",
+    },
+    Object {
+      "currentValue": "npm:foo",
+      "depName": "c",
+      "depType": "dependencies",
+      "npmPackageAlias": true,
+      "prettyDepType": "dependency",
+      "skipReason": "unknown-version",
+    },
+  ],
+  "lernaClient": undefined,
+  "lernaDir": undefined,
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageJsonName": undefined,
+  "packageJsonType": "app",
+  "packageJsonVersion": undefined,
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": undefined,
+  "yarnrc": undefined,
+}
+`;
+
 exports[`manager/npm/extract .extractPackageFile() finds a lock file 1`] = `
 Object {
   "deps": Array [
