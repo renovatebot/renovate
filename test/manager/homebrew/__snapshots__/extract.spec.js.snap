@@ -32,6 +32,22 @@ Object {
 }
 `;
 
+exports[`lib/manager/homebrew/extract extractPackageFile() handles no space before class header 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v0.8.2",
+      "datasource": "github",
+      "depName": "bazelbuild/bazel-watcher",
+      "ownerName": "bazelbuild",
+      "repoName": "bazel-watcher",
+      "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
+      "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz",
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/homebrew/extract extractPackageFile() skips github dependency with wrong format 1`] = `
 Object {
   "deps": Array [
@@ -44,6 +60,108 @@ Object {
       "sha256": "6f2cf5cfb987a2df2f791c162209039804fd8fd12692da69f52153ec9668e9ca",
       "skipReason": "unsupported-url",
       "url": "https://github.com/hlandau/acme.git",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() skips if invalid url field 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": null,
+      "datasource": null,
+      "depName": "Ibazel",
+      "ownerName": null,
+      "repoName": null,
+      "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
+      "skipReason": "unsupported-url",
+      "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.not_tar.not_gz",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() skips if invalid url field 2`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": null,
+      "datasource": null,
+      "depName": "Ibazel",
+      "ownerName": null,
+      "repoName": null,
+      "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
+      "skipReason": "unsupported-url",
+      "url": "https://github.com/bazelbuild/bazel-watcher/archive/vInvalid.version.2.tar.gz",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() skips if invalid url field 3`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": null,
+      "datasource": null,
+      "depName": "Ibazel",
+      "ownerName": null,
+      "repoName": null,
+      "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
+      "skipReason": "unsupported-url",
+      "url": null,
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() skips if sha256 field is invalid 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v0.8.2",
+      "datasource": "github",
+      "depName": "bazelbuild/bazel-watcher",
+      "ownerName": "bazelbuild",
+      "repoName": "bazel-watcher",
+      "sha256": "26f5125218fad2741d3caf937b0229",
+      "skipReason": "invalid-sha256",
+      "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() skips if there is no sha256 field 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v0.8.2",
+      "datasource": "github",
+      "depName": "bazelbuild/bazel-watcher",
+      "ownerName": "bazelbuild",
+      "repoName": "bazel-watcher",
+      "sha256": null,
+      "skipReason": "invalid-sha256",
+      "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/homebrew/extract extractPackageFile() skips if there is no url field 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": null,
+      "datasource": null,
+      "depName": "Ibazel",
+      "ownerName": null,
+      "repoName": null,
+      "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
+      "skipReason": "unsupported-url",
+      "url": null,
     },
   ],
 }
