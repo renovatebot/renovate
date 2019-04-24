@@ -63,6 +63,7 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'unknown:unknown',
         registryUrls: [
+          's3://somewhere.s3.aws.amazon.com',
           'file://test/datasource/gradle/_fixtures/maven/repo1.maven.org/maven2/',
         ],
       });
@@ -76,6 +77,7 @@ describe('datasource/maven', () => {
         registryUrls: [
           'file://test/datasource/gradle/_fixtures/maven/repo1.maven.org/maven2/',
           'file://test/datasource/gradle/_fixtures/maven/custom_maven_repo/maven2/',
+          's3://somewhere.s3.aws.amazon.com',
         ],
       });
       expect(releases.releases).toEqual(
