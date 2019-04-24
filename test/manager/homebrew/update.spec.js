@@ -11,6 +11,9 @@ const ibazel = fs.readFileSync(
 );
 
 describe('manager/homebrew/update', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
   it('updates "releases" github dependency', async () => {
     const upgrade = {
       currentValue: 'v0.16.1',
@@ -45,5 +48,190 @@ describe('manager/homebrew/update', () => {
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(ibazel);
     expect(newContent).toMatchSnapshot();
+  });
+  it('returns unchanged content if got function throws errors', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      ownerName: 'bazelbuild',
+      repoName: 'bazel-watcher',
+      sha256:
+        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+      newValue: 'v0.9.3',
+    };
+    got.mockImplementationOnce(() => {
+      throw new Error('Request failed');
+    });
+    const newContent = await updateDependency(ibazel, upgrade);
+    expect(newContent).not.toBeNull();
+    expect(newContent).toBe(ibazel);
+  });
+  it('returns unchanged content if url field in upgrade object is invalid', async () => {
+    const content = ibazel;
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      ownerName: 'bazelbuild',
+      repoName: 'bazel-watcher',
+      sha256:
+        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      url: 'invalid_url',
+      newValue: 'v0.9.3',
+    };
+    got.mockImplementationOnce(() => {
+      return { body: 'some_content' };
+    });
+    const newContent = await updateDependency(content, upgrade);
+    expect(newContent).not.toBeNull();
+    expect(newContent).toBe(content);
+  });
+  it('returns unchanged content if repoName in upgrade object is invalid', async () => {
+    const content = ibazel;
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      ownerName: 'bazelbuild',
+      repoName: 'invalid/repo/name',
+      sha256:
+        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+      newValue: 'v0.9.3',
+    };
+    got
+      .mockImplementationOnce(() => {
+        throw Error('Request failed');
+      })
+      .mockImplementationOnce(() => {
+        return { body: 'some_content' };
+      });
+    const newContent = await updateDependency(content, upgrade);
+    expect(newContent).not.toBeNull();
+    expect(newContent).toBe(content);
+  });
+  it('returns unchanged content if repoName in upgrade object is wrong', async () => {
+    const content = ibazel;
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      ownerName: 'bazelbuild',
+      repoName: 'wrong-version/archive/v10.2.3.tar.gz',
+      sha256:
+        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+      newValue: 'v0.9.3',
+    };
+    got
+      .mockImplementationOnce(() => {
+        throw Error('Request failed');
+      })
+      .mockImplementationOnce(() => {
+        return { body: 'some_content' };
+      });
+    const newContent = await updateDependency(content, upgrade);
+    expect(newContent).not.toBeNull();
+    expect(newContent).toBe(content);
+  });
+  it('returns unchanged content if url field in Formula file is invalid', async () => {
+    const content = `
+          class Ibazel < Formula
+          desc 'IBazel is a tool for building Bazel targets when source files change.'
+          homepage 'https://github.com/bazelbuild/bazel-watcher'
+          url ???https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+          end
+      `;
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      ownerName: 'bazelbuild',
+      repoName: 'bazel-watcher',
+      sha256:
+        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+      newValue: 'v0.9.3',
+    };
+    got.mockImplementationOnce(() => {
+      return { body: 'some_content' };
+    });
+    const newContent = await updateDependency(content, upgrade);
+    expect(newContent).not.toBeNull();
+    expect(newContent).toBe(content);
+  });
+  it('returns unchanged content if url field in Formula file is missing', async () => {
+    const content = `
+          class Ibazel < Formula
+          desc 'IBazel is a tool for building Bazel targets when source files change.'
+          homepage 'https://github.com/bazelbuild/bazel-watcher'
+          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+          end
+      `;
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      ownerName: 'bazelbuild',
+      repoName: 'bazel-watcher',
+      sha256:
+        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+      newValue: 'v0.9.3',
+    };
+    got.mockImplementationOnce(() => {
+      return { body: 'some_content' };
+    });
+    const newContent = await updateDependency(content, upgrade);
+    expect(newContent).not.toBeNull();
+    expect(newContent).toBe(content);
+  });
+  it('returns unchanged content if sha256 field in Formula file is invalid', async () => {
+    const content = `
+          class Ibazel < Formula
+          desc 'IBazel is a tool for building Bazel targets when source files change.'
+          homepage 'https://github.com/bazelbuild/bazel-watcher'
+          url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+          sha256 ???26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
+          end
+      `;
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      ownerName: 'bazelbuild',
+      repoName: 'bazel-watcher',
+      sha256:
+        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+      newValue: 'v0.9.3',
+    };
+    got.mockImplementationOnce(() => {
+      return { body: 'some_content' };
+    });
+    const newContent = await updateDependency(content, upgrade);
+    expect(newContent).not.toBeNull();
+    expect(newContent).toBe(content);
+  });
+  it('returns unchanged content if sha256 field in Formula file is missing', async () => {
+    const content = `
+          class Ibazel < Formula
+          desc 'IBazel is a tool for building Bazel targets when source files change.'
+          homepage 'https://github.com/bazelbuild/bazel-watcher'
+          url "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
+          end
+      `;
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      ownerName: 'bazelbuild',
+      repoName: 'bazel-watcher',
+      sha256:
+        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+      newValue: 'v0.9.3',
+    };
+    got.mockImplementationOnce(() => {
+      return { body: 'some_content' };
+    });
+    const newContent = await updateDependency(content, upgrade);
+    expect(newContent).not.toBeNull();
+    expect(newContent).toBe(content);
   });
 });
