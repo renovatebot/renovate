@@ -119,7 +119,7 @@
     "markdown-it": "8.4.2",
     "minimatch": "3.0.4",
     "moment": "2.24.0",
-    "moment-timezone": "0.5.23",
+    "moment-timezone": "0.5.25",
     "node-html-parser": "1.1.15",
     "npm": "6.9.0",
     "openpgp": "2.6.2",
