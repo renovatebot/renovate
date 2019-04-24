@@ -57,6 +57,20 @@ describe('manager/gomod/update', () => {
       expect(res.includes(upgrade.newValue)).toBe(true);
       expect(res.includes('github.com/pkg/errors/v2')).toBe(true);
     });
+    it('replaces major updates > 1 with "+incompatible" tag', () => {
+      const upgrade = {
+        depName: 'github.com/pkg/errors',
+        lineNumber: 2,
+        newMajor: 2,
+        updateType: 'major',
+        currentValue: 'v0.7.0',
+        newValue: 'v2.0.0+incompatible',
+      };
+      const res = goUpdate.updateDependency(gomod1, upgrade);
+      expect(res).not.toEqual(gomod2);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+      expect(res.includes('github.com/pkg/errors/v2')).toBe(true);
+    });
     it('replaces major gopkg.in updates', () => {
       const upgrade = {
         depName: 'gopkg.in/russross/blackfriday.v1',
