@@ -45,17 +45,13 @@ describe('manager/npm/extract', () => {
       expect(res).toBeNull();
     });
     it('throws error if non-root renovate config', async () => {
-      let e;
-      try {
-        await npmExtract.extractPackageFile(
+      await expect(
+        npmExtract.extractPackageFile(
           '{ "renovate": {} }',
           'backend/package.json',
           defaultConfig
-        );
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+        )
+      ).rejects.toThrow();
     });
     it('returns null if no deps', async () => {
       const res = await npmExtract.extractPackageFile(
@@ -196,6 +192,22 @@ describe('manager/npm/extract', () => {
           l: 'github:owner/l.git#abcdef0',
           m: 'https://github.com/owner/m.git#v1.0.0',
           n: 'git+https://github.com/owner/n#v2.0.0',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('extracts npm package alias', async () => {
+      const pJson = {
+        dependencies: {
+          a: 'npm:foo@1',
+          b: 'npm:@foo/bar@1.2.3',
+          c: 'npm:foo',
         },
       };
       const pJsonStr = JSON.stringify(pJson);

@@ -66,6 +66,13 @@ describe('workers/repository/init/config', () => {
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
+    it('finds and parse renovate.json5', async () => {
+      platform.getFileList.mockReturnValue(['package.json', 'renovate.json5']);
+      platform.getFile.mockReturnValue(`{
+        // this is json5 format
+      }`);
+      await mergeRenovateConfig(config);
+    });
     it('finds .github/renovate.json', async () => {
       platform.getFileList.mockReturnValue([
         'package.json',

@@ -16,23 +16,11 @@ describe('workers/repository/onboarding/branch', () => {
       platform.getFileList.mockReturnValue([]);
     });
     it('throws if no package files', async () => {
-      let e;
-      try {
-        await checkOnboardingBranch(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
     it('throws if fork', async () => {
       config.isFork = true;
-      let e;
-      try {
-        await checkOnboardingBranch(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
     it('handles skipped onboarding combined with requireConfig = false', async () => {
       config.requireConfig = false;
@@ -67,16 +55,8 @@ describe('workers/repository/onboarding/branch', () => {
       expect(res.repoIsOnboarded).toBe(true);
     });
     it('detects repo is onboarded via PR', async () => {
+      config.requireConfig = false;
       platform.findPr.mockReturnValue(true);
-      const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBe(true);
-    });
-    it('detects repo is onboarded via PR and merged', async () => {
-      config.requireConfig = true;
-      platform.findPr.mockReturnValue(true);
-      platform.getPrList.mockReturnValueOnce([
-        { branchName: 'renovate/something', state: 'merged' },
-      ]);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
@@ -86,13 +66,7 @@ describe('workers/repository/onboarding/branch', () => {
       platform.getPrList.mockReturnValueOnce([
         { branchName: 'renovate/something', state: 'open' },
       ]);
-      let e;
-      try {
-        await checkOnboardingBranch(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
     it('creates onboarding branch with greenkeeper migration', async () => {
       platform.getFileList.mockReturnValue(['package.json']);

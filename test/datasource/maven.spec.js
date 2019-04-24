@@ -63,6 +63,7 @@ describe('datasource/maven', () => {
         ...config,
         lookupName: 'unknown:unknown',
         registryUrls: [
+          's3://somewhere.s3.aws.amazon.com',
           'file://test/datasource/gradle/_fixtures/maven/repo1.maven.org/maven2/',
         ],
       });
@@ -76,6 +77,7 @@ describe('datasource/maven', () => {
         registryUrls: [
           'file://test/datasource/gradle/_fixtures/maven/repo1.maven.org/maven2/',
           'file://test/datasource/gradle/_fixtures/maven/custom_maven_repo/maven2/',
+          's3://somewhere.s3.aws.amazon.com',
         ],
       });
       expect(releases.releases).toEqual(
@@ -136,15 +138,13 @@ describe('datasource/maven', () => {
         .reply(503);
 
       expect.assertions(1);
-      try {
-        await datasource.getPkgReleases({
+      await expect(
+        datasource.getPkgReleases({
           ...config,
           lookupName: 'org:artifact',
           registryUrls: ['http://central.maven.org/maven2/'],
-        });
-      } catch (e) {
-        expect(e.message).toEqual('registry-failure');
-      }
+        })
+      ).rejects.toThrow(Error('registry-failure'));
     });
 
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {

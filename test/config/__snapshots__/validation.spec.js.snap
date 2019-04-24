@@ -4,10 +4,6 @@ exports[`config/validation validateConfig(config) errors for all types 1`] = `
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "extends: Invalid timezone: Europe/Brussel",
-  },
-  Object {
-    "depName": "Configuration Error",
     "message": "Configuration option \`enabled\` should be boolean. Found: 1 (number)",
   },
   Object {
@@ -37,6 +33,10 @@ Array [
   Object {
     "depName": "Configuration Error",
     "message": "Invalid schedule: \`Schedule \\"every 15 mins every weekday\\" should not specify minutes\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "extends: Invalid timezone: Europe/Brussel",
   },
   Object {
     "depName": "Configuration Error",
@@ -87,7 +87,7 @@ Array [
     "depName": "Configuration Error",
     "message": "packageRules:
         You have included an unsupported manager in a package rule. Your list: foo. 
-        Supported managers are: (ansible, bazel, buildkite, bundler, cargo, circleci, composer, docker-compose, dockerfile, github-actions, gitlabci, gomod, gradle, gradle-wrapper, kubernetes, maven, meteor, npm, nuget, nvm, pip_requirements, pip_setup, pipenv, poetry, terraform, travis, ruby-version, homebrew).",
+        Supported managers are: (ansible, bazel, buildkite, bundler, cargo, circleci, composer, docker-compose, dockerfile, github-actions, gitlabci, gomod, gradle, gradle-wrapper, kubernetes, maven, meteor, npm, nuget, nvm, pip_requirements, pip_setup, pipenv, poetry, pub, terraform, travis, ruby-version, homebrew).",
   },
 ]
 `;

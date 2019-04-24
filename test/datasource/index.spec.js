@@ -62,4 +62,14 @@ describe('datasource/index', () => {
     });
     expect(res.sourceUrl).toEqual('https://abc.com');
   });
+  it('massages sourceUrl', async () => {
+    npmDatasource.getPkgReleases.mockReturnValue({
+      sourceUrl: 'scm:git@github.com:Jasig/cas.git',
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: 'npm',
+      depName: 'cas',
+    });
+    expect(res.sourceUrl).toEqual('https://github.com/Jasig/cas');
+  });
 });

@@ -21,6 +21,11 @@ const pyproject4toml = fs.readFileSync(
   'utf8'
 );
 
+const pyproject5toml = fs.readFileSync(
+  'test/manager/poetry/_fixtures/pyproject.5.toml',
+  'utf8'
+);
+
 describe('lib/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let config;
@@ -28,7 +33,10 @@ describe('lib/manager/poetry/extract', () => {
       config = {};
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBe(null);
+      expect(extractPackageFile('nothing here', config)).toBeNull();
+    });
+    it('returns null for parsed file without poetry section', () => {
+      expect(extractPackageFile(pyproject5toml, config)).toBeNull();
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(pyproject1toml, config);

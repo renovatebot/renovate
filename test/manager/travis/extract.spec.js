@@ -8,7 +8,7 @@ describe('lib/manager/travis/extract', () => {
     });
     it('returns empty if fails to parse', () => {
       const res = extractPackageFile('blahhhhh:foo:@what\n', config);
-      expect(res).toBe(null);
+      expect(res).toBeNull();
     });
     it('returns results', () => {
       const res = extractPackageFile('node_js:\n  - 6\n  - 8\n', config);
