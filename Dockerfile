@@ -143,8 +143,8 @@ ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
-COPY lib lib
+COPY dist dist
 COPY bin bin
 
-ENTRYPOINT ["node", "-r", "ts-node/register/transpile-only", "/usr/src/app/lib/renovate.ts"]
+ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []

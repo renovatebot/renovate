@@ -7,6 +7,7 @@
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
+    "build": "tsc",
     "clean-cache": "node bin/clean-cache.js",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "node -r ts-node/register/transpile-only --inspect-brk dist/renovate.ts",
@@ -139,8 +140,6 @@
     "toml": "3.0.0",
     "tomlify-j0.4": "3.0.0",
     "traverse": "0.6.6",
-    "ts-node": "8.1.0",
-    "typescript": "3.4.5",
     "upath": "1.1.2",
     "validate-npm-package-name": "3.0.0",
     "validator": "10.11.0",
@@ -170,7 +169,9 @@
     "pretty-quick": "1.10.0",
     "semantic-release": "15.13.3",
     "tmp-promise": "1.0.5",
-    "ts-jest": "24.0.0"
+    "ts-jest": "24.0.0",
+    "ts-node": "8.1.0",
+    "typescript": "3.4.5"
   },
   "resolutions": {
     "lodash": ">= 4.17.11"
@@ -178,7 +179,7 @@
   "files": [
     "bin/config-validator.js",
     "bin/yarn-1.9.4.js",
-    "lib"
+    "dist"
   ],
   "babel": {
     "plugins": [
