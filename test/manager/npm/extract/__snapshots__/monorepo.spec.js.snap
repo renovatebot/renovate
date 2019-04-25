@@ -3,6 +3,10 @@
 exports[`manager/npm/extract .extractPackageFile() uses lerna package settings 1`] = `
 Array [
   Object {
+    "internalPackages": Array [
+      "@org/a",
+      "@org/b",
+    ],
     "lernaDir": ".",
     "lernaPackages": Array [
       "packages/*",
@@ -37,6 +41,10 @@ Array [
 exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings 1`] = `
 Array [
   Object {
+    "internalPackages": Array [
+      "@org/a",
+      "@org/b",
+    ],
     "lernaClient": "yarn",
     "lernaDir": ".",
     "lernaPackages": Array [
