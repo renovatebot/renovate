@@ -9,7 +9,7 @@
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
-    "debug": "node -r ts-node/register/transpile-only --inspect-brk dist/renovate",
+    "debug": "node -r ts-node/register/transpile-only --inspect-brk dist/renovate.ts",
     "eslint": "eslint lib test",
     "eslint-fix": "eslint --fix lib test",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
@@ -19,7 +19,7 @@
     "lint-fix": "yarn eslint-fix && yarn prettier-fix",
     "prettier": "prettier --list-different \"**/*.{ts, js,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts, js,json,md}\"",
-    "start": "node -r ts-node/register/transpile-only dist/renovate",
+    "start": "node -r ts-node/register/transpile-only dist/renovate.ts",
     "test-dirty": "git diff --exit-code",
     "test-schema": "bash test/json-schema.sh",
     "test": "yarn lint && yarn test-schema && yarn jest"
