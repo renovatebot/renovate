@@ -11,6 +11,7 @@ exports[`platform/git/storage getFile(filePath, branchName) returns null for 404
 
 exports[`platform/git/storage getFileList() should return the correct files 1`] = `
 Array [
+  "file_to_delete",
   "future_file",
   "master_file",
   "past_file",

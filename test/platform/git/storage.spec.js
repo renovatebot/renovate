@@ -24,7 +24,8 @@ describe('platform/git/storage', () => {
 
     await repo.checkout('master');
     await fs.writeFile(base.path + '/master_file', 'master');
-    await repo.add(['master_file']);
+    await fs.writeFile(base.path + '/file_to_delete', 'bye');
+    await repo.add(['master_file', 'file_to_delete']);
     await repo.commit('master message', [
       '--date=' + masterCommitDate.toISOString(),
     ]);
@@ -180,6 +181,17 @@ describe('platform/git/storage', () => {
         'renovate/past_branch',
         [file],
         'Create something'
+      );
+    });
+    it('deletes file', async () => {
+      const file = {
+        name: '|delete|',
+        contents: 'file_to_delete',
+      };
+      await git.commitFilesToBranch(
+        'renovate/something',
+        [file],
+        'Delete something'
       );
     });
     it('updates multiple files', async () => {
