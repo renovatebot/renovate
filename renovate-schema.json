@@ -840,6 +840,7 @@
       "$ref": "#"
     },
     "ruby-version": {
+      "description": "Configuration object for .ruby-version updating",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)\\.ruby-version$"],
