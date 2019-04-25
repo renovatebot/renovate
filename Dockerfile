@@ -146,5 +146,5 @@ RUN yarn install --production && yarn cache clean
 COPY lib lib
 COPY bin bin
 
-ENTRYPOINT ["node", "/usr/src/app/lib/renovate.js"]
+ENTRYPOINT ["node", "-r", "ts-node/register/transpile-only", "/usr/src/app/lib/renovate.ts"]
 CMD []
