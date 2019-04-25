@@ -9,7 +9,7 @@
   "scripts": {
     "clean-cache": "node bin/clean-cache.js",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
-    "debug": "tsc && node --inspect-brk dist/renovate",
+    "debug": "node -r ts-node/register/transpile-only --inspect-brk dist/renovate",
     "eslint": "eslint lib test",
     "eslint-fix": "eslint --fix lib test",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
@@ -19,7 +19,7 @@
     "lint-fix": "yarn eslint-fix && yarn prettier-fix",
     "prettier": "prettier --list-different \"**/*.{ts, js,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts, js,json,md}\"",
-    "start": "tsc && node dist/renovate",
+    "start": "node -r ts-node/register/transpile-only dist/renovate",
     "test-dirty": "git diff --exit-code",
     "test-schema": "bash test/json-schema.sh",
     "test": "yarn lint && yarn test-schema && yarn jest"
@@ -139,7 +139,8 @@
     "toml": "3.0.0",
     "tomlify-j0.4": "3.0.0",
     "traverse": "0.6.6",
-    "typescript": "3.3.4000",
+    "ts-node": "8.1.0",
+    "typescript": "3.4.5",
     "upath": "1.1.2",
     "validate-npm-package-name": "3.0.0",
     "validator": "10.11.0",

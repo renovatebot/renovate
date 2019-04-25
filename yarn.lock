@@ -725,6 +725,11 @@ are-we-there-yet@~1.1.2:
     delegates "^1.0.0"
     readable-stream "^2.0.6"
 
+arg@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.0.tgz#583c518199419e0037abb74062c37f8519e575f0"
+  integrity sha512-ZWc51jO3qegGkVh8Hwpv636EkbesNV5ZNQPCtRa+0qytRYPEs9IYT9qITY9buezqUH5uqyzlWLcufrzU2rffdg==
+
 argparse@^1.0.7:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-1.0.10.tgz#bcd6791ea5ae09725e17e5ad988134cd40b3d911"
@@ -2049,6 +2054,11 @@ diff-sequences@^24.3.0:
   version "24.3.0"
   resolved "https://registry.yarnpkg.com/diff-sequences/-/diff-sequences-24.3.0.tgz#0f20e8a1df1abddaf4d9c226680952e64118b975"
   integrity sha512-xLqpez+Zj9GKSnPWS0WZw1igGocZ+uua8+y+5dDNTT934N3QuY1sp2LkHzwiaYQGz60hMq0pjAshdeXm5VUOEw==
+
+diff@^3.1.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
+  integrity sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==
 
 dir-glob@^2.0.0, dir-glob@^2.2.1:
   version "2.2.2"
@@ -4871,7 +4881,7 @@ make-dir@^1.0.0, make-dir@^1.3.0:
   dependencies:
     pify "^3.0.0"
 
-make-error@1.x:
+make-error@1.x, make-error@^1.1.1:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/make-error/-/make-error-1.3.5.tgz#efe4e81f6db28cadd605c70f29c831b58ef776c8"
   integrity sha512-c3sIjNUow0+8swNwVpqoH4YCShKNFkMaw6oH1mNS2haDZQqkeZFlHS3dhoeEbKKmJB4vXpJucU6oH75aDYeE9g==
@@ -8137,6 +8147,17 @@ ts-jest@24.0.0:
     semver "^5.5"
     yargs-parser "10.x"
 
+ts-node@8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-8.1.0.tgz#8c4b37036abd448577db22a061fd7a67d47e658e"
+  integrity sha512-34jpuOrxDuf+O6iW1JpgTRDFynUZ1iEqtYruBqh35gICNjN8x+LpVcPAcwzLPi9VU6mdA3ym+x233nZmZp445A==
+  dependencies:
+    arg "^4.1.0"
+    diff "^3.1.0"
+    make-error "^1.1.1"
+    source-map-support "^0.5.6"
+    yn "^3.0.0"
+
 tslib@^1.9.0:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
@@ -8189,10 +8210,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@3.3.4000:
-  version "3.3.4000"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.3.4000.tgz#76b0f89cfdbf97827e1112d64f283f1151d6adf0"
-  integrity sha512-jjOcCZvpkl2+z7JFn0yBOoLQyLoIkNZAs/fYJkUG6VKy6zLPHJGfQJYFHzibB6GJaF/8QrcECtlQ5cpvRHSMEA==
+typescript@3.4.5:
+  version "3.4.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.4.5.tgz#2d2618d10bb566572b8d7aad5180d84257d70a99"
+  integrity sha512-YycBxUb49UUhdNMU5aJ7z5Ej2XGmaIBL0x34vZ82fn3hGvD+bgrMrVDpatgz2f7YxUMJxMkbWxJZeAvDxVe7Vw==
 
 uc.micro@^1.0.1, uc.micro@^1.0.5:
   version "1.0.6"
@@ -8778,3 +8799,8 @@ yarn@1.15.2:
   version "1.15.2"
   resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.15.2.tgz#7a064ca81ca34235f16376ad2f796ed432f9e285"
   integrity sha512-DhqaGe2FcYKduO42d2hByXk7y8k2k42H3uzYdWBMTvcNcgWKx7xCkJWsVAQikXvaEQN2GyJNrz8CboqUmaBRrw==
+
+yn@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/yn/-/yn-3.1.0.tgz#fcbe2db63610361afcc5eb9e0ac91e976d046114"
+  integrity sha512-kKfnnYkbTfrAdd0xICNFw7Atm8nKpLcLv9AZGEt+kczL/WQVai4e2V6ZN8U/O+iI6WrNuJjNNOyu4zfhl9D3Hg==
