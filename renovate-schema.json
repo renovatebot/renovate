@@ -1065,6 +1065,16 @@
       },
       "$ref": "#"
     },
+    "sbt": {
+      "description": "Configuration object for *.sbt files",
+      "type": "object",
+      "default": {
+        "fileMatch": ["\\.sbt$"],
+        "timeout": 300,
+        "versionScheme": "ivy"
+      },
+      "$ref": "#"
+    },
     "compatibility": {
       "description": "Configuration object for compatibility",
       "type": "object",

@@ -80,6 +80,9 @@ Object {
   "ruby-version": Array [
     Object {},
   ],
+  "sbt": Array [
+    Object {},
+  ],
   "terraform": Array [
     Object {},
   ],

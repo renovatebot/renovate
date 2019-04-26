@@ -937,6 +937,11 @@ Set this to false either globally, per-language, or per-package if you want to d
 
 ## ruby-version
 
+## sbt
+
+It isn't supporting Scala version inference well (`%%` operator), just searching for package like `<artifactId>_<scalaVersion>` without any additional resolving.
+In case of problems, please use explicit versions with `%` operator.
+
 ## schedule
 
 The `schedule` option allows you to define times of week or month for Renovate updates. Running Renovate around the clock may seem too "noisy" for some projects and therefore `schedule` is a good way to reduce the noise by reducing the timeframe in which Renovate will operate on your repository.
