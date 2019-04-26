@@ -1122,7 +1122,7 @@
       "description": "Configuration object for homebrew",
       "type": "object",
       "default": {
-        "enabled": false,
+        "enabled": true,
         "commitMessageTopic": "Homebrew Formula {{depName}}",
         "managerBranchPrefix": "homebrew-",
         "fileMatch": ["^Formula/[^/]+[.]rb$"]

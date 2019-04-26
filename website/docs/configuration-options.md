@@ -291,6 +291,8 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 
 And then the branchName would be `renovate/eslint` instead.
 
+## homebrew
+
 ## hostRules
 
 Example for configuring `docker` auth:
