@@ -264,6 +264,8 @@ Configuration added here applies for all Go-related updates, however currently t
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
+You might interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
+
 ## gradle
 
 Configuration for Java gradle projects
@@ -743,10 +745,10 @@ Warning: `pipenv` support is currently in beta, so it is not enabled by default.
 
 ## postUpdateOptions
 
-`gomodTidy`: Run `go mod tidy` after Go module updates
-`npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
-`yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
-`yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
+- `gomodTidy`: Run `go mod tidy` after Go module updates
+- `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
+- `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
+- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
 
 ## prBodyColumns
 
