@@ -1,6 +1,4 @@
-FROM node:lts-alpine@sha256:313c5c88acc0ec12a9abca9a83719065dfd54e94ffc56464b7ce24998dd2838d
-
-WORKDIR /usr/src/app/
+FROM node:lts-alpine@sha256:313c5c88acc0ec12a9abca9a83719065dfd54e94ffc56464b7ce24998dd2838d AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
@@ -157,7 +155,7 @@ ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
-COPY --from=0 /usr/src/app/dist dist
+COPY --from=tsbuild dist dist
 COPY bin bin
 
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
