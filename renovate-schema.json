@@ -1122,6 +1122,8 @@
       "type": "object",
       "default": {
         "enabled": false,
+        "commitMessageTopic": "Homebrew Formula {{depName}}",
+        "managerBranchPrefix": "homebrew-",
         "fileMatch": ["^Formula/[^/]+[.]rb$"]
       },
       "$ref": "#"
