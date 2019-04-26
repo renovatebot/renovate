@@ -806,26 +806,6 @@ describe('platform/gitlab', () => {
       expect(pr).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();
     });
-    it('auto-accepts the MR when requested', async () => {
-      get.post.mockReturnValueOnce({
-        body: {
-          id: 1,
-          iid: 12345,
-        },
-      });
-      const _ = 42;
-      const automerge = true;
-      await gitlab.createPr(
-        'some-branch',
-        'some-title',
-        'the-body',
-        [],
-        true,
-        _,
-        automerge
-      );
-      expect(get.put.mock.calls).toMatchSnapshot();
-    });
   });
   describe('getPr(prNo)', () => {
     it('returns the PR', async () => {

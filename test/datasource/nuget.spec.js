@@ -268,6 +268,21 @@ describe('datasource/nuget', () => {
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
     });
+    it('processes real data (v3) feed is not a nuget.org with mismatch', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(nugetIndexV3),
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        body: JSON.parse(pkgListV3),
+        statusCode: 200,
+      });
+      const res = await datasource.getPkgReleases({
+        ...configV3NotNugetOrg,
+        lookupName: 'nun',
+      });
+      expect(res).toBeNull();
+    });
     it('processes real data without project url (v3)', async () => {
       got.mockReturnValueOnce({
         body: JSON.parse(nugetIndexV3),

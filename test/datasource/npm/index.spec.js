@@ -365,10 +365,12 @@ describe('api/npm', () => {
     expect(res1).toEqual(res2);
   });
   it('should use global cache', async () => {
-    const dummyValue = 'abc123';
-    await global.renovateCache.set('datasource-npm', 'foobar', dummyValue, 10);
+    const dep = {
+      name: 'abc123',
+    };
+    await global.renovateCache.set('datasource-npm', 'foobar', dep, 10);
     const res = await npm.getPkgReleases({ lookupName: 'foobar' });
-    expect(res).toEqual(dummyValue);
+    expect(res).toEqual(dep);
   });
   it('should fetch package info from custom registry', async () => {
     nock('https://npm.mycustomregistry.com')

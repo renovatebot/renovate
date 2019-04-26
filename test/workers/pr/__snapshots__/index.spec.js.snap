@@ -67,7 +67,6 @@ Array [
   Array [],
   false,
   false,
-  false,
 ]
 `;
 
@@ -112,7 +111,6 @@ Array [
   Array [],
   false,
   false,
-  true,
 ]
 `;
 
@@ -174,7 +172,6 @@ note 2
   Array [],
   false,
   false,
-  false,
 ]
 `;
 
@@ -217,7 +214,6 @@ Array [
 
  - [ ] <!-- renovate-rebase -->If you want to rebase/retry this PR, check this box",
   Array [],
-  false,
   false,
   false,
 ]
