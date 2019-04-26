@@ -6,7 +6,7 @@ const globalWorker = require('./workers/global');
 (async () => {
   await globalWorker.start();
   // istanbul ignore if
-  if (global.renovateError) {
+  if ((global as any).renovateError) {
     process.exitCode = 1;
   }
 })();
