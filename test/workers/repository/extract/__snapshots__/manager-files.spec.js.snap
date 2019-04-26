@@ -14,7 +14,7 @@ Array [
     "packageJsonName": undefined,
     "packageJsonType": "app",
     "packageJsonVersion": undefined,
-    "pnpmShrinkwrap": "shrinkwrap.yaml",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
     "skipInstalls": true,
     "yarnLock": "yarn.lock",
     "yarnWorkspacesPackages": undefined,

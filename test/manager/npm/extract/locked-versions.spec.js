@@ -62,7 +62,7 @@ describe('manager/npm/extract/locked-versions', () => {
     it('ignores pnpm', async () => {
       const packageFiles = [
         {
-          pnpmShrinkwrap: 'shrinkwrap.yaml',
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
           deps: [
             {
               depName: 'a',
