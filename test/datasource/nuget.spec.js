@@ -27,6 +27,15 @@ const pkgListV2WithoutProjectUrl = fs.readFileSync(
   'utf8'
 );
 
+const pkgListV2Page1of2 = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV2_paginated_1.xml',
+  'utf8'
+);
+const pkgListV2Page2of2 = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV2_paginated_2.xml',
+  'utf8'
+);
+
 const nugetIndexV3 = fs.readFileSync(
   'test/datasource/nuget/_fixtures/indexV3.json',
   'utf8'
@@ -322,6 +331,21 @@ describe('datasource/nuget', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).not.toBeDefined();
+    });
+    it('handles paginated results (v2)', async () => {
+      got.mockReturnValueOnce({
+        body: pkgListV2Page1of2,
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        body: pkgListV2Page2of2,
+        statusCode: 200,
+      });
+      const res = await datasource.getPkgReleases({
+        ...configV2,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
     });
   });
 });
