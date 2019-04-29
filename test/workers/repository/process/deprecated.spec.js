@@ -52,8 +52,16 @@ describe('workers/repository/process/deprecated', () => {
           },
         ],
       };
+      const mockIssue = [
+        {
+          title: 'Dependency deprecation warning: mockDependency (mockManager)',
+          state: 'open',
+        },
+      ];
+      platform.getIssueList = jest.fn(() => mockIssue);
       await raiseDeprecationWarnings(config, packageFiles);
       expect(platform.ensureIssue.mock.calls).toMatchSnapshot();
+      expect(platform.getIssueList).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
     });
   });
