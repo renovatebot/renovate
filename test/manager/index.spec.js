@@ -21,7 +21,7 @@ describe('manager', () => {
       expect(manager.extractAllPackageFiles('dockerfile', [])).toBeNull();
     });
     it('returns non-null', () => {
-      expect(manager.extractAllPackageFiles('npm', [])).not.toBeNull();
+      expect(manager.extractAllPackageFiles('npm', {}, [])).not.toBeNull();
     });
   });
 });
