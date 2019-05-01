@@ -44,6 +44,9 @@ Object {
   "gradle-wrapper": Array [
     Object {},
   ],
+  "homebrew": Array [
+    Object {},
+  ],
   "kubernetes": Array [
     Object {},
   ],
@@ -81,6 +84,9 @@ Object {
     Object {},
   ],
   "ruby-version": Array [
+    Object {},
+  ],
+  "sbt": Array [
     Object {},
   ],
   "terraform": Array [

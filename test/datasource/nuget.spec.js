@@ -27,6 +27,15 @@ const pkgListV2WithoutProjectUrl = fs.readFileSync(
   'utf8'
 );
 
+const pkgListV2Page1of2 = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV2_paginated_1.xml',
+  'utf8'
+);
+const pkgListV2Page2of2 = fs.readFileSync(
+  'test/datasource/nuget/_fixtures/nunitV2_paginated_2.xml',
+  'utf8'
+);
+
 const nugetIndexV3 = fs.readFileSync(
   'test/datasource/nuget/_fixtures/indexV3.json',
   'utf8'
@@ -268,6 +277,21 @@ describe('datasource/nuget', () => {
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
     });
+    it('processes real data (v3) feed is not a nuget.org with mismatch', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(nugetIndexV3),
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        body: JSON.parse(pkgListV3),
+        statusCode: 200,
+      });
+      const res = await datasource.getPkgReleases({
+        ...configV3NotNugetOrg,
+        lookupName: 'nun',
+      });
+      expect(res).toBeNull();
+    });
     it('processes real data without project url (v3)', async () => {
       got.mockReturnValueOnce({
         body: JSON.parse(nugetIndexV3),
@@ -307,6 +331,21 @@ describe('datasource/nuget', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).not.toBeDefined();
+    });
+    it('handles paginated results (v2)', async () => {
+      got.mockReturnValueOnce({
+        body: pkgListV2Page1of2,
+        statusCode: 200,
+      });
+      got.mockReturnValueOnce({
+        body: pkgListV2Page2of2,
+        statusCode: 200,
+      });
+      const res = await datasource.getPkgReleases({
+        ...configV2,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
     });
   });
 });

@@ -13,7 +13,7 @@ Array [
         "depName": "b",
       },
     ],
-    "pnpmShrinkwrap": "shrinkwrap.yaml",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
 ]
 `;

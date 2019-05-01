@@ -13,6 +13,7 @@ describe('platform/bitbucket-server', () => {
       beforeEach(() => {
         // reset module
         jest.resetModules();
+        jest.mock('delay');
         jest.mock('got', () => (url, options) => {
           const { method } = options;
           const body = mockResponses[url] && mockResponses[url][method];

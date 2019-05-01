@@ -250,12 +250,20 @@
       "default": []
     },
     "ignorePaths": {
-      "description": "Skip any package.json whose path matches one of these. Can be string or glob pattern",
+      "description": "Skip any package file whose path matches one of these. Can be string or glob pattern",
       "type": "array",
       "items": {
         "type": "string"
       },
       "default": ["**/node_modules/**", "**/bower_components/**"]
+    },
+    "excludeCommitPaths": {
+      "description": "A file that matches any of these glob patterns will not be committed, even if it has been updated.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     },
     "engines": {
       "description": "Configuration specifically for `package.json`>`engines`",
@@ -840,6 +848,7 @@
       "$ref": "#"
     },
     "ruby-version": {
+      "description": "Configuration object for .ruby-version updating",
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)\\.ruby-version$"],
@@ -1066,6 +1075,16 @@
       },
       "$ref": "#"
     },
+    "sbt": {
+      "description": "Configuration object for *.sbt files",
+      "type": "object",
+      "default": {
+        "fileMatch": ["\\.sbt$"],
+        "timeout": 300,
+        "versionScheme": "ivy"
+      },
+      "$ref": "#"
+    },
     "compatibility": {
       "description": "Configuration object for compatibility",
       "type": "object",
@@ -1124,6 +1143,17 @@
       "type": "object",
       "default": {
         "fileMatch": ["\\.csproj$"]
+      },
+      "$ref": "#"
+    },
+    "homebrew": {
+      "description": "Configuration object for homebrew",
+      "type": "object",
+      "default": {
+        "enabled": true,
+        "commitMessageTopic": "Homebrew Formula {{depName}}",
+        "managerBranchPrefix": "homebrew-",
+        "fileMatch": ["^Formula/[^/]+[.]rb$"]
       },
       "$ref": "#"
     },
