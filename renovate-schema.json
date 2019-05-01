@@ -1136,6 +1136,17 @@
       },
       "$ref": "#"
     },
+    "homebrew": {
+      "description": "Configuration object for homebrew",
+      "type": "object",
+      "default": {
+        "enabled": true,
+        "commitMessageTopic": "Homebrew Formula {{depName}}",
+        "managerBranchPrefix": "homebrew-",
+        "fileMatch": ["^Formula/[^/]+[.]rb$"]
+      },
+      "$ref": "#"
+    },
     "hostRules": {
       "description": "Host rules/configuration including credentials",
       "type": "array"
