@@ -236,6 +236,16 @@ See https://renovatebot.com/docs/private-modules for details on how this is used
 
 Extend this if you wish to configure rules specifically for `engines` definitions. Currently only `node` is supported.
 
+## excludeCommitPaths
+
+Be careful you know what you're doing with this option. The initial intended use is to allow the user to exclude certain dependencies from being added/removed/modified when "vendoring" dependencies. Example:
+
+```json
+{
+  "excludeCommitPaths": ["vendor/golang.org/x/text/**"]
+}
+```
+
 ## extends
 
 See https://renovatebot.com/docs/config-presets for details.
@@ -264,6 +274,8 @@ Configuration added here applies for all Go-related updates, however currently t
 
 Configuration for Go Modules (`go mod`). Supersedes anything in the `go` config object.
 
+You might interested to add `"postUpdateOptions": ["gomodTidy"]` to your config if you'd like Renovate to run `go mod tidy` after any update.
+
 ## gradle
 
 Configuration for Java gradle projects
@@ -290,6 +302,8 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
 ```
 
 And then the branchName would be `renovate/eslint` instead.
+
+## homebrew
 
 ## hostRules
 
@@ -747,10 +761,10 @@ Warning: `pipenv` support is currently in beta, so it is not enabled by default.
 
 ## postUpdateOptions
 
-`gomodTidy`: Run `go mod tidy` after Go module updates
-`npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
-`yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
-`yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
+- `gomodTidy`: Run `go mod tidy` after Go module updates
+- `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
+- `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
+- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
 
 ## prBodyColumns
 
@@ -928,6 +942,11 @@ Set this to false either globally, per-language, or per-package if you want to d
 ## ruby
 
 ## ruby-version
+
+## sbt
+
+It isn't supporting Scala version inference well (`%%` operator), just searching for package like `<artifactId>_<scalaVersion>` without any additional resolving.
+In case of problems, please use explicit versions with `%` operator.
 
 ## schedule
 

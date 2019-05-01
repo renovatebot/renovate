@@ -126,6 +126,13 @@ ENV PATH="/home/ubuntu/.local/bin:$PATH"
 
 RUN pip install --user pipenv
 
+# Poetry
+
+RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+
+ENV PATH="/home/ubuntu/.poetry/bin:$PATH"
+RUN poetry config settings.virtualenvs.create false
+
 # npm
 
 ENV NPM_VERSION=6.9.0
