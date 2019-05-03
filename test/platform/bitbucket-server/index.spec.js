@@ -409,6 +409,25 @@ describe('platform/bitbucket-server', () => {
           expect(api.get.mock.calls).toMatchSnapshot();
         });
 
+        it('canRebase', async () => {
+          expect.assertions(4);
+          await initRepo();
+          const author = global.gitAuthor;
+          try {
+            expect(await bitbucket.getPr(3)).toMatchSnapshot();
+
+            global.gitAuthor = { email: 'bot@renovateapp.com' };
+            expect(await bitbucket.getPr(5)).toMatchSnapshot();
+
+            global.gitAuthor = { email: 'jane@example.com' };
+            expect(await bitbucket.getPr(5)).toMatchSnapshot();
+
+            expect(api.get.mock.calls).toMatchSnapshot();
+          } finally {
+            global.gitAuthor = author;
+          }
+        });
+
         it('gets a closed PR', async () => {
           expect.assertions(2);
           await initRepo();

@@ -160,12 +160,29 @@ function generateServerResponses(endpoint) {
         values: [generatePR(endpoint, 'SOME', 'repo')],
       },
     },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3`]: {
+      GET: generatePR(endpoint, 'SOME', 'repo'),
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/merge`]: {
+      GET: { conflicted: false },
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true`]: {
+      GET: {
+        totalCount: 2,
+      },
+    },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`]: {
       GET: Promise.reject({ statusCode: 404 }),
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`]: {
       GET: generatePR(endpoint, 'SOME', 'repo'),
       PUT: generatePR(endpoint, 'SOME', 'repo'),
+    },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`]: {
+      GET: {
+        totalCount: 1,
+        values: [ { author: { emailAddress: 'bot@renovateapp.com'} } ],
+      },
     },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/participants`]: {
       POST: {
