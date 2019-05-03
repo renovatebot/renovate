@@ -167,6 +167,12 @@ function generateServerResponses(endpoint) {
       GET: generatePR(endpoint, 'SOME', 'repo'),
       PUT: generatePR(endpoint, 'SOME', 'repo'),
     },
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`]: {
+      GET: {
+        totalCount: 1,
+        values: [ { author: { emailAddress: 'jane@example.com'} } ],
+      },
+    },
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/participants`]: {
       POST: {
         user: {
