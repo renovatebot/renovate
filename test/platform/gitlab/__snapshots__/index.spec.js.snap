@@ -16,57 +16,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab commitFilesToBranch(branchName, files, message, parentBranch) creates file 1`] = `
-Array [
-  Array [
-    "projects/undefined/repository/commits",
-    Object {
-      "body": Object {
-        "actions": Array [
-          Object {
-            "action": "create",
-            "content": "c29tZSBuZXctY29udGVudHM=",
-            "encoding": "base64",
-            "file_path": "some-new-file",
-          },
-        ],
-        "branch": "renovate/something",
-        "commit_message": "Create something",
-        "start_branch": undefined,
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/gitlab commitFilesToBranch(branchName, files, message, parentBranch) updates multiple files 1`] = `
-Array [
-  Array [
-    "projects/undefined/repository/commits",
-    Object {
-      "body": Object {
-        "actions": Array [
-          Object {
-            "action": "update",
-            "content": "dXBkYXRlZCBjb250ZW50",
-            "encoding": "base64",
-            "file_path": "some-existing-file",
-          },
-          Object {
-            "action": "update",
-            "content": "b3RoZXIgdXBkYXRlZCBjb250ZW50",
-            "encoding": "base64",
-            "file_path": "some-other-existing-file",
-          },
-        ],
-        "branch": "renovate/something",
-        "commit_message": "Update something",
-        "start_branch": undefined,
-      },
-    },
-  ],
-]
-`;
+exports[`platform/gitlab commitFilesToBranch() sends to gitFs 1`] = `Array []`;
 
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 1`] = `
 Object {
@@ -169,15 +119,6 @@ content",
 ]
 `;
 
-exports[`platform/gitlab getAllRenovateBranches() should return all renovate branches 1`] = `
-Array [
-  "renovate/a",
-  "renovate/b",
-]
-`;
-
-exports[`platform/gitlab getBranchLastCommitTime should return a Date 1`] = `2012-09-20T08:50:22.000Z`;
-
 exports[`platform/gitlab getBranchPr(branchName) should return the PR object 1`] = `
 Object {
   "additions": 1,
@@ -186,7 +127,6 @@ Object {
   },
   "body": undefined,
   "branchName": "some-branch",
-  "canMerge": true,
   "canRebase": false,
   "commits": 1,
   "deletions": 1,
@@ -197,30 +137,6 @@ Object {
   "source_branch": "some-branch",
   "state": "open",
 }
-`;
-
-exports[`platform/gitlab getCommitMessages() returns commits messages 1`] = `
-Array [
-  "foo",
-  "bar",
-]
-`;
-
-exports[`platform/gitlab getFile(filePath, branchName) gets the file 1`] = `"~�"`;
-
-exports[`platform/gitlab getFile(filePath, branchName) throws error for non-404 1`] = `
-Object {
-  "statusCode": 403,
-}
-`;
-
-exports[`platform/gitlab getFileList should return the files matching the fileName 1`] = `
-Array [
-  "package.json",
-  "some-dir/package.json.some-thing-else",
-  "src/app/package.json",
-  "src/otherapp/package.json",
-]
 `;
 
 exports[`platform/gitlab getPr(prNo) returns the PR 1`] = `
@@ -256,6 +172,24 @@ Object {
   "isConflicted": true,
   "isStale": true,
   "merge_status": "cannot_be_merged",
+  "number": 12345,
+  "source_branch": "some-branch",
+  "state": "open",
+}
+`;
+
+exports[`platform/gitlab getPr(prNo) returns the mergeable PR 1`] = `
+Object {
+  "body": "a merge request",
+  "branchName": "some-branch",
+  "canMerge": true,
+  "canRebase": false,
+  "description": "a merge request",
+  "displayNumber": "Merge Request #12345",
+  "diverged_commits_count": 5,
+  "id": 1,
+  "iid": 12345,
+  "isStale": true,
   "number": 12345,
   "source_branch": "some-branch",
   "state": "open",
@@ -326,18 +260,6 @@ Array [
   Array [
     "user",
   ],
-  Array [
-    "projects/some%2Frepo%2Fproject/merge_requests?per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "projects/some%2Frepo%2Fproject/repository/tree?ref=undefined&per_page=100&recursive=true",
-    Object {
-      "paginate": true,
-    },
-  ],
 ]
 `;
 
@@ -348,18 +270,6 @@ Array [
   ],
   Array [
     "user",
-  ],
-  Array [
-    "projects/some%2Frepo/merge_requests?per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
-    Object {
-      "paginate": true,
-    },
   ],
 ]
 `;
@@ -374,18 +284,6 @@ Array [
   Array [
     "user",
   ],
-  Array [
-    "projects/some%2Frepo/merge_requests?per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
-    Object {
-      "paginate": true,
-    },
-  ],
 ]
 `;
 
@@ -398,18 +296,6 @@ Array [
   ],
   Array [
     "user",
-  ],
-  Array [
-    "projects/some%2Frepo/merge_requests?per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
-    Object {
-      "paginate": true,
-    },
   ],
 ]
 `;
@@ -424,58 +310,18 @@ Array [
   Array [
     "user",
   ],
-  Array [
-    "projects/some%2Frepo/merge_requests?per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-  Array [
-    "projects/some%2Frepo/repository/tree?ref=undefined&per_page=100&recursive=true",
-    Object {
-      "paginate": true,
-    },
-  ],
 ]
 `;
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 3 2`] = `Object {}`;
 
-exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 1`] = `
-Array [
-  Array [
-    "projects/some%2Frepo/repository/commits/thebranchname/cherry_pick?branch=undefined",
-  ],
-]
-`;
-
-exports[`platform/gitlab mergeBranch(branchName) should perform a branch merge 2`] = `
-Array [
-  Array [
-    "projects/some%2Frepo/repository/branches/thebranchname",
-  ],
-]
-`;
-
-exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 1`] = `[Error: Branch automerge failed]`;
-
-exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 2`] = `
-Array [
-  Array [
-    "projects/some%2Frepo/repository/commits/thebranchname/cherry_pick?branch=undefined",
-  ],
-]
-`;
-
-exports[`platform/gitlab mergeBranch(branchName) should throw if branch merge throws 3`] = `Array []`;
-
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
-    "projects/undefined/repository/tree?ref=some-branch&per_page=100&recursive=true",
-    Object {
-      "paginate": true,
-    },
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
   ],
 ]
 `;

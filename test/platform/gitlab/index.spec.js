@@ -3,6 +3,7 @@ const hostRules = require('../../../lib/util/host-rules');
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
+  let GitStorage;
   beforeEach(() => {
     // clean up hostRules
     hostRules.clear();
@@ -12,6 +13,31 @@ describe('platform/gitlab', () => {
     jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
     gitlab = require('../../../lib/platform/gitlab');
     get = require('../../../lib/platform/gitlab/gl-got-wrapper');
+    jest.mock('../../../lib/platform/git/storage');
+    GitStorage = require('../../../lib/platform/git/storage');
+    GitStorage.mockImplementation(() => ({
+      initRepo: jest.fn(),
+      cleanRepo: jest.fn(),
+      getFileList: jest.fn(),
+      branchExists: jest.fn(() => true),
+      isBranchStale: jest.fn(() => false),
+      setBaseBranch: jest.fn(),
+      getBranchLastCommitTime: jest.fn(),
+      getAllRenovateBranches: jest.fn(),
+      getCommitMessages: jest.fn(),
+      getFile: jest.fn(),
+      commitFilesToBranch: jest.fn(),
+      mergeBranch: jest.fn(),
+      deleteBranch: jest.fn(),
+      getRepoStatus: jest.fn(),
+      getBranchCommit: jest.fn(
+        () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+      ),
+    }));
+  });
+
+  afterEach(() => {
+    gitlab.cleanRepo();
   });
 
   describe('getRepos', () => {
@@ -55,7 +81,8 @@ describe('platform/gitlab', () => {
   });
   describe('getRepoStatus()', () => {
     it('exists', async () => {
-      expect(await gitlab.getRepoStatus()).toEqual({});
+      await initRepo();
+      await gitlab.getRepoStatus();
     });
   });
   describe('cleanRepo()', () => {
@@ -86,7 +113,14 @@ describe('platform/gitlab', () => {
         },
       ],
     });
-    return gitlab.initRepo(...args);
+    if (args.length) {
+      return gitlab.initRepo(...args);
+    }
+    return gitlab.initRepo({
+      endpoint: 'https://gitlab.com',
+      repository: 'some/repo',
+      token: 'token',
+    });
   }
 
   describe('initRepo', () => {
@@ -151,153 +185,47 @@ describe('platform/gitlab', () => {
   });
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch', async () => {
+      await initRepo();
       await gitlab.setBaseBranch('some-branch');
       expect(get.mock.calls).toMatchSnapshot();
     });
   });
-  describe('getFileList', () => {
-    it('returns empty array if error', async () => {
-      get.mockImplementationOnce(() => {
-        throw new Error('some error');
-      });
-      const files = await gitlab.getFileList();
-      expect(files).toEqual([]);
-    });
-    it('warns if truncated result', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [],
-      }));
-      const files = await gitlab.getFileList();
-      expect(files).toHaveLength(0);
-    });
-    it('caches the result', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [],
-      }));
-      let files = await gitlab.getFileList();
-      expect(files).toHaveLength(0);
-      files = await gitlab.getFileList();
-      expect(files).toHaveLength(0);
-    });
-    it('should return the files matching the fileName', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [
-          { type: 'blob', path: 'symlinks/package.json', mode: '120000' },
-          { type: 'blob', path: 'package.json' },
-          {
-            type: 'blob',
-            path: 'some-dir/package.json.some-thing-else',
-          },
-          { type: 'blob', path: 'src/app/package.json' },
-          { type: 'blob', path: 'src/otherapp/package.json' },
-        ],
-      }));
-      const files = await gitlab.getFileList();
-      expect(files).toMatchSnapshot();
+  describe('getFileList()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await gitlab.getFileList();
     });
   });
-  describe('branchExists(branchName)', () => {
-    it('should return true if 200 OK', async () => {
-      get.mockImplementationOnce(() => ({ statusCode: 200 }));
-      const branchExists = await gitlab.branchExists('foo');
-      expect(branchExists).toBe(true);
-    });
-    it('should return false if not 200 OK', async () => {
-      get.mockImplementationOnce(() => ({ statusCode: 500 }));
-      const branchExists = await gitlab.branchExists('foo');
-      expect(branchExists).toBe(false);
-    });
-    it('should return false if 404 error received', async () => {
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
-      const branchExists = await gitlab.branchExists('foo');
-      expect(branchExists).toBe(false);
-    });
-    it('should return error if non-404 error thrown', async () => {
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 500,
-        })
-      );
-      await expect(gitlab.branchExists('foo')).rejects.toEqual({
-        statusCode: 500,
+  describe('branchExists()', () => {
+    describe('getFileList()', () => {
+      it('sends to gitFs', async () => {
+        await initRepo();
+        await gitlab.branchExists();
       });
     });
   });
   describe('getAllRenovateBranches()', () => {
-    it('should return all renovate branches', async () => {
-      const search = 'renovate/';
-      get.mockImplementationOnce(path => {
-        expect(path).toBe(
-          'projects/undefined/repository/branches?search=^renovate%2F'
-        );
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await gitlab.getAllRenovateBranches();
+    });
+  });
 
-        return {
-          body: [
-            {
-              name: 'renovate/a',
-            },
-            {
-              name: 'renovate/b',
-            },
-          ],
-        };
-      });
-      const res = await gitlab.getAllRenovateBranches(search);
-      expect(res).toMatchSnapshot();
+  describe('getBranchLastCommitTime()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await gitlab.getBranchLastCommitTime();
     });
   });
   describe('isBranchStale()', () => {
-    it('should return false if same SHA as master', async () => {
-      // getBranchDetails - same as master
-      get.mockImplementationOnce(() => ({
-        body: {
-          commit: {
-            parent_ids: ['1234'],
-          },
-        },
-      }));
-      // getBranchDetails - master
-      get.mockImplementationOnce(() => ({
-        body: {
-          commit: {
-            id: '1234',
-          },
-        },
-      }));
-      expect(await gitlab.isBranchStale('thebranchname')).toBe(false);
-    });
-    it('should return true if SHA different from master', async () => {
-      // getBranchDetails - different from master
-      get.mockImplementationOnce(() => ({
-        body: {
-          commit: {
-            parent_ids: ['12345678'],
-          },
-        },
-      }));
-      // getBranchDetails - master
-      get.mockImplementationOnce(() => ({
-        body: {
-          commit: {
-            id: '1234',
-          },
-        },
-      }));
-      expect(await gitlab.isBranchStale('thebranchname')).toBe(true);
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await gitlab.isBranchStale();
     });
   });
   describe('getBranchPr(branchName)', () => {
-    it('should return null if branch does not exist', async () => {
-      get.mockReturnValueOnce({ statusCode: 500 }); // branchExists
-      const pr = await gitlab.getBranchPr('somebranch');
-      expect(pr).toBeNull();
-    });
     it('should return null if no PR exists', async () => {
-      get.mockReturnValueOnce({ statusCode: 200 }); // branchExists
+      await initRepo();
       get.mockReturnValueOnce({
         // branchExists
         body: [],
@@ -306,7 +234,7 @@ describe('platform/gitlab', () => {
       expect(pr).toBeNull();
     });
     it('should return the PR object', async () => {
-      get.mockReturnValueOnce({ statusCode: 200 }); // branchExists
+      await initRepo();
       get.mockReturnValueOnce({
         body: [{ number: 91, source_branch: 'somebranch' }],
       });
@@ -349,6 +277,7 @@ describe('platform/gitlab', () => {
       expect(res).toEqual('failed');
     });
     it('returns pending if no results', async () => {
+      await initRepo();
       get.mockReturnValueOnce({
         body: [],
       });
@@ -356,6 +285,7 @@ describe('platform/gitlab', () => {
       expect(res).toEqual('pending');
     });
     it('returns success if all are success', async () => {
+      await initRepo();
       get.mockReturnValueOnce({
         body: [{ status: 'success' }, { status: 'success' }],
       });
@@ -363,6 +293,7 @@ describe('platform/gitlab', () => {
       expect(res).toEqual('success');
     });
     it('returns success if optional jobs fail', async () => {
+      await initRepo();
       get.mockReturnValueOnce({
         body: [
           { status: 'success' },
@@ -373,6 +304,7 @@ describe('platform/gitlab', () => {
       expect(res).toEqual('success');
     });
     it('returns failure if any mandatory jobs fails', async () => {
+      await initRepo();
       get.mockReturnValueOnce({
         body: [
           { status: 'success' },
@@ -384,6 +316,7 @@ describe('platform/gitlab', () => {
       expect(res).toEqual('failure');
     });
     it('returns custom statuses', async () => {
+      await initRepo();
       get.mockReturnValueOnce({
         body: [{ status: 'success' }, { status: 'foo' }],
       });
@@ -392,15 +325,7 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getBranchStatusCheck', () => {
-    beforeEach(() => {
-      get.mockReturnValueOnce({
-        body: {
-          commit: {
-            id: 1,
-          },
-        },
-      });
-    });
+    beforeEach(() => initRepo());
     it('returns null if no results', async () => {
       get.mockReturnValueOnce({
         body: [],
@@ -438,14 +363,7 @@ describe('platform/gitlab', () => {
   });
   describe('setBranchStatus', () => {
     it('sets branch status', async () => {
-      // getBranchCommit
-      get.mockReturnValueOnce({
-        body: {
-          commit: {
-            id: 1,
-          },
-        },
-      });
+      await initRepo();
       await gitlab.setBranchStatus(
         'some-branch',
         'some-context',
@@ -456,95 +374,16 @@ describe('platform/gitlab', () => {
       expect(get.post).toHaveBeenCalledTimes(1);
     });
   });
-  describe('mergeBranch(branchName)', () => {
-    it('should perform a branch merge', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      });
-
-      await gitlab.mergeBranch('thebranchname');
-
-      // deleteBranch
-      get.delete.mockImplementationOnce();
-
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.delete.mock.calls).toMatchSnapshot();
-    });
-    it('should throw if branch merge throws', async () => {
-      await initRepo({
-        repository: 'some/repo',
-        token: 'token',
-      });
-      get.post.mockImplementationOnce(() => {
-        throw new Error('branch-push failed');
-      });
-
-      await expect(
-        gitlab.mergeBranch('thebranchname')
-      ).rejects.toMatchSnapshot();
-
-      // deleteBranch
-      get.delete.mockImplementationOnce();
-
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.delete.mock.calls).toMatchSnapshot();
+  describe('mergeBranch()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await gitlab.mergeBranch('branch');
     });
   });
-  describe('deleteBranch(branchName)', () => {
-    it('should send delete', async () => {
-      get.delete = jest.fn();
-      await gitlab.deleteBranch('some-branch');
-      expect(get.delete).toHaveBeenCalledTimes(1);
-    });
-    it('should close PR', async () => {
-      get.delete = jest.fn();
-      get.mockReturnValueOnce({ body: [] }); // getBranchPr
-      await gitlab.deleteBranch('some-branch', true);
-      expect(get.delete).toHaveBeenCalledTimes(1);
-    });
-  });
-  describe('getBranchLastCommitTime', () => {
-    it('should return a Date', async () => {
-      get.mockReturnValueOnce({
-        body: [
-          {
-            id: 'ed899a2f4b50b4370feeea94676502b42383c746',
-            short_id: 'ed899a2f4b5',
-            title: 'Replace sanitize with escape once',
-            author_name: 'Dmitriy Zaporozhets',
-            author_email: 'dzaporozhets@sphereconsultinginc.com',
-            authored_date: '2012-09-20T11:50:22+03:00',
-            committer_name: 'Administrator',
-            committer_email: 'admin@example.com',
-            committed_date: '2012-09-20T11:50:22+03:00',
-            created_at: '2012-09-20T11:50:22+03:00',
-            message: 'Replace sanitize with escape once',
-            parent_ids: ['6104942438c14ec7bd21c6cd5bd995272b3faff6'],
-          },
-          {
-            id: '6104942438c14ec7bd21c6cd5bd995272b3faff6',
-            short_id: '6104942438c',
-            title: 'Sanitize for network graph',
-            author_name: 'randx',
-            author_email: 'dmitriy.zaporozhets@gmail.com',
-            committer_name: 'Dmitriy',
-            committer_email: 'dmitriy.zaporozhets@gmail.com',
-            created_at: '2012-09-20T09:06:12+03:00',
-            message: 'Sanitize for network graph',
-            parent_ids: ['ae1d9fb46aa2b07ee9836d49862ec4e2c46fbbba'],
-          },
-        ],
-      });
-      const res = await gitlab.getBranchLastCommitTime('some-branch');
-      expect(res).toMatchSnapshot();
-    });
-    it('handles error', async () => {
-      get.mockReturnValueOnce({
-        body: [],
-      });
-      const res = await gitlab.getBranchLastCommitTime('some-branch');
-      expect(res).toBeDefined();
+  describe('deleteBranch()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await gitlab.deleteBranch('branch', true);
     });
   });
   describe('findIssue()', () => {
@@ -828,6 +667,22 @@ describe('platform/gitlab', () => {
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
     });
+    it('returns the mergeable PR', async () => {
+      await initRepo();
+      get.mockReturnValueOnce({
+        body: {
+          id: 1,
+          iid: 12345,
+          description: 'a merge request',
+          state: 'open',
+          diverged_commits_count: 5,
+          source_branch: 'some-branch',
+        },
+      });
+      get.mockReturnValueOnce({ body: [{ status: 'success' }] }); // get commit statuses
+      const pr = await gitlab.getPr(12345);
+      expect(pr).toMatchSnapshot();
+    });
     it('returns the PR with nonexisting branch', async () => {
       get.mockImplementationOnce(() => ({
         body: {
@@ -897,114 +752,24 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(gitlab.getPrBody(prBody)).toMatchSnapshot();
     });
   });
-  describe('getFile(filePath, branchName)', () => {
-    beforeEach(async () => {
-      get.mockReturnValueOnce({ body: [{ type: 'blob', path: 'some-path' }] });
-      await gitlab.getFileList();
-    });
-    it('gets the file', async () => {
-      get.mockReturnValueOnce({
-        body: {
-          content: 'foo',
-        },
-      });
-      const res = await gitlab.getFile('some-path');
-      expect(res).toMatchSnapshot();
-    });
-    it('short cuts 404', async () => {
-      const res = await gitlab.getFile('some-missing-path');
-      expect(res).toBeNull();
-    });
-    it('returns null for 404', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 }));
-      const res = await gitlab.getFile('some-path', 'some-branch');
-      expect(res).toBeNull();
-    });
-    it('throws error for non-404', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 403 }));
-
-      await expect(
-        gitlab.getFile('some-path', 'some-branch')
-      ).rejects.toMatchSnapshot();
+  describe('getFile()', () => {
+    it('sends to gitFs', async () => {
+      await initRepo();
+      await gitlab.getFile();
     });
   });
-  describe('commitFilesToBranch(branchName, files, message, parentBranch)', () => {
-    it('creates file', async () => {
-      get.mockImplementationOnce(() => Promise.reject({ statusCode: 404 })); // file exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      const file = {
-        name: 'some-new-file',
-        contents: 'some new-contents',
-      };
-      await gitlab.commitFilesToBranch(
-        'renovate/something',
-        [file],
-        'Create something'
-      );
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.post).toHaveBeenCalledTimes(1);
-    });
-    it('updates multiple files', async () => {
-      // Two files exist
-      get.mockReturnValueOnce({
-        body: {
-          content: 'foo',
-        },
-      });
-      get.mockReturnValueOnce({
-        body: {
-          content: 'foo',
-        },
-      });
-      // branch exists
-      get.mockImplementationOnce(() => ({ statusCode: 200 }));
-      get.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      ); // branch exists
-      const files = [
-        {
-          name: 'some-existing-file',
-          contents: 'updated content',
-        },
-        {
-          name: 'some-other-existing-file',
-          contents: 'other updated content',
-        },
-      ];
-      await gitlab.commitFilesToBranch(
-        'renovate/something',
-        files,
-        'Update something'
-      );
-      expect(get.post.mock.calls).toMatchSnapshot();
-      expect(get.post).toHaveBeenCalledTimes(1);
+  describe('commitFilesToBranch()', () => {
+    it('sends to gitFs', async () => {
+      expect.assertions(1);
+      await initRepo();
+      await gitlab.commitFilesToBranch('some-branch', [{}]);
+      expect(get.get.mock.calls).toMatchSnapshot();
     });
   });
   describe('getCommitMessages()', () => {
-    it('returns commits messages', async () => {
-      get.mockReturnValueOnce({
-        body: [
-          {
-            title: 'foo',
-          },
-          {
-            title: 'bar',
-          },
-        ],
-      });
-      const res = await gitlab.getCommitMessages();
-      expect(res).toMatchSnapshot();
+    it('passes to gitFs', async () => {
+      await initRepo();
+      await gitlab.getCommitMessages();
     });
   });
   describe('getVulnerabilityAlerts()', () => {
