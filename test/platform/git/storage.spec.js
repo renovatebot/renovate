@@ -99,6 +99,7 @@ describe('platform/git/storage', () => {
   });
   describe('getAllRenovateBranches()', () => {
     it('should return all renovate branches', async () => {
+      await git.setBranchPrefix('renovate/');
       const res = await git.getAllRenovateBranches('renovate/');
       expect(res).toContain('renovate/past_branch');
       expect(res).toContain('renovate/future_branch');
