@@ -27,7 +27,7 @@ Array [
     "datasource": "hex",
     "depName": "secret",
     "lineNumber": 21,
-    "organization": "acme",
+    "lookupName": "undefined:undefined",
   },
   Object {
     "currentValue": ">2.1.0 and <=3.0.0",
