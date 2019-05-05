@@ -90,11 +90,6 @@ describe('platform/git/storage', () => {
     });
     it('should return false if not found', async () => {
       expect(await git.branchExists('not_found')).toBe(false);
-      const hex = await git.getBranchCommit('renovate/past_branch');
-      await git.createBranch('not_found', hex);
-      expect(await git.branchExists('not_found')).toBe(true);
-      await git.deleteBranch('not_found');
-      expect(await git.branchExists('not_found')).toBe(false);
     });
   });
   describe('getAllRenovateBranches()', () => {
