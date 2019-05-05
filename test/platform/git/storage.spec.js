@@ -129,6 +129,7 @@ describe('platform/git/storage', () => {
 
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
+      await git.setBranchPrefix('renovate/');
       await git.mergeBranch('renovate/future_branch');
       const merged = await Git(origin.path).branch([
         '--verbose',
