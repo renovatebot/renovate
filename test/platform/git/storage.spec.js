@@ -86,8 +86,14 @@ describe('platform/git/storage', () => {
   describe('branchExists(branchName)', () => {
     it('should return true if found', async () => {
       expect(await git.branchExists('renovate/future_branch')).toBe(true);
+      expect(await git.branchExists('renovate/future_branch')).toBe(true); // should come from cache
     });
     it('should return false if not found', async () => {
+      expect(await git.branchExists('not_found')).toBe(false);
+      const hex = await git.getBranchCommit('renovate/past_branch');
+      await git.createBranch('not_found', hex);
+      expect(await git.branchExists('not_found')).toBe(true);
+      await git.deleteBranch('not_found');
       expect(await git.branchExists('not_found')).toBe(false);
     });
   });

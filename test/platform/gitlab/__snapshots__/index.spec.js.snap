@@ -187,6 +187,7 @@ Object {
   "body": undefined,
   "branchName": "some-branch",
   "canMerge": true,
+  "canRebase": false,
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Merge Request #91",

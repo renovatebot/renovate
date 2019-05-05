@@ -10,8 +10,10 @@ This document describes all the configuration options you may configure in a Ren
 You can store your Renovate configuration file in one of the following locations:
 
 - `.github/renovate.json`
+- `.github/renovate.json5`
 - `.renovaterc.json`
 - `renovate.json`
+- `renovate.json5`
 - `.renovaterc`
 - `package.json` _(within a `"renovate"` section)_
 

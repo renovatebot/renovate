@@ -241,6 +241,7 @@ Object {
   "body": "* Line 1
 * Line 2",
   "branchName": "userName1/pullRequest5",
+  "canRebase": false,
   "createdAt": 1547853840016,
   "number": 5,
   "state": "open",
@@ -319,6 +320,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -435,6 +439,113 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with no path getPr() canRebase 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": false,
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "isConflicted": false,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getPr() canRebase 2`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": true,
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "isConflicted": false,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getPr() canRebase 3`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": false,
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "isConflicted": false,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with no path getPr() canRebase 4`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with no path getPr() gets a PR 1`] = `
 Object {
   "body": "* Line 1
@@ -472,6 +583,9 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
 ]
 `;
 
@@ -479,6 +593,7 @@ exports[`platform/bitbucket-server endpoint with no path getPr() gets a closed P
 Object {
   "body": undefined,
   "branchName": undefined,
+  "canRebase": false,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
@@ -531,6 +646,7 @@ Array [
     "body": "* Line 1
 * Line 2",
     "branchName": "userName1/pullRequest5",
+    "canRebase": false,
     "createdAt": 1547853840016,
     "number": 5,
     "state": "open",
@@ -598,6 +714,9 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
   Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "useCache": false,
@@ -605,6 +724,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -633,6 +755,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -668,6 +793,9 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
 ]
 `;
 
@@ -695,6 +823,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -825,6 +956,9 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
   Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "useCache": false,
@@ -832,6 +966,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -874,6 +1011,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -923,6 +1063,9 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
 ]
 `;
 
@@ -964,6 +1107,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -1231,6 +1377,7 @@ Object {
   "body": "* Line 1
 * Line 2",
   "branchName": "userName1/pullRequest5",
+  "canRebase": false,
   "createdAt": 1547853840016,
   "number": 5,
   "state": "open",
@@ -1309,6 +1456,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -1425,6 +1575,113 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with path getPr() canRebase 1`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": false,
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "isConflicted": false,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with path getPr() canRebase 2`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": true,
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "isConflicted": false,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with path getPr() canRebase 3`] = `
+Object {
+  "body": "* Line 1
+* Line 2",
+  "branchName": "userName1/pullRequest5",
+  "canMerge": false,
+  "canRebase": false,
+  "createdAt": 1547853840016,
+  "displayNumber": "Pull Request #5",
+  "isConflicted": false,
+  "number": 5,
+  "reviewers": Array [
+    "userName2",
+  ],
+  "state": "open",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with path getPr() canRebase 4`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with path getPr() gets a PR 1`] = `
 Object {
   "body": "* Line 1
@@ -1462,6 +1719,9 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
 ]
 `;
 
@@ -1469,6 +1729,7 @@ exports[`platform/bitbucket-server endpoint with path getPr() gets a closed PR 1
 Object {
   "body": undefined,
   "branchName": undefined,
+  "canRebase": false,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
@@ -1521,6 +1782,7 @@ Array [
     "body": "* Line 1
 * Line 2",
     "branchName": "userName1/pullRequest5",
+    "canRebase": false,
     "createdAt": 1547853840016,
     "number": 5,
     "state": "open",
@@ -1588,6 +1850,9 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
   Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "useCache": false,
@@ -1595,6 +1860,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -1623,6 +1891,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -1658,6 +1929,9 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
 ]
 `;
 
@@ -1685,6 +1959,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -1815,6 +2092,9 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
   Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
       "useCache": false,
@@ -1822,6 +2102,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -1864,6 +2147,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
@@ -1913,6 +2199,9 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
 ]
 `;
 
@@ -1954,6 +2243,9 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   ],
 ]
 `;
