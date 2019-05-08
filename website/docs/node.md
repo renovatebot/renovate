@@ -28,7 +28,7 @@ When Renovate processes your project's repository it will look for the files lis
 
 ## Configuring Support Policy
 
-Renovate supports a [`supportPolicy`](configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of December 2017):
+Renovate supports a [`supportPolicy`](configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of May 2019):
 
 **Default:** `lts`
 
