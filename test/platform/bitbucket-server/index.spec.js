@@ -211,9 +211,11 @@ describe('platform/bitbucket-server', () => {
         });
 
         it('sends the reviewer name as a reviewer', async () => {
-          expect.assertions(1);
+          expect.assertions(3);
           await initRepo();
           await bitbucket.addReviewers(5, ['name']);
+          expect(api.get.mock.calls).toMatchSnapshot();
+          expect(api.put.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
         });
       });
