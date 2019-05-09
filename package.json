@@ -11,6 +11,7 @@
     "clean-cache": "node bin/clean-cache.js",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "node -r ts-node/register/transpile-only --inspect-brk lib/renovate.ts",
+    "e2e": "npm pack && cd e2e && yarn install --no-lockfile && yarn test",
     "eslint": "eslint lib test",
     "eslint-fix": "eslint --fix lib test",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",

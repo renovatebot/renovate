@@ -36,8 +36,7 @@ script:
   - yarn test-schema
   - yarn build
   - yarn jest --maxWorkers=4
-  - npm pack
-  - cd e2e && yarn install --no-lockfile && yarn test
+  - yarn e2e
 
 after_success:
   - yarn codecov
