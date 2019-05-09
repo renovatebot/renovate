@@ -52,6 +52,7 @@ Array [
         "fromRef": Object {
           "id": "refs/heads/branch",
         },
+        "reviewers": Array [],
         "title": "title",
         "toRef": Object {
           "id": "refs/heads/master",
@@ -83,6 +84,7 @@ Array [
         "fromRef": Object {
           "id": "refs/heads/branch",
         },
+        "reviewers": Array [],
         "title": "title",
         "toRef": Object {
           "id": "refs/heads/master",
@@ -1188,6 +1190,7 @@ Array [
         "fromRef": Object {
           "id": "refs/heads/branch",
         },
+        "reviewers": Array [],
         "title": "title",
         "toRef": Object {
           "id": "refs/heads/master",
@@ -1219,6 +1222,7 @@ Array [
         "fromRef": Object {
           "id": "refs/heads/branch",
         },
+        "reviewers": Array [],
         "title": "title",
         "toRef": Object {
           "id": "refs/heads/master",
