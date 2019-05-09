@@ -64,6 +64,162 @@ Array [
 
 exports[`platform/bitbucket-server endpoint with no path addReviewers sends the reviewer name as a reviewer 3`] = `Array []`;
 
+exports[`platform/bitbucket-server endpoint with no path addReviewers throws 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path addReviewers throws 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": undefined,
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+          Object {
+            "user": Object {
+              "name": "name",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path addReviewers throws not-found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/4",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path addReviewers throws not-found 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": undefined,
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+          Object {
+            "user": Object {
+              "name": "name",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path addReviewers throws repository-changed 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path addReviewers throws repository-changed 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": undefined,
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+          Object {
+            "user": Object {
+              "name": "name",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
 exports[`platform/bitbucket-server endpoint with no path commitFilesToBranch() sends to gitFs 1`] = `
 Array [
   Array [
@@ -1273,6 +1429,162 @@ Array [
 `;
 
 exports[`platform/bitbucket-server endpoint with path addReviewers sends the reviewer name as a reviewer 3`] = `Array []`;
+
+exports[`platform/bitbucket-server endpoint with path addReviewers throws 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path addReviewers throws 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": undefined,
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+          Object {
+            "user": Object {
+              "name": "name",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path addReviewers throws not-found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/4",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path addReviewers throws not-found 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": undefined,
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+          Object {
+            "user": Object {
+              "name": "name",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path addReviewers throws repository-changed 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "useCache": true,
+    },
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path addReviewers throws repository-changed 2`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
+    Object {
+      "body": Object {
+        "description": undefined,
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "userName2",
+            },
+          },
+          Object {
+            "user": Object {
+              "name": "name",
+            },
+          },
+        ],
+        "title": "title",
+        "version": 1,
+      },
+    },
+  ],
+]
+`;
 
 exports[`platform/bitbucket-server endpoint with path commitFilesToBranch() sends to gitFs 1`] = `
 Array [
