@@ -91,6 +91,10 @@ It's possible to add this setting into the `renovate.json` file as part of the "
 
 ## bazel
 
+## bbUseDefaultReviewers
+
+Apply the default reviewers rules to PR's (Bitbucket server only).
+
 ## branchName
 
 It's recommended to use our default templates, but you may override branch name if you really wish. It's recommended to still keep `depName` and `newMajor` in the branch name to make sure all other Renovate features can still work.
