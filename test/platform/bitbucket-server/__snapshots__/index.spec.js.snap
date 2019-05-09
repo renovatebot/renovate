@@ -39,6 +39,12 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=13076&targetRepoId=13076",
+  ],
 ]
 `;
 
@@ -52,7 +58,13 @@ Array [
         "fromRef": Object {
           "id": "refs/heads/branch",
         },
-        "reviewers": Array [],
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "jcitizen",
+            },
+          },
+        ],
         "title": "title",
         "toRef": Object {
           "id": "refs/heads/master",
@@ -71,6 +83,12 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=13076&targetRepoId=13076",
+  ],
 ]
 `;
 
@@ -84,7 +102,13 @@ Array [
         "fromRef": Object {
           "id": "refs/heads/branch",
         },
-        "reviewers": Array [],
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "jcitizen",
+            },
+          },
+        ],
         "title": "title",
         "toRef": Object {
           "id": "refs/heads/master",
@@ -1177,6 +1201,12 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=13076&targetRepoId=13076",
+  ],
 ]
 `;
 
@@ -1190,7 +1220,13 @@ Array [
         "fromRef": Object {
           "id": "refs/heads/branch",
         },
-        "reviewers": Array [],
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "jcitizen",
+            },
+          },
+        ],
         "title": "title",
         "toRef": Object {
           "id": "refs/heads/master",
@@ -1209,6 +1245,12 @@ Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo",
+  ],
+  Array [
+    "./rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=13076&targetRepoId=13076",
+  ],
 ]
 `;
 
@@ -1222,7 +1264,13 @@ Array [
         "fromRef": Object {
           "id": "refs/heads/branch",
         },
-        "reviewers": Array [],
+        "reviewers": Array [
+          Object {
+            "user": Object {
+              "name": "jcitizen",
+            },
+          },
+        ],
         "title": "title",
         "toRef": Object {
           "id": "refs/heads/master",
