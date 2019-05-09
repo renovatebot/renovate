@@ -181,6 +181,7 @@
   "files": [
     "bin/config-validator.js",
     "bin/yarn-1.9.4.js",
+    "data",
     "dist"
   ],
   "babel": {
