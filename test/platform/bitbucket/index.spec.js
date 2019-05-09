@@ -204,6 +204,20 @@ describe('platform/bitbucket', () => {
         await bitbucket.deleteBranch();
       });
     });
+    it('should handle closing PRs when none exist', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.deleteBranch('some-branch', true);
+        expect(api.post.mock.calls).toMatchSnapshot();
+      });
+    });
+    it('should handle closing PRs when some exist', async () => {
+      await initRepo();
+      await mocked(async () => {
+        await bitbucket.deleteBranch('branch', true);
+        expect(api.post.mock.calls).toMatchSnapshot();
+      });
+    });
   });
 
   describe('mergeBranch()', () => {
