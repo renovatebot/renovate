@@ -164,6 +164,7 @@ COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
 COPY --from=tsbuild dist dist
 COPY bin bin
+COPY data data
 
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []
