@@ -77,6 +77,10 @@ async function validate(desc, config, isPreset = false) {
   } catch (err) {
     // ignore
   }
+  // istanbul ignore if
+  if (global.renovateTimers) {
+    global.renovateTimers.forEach(timer => clearTimeout(timer));
+  }
   if (returnVal !== 0) {
     process.exit(returnVal);
   }
