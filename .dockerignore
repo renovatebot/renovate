@@ -5,3 +5,4 @@
 !lib
 !bin/yarn*
 !tsconfig.json
+!data
