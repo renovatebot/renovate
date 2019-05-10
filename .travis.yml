@@ -36,7 +36,7 @@ script:
   - yarn test-schema
   - yarn build
   - yarn jest --maxWorkers=4
-  - yarn e2e
+  - yarn test-e2e
 
 after_success:
   - yarn codecov
