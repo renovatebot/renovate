@@ -146,7 +146,7 @@
     "validator": "10.11.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.15.2"
+    "yarn": "1.16.0"
   },
   "devDependencies": {
     "@types/bunyan": "1.8.6",
