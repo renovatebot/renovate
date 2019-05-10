@@ -6,7 +6,7 @@
     "allowJs": true,
     "checkJs": false,
     "module": "commonjs",
-    "sourceMap": true
+    "sourceMap": false
   },
   "include": ["./lib/**/*"],
   "exclude": ["node_modules", "./.cache", "./dist"]
