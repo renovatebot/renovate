@@ -84,7 +84,7 @@
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@renovatebot/docker-registry-client": "3.3.0",
-    "@sindresorhus/is": "0.15.0",
+    "@sindresorhus/is": "0.16.0",
     "@snyk/ruby-semver": "2.0.1",
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "7.2.0",
