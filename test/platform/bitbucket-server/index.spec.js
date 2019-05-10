@@ -211,10 +211,66 @@ describe('platform/bitbucket-server', () => {
         });
 
         it('sends the reviewer name as a reviewer', async () => {
-          expect.assertions(1);
+          expect.assertions(3);
           await initRepo();
           await bitbucket.addReviewers(5, ['name']);
+          expect(api.get.mock.calls).toMatchSnapshot();
+          expect(api.put.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
+        });
+
+        it('throws not-found', async () => {
+          expect.assertions(5);
+          await initRepo();
+
+          await expect(bitbucket.addReviewers(null, ['name'])).rejects.toThrow(
+            'not-found'
+          );
+
+          await expect(bitbucket.addReviewers(4, ['name'])).rejects.toThrow(
+            'not-found'
+          );
+          api.put.mockReturnValueOnce(
+            Promise.reject({
+              statusCode: 404,
+            })
+          );
+          await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
+            'not-found'
+          );
+
+          expect(api.get.mock.calls).toMatchSnapshot();
+          expect(api.put.mock.calls).toMatchSnapshot();
+        });
+
+        it('throws repository-changed', async () => {
+          expect.assertions(3);
+          await initRepo();
+          api.put.mockReturnValueOnce(
+            Promise.reject({
+              statusCode: 409,
+            })
+          );
+          await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
+            'repository-changed'
+          );
+          expect(api.get.mock.calls).toMatchSnapshot();
+          expect(api.put.mock.calls).toMatchSnapshot();
+        });
+
+        it('throws', async () => {
+          expect.assertions(3);
+          await initRepo();
+          api.put.mockReturnValueOnce(
+            Promise.reject({
+              statusCode: 405,
+            })
+          );
+          await expect(bitbucket.addReviewers(5, ['name'])).rejects.toEqual({
+            statusCode: 405,
+          });
+          expect(api.get.mock.calls).toMatchSnapshot();
+          expect(api.put.mock.calls).toMatchSnapshot();
         });
       });
 

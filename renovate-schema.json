@@ -599,6 +599,11 @@
       "type": "integer",
       "default": 0
     },
+    "bbUseDefaultReviewers": {
+      "description": "Use the default reviewers (Bitbucket server only).",
+      "type": "boolean",
+      "default": true
+    },
     "automerge": {
       "description": "Whether to automerge branches/PRs automatically, without human intervention",
       "type": "boolean",
