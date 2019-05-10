@@ -22,6 +22,7 @@
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
     "start": "node -r ts-node/register/transpile-only lib/renovate.ts",
     "test-dirty": "git diff --exit-code",
+    "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile && yarn test",
     "test-schema": "bash test/json-schema.sh",
     "test": "yarn lint && yarn test-schema && yarn jest"
   },
