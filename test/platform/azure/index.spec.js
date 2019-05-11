@@ -394,6 +394,45 @@ describe('platform/azure', () => {
       );
       expect(pr).toMatchSnapshot();
     });
+    it('should create and return a PR object with auto-complete set', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      const prResult = {
+        pullRequestId: 456,
+        displayNumber: `Pull Request #456`,
+        createdBy: {
+          id: 123,
+        },
+      };
+      const prUpdateResult = {
+        ...prResult,
+        autoCompleteSetBy: {
+          id: prResult.createdBy.id,
+        },
+        completionOptions: {
+          squashMerge: true,
+          deleteSourceBranch: true,
+        },
+      };
+      const updateFn = jest
+        .fn(() => prUpdateResult)
+        .mockName('updatePullRequest');
+      azureApi.gitApi.mockImplementationOnce(() => ({
+        createPullRequest: jest.fn(() => prResult),
+        createPullRequestLabel: jest.fn(() => ({})),
+        updatePullRequest: updateFn,
+      }));
+      azureHelper.getRenovatePRFormat.mockImplementation(x => x);
+      const pr = await azure.createPr(
+        'some-branch',
+        'The Title',
+        'Hello world',
+        ['deps', 'renovate'],
+        false,
+        { azureAutoComplete: true }
+      );
+      expect(updateFn).toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
+    });
   });
 
   describe('updatePr(prNo, title, body)', () => {
