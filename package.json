@@ -152,6 +152,8 @@
   },
   "devDependencies": {
     "@types/bunyan": "1.8.6",
+    "@types/convert-hrtime": "2.0.0",
+    "@types/fs-extra": "5.1.0",
     "@types/jest": "24.0.13",
     "@types/node": "11.13.10",
     "@typescript-eslint/eslint-plugin": "1.7.0",
