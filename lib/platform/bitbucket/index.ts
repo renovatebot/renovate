@@ -1,51 +1,62 @@
-import parseDiff from 'parse-diff';
-import api from './bb-got-wrapper';
-import * as utils from './utils';
-import * as hostRules from '../../util/host-rules';
-import GitStorage from '../git/storage';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import { appSlug } from '../../config/app-strings';
+const parseDiff = require('parse-diff');
+const { logger } = require('../../logger');
+const api = require('./bb-got-wrapper');
+const utils = require('./utils');
+const hostRules = require('../../util/host-rules');
+const GitStorage = require('../git/storage');
+const { appSlug } = require('../../config/app-strings');
 
-interface Config {
-  baseBranch: string;
-  baseCommitSHA: string;
-  defaultBranch: string;
-  fileList: any[];
-  mergeMethod: string;
-  owner: string;
-  prList: any[];
-  repository: string;
-  storage: GitStorage;
-}
+let config = {};
 
-let config: Config = {} as any;
-
-export function initPlatform({
-  endpoint,
-  username,
-  password,
-}: {
-  endpoint?: string;
-  username: string;
-  password: string;
-}) {
-  if (!(username && password)) {
-    throw new Error(
-      'Init: You must configure a Bitbucket username and password'
-    );
-  }
-  if (endpoint && endpoint !== 'https://api.bitbucket.org/') {
-    throw new Error(
-      'Init: Bitbucket Cloud endpoint can only be https://api.bitbucket.org/'
-    );
-  }
-  // TODO: Add a connection check that endpoint/username/password combination are valid
-  const res = {
-    endpoint: 'https://api.bitbucket.org/',
-  };
-  logger.info('Using default Bitbucket Cloud endpoint: ' + res.endpoint);
-  return res;
-}
+module.exports = {
+  // Initialization
+  getRepos,
+  cleanRepo,
+  initRepo,
+  getRepoStatus,
+  getRepoForceRebase,
+  setBaseBranch,
+  // Search
+  getFileList,
+  // Branch
+  branchExists,
+  getAllRenovateBranches,
+  isBranchStale,
+  getBranchPr,
+  getBranchStatus,
+  getBranchStatusCheck,
+  setBranchStatus,
+  deleteBranch,
+  mergeBranch,
+  getBranchLastCommitTime,
+  // Issue
+  findIssue,
+  ensureIssue,
+  ensureIssueClosing,
+  addAssignees,
+  addReviewers,
+  deleteLabel,
+  getIssueList,
+  // Comments
+  ensureComment,
+  ensureCommentRemoval,
+  // PR
+  getPrList,
+  findPr,
+  createPr,
+  getPr,
+  getPrFiles,
+  updatePr,
+  mergePr,
+  getPrBody,
+  // file
+  commitFilesToBranch,
+  getFile,
+  // Commits
+  getCommitMessages,
+  // vulnerability alerts
+  getVulnerabilityAlerts,
+};
 
 // Get all repositories that the user has access to
 export async function getRepos() {
