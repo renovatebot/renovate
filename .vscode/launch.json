@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "debug",
+      "program": "${workspaceFolder}/lib/renovate.ts",
+      "env": { "LOG_LEVEL": "debug" },
+      "console": "integratedTerminal",
+      "runtimeArgs": [
+        "--nolazy",
+        "--preserve-symlinks",
+        "-r",
+        "ts-node/register"
+      ],
+      "protocol": "inspector",
+      "skipFiles": ["<node_internals>/**/*.js"]
+    }
+  ]
+}
