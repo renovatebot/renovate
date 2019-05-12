@@ -6,7 +6,6 @@
 .DS_Store
 .cache
 /*.log
-/.vscode
 /.idea
 /package-lock.json
 *.pyc
