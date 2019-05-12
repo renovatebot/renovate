@@ -1,0 +1,160 @@
+version: 2
+
+#################
+# Job Variables #
+#################
+
+jobDefaults: &jobDefaults
+  docker:
+    - image: circleci/node:10.15.1
+  working_directory: ~/repo
+
+restore_cache: &restore_cache
+  keys:
+    - v1-dependencies-{{ checksum "package-lock.json" }}
+    - v1-dependencies-
+
+save_cache: &save_cache
+  key: v1-dependencies-{{ checksum "package-lock.json" }}
+  paths:
+    - node_modules
+
+stepSetupGit: &stepSetupGit
+  name: Setting up git
+  command: |
+    git config --global user.email "nihal9ns@gmail.com"
+    git config --global user.name "nihal9ns"
+
+# Tasks
+
+stepInstall: &stepInstall
+  name: Installing project dependencies
+  command: |
+    npm install
+
+stepLint: &stepLint
+  name: Running linting
+  command: npm run lint
+
+# stepUnitTest: &stepUnitTest
+#   name: Running unit tests
+#   command: |
+#     JEST_JUNIT_OUTPUT=reports/unit/services/results.xml npm run test:unit:ci:services && npm run test:unit:ci:commons
+
+stepIntegrationTest: &stepIntegrationTest
+  name: Running integration tests
+  command: |
+    npm run jest -- -u
+
+stepBuild: &stepBuild
+  name: Running build
+  command: npm run build
+
+###################
+# Job definitions #
+###################
+
+jobs:
+  test-integration:
+    <<: *jobDefaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - restore_cache:
+          <<: *restore_cache
+
+      - run:
+          <<: *stepInstall
+
+      - save_cache:
+          <<: *save_cache
+
+      - run:
+          <<: *stepLint
+
+      - run:
+          <<: *stepIntegrationTest
+
+  build:
+    <<: *jobDefaults
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+
+      - run:
+          <<: *stepSetupGit
+
+      - run:
+          <<: *stepInstall
+
+      - save_cache:
+          <<: *save_cache
+
+      - run:
+          <<: *stepBuild
+
+  # deploy:
+  #   <<: *jobDefaults
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         <<: *addSshKeysForGithub
+  #     - attach_workspace:
+  #         <<: *attachWorkspace
+  #     - setup_remote_docker:
+  #         docker_layer_caching: true
+  #     - run:
+  #         <<: *stepSetupPath
+  #     - run:
+  #         <<: *stepSetupGit
+  #     - run:
+  #         <<: *stepSetupAwsCli
+  #     - run:
+  #         <<: *stepSetupTerragrunt
+  #     - run:
+  #         <<: *stepDeploy
+
+######################
+# Workflow variables #
+######################
+
+tagOnlyFilter: &tagOnlyFilter
+  filters:
+    tags:
+      only: /(.*)_(ms|lb|dk)_v(\d{1,4}\.\d{1,4}\.\d{1,4})(-->(\w*))?$/
+    branches:
+      ignore: /.*/
+
+branchOnlyFilter: &branchOnlyFilter
+  filters:
+    branches:
+      only: /.*/
+
+allFilter: &allFilter
+  filters:
+    tags:
+      only: /(.*)_(ms|lb|dk)_v(\d{1,4}\.\d{1,4}\.\d{1,4})(-->(\w*))?$/
+    branches:
+      only: /.*/
+
+#######################
+# Workflow definition #
+#######################
+
+workflows:
+  version: 2
+  test-build:
+    jobs:
+      - test-integration:
+          <<: *allFilter
+
+      - build:
+          <<: *allFilter
+      # - deploy:
+      #     <<: *tagOnlyFilter
+      #     requires:
+      #       - build
+      #       - test-unit
