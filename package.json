@@ -150,7 +150,7 @@
   },
   "devDependencies": {
     "@types/bunyan": "1.8.6",
-    "@types/jest": "24.0.11",
+    "@types/jest": "24.0.12",
     "@types/node": "11.11.6",
     "@typescript-eslint/eslint-plugin": "1.7.0",
     "@typescript-eslint/parser": "1.7.0",
