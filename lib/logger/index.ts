@@ -28,6 +28,4 @@ logger = Logger.createLogger({
   streams: [stdout],
 });
 
-module.exports = {
-  logger,
-};
+export { logger };
