@@ -7,7 +7,8 @@
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
-    "build": "tsc && yarn copy-static-files",
+    "build": "yarn clean && tsc && yarn copy-static-files",
+    "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
     "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
@@ -165,6 +166,7 @@
     "eslint-config-prettier": "4.2.0",
     "eslint-plugin-import": "2.17.2",
     "eslint-plugin-promise": "4.1.1",
+    "glob": "7.1.4",
     "husky": "2.2.0",
     "jest": "24.7.1",
     "jest-silent-reporter": "0.1.2",
@@ -172,6 +174,7 @@
     "nock": "10.0.6",
     "prettier": "1.17.0",
     "pretty-quick": "1.10.0",
+    "rimraf": "2.6.3",
     "semantic-release": "15.13.12",
     "tmp-promise": "1.0.5",
     "ts-jest": "24.0.0",
