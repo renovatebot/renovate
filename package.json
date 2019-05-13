@@ -7,8 +7,9 @@
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && yarn copy-static-files",
     "clean-cache": "node bin/clean-cache.js",
+    "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "node -r ts-node/register/transpile-only --inspect-brk lib/renovate.ts",
     "eslint": "eslint lib test",
@@ -157,6 +158,7 @@
     "babel-plugin-transform-object-rest-spread": "7.0.0-beta.3",
     "chai": "4.2.0",
     "codecov": "3.3.0",
+    "copyfiles": "2.1.0",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb-base": "13.1.0",
