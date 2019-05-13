@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/rubygems getPkgReleases returns a dep for rubygems.org package hit 1`] = `
+Object {
+  "name": "1pass",
+  "releases": Array [
+    Object {
+      "version": "0.1.0",
+    },
+    Object {
+      "version": "0.1.1",
+    },
+  ],
+}
+`;
+
 exports[`datasource/rubygems getPkgReleases uses multiple source urls 1`] = `
 Object {
   "changelogUrl": null,
