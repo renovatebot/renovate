@@ -274,7 +274,11 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab initRepo should initialise the config for the repo - 0 2`] = `Object {}`;
+exports[`platform/gitlab initRepo should initialise the config for the repo - 0 2`] = `
+Object {
+  "isFork": false,
+}
+`;
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 1 1`] = `
 Array [
@@ -287,7 +291,11 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab initRepo should initialise the config for the repo - 1 2`] = `Object {}`;
+exports[`platform/gitlab initRepo should initialise the config for the repo - 1 2`] = `
+Object {
+  "isFork": false,
+}
+`;
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 2 1`] = `
 Array [
@@ -300,7 +308,11 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab initRepo should initialise the config for the repo - 2 2`] = `Object {}`;
+exports[`platform/gitlab initRepo should initialise the config for the repo - 2 2`] = `
+Object {
+  "isFork": false,
+}
+`;
 
 exports[`platform/gitlab initRepo should initialise the config for the repo - 3 1`] = `
 Array [
@@ -313,7 +325,11 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab initRepo should initialise the config for the repo - 3 2`] = `Object {}`;
+exports[`platform/gitlab initRepo should initialise the config for the repo - 3 2`] = `
+Object {
+  "isFork": false,
+}
+`;
 
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
