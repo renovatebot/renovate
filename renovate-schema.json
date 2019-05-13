@@ -300,6 +300,11 @@
       ],
       "default": "semver"
     },
+    "azureAutoComplete": {
+      "description": "If set to true, Azure DevOps PRs will be set to auto-complete after all (if any) branch policies have been met",
+      "type": "boolean",
+      "default": false
+    },
     "azureWorkItemId": {
       "description": "The id of an existing work item on Azure Boards to link to each PR",
       "type": "integer",
