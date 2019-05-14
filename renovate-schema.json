@@ -1107,6 +1107,16 @@
       },
       "$ref": "#"
     },
+    "gradle2": {
+      "description": "JS-based manager for Gradle",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)build.gradle$"],
+        "timeout": 300,
+        "versionScheme": "maven"
+      },
+      "$ref": "#"
+    },
     "gradle-wrapper": {
       "description": "Configuration object for gradle-wrapper.properties files",
       "type": "object",

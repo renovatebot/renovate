@@ -296,6 +296,10 @@ Configuration for Java gradle projects
 
 Configuration for Gradle Wrapper updates. Changes here affect how Renovate updates the version of gradle in the wrapper, not how it uses the wrapper.
 
+## gradle2
+
+This is an alternate manager for Gradle, written completely in JS.
+
 ## group
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them. However, you may choose to _add_ settings to any group by defining your own `group` configuration object.

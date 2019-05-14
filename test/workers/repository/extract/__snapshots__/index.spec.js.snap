@@ -44,6 +44,9 @@ Object {
   "gradle-wrapper": Array [
     Object {},
   ],
+  "gradle2": Array [
+    Object {},
+  ],
   "homebrew": Array [
     Object {},
   ],
