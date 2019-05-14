@@ -7,7 +7,7 @@
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
-    "build": "yarn clean && tsc -p lib && yarn copy-static-files",
+    "build": "yarn clean && tsc -p tsconfig.app.json && yarn copy-static-files",
     "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
     "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
@@ -198,6 +198,7 @@
     ]
   },
   "jest": {
+    "globals": { "ts-jest": { "isolatedModules": true } },
     "cacheDirectory": ".cache/jest",
     "coverageDirectory": "./coverage",
     "collectCoverage": true,
