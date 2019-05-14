@@ -3,14 +3,17 @@ describe('platform/github/storage', () => {
   const GitStorage = require('../../../lib/platform/git/storage');
 
   function getAllPropertyNames(obj) {
-    var props = [];
+    let props = [];
+    let obj2 = obj;
 
-    do {
-      props = props.concat(Object.getOwnPropertyNames(obj));
-    } while ((obj = Object.getPrototypeOf(obj)));
+    while (obj2 != null) {
+      props = props.concat(Object.getOwnPropertyNames(obj2));
+      obj2 = Object.getPrototypeOf(obj2);
+    }
 
     return props.filter(p => !p.startsWith('_'));
   }
+
   it('has same API for git storage', () => {
     const githubMethods = getAllPropertyNames(new GithubStorage()).sort();
     const gitMethods = getAllPropertyNames(new GitStorage()).sort();
