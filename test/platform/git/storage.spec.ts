@@ -1,7 +1,7 @@
-const fs = require('fs-extra');
-const Git = require('simple-git/promise');
-const tmp = require('tmp-promise');
-const GitStorage = require('../../../lib/platform/git/storage');
+import fs from 'fs-extra';
+import Git from 'simple-git/promise';
+import tmp from 'tmp-promise';
+import GitStorage from '../../../lib/platform/git/storage';
 
 describe('platform/git/storage', () => {
   jest.setTimeout(15000);
@@ -9,8 +9,8 @@ describe('platform/git/storage', () => {
   const git = new GitStorage();
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
-  let base;
-  let origin;
+  let base: tmp.DirectoryResult;
+  let origin: tmp.DirectoryResult;
   beforeAll(async () => {
     base = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(base.path).silent(true);
@@ -38,7 +38,7 @@ describe('platform/git/storage', () => {
     await repo.checkout('master');
   });
 
-  let tmpDir;
+  let tmpDir: tmp.DirectoryResult;
 
   beforeEach(async () => {
     origin = await tmp.dir({ unsafeCleanup: true });
@@ -51,8 +51,6 @@ describe('platform/git/storage', () => {
     };
     await git.initRepo({
       localDir: tmpDir.path,
-      platform: 'github',
-      repository: 'owner/repo-name',
       url: origin.path,
     });
   });
@@ -149,7 +147,7 @@ describe('platform/git/storage', () => {
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       await git.deleteBranch('renovate/past_branch');
-      const branches = await Git(origin.path).branch();
+      const branches = await Git(origin.path).branch({});
       expect(branches.all).not.toContain('renovate/past_branch');
     });
   });
