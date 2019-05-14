@@ -169,7 +169,10 @@ jobs:
             # apt install python3-pip
             curl -o- -L https://yarnpkg.com/install.sh | bash
             export PATH="$HOME/.yarn/bin:$PATH"
-            python --version            
+            python --version
+            python3 --version                     
+            pip --version
+            pip3 --version
 
   install_packages:
     docker:
@@ -202,5 +205,5 @@ workflows:
   build_and_test:
     jobs:
       - env_setup
-      - install_packages
+      # - install_packages
       # - test
