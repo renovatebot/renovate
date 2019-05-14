@@ -166,10 +166,10 @@ jobs:
       - run:
           name: Spinning up env
           command: |
-            apt install python3-pip
+            # apt install python3-pip
             curl -o- -L https://yarnpkg.com/install.sh | bash
             export PATH="$HOME/.yarn/bin:$PATH"
-            python3 --version            
+            python --version            
 
   install_packages:
     docker:
