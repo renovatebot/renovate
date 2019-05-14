@@ -175,6 +175,12 @@ jobs:
             python3 --version                     
             pip --version
             # pip3 --version
+            yarn install --frozen-lockfile
+            pip install --user -r requirements.txt
+            yarn prettier --list-different
+            yarn lint
+            yarn test-schema
+            yarn build              
 
   install_packages:
     docker:
@@ -207,5 +213,5 @@ workflows:
   build_and_test:
     jobs:
       - env_setup
-      - install_packages
+      # - install_packages
       # - test
