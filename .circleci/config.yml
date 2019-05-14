@@ -174,7 +174,7 @@ jobs:
             python --version
             python3 --version                     
             pip --version
-            pip3 --version
+            # pip3 --version
 
   install_packages:
     docker:
@@ -207,5 +207,5 @@ workflows:
   build_and_test:
     jobs:
       - env_setup
-      # - install_packages
+      - install_packages
       # - test
