@@ -203,7 +203,7 @@
     "coverageDirectory": "./coverage",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "lib/**/*.js",
+      "lib/**/*.{js,ts}",
       "!lib/platform/bitbucket-server/bb-got-wrapper.js",
       "!lib/versioning/maven/index.js",
       "!lib/proxy.js"
