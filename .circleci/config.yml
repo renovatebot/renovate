@@ -202,5 +202,5 @@ workflows:
   build_and_test:
     jobs:
       - env_setup
-      # - install_packages
+      - install_packages
       # - test
