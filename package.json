@@ -206,7 +206,7 @@
     ]
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "v16"
   },
   "husky": {
     "hooks": {
@@ -214,7 +214,7 @@
     }
   },
   "release": {
-    "branch": "master",
+    "branch": "v16",
     "tagFormat": "${version}"
   }
 }

@@ -11,8 +11,7 @@ sudo: false
 branches:
   only:
     - master
-    - stable
-    - v13
+    - v16
 
 if: tag IS blank
 
@@ -43,7 +42,7 @@ after_success:
 
 deploy:
   provider: script
-  script: curl -X POST -d '{}' $NETLIFY_DEPLOY_WEBHOOK && yarn semantic-release
+  script: yarn semantic-release
   skip_cleanup: true
   on:
-    branch: master
+    branch: v16
