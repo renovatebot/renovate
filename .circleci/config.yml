@@ -181,7 +181,7 @@ jobs:
             yarn lint
             yarn test-schema
             yarn build              
-            yarn jest --maxWorkers=4
+            yarn jest --maxWorkers=4 -- -u
             yarn test-e2e
 
   install_packages:
