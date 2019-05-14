@@ -9,13 +9,7 @@ jobDefaults: &jobDefaults
     - image: circleci/node:10.15.1
   working_directory: ~/repo
 
-restore_cache: &restore_cache
-  keys:
-    - v1-dependencies-{{ checksum "package-lock.json" }}
-    - v1-dependencies-
-
 save_cache: &save_cache
-  key: v1-dependencies-{{ checksum "package-lock.json" }}
   paths:
     - node_modules
     - '.cache'
