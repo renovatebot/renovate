@@ -26,6 +26,7 @@
 # stepBeforeInstall: &stepBeforeInstall
 #   name: Before Install
 #   command: |
+#     apt install python3-pip
 #     curl -o- -L https://yarnpkg.com/install.sh | bash
 #     export PATH="$HOME/.yarn/bin:$PATH"
 #     python --version
@@ -34,7 +35,7 @@
 #   name: Installing project dependencies
 #   command: |
 #     yarn install --frozen-lockfile
-#     # pip install --user -r requirements.txt
+#     pip install --user -r requirements.txt
 
 # afterSuccess: &afterSuccess
 #   name: Code Coverage
@@ -165,10 +166,10 @@ jobs:
       - run:
           name: Spinning up env
           command: |
-            - apt install python3-pip
-            - curl -o- -L https://yarnpkg.com/install.sh | bash
-            - export PATH="$HOME/.yarn/bin:$PATH"
-            - python3 --version            
+            apt install python3-pip
+            curl -o- -L https://yarnpkg.com/install.sh | bash
+            export PATH="$HOME/.yarn/bin:$PATH"
+            python3 --version            
 
   install_packages:
     docker:
@@ -178,12 +179,12 @@ jobs:
       - run:
           name: Installing dependencies
           command: |
-            - yarn install --frozen-lockfile
-            - pip install --user -r requirements.txt
-            - yarn prettier --list-different
-            - yarn lint
-            - yarn test-schema
-            - yarn build              
+            yarn install --frozen-lockfile
+            pip install --user -r requirements.txt
+            yarn prettier --list-different
+            yarn lint
+            yarn test-schema
+            yarn build              
 
   test:
     docker:
@@ -193,8 +194,8 @@ jobs:
       - run:
           name: Running tests
           command: |
-            - yarn jest --maxWorkers=4
-            - yarn test-e2e
+            yarn jest --maxWorkers=4
+            yarn test-e2e
 
 workflows:
   version: 2
