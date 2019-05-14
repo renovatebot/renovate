@@ -1,150 +1,187 @@
+# version: 2
+
+# #################
+# # Job Variables #
+# #################
+
+# jobDefaults: &jobDefaults
+#   docker:
+#     - image: circleci/node:10.15.1
+#   working_directory: ~/repo
+
+# save_cache: &save_cache
+#   key: v1-dependencies-{{ checksum "package-lock.json" }}
+#   paths:
+#     - -/node_modules
+#     - '-/.cache'
+#     - '-/.eslintcache'
+
+# restore_cache: &restore_cache
+#   keys:
+#     - v1-dependencies-{{ checksum "package-lock.json" }}
+#     - v1-dependencies-
+
+# # Tasks
+
+# stepBeforeInstall: &stepBeforeInstall
+#   name: Before Install
+#   command: |
+#     curl -o- -L https://yarnpkg.com/install.sh | bash
+#     export PATH="$HOME/.yarn/bin:$PATH"
+#     python --version
+
+# stepInstall: &stepInstall
+#   name: Installing project dependencies
+#   command: |
+#     yarn install --frozen-lockfile
+#     # pip install --user -r requirements.txt
+
+# afterSuccess: &afterSuccess
+#   name: Code Coverage
+#   command: yarn codecov
+
+# script: &script
+#   name: Running Scripts
+#   command: |
+#     yarn prettier --list-different
+#     yarn lint
+#     yarn test-schema
+#     yarn build
+#     yarn jest --maxWorkers=4
+#     yarn test-e2e
+
+# stepIntegrationTest: &stepIntegrationTest
+#   name: Running integration tests
+#   command: |
+#     npm run jest -- -u
+
+# stepBuild: &stepBuild
+#   name: Running build
+#   command: npm run build
+
+# ###################
+# # Job definitions #
+# ###################
+
+# jobs:
+#   test-integration:
+#     <<: *jobDefaults
+#     steps:
+#       - checkout
+#       - run:
+#           <<: *stepInstall
+
+#       - save_cache:
+#           <<: *save_cache
+
+#       - run:
+#           <<: *stepIntegrationTest
+
+#   build:
+#     <<: *jobDefaults
+#     steps:
+#       - checkout
+#       - run:
+#           <<: *stepInstall
+
+#       - save_cache:
+#           <<: *save_cache
+
+#       - run:
+#           <<: *stepBuild
+
+#   # deploy:
+#   #   <<: *jobDefaults
+#   #   steps:
+#   #     - checkout
+#   #     - add_ssh_keys:
+#   #         <<: *addSshKeysForGithub
+#   #     - attach_workspace:
+#   #         <<: *attachWorkspace
+#   #     - setup_remote_docker:
+#   #         docker_layer_caching: true
+#   #     - run:
+#   #         <<: *stepSetupPath
+#   #     - run:
+#   #         <<: *stepSetupGit
+#   #     - run:
+#   #         <<: *stepSetupAwsCli
+#   #     - run:
+#   #         <<: *stepSetupTerragrunt
+#   #     - run:
+#   #         <<: *stepDeploy
+
+# ######################
+# # Workflow variables #
+# ######################
+
+# tagOnlyFilter: &tagOnlyFilter
+#   filters:
+#     tags:
+#       only: /(.*)_(ms|lb|dk)_v(\d{1,4}\.\d{1,4}\.\d{1,4})(-->(\w*))?$/
+#     branches:
+#       ignore: /.*/
+
+# branchOnlyFilter: &branchOnlyFilter
+#   filters:
+#     branches:
+#       only: /.*/
+
+# allFilter: &allFilter
+#   filters:
+#     tags:
+#       only: /(.*)_(ms|lb|dk)_v(\d{1,4}\.\d{1,4}\.\d{1,4})(-->(\w*))?$/
+#     branches:
+#       only: /.*/
+
+# #######################
+# # Workflow definition #
+# #######################
+
+# workflows:
+#   version: 2
+#   test-build:
+#     jobs:
+#       - test-integration:
+#           <<: *allFilter
+
+#       - build:
+#           <<: *allFilter
+#           requires:
+#             - test-integration
+#       # - deploy:
+#       #     <<: *tagOnlyFilter
+#       # requires:
+#       # - build
+#       # - test-unit
+
 version: 2
-
-#################
-# Job Variables #
-#################
-
-jobDefaults: &jobDefaults
-  docker:
-    - image: circleci/node:10.15.1
-  working_directory: ~/repo
-
-save_cache: &save_cache
-  paths:
-    - node_modules
-    - '.cache'
-    - '.eslintcache'
-
-# Tasks
-
-stepBeforeInstall: &stepBeforeInstall
-  name: Before Install
-  command: |
-    curl -o- -L https://yarnpkg.com/install.sh | bash
-    export PATH="$HOME/.yarn/bin:$PATH"
-    python --version
-
-stepInstall: &stepInstall
-  name: Installing project dependencies
-  command: |
-    yarn install --frozen-lockfile
-    # pip install --user -r requirements.txt
-
-afterSuccess: &afterSuccess
-  name: Code Coverage
-  command: yarn codecov
-
-script: &script
-  name: Running Scripts
-  command: |
-    yarn prettier --list-different
-    yarn lint
-    yarn test-schema
-    yarn build
-    yarn jest --maxWorkers=4
-    yarn test-e2e
-
-stepIntegrationTest: &stepIntegrationTest
-  name: Running integration tests
-  command: |
-    npm run jest -- -u
-
-stepBuild: &stepBuild
-  name: Running build
-  command: npm run build
-
-###################
-# Job definitions #
-###################
-
 jobs:
-  test-integration:
-    <<: *jobDefaults
-    steps:
-      - checkout
-      - run:
-          <<: *stepInstall
-
-      - save_cache:
-          <<: *save_cache
-
-      - run:
-          <<: *stepIntegrationTest
-
   build:
-    <<: *jobDefaults
+    docker:
+      - image: node:10.13.0
     steps:
       - checkout
       - run:
-          <<: *stepInstall
+          name: Running Build
+          command: |
+            - apt install python3-pip
+            - curl -o- -L https://yarnpkg.com/install.sh | bash
+            - export PATH="$HOME/.yarn/bin:$PATH"
+            - python3 --version
 
-      - save_cache:
-          <<: *save_cache
-
+  test:
+    docker:
+      - image: node:10.13.0
+    steps:
+      - checkout
       - run:
-          <<: *stepBuild
-
-  # deploy:
-  #   <<: *jobDefaults
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         <<: *addSshKeysForGithub
-  #     - attach_workspace:
-  #         <<: *attachWorkspace
-  #     - setup_remote_docker:
-  #         docker_layer_caching: true
-  #     - run:
-  #         <<: *stepSetupPath
-  #     - run:
-  #         <<: *stepSetupGit
-  #     - run:
-  #         <<: *stepSetupAwsCli
-  #     - run:
-  #         <<: *stepSetupTerragrunt
-  #     - run:
-  #         <<: *stepDeploy
-
-######################
-# Workflow variables #
-######################
-
-tagOnlyFilter: &tagOnlyFilter
-  filters:
-    tags:
-      only: /(.*)_(ms|lb|dk)_v(\d{1,4}\.\d{1,4}\.\d{1,4})(-->(\w*))?$/
-    branches:
-      ignore: /.*/
-
-branchOnlyFilter: &branchOnlyFilter
-  filters:
-    branches:
-      only: /.*/
-
-allFilter: &allFilter
-  filters:
-    tags:
-      only: /(.*)_(ms|lb|dk)_v(\d{1,4}\.\d{1,4}\.\d{1,4})(-->(\w*))?$/
-    branches:
-      only: /.*/
-
-#######################
-# Workflow definition #
-#######################
+          name: Running Build
+          command: npm run jest
 
 workflows:
   version: 2
-  test-build:
+  build_and_test:
     jobs:
-      - test-integration:
-          <<: *allFilter
-
-      - build:
-          <<: *allFilter
-          requires:
-            - test-integration
-      # - deploy:
-      #     <<: *tagOnlyFilter
-      # requires:
-      # - build
-      # - test-unit
+      - build
+      - test
