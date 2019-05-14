@@ -157,39 +157,49 @@
 
 version: 2
 jobs:
-  build:
+  env_setup:
     docker:
       - image: node:10.13.0
     steps:
       - checkout
       - run:
-          name: Running Build
+          name: Spinning up env
           command: |
             - apt install python3-pip
             - curl -o- -L https://yarnpkg.com/install.sh | bash
             - export PATH="$HOME/.yarn/bin:$PATH"
-            - python3 --version
+            - python3 --version            
+
+  install_packages:
+    docker:
+      - image: node:10.13.0
+    steps:
+      - checkout
+      - run:
+          name: Installing dependencies
+          command: |
             - yarn install --frozen-lockfile
             - pip install --user -r requirements.txt
             - yarn prettier --list-different
             - yarn lint
             - yarn test-schema
-            - yarn build
+            - yarn build              
+
+  test:
+    docker:
+      - image: node:10.13.0
+    steps:
+      - checkout
+      - run:
+          name: Running tests
+          command: |
             - yarn jest --maxWorkers=4
             - yarn test-e2e
-
-  # test:
-  #   docker:
-  #     - image: node:10.13.0
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Running Build
-  #         command: npm run jest
 
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - build
-      # - test
+      - env_setup
+      - install_packages
+      - test
