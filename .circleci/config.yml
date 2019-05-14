@@ -19,22 +19,34 @@ save_cache: &save_cache
   paths:
     - node_modules
 
-stepSetupGit: &stepSetupGit
-  name: Setting up git
-  command: |
-    git config --global user.email "nihal9ns@gmail.com"
-    git config --global user.name "nihal9ns"
-
 # Tasks
+
+stepBeforeInstall: &stepBeforeInstall
+  name: Before Install
+  command: |
+    curl -o- -L https://yarnpkg.com/install.sh | bash
+    export PATH="$HOME/.yarn/bin:$PATH"
+    python --version
 
 stepInstall: &stepInstall
   name: Installing project dependencies
   command: |
-    npm install
+    yarn install --frozen-lockfile
+    pip install --user -r requirements.txt
 
-stepLint: &stepLint
-  name: Running linting
-  command: npm run lint
+afterSuccess: &afterSuccess
+  name: Code Coverage
+  command: yarn codecov
+
+script: &script
+  name: Running Scripts
+  command: |
+    yarn prettier --list-different
+    yarn lint
+    yarn test-schema
+    yarn build
+    yarn jest --maxWorkers=4
+    yarn test-e2e
 
 # stepUnitTest: &stepUnitTest
 #   name: Running unit tests
@@ -72,9 +84,6 @@ jobs:
           <<: *save_cache
 
       - run:
-          <<: *stepLint
-
-      - run:
           <<: *stepIntegrationTest
 
   build:
@@ -83,9 +92,6 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-
-      - run:
-          <<: *stepSetupGit
 
       - run:
           <<: *stepInstall
@@ -153,8 +159,10 @@ workflows:
 
       - build:
           <<: *allFilter
+          requires:
+            - test-integration
       # - deploy:
       #     <<: *tagOnlyFilter
-      #     requires:
-      #       - build
-      #       - test-unit
+      # requires:
+      # - build
+      # - test-unit
