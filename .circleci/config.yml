@@ -34,7 +34,7 @@ stepInstall: &stepInstall
   name: Installing project dependencies
   command: |
     yarn install --frozen-lockfile
-    pip install --user -r requirements.txt
+    # pip install --user -r requirements.txt
 
 afterSuccess: &afterSuccess
   name: Code Coverage
