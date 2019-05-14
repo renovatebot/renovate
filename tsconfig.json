@@ -13,6 +13,6 @@
     "lib": ["es2018"],
     "types": ["node"]
   },
-  "include": ["lib/**/*"],
+  "include": ["lib/**/*", "test/**/*"],
   "exclude": ["node_modules", "./.cache", "./dist"]
 }

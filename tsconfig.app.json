@@ -2,5 +2,6 @@
   "extends": "./tsconfig",
   "compilerOptions": {
     "resolveJsonModule": false
-  }
+  },
+  "include": ["lib/**/*"]
 }
