@@ -177,7 +177,7 @@
     "rimraf": "2.6.3",
     "semantic-release": "15.13.12",
     "tmp-promise": "1.0.5",
-    "ts-jest": "24.0.0",
+    "ts-jest": "24.0.2",
     "ts-node": "8.1.0",
     "typescript": "3.4.5"
   },
