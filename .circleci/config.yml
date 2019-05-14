@@ -173,15 +173,16 @@ jobs:
             export PATH="$HOME/.yarn/bin:$PATH"
             python --version
             python3 --version                     
-            pip --version
-            # pip3 --version
+            pip --version            
             yarn install --frozen-lockfile
             pip install --user -r requirements.txt
             yarn prettier --list-different
             yarn lint
+            git config --global user.email "nihal9ns@gmail.com"
+            git config --global user.name "nihal9ns"
             yarn test-schema
             yarn build              
-            yarn jest --maxWorkers=4 -- -u
+            yarn jest --updateSnapshot --runInBand
             yarn test-e2e
 
   install_packages:
@@ -214,6 +215,10 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - env_setup
+      - env_setup:
+          filters:
+            branches:
+              only:
+                - master
       # - install_packages
       # - test
