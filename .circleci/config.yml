@@ -181,6 +181,8 @@ jobs:
             yarn lint
             yarn test-schema
             yarn build              
+            yarn jest --maxWorkers=4
+            yarn test-e2e
 
   install_packages:
     docker:
