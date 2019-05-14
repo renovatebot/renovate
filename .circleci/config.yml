@@ -18,6 +18,8 @@ save_cache: &save_cache
   key: v1-dependencies-{{ checksum "package-lock.json" }}
   paths:
     - node_modules
+    - '.cache'
+    - '.eslintcache'
 
 # Tasks
 
@@ -48,11 +50,6 @@ script: &script
     yarn jest --maxWorkers=4
     yarn test-e2e
 
-# stepUnitTest: &stepUnitTest
-#   name: Running unit tests
-#   command: |
-#     JEST_JUNIT_OUTPUT=reports/unit/services/results.xml npm run test:unit:ci:services && npm run test:unit:ci:commons
-
 stepIntegrationTest: &stepIntegrationTest
   name: Running integration tests
   command: |
@@ -71,12 +68,6 @@ jobs:
     <<: *jobDefaults
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-
-      - restore_cache:
-          <<: *restore_cache
-
       - run:
           <<: *stepInstall
 
@@ -90,9 +81,6 @@ jobs:
     <<: *jobDefaults
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-
       - run:
           <<: *stepInstall
 
