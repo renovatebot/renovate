@@ -7,7 +7,7 @@
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
-    "build": "yarn clean && tsc && yarn copy-static-files",
+    "build": "yarn clean && tsc -p tsconfig.app.json && yarn copy-static-files",
     "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
     "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
@@ -152,6 +152,8 @@
   },
   "devDependencies": {
     "@types/bunyan": "1.8.6",
+    "@types/convert-hrtime": "2.0.0",
+    "@types/fs-extra": "5.1.0",
     "@types/jest": "24.0.13",
     "@types/node": "11.13.10",
     "@typescript-eslint/eslint-plugin": "1.7.0",
@@ -196,6 +198,7 @@
     ]
   },
   "jest": {
+    "globals": { "ts-jest": { "isolatedModules": true } },
     "cacheDirectory": ".cache/jest",
     "coverageDirectory": "./coverage",
     "collectCoverage": true,

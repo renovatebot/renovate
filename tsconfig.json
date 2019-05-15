@@ -6,8 +6,13 @@
     "allowJs": true,
     "checkJs": false,
     "module": "commonjs",
-    "sourceMap": false
+    "sourceMap": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "lib": ["es2018"],
+    "types": ["node"]
   },
-  "include": ["./lib/**/*"],
+  "include": ["lib/**/*"],
   "exclude": ["node_modules", "./.cache", "./dist"]
 }

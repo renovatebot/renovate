@@ -1,16 +1,31 @@
-const fs = require('fs-extra');
-const { join } = require('path');
-const path = require('path');
-const URL = require('url');
-const Git = require('simple-git/promise');
-const convertHrtime = require('convert-hrtime');
+import convertHrtime from 'convert-hrtime';
+import fs from 'fs-extra';
+import { join } from 'path';
+import Git from 'simple-git/promise';
+import URL from 'url';
+
+declare module 'fs-extra' {
+  export function exists(pathLike: string): Promise<boolean>;
+}
+
+interface IStorageConfig {
+  localDir: string;
+  baseBranch?: string;
+  url: string;
+  gitPrivateKey?: string;
+}
+
+interface ILocalConfig extends IStorageConfig {
+  baseBranch: string;
+  baseBranchSha: string;
+  branchExists: { [branch: string]: boolean };
+}
 
 class Storage {
   constructor() {
-    let config = {};
-    /** @type {Git.SimpleGit} */
-    let git = null;
-    let cwd = null;
+    let config: ILocalConfig = {} as any;
+    let git: Git.SimpleGit;
+    let cwd: string;
 
     Object.assign(this, {
       initRepo,
@@ -32,7 +47,7 @@ class Storage {
     });
 
     // istanbul ignore next
-    async function resetToBranch(branchName) {
+    async function resetToBranch(branchName: string) {
       logger.debug(`resetToBranch(${branchName})`);
       await git.raw(['reset', '--hard']);
       await git.checkout(branchName);
@@ -53,13 +68,13 @@ class Storage {
       }
     }
 
-    async function initRepo(args) {
+    async function initRepo(args: IStorageConfig) {
       cleanRepo();
-      config = { ...args };
+      config = { ...args } as any;
       cwd = config.localDir;
       config.branchExists = {};
       logger.info('Initialising git repository into ' + cwd);
-      const gitHead = path.join(cwd, '.git/HEAD');
+      const gitHead = join(cwd, '.git/HEAD');
       let clone = true;
       async function determineBaseBranch() {
         // see https://stackoverflow.com/a/44750379/1438522
@@ -153,7 +168,7 @@ class Storage {
       return git.status();
     }
 
-    async function createBranch(branchName, sha) {
+    async function createBranch(branchName: string, sha: string) {
       logger.debug(`createBranch(${branchName})`);
       await git.reset('hard');
       await git.raw(['clean', '-fd']);
@@ -163,7 +178,7 @@ class Storage {
     }
 
     // Return the commit SHA for a branch
-    async function getBranchCommit(branchName) {
+    async function getBranchCommit(branchName: string) {
       const res = await git.revparse(['origin/' + branchName]);
       return res.trim();
     }
@@ -177,7 +192,7 @@ class Storage {
       return res.all.map(commit => commit.message);
     }
 
-    async function setBaseBranch(branchName) {
+    async function setBaseBranch(branchName: string) {
       if (branchName) {
         logger.debug(`Setting baseBranch to ${branchName}`);
         config.baseBranch = branchName;
@@ -192,7 +207,7 @@ class Storage {
       }
     }
 
-    async function getFileList(branchName) {
+    async function getFileList(branchName?: string) {
       const branch = branchName || config.baseBranch;
       const exists = await branchExists(branch);
       if (!exists) {
@@ -211,7 +226,7 @@ class Storage {
       return files.split('\n').filter(Boolean);
     }
 
-    async function branchExists(branchName) {
+    async function branchExists(branchName: string) {
       // First check cache
       if (config.branchExists[branchName] !== undefined) {
         return config.branchExists[branchName];
@@ -226,14 +241,14 @@ class Storage {
       }
     }
 
-    async function getAllRenovateBranches(branchPrefix) {
+    async function getAllRenovateBranches(branchPrefix: string) {
       const branches = await git.branch(['--remotes', '--verbose']);
       return branches.all
         .map(localName)
         .filter(branchName => branchName.startsWith(branchPrefix));
     }
 
-    async function isBranchStale(branchName) {
+    async function isBranchStale(branchName: string) {
       const branches = await git.branch([
         '--remotes',
         '--verbose',
@@ -243,11 +258,11 @@ class Storage {
       return !branches.all.map(localName).includes(branchName);
     }
 
-    async function deleteLocalBranch(branchName) {
+    async function deleteLocalBranch(branchName: string) {
       await git.branch(['-D', branchName]);
     }
 
-    async function deleteBranch(branchName) {
+    async function deleteBranch(branchName: string) {
       try {
         await git.raw(['push', '--delete', 'origin', branchName]);
         logger.debug({ branchName }, 'Deleted remote branch');
@@ -271,7 +286,7 @@ class Storage {
       config.branchExists[branchName] = false;
     }
 
-    async function mergeBranch(branchName) {
+    async function mergeBranch(branchName: string) {
       await git.reset('hard');
       await git.checkout(['-B', branchName, 'origin/' + branchName]);
       await git.checkout(config.baseBranch);
@@ -279,7 +294,7 @@ class Storage {
       await git.push('origin', config.baseBranch);
     }
 
-    async function getBranchLastCommitTime(branchName) {
+    async function getBranchLastCommitTime(branchName: string) {
       try {
         const time = await git.show([
           '-s',
@@ -292,7 +307,7 @@ class Storage {
       }
     }
 
-    async function getFile(filePath, branchName) {
+    async function getFile(filePath: string, branchName?: string) {
       if (branchName) {
         const exists = await branchExists(branchName);
         if (!exists) {
@@ -311,9 +326,9 @@ class Storage {
     }
 
     async function commitFilesToBranch(
-      branchName,
-      files,
-      message,
+      branchName: string,
+      files: any[],
+      message: string,
       parentBranch = config.baseBranch
     ) {
       logger.debug(`Committing files to branch ${branchName}`);
@@ -371,7 +386,19 @@ class Storage {
     function cleanRepo() {}
   }
 
-  static getUrl({ gitFs, auth, hostname, host, repository }) {
+  static getUrl({
+    gitFs,
+    auth,
+    hostname,
+    host,
+    repository,
+  }: {
+    gitFs: 'ssh' | 'http' | 'https';
+    auth: string;
+    hostname: string;
+    host: string;
+    repository: string;
+  }) {
     let protocol = gitFs || 'https';
     // istanbul ignore if
     if (protocol.toString() === 'true') {
@@ -390,8 +417,8 @@ class Storage {
   }
 }
 
-function localName(branchName) {
+function localName(branchName: string) {
   return branchName.replace(/^origin\//, '');
 }
 
-module.exports = Storage;
+export = Storage;
