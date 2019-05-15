@@ -94,6 +94,13 @@ Object {
       "depName": "ipaddress",
       "lineNumber": 67,
     },
+    Object {
+      "currentValue": "==0.10.0",
+      "datasource": "pypi",
+      "depName": "aioxmpp",
+      "fromVersion": "0.10.0",
+      "lineNumber": 68,
+    },
   ],
 }
 `;
