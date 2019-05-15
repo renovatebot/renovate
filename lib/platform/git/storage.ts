@@ -202,7 +202,7 @@ class Storage {
             'origin/' + branchName,
           ])).trim();
         }
-        await git.checkout(branchName);
+        await git.checkout([branchName, '-f']);
         await git.reset('hard');
       }
     }
