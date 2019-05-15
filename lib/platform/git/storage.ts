@@ -79,7 +79,10 @@ class Storage {
     }
 
     // istanbul ignore if
-    if (process.env.NODE_ENV !== 'test' && (await fs.exists(gitHead))) {
+    if (
+      process.env.NODE_ENV !== 'test' &&
+      /* istanbul ignore next */ (await fs.exists(gitHead))
+    ) {
       try {
         this._git = Git(cwd).silent(true);
         await this._git.raw(['remote', 'set-url', 'origin', config.url]);
