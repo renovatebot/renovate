@@ -323,6 +323,18 @@ describe('platform/gitlab', () => {
       const res = await gitlab.getBranchStatus('somebranch', []);
       expect(res).toEqual('foo');
     });
+    it('throws repository-changed', async () => {
+      expect.assertions(1);
+      GitStorage.mockImplementationOnce(() => ({
+        initRepo: jest.fn(),
+        branchExists: jest.fn(() => Promise.resolve(false)),
+        cleanRepo: jest.fn(),
+      }));
+      await initRepo();
+      await expect(gitlab.getBranchStatus('somebranch', true)).rejects.toThrow(
+        'repository-changed'
+      );
+    });
   });
   describe('getBranchStatusCheck', () => {
     beforeEach(() => initRepo());
