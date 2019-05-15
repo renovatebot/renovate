@@ -1,9 +1,8 @@
+import convertHrtime from 'convert-hrtime';
 import fs from 'fs-extra';
 import { join } from 'path';
-import path from 'path';
-import URL from 'url';
 import Git from 'simple-git/promise';
-import convertHrtime from 'convert-hrtime';
+import URL from 'url';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
@@ -75,7 +74,7 @@ class Storage {
       cwd = config.localDir;
       config.branchExists = {};
       logger.info('Initialising git repository into ' + cwd);
-      const gitHead = path.join(cwd, '.git/HEAD');
+      const gitHead = join(cwd, '.git/HEAD');
       let clone = true;
       async function determineBaseBranch() {
         // see https://stackoverflow.com/a/44750379/1438522
