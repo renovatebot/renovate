@@ -741,6 +741,19 @@ describe('platform/bitbucket-server', () => {
 
           expect(api.get.mock.calls).toMatchSnapshot();
         });
+
+        it('throws repository-changed', async () => {
+          expect.assertions(1);
+          GitStorage.mockImplementationOnce(() => ({
+            initRepo: jest.fn(),
+            branchExists: jest.fn(() => Promise.resolve(false)),
+            cleanRepo: jest.fn(),
+          }));
+          await initRepo();
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).rejects.toThrow('repository-changed');
+        });
       });
 
       describe('getBranchStatusCheck()', () => {
