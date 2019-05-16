@@ -72,6 +72,9 @@ describe('platform/git/storage', () => {
     it('sets non-master base branch', async () => {
       await git.setBaseBranch('develop');
     });
+    it('should throw if branch does not exist', async () => {
+      await expect(git.setBaseBranch('not_found')).rejects.toMatchSnapshot();
+    });
   });
   describe('getFileList()', () => {
     it('returns empty array if error', async () => {
@@ -107,6 +110,9 @@ describe('platform/git/storage', () => {
     it('should return true if SHA different from master', async () => {
       expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
     });
+    it('should throw if branch does not exist', async () => {
+      await expect(git.isBranchStale('not_found')).rejects.toMatchSnapshot();
+    });
   });
 
   describe('getBranchCommit(branchName)', () => {
@@ -114,6 +120,9 @@ describe('platform/git/storage', () => {
       const hex = await git.getBranchCommit('renovate/past_branch');
       expect(hex).toBe(await git.getBranchCommit('master~1'));
       expect(hex).toHaveLength(40);
+    });
+    it('should throw if branch does not exist', async () => {
+      await expect(git.getBranchCommit('not_found')).rejects.toMatchSnapshot();
     });
   });
 

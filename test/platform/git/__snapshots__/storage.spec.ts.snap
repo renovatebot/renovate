@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/git/storage getBranchCommit(branchName) should throw if branch does not exist 1`] = `[Error: Cannot fetch commit for branch that does not exist]`;
+
 exports[`platform/git/storage getCommitMessages() returns commit messages 1`] = `
 Array [
   "master message",
@@ -40,7 +42,11 @@ Array [
 ]
 `;
 
+exports[`platform/git/storage isBranchStale() should throw if branch does not exist 1`] = `[Error: Cannot check staleness for branch that does not exist]`;
+
 exports[`platform/git/storage mergeBranch(branchName) should throw if branch merge throws 1`] = `
 [Error: fatal: 'origin/not_found' is not a commit and a branch 'not_found' cannot be created from it
 ]
 `;
+
+exports[`platform/git/storage setBaseBranch(branchName) should throw if branch does not exist 1`] = `[Error: Cannot set baseBranch to something that does not exist]`;
