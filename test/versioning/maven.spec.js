@@ -5,6 +5,7 @@ const {
   autoExtendMavenRange,
 } = require('../../lib/versioning/maven/compare');
 const {
+  isValid,
   isVersion,
   isStable,
   getMajor,
@@ -239,6 +240,11 @@ describe('versioning/maven/compare', () => {
 });
 
 describe('versioning/maven/index', () => {
+  it('returns valid', () => {
+    expect(isValid('1.0.0')).toBe(true);
+    expect(isValid('[1.12.6,1.18.6]')).toBe(true);
+    expect(isValid()).toBe(false);
+  });
   it('validates version string', () => {
     expect(isVersion('')).toBe(false);
     expect(isVersion('1.0.0')).toBe(true);
@@ -253,6 +259,7 @@ describe('versioning/maven/index', () => {
     expect(isVersion('1.')).toBe(false);
     expect(isVersion('-1')).toBe(false);
     expect(isVersion('1-')).toBe(false);
+    expect(isVersion('[1.12.6,1.18.6]')).toBe(false);
   });
   it('checks if version is stable', () => {
     expect(isStable('')).toBeNull();

@@ -46,6 +46,16 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket deleteBranch() should handle closing PRs when none exist 1`] = `Array []`;
+
+exports[`platform/bitbucket deleteBranch() should handle closing PRs when some exist 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/pullrequests/5/decline",
+  ],
+]
+`;
+
 exports[`platform/bitbucket ensureIssue() creates new issue 1`] = `
 Array [
   Array [

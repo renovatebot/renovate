@@ -1,7 +1,7 @@
-const fs = require('fs-extra');
-const Git = require('simple-git/promise');
-const tmp = require('tmp-promise');
-const GitStorage = require('../../../lib/platform/git/storage');
+import fs from 'fs-extra';
+import Git from 'simple-git/promise';
+import tmp from 'tmp-promise';
+import GitStorage from '../../../lib/platform/git/storage';
 
 describe('platform/git/storage', () => {
   jest.setTimeout(15000);
@@ -9,8 +9,8 @@ describe('platform/git/storage', () => {
   const git = new GitStorage();
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
-  let base;
-  let origin;
+  let base: tmp.DirectoryResult;
+  let origin: tmp.DirectoryResult;
   beforeAll(async () => {
     base = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(base.path).silent(true);
@@ -38,7 +38,7 @@ describe('platform/git/storage', () => {
     await repo.checkout('master');
   });
 
-  let tmpDir;
+  let tmpDir: tmp.DirectoryResult;
 
   beforeEach(async () => {
     origin = await tmp.dir({ unsafeCleanup: true });
@@ -51,8 +51,6 @@ describe('platform/git/storage', () => {
     };
     await git.initRepo({
       localDir: tmpDir.path,
-      platform: 'github',
-      repository: 'owner/repo-name',
       url: origin.path,
     });
   });
@@ -81,6 +79,7 @@ describe('platform/git/storage', () => {
     });
     it('should return the correct files', async () => {
       expect(await git.getFileList('renovate/future_branch')).toMatchSnapshot();
+      expect(await git.getFileList()).toMatchSnapshot();
     });
   });
   describe('branchExists(branchName)', () => {
@@ -145,7 +144,7 @@ describe('platform/git/storage', () => {
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       await git.deleteBranch('renovate/past_branch');
-      const branches = await Git(origin.path).branch();
+      const branches = await Git(origin.path).branch({});
       expect(branches.all).not.toContain('renovate/past_branch');
     });
   });
@@ -233,6 +232,13 @@ describe('platform/git/storage', () => {
           repository: 'some/repo',
         })
       ).toEqual('https://user:pass@host/some/repo.git');
+      expect(
+        getUrl({
+          auth: 'user:pass',
+          hostname: 'host',
+          repository: 'some/repo',
+        })
+      ).toEqual('https://user:pass@host/some/repo.git');
     });
 
     it('returns ssh url', () => {
@@ -244,6 +250,36 @@ describe('platform/git/storage', () => {
           repository: 'some/repo',
         })
       ).toEqual('git@host:some/repo.git');
+    });
+  });
+
+  describe('initRepo())', () => {
+    it('should fetch latest', async () => {
+      const repo = Git(base.path).silent(true);
+      await repo.checkoutBranch('test', 'master');
+      await fs.writeFile(base.path + '/test', 'lorem ipsum');
+      await repo.add(['test']);
+      await repo.commit('past message2');
+      await repo.checkout('master');
+
+      expect(await git.branchExists('test')).toBeFalsy();
+
+      expect(await git.getCommitMessages()).toMatchSnapshot();
+
+      await git.setBaseBranch('develop');
+
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: base.path,
+      });
+
+      expect(await git.branchExists('test')).toBeTruthy();
+
+      await git.setBaseBranch('test');
+
+      const msg = await git.getCommitMessages();
+      expect(msg).toMatchSnapshot();
+      expect(msg).toContain('past message2');
     });
   });
 });

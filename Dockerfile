@@ -1,4 +1,16 @@
-FROM amd64/ubuntu:18.04@sha256:ab6cb8de3ad7bb33e2534677f865008535427390b117d7939193f8d1a6613e34
+FROM node:lts-alpine@sha256:101042fddccda3a5ae5fbd6752fa568c663e9dc18cec7f7e7b8300c88480fcbe AS tsbuild
+
+COPY package.json .
+COPY yarn.lock .
+RUN yarn install
+
+COPY lib lib
+COPY tsconfig.json tsconfig.json
+
+RUN yarn build
+
+
+FROM amd64/ubuntu:18.04@sha256:b36667c98cf8f68d4b7f1fb8e01f742c2ed26b5f0c965a788e98dfe589a4b3e4
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -150,8 +162,9 @@ ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.
 COPY package.json .
 COPY yarn.lock .
 RUN yarn install --production && yarn cache clean
-COPY lib lib
+COPY --from=tsbuild dist dist
 COPY bin bin
+COPY data data
 
-ENTRYPOINT ["node", "/usr/src/app/lib/renovate.js"]
+ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []

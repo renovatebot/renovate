@@ -76,6 +76,16 @@ describe('lib/manager/dockerfile/extract', () => {
         config
       ).deps;
       expect(res).toMatchSnapshot();
+      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
+      expect(res[0].currentValue).toEqual('8');
+    });
+    it('handles custom hosts with port without tag', () => {
+      const res = extractPackageFile(
+        'FROM registry2.something.info:5005/node\n',
+        config
+      ).deps;
+      expect(res).toMatchSnapshot();
+      expect(res[0].depName).toEqual('registry2.something.info:5005/node');
     });
     it('handles namespaced images', () => {
       const res = extractPackageFile('FROM mynamespace/node:8\n', config).deps;

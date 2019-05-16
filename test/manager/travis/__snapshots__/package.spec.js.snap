@@ -6,7 +6,6 @@ Array [
     "isRange": true,
     "newMajor": 10,
     "newValue": Array [
-      "6.11.0",
       "8.9.4",
       "10.0.1",
     ],
@@ -15,4 +14,16 @@ Array [
 ]
 `;
 
-exports[`lib/manager/node/package getPackageUpdates returns result if needing updates 1`] = `Array []`;
+exports[`lib/manager/node/package getPackageUpdates returns result if needing updates 1`] = `
+Array [
+  Object {
+    "isRange": true,
+    "newMajor": 10,
+    "newValue": Array [
+      "8",
+      "10",
+    ],
+    "sourceUrl": "https://github.com/nodejs/node",
+  },
+]
+`;

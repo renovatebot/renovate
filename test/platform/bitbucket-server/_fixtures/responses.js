@@ -569,6 +569,9 @@ function generateServerResponses(endpoint) {
     [`${endpoint}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`]: {
       POST: {},
     },
+    [`${endpoint}/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=13076&targetRepoId=13076`]: {
+      GET: [{ name: 'jcitizen' }],
+    },
   };
 }
 

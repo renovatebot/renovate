@@ -11,8 +11,7 @@ sudo: false
 branches:
   only:
     - master
-    - stable
-    - v13
+    - v16
 
 if: tag IS blank
 
@@ -36,7 +35,9 @@ script:
   - yarn prettier --list-different
   - yarn lint
   - yarn test-schema
+  - yarn build
   - yarn jest --maxWorkers=4
+  - yarn test-e2e
 
 after_success:
   - yarn codecov
