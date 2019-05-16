@@ -255,4 +255,34 @@ describe('platform/git/storage', () => {
       ).toEqual('git@host:some/repo.git');
     });
   });
+
+  describe('initRepo())', () => {
+    it('should fetch latest', async () => {
+      const repo = Git(base.path).silent(true);
+      await repo.checkoutBranch('test', 'master');
+      await fs.writeFile(base.path + '/test', 'lorem ipsum');
+      await repo.add(['test']);
+      await repo.commit('past message2');
+      await repo.checkout('master');
+
+      expect(await git.branchExists('test')).toBeFalsy();
+
+      expect(await git.getCommitMessages()).toMatchSnapshot();
+
+      await git.setBaseBranch('develop');
+
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: base.path,
+      });
+
+      expect(await git.branchExists('test')).toBeTruthy();
+
+      await git.setBaseBranch('test');
+
+      const msg = await git.getCommitMessages();
+      expect(msg).toMatchSnapshot();
+      expect(msg).toContain('past message2');
+    });
+  });
 });

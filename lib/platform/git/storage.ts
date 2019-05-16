@@ -26,7 +26,6 @@ class Storage {
   private _git: Git.SimpleGit | undefined;
   private _cwd: string | undefined;
 
-  // istanbul ignore next
   private async _resetToBranch(branchName: string) {
     logger.debug(`resetToBranch(${branchName})`);
     await this._git!.raw(['reset', '--hard']);
@@ -35,7 +34,6 @@ class Storage {
     await this._git!.raw(['clean', '-fd']);
   }
 
-  // istanbul ignore next
   private async _cleanLocalBranches() {
     const existingBranches = (await this._git!.raw(['branch']))
       .split('\n')
@@ -78,16 +76,12 @@ class Storage {
       }
     }
 
-    // istanbul ignore if
-    if (
-      process.env.NODE_ENV !== 'test' &&
-      /* istanbul ignore next */ (await fs.exists(gitHead))
-    ) {
+    if (await fs.exists(gitHead)) {
       try {
         this._git = Git(cwd).silent(true);
         await this._git.raw(['remote', 'set-url', 'origin', config.url]);
         const fetchStart = process.hrtime();
-        await this._git.fetch([config.url, '--depth=2']);
+        await this._git.fetch(['--depth=2']);
         await determineBaseBranch(this._git);
         await this._resetToBranch(config.baseBranch);
         await this._cleanLocalBranches();
@@ -98,7 +92,7 @@ class Storage {
           ) / 10;
         logger.info({ fetchSeconds }, 'git fetch completed');
         clone = false;
-      } catch (err) {
+      } catch (err) /* istanbul ignore next */ {
         logger.error({ err }, 'git fetch error');
       }
     }
