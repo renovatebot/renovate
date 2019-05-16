@@ -15,6 +15,11 @@ declare namespace Renovate {
 
 declare var logger: Renovate.ILogger;
 
+declare interface Error {
+  validationError?: string;
+  validationMessage?: string;
+}
+
 declare namespace NodeJS {
   interface Global {
     gitAuthor?: { name: string; email: string };

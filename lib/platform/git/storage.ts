@@ -184,14 +184,30 @@ class Storage {
     if (branchName) {
       logger.debug(`Setting baseBranch to ${branchName}`);
       this._config.baseBranch = branchName;
-      if (branchName !== 'master') {
-        this._config.baseBranchSha = (await this._git!.raw([
-          'rev-parse',
-          'origin/' + branchName,
-        ])).trim();
+      try {
+        if (branchName !== 'master') {
+          this._config.baseBranchSha = (await this._git!.raw([
+            'rev-parse',
+            'origin/' + branchName,
+          ])).trim();
+        }
+        await this._git!.checkout([branchName, '-f']);
+        await this._git!.reset('hard');
+      } catch (err) /* istanbul ignore next */ {
+        if (
+          err.message.includes(
+            'unknown revision or path not in the working tree'
+          )
+        ) {
+          const error = new Error('config-validation');
+          error.validationError = 'baseBranch not found';
+          error.validationMessage =
+            'The following configured baseBranch could not be found: ' +
+            branchName;
+          throw error;
+        }
+        throw err;
       }
-      await this._git!.checkout([branchName, '-f']);
-      await this._git!.reset('hard');
     }
   }
 
