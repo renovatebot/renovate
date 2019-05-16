@@ -281,7 +281,6 @@ class Storage {
 
   async isBranchStale(branchName: string) {
     if (!(await this.branchExists(branchName))) {
-      // Calling to branchExists also handles the fetching
       throw Error('Cannot check staleness for branch that does not exist');
     }
     const branches = await this._git!.branch([
