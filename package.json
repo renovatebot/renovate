@@ -154,6 +154,7 @@
     "@types/bunyan": "1.8.6",
     "@types/convert-hrtime": "2.0.0",
     "@types/fs-extra": "7.0.0",
+    "@types/got": "9.4.4",
     "@types/jest": "24.0.13",
     "@types/node": "11.13.11",
     "@types/tmp": "0.0.33",
