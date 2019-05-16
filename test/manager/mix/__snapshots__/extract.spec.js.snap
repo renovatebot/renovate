@@ -4,46 +4,47 @@ exports[`lib/manager/mix/extract extractPackageFile() extracts all dependencies 
 Array [
   Object {
     "currentValue": "~> 0.8.1",
+    "datasource": "hex",
     "depName": "postgrex",
     "lineNumber": 18,
-    "skipReason": "non-hex depTypes",
   },
   Object {
     "currentValue": ">2.1.0 or <=3.0.0",
+    "datasource": "hex",
     "depName": "ecto",
     "lineNumber": 19,
-    "skipReason": "non-hex depTypes",
   },
   Object {
     "currentValue": "ninenines/cowboy",
+    "datasource": "github",
     "depName": "cowboy",
     "lineNumber": 20,
     "skipReason": "non-hex depTypes",
   },
   Object {
     "currentValue": "~> 1.0",
+    "datasource": "hex",
     "depName": "secret",
     "lineNumber": 21,
     "lookupName": "undefined:acme",
-    "skipReason": "non-hex depTypes",
   },
   Object {
     "currentValue": ">2.1.0 and <=3.0.0",
+    "datasource": "hex",
     "depName": "ex_doc",
     "lineNumber": 22,
-    "skipReason": "non-hex depTypes",
   },
   Object {
     "currentValue": ">= 1.0.0",
+    "datasource": "hex",
     "depName": "jason",
     "lineNumber": 24,
-    "skipReason": "non-hex depTypes",
   },
   Object {
     "currentValue": "~> 1.0",
+    "datasource": "hex",
     "depName": "jason",
     "lineNumber": 24,
-    "skipReason": "non-hex depTypes",
   },
 ]
 `;
