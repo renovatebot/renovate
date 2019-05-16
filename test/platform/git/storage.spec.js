@@ -81,6 +81,7 @@ describe('platform/git/storage', () => {
     });
     it('should return the correct files', async () => {
       expect(await git.getFileList('renovate/future_branch')).toMatchSnapshot();
+      expect(await git.getFileList()).toMatchSnapshot();
     });
   });
   describe('branchExists(branchName)', () => {
@@ -231,6 +232,13 @@ describe('platform/git/storage', () => {
       expect(
         getUrl({
           gitFs: 'https',
+          auth: 'user:pass',
+          hostname: 'host',
+          repository: 'some/repo',
+        })
+      ).toEqual('https://user:pass@host/some/repo.git');
+      expect(
+        getUrl({
           auth: 'user:pass',
           hostname: 'host',
           repository: 'some/repo',
