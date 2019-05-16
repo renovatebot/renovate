@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
-    "resolveJsonModule": false
+    "resolveJsonModule": false,
+    "sourceMap": false,
+    "types": ["node"]
   },
   "include": ["lib/**/*"]
 }
