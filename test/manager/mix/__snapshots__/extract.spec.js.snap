@@ -7,12 +7,14 @@ Array [
     "datasource": "hex",
     "depName": "postgrex",
     "lineNumber": 18,
+    "lookupName": "postgrex",
   },
   Object {
     "currentValue": ">2.1.0 or <=3.0.0",
     "datasource": "hex",
     "depName": "ecto",
     "lineNumber": 19,
+    "lookupName": "ecto",
   },
   Object {
     "currentValue": "ninenines/cowboy",
@@ -26,25 +28,28 @@ Array [
     "datasource": "hex",
     "depName": "secret",
     "lineNumber": 21,
-    "lookupName": "undefined:acme",
+    "lookupName": "secret:acme",
   },
   Object {
     "currentValue": ">2.1.0 and <=3.0.0",
     "datasource": "hex",
     "depName": "ex_doc",
     "lineNumber": 22,
+    "lookupName": "ex_doc",
   },
   Object {
     "currentValue": ">= 1.0.0",
     "datasource": "hex",
     "depName": "jason",
     "lineNumber": 24,
+    "lookupName": "jason",
   },
   Object {
     "currentValue": "~> 1.0",
     "datasource": "hex",
     "depName": "jason",
     "lineNumber": 24,
+    "lookupName": "jason",
   },
 ]
 `;
