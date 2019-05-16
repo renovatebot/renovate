@@ -1,7 +1,7 @@
 import URL from 'url';
 
 //TODO: add known properties
-interface IPlatformConfig {
+export interface IPlatformConfig {
   [prop: string]: any;
   name?: string;
   endpoint?: string;
