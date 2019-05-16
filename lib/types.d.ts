@@ -11,6 +11,10 @@ declare namespace Renovate {
 
     setMeta(obj: any): void;
   }
+
+  interface IDict<T> {
+    [key: string]: T;
+  }
 }
 
 declare var logger: Renovate.ILogger;
