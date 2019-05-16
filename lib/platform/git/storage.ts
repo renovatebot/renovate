@@ -19,6 +19,7 @@ interface ILocalConfig extends IStorageConfig {
   baseBranch: string;
   baseBranchSha: string;
   branchExists: { [branch: string]: boolean };
+  branchPrefix: string;
 }
 
 class Storage {
@@ -101,10 +102,8 @@ class Storage {
       this._git = Git(cwd).silent(true);
       const cloneStart = process.hrtime();
       try {
-        await this._git.clone(config.url, '.', [
-          '--depth=2',
-          '--no-single-branch',
-        ]);
+        // clone only the default branch
+        await this._git.clone(config.url, '.', ['--depth=2']);
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ err }, 'git clone error');
         throw new Error('platform-failure');
@@ -161,6 +160,9 @@ class Storage {
 
   // Return the commit SHA for a branch
   async getBranchCommit(branchName: string) {
+    if (!(await this.branchExists(branchName))) {
+      throw Error('Cannot fetch commit for branch that does not exist');
+    }
     const res = await this._git!.revparse(['origin/' + branchName]);
     return res.trim();
   }
@@ -176,6 +178,11 @@ class Storage {
 
   async setBaseBranch(branchName: string) {
     if (branchName) {
+      if (!(await this.branchExists(branchName))) {
+        throw new Error(
+          'Cannot set baseBranch to something that does not exist'
+        );
+      }
       logger.debug(`Setting baseBranch to ${branchName}`);
       this._config.baseBranch = branchName;
       try {
@@ -205,6 +212,17 @@ class Storage {
     }
   }
 
+  /*
+   * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
+   * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
+   */
+  async setBranchPrefix(branchPrefix: string) {
+    logger.debug('Setting branchPrefix: ' + branchPrefix);
+    this._config.branchPrefix = branchPrefix;
+    const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
+    await this._git!.fetch(['origin', ref, '--depth=2']);
+  }
+
   async getFileList(branchName?: string) {
     const branch = branchName || this._config.baseBranch;
     const exists = await this.branchExists(branch);
@@ -229,6 +247,21 @@ class Storage {
     if (this._config.branchExists[branchName] !== undefined) {
       return this._config.branchExists[branchName];
     }
+    if (!branchName.startsWith(this._config.branchPrefix)) {
+      // fetch the branch only if it's not part of the existing branchPrefix
+      try {
+        await this._git!.raw([
+          'remote',
+          'set-branches',
+          '--add',
+          'origin',
+          branchName,
+        ]);
+        await this._git!.fetch(['origin', branchName, '--depth=2']);
+      } catch (err) {
+        // do nothing
+      }
+    }
     try {
       await this._git!.raw(['show-branch', 'origin/' + branchName]);
       this._config.branchExists[branchName] = true;
@@ -247,6 +280,10 @@ class Storage {
   }
 
   async isBranchStale(branchName: string) {
+    if (!(await this.branchExists(branchName))) {
+      // Calling to branchExists also handles the fetching
+      throw Error('Cannot check staleness for branch that does not exist');
+    }
     const branches = await this._git!.branch([
       '--remotes',
       '--verbose',
