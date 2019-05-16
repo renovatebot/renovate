@@ -95,3 +95,12 @@ release:
     <<: *docker-logout
     only:
       - tags
+
+image-name-test:
+    stage: build
+    <<: *executor-docker
+    image:
+      name: image-name-test:1.15
+      entrypoint: [""]
+    script:
+        - image-name-test Dockerfile
