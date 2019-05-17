@@ -34,8 +34,8 @@ jobs:
           command: |
             yarn prettier --list-different
             yarn lint
-            git config --global user.email "nihal9ns@gmail.com"
-            git config --global user.name "nihal9ns"
+            git config --global user.email "nihal9ns@gmail.com" # add your github email here
+            git config --global user.name "nihal9ns"    # add your github user name here
 
       - run:
           name: Running Tests
