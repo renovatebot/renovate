@@ -406,6 +406,7 @@ class Storage {
       // Fetch it after create
       const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
       await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+      this._config.branchExists[branchName] = true;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error commiting files');
       if (err.message.includes('.github/main.workflow')) {
