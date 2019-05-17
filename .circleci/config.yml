@@ -48,7 +48,7 @@ jobs:
       - run:
           name: Getting Code Coverage
           command: |
-            - yarn codecov
+            yarn codecov
 
 workflows:
   version: 2
