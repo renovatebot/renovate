@@ -1003,6 +1003,14 @@
       },
       "$ref": "#"
     },
+    "cocoapods": {
+      "description": "Configuration object for Cocoapods renovation.",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)Podfile$"]
+      },
+      "$ref": "#"
+    },
     "ansible": {
       "description": "Configuration object for Ansible yaml renovation. Also inherits settings from `docker` object.",
       "type": "object",
