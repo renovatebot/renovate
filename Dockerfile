@@ -6,6 +6,7 @@ RUN yarn install
 
 COPY lib lib
 COPY tsconfig.json tsconfig.json
+COPY tsconfig.app.json tsconfig.app.json
 
 RUN yarn build
 
