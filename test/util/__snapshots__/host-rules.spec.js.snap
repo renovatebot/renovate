@@ -36,6 +36,13 @@ Object {
 }
 `;
 
+exports[`util/host-rules find() matches on host 1`] = `
+Object {
+  "host": "docker.io",
+  "platform": "docker",
+}
+`;
+
 exports[`util/host-rules find() needs exact host matches 1`] = `
 Object {
   "endpoint": "endpoint/",

@@ -102,5 +102,23 @@ describe('util/host-rules', () => {
         })
       ).toMatchSnapshot();
     });
+    it('matches on host', () => {
+      update({
+        platform: 'docker',
+        host: 'docker.io',
+      });
+      update({
+        platform: 'docker',
+        host: 'myregistry.internal',
+        username: 'user',
+        password: 'password',
+      });
+      expect(
+        find({
+          platform: 'docker',
+          host: 'docker.io',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });
