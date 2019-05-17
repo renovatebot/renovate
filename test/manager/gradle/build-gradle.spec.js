@@ -182,4 +182,54 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
     expect(updatedGradleFile).toEqual('String mysqlVersion = "7.0.0"');
   });
+
+  describe('Plugins', function () {
+    it('should update an inline plugin version ', () => {
+      const gradleFile = `
+        plugins {
+          id 'com.jfrog.bintray' version '0.4.1' apply false
+        }
+      `;
+      const updatedGradleFile = gradle.updateGradleVersion(
+        gradleFile,
+        { name: 'com.jfrog.bintray', depName: 'Gradle Plugin com.jfrog.bintray', version: '0.4.1' },
+        '1.0.0'
+      );
+      expect(updatedGradleFile).toEqual(`
+        plugins {
+          id 'com.jfrog.bintray' version '1.0.0' apply false
+        }
+      `
+      );
+    });
+
+    it('should update a plugin defined in buildscript', () => {
+      const gradleFile = `
+        buildscript {
+            dependencies {
+                classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.4.1'
+            }
+        }
+      `;
+      const pluginDependency = {
+        group: 'com.jfrog.bintray.gradle',
+        depGroup: 'com.jfrog.bintray.gradle',
+        name: 'gradle-bintray-plugin',
+        version: '0.4.1',
+      };
+      const updatedGradleFile = gradle.updateGradleVersion(
+        gradleFile,
+        pluginDependency,
+        '1.0.0'
+      );
+      expect(updatedGradleFile).toEqual(`
+        buildscript {
+            dependencies {
+                classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0.0'
+            }
+        }
+      `
+      );
+    });
+  });
 });

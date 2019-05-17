@@ -193,6 +193,12 @@ describe('manager/gradle', () => {
         'docker run --rm -v localDir:localDir -w localDir renovate/gradle gradle --init-script renovate-plugin.gradle renovate'
       );
     });
+
+    it('should execute gradle only once', async () => {
+      await manager.extractAllPackageFiles(config, ['build.gradle', 'build2.gradle']);
+
+      expect(exec).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('updateDependency', () => {
