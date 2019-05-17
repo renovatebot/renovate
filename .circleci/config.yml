@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  setup:
     docker:
       - image: node:10.13.0
     steps:
@@ -54,7 +54,7 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - build:
+      - setup:
           filters:
             branches:
               only:
