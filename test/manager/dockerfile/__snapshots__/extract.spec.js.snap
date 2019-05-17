@@ -122,12 +122,13 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles abnoral spacing 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "registry.allmine.info:5005/node:8.7.0",
     "currentDigest": undefined,
     "currentFrom": "registry.allmine.info:5005/node:8.7.0",
-    "currentValue": "5005/node",
+    "currentValue": "8.7.0",
     "datasource": "docker",
-    "depName": "registry.allmine.info",
+    "depName": "registry.allmine.info:5005/node",
     "depType": "final",
     "fromPrefix": "FROM",
     "fromSuffix": "",
@@ -228,12 +229,31 @@ Array [
 exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom hosts with port 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "Node.js",
     "currentDepTag": "registry2.something.info:5005/node:8",
     "currentDigest": undefined,
     "currentFrom": "registry2.something.info:5005/node:8",
-    "currentValue": "5005/node",
+    "currentValue": "8",
     "datasource": "docker",
-    "depName": "registry2.something.info",
+    "depName": "registry2.something.info:5005/node",
+    "depType": "final",
+    "fromPrefix": "FROM",
+    "fromSuffix": "",
+    "lineNumber": 0,
+  },
+]
+`;
+
+exports[`lib/manager/dockerfile/extract extractPackageFile() handles custom hosts with port without tag 1`] = `
+Array [
+  Object {
+    "commitMessageTopic": "Node.js",
+    "currentDepTag": "registry2.something.info:5005/node",
+    "currentDigest": undefined,
+    "currentFrom": "registry2.something.info:5005/node",
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "registry2.something.info:5005/node",
     "depType": "final",
     "fromPrefix": "FROM",
     "fromSuffix": "",

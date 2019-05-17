@@ -16,6 +16,7 @@ describe('workers/branch/get-updated', () => {
       composer.updateDependency = jest.fn();
       composer.getArtifacts = jest.fn();
       npm.updateDependency = jest.fn();
+      platform.getFile.mockReturnValueOnce('existing content');
     });
     it('handles empty', async () => {
       const res = await getUpdatedPackageFiles(config);

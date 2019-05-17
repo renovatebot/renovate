@@ -1,7 +1,7 @@
-const fs = require('fs-extra');
-const Git = require('simple-git/promise');
-const tmp = require('tmp-promise');
-const GitStorage = require('../../../lib/platform/git/storage');
+import fs from 'fs-extra';
+import Git from 'simple-git/promise';
+import tmp from 'tmp-promise';
+import GitStorage from '../../../lib/platform/git/storage';
 
 describe('platform/git/storage', () => {
   jest.setTimeout(15000);
@@ -9,8 +9,8 @@ describe('platform/git/storage', () => {
   const git = new GitStorage();
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
-  let base;
-  let origin;
+  let base: tmp.DirectoryResult;
+  let origin: tmp.DirectoryResult;
   beforeAll(async () => {
     base = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(base.path).silent(true);
@@ -38,7 +38,7 @@ describe('platform/git/storage', () => {
     await repo.checkout('master');
   });
 
-  let tmpDir;
+  let tmpDir: tmp.DirectoryResult;
 
   beforeEach(async () => {
     origin = await tmp.dir({ unsafeCleanup: true });
@@ -51,8 +51,6 @@ describe('platform/git/storage', () => {
     };
     await git.initRepo({
       localDir: tmpDir.path,
-      platform: 'github',
-      repository: 'owner/repo-name',
       url: origin.path,
     });
   });
@@ -74,6 +72,9 @@ describe('platform/git/storage', () => {
     it('sets non-master base branch', async () => {
       await git.setBaseBranch('develop');
     });
+    it('should throw if branch does not exist', async () => {
+      await expect(git.setBaseBranch('not_found')).rejects.toMatchSnapshot();
+    });
   });
   describe('getFileList()', () => {
     it('returns empty array if error', async () => {
@@ -81,6 +82,7 @@ describe('platform/git/storage', () => {
     });
     it('should return the correct files', async () => {
       expect(await git.getFileList('renovate/future_branch')).toMatchSnapshot();
+      expect(await git.getFileList()).toMatchSnapshot();
     });
   });
   describe('branchExists(branchName)', () => {
@@ -90,15 +92,11 @@ describe('platform/git/storage', () => {
     });
     it('should return false if not found', async () => {
       expect(await git.branchExists('not_found')).toBe(false);
-      const hex = await git.getBranchCommit('renovate/past_branch');
-      await git.createBranch('not_found', hex);
-      expect(await git.branchExists('not_found')).toBe(true);
-      await git.deleteBranch('not_found');
-      expect(await git.branchExists('not_found')).toBe(false);
     });
   });
   describe('getAllRenovateBranches()', () => {
     it('should return all renovate branches', async () => {
+      await git.setBranchPrefix('renovate/');
       const res = await git.getAllRenovateBranches('renovate/');
       expect(res).toContain('renovate/past_branch');
       expect(res).toContain('renovate/future_branch');
@@ -112,6 +110,9 @@ describe('platform/git/storage', () => {
     it('should return true if SHA different from master', async () => {
       expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
     });
+    it('should throw if branch does not exist', async () => {
+      await expect(git.isBranchStale('not_found')).rejects.toMatchSnapshot();
+    });
   });
 
   describe('getBranchCommit(branchName)', () => {
@@ -119,6 +120,9 @@ describe('platform/git/storage', () => {
       const hex = await git.getBranchCommit('renovate/past_branch');
       expect(hex).toBe(await git.getBranchCommit('master~1'));
       expect(hex).toHaveLength(40);
+    });
+    it('should throw if branch does not exist', async () => {
+      await expect(git.getBranchCommit('not_found')).rejects.toMatchSnapshot();
     });
   });
 
@@ -133,6 +137,7 @@ describe('platform/git/storage', () => {
 
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
+      await git.setBranchPrefix('renovate/');
       await git.mergeBranch('renovate/future_branch');
       const merged = await Git(origin.path).branch([
         '--verbose',
@@ -148,7 +153,7 @@ describe('platform/git/storage', () => {
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
       await git.deleteBranch('renovate/past_branch');
-      const branches = await Git(origin.path).branch();
+      const branches = await Git(origin.path).branch({});
       expect(branches.all).not.toContain('renovate/past_branch');
     });
   });
@@ -236,6 +241,13 @@ describe('platform/git/storage', () => {
           repository: 'some/repo',
         })
       ).toEqual('https://user:pass@host/some/repo.git');
+      expect(
+        getUrl({
+          auth: 'user:pass',
+          hostname: 'host',
+          repository: 'some/repo',
+        })
+      ).toEqual('https://user:pass@host/some/repo.git');
     });
 
     it('returns ssh url', () => {
@@ -247,6 +259,66 @@ describe('platform/git/storage', () => {
           repository: 'some/repo',
         })
       ).toEqual('git@host:some/repo.git');
+    });
+  });
+
+  describe('initRepo())', () => {
+    it('should fetch latest', async () => {
+      const repo = Git(base.path).silent(true);
+      await repo.checkoutBranch('test', 'master');
+      await fs.writeFile(base.path + '/test', 'lorem ipsum');
+      await repo.add(['test']);
+      await repo.commit('past message2');
+      await repo.checkout('master');
+
+      expect(await git.branchExists('test')).toBeFalsy();
+
+      expect(await git.getCommitMessages()).toMatchSnapshot();
+
+      await git.setBaseBranch('develop');
+
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: base.path,
+      });
+
+      expect(await git.branchExists('test')).toBeTruthy();
+
+      await git.setBaseBranch('test');
+
+      const msg = await git.getCommitMessages();
+      expect(msg).toMatchSnapshot();
+      expect(msg).toContain('past message2');
+    });
+
+    it('should set branch prefix', async () => {
+      const repo = Git(base.path).silent(true);
+      await repo.checkoutBranch('renovate/test', 'master');
+      await fs.writeFile(base.path + '/test', 'lorem ipsum');
+      await repo.add(['test']);
+      await repo.commit('past message2');
+      await repo.checkout('master');
+
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: base.path,
+      });
+
+      await git.setBranchPrefix('renovate/');
+      expect(await git.branchExists('renovate/test')).toBe(true);
+      const cid = await git.getBranchCommit('renovate/test');
+
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: base.path,
+      });
+
+      await repo.checkout('renovate/test');
+      await repo.commit('past message3', ['--amend']);
+
+      await git.setBranchPrefix('renovate/');
+      expect(await git.branchExists('renovate/test')).toBe(true);
+      expect(await git.getBranchCommit('renovate/test')).not.toEqual(cid);
     });
   });
 });

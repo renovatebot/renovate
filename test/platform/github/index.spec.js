@@ -1342,7 +1342,7 @@ describe('platform/github', () => {
         'Hello world',
         ['deps', 'renovate'],
         false,
-        true
+        { statusCheckVerify: true }
       );
       expect(pr).toMatchSnapshot();
       expect(get.post.mock.calls).toMatchSnapshot();

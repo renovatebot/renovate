@@ -383,6 +383,12 @@ describe('semverRuby', () => {
       });
     });
 
+    it('does not error', () => {
+      expect(
+        semverRuby.getNewValue('>= 3.2, < 5.0', 'replace', '4.0.2', '6.0.1')
+      ).toMatchSnapshot();
+    });
+
     it('returns correct version for replace strategy', () => {
       [
         ['1.2.3', '1.0.3', 'replace', '1.0.3', '1.2.3'],
