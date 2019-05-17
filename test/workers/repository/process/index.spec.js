@@ -20,24 +20,12 @@ describe('workers/repository/process/index', () => {
     it('throws if bitbucket with master issue', async () => {
       config.isBitbucket = true;
       config.masterIssue = true;
-      let e;
-      try {
-        await processRepo(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(processRepo(config)).rejects.toThrow();
     });
     it('throws if azure with master issue', async () => {
       config.isAzure = true;
       config.masterIssue = true;
-      let e;
-      try {
-        await processRepo(config);
-      } catch (err) {
-        e = err;
-      }
-      expect(e).toBeDefined();
+      await expect(processRepo(config)).rejects.toThrow();
     });
     it('processes single branches', async () => {
       const res = await processRepo(config);
