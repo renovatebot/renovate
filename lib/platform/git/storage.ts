@@ -82,7 +82,7 @@ class Storage {
         this._git = Git(cwd).silent(true);
         await this._git.raw(['remote', 'set-url', 'origin', config.url]);
         const fetchStart = process.hrtime();
-        await this._git.fetch(['--depth=2']);
+        await this._git.fetch(['--depth=10']);
         await determineBaseBranch(this._git);
         await this._resetToBranch(config.baseBranch);
         await this._cleanLocalBranches();
