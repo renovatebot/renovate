@@ -46,7 +46,7 @@ Consfiguring CircleCI to trigger a build whenever a PR is created can be handled
 
 https://circleci.com/docs/2.0/oss/#only-build-pull-requests
 
-## Notification Settings of CircleCI
+## Notification Settings for CircleCI
 
 Don't like much noise? Don't worry, you can setup notification settings of CircleCI right through the web interface so that you only get notified for what you think is important.
 
