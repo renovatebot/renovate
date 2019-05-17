@@ -12,7 +12,33 @@ beforeEach(() => {
 });
 
 describe('workers/repository/process/index', () => {
+  let config;
+  beforeEach(() => {
+    config = {};
+  });
   describe('processRepo()', () => {
+    it('throws if bitbucket with master issue', async () => {
+      config.isBitbucket = true;
+      config.masterIssue = true;
+      let e;
+      try {
+        await processRepo(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
+    it('throws if azure with master issue', async () => {
+      config.isAzure = true;
+      config.masterIssue = true;
+      let e;
+      try {
+        await processRepo(config);
+      } catch (err) {
+        e = err;
+      }
+      expect(e).toBeDefined();
+    });
     it('processes single branches', async () => {
       const res = await processRepo(config);
       expect(res).toMatchSnapshot();
