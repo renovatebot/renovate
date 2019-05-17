@@ -220,7 +220,7 @@ class Storage {
     logger.debug('Setting branchPrefix: ' + branchPrefix);
     this._config.branchPrefix = branchPrefix;
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-    await this._git!.fetch(['origin', ref, '--depth=2']);
+    await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
   }
 
   async getFileList(branchName?: string) {
