@@ -37,7 +37,11 @@ export function update(params: IPlatformConfig) {
   if (!endpoint) {
     // istanbul ignore if
     if (platform === 'docker') {
-      platforms.docker = params;
+      const { host } = config;
+      if (!platforms.docker) {
+        platforms.docker = {};
+      }
+      platforms.docker[host] = config;
       return true;
     }
     throw new Error(
