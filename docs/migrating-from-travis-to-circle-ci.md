@@ -1,7 +1,6 @@
-# Why CircleCI?
+# CircleCI
 
-Sources speak that circleCI is a bit faster than travisCI.
-https://hackernoon.com/why-xod-switched-from-travis-to-circle-ci-98b6832f2d96
+https://circleci.com/docs/2.0/about-circleci/#section=welcome
 
 ## Setting up CircleCI
 
