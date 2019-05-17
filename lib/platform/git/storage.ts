@@ -403,6 +403,18 @@ class Storage {
         '--force': true,
         '-u': true,
       });
+      try {
+        await this._git!.raw([
+          'remote',
+          'set-branches',
+          '--add',
+          'origin',
+          branchName,
+        ]);
+        await this._git!.fetch(['origin', branchName, '--depth=2']);
+      } catch (err) /* istanbul ignore next */ {
+        logger.info({ err }, 'Error fetching branch after create');
+      }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error commiting files');
       if (err.message.includes('.github/main.workflow')) {
