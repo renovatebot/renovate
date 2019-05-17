@@ -250,14 +250,8 @@ class Storage {
     if (!branchName.startsWith(this._config.branchPrefix)) {
       // fetch the branch only if it's not part of the existing branchPrefix
       try {
-        await this._git!.raw([
-          'remote',
-          'set-branches',
-          '--add',
-          'origin',
-          branchName,
-        ]);
-        await this._git!.fetch(['origin', branchName, '--depth=2']);
+        const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+        await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
       } catch (err) {
         // do nothing
       }
