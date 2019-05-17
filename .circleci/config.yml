@@ -47,7 +47,7 @@ jobs:
 
       - run:
           name: Getting Code Coverage
-          command:
+          command: |
             - yarn codecov
 
 workflows:
