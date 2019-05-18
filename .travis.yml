@@ -33,7 +33,6 @@ cache:
     - 'node_modules'
 
 script:
-  - yarn prettier --list-different
   - yarn lint
   - yarn test-schema
   - yarn build
