@@ -10,6 +10,8 @@ jobs:
           command: |
             python --version
             python3 --version
+            curl https://bootstrap.pypa.io/get-pip.py | python             
+            pip --version
             git config --global user.email "bot@renovateapp.com"
             git config --global user.name "Renovate Bot"      
             git --version
@@ -18,6 +20,7 @@ jobs:
           name: Installing Dependencies
           command: |
             yarn install --frozen-lockfile
+            pip install --user -r requirements.txt
 
       - save_cache:
           key: dependency-cache-{{ checksum "yarn.lock" }}
