@@ -12,18 +12,21 @@ jobs:
             python get-pip.py
             curl -o- -L https://yarnpkg.com/install.sh | bash
             export PATH="$HOME/.yarn/bin:$PATH"
-            apt install software-properties-common -y
-            add-apt-repository ppa:git-core/ppa -y
-            apt update -y
+            # apt install software-properties-common -y
+            # add-apt-repository ppa:git-core/ppa -y
+            # apt update -y
             # apt -f dist-upgrade -y
             # apt -f install -y
-            apt install git -y
+            # apt install git -y
             python --version
             python3 --version                     
-            pip --version         
-            git --version
+            pip --version  
+            curl -o- -L https://yarnpkg.com/install.sh | bash
+            export PATH="$HOME/.yarn/bin:$PATH"
+            yarn --version
             git config --global user.email "bot@renovateapp.com"
-            git config --global user.name "Renovate Bot" 
+            git config --global user.name "Renovate Bot"      
+            git --version
 
       - run:
           name: Installing Dependencies
