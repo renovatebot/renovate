@@ -2,7 +2,7 @@ version: 2
 jobs:
   setup:
     docker:
-      - image: node:10.13.0
+      - image: node:10.15.3
     steps:
       - checkout
       - run:
@@ -14,7 +14,9 @@ jobs:
             export PATH="$HOME/.yarn/bin:$PATH"
             python --version
             python3 --version                     
-            pip --version          
+            pip --version         
+            git config --global user.email "bot@renovateapp.com"
+            git config --global user.name "Renovate Bot" 
 
       - run:
           name: Installing Dependencies
@@ -30,23 +32,21 @@ jobs:
             - '.eslintcache'
 
       - run:
-          name: Running Scripts
+          name: Linting
           command: |
             yarn prettier --list-different
-            yarn lint
-            git config --global user.email "nihal9ns@gmail.com" # add your github email here
-            git config --global user.name "nihal9ns"    # add your github user name here
+            yarn lint            
 
       - run:
-          name: Running Tests
+          name: Tests
           command: |
             yarn test-schema
             yarn build              
-            yarn jest --updateSnapshot --runInBand
+            yarn jest --runInBand
             yarn test-e2e  
 
       - run:
-          name: Getting Code Coverage
+          name: Coverage
           command: |
             yarn codecov
 
