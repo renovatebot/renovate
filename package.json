@@ -89,7 +89,7 @@
     "@sindresorhus/is": "0.17.0",
     "@snyk/ruby-semver": "rarkins/ruby-semver#semverfix",
     "@yarnpkg/lockfile": "1.1.0",
-    "azure-devops-node-api": "7.2.0",
+    "azure-devops-node-api": "8.0.0",
     "bunyan": "1.8.12",
     "cacache": "11.3.2",
     "chalk": "2.4.2",
@@ -156,6 +156,7 @@
     "@types/fs-extra": "7.0.0",
     "@types/jest": "24.0.13",
     "@types/node": "11.13.10",
+    "@types/tmp": "0.0.33",
     "@typescript-eslint/eslint-plugin": "1.9.0",
     "@typescript-eslint/parser": "1.9.0",
     "babel-plugin-transform-object-rest-spread": "7.0.0-beta.3",
@@ -198,7 +199,11 @@
     ]
   },
   "jest": {
-    "globals": { "ts-jest": { "isolatedModules": true } },
+    "globals": {
+      "ts-jest": {
+        "isolatedModules": true
+      }
+    },
     "cacheDirectory": ".cache/jest",
     "coverageDirectory": "./coverage",
     "collectCoverage": true,

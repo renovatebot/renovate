@@ -1,6 +1,6 @@
-const URL = require('url');
+import URL from 'url';
 
-const defaults = {
+export const defaults: IDict<IPlatformConfig> = {
   bitbucket: { name: 'Bitbucket', endpoint: 'https://api.bitbucket.org/' },
   'bitbucket-server': { name: 'Bitbucket Server' },
   github: { name: 'GitHub', endpoint: 'https://api.github.com/' },
@@ -8,23 +8,24 @@ const defaults = {
   azure: { name: 'Azure DevOps' },
 };
 
-module.exports = {
-  update,
-  find,
-  clear,
-  defaults,
-  hosts,
-};
+//TODO: add known properties
+interface IPlatformConfig {
+  [prop: string]: any;
+  name?: string;
+  endpoint?: string;
+}
+interface IDict<T> {
+  [key: string]: T;
+}
+const platforms: IDict<IPlatformConfig> = {};
+const hostsOnly: IDict<IPlatformConfig> = {};
 
-const platforms = {};
-const hostsOnly = {};
-
-function update(params) {
+export function update(params: IPlatformConfig) {
   const { platform } = params;
   if (!platform) {
     if (params.endpoint) {
       const { host } = URL.parse(params.endpoint);
-      hostsOnly[host] = params;
+      hostsOnly[host!] = params;
       return true;
     }
     throw new Error(
@@ -65,7 +66,10 @@ function update(params) {
   return true;
 }
 
-function find({ platform, host }, overrides) {
+export function find(
+  { platform, host }: { platform: string; host?: string },
+  overrides?: IPlatformConfig
+) {
   if (!platforms[platform]) {
     if (host && hostsOnly[host]) {
       return merge(hostsOnly[host], overrides);
@@ -77,7 +81,7 @@ function find({ platform, host }, overrides) {
     if (platforms.docker.platform === 'docker') {
       return merge(platforms.docker, overrides);
     }
-    return merge(platforms.docker[host], overrides);
+    return merge(platforms.docker[host!], overrides);
   }
   if (host) {
     return merge(platforms[platform][host], overrides);
@@ -90,11 +94,11 @@ function find({ platform, host }, overrides) {
   return merge(config, overrides);
 }
 
-function hosts({ platform }) {
+export function hosts({ platform }: { platform: string }) {
   return Object.keys({ ...platforms[platform] });
 }
 
-function merge(config, overrides) {
+function merge(config: IPlatformConfig | null, overrides?: IPlatformConfig) {
   if (!overrides) {
     return config || null;
   }
@@ -107,6 +111,6 @@ function merge(config, overrides) {
   return { ...config, ...locals };
 }
 
-function clear() {
+export function clear() {
   Object.keys(platforms).forEach(key => delete platforms[key]);
 }

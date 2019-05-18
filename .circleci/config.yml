@@ -2,7 +2,7 @@ version: 2
 jobs:
   setup:
     docker:
-      - image: node:10.15.3
+      - image: node:10.15.3@sha256:2939bbf1f233c88ed1bc5fec51d4e6ac59beeb397b6b81371c4c576e4606de19
     steps:
       - checkout
       - run:
@@ -60,8 +60,8 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - setup
-        # filters:
-        #   branches:
-        #     only:
-        #       - master
+      - setup:
+          filters:
+            branches:
+              only:
+                - master
