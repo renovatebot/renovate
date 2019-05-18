@@ -2,6 +2,7 @@ const github = require('../../lib/platform/github');
 const gitlab = require('../../lib/platform/gitlab');
 const azure = require('../../lib/platform/azure');
 const bitbucket = require('../../lib/platform/bitbucket');
+const bitbucketServer = require('../../lib/platform/bitbucket-server');
 
 describe('platform', () => {
   it('has a list of supported methods for github', () => {
@@ -34,6 +35,12 @@ describe('platform', () => {
   it('has same API for github and Bitbucket', () => {
     const githubMethods = Object.keys(github);
     const bitbucketMethods = Object.keys(bitbucket);
+    expect(bitbucketMethods).toMatchObject(githubMethods);
+  });
+
+  it('has same API for github and Bitbucket Server', () => {
+    const githubMethods = Object.keys(github);
+    const bitbucketMethods = Object.keys(bitbucketServer);
     expect(bitbucketMethods).toMatchObject(githubMethods);
   });
 });

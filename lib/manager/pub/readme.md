@@ -8,7 +8,7 @@
 
 #### Implementation status
 
-Unimplemented
+Beta
 
 ---
 

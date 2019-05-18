@@ -11,8 +11,7 @@ sudo: false
 branches:
   only:
     - master
-    - stable
-    - v13
+    - v16
 
 if: tag IS blank
 
@@ -20,6 +19,7 @@ before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
   - export PATH="$HOME/.yarn/bin:$PATH"
   - python --version
+  - git --version
 
 install:
   - yarn install --frozen-lockfile
@@ -33,10 +33,11 @@ cache:
     - 'node_modules'
 
 script:
-  - yarn prettier --list-different
   - yarn lint
   - yarn test-schema
+  - yarn build
   - yarn jest --maxWorkers=4
+  - yarn test-e2e
 
 after_success:
   - yarn codecov

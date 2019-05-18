@@ -3,13 +3,16 @@
   "description": "Automated dependency updates. Flexible so you don't need to be.",
   "version": "0.0.0-semantic-release",
   "bin": {
-    "renovate": "lib/renovate.js",
+    "renovate": "dist/renovate.js",
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
+    "build": "yarn clean && tsc -p tsconfig.app.json && yarn copy-static-files",
+    "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
+    "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
-    "debug": "node --inspect-brk lib/renovate",
+    "debug": "node -r ts-node/register/transpile-only --inspect-brk lib/renovate.ts",
     "eslint": "eslint lib test",
     "eslint-fix": "eslint --fix lib test",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
@@ -17,10 +20,11 @@
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
     "lint": "yarn eslint && yarn prettier",
     "lint-fix": "yarn eslint-fix && yarn prettier-fix",
-    "prettier": "prettier --list-different \"**/*.{js,json,md}\"",
-    "prettier-fix": "prettier --write \"**/*.{js,json,md}\"",
-    "start": "node lib/renovate",
+    "prettier": "prettier --list-different \"**/*.{ts,js,json,md}\"",
+    "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "start": "node -r ts-node/register/transpile-only lib/renovate.ts",
     "test-dirty": "git diff --exit-code",
+    "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile && yarn test",
     "test-schema": "bash test/json-schema.sh",
     "test": "yarn lint && yarn test-schema && yarn jest"
   },
@@ -82,10 +86,10 @@
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@renovatebot/docker-registry-client": "3.3.0",
-    "@sindresorhus/is": "0.15.0",
-    "@snyk/ruby-semver": "2.0.1",
+    "@sindresorhus/is": "0.17.0",
+    "@snyk/ruby-semver": "rarkins/ruby-semver#semverfix",
     "@yarnpkg/lockfile": "1.1.0",
-    "azure-devops-node-api": "7.2.0",
+    "azure-devops-node-api": "8.0.0",
     "bunyan": "1.8.12",
     "cacache": "11.3.2",
     "chalk": "2.4.2",
@@ -115,7 +119,7 @@
     "later": "1.2.0",
     "linkify-markdown": "1.0.0",
     "lodash": "4.17.11",
-    "luxon": "1.12.1",
+    "luxon": "1.13.2",
     "markdown-it": "8.4.2",
     "minimatch": "3.0.4",
     "moment": "2.24.0",
@@ -126,15 +130,15 @@
     "p-all": "2.1.0",
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
-    "pnpm": "3.2.0",
+    "pnpm": "3.3.3",
     "proxy-agent": "3.0.3",
-    "registry-auth-token": "3.3.2",
+    "registry-auth-token": "3.4.0",
     "root-require": "0.3.1",
     "safe-regex": "2.0.2",
     "semver": "6.0.0",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.4",
-    "simple-git": "1.111.0",
+    "simple-git": "1.113.0",
     "slugify": "1.3.4",
     "toml": "3.0.0",
     "tomlify-j0.4": "3.0.0",
@@ -144,27 +148,41 @@
     "validator": "10.11.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.15.2"
+    "yarn": "1.16.0"
   },
   "devDependencies": {
+    "@types/bunyan": "1.8.6",
+    "@types/convert-hrtime": "2.0.0",
+    "@types/fs-extra": "7.0.0",
+    "@types/jest": "24.0.13",
+    "@types/node": "11.13.11",
+    "@types/tmp": "0.1.0",
+    "@typescript-eslint/eslint-plugin": "1.9.0",
+    "@typescript-eslint/parser": "1.9.0",
     "babel-plugin-transform-object-rest-spread": "7.0.0-beta.3",
     "chai": "4.2.0",
-    "codecov": "3.3.0",
+    "codecov": "3.5.0",
+    "copyfiles": "2.1.0",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb-base": "13.1.0",
     "eslint-config-prettier": "4.2.0",
     "eslint-plugin-import": "2.17.2",
     "eslint-plugin-promise": "4.1.1",
-    "husky": "2.2.0",
-    "jest": "24.7.1",
+    "glob": "7.1.4",
+    "husky": "2.3.0",
+    "jest": "24.8.0",
     "jest-silent-reporter": "0.1.2",
     "mockdate": "2.0.2",
     "nock": "10.0.6",
-    "prettier": "1.17.0",
+    "prettier": "1.17.1",
     "pretty-quick": "1.10.0",
-    "semantic-release": "15.13.3",
-    "tmp-promise": "1.0.5"
+    "rimraf": "2.6.3",
+    "semantic-release": "15.13.12",
+    "tmp-promise": "1.1.0",
+    "ts-jest": "24.0.2",
+    "ts-node": "8.1.0",
+    "typescript": "3.4.5"
   },
   "resolutions": {
     "lodash": ">= 4.17.11"
@@ -172,7 +190,8 @@
   "files": [
     "bin/config-validator.js",
     "bin/yarn-1.9.4.js",
-    "lib"
+    "data",
+    "dist"
   ],
   "babel": {
     "plugins": [
@@ -180,11 +199,16 @@
     ]
   },
   "jest": {
+    "globals": {
+      "ts-jest": {
+        "isolatedModules": true
+      }
+    },
     "cacheDirectory": ".cache/jest",
     "coverageDirectory": "./coverage",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "lib/**/*.js",
+      "lib/**/*.{js,ts}",
       "!lib/platform/bitbucket-server/bb-got-wrapper.js",
       "!lib/versioning/maven/index.js",
       "!lib/proxy.js"
@@ -203,7 +227,8 @@
     ],
     "snapshotSerializers": [
       "./test/newline-snapshot-serializer.js"
-    ]
+    ],
+    "preset": "ts-jest/presets/js-with-ts"
   },
   "publishConfig": {
     "tag": "latest"
