@@ -28,21 +28,16 @@ jobs:
             pip install --user -r requirements.txt
 
       - save_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
+          key: dependency-cache-{{ checksum "yarn.lock" }}
           paths:
             - ./node_modules
             - '.cache'
-            - '.eslintcache'
-
-      - run:
-          name: Linting
-          command: |
-            yarn prettier --list-different
-            yarn lint            
+            - '.eslintcache'           
 
       - run:
           name: Tests
           command: |
+            yarn lint
             yarn test-schema
             yarn build              
             yarn jest --runInBand
