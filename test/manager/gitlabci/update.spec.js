@@ -41,6 +41,26 @@ describe('manager/gitlabci/update', () => {
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
       expect(res).toBeNull();
     });
+    it('replaces image-name value', () => {
+      const upgrade = {
+        lineNumber: 102,
+        depType: 'image-name',
+        depName: 'image-name-test',
+        newValue: '1.35',
+      };
+      const res = dcUpdate.updateDependency(yamlFile, upgrade);
+      expect(res).not.toEqual(yamlFile);
+    });
+    it('returns same image-name value', () => {
+      const upgrade = {
+        lineNumber: 102,
+        depType: 'image-name',
+        depName: 'image-name-test',
+        newValue: '1.15',
+      };
+      const res = dcUpdate.updateDependency(yamlFile, upgrade);
+      expect(res).toEqual(yamlFile);
+    });
     it('replaces service-image update', () => {
       const upgrade = {
         lineNumber: 55,

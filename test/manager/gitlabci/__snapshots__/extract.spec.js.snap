@@ -52,5 +52,15 @@ Array [
     "depType": "service-image",
     "lineNumber": 77,
   },
+  Object {
+    "currentDepTag": "image-name-test:1.15",
+    "currentDigest": undefined,
+    "currentFrom": "image-name-test:1.15",
+    "currentValue": "1.15",
+    "datasource": "docker",
+    "depName": "image-name-test",
+    "depType": "image-name",
+    "lineNumber": 102,
+  },
 ]
 `;

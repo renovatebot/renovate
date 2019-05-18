@@ -4,5 +4,5 @@
 !hooks
 !lib
 !bin/yarn*
-!tsconfig.json
+!tsconfig*.json
 !data
