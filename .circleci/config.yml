@@ -8,16 +8,10 @@ jobs:
       - run:
           name: Initial Setup
           command: |
-            curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-            python get-pip.py
-            curl -o- -L https://yarnpkg.com/install.sh | bash
-            export PATH="$HOME/.yarn/bin:$PATH"            
             python --version
-            python3 --version                     
-            pip --version  
-            curl -o- -L https://yarnpkg.com/install.sh | bash
-            export PATH="$HOME/.yarn/bin:$PATH"
-            yarn --version
+            python3 --version
+            curl https://bootstrap.pypa.io/get-pip.py | python             
+            pip --version
             git config --global user.email "bot@renovateapp.com"
             git config --global user.name "Renovate Bot"      
             git --version
@@ -36,12 +30,25 @@ jobs:
             - '.eslintcache'
 
       - run:
-          name: Tests
+          name: Lint
           command: |
             yarn lint
             yarn test-schema
-            yarn build              
+
+      - run:
+          name: Build
+          command: |
+            yarn build  
+
+      - run:
+          name: Unit Tests
+          command: |
             yarn jest --runInBand
+            yarn test-e2e  
+
+      - run:
+          name: E2E Tests
+          command: |
             yarn test-e2e  
 
       - run:
