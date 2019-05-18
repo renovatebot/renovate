@@ -89,7 +89,7 @@
     "@sindresorhus/is": "0.17.0",
     "@snyk/ruby-semver": "rarkins/ruby-semver#semverfix",
     "@yarnpkg/lockfile": "1.1.0",
-    "azure-devops-node-api": "7.2.0",
+    "azure-devops-node-api": "8.0.0",
     "bunyan": "1.8.12",
     "cacache": "11.3.2",
     "chalk": "2.4.2",
