@@ -30,12 +30,25 @@ jobs:
             - '.eslintcache'
 
       - run:
-          name: Tests
+          name: Lint
           command: |
             yarn lint
             yarn test-schema
-            yarn build              
+
+      - run:
+          name: Build
+          command: |
+            yarn build  
+
+      - run:
+          name: Unit Tests
+          command: |
             yarn jest --runInBand
+            yarn test-e2e  
+
+      - run:
+          name: E2E Tests
+          command: |
             yarn test-e2e  
 
       - run:
