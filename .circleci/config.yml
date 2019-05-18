@@ -12,7 +12,7 @@ jobs:
             python get-pip.py
             curl -o- -L https://yarnpkg.com/install.sh | bash
             export PATH="$HOME/.yarn/bin:$PATH"
-            sudo apt-get git
+            apt install git
             python --version
             python3 --version                     
             pip --version         
