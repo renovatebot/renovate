@@ -12,10 +12,6 @@ beforeEach(() => {
 });
 
 describe('workers/repository/process/index', () => {
-  let config;
-  beforeEach(() => {
-    config = {};
-  });
   describe('processRepo()', () => {
     it('throws if bitbucket with master issue', async () => {
       config.isBitbucket = true;
