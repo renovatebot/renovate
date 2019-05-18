@@ -15,6 +15,7 @@ jobs:
             python --version
             python3 --version                     
             pip --version         
+            git --version
             git config --global user.email "bot@renovateapp.com"
             git config --global user.name "Renovate Bot" 
 
