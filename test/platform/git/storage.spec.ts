@@ -147,7 +147,7 @@ describe('platform/git/storage', () => {
       expect(merged.all).toContain('renovate/future_branch');
     });
     it('should throw if branch merge throws', async () => {
-      await expect(git.mergeBranch('not_found')).rejects.toMatchSnapshot();
+      await expect(git.mergeBranch('not_found')).rejects.toThrow();
     });
   });
   describe('deleteBranch(branchName)', () => {
