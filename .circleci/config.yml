@@ -1,0 +1,67 @@
+version: 2
+jobs:
+  setup:
+    docker:
+      - image: node:10.15.3@sha256:2939bbf1f233c88ed1bc5fec51d4e6ac59beeb397b6b81371c4c576e4606de19
+    steps:
+      - checkout
+      - run:
+          name: Initial Setup
+          command: |
+            python --version
+            python3 --version
+            curl https://bootstrap.pypa.io/get-pip.py | python             
+            pip --version
+            git config --global user.email "bot@renovateapp.com"
+            git config --global user.name "Renovate Bot"      
+            git --version
+
+      - run:
+          name: Installing Dependencies
+          command: |
+            yarn install --frozen-lockfile
+            pip install --user -r requirements.txt
+
+      - save_cache:
+          key: dependency-cache-{{ checksum "yarn.lock" }}
+          paths:
+            - ./node_modules
+            - '.cache'
+            - '.eslintcache'
+
+      - run:
+          name: Lint
+          command: |
+            yarn lint
+            yarn test-schema
+
+      - run:
+          name: Build
+          command: |
+            yarn build  
+
+      - run:
+          name: Unit Tests
+          command: |
+            yarn jest --runInBand
+            yarn test-e2e  
+
+      - run:
+          name: E2E Tests
+          command: |
+            yarn test-e2e  
+
+      - run:
+          name: Coverage
+          command: |
+            yarn codecov
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - setup:
+          filters:
+            branches:
+              only:
+                - master

@@ -403,18 +403,10 @@ class Storage {
         '--force': true,
         '-u': true,
       });
-      try {
-        await this._git!.raw([
-          'remote',
-          'set-branches',
-          '--add',
-          'origin',
-          branchName,
-        ]);
-        await this._git!.fetch(['origin', branchName, '--depth=2']);
-      } catch (err) /* istanbul ignore next */ {
-        logger.info({ err }, 'Error fetching branch after create');
-      }
+      // Fetch it after create
+      const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+      await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+      this._config.branchExists[branchName] = true;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error commiting files');
       if (err.message.includes('.github/main.workflow')) {
