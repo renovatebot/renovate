@@ -10,9 +10,7 @@ jobs:
           command: |
             python --version
             python3 --version
-            pip --version
-            curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-            python get-pip.py              
+            curl https://bootstrap.pypa.io/get-pip.py | python             
             pip --version
             git config --global user.email "bot@renovateapp.com"
             git config --global user.name "Renovate Bot"      
