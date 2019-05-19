@@ -456,7 +456,7 @@ Array [
 exports[`platform/github getRepos should return an array of repos 1`] = `
 Array [
   Array [
-    "user/repos",
+    "user/repos?per_page=100",
     Object {
       "paginate": true,
     },
@@ -474,7 +474,7 @@ Array [
 exports[`platform/github getRepos should support a custom endpoint 1`] = `
 Array [
   Array [
-    "user/repos",
+    "user/repos?per_page=100",
     Object {
       "paginate": true,
     },
