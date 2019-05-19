@@ -5,6 +5,7 @@ import Git from 'simple-git/promise';
 import URL from 'url';
 
 declare module 'fs-extra' {
+  // eslint-disable-next-line import/prefer-default-export
   export function exists(pathLike: string): Promise<boolean>;
 }
 
@@ -24,7 +25,9 @@ interface ILocalConfig extends IStorageConfig {
 
 class Storage {
   private _config: ILocalConfig = {} as any;
+
   private _git: Git.SimpleGit | undefined;
+
   private _cwd: string | undefined;
 
   private async _resetToBranch(branchName: string) {
@@ -50,14 +53,16 @@ class Storage {
   async initRepo(args: IStorageConfig) {
     debugger;
     this.cleanRepo();
-    let config: ILocalConfig = (this._config = { ...args } as any);
-    let cwd = (this._cwd = config.localDir);
+    // eslint-disable-next-line no-multi-assign
+    const config: ILocalConfig = (this._config = { ...args } as any);
+    // eslint-disable-next-line no-multi-assign
+    const cwd = (this._cwd = config.localDir);
     this._config.branchExists = {};
     logger.info('Initialising git repository into ' + cwd);
     const gitHead = join(cwd, '.git/HEAD');
     let clone = true;
 
-    //TODO: move to private class scope
+    // TODO: move to private class scope
     async function determineBaseBranch(git: Git.SimpleGit) {
       // see https://stackoverflow.com/a/44750379/1438522
       try {
@@ -423,6 +428,7 @@ class Storage {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   cleanRepo() {}
 
   static getUrl({
