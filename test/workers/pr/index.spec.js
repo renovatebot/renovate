@@ -114,7 +114,6 @@ describe('workers/pr', () => {
       config.prTitle = 'Update dependency dummy to v1.1.0';
       config.depType = 'devDependencies';
       config.depName = 'dummy';
-      config.isGitHub = true;
       config.privateRepo = true;
       config.currentValue = '1.0.0';
       config.newValue = '1.1.0';

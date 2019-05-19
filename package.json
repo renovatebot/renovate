@@ -18,7 +18,7 @@
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "jest-debug": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --inspect-brk node_modules/jest/bin/jest.js",
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
-    "lint": "yarn eslint && yarn prettier --list-different",
+    "lint": "yarn eslint && yarn prettier",
     "lint-fix": "yarn eslint-fix && yarn prettier-fix",
     "prettier": "prettier --list-different \"**/*.{ts,js,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
