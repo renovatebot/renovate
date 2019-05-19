@@ -1,10 +1,20 @@
 import URL from 'url';
 
-//TODO: add known properties
+export const defaults: IDict<IPlatformConfig> = {
+  bitbucket: { name: 'Bitbucket', endpoint: 'https://api.bitbucket.org/' },
+  'bitbucket-server': { name: 'Bitbucket Server' },
+  github: { name: 'GitHub', endpoint: 'https://api.github.com/' },
+  gitlab: { name: 'GitLab', endpoint: 'https://gitlab.com/api/v4/' },
+  azure: { name: 'Azure DevOps' },
+};
+
+// TODO: add known properties
 export interface IPlatformConfig {
   [prop: string]: any;
   name?: string;
   endpoint?: string;
+
+  token?: string;
 }
 interface IDict<T> {
   [key: string]: T;

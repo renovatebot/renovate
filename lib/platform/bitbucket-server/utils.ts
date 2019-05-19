@@ -9,16 +9,18 @@ const prStateMapping: any = {
   OPEN: 'open',
 };
 
-const prInfo = (pr: any) => ({
-  version: pr.version,
-  number: pr.id,
-  body: pr.description,
-  branchName: pr.fromRef.displayId,
-  title: pr.title,
-  state: prStateMapping[pr.state],
-  createdAt: pr.createdDate,
-  canRebase: false,
-});
+export function prInfo(pr: any) {
+  return {
+    version: pr.version,
+    number: pr.id,
+    body: pr.description,
+    branchName: pr.fromRef.displayId,
+    title: pr.title,
+    state: prStateMapping[pr.state],
+    createdAt: pr.createdDate,
+    canRebase: false,
+  };
+}
 
 const addMaxLength = (inputUrl: string, limit = 100) => {
   const { search, ...parsedUrl } = url.parse(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -29,12 +31,12 @@ const addMaxLength = (inputUrl: string, limit = 100) => {
   return maxedUrl;
 };
 
-const accumulateValues = async (
+export async function accumulateValues(
   reqUrl: string,
   method = 'get',
-  options: any,
+  options?: any,
   limit?: number
-) => {
+) {
   let accumulator: any = [];
   let nextUrl = addMaxLength(reqUrl, limit);
   const lowerCaseMethod = method.toLocaleLowerCase();
@@ -56,13 +58,4 @@ const accumulateValues = async (
   }
 
   return accumulator;
-};
-
-module.exports = {
-  // buildStates,
-  prInfo,
-  accumulateValues,
-  // files: filesEndpoint,
-  // isConflicted,
-  // commitForm,
-};
+}

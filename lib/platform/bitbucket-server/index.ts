@@ -2,7 +2,7 @@ import url from 'url';
 import delay from 'delay';
 
 import api from './bb-got-wrapper';
-import utils from './utils';
+import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 
