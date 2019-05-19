@@ -2,6 +2,7 @@ import got from 'got';
 
 export interface IGotApiOptions {
   useCache?: boolean;
+  body?: any;
 }
 
 export interface IGotApi {
@@ -31,4 +32,6 @@ export interface IGotApi {
   ): Promise<got.Response<T>>;
 
   reset(): void;
+
+  setEndpoint(endpoint: string): void;
 }
