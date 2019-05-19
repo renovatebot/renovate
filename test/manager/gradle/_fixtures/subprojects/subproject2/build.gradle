@@ -1,0 +1,4 @@
+plugins {
+  id 'com.jfrog.bintray' version '0.4.1'
+  id 'distribution'
+}

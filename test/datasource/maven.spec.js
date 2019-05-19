@@ -93,6 +93,23 @@ describe('datasource/maven', () => {
       );
     });
 
+    it('should return all versions of a specific plugin', async () => {
+      const releases = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'com.jfrog.bintray:com.jfrog.bintray.gradle.plugin',
+        registryUrls: [
+          'file://test/datasource/gradle/_fixtures/maven/plugins.gradle.org/m2/',
+        ],
+      });
+      expect(releases.releases).toEqual(
+        generateReleases([
+          '1.8.2',
+          '1.8.3',
+          '1.8.4',
+        ])
+      );
+    });
+
     it('should return versions in all repositories for a specific library', async () => {
       const releases = await datasource.getPkgReleases({
         ...config,

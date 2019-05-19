@@ -1,0 +1,5 @@
+
+plugins {
+  id 'submodule-plugin' version '1.2.4'
+  id 'groovy'
+}

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='US-ASCII'?>
+<metadata>
+  <groupId>com.jfrog.bintray</groupId>
+  <artifactId>com.jfrog.bintray.gradle.plugin</artifactId>
+  <version>1.8.4</version>
+  <versioning>
+    <latest>1.8.4</latest>
+    <release>1.8.4</release>
+    <versions>
+      <version>1.8.2</version>
+      <version>1.8.3</version>
+      <version>1.8.4</version>
+    </versions>
+    <lastUpdated>20180708062740</lastUpdated>
+  </versioning>
+</metadata>

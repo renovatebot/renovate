@@ -183,7 +183,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     expect(updatedGradleFile).toEqual('String mysqlVersion = "7.0.0"');
   });
 
-  describe('Plugins', function () {
+  describe('Plugins', () => {
     it('should update an inline plugin version ', () => {
       const gradleFile = `
         plugins {
