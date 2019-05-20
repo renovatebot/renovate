@@ -66,7 +66,7 @@ describe('platform/bitbucket-server', () => {
             ? 'https://stash.renovatebot.com/vcs/'
             : 'https://stash.renovatebot.com';
         hostRules.find.mockReturnValue({
-          platform: 'bitbucket-server',
+          hostType: 'bitbucket-server',
           endpoint,
           username: 'abc',
           password: '123',

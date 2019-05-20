@@ -3,8 +3,8 @@
 exports[`util/host-rules find() allows overrides 1`] = `
 Object {
   "endpoint": "endpoint/",
+  "hostType": "github",
   "other": "data",
-  "platform": "github",
   "token": "secret",
 }
 `;
@@ -24,7 +24,7 @@ Object {
 exports[`util/host-rules find() matches on endpoint 1`] = `
 Object {
   "endpoint": "https://nuget.local/api/",
-  "platform": "nuget",
+  "hostType": "nuget",
   "token": "abc",
 }
 `;
@@ -32,7 +32,7 @@ Object {
 exports[`util/host-rules find() matches on endpoint subresource 1`] = `
 Object {
   "endpoint": "https://nuget.local/api/",
-  "platform": "nuget",
+  "hostType": "nuget",
   "token": "abc",
 }
 `;
@@ -41,8 +41,8 @@ exports[`util/host-rules find() needs exact host matches 1`] = `
 Object {
   "endpoint": "endpoint/",
   "host": "nuget.org",
+  "hostType": "nuget",
   "password": "p4$$w0rd",
-  "platform": "nuget",
   "username": "root",
 }
 `;

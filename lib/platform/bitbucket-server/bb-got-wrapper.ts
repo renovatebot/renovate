@@ -5,10 +5,11 @@ import { IGotApiOptions, IGotApi } from '../common';
 
 let cache: Renovate.IDict<got.Response<any>> = {};
 
-const platform = 'bitbucket-server';
+const hostType = 'bitbucket-server';
 let endpoint: string;
 
 async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
+  debugger;
   const host = URL.parse(path).host || URL.parse(endpoint).host;
   const opts: IGotApiOptions &
     hostRules.IPlatformConfig &
@@ -17,7 +18,7 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
     timeout: 60 * 1000,
     json: true,
     basic: false,
-    ...hostRules.find({ platform, host }),
+    ...hostRules.find({ hostType, host }),
     ...options,
   };
   const url = URL.resolve(endpoint, path);
