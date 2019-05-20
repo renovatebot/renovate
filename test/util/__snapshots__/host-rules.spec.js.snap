@@ -26,6 +26,7 @@ exports[`util/host-rules find() matches on endpoint 1`] = `
 Object {
   "endpoint": "https://nuget.local/api/",
   "platform": "nuget",
+  "token": "abc",
 }
 `;
 
@@ -33,6 +34,7 @@ exports[`util/host-rules find() matches on endpoint subresource 1`] = `
 Object {
   "endpoint": "https://nuget.local/api/",
   "platform": "nuget",
+  "token": "abc",
 }
 `;
 
