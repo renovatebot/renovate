@@ -1,15 +1,18 @@
 const {
   autodiscoverRepositories,
 } = require('../../../lib/workers/global/autodiscover');
-
+const platform = require('../../../lib/platform');
 const hostRules = require('../../../lib/util/host-rules');
 const ghApi = require('../../../lib/platform/github');
+
+jest.mock('../../../lib/platform/github');
 
 describe('lib/workers/global/autodiscover', () => {
   let config;
   beforeEach(() => {
     jest.resetAllMocks();
     config = {};
+    platform.initPlatform({ platform: 'github', token: 'abc123' });
   });
   it('returns if not autodiscovering', async () => {
     expect(await autodiscoverRepositories(config)).toEqual(config);

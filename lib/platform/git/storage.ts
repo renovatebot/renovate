@@ -48,6 +48,7 @@ class Storage {
   }
 
   async initRepo(args: IStorageConfig) {
+    debugger;
     this.cleanRepo();
     let config: ILocalConfig = (this._config = { ...args } as any);
     let cwd = (this._cwd = config.localDir);
@@ -105,6 +106,7 @@ class Storage {
         // clone only the default branch
         await this._git.clone(config.url, '.', ['--depth=2']);
       } catch (err) /* istanbul ignore next */ {
+        debugger;
         logger.debug({ err }, 'git clone error');
         throw new Error('platform-failure');
       }

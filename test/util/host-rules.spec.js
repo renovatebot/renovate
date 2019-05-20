@@ -31,18 +31,6 @@ describe('util/host-rules', () => {
       });
       expect(find({ host: 'some.endpoint' })).toMatchSnapshot();
     });
-    it('uses default endpoint', () => {
-      update({
-        platform: 'github',
-        token: 'token',
-        other: 'data',
-      });
-      expect(find({ platform: 'github' })).toMatchSnapshot();
-      expect(
-        find({ platform: 'github', host: 'api.github.com' })
-      ).toMatchSnapshot();
-      expect(find({ platform: 'github', host: 'example.com' })).toBeNull();
-    });
   });
   describe('find()', () => {
     it('allows overrides', () => {

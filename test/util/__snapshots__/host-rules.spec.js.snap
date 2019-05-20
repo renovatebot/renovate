@@ -3,7 +3,6 @@
 exports[`util/host-rules find() allows overrides 1`] = `
 Object {
   "endpoint": "endpoint/",
-  "name": "GitHub",
   "other": "data",
   "platform": "github",
   "token": "secret",
@@ -57,25 +56,5 @@ Object {
   "endpoint": "https://some.endpoint",
   "password": "pass1",
   "username": "user1",
-}
-`;
-
-exports[`util/host-rules update() uses default endpoint 1`] = `
-Object {
-  "endpoint": "https://api.github.com/",
-  "name": "GitHub",
-  "other": "data",
-  "platform": "github",
-  "token": "token",
-}
-`;
-
-exports[`util/host-rules update() uses default endpoint 2`] = `
-Object {
-  "endpoint": "https://api.github.com/",
-  "name": "GitHub",
-  "other": "data",
-  "platform": "github",
-  "token": "token",
 }
 `;

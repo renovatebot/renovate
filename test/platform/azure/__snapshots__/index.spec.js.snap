@@ -120,6 +120,12 @@ Array [
 ]
 `;
 
+exports[`platform/azure initPlatform() should init 1`] = `
+Object {
+  "endpoint": "https://dev.azure.com/renovate12345/",
+}
+`;
+
 exports[`platform/azure initRepo should initialise the config for a repo 1`] = `
 Array [
   Array [],

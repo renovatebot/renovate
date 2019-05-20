@@ -184,6 +184,12 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket initPlatform() should init 1`] = `
+Object {
+  "endpoint": "https://api.bitbucket.org/",
+}
+`;
+
 exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
   "isFork": false,

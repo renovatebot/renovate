@@ -3,7 +3,7 @@
 exports[`platform/azure/azure-got-wrapper gitApi should set token and endpoint 1`] = `
 WebApi {
   "authHandler": PersonalAccessTokenCredentialHandler {
-    "token": "myToken",
+    "token": "token",
   },
   "isNoProxyHost": [Function],
   "options": Object {
@@ -23,7 +23,7 @@ WebApi {
       "_socketTimeout": undefined,
       "handlers": Array [
         PersonalAccessTokenCredentialHandler {
-          "token": "myToken",
+          "token": "token",
         },
       ],
       "requestOptions": Object {
@@ -31,12 +31,12 @@ WebApi {
       },
     },
   },
-  "serverUrl": "myEndpoint/",
+  "serverUrl": "https://dev.azure.com/renovate12345",
   "vsoClient": VsoClient {
     "_initializationPromise": Promise {},
     "_locationsByAreaPromises": Object {},
-    "basePath": "myEndpoint/",
-    "baseUrl": "myEndpoint/",
+    "basePath": "/renovate12345",
+    "baseUrl": "https://dev.azure.com/renovate12345",
     "restClient": RestClient {
       "client": HttpClient {
         "_allowRedirects": true,
@@ -51,7 +51,7 @@ WebApi {
         "_socketTimeout": undefined,
         "handlers": Array [
           PersonalAccessTokenCredentialHandler {
-            "token": "myToken",
+            "token": "token",
           },
         ],
         "requestOptions": Object {

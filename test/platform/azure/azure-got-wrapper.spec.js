@@ -16,9 +16,10 @@ describe('platform/azure/azure-got-wrapper', () => {
     it('should set token and endpoint', async () => {
       hostRules.update({
         platform: 'azure',
-        token: 'myToken',
-        endpoint: 'myEndpoint',
+        token: 'token',
+        endpoint: 'https://dev.azure.com/renovate12345',
       });
+      azure.setEndpoint('https://dev.azure.com/renovate12345');
       const res = await azure.azureObj();
 
       delete res.rest.client.userAgent;

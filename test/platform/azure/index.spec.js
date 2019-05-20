@@ -10,6 +10,7 @@ describe('platform/azure', () => {
     jest.mock('../../../lib/platform/azure/azure-got-wrapper');
     jest.mock('../../../lib/platform/azure/azure-helper');
     jest.mock('../../../lib/platform/git/storage');
+    jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
     azure = require('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
@@ -31,11 +32,11 @@ describe('platform/azure', () => {
       deleteBranch: jest.fn(),
       getRepoStatus: jest.fn(),
     }));
-
-    // clean up hostRules
-    hostRules.clear();
-    hostRules.update({
-      platform: 'azure',
+    hostRules.find.mockReturnValue({
+      endpoint: 'https://dev.azure.com/renovate12345',
+      token: 'token',
+    });
+    azure.initPlatform({
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
     });
@@ -64,6 +65,27 @@ describe('platform/azure', () => {
     }));
     return azure.getRepos(token, endpoint);
   }
+
+  describe('initPlatform()', () => {
+    it('should throw if no endpoint', () => {
+      expect(() => {
+        azure.initPlatform({});
+      }).toThrow();
+    });
+    it('should throw if no token', () => {
+      expect(() => {
+        azure.initPlatform({ endpoint: 'https://dev.azure.com/renovate12345' });
+      }).toThrow();
+    });
+    it('should init', () => {
+      expect(
+        azure.initPlatform({
+          endpoint: 'https://dev.azure.com/renovate12345',
+          token: 'token',
+        })
+      ).toMatchSnapshot();
+    });
+  });
 
   describe('getRepos()', () => {
     it('should return an array of repos', async () => {

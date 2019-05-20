@@ -11,6 +11,7 @@ describe('platform/bitbucket', () => {
     jest.resetModules();
     jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
     jest.mock('../../../lib/platform/git/storage');
+    jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
     api = require('../../../lib/platform/bitbucket/bb-got-wrapper');
     bitbucket = require('../../../lib/platform/bitbucket');
@@ -34,11 +35,11 @@ describe('platform/bitbucket', () => {
 
     // clean up hostRules
     hostRules.clear();
-    hostRules.update({
+    hostRules.find.mockReturnValue({
       platform: 'bitbucket',
-      token: 'token',
-      username: 'username',
-      password: 'password',
+      endpoint: 'https://bitbucket.org',
+      username: 'abc',
+      password: '123',
     });
   });
 
@@ -75,6 +76,31 @@ describe('platform/bitbucket', () => {
       })
     );
   }
+
+  describe('initPlatform()', () => {
+    it('should throw if no username/password', () => {
+      expect(() => {
+        bitbucket.initPlatform({});
+      }).toThrow();
+    });
+    it('should throw if wrong endpoint', () => {
+      expect(() => {
+        bitbucket.initPlatform({
+          endpoint: 'endpoint',
+          username: 'abc',
+          password: '123',
+        });
+      }).toThrow();
+    });
+    it('should init', () => {
+      expect(
+        bitbucket.initPlatform({
+          username: 'abc',
+          password: '123',
+        })
+      ).toMatchSnapshot();
+    });
+  });
 
   describe('getRepos()', () => {
     it('returns repos', async () => {
