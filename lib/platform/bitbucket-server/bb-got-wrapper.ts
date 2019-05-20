@@ -34,8 +34,8 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
     'X-Atlassian-Token': 'no-check',
 
     authorization: opts.token
-      ? `Basic ${opts.token}`
-      : /* istanbul ignore next */ undefined,
+      ? /* istanbul ignore next */ `Basic ${opts.token}`
+      : undefined,
     ...opts.headers,
   };
 
