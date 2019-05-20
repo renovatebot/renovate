@@ -1,15 +1,18 @@
-const got = require('got');
-const URL = require('url');
-const hostRules = require('../../util/host-rules');
+import got from 'got';
+import URL from 'url';
+import * as hostRules from '../../util/host-rules';
+import { IGotApiOptions, IGotApi } from '../common';
 
-let cache = {};
+let cache: Renovate.IDict<got.Response<any>> = {};
 
 const platform = 'bitbucket-server';
-let endpoint;
+let endpoint: string;
 
-async function get(path, options) {
+async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   const host = URL.parse(path).host || URL.parse(endpoint).host;
-  const opts = {
+  const opts: IGotApiOptions &
+    hostRules.IPlatformConfig &
+    got.GotJSONOptions = {
     // TODO: Move to configurable host rules, or use utils/got
     timeout: 60 * 1000,
     json: true,
@@ -18,7 +21,9 @@ async function get(path, options) {
     ...options,
   };
   const url = URL.resolve(endpoint, path);
-  const method = (opts.method || 'get').toLowerCase();
+  const method = (
+    opts.method || /* istanbul ignore next */ 'get'
+  ).toLowerCase();
   const useCache = opts.useCache;
   if (method === 'get' && useCache !== false && cache[path]) {
     logger.trace({ path }, 'Returning cached result');
@@ -27,7 +32,10 @@ async function get(path, options) {
   opts.headers = {
     'user-agent': 'https://github.com/renovatebot/renovate',
     'X-Atlassian-Token': 'no-check',
-    authorization: opts.token ? `Basic ${opts.token}` : undefined,
+
+    authorization: opts.token
+      ? /* istanbul ignore next */ `Basic ${opts.token}`
+      : undefined,
     ...opts.headers,
   };
 
@@ -41,17 +49,19 @@ async function get(path, options) {
 
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 
+export const api: IGotApi = {} as any;
+
 for (const x of helpers) {
-  get[x] = (url, opts) =>
+  (api as any)[x] = (url: string, opts: any) =>
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
-get.reset = function reset() {
+api.reset = function reset() {
   cache = {};
 };
 
-get.setEndpoint = e => {
+api.setEndpoint = (e: string) => {
   endpoint = e;
 };
 
-module.exports = get;
+export default api;

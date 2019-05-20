@@ -922,14 +922,6 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path initRepo() no author 1`] = `
-Object {
-  "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
-}
-`;
-
 exports[`platform/bitbucket-server endpoint with no path initRepo() works 1`] = `
 Object {
   "isFork": false,
@@ -2297,14 +2289,6 @@ Array [
 exports[`platform/bitbucket-server endpoint with path init function should init 1`] = `
 Object {
   "endpoint": "https://stash.renovatebot.com/",
-}
-`;
-
-exports[`platform/bitbucket-server endpoint with path initRepo() no author 1`] = `
-Object {
-  "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
 }
 `;
 

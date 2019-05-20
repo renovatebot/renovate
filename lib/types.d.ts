@@ -11,8 +11,13 @@ declare namespace Renovate {
 
     setMeta(obj: any): void;
   }
+
+  interface IDict<T> {
+    [key: string]: T;
+  }
 }
 
+// eslint-disable-next-line no-var, vars-on-top
 declare var logger: Renovate.ILogger;
 
 declare interface Error {
