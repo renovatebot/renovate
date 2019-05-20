@@ -31,26 +31,26 @@ describe('platform', () => {
   });
 
   it('has same API for github and gitlab', () => {
-    const githubMethods = Object.keys(github);
-    const gitlabMethods = Object.keys(gitlab);
+    const githubMethods = Object.keys(github).sort();
+    const gitlabMethods = Object.keys(gitlab).sort();
     expect(githubMethods).toMatchObject(gitlabMethods);
   });
 
   it('has same API for github and azure', () => {
-    const githubMethods = Object.keys(github);
-    const azureMethods = Object.keys(azure);
+    const githubMethods = Object.keys(github).sort();
+    const azureMethods = Object.keys(azure).sort();
     expect(githubMethods).toMatchObject(azureMethods);
   });
 
   it('has same API for github and Bitbucket', () => {
-    const githubMethods = Object.keys(github);
-    const bitbucketMethods = Object.keys(bitbucket);
+    const githubMethods = Object.keys(github).sort();
+    const bitbucketMethods = Object.keys(bitbucket).sort();
     expect(bitbucketMethods).toMatchObject(githubMethods);
   });
 
   it('has same API for github and Bitbucket Server', () => {
-    const githubMethods = Object.keys(github);
-    const bitbucketMethods = Object.keys(bitbucketServer);
+    const githubMethods = Object.keys(github).sort();
+    const bitbucketMethods = Object.keys(bitbucketServer).sort();
     expect(bitbucketMethods).toMatchObject(githubMethods);
   });
 });
