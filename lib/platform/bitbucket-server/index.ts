@@ -159,7 +159,9 @@ async function initRepo({
   const gitUrl = GitStorage.getUrl({
     gitFs: opts!.endpoint!.split(':')[0] as any,
     auth: `${opts!.username}:${opts!.password}`,
-    host: `${host}${pathname}${pathname!.endsWith('/') ? '' : '/'}scm`,
+    host: `${host}${pathname}${
+      pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+    }scm`,
     repository,
   });
 
@@ -962,7 +964,7 @@ async function mergePr(prNo: any, branchName: any) {
 }
 
 function getPrBody(input: string) {
-  logger.debug(`getPrBody(${(input || '').split('\n')[0]})`);
+  logger.debug(`getPrBody(${input.split('\n')[0]})`);
   // Remove any HTML we use
   return input
     .replace(/<\/?summary>/g, '**')

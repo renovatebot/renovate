@@ -21,7 +21,9 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
     ...options,
   };
   const url = URL.resolve(endpoint, path);
-  const method = (opts.method || 'get').toLowerCase();
+  const method = (
+    opts.method || /* istanbul ignore next */ 'get'
+  ).toLowerCase();
   const useCache = opts.useCache;
   if (method === 'get' && useCache !== false && cache[path]) {
     logger.trace({ path }, 'Returning cached result');
@@ -30,7 +32,10 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   opts.headers = {
     'user-agent': 'https://github.com/renovatebot/renovate',
     'X-Atlassian-Token': 'no-check',
-    authorization: opts.token ? `Basic ${opts.token}` : undefined,
+
+    authorization: opts.token
+      ? `Basic ${opts.token}`
+      : /* istanbul ignore next */ undefined,
     ...opts.headers,
   };
 
