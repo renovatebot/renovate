@@ -49,14 +49,10 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
 
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 
-interface IApi {
-  [method: string]: any;
-}
-
-const api: IApi = {} as any;
+export const api: IGotApi = {} as any;
 
 for (const x of helpers) {
-  api[x] = (url: string, opts: any) =>
+  (api as any)[x] = (url: string, opts: any) =>
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
@@ -64,8 +60,8 @@ api.reset = function reset() {
   cache = {};
 };
 
-get.setEndpoint = (e: string) => {
+api.setEndpoint = (e: string) => {
   endpoint = e;
 };
 
-export = api as IGotApi;
+export default api;
