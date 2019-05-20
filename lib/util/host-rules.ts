@@ -67,12 +67,21 @@ export function update(params: IPlatformConfig) {
 }
 
 export function find(
-  { platform, host }: { platform: string; host?: string },
+  {
+    platform,
+    host,
+    endpoint,
+  }: { platform: string; host?: string; endpoint?: string },
   overrides?: IPlatformConfig
 ) {
+  const massagedHost = host
+    ? host
+    : endpoint
+    ? URL.parse(endpoint).host
+    : undefined;
   if (!platforms[platform]) {
-    if (host && hostsOnly[host]) {
-      return merge(hostsOnly[host], overrides);
+    if (massagedHost && hostsOnly[massagedHost]) {
+      return merge(hostsOnly[massagedHost], overrides);
     }
     return merge(null, overrides);
   }
@@ -81,10 +90,10 @@ export function find(
     if (platforms.docker.platform === 'docker') {
       return merge(platforms.docker, overrides);
     }
-    return merge(platforms.docker[host!], overrides);
+    return merge(platforms.docker[massagedHost!], overrides);
   }
-  if (host) {
-    return merge(platforms[platform][host], overrides);
+  if (massagedHost) {
+    return merge(platforms[platform][massagedHost], overrides);
   }
   const configs = Object.values(platforms[platform]);
   let config = configs.find(c => c.default);

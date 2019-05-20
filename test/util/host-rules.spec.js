@@ -85,6 +85,7 @@ describe('util/host-rules', () => {
       update({
         platform: 'nuget',
         endpoint: 'https://nuget.local/api',
+        token: 'abc',
       });
       expect(
         find({ platform: 'nuget', endpoint: 'https://nuget.local/api' })
@@ -94,6 +95,7 @@ describe('util/host-rules', () => {
       update({
         platform: 'nuget',
         endpoint: 'https://nuget.local/api',
+        token: 'abc',
       });
       expect(
         find({
