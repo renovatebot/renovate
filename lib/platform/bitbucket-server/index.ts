@@ -8,7 +8,21 @@ import GitStorage from '../git/storage';
 
 const platform = 'bitbucket-server';
 
-let config: any = {};
+interface BbsConfig {
+  baseBranch: string;
+  bbUseDefaultReviewers: boolean;
+  defaultBranch: string;
+  fileList: any[];
+  mergeMethod: string;
+  owner: string;
+  prList: any[];
+  projectKey: string;
+  repository: string;
+  repositorySlug: string;
+  storage: GitStorage;
+}
+
+let config: BbsConfig = {} as any;
 
 const defaults: any = {
   platform: 'bitbucket-server',
@@ -116,7 +130,7 @@ function cleanRepo() {
     config.storage.cleanRepo();
   }
   api.reset();
-  config = {};
+  config = {} as any;
 }
 
 // Initialize GitLab by getting base branch
@@ -146,7 +160,7 @@ async function initRepo({
   api.reset();
 
   const [projectKey, repositorySlug] = repository.split('/');
-  config = { projectKey, repositorySlug, gitPrivateKey };
+  config = { projectKey, repositorySlug, gitPrivateKey, repository } as any;
 
   /* istanbul ignore else */
   if (bbUseDefaultReviewers !== false) {
