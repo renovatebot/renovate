@@ -17,6 +17,7 @@ declare namespace Renovate {
   }
 }
 
+// eslint-disable-next-line no-var, vars-on-top
 declare var logger: Renovate.ILogger;
 
 declare interface Error {
