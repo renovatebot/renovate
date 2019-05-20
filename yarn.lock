@@ -442,9 +442,9 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
-"@snyk/ruby-semver@rarkins/ruby-semver#semverfix":
+"@snyk/ruby-semver@git+https://github.com/rarkins/ruby-semver.git#semverfix":
   version "2.0.2-rc.0"
-  resolved "https://codeload.github.com/rarkins/ruby-semver/tar.gz/aefe0848d062e417ade9d9529dfe3cbd2e53dad3"
+  resolved "git+https://github.com/rarkins/ruby-semver.git#aefe0848d062e417ade9d9529dfe3cbd2e53dad3"
   dependencies:
     lodash "^4.17.11"
 
