@@ -14,6 +14,7 @@ describe('platform/gl-got-wrapper', () => {
     hostRules.clear();
     hostRules.update({
       platform: 'bitbucket',
+      endpoint: 'https://api.bitbucket.org',
       token: 'token',
     });
   });

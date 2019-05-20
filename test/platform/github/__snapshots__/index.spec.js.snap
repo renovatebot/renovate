@@ -471,70 +471,21 @@ Array [
 ]
 `;
 
-exports[`platform/github getRepos should support a custom endpoint 1`] = `
-Array [
-  Array [
-    "user/repos?per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-]
+exports[`platform/github initPlatform() should support custom endpoint 1`] = `
+Object {
+  "endpoint": "https://ghe.renovatebot.com/",
+  "renovateUsername": "renovate-bot",
+}
 `;
 
-exports[`platform/github getRepos should support a custom endpoint 2`] = `
-Array [
-  "a/b",
-  "c/d",
-]
+exports[`platform/github initPlatform() should support default endpoint 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "renovateUsername": "renovate-bot",
+}
 `;
 
 exports[`platform/github initRepo should forks when forkMode 1`] = `
-Object {
-  "isFork": false,
-  "privateRepo": false,
-}
-`;
-
-exports[`platform/github initRepo should initialise the config for the repo - 0 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-]
-`;
-
-exports[`platform/github initRepo should initialise the config for the repo - 0 2`] = `
-Object {
-  "isFork": false,
-  "privateRepo": false,
-}
-`;
-
-exports[`platform/github initRepo should initialise the config for the repo - 1 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-]
-`;
-
-exports[`platform/github initRepo should initialise the config for the repo - 1 2`] = `
-Object {
-  "isFork": false,
-  "privateRepo": false,
-}
-`;
-
-exports[`platform/github initRepo should initialise the config for the repo - 2 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-]
-`;
-
-exports[`platform/github initRepo should initialise the config for the repo - 2 2`] = `
 Object {
   "isFork": false,
   "privateRepo": false,

@@ -1,13 +1,5 @@
 import URL from 'url';
 
-export const defaults: IDict<IPlatformConfig> = {
-  bitbucket: { name: 'Bitbucket', endpoint: 'https://api.bitbucket.org/' },
-  'bitbucket-server': { name: 'Bitbucket Server' },
-  github: { name: 'GitHub', endpoint: 'https://api.github.com/' },
-  gitlab: { name: 'GitLab', endpoint: 'https://gitlab.com/api/v4/' },
-  azure: { name: 'Azure DevOps' },
-};
-
 //TODO: add known properties
 interface IPlatformConfig {
   [prop: string]: any;
@@ -32,7 +24,7 @@ export function update(params: IPlatformConfig) {
       'Failed to set configuration: no platform or endpoint specified'
     );
   }
-  const config = { ...defaults[platform], ...params };
+  const config = { ...params };
   const { endpoint } = config;
   if (!endpoint) {
     // istanbul ignore if
@@ -56,11 +48,6 @@ export function update(params: IPlatformConfig) {
     );
   }
   platforms[platform] = { ...platforms[platform] };
-  if (config.default) {
-    for (const conf of Object.values(platforms[platform])) {
-      delete conf.default;
-    }
-  }
   logger.debug({ config }, 'Setting hostRule');
   platforms[platform][host] = { ...platforms[platform][host], ...config };
   return true;
@@ -96,8 +83,8 @@ export function find(
     return merge(platforms[platform][massagedHost], overrides);
   }
   const configs = Object.values(platforms[platform]);
-  let config = configs.find(c => c.default);
-  if (!config && configs.length === 1) {
+  let config;
+  if (configs.length === 1) {
     [config] = configs;
   }
   return merge(config, overrides);

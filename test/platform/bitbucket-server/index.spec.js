@@ -23,6 +23,7 @@ describe('platform/bitbucket-server', () => {
           return Promise.resolve({ body });
         });
         jest.mock('../../../lib/platform/git/storage');
+        jest.mock('../../../lib/util/host-rules');
         hostRules = require('../../../lib/util/host-rules');
         api = require('../../../lib/platform/bitbucket-server/bb-got-wrapper');
         jest.spyOn(api, 'get');
@@ -50,15 +51,20 @@ describe('platform/bitbucket-server', () => {
             () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
           ),
         }));
-
-        // clean up hostRules
-        hostRules.clear();
-        hostRules.update({
+        const endpoint =
+          scenarioName === 'endpoint with path'
+            ? 'https://stash.renovatebot.com/vcs/'
+            : 'https://stash.renovatebot.com';
+        hostRules.find.mockReturnValue({
           platform: 'bitbucket-server',
-          token: 'token',
-          username: 'username',
-          password: 'password',
-          endpoint: mockResponses.baseURL,
+          endpoint,
+          username: 'abc',
+          password: '123',
+        });
+        bitbucket.initPlatform({
+          endpoint,
+          username: 'abc',
+          password: '123',
         });
       });
 
@@ -72,6 +78,28 @@ describe('platform/bitbucket-server', () => {
           gitAuthor: 'bot@renovateapp.com',
         });
       }
+
+      describe('init function', () => {
+        it('should throw if no endpoint', () => {
+          expect(() => {
+            bitbucket.initPlatform({});
+          }).toThrow();
+        });
+        it('should throw if no username/password', () => {
+          expect(() => {
+            bitbucket.initPlatform({ endpoint: 'endpoint' });
+          }).toThrow();
+        });
+        it('should init', () => {
+          expect(
+            bitbucket.initPlatform({
+              endpoint: 'https://stash.renovatebot.com',
+              username: 'abc',
+              password: '123',
+            })
+          ).toMatchSnapshot();
+        });
+      });
 
       describe('getRepos()', () => {
         it('returns repos', async () => {

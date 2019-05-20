@@ -2,6 +2,7 @@
 
 exports[`platform has a list of supported methods for azure 1`] = `
 Array [
+  "initPlatform",
   "getRepos",
   "cleanRepo",
   "initRepo",
@@ -46,6 +47,7 @@ Array [
 
 exports[`platform has a list of supported methods for github 1`] = `
 Array [
+  "initPlatform",
   "getRepos",
   "cleanRepo",
   "initRepo",
@@ -90,6 +92,7 @@ Array [
 
 exports[`platform has a list of supported methods for gitlab 1`] = `
 Array [
+  "initPlatform",
   "getRepos",
   "cleanRepo",
   "initRepo",
@@ -130,4 +133,11 @@ Array [
   "getCommitMessages",
   "getVulnerabilityAlerts",
 ]
+`;
+
+exports[`platform initializes 1`] = `
+Object {
+  "endpoint": "https://api.bitbucket.org/",
+  "platform": "bitbucket",
+}
 `;
