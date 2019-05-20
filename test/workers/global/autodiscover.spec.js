@@ -9,10 +9,14 @@ jest.mock('../../../lib/platform/github');
 
 describe('lib/workers/global/autodiscover', () => {
   let config;
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.resetAllMocks();
     config = {};
-    platform.initPlatform({ platform: 'github', token: 'abc123' });
+    await platform.initPlatform({
+      platform: 'github',
+      token: 'abc123',
+      endpoint: 'endpoint',
+    });
   });
   it('returns if not autodiscovering', async () => {
     expect(await autodiscoverRepositories(config)).toEqual(config);
