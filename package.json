@@ -179,7 +179,7 @@
     "pretty-quick": "1.10.0",
     "rimraf": "2.6.3",
     "semantic-release": "15.13.12",
-    "tmp-promise": "1.1.0",
+    "tmp-promise": "2.0.1",
     "ts-jest": "24.0.2",
     "ts-node": "8.1.0",
     "typescript": "3.4.5"
