@@ -25,7 +25,7 @@ export function initPlatform({
   username,
   password,
 }: {
-  endpoint: string;
+  endpoint?: string;
   username: string;
   password: string;
 }) {
@@ -394,7 +394,7 @@ export async function ensureIssueClosing(title: string) {
   }
 }
 
-export function addAssignees() {
+export function addAssignees(_prNr: number, _assignees: string[]) {
   // Bitbucket supports "participants" and "reviewers" so does not seem to have the concept of "assignee"
   logger.warn('Cannot add assignees');
   return Promise.resolve();
@@ -420,13 +420,17 @@ export function deleteLabel() {
   throw new Error('deleteLabel not implemented');
 }
 
-export function ensureComment() {
+export function ensureComment(
+  _prNo: number,
+  _topic: string | null,
+  _content: string
+) {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
   logger.warn('Comment functionality not implemented yet');
   return Promise.resolve();
 }
 
-export function ensureCommentRemoval() {
+export function ensureCommentRemoval(_prNo: number, _topic: string) {
   // The api does not support removing comments
   return Promise.resolve();
 }
