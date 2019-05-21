@@ -39,9 +39,6 @@ script:
   - yarn jest --maxWorkers=4
   - yarn test-e2e
 
-after_success:
-  - yarn codecov
-
 deploy:
   provider: script
   script: curl -X POST -d '{}' $NETLIFY_DEPLOY_WEBHOOK && yarn semantic-release
