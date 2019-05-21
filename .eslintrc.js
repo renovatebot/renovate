@@ -32,6 +32,13 @@ module.exports = {
     'promise/no-promise-in-callback': 'warn',
     'promise/no-callback-in-promise': 'warn',
     'promise/avoid-new': 'warn',
+
+    '@typescript-eslint/explicit-member-accessibility': 0,
+    '@typescript-eslint/explicit-function-return-type': 0,
+    '@typescript-eslint/interface-name-prefix': 0,
+    '@typescript-eslint/no-explicit-any': 0,
+    '@typescript-eslint/no-non-null-assertion': 0,
+    'no-underscore-dangle': 0,
   },
   settings: {
     'import/resolver': {

@@ -146,6 +146,17 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket findPr() finds pr 1`] = `
+Object {
+  "body": "summary",
+  "branchName": "branch",
+  "createdAt": "2018-07-02T07:02:25.275030+00:00",
+  "number": 5,
+  "state": "open",
+  "title": "title",
+}
+`;
+
 exports[`platform/bitbucket getBranchPr() bitbucket finds PR for branch 1`] = `
 Object {
   "body": "summary",
@@ -182,6 +193,12 @@ exports[`platform/bitbucket getPrFiles() returns diff files 1`] = `
 Array [
   "requirements.txt",
 ]
+`;
+
+exports[`platform/bitbucket initPlatform() should init 1`] = `
+Object {
+  "endpoint": "https://api.bitbucket.org/",
+}
 `;
 
 exports[`platform/bitbucket initRepo() works 1`] = `

@@ -1,17 +1,23 @@
-const responses = require('./_fixtures/responses');
+import responses from './_fixtures/responses';
+import { IGotApi } from '../../../lib/platform/common';
+import Storage from '../../../lib/platform/git/storage';
+
+type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
 
 describe('platform/bitbucket-server', () => {
   Object.entries(responses).forEach(([scenarioName, mockResponses]) => {
     describe(scenarioName, () => {
-      let bitbucket;
-      let api;
-      let hostRules;
-      let GitStorage;
+      let bitbucket: typeof import('../../../lib/platform/bitbucket-server');
+      let api: jest.Mocked<IGotApi>;
+      let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
+      let GitStorage: jest.Mock<Storage> & {
+        getUrl: jest.MockInstance<any, any>;
+      };
       beforeEach(() => {
         // reset module
         jest.resetModules();
         jest.mock('delay');
-        jest.mock('got', () => (url, options) => {
+        jest.mock('got', () => (url: string, options: { method: string }) => {
           const { method } = options;
           const body = mockResponses[url] && mockResponses[url][method];
           if (!body) {
@@ -23,42 +29,52 @@ describe('platform/bitbucket-server', () => {
           return Promise.resolve({ body });
         });
         jest.mock('../../../lib/platform/git/storage');
+        jest.mock('../../../lib/util/host-rules');
         hostRules = require('../../../lib/util/host-rules');
-        api = require('../../../lib/platform/bitbucket-server/bb-got-wrapper');
+        api = require('../../../lib/platform/bitbucket-server/bb-got-wrapper')
+          .api;
         jest.spyOn(api, 'get');
         jest.spyOn(api, 'post');
         jest.spyOn(api, 'put');
         jest.spyOn(api, 'delete');
         bitbucket = require('../../../lib/platform/bitbucket-server');
         GitStorage = require('../../../lib/platform/git/storage');
-        GitStorage.mockImplementation(() => ({
-          initRepo: jest.fn(),
-          cleanRepo: jest.fn(),
-          getFileList: jest.fn(),
-          branchExists: jest.fn(() => true),
-          isBranchStale: jest.fn(() => false),
-          setBaseBranch: jest.fn(),
-          getBranchLastCommitTime: jest.fn(),
-          getAllRenovateBranches: jest.fn(),
-          getCommitMessages: jest.fn(),
-          getFile: jest.fn(),
-          commitFilesToBranch: jest.fn(),
-          mergeBranch: jest.fn(),
-          deleteBranch: jest.fn(),
-          getRepoStatus: jest.fn(),
-          getBranchCommit: jest.fn(
-            () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
-          ),
-        }));
-
-        // clean up hostRules
-        hostRules.clear();
-        hostRules.update({
+        GitStorage.mockImplementation(
+          () =>
+            ({
+              initRepo: jest.fn(),
+              cleanRepo: jest.fn(),
+              getFileList: jest.fn(),
+              branchExists: jest.fn(() => true),
+              isBranchStale: jest.fn(() => false),
+              setBaseBranch: jest.fn(),
+              getBranchLastCommitTime: jest.fn(),
+              getAllRenovateBranches: jest.fn(),
+              getCommitMessages: jest.fn(),
+              getFile: jest.fn(),
+              commitFilesToBranch: jest.fn(),
+              mergeBranch: jest.fn(),
+              deleteBranch: jest.fn(),
+              getRepoStatus: jest.fn(),
+              getBranchCommit: jest.fn(
+                () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+              ),
+            } as any)
+        );
+        const endpoint =
+          scenarioName === 'endpoint with path'
+            ? 'https://stash.renovatebot.com/vcs/'
+            : 'https://stash.renovatebot.com';
+        hostRules.find.mockReturnValue({
           platform: 'bitbucket-server',
-          token: 'token',
-          username: 'username',
-          password: 'password',
-          endpoint: mockResponses.baseURL,
+          endpoint,
+          username: 'abc',
+          password: '123',
+        });
+        bitbucket.initPlatform({
+          endpoint,
+          username: 'abc',
+          password: '123',
         });
       });
 
@@ -69,9 +85,30 @@ describe('platform/bitbucket-server', () => {
       function initRepo() {
         return bitbucket.initRepo({
           repository: 'SOME/repo',
-          gitAuthor: 'bot@renovateapp.com',
-        });
+        } as any);
       }
+
+      describe('init function', () => {
+        it('should throw if no endpoint', () => {
+          expect(() => {
+            bitbucket.initPlatform({} as any);
+          }).toThrow();
+        });
+        it('should throw if no username/password', () => {
+          expect(() => {
+            bitbucket.initPlatform({ endpoint: 'endpoint' } as any);
+          }).toThrow();
+        });
+        it('should init', () => {
+          expect(
+            bitbucket.initPlatform({
+              endpoint: 'https://stash.renovatebot.com',
+              username: 'abc',
+              password: '123',
+            })
+          ).toMatchSnapshot();
+        });
+      });
 
       describe('getRepos()', () => {
         it('returns repos', async () => {
@@ -88,20 +125,12 @@ describe('platform/bitbucket-server', () => {
           expect(res).toMatchSnapshot();
         });
 
-        it('no author', async () => {
-          expect.assertions(1);
-          const res = await bitbucket.initRepo({
-            repository: 'SOME/repo',
-          });
-          expect(res).toMatchSnapshot();
-        });
-
         it('sends the host as the endpoint option', async () => {
           expect.assertions(2);
           GitStorage.getUrl.mockClear();
           await bitbucket.initRepo({
             repository: 'SOME/repo',
-          });
+          } as any);
           expect(GitStorage.getUrl).toHaveBeenCalledTimes(1);
           expect(GitStorage.getUrl.mock.calls[0][0]).toHaveProperty(
             'host',
@@ -139,7 +168,7 @@ describe('platform/bitbucket-server', () => {
         describe('getFileList()', () => {
           it('sends to gitFs', async () => {
             await initRepo();
-            await bitbucket.branchExists();
+            await bitbucket.branchExists(undefined as any);
           });
         });
       });
@@ -147,7 +176,7 @@ describe('platform/bitbucket-server', () => {
       describe('isBranchStale()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.isBranchStale();
+          await bitbucket.isBranchStale(undefined as any);
         });
       });
 
@@ -169,7 +198,7 @@ describe('platform/bitbucket-server', () => {
         it('sends to gitFs', async () => {
           expect.assertions(1);
           await initRepo();
-          await bitbucket.commitFilesToBranch('some-branch', [{}]);
+          await bitbucket.commitFilesToBranch('some-branch', [{}], 'message');
           expect(api.get.mock.calls).toMatchSnapshot();
         });
       });
@@ -177,21 +206,21 @@ describe('platform/bitbucket-server', () => {
       describe('getFile()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.getFile();
+          await bitbucket.getFile('', '');
         });
       });
 
       describe('getAllRenovateBranches()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.getAllRenovateBranches();
+          await bitbucket.getAllRenovateBranches('');
         });
       });
 
       describe('getBranchLastCommitTime()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.getBranchLastCommitTime();
+          await bitbucket.getBranchLastCommitTime('');
         });
       });
 
@@ -220,9 +249,9 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(5);
           await initRepo();
 
-          await expect(bitbucket.addReviewers(null, ['name'])).rejects.toThrow(
-            'not-found'
-          );
+          await expect(
+            bitbucket.addReviewers(null as any, ['name'])
+          ).rejects.toThrow('not-found');
 
           await expect(bitbucket.addReviewers(4, ['name'])).rejects.toThrow(
             'not-found'
@@ -398,7 +427,7 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(2);
           await initRepo();
           expect(
-            await bitbucket.findPr('userName1/pullRequest1', false)
+            await bitbucket.findPr('userName1/pullRequest1')
           ).toBeUndefined();
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -452,7 +481,7 @@ describe('platform/bitbucket-server', () => {
       describe('getPr()', () => {
         it('returns null for no prNo', async () => {
           expect.assertions(2);
-          expect(await bitbucket.getPr()).toBeNull();
+          expect(await bitbucket.getPr(undefined as any)).toBeNull();
           expect(api.get.mock.calls).toMatchSnapshot();
         });
         it('gets a PR', async () => {
@@ -469,10 +498,10 @@ describe('platform/bitbucket-server', () => {
           try {
             expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-            global.gitAuthor = { email: 'bot@renovateapp.com' };
+            global.gitAuthor = { email: 'bot@renovateapp.com', name: 'bot' };
             expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            global.gitAuthor = { email: 'jane@example.com' };
+            global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
             expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
             expect(api.get.mock.calls).toMatchSnapshot();
@@ -492,7 +521,7 @@ describe('platform/bitbucket-server', () => {
               reviewers: [],
               fromRef: {},
             },
-          });
+          } as any);
           expect(await bitbucket.getPr(5)).toMatchSnapshot();
           expect(api.get.mock.calls).toMatchSnapshot();
         });
@@ -501,7 +530,7 @@ describe('platform/bitbucket-server', () => {
       describe('getPrFiles()', () => {
         it('returns empty files', async () => {
           expect.assertions(1);
-          expect(await bitbucket.getPrFiles(null)).toHaveLength(0);
+          expect(await bitbucket.getPrFiles(null as any)).toHaveLength(0);
         });
 
         it('returns one file', async () => {
@@ -526,7 +555,7 @@ describe('platform/bitbucket-server', () => {
           await initRepo();
 
           await expect(
-            bitbucket.updatePr(null, 'title', 'body')
+            bitbucket.updatePr(null as any, 'title', 'body')
           ).rejects.toThrow('not-found');
 
           await expect(bitbucket.updatePr(4, 'title', 'body')).rejects.toThrow(
@@ -589,9 +618,9 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(5);
           await initRepo();
 
-          await expect(bitbucket.mergePr(null, 'branch')).rejects.toThrow(
-            'not-found'
-          );
+          await expect(
+            bitbucket.mergePr(null as any, 'branch')
+          ).rejects.toThrow('not-found');
           await expect(bitbucket.mergePr(4, 'branch')).rejects.toThrow(
             'not-found'
           );
@@ -672,7 +701,7 @@ describe('platform/bitbucket-server', () => {
               inProgress: 0,
               failed: 0,
             },
-          });
+          } as any);
 
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
@@ -694,7 +723,7 @@ describe('platform/bitbucket-server', () => {
               inProgress: 1,
               failed: 0,
             },
-          });
+          } as any);
 
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
@@ -706,7 +735,7 @@ describe('platform/bitbucket-server', () => {
               inProgress: 0,
               failed: 0,
             },
-          });
+          } as any);
 
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
@@ -725,7 +754,7 @@ describe('platform/bitbucket-server', () => {
               inProgress: 1,
               failed: 1,
             },
-          });
+          } as any);
 
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
@@ -744,11 +773,14 @@ describe('platform/bitbucket-server', () => {
 
         it('throws repository-changed', async () => {
           expect.assertions(1);
-          GitStorage.mockImplementationOnce(() => ({
-            initRepo: jest.fn(),
-            branchExists: jest.fn(() => Promise.resolve(false)),
-            cleanRepo: jest.fn(),
-          }));
+          GitStorage.mockImplementationOnce(
+            () =>
+              ({
+                initRepo: jest.fn(),
+                branchExists: jest.fn(() => Promise.resolve(false)),
+                cleanRepo: jest.fn(),
+              } as any)
+          );
           await initRepo();
           await expect(
             bitbucket.getBranchStatus('somebranch', true)
@@ -771,7 +803,7 @@ describe('platform/bitbucket-server', () => {
                 },
               ],
             },
-          });
+          } as any);
 
           await expect(
             bitbucket.getBranchStatusCheck('somebranch', 'context-2')
@@ -794,7 +826,7 @@ describe('platform/bitbucket-server', () => {
                 },
               ],
             },
-          });
+          } as any);
 
           await expect(
             bitbucket.getBranchStatusCheck('somebranch', 'context-2')
@@ -817,7 +849,7 @@ describe('platform/bitbucket-server', () => {
                 },
               ],
             },
-          });
+          } as any);
 
           await expect(
             bitbucket.getBranchStatusCheck('somebranch', 'context-2')
@@ -842,7 +874,7 @@ describe('platform/bitbucket-server', () => {
               isLastPage: true,
               values: [],
             },
-          });
+          } as any);
 
           await expect(
             bitbucket.getBranchStatusCheck('somebranch', 'context-2')
@@ -861,28 +893,28 @@ describe('platform/bitbucket-server', () => {
           await bitbucket.setBranchStatus(
             'somebranch',
             'context-2',
-            null,
+            null as any,
             'success'
           );
 
           await bitbucket.setBranchStatus(
             'somebranch',
             'context-2',
-            null,
+            null as any,
             'failed'
           );
 
           await bitbucket.setBranchStatus(
             'somebranch',
             'context-2',
-            null,
+            null as any,
             'failure'
           );
 
           await bitbucket.setBranchStatus(
             'somebranch',
             'context-2',
-            null,
+            null as any,
             'pending'
           );
 
@@ -893,14 +925,14 @@ describe('platform/bitbucket-server', () => {
           await bitbucket.setBranchStatus(
             'somebranch',
             'context-2',
-            null,
+            null as any,
             'success'
           );
 
           await bitbucket.setBranchStatus(
             'somebranch',
             'context-1',
-            null,
+            null as any,
             'success'
           );
 

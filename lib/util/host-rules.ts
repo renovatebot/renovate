@@ -8,11 +8,13 @@ export const defaults: IDict<IPlatformConfig> = {
   azure: { name: 'Azure DevOps' },
 };
 
-//TODO: add known properties
-interface IPlatformConfig {
+// TODO: add known properties
+export interface IPlatformConfig {
   [prop: string]: any;
   name?: string;
   endpoint?: string;
+
+  token?: string;
 }
 interface IDict<T> {
   [key: string]: T;
@@ -32,7 +34,7 @@ export function update(params: IPlatformConfig) {
       'Failed to set configuration: no platform or endpoint specified'
     );
   }
-  const config = { ...defaults[platform], ...params };
+  const config = { ...params };
   const { endpoint } = config;
   if (!endpoint) {
     // istanbul ignore if
@@ -56,23 +58,24 @@ export function update(params: IPlatformConfig) {
     );
   }
   platforms[platform] = { ...platforms[platform] };
-  if (config.default) {
-    for (const conf of Object.values(platforms[platform])) {
-      delete conf.default;
-    }
-  }
   logger.debug({ config }, 'Setting hostRule');
   platforms[platform][host] = { ...platforms[platform][host], ...config };
   return true;
 }
 
 export function find(
-  { platform, host }: { platform: string; host?: string },
+  {
+    platform,
+    host,
+    endpoint,
+  }: { platform: string; host?: string; endpoint?: string },
   overrides?: IPlatformConfig
 ) {
+  const massagedHost =
+    host || (endpoint ? URL.parse(endpoint).host : undefined);
   if (!platforms[platform]) {
-    if (host && hostsOnly[host]) {
-      return merge(hostsOnly[host], overrides);
+    if (massagedHost && hostsOnly[massagedHost]) {
+      return merge(hostsOnly[massagedHost], overrides);
     }
     return merge(null, overrides);
   }
@@ -81,14 +84,14 @@ export function find(
     if (platforms.docker.platform === 'docker') {
       return merge(platforms.docker, overrides);
     }
-    return merge(platforms.docker[host!], overrides);
+    return merge(platforms.docker[massagedHost!], overrides);
   }
-  if (host) {
-    return merge(platforms[platform][host], overrides);
+  if (massagedHost) {
+    return merge(platforms[platform][massagedHost], overrides);
   }
   const configs = Object.values(platforms[platform]);
-  let config = configs.find(c => c.default);
-  if (!config && configs.length === 1) {
+  let config;
+  if (configs.length === 1) {
     [config] = configs;
   }
   return merge(config, overrides);

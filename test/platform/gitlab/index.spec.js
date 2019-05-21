@@ -1,18 +1,16 @@
-const hostRules = require('../../../lib/util/host-rules');
-
 describe('platform/gitlab', () => {
   let gitlab;
   let get;
+  let hostRules;
   let GitStorage;
   beforeEach(() => {
-    // clean up hostRules
-    hostRules.clear();
-
     // reset module
     jest.resetModules();
     jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
     gitlab = require('../../../lib/platform/gitlab');
     get = require('../../../lib/platform/gitlab/gl-got-wrapper');
+    jest.mock('../../../lib/util/host-rules');
+    hostRules = require('../../../lib/util/host-rules');
     jest.mock('../../../lib/platform/git/storage');
     GitStorage = require('../../../lib/platform/git/storage');
     GitStorage.mockImplementation(() => ({
@@ -34,10 +32,34 @@ describe('platform/gitlab', () => {
         () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
       ),
     }));
+    hostRules.find.mockReturnValue({
+      platform: 'github',
+      endpoint: 'https://gitlab.com/v4/',
+      token: 'abc123',
+    });
   });
 
   afterEach(() => {
     gitlab.cleanRepo();
+  });
+
+  describe('initPlatform()', () => {
+    it(`should throw if no token`, () => {
+      expect(() => {
+        gitlab.initPlatform({});
+      }).toThrow();
+    });
+    it(`should default to gitlab.com`, () => {
+      expect(gitlab.initPlatform({ token: 'some-token' })).toMatchSnapshot();
+    });
+    it(`should accept custom endpoint`, () => {
+      expect(
+        gitlab.initPlatform({
+          endpoint: 'https://gitlab.renovatebot.com',
+          token: 'some-token',
+        })
+      ).toMatchSnapshot();
+    });
   });
 
   describe('getRepos', () => {
@@ -55,26 +77,14 @@ describe('platform/gitlab', () => {
       }));
       return gitlab.getRepos(...args);
     }
-    it('should throw an error if no token is provided', async () => {
-      await expect(gitlab.getRepos()).rejects.toThrow(
-        Error('No token found for getRepos')
-      );
-    });
     it('should throw an error if it receives an error', async () => {
       get.mockImplementation(() => {
         throw new Error('getRepos error');
       });
-      await expect(gitlab.getRepos('sometoken')).rejects.toThrow(
-        Error('getRepos error')
-      );
+      await expect(gitlab.getRepos()).rejects.toThrow(Error('getRepos error'));
     });
     it('should return an array of repos', async () => {
-      const repos = await getRepos('sometoken');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(repos).toMatchSnapshot();
-    });
-    it('should support a custom endpoint', async () => {
-      const repos = await getRepos('sometoken', 'someendpoint');
+      const repos = await getRepos();
       expect(get.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
@@ -124,38 +134,10 @@ describe('platform/gitlab', () => {
   }
 
   describe('initRepo', () => {
-    [
-      [undefined, 'mytoken', undefined],
-      [undefined, 'mytoken', 'https://my.custom.endpoint/'],
-      ['myenvtoken', 'myenvtoken', undefined],
-      [undefined, 'mytoken', undefined, 'Renovate Bot <bot@renovatebot.com>'],
-    ].forEach(([envToken, token, endpoint, gitAuthor], i) => {
-      it(`should initialise the config for the repo - ${i}`, async () => {
-        if (envToken !== undefined) {
-          process.env.RENOVATE_TOKEN = envToken;
-        }
-        get.mockReturnValue({ body: [] });
-        const config = await initRepo({
-          repository: 'some/repo',
-          token,
-          endpoint,
-          gitAuthor,
-        });
-        expect(get.mock.calls).toMatchSnapshot();
-        expect(config).toMatchSnapshot();
-      });
-    });
     it(`should escape all forward slashes in project names`, async () => {
       get.mockReturnValue({ body: [] });
       await initRepo({ repository: 'some/repo/project', token: 'some-token' });
       expect(get.mock.calls).toMatchSnapshot();
-    });
-    it('should throw an error if no token is provided', async () => {
-      await expect(
-        gitlab.initRepo({ repository: 'some/repo' })
-      ).rejects.toThrow(
-        Error('No token found for GitLab repository some/repo')
-      );
     });
     it('should throw an error if receiving an error', async () => {
       get.mockImplementation(() => {

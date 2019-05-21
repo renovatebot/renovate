@@ -4,6 +4,7 @@ exports[`workers/repository/extract/manager-files getManagerPackageFiles() retur
 Array [
   Object {
     "deps": Array [],
+    "ignoreNpmrcFile": undefined,
     "lernaClient": "npm",
     "lernaDir": ".",
     "lernaPackages": undefined,

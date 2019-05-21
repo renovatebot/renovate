@@ -13,8 +13,8 @@
     "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "node -r ts-node/register/transpile-only --inspect-brk lib/renovate.ts",
-    "eslint": "eslint lib test",
-    "eslint-fix": "eslint --fix lib test",
+    "eslint": "eslint lib test --ext \".js,.ts\"",
+    "eslint-fix": "eslint --fix  lib test --ext \".js,.ts\"",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "jest-debug": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --inspect-brk node_modules/jest/bin/jest.js",
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
@@ -87,7 +87,7 @@
     "@renovate/pep440": "0.4.1",
     "@renovatebot/docker-registry-client": "3.3.0",
     "@sindresorhus/is": "0.17.0",
-    "@snyk/ruby-semver": "rarkins/ruby-semver#semverfix",
+    "@snyk/ruby-semver": "rarkins/ruby-semver.git#semverfix",
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "8.0.0",
     "bunyan": "1.8.12",
@@ -154,14 +154,13 @@
     "@types/bunyan": "1.8.6",
     "@types/convert-hrtime": "2.0.0",
     "@types/fs-extra": "7.0.0",
+    "@types/got": "9.4.4",
     "@types/jest": "24.0.13",
     "@types/node": "11.13.11",
-    "@types/tmp": "0.1.0",
+    "@types/tmp": "0.0.33",
     "@typescript-eslint/eslint-plugin": "1.9.0",
     "@typescript-eslint/parser": "1.9.0",
-    "babel-plugin-transform-object-rest-spread": "7.0.0-beta.3",
     "chai": "4.2.0",
-    "codecov": "3.5.0",
     "copyfiles": "2.1.0",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
@@ -193,11 +192,6 @@
     "data",
     "dist"
   ],
-  "babel": {
-    "plugins": [
-      "transform-object-rest-spread"
-    ]
-  },
   "jest": {
     "globals": {
       "ts-jest": {
