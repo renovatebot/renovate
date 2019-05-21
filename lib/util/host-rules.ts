@@ -15,7 +15,6 @@ const hostTypes: IDict<IPlatformConfig> = {};
 const hostsOnly: IDict<IPlatformConfig> = {};
 
 export function update(params: IPlatformConfig) {
-  debugger;
   const { hostType } = params;
   if (!hostType) {
     if (params.endpoint) {

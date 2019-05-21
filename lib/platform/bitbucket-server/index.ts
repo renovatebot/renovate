@@ -54,7 +54,6 @@ export function initPlatform({
 
 // Get all repositories that the user has access to
 export async function getRepos() {
-  debugger;
   logger.info('Autodiscovering Bitbucket Server repositories');
   try {
     const repos = await utils.accumulateValues(

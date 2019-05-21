@@ -9,7 +9,6 @@ const hostType = 'bitbucket-server';
 let endpoint: string;
 
 async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
-  debugger;
   const host = URL.parse(path).host || URL.parse(endpoint).host;
   const opts: IGotApiOptions &
     hostRules.IPlatformConfig &
