@@ -73,3 +73,7 @@ workflows:
       - release:
           requires:
             - test_node_10
+          filters:
+            branches:
+              only:
+                - master
