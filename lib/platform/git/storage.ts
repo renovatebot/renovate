@@ -51,7 +51,6 @@ class Storage {
   }
 
   async initRepo(args: IStorageConfig) {
-    debugger;
     this.cleanRepo();
     // eslint-disable-next-line no-multi-assign
     const config: ILocalConfig = (this._config = { ...args } as any);
@@ -111,7 +110,6 @@ class Storage {
         // clone only the default branch
         await this._git.clone(config.url, '.', ['--depth=2']);
       } catch (err) /* istanbul ignore next */ {
-        debugger;
         logger.debug({ err }, 'git clone error');
         throw new Error('platform-failure');
       }
