@@ -1,7 +1,7 @@
-jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
-
 import * as utils from '../../../lib/platform/bitbucket/utils';
 import { IGotApi } from '../../../lib/platform/common';
+
+jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
 
 const api: jest.Mocked<
   IGotApi
