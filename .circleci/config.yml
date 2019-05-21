@@ -1,13 +1,7 @@
 version: 2.1
-jobs:
-  build_and_test:
+commands:
+  test:
     description: Build and test
-    parameters:
-      docker_image:
-        description: A Node.js Docker image to test against
-        type: string
-    docker:
-      - image: '<< parameters.docker_image >>'
     steps:
       - checkout
       - run:
@@ -59,7 +53,12 @@ jobs:
           name: Coverage
           command: |
             bash <(curl -s https://codecov.io/bash)
-
+jobs:
+  test_node_10:
+    docker:
+      - image: node:10.15.3@sha256:2939bbf1f233c88ed1bc5fec51d4e6ac59beeb397b6b81371c4c576e4606de19
+    steps:
+      - test
   release:
     docker:
       - image: node:10.15.3@sha256:2939bbf1f233c88ed1bc5fec51d4e6ac59beeb397b6b81371c4c576e4606de19
