@@ -44,12 +44,12 @@ Here is an example configuration to work with custom Artifactory servers using a
 	    "enabled": true
 	},
 	"hostRules": [{
-	    "platform": "maven",
+	    "hostType": "maven",
         "endpoint": "https://artifactoryurl1/",
 	    "username": "artifactoryusername",
 	    "password": "artifactorypassword"
 	}, {
-	    "platform": "maven",
+	    "hostType": "maven",
         "endpoint": "https://artifactoryurl2/",
 	    "username": "artifactoryusername",
 	    "password": "artifactorypassword"

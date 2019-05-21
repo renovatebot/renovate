@@ -325,7 +325,7 @@ Example for configuring `docker` auth:
 {
   "hostRules": [
     {
-      "platform": "docker",
+      "hostType": "docker",
       "username": "<some-username>",
       "password": "<some-password>"
     }
