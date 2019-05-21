@@ -33,26 +33,6 @@ describe('util/host-rules', () => {
     });
   });
   describe('find()', () => {
-    it('allows overrides', () => {
-      update({
-        hostType: 'github',
-        endpoint: 'endpoint',
-        token: 'token',
-        other: 'data',
-      });
-      const overrides = {
-        token: 'secret',
-        other: null,
-        foo: undefined,
-      };
-      expect(find({ hostType: 'github' }, overrides)).toMatchSnapshot();
-      expect(
-        find({ hostType: 'github', host: 'api.github.com' }, overrides)
-      ).toMatchSnapshot();
-      expect(
-        find({ hostType: 'github', host: 'example.com' }, overrides)
-      ).toMatchSnapshot();
-    });
     it('needs exact host matches', () => {
       update({
         hostType: 'nuget',
@@ -61,6 +41,7 @@ describe('util/host-rules', () => {
         username: 'root',
         password: 'p4$$w0rd',
       });
+      expect(find({ hostType: 'nuget' })).toMatchSnapshot();
       expect(find({ hostType: 'nuget', host: 'nuget.org' })).toMatchSnapshot();
       expect(
         find({ hostType: 'nuget', host: 'not.nuget.org' })
