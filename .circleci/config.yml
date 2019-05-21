@@ -60,7 +60,7 @@ jobs:
       - test
   test_node_12:
     docker:
-      - image: node:12
+      - image: node:12.2.0
     steps:
       - test
   release:
@@ -78,9 +78,11 @@ workflows:
   test_and_release:
     jobs:
       - test_node_10
+      - test_node_12
       - release:
           requires:
             - test_node_10
+            - test_node_12
           filters:
             branches:
               only:
