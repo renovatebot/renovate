@@ -44,7 +44,6 @@ jobs:
           name: Unit Tests
           command: |
             yarn jest --runInBand
-            yarn test-e2e  
 
       - run:
           name: E2E Tests
