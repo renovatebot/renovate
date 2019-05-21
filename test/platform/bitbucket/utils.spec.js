@@ -1,6 +1,6 @@
 jest.mock('../../../lib/platform/bitbucket/bb-got-wrapper');
 
-const got = require('../../../lib/platform/bitbucket/bb-got-wrapper');
+const got = require('../../../lib/platform/bitbucket/bb-got-wrapper').api;
 const utils = require('../../../lib/platform/bitbucket/utils');
 
 const range = count => [...Array(count).keys()];

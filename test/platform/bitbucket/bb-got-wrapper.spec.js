@@ -1,5 +1,5 @@
 describe('platform/gl-got-wrapper', () => {
-  let get;
+  let api;
   let got;
   let hostRules;
   beforeEach(() => {
@@ -8,7 +8,7 @@ describe('platform/gl-got-wrapper', () => {
     jest.mock('got');
     got = require('got');
     hostRules = require('../../../lib/util/host-rules');
-    get = require('../../../lib/platform/bitbucket/bb-got-wrapper');
+    api = require('../../../lib/platform/bitbucket/bb-got-wrapper').api;
 
     // clean up hostRules
     hostRules.clear();
@@ -23,16 +23,16 @@ describe('platform/gl-got-wrapper', () => {
     got.mockImplementationOnce(() => ({
       body,
     }));
-    const res = await get.post('some-url');
+    const res = await api.post('some-url');
     expect(res.body).toEqual(body);
   });
   it('returns cached', async () => {
-    get.reset();
+    api.reset();
     got.mockReturnValueOnce({
       body: {},
     });
-    const res1 = await get('projects/foo');
-    const res2 = await get('projects/foo');
+    const res1 = await api.get('projects/foo');
+    const res2 = await api.get('projects/foo');
     expect(res1).toEqual(res2);
   });
 });
