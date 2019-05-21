@@ -64,7 +64,6 @@ export function find(
   }: { hostType: string; host?: string; endpoint?: string },
   overrides?: IPlatformConfig
 ) {
-  debugger;
   const massagedHost = host
     ? host
     : endpoint
