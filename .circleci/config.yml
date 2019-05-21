@@ -44,7 +44,6 @@ jobs:
           name: Unit Tests
           command: |
             yarn jest --runInBand
-            yarn test-e2e  
 
       - run:
           name: E2E Tests
@@ -57,7 +56,7 @@ jobs:
             yarn codecov
 
 workflows:
-  version: 2
+  version: 2.1
   build_and_test:
     jobs:
       - test
