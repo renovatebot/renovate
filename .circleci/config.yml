@@ -52,6 +52,7 @@ commands:
           name: Coverage
           command: |
             bash <(curl -s https://codecov.io/bash)
+            cat ./coverage/lcov.info | yarn coveralls
 jobs:
   test_node_10:
     docker:
