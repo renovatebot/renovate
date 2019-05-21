@@ -58,6 +58,11 @@ jobs:
       - image: node:10.15.3@sha256:2939bbf1f233c88ed1bc5fec51d4e6ac59beeb397b6b81371c4c576e4606de19
     steps:
       - test
+  test_node_12:
+    docker:
+      - image: node:12
+    steps:
+      - test
   release:
     docker:
       - image: node:10.15.3@sha256:2939bbf1f233c88ed1bc5fec51d4e6ac59beeb397b6b81371c4c576e4606de19
@@ -73,9 +78,11 @@ workflows:
   test_and_release:
     jobs:
       - test_node_10
+      - test_node_12
       - release:
           requires:
             - test_node_10
+            - test_node_12
           filters:
             branches:
               only:
