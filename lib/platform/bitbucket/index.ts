@@ -1,66 +1,34 @@
-const parseDiff = require('parse-diff');
-const api = require('./bb-got-wrapper');
-const utils = require('./utils');
-const hostRules = require('../../util/host-rules');
-const GitStorage = require('../git/storage');
-const { readOnlyIssueBody } = require('../utils/read-only-issue-body');
-const { appSlug } = require('../../config/app-strings');
+import parseDiff from 'parse-diff';
+import api from './bb-got-wrapper';
+import * as utils from './utils';
+import * as hostRules from '../../util/host-rules';
+import GitStorage from '../git/storage';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body';
+import { appSlug } from '../../config/app-strings';
 
-let config = {};
+interface Config {
+  baseBranch: string;
+  baseCommitSHA: string;
+  defaultBranch: string;
+  fileList: any[];
+  mergeMethod: string;
+  owner: string;
+  prList: any[];
+  repository: string;
+  storage: GitStorage;
+}
 
-module.exports = {
-  // Initialization
-  initPlatform,
-  getRepos,
-  cleanRepo,
-  initRepo,
-  getRepoStatus,
-  getRepoForceRebase,
-  setBaseBranch,
-  setBranchPrefix,
-  // Search
-  getFileList,
-  // Branch
-  branchExists,
-  getAllRenovateBranches,
-  isBranchStale,
-  getBranchPr,
-  getBranchStatus,
-  getBranchStatusCheck,
-  setBranchStatus,
-  deleteBranch,
-  mergeBranch,
-  getBranchLastCommitTime,
-  // Issue
-  findIssue,
-  ensureIssue,
-  ensureIssueClosing,
-  addAssignees,
-  addReviewers,
-  deleteLabel,
-  getIssueList,
-  // Comments
-  ensureComment,
-  ensureCommentRemoval,
-  // PR
-  getPrList,
-  findPr,
-  createPr,
-  getPr,
-  getPrFiles,
-  updatePr,
-  mergePr,
-  getPrBody,
-  // file
-  commitFilesToBranch,
-  getFile,
-  // Commits
-  getCommitMessages,
-  // vulnerability alerts
-  getVulnerabilityAlerts,
-};
+let config: Config = {} as any;
 
-function initPlatform({ endpoint, username, password }) {
+export function initPlatform({
+  endpoint,
+  username,
+  password,
+}: {
+  endpoint?: string;
+  username: string;
+  password: string;
+}) {
   if (!(username && password)) {
     throw new Error(
       'Init: You must configure a Bitbucket username and password'
@@ -80,13 +48,13 @@ function initPlatform({ endpoint, username, password }) {
 }
 
 // Get all repositories that the user has access to
-async function getRepos() {
+export async function getRepos() {
   logger.info('Autodiscovering Bitbucket Cloud repositories');
   try {
     const repos = await utils.accumulateValues(
       `/2.0/repositories/?role=contributor`
     );
-    return repos.map(repo => repo.full_name);
+    return repos.map((repo: { full_name: string }) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
@@ -94,19 +62,25 @@ async function getRepos() {
 }
 
 // Initialize bitbucket by getting base branch and SHA
-async function initRepo({ repository, localDir }) {
+export async function initRepo({
+  repository,
+  localDir,
+}: {
+  repository: string;
+  localDir: string;
+}) {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({ hostType: 'bitbucket' });
   api.reset();
-  config = {};
+  config = {} as any;
   // TODO: get in touch with @rarkins about lifting up the caching into the app layer
   config.repository = repository;
-  const platformConfig = {};
+  const platformConfig: any = {};
 
   // Always gitFs
   const url = GitStorage.getUrl({
     gitFs: 'https',
-    auth: `${opts.username}:${opts.password}`,
+    auth: `${opts!.username}:${opts!.password}`,
     hostname: 'bitbucket.org',
     repository,
   });
@@ -144,12 +118,12 @@ async function initRepo({ repository, localDir }) {
 }
 
 // Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
-function getRepoForceRebase() {
+export function getRepoForceRebase() {
   // BB doesnt have an option to flag staled branches
   return false;
 }
 
-async function setBaseBranch(branchName = config.baseBranch) {
+export async function setBaseBranch(branchName = config.baseBranch) {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
@@ -159,37 +133,37 @@ async function setBaseBranch(branchName = config.baseBranch) {
 }
 
 // istanbul ignore next
-function setBranchPrefix(branchPrefix) {
+export function setBranchPrefix(branchPrefix: string) {
   return config.storage.setBranchPrefix(branchPrefix);
 }
 
 // Search
 
 // Get full file list
-function getFileList(branchName) {
+export function getFileList(branchName?: string) {
   return config.storage.getFileList(branchName);
 }
 
 // Branch
 
 // Returns true if branch exists, otherwise false
-function branchExists(branchName) {
+export function branchExists(branchName: string) {
   return config.storage.branchExists(branchName);
 }
 
-function getAllRenovateBranches(branchPrefix) {
+export function getAllRenovateBranches(branchPrefix: string) {
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-function isBranchStale(branchName) {
+export function isBranchStale(branchName: string) {
   return config.storage.isBranchStale(branchName);
 }
 
-function getFile(filePath, branchName) {
+export function getFile(filePath: string, branchName?: string) {
   return config.storage.getFile(filePath, branchName);
 }
 
-async function deleteBranch(branchName, closePr) {
+export async function deleteBranch(branchName: string, closePr?: boolean) {
   if (closePr) {
     const pr = await findPr(branchName, null, 'open');
     if (pr) {
@@ -203,23 +177,23 @@ async function deleteBranch(branchName, closePr) {
   return config.storage.deleteBranch(branchName);
 }
 
-function getBranchLastCommitTime(branchName) {
+export function getBranchLastCommitTime(branchName: string) {
   return config.storage.getBranchLastCommitTime(branchName);
 }
 
 // istanbul ignore next
-function getRepoStatus() {
+export function getRepoStatus() {
   return config.storage.getRepoStatus();
 }
 
-function mergeBranch(branchName) {
+export function mergeBranch(branchName: string) {
   return config.storage.mergeBranch(branchName);
 }
 
-function commitFilesToBranch(
-  branchName,
-  files,
-  message,
+export function commitFilesToBranch(
+  branchName: string,
+  files: any[],
+  message: string,
   parentBranch = config.baseBranch
 ) {
   return config.storage.commitFilesToBranch(
@@ -230,19 +204,22 @@ function commitFilesToBranch(
   );
 }
 
-function getCommitMessages() {
+export function getCommitMessages() {
   return config.storage.getCommitMessages();
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
-async function getBranchPr(branchName) {
+export async function getBranchPr(branchName: string) {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr(branchName, null, 'open');
   return existingPr ? getPr(existingPr.number) : null;
 }
 
 // Returns the combined status for a branch.
-async function getBranchStatus(branchName, requiredStatusChecks) {
+export async function getBranchStatus(
+  branchName: string,
+  requiredStatusChecks?: string[]
+) {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
     // null means disable status checks, so it always succeeds
@@ -258,8 +235,9 @@ async function getBranchStatus(branchName, requiredStatusChecks) {
   const statuses = await utils.accumulateValues(
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`
   );
-  const noOfFailures = statuses.filter(status => status.state === 'FAILED')
-    .length;
+  const noOfFailures = statuses.filter(
+    (status: { state: string }) => status.state === 'FAILED'
+  ).length;
   logger.debug(
     { branch: branchName, sha, statuses },
     'branch status check result'
@@ -270,12 +248,17 @@ async function getBranchStatus(branchName, requiredStatusChecks) {
   return 'success';
 }
 
-async function getBranchStatusCheck(branchName, context) {
+export async function getBranchStatusCheck(
+  branchName: string,
+  context: string
+) {
   const sha = await getBranchCommit(branchName);
   const statuses = await utils.accumulateValues(
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`
   );
-  const bbState = (statuses.find(status => status.key === context) || {}).state;
+  const bbState = (
+    statuses.find((status: { key: string }) => status.key === context) || {}
+  ).state;
 
   return (
     Object.keys(utils.buildStates).find(
@@ -284,17 +267,17 @@ async function getBranchStatusCheck(branchName, context) {
   );
 }
 
-async function setBranchStatus(
-  branchName,
-  context,
-  description,
-  state,
-  targetUrl
+export async function setBranchStatus(
+  branchName: string,
+  context: string,
+  description: string,
+  state: string,
+  targetUrl?: string
 ) {
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || 'http://bitbucket.org';
+  const url = targetUrl || /* istanbul ignore next */ 'http://bitbucket.org';
 
   const body = {
     name: context,
@@ -310,7 +293,7 @@ async function setBranchStatus(
   );
 }
 
-async function findOpenIssues(title) {
+async function findOpenIssues(title: string) {
   try {
     const currentUser = (await api.get('/2.0/user')).body.username;
     const filter = encodeURIComponent(
@@ -323,7 +306,7 @@ async function findOpenIssues(title) {
     return (
       (await api.get(
         `/2.0/repositories/${config.repository}/issues?q=${filter}`
-      )).body.values || []
+      )).body.values || /* istanbul ignore next */ []
     );
   } catch (err) /* istanbul ignore next */ {
     logger.warn('Error finding issues');
@@ -331,7 +314,7 @@ async function findOpenIssues(title) {
   }
 }
 
-async function findIssue(title) {
+export async function findIssue(title: string) {
   logger.debug(`findIssue(${title})`);
   const issues = await findOpenIssues(title);
   if (!issues.length) {
@@ -344,7 +327,7 @@ async function findIssue(title) {
   };
 }
 
-async function closeIssue(issueNumber) {
+async function closeIssue(issueNumber: number) {
   await api.put(
     `/2.0/repositories/${config.repository}/issues/${issueNumber}`,
     {
@@ -353,7 +336,7 @@ async function closeIssue(issueNumber) {
   );
 }
 
-async function ensureIssue(title, body) {
+export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
   try {
     const issues = await findOpenIssues(title);
@@ -398,33 +381,33 @@ async function ensureIssue(title, body) {
 }
 
 // istanbul ignore next
-function getIssueList() {
+export function getIssueList() {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return [];
 }
 
-async function ensureIssueClosing(title) {
+export async function ensureIssueClosing(title: string) {
   const issues = await findOpenIssues(title);
   for (const issue of issues) {
     await closeIssue(issue.id);
   }
 }
 
-function addAssignees() {
+export function addAssignees(_prNr: number, _assignees: string[]) {
   // Bitbucket supports "participants" and "reviewers" so does not seem to have the concept of "assignee"
   logger.warn('Cannot add assignees');
   return Promise.resolve();
 }
 
-async function addReviewers(prId, reviewers) {
+export async function addReviewers(prId: number, reviewers: string[]) {
   logger.debug(`Adding reviewers ${reviewers} to #${prId}`);
 
   const { title } = await getPr(prId);
 
   const body = {
     title,
-    reviewers: reviewers.map(username => ({ username })),
+    reviewers: reviewers.map((username: string) => ({ username })),
   };
 
   await api.put(`/2.0/repositories/${config.repository}/pullrequests/${prId}`, {
@@ -433,23 +416,27 @@ async function addReviewers(prId, reviewers) {
 }
 
 // istanbul ignore next
-function deleteLabel() {
+export function deleteLabel() {
   throw new Error('deleteLabel not implemented');
 }
 
-function ensureComment() {
+export function ensureComment(
+  _prNo: number,
+  _topic: string | null,
+  _content: string
+) {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
   logger.warn('Comment functionality not implemented yet');
   return Promise.resolve();
 }
 
-function ensureCommentRemoval() {
+export function ensureCommentRemoval(_prNo: number, _topic: string) {
   // The api does not support removing comments
   return Promise.resolve();
 }
 
 // istanbul ignore next
-function matchesState(state, desiredState) {
+function matchesState(state: string, desiredState: string) {
   if (desiredState === 'all') {
     return true;
   }
@@ -459,11 +446,15 @@ function matchesState(state, desiredState) {
   return state === desiredState;
 }
 
-async function findPr(branchName, prTitle, state = 'all') {
+export async function findPr(
+  branchName: string,
+  prTitle?: string | null,
+  state: string = 'all'
+) {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find(
-    p =>
+    (p: { branchName: string; title: string; state: string }) =>
       p.branchName === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state)
@@ -475,16 +466,18 @@ async function findPr(branchName, prTitle, state = 'all') {
 }
 
 // Creates PR and returns PR number
-async function createPr(
-  branchName,
-  title,
-  description,
-  labels,
+export async function createPr(
+  branchName: string,
+  title: string,
+  description: string,
+  _labels?: string[],
   useDefaultBranch = true
 ) {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
-  const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+  const base = useDefaultBranch
+    ? config.defaultBranch
+    : /* istanbul ignore next */ config.baseBranch;
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 
@@ -516,17 +509,17 @@ async function createPr(
   return pr;
 }
 
-async function isPrConflicted(prNo) {
+async function isPrConflicted(prNo: number) {
   const diff = (await api.get(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-    { json: false }
+    { json: false } as any
   )).body;
 
   return utils.isConflicted(parseDiff(diff));
 }
 
 // Gets details for a PR
-async function getPr(prNo) {
+export async function getPr(prNo: number) {
   const pr = (await api.get(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
   )).body;
@@ -536,7 +529,7 @@ async function getPr(prNo) {
     return null;
   }
 
-  const res = {
+  const res: any = {
     displayNumber: `Pull Request #${pr.id}`,
     ...utils.prInfo(pr),
   };
@@ -556,24 +549,28 @@ async function getPr(prNo) {
 }
 
 // Return a list of all modified files in a PR
-async function getPrFiles(prNo) {
+export async function getPrFiles(prNo: number) {
   logger.debug({ prNo }, 'getPrFiles');
   const diff = (await api.get(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-    { json: false }
+    { json: false } as any
   )).body;
   const files = parseDiff(diff).map(file => file.to);
   return files;
 }
 
-async function updatePr(prNo, title, description) {
+export async function updatePr(
+  prNo: number,
+  title: string,
+  description: string
+) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   await api.put(`/2.0/repositories/${config.repository}/pullrequests/${prNo}`, {
     body: { title, description },
   });
 }
 
-async function mergePr(prNo, branchName) {
+export async function mergePr(prNo: number, branchName: string) {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
 
   try {
@@ -595,7 +592,7 @@ async function mergePr(prNo, branchName) {
   return true;
 }
 
-function getPrBody(input) {
+export function getPrBody(input: string) {
   // Remove any HTML we use
   return input
     .replace(/<\/?summary>/g, '**')
@@ -605,7 +602,7 @@ function getPrBody(input) {
 }
 
 // Return the commit SHA for a branch
-async function getBranchCommit(branchName) {
+async function getBranchCommit(branchName: string) {
   try {
     const branch = (await api.get(
       `/2.0/repositories/${config.repository}/refs/branches/${branchName}`
@@ -619,7 +616,7 @@ async function getBranchCommit(branchName) {
 
 // Pull Request
 
-async function getPrList() {
+export async function getPrList() {
   logger.debug('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
@@ -632,15 +629,15 @@ async function getPrList() {
   return config.prList;
 }
 
-function cleanRepo() {
+export function cleanRepo() {
   // istanbul ignore if
   if (config.storage && config.storage.cleanRepo) {
     config.storage.cleanRepo();
   }
   api.reset();
-  config = {};
+  config = {} as any;
 }
 
-function getVulnerabilityAlerts() {
+export function getVulnerabilityAlerts() {
   return [];
 }

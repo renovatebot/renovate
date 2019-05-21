@@ -1,11 +1,15 @@
-const URL = require('url');
-const responses = require('./_fixtures/responses');
+import URL from 'url';
+import responses from './_fixtures/responses';
+import { IGotApi } from '../../../lib/platform/common';
 
 describe('platform/bitbucket', () => {
-  let bitbucket;
-  let api;
-  let hostRules;
-  let GitStorage;
+  let bitbucket: typeof import('../../../lib/platform/bitbucket');
+  let api: jest.Mocked<IGotApi>;
+  let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
+  let GitStorage: jest.Mocked<
+    typeof import('../../../lib/platform/git/storage')
+  > &
+    jest.Mock;
   beforeEach(() => {
     // reset module
     jest.resetModules();
@@ -13,7 +17,7 @@ describe('platform/bitbucket', () => {
     jest.mock('../../../lib/platform/git/storage');
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
-    api = require('../../../lib/platform/bitbucket/bb-got-wrapper');
+    api = require('../../../lib/platform/bitbucket/bb-got-wrapper').api;
     bitbucket = require('../../../lib/platform/bitbucket');
     GitStorage = require('../../../lib/platform/git/storage');
     GitStorage.mockImplementation(() => ({
@@ -47,15 +51,15 @@ describe('platform/bitbucket', () => {
     bitbucket.cleanRepo();
   });
 
-  async function mockedGet(path) {
-    let body = responses[URL.parse(path).pathname] || { values: [] };
+  async function mockedGet(path: string) {
+    let body = (responses as any)[URL.parse(path).pathname!] || { values: [] };
     if (typeof body === 'function') {
       body = await body();
     }
     return { body };
   }
 
-  async function mocked(fn) {
+  async function mocked<T = any>(fn: () => Promise<T>) {
     const oldGet = api.get;
     try {
       api.get = jest.fn().mockImplementation(mockedGet);
@@ -65,14 +69,15 @@ describe('platform/bitbucket', () => {
     }
   }
 
-  function wrap(prop) {
-    return (...args) => mocked(() => bitbucket[prop](...args));
+  function wrap(prop: string) {
+    return (...args: any) => mocked(() => (bitbucket as any)[prop](...args));
   }
 
   function initRepo() {
     return mocked(() =>
       bitbucket.initRepo({
         repository: 'some/repo',
+        localDir: '',
       })
     );
   }
@@ -80,7 +85,7 @@ describe('platform/bitbucket', () => {
   describe('initPlatform()', () => {
     it('should throw if no username/password', () => {
       expect(() => {
-        bitbucket.initPlatform({});
+        bitbucket.initPlatform({} as any);
       }).toThrow();
     });
     it('should throw if wrong endpoint', () => {
@@ -108,7 +113,7 @@ describe('platform/bitbucket', () => {
         body: {
           values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
         },
-      });
+      } as any);
       expect(await bitbucket.getRepos()).toEqual(['foo/bar', 'some/repo']);
     });
   });
@@ -131,6 +136,7 @@ describe('platform/bitbucket', () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.setBaseBranch('branch');
+        await bitbucket.setBaseBranch();
         expect(api.get.mock.calls).toMatchSnapshot();
       });
     });
@@ -150,7 +156,7 @@ describe('platform/bitbucket', () => {
       it('sends to gitFs', async () => {
         await initRepo();
         await mocked(async () => {
-          await bitbucket.branchExists();
+          await bitbucket.branchExists('test');
         });
       });
     });
@@ -160,7 +166,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.isBranchStale();
+        await bitbucket.isBranchStale('test');
       });
     });
   });
@@ -168,7 +174,7 @@ describe('platform/bitbucket', () => {
   describe('getBranchPr()', () => {
     const getBranchPr = wrap('getBranchPr');
     it('bitbucket finds PR for branch', async () => {
-      await initRepo(responses);
+      await initRepo();
       expect(await getBranchPr('branch')).toMatchSnapshot();
     });
     it('returns null if no PR for branch', async () => {
@@ -227,7 +233,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.deleteBranch();
+        await bitbucket.deleteBranch('test');
       });
     });
     it('should handle closing PRs when none exist', async () => {
@@ -250,7 +256,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.mergeBranch();
+        await bitbucket.mergeBranch('test');
       });
     });
   });
@@ -259,7 +265,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getBranchLastCommitTime();
+        await bitbucket.getBranchLastCommitTime('test');
       });
     });
   });
@@ -276,6 +282,7 @@ describe('platform/bitbucket', () => {
       await mocked(async () => {
         await bitbucket.initRepo({
           repository: 'some/empty',
+          localDir: '',
         });
         expect(await bitbucket.findIssue('title')).toBeNull();
       });
@@ -294,6 +301,7 @@ describe('platform/bitbucket', () => {
       await mocked(async () => {
         await bitbucket.initRepo({
           repository: 'some/empty',
+          localDir: '',
         });
         await bitbucket.ensureIssue('title', 'body');
         expect(api.get.mock.calls).toMatchSnapshot();
@@ -359,6 +367,13 @@ describe('platform/bitbucket', () => {
     it('exists', () => {
       expect(bitbucket.findPr).toBeDefined();
     });
+
+    it('finds pr', async () => {
+      await initRepo();
+      await mocked(async () => {
+        expect(await bitbucket.findPr('branch', 'title')).toMatchSnapshot();
+      });
+    });
   });
 
   describe('createPr()', () => {
@@ -366,7 +381,7 @@ describe('platform/bitbucket', () => {
       await initRepo();
       api.post.mockReturnValueOnce({
         body: { id: 5 },
-      });
+      } as any);
       const { number } = await bitbucket.createPr('branch', 'title', 'body');
       expect(number).toBe(5);
       expect(api.post.mock.calls).toMatchSnapshot();
@@ -419,7 +434,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.commitFilesToBranch();
+        await bitbucket.commitFilesToBranch('test', [], 'message');
       });
     });
   });
@@ -428,7 +443,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getFile();
+        await bitbucket.getFile('test.file');
       });
     });
   });
@@ -446,7 +461,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getAllRenovateBranches();
+        await bitbucket.getAllRenovateBranches('test');
       });
     });
   });
@@ -455,7 +470,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getBranchLastCommitTime();
+        await bitbucket.getBranchLastCommitTime('test');
       });
     });
   });
