@@ -1672,6 +1672,15 @@ describe('platform/github', () => {
       expect(github.getPrBody(input)).toMatchSnapshot();
     });
     it('returns not-updated pr body for GHE', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          login: 'renovate-bot',
+        },
+      }));
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: 'abc123',
+      });
       hostRules.find.mockReturnValue({
         hostType: 'github',
         endpoint: 'https://github.company.com',
