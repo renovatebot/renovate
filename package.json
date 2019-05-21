@@ -161,7 +161,6 @@
     "@typescript-eslint/eslint-plugin": "1.9.0",
     "@typescript-eslint/parser": "1.9.0",
     "chai": "4.2.0",
-    "codecov": "3.5.0",
     "copyfiles": "2.1.0",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
