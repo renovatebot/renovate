@@ -63,12 +63,9 @@ export function find(
   }: { hostType: string; host?: string; endpoint?: string },
   overrides?: IPlatformConfig
 ) {
-  const massagedHost = host
-    ? host
-    : endpoint
-    ? URL.parse(endpoint).host
-    : undefined;
-  if (!hostTypes[hostType]) {
+  const massagedHost =
+    host || (endpoint ? URL.parse(endpoint).host : undefined);
+  if (!hostType[hostType]) {
     if (massagedHost && hostsOnly[massagedHost]) {
       return merge(hostsOnly[massagedHost], overrides);
     }
