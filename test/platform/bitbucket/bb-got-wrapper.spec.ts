@@ -1,7 +1,9 @@
+import { IGotApi } from '../../../lib/platform/common';
+
 describe('platform/gl-got-wrapper', () => {
-  let api;
-  let got;
-  let hostRules;
+  let api: IGotApi;
+  let got: jest.Mock<typeof import('got')>;
+  let hostRules: typeof import('../../../lib/util/host-rules');
   beforeEach(() => {
     // reset module
     jest.resetAllMocks();
@@ -20,9 +22,12 @@ describe('platform/gl-got-wrapper', () => {
   });
   it('posts', async () => {
     const body = ['a', 'b'];
-    got.mockImplementationOnce(() => ({
-      body,
-    }));
+    got.mockImplementationOnce(
+      () =>
+        ({
+          body,
+        } as any)
+    );
     const res = await api.post('some-url');
     expect(res.body).toEqual(body);
   });
@@ -30,7 +35,7 @@ describe('platform/gl-got-wrapper', () => {
     api.reset();
     got.mockReturnValueOnce({
       body: {},
-    });
+    } as any);
     const res1 = await api.get('projects/foo');
     const res2 = await api.get('projects/foo');
     expect(res1).toEqual(res2);
