@@ -55,7 +55,9 @@ export function update(params: IPlatformConfig) {
   return true;
 }
 
-const copy = config => JSON.parse(JSON.stringify(config || null));
+function copy(config: object) {
+  return JSON.parse(JSON.stringify(config || null));
+}
 
 export function find({
   hostType,
