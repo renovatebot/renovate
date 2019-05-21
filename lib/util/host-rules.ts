@@ -65,7 +65,7 @@ export function find(
 ) {
   const massagedHost =
     host || (endpoint ? URL.parse(endpoint).host : undefined);
-  if (!hostType[hostType]) {
+  if (!hostTypes[hostType]) {
     if (massagedHost && hostsOnly[massagedHost]) {
       return merge(hostsOnly[massagedHost], overrides);
     }
