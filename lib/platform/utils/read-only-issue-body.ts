@@ -1,4 +1,4 @@
-function readOnlyIssueBody(body) {
+export function readOnlyIssueBody(body: string) {
   return body
     .replace(' only once you click their checkbox below', '')
     .replace(' unless you click a checkbox below', '')
@@ -6,7 +6,3 @@ function readOnlyIssueBody(body) {
     .replace(/ Click (?:on |)a checkbox.*\./g, '')
     .replace(/\[ ] <!-- \w*-branch.*-->/g, '');
 }
-
-module.exports = {
-  readOnlyIssueBody,
-};
