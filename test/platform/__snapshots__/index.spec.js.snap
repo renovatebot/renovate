@@ -138,6 +138,15 @@ Array [
 exports[`platform initializes 1`] = `
 Object {
   "endpoint": "https://api.bitbucket.org/",
+  "hostRules": Array [
+    Object {
+      "endpoint": "https://api.bitbucket.org/",
+      "hostType": "bitbucket",
+      "password": "123",
+      "token": "YWJjOjEyMw==",
+      "username": "abc",
+    },
+  ],
   "platform": "bitbucket",
 }
 `;

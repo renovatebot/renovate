@@ -34,6 +34,14 @@ describe('lib/workers/global', () => {
       gitAuthor: 'a@b.com',
       enabled: true,
       repositories: ['a', 'b'],
+      hostRules: [
+        {
+          hostType: 'docker',
+          host: 'docker.io',
+          username: 'some-user',
+          password: 'some-password',
+        },
+      ],
     });
     await globalWorker.start();
     expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
