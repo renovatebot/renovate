@@ -6,3 +6,5 @@ export function readOnlyIssueBody(body: string) {
     .replace(/ Click (?:on |)a checkbox.*\./g, '')
     .replace(/\[ ] <!-- \w*-branch.*-->/g, '');
 }
+
+export default readOnlyIssueBody;
