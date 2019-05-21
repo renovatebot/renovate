@@ -16,7 +16,7 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
     timeout: 60 * 1000,
     json: true,
     basic: false,
-    ...hostRules.find({ platform: 'bitbucket', host }),
+    ...hostRules.find({ hostType: 'bitbucket', host }),
     ...options,
   };
   const url = URL.resolve(endpoint, path);

@@ -36,7 +36,7 @@ describe('lib/workers/global', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          platform: 'docker',
+          hostType: 'docker',
           host: 'docker.io',
           username: 'some-user',
           password: 'some-password',

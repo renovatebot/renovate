@@ -141,8 +141,8 @@ Object {
   "hostRules": Array [
     Object {
       "endpoint": "https://api.bitbucket.org/",
+      "hostType": "bitbucket",
       "password": "123",
-      "platform": "bitbucket",
       "token": "YWJjOjEyMw==",
       "username": "abc",
     },

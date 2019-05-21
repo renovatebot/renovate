@@ -36,7 +36,7 @@ describe('workers/pr/changelog', () => {
       ghGot.mockClear();
       hostRules.clear();
       hostRules.update({
-        platform: 'github',
+        hostType: 'github',
         endpoint: 'https://api.github.com/',
       });
       await global.renovateCache.rmAll();
@@ -156,7 +156,7 @@ describe('workers/pr/changelog', () => {
     });
     it('supports github enterprise and github.com changelog', async () => {
       hostRules.update({
-        platform: 'github',
+        hostType: 'github',
         token: 'super_secret',
         endpoint: 'https://github-enterprise.example.com/',
       });
@@ -168,7 +168,7 @@ describe('workers/pr/changelog', () => {
     });
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.update({
-        platform: 'github',
+        hostType: 'github',
         endpoint: 'https://github-enterprise.example.com/',
       });
       process.env.GITHUB_ENDPOINT = '';

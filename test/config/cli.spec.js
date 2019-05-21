@@ -76,13 +76,13 @@ describe('config/cli', () => {
     });
     it('parses json lists correctly', () => {
       argv.push(
-        `--host-rules=[{"host":"docker.io","platform":"docker","username":"user","password":"password"}]`
+        `--host-rules=[{"host":"docker.io","hostType":"docker","username":"user","password":"password"}]`
       );
       cli.getConfig(argv).should.deep.equal({
         hostRules: [
           {
             host: 'docker.io',
-            platform: 'docker',
+            hostType: 'docker',
             username: 'user',
             password: 'password',
           },
