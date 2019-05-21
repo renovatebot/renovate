@@ -136,6 +136,7 @@ describe('platform/bitbucket', () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.setBaseBranch('branch');
+        await bitbucket.setBaseBranch();
         expect(api.get.mock.calls).toMatchSnapshot();
       });
     });
@@ -302,7 +303,6 @@ describe('platform/bitbucket', () => {
           repository: 'some/empty',
           localDir: '',
         });
-        localDir: '';
         await bitbucket.ensureIssue('title', 'body');
         expect(api.get.mock.calls).toMatchSnapshot();
         expect(api.post.mock.calls).toMatchSnapshot();
@@ -366,6 +366,13 @@ describe('platform/bitbucket', () => {
   describe('findPr()', () => {
     it('exists', () => {
       expect(bitbucket.findPr).toBeDefined();
+    });
+
+    it('finds pr', async () => {
+      await initRepo();
+      await mocked(async () => {
+        expect(await bitbucket.findPr('branch', 'title')).toMatchSnapshot();
+      });
     });
   });
 

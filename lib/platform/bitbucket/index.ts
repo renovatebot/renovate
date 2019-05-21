@@ -277,7 +277,7 @@ export async function setBranchStatus(
   const sha = await getBranchCommit(branchName);
 
   // TargetUrl can not be empty so default to bitbucket
-  const url = targetUrl || 'http://bitbucket.org';
+  const url = targetUrl || /* istanbul ignore next */ 'http://bitbucket.org';
 
   const body = {
     name: context,
@@ -306,7 +306,7 @@ async function findOpenIssues(title: string) {
     return (
       (await api.get(
         `/2.0/repositories/${config.repository}/issues?q=${filter}`
-      )).body.values || []
+      )).body.values || /* istanbul ignore next */ []
     );
   } catch (err) /* istanbul ignore next */ {
     logger.warn('Error finding issues');
@@ -475,7 +475,9 @@ export async function createPr(
 ) {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
-  const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+  const base = useDefaultBranch
+    ? config.defaultBranch
+    : /* istanbul ignore next */ config.baseBranch;
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 

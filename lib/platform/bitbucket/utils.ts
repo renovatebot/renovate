@@ -76,11 +76,11 @@ export function isConflicted(files: any) {
 export function prInfo(pr: any) {
   return {
     number: pr.id,
-    body: pr.summary ? pr.summary.raw : undefined,
+    body: pr.summary ? pr.summary.raw : /* istanbul ignore next */ undefined,
     branchName: pr.source.branch.name,
     title: pr.title,
     state: prStates.closed.includes(pr.state)
-      ? 'closed'
+      ? /* istanbul ignore next */ 'closed'
       : pr.state.toLowerCase(),
     createdAt: pr.created_on,
   };
