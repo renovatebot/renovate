@@ -1,14 +1,17 @@
-const got = require('got');
-const URL = require('url');
-const hostRules = require('../../util/host-rules');
+import got from 'got';
+import URL from 'url';
+import * as hostRules from '../../util/host-rules';
+import { IGotApi, IGotApiOptions } from '../common';
 
-let cache = {};
+let cache: Renovate.IDict<got.Response<any>> = {};
 
 const endpoint = 'https://api.bitbucket.org/';
 const host = 'api.bitbucket.org';
 
-async function get(path, options) {
-  const opts = {
+async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
+  const opts: IGotApiOptions &
+    hostRules.IPlatformConfig &
+    got.GotJSONOptions = {
     // TODO: Move to configurable host rules, or use utils/got
     timeout: 60 * 1000,
     json: true,
@@ -37,13 +40,15 @@ async function get(path, options) {
 
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 
+export const api: IGotApi = {} as any;
+
 for (const x of helpers) {
-  get[x] = (url, opts) =>
+  (api as any)[x] = (url: string, opts: any) =>
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
-get.reset = function reset() {
+api.reset = function reset() {
   cache = {};
 };
 
-module.exports = get;
+export default api;
