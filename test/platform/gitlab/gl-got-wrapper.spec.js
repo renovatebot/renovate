@@ -61,4 +61,7 @@ describe('platform/gl-got-wrapper', () => {
     const res2 = await get('projects/foo');
     expect(res1).toEqual(res2);
   });
+  it('sets endpoint', () => {
+    get.setEndpoint('https://gitlab.renovatebot.com/api/v4/');
+  });
 });

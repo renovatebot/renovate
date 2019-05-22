@@ -15,6 +15,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
         "headers": Object {
           "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
+        "json": true,
         "password": "some-password",
         "username": "some-username",
       },
@@ -106,6 +107,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
         "headers": Object {
           "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
+        "json": true,
         "password": "some-password",
         "username": "some-username",
       },
@@ -197,6 +199,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
         "headers": Object {
           "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
+        "json": true,
         "password": "some-password",
         "username": "some-username",
       },

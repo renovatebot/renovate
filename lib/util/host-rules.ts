@@ -1,47 +1,41 @@
 import URL from 'url';
 
-export const defaults: IDict<IPlatformConfig> = {
-  bitbucket: { name: 'Bitbucket', endpoint: 'https://api.bitbucket.org/' },
-  'bitbucket-server': { name: 'Bitbucket Server' },
-  github: { name: 'GitHub', endpoint: 'https://api.github.com/' },
-  gitlab: { name: 'GitLab', endpoint: 'https://gitlab.com/api/v4/' },
-  azure: { name: 'Azure DevOps' },
-};
-
-//TODO: add known properties
-interface IPlatformConfig {
+// TODO: add known properties
+export interface IPlatformConfig {
   [prop: string]: any;
   name?: string;
   endpoint?: string;
+
+  token?: string;
 }
 interface IDict<T> {
   [key: string]: T;
 }
-const platforms: IDict<IPlatformConfig> = {};
+const hostTypes: IDict<IPlatformConfig> = {};
 const hostsOnly: IDict<IPlatformConfig> = {};
 
 export function update(params: IPlatformConfig) {
-  const { platform } = params;
-  if (!platform) {
+  const { hostType } = params;
+  if (!hostType) {
     if (params.endpoint) {
       const { host } = URL.parse(params.endpoint);
       hostsOnly[host!] = params;
       return true;
     }
     throw new Error(
-      'Failed to set configuration: no platform or endpoint specified'
+      'Failed to set configuration: no hostType or endpoint specified'
     );
   }
-  const config = { ...defaults[platform], ...params };
+  const config = { ...params };
   const { endpoint } = config;
   if (!endpoint) {
     // istanbul ignore if
-    if (platform === 'docker') {
-      platforms.docker = params;
+    if (hostType === 'docker') {
+      hostTypes.docker = params;
       return true;
     }
     throw new Error(
-      `Failed to configure platform '${platform}': no endpoint defined`
+      `Failed to configure hostType '${hostType}': no endpoint defined`
     );
   }
   config.endpoint = endpoint.replace(/[^/]$/, '$&/');
@@ -52,65 +46,58 @@ export function update(params: IPlatformConfig) {
   host = host || (endpoint && URL.parse('http://' + endpoint).host);
   if (!host) {
     throw new Error(
-      `Failed to configure platform '${platform}': no host for endpoint '${endpoint}'`
+      `Failed to configure hostType '${hostType}': no host for endpoint '${endpoint}'`
     );
   }
-  platforms[platform] = { ...platforms[platform] };
-  if (config.default) {
-    for (const conf of Object.values(platforms[platform])) {
-      delete conf.default;
-    }
-  }
+  hostTypes[hostType] = { ...hostTypes[hostType] };
   logger.debug({ config }, 'Setting hostRule');
-  platforms[platform][host] = { ...platforms[platform][host], ...config };
+  hostTypes[hostType][host] = { ...hostTypes[hostType][host], ...config };
   return true;
 }
 
-export function find(
-  { platform, host }: { platform: string; host?: string },
-  overrides?: IPlatformConfig
-) {
-  if (!platforms[platform]) {
-    if (host && hostsOnly[host]) {
-      return merge(hostsOnly[host], overrides);
+function copy(config: object) {
+  return JSON.parse(JSON.stringify(config || null));
+}
+
+export function find({
+  hostType,
+  host,
+  endpoint,
+}: {
+  hostType: string;
+  host?: string;
+  endpoint?: string;
+}) {
+  const massagedHost =
+    host || (endpoint ? URL.parse(endpoint).host : undefined);
+  if (!hostTypes[hostType]) {
+    if (massagedHost && hostsOnly[massagedHost]) {
+      return copy(hostsOnly[massagedHost]);
     }
-    return merge(null, overrides);
+    return null;
   }
   // istanbul ignore if
-  if (platform === 'docker') {
-    if (platforms.docker.platform === 'docker') {
-      return merge(platforms.docker, overrides);
+  if (hostType === 'docker') {
+    if (hostTypes.docker.hostType === 'docker') {
+      return copy(hostTypes.docker);
     }
-    return merge(platforms.docker[host!], overrides);
+    return copy(hostTypes.docker[massagedHost!]);
   }
-  if (host) {
-    return merge(platforms[platform][host], overrides);
+  if (massagedHost) {
+    return copy(hostTypes[hostType][massagedHost]);
   }
-  const configs = Object.values(platforms[platform]);
-  let config = configs.find(c => c.default);
-  if (!config && configs.length === 1) {
+  const configs = Object.values(hostTypes[hostType]);
+  let config;
+  if (configs.length === 1) {
     [config] = configs;
   }
-  return merge(config, overrides);
+  return copy(config);
 }
 
-export function hosts({ platform }: { platform: string }) {
-  return Object.keys({ ...platforms[platform] });
-}
-
-function merge(config: IPlatformConfig | null, overrides?: IPlatformConfig) {
-  if (!overrides) {
-    return config || null;
-  }
-  const locals = { ...overrides };
-  Object.keys(locals).forEach(key => {
-    if (locals[key] === undefined || locals[key] === null) {
-      delete locals[key];
-    }
-  });
-  return { ...config, ...locals };
+export function hosts({ hostType }: { hostType: string }) {
+  return Object.keys({ ...hostTypes[hostType] });
 }
 
 export function clear() {
-  Object.keys(platforms).forEach(key => delete platforms[key]);
+  Object.keys(hostTypes).forEach(key => delete hostTypes[key]);
 }

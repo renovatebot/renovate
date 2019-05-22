@@ -24,13 +24,11 @@ describe('platform/gh-got-wrapper', () => {
     ghGot.mockImplementationOnce(() => ({
       body: '{"data":{',
     }));
+    get.setEndpoint('https://ghe.mycompany.com/api/v3/');
     await get.post('graphql', {
-      endpoint: 'https://ghe.mycompany.com/api/v3/',
       body: 'abc',
     });
-    expect(ghGot.mock.calls[0][1].baseUrl).toEqual(
-      'https://ghe.mycompany.com/api/'
-    );
+    expect(ghGot.mock.calls[0][0].includes('/v3')).toBe(false);
   });
   it('paginates', async () => {
     ghGot.mockReturnValueOnce({
