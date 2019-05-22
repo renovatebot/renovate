@@ -1,103 +1,118 @@
 import URL from 'url';
 
-// TODO: add known properties
-export interface IPlatformConfig {
-  [prop: string]: any;
-  name?: string;
-  endpoint?: string;
-
+export interface HostRule {
+  hostType?: string;
+  hostName?: string;
+  baseUrl?: string;
   token?: string;
-}
-interface IDict<T> {
-  [key: string]: T;
-}
-const hostTypes: IDict<IPlatformConfig> = {};
-const hostsOnly: IDict<IPlatformConfig> = {};
-
-export function update(params: IPlatformConfig) {
-  const { hostType } = params;
-  if (!hostType) {
-    if (params.endpoint) {
-      const { host } = URL.parse(params.endpoint);
-      hostsOnly[host!] = params;
-      return true;
-    }
-    throw new Error(
-      'Failed to set configuration: no hostType or endpoint specified'
-    );
-  }
-  const config = { ...params };
-  const { endpoint } = config;
-  if (!endpoint) {
-    // istanbul ignore if
-    if (hostType === 'docker') {
-      hostTypes.docker = params;
-      return true;
-    }
-    throw new Error(
-      `Failed to configure hostType '${hostType}': no endpoint defined`
-    );
-  }
-  config.endpoint = endpoint.replace(/[^/]$/, '$&/');
-  let { host } = config;
-  // extract host from endpoint
-  host = host || (endpoint && URL.parse(endpoint).host);
-  // endpoint is in the format host/path (protocol missing)
-  host = host || (endpoint && URL.parse('http://' + endpoint).host);
-  if (!host) {
-    throw new Error(
-      `Failed to configure hostType '${hostType}': no host for endpoint '${endpoint}'`
-    );
-  }
-  hostTypes[hostType] = { ...hostTypes[hostType] };
-  logger.debug({ config }, 'Setting hostRule');
-  hostTypes[hostType][host] = { ...hostTypes[hostType][host], ...config };
-  return true;
+  username?: string;
+  password?: string;
 }
 
-function copy(config: object) {
-  return JSON.parse(JSON.stringify(config || null));
+let hostRules: HostRule[] = [];
+
+export function add(params: HostRule) {
+  if (!(params.hostType || params.hostName || params.baseUrl)) {
+    throw new Error('hostRules must contain a hostType, hostName or baseUrl');
+  }
+  if (params.hostName && params.baseUrl) {
+    throw new Error('hostRules cannot contain both a hostName and baseUrl');
+  }
+  hostRules.push(params);
 }
 
-export function find({
-  hostType,
-  host,
-  endpoint,
-}: {
-  hostType: string;
-  host?: string;
-  endpoint?: string;
-}) {
-  const massagedHost =
-    host || (endpoint ? URL.parse(endpoint).host : undefined);
-  if (!hostTypes[hostType]) {
-    if (massagedHost && hostsOnly[massagedHost]) {
-      return copy(hostsOnly[massagedHost]);
-    }
+export interface HostRuleSearch {
+  hostType?: string;
+  url: string;
+}
+
+function isHostTypeRule(rule: HostRule) {
+  return rule.hostType && !rule.hostName && !rule.baseUrl;
+}
+
+function matchesHostType(rule: HostRule, search: HostRuleSearch) {
+  return search.hostType && rule.hostType === search.hostType;
+}
+
+function isHostnameRule(rule: HostRule) {
+  return rule.hostName && !(rule.hostType || rule.baseUrl);
+}
+
+function matchesHostName(rule: HostRule, search: HostRuleSearch) {
+  return search.url && rule.hostName === URL.parse(search.url).hostname;
+}
+
+function isBaseUrlRule(rule: HostRule) {
+  return rule.baseUrl && !rule.hostType;
+}
+
+function matchesBaseUrl(rule: HostRule, search: HostRuleSearch) {
+  return search.url && rule.baseUrl && search.url.startsWith(rule.baseUrl);
+}
+
+export function find(search: HostRuleSearch) {
+  if (!(search.hostType || search.url)) {
+    logger.warn({ search }, 'Invalid hostRules search');
     return null;
   }
-  // istanbul ignore if
-  if (hostType === 'docker') {
-    if (hostTypes.docker.hostType === 'docker') {
-      return copy(hostTypes.docker);
-    }
-    return copy(hostTypes.docker[massagedHost!]);
+  let res = {};
+  // First, find hostType-only matches
+  hostRules
+    .filter(rule => isHostTypeRule(rule) && matchesHostType(rule, search))
+    .forEach(rule => {
+      res = merge(res, rule);
+    });
+  // Next, find hostName-only matches
+  hostRules
+    .filter(rule => isHostnameRule(rule) && matchesHostName(rule, search))
+    .forEach(rule => {
+      res = merge(res, rule);
+    });
+  // Next, find baseUrl-only matches
+  hostRules
+    .filter(rule => isBaseUrlRule(rule) && matchesBaseUrl(rule, search))
+    .forEach(rule => {
+      res = merge(res, rule);
+    });
+  // Finally, find combination matches
+  hostRules
+    .filter(
+      rule =>
+        matchesHostType(rule, search) &&
+        (matchesHostName(rule, search) || matchesBaseUrl(rule, search))
+    )
+    .forEach(rule => {
+      res = merge(res, rule);
+    });
+  if (res) {
+    delete res.hostType;
+    delete res.hostName;
+    delete res.baseUrl;
   }
-  if (massagedHost) {
-    return copy(hostTypes[hostType][massagedHost]);
-  }
-  const configs = Object.values(hostTypes[hostType]);
-  let config;
-  if (configs.length === 1) {
-    [config] = configs;
-  }
-  return copy(config);
+  return res;
 }
 
 export function hosts({ hostType }: { hostType: string }) {
-  return Object.keys({ ...hostTypes[hostType] });
+  return hostRules
+    .filter(rule => rule.hostType === hostType)
+    .map(rule => {
+      if (rule.hostName) return rule.hostName;
+      if (rule.baseUrl) return URL.parse(rule.baseUrl).hostname;
+      return null;
+    })
+    .filter(Boolean);
 }
 
 export function clear() {
-  Object.keys(hostTypes).forEach(key => delete hostTypes[key]);
+  hostRules = [];
+}
+
+function merge(existing: HostRule | null, additional: HostRule) {
+  const locals = { ...additional };
+  Object.keys(locals).forEach(key => {
+    if (locals[key] === undefined || locals[key] === null) {
+      delete locals[key];
+    }
+  });
+  return { ...existing, ...locals };
 }

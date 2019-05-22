@@ -103,7 +103,7 @@ export async function initRepo({
       2
     )}")`
   );
-  const opts = hostRules.find({ hostType: defaults.hostType, endpoint });
+  const opts = hostRules.find({ hostType: defaults.hostType, url: endpoint });
   api.reset();
 
   const [projectKey, repositorySlug] = repository.split('/');

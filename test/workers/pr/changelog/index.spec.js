@@ -35,9 +35,9 @@ describe('workers/pr/changelog', () => {
     beforeEach(async () => {
       ghGot.mockClear();
       hostRules.clear();
-      hostRules.update({
+      hostRules.add({
         hostType: 'github',
-        endpoint: 'https://api.github.com/',
+        baseUrl: 'https://api.github.com/',
       });
       await global.renovateCache.rmAll();
     });
@@ -155,10 +155,10 @@ describe('workers/pr/changelog', () => {
       ).toBeNull();
     });
     it('supports github enterprise and github.com changelog', async () => {
-      hostRules.update({
+      hostRules.add({
         hostType: 'github',
         token: 'super_secret',
-        endpoint: 'https://github-enterprise.example.com/',
+        baseUrl: 'https://github-enterprise.example.com/',
       });
       expect(
         await getChangeLogJSON({
@@ -167,9 +167,9 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('supports github enterprise and github enterprise changelog', async () => {
-      hostRules.update({
+      hostRules.add({
         hostType: 'github',
-        endpoint: 'https://github-enterprise.example.com/',
+        baseUrl: 'https://github-enterprise.example.com/',
       });
       process.env.GITHUB_ENDPOINT = '';
       expect(
