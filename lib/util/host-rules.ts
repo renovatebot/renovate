@@ -2,6 +2,7 @@ import URL from 'url';
 
 export interface HostRule {
   hostType?: string;
+  domainName?: string;
   hostName?: string;
   baseUrl?: string;
   token?: string;
@@ -12,8 +13,11 @@ export interface HostRule {
 let hostRules: HostRule[] = [];
 
 export function add(params: HostRule) {
-  if (!(params.hostType || params.hostName || params.baseUrl)) {
-    throw new Error('hostRules must contain a hostType, hostName or baseUrl');
+  if (params.domainName && params.hostName) {
+    throw new Error('hostRules cannot contain both a domainName and hostName');
+  }
+  if (params.domainName && params.baseUrl) {
+    throw new Error('hostRules cannot contain both a domainName and baseUrl');
   }
   if (params.hostName && params.baseUrl) {
     throw new Error('hostRules cannot contain both a hostName and baseUrl');
@@ -26,24 +30,49 @@ export interface HostRuleSearch {
   url: string;
 }
 
+function isEmptyRule(rule: HostRule) {
+  return !rule.hostType && !rule.domainName && !rule.hostName && !rule.baseUrl;
+}
+
 function isHostTypeRule(rule: HostRule) {
-  return rule.hostType && !rule.hostName && !rule.baseUrl;
+  return rule.hostType && !rule.domainName && !rule.hostName && !rule.baseUrl;
 }
 
-function matchesHostType(rule: HostRule, search: HostRuleSearch) {
-  return search.hostType && rule.hostType === search.hostType;
+function isDomainNameRule(rule: HostRule) {
+  return !rule.hostType && rule.domainName;
 }
 
-function isHostnameRule(rule: HostRule) {
-  return rule.hostName && !(rule.hostType || rule.baseUrl);
-}
-
-function matchesHostName(rule: HostRule, search: HostRuleSearch) {
-  return search.url && rule.hostName === URL.parse(search.url).hostname;
+function isHostNameRule(rule: HostRule) {
+  return !rule.hostType && rule.hostName;
 }
 
 function isBaseUrlRule(rule: HostRule) {
-  return rule.baseUrl && !rule.hostType;
+  return !rule.hostType && rule.baseUrl;
+}
+
+function isMultiRule(rule: HostRule) {
+  return rule.hostType && (rule.domainName || rule.hostName || rule.baseUrl);
+}
+
+function matchesHostType(rule: HostRule, search: HostRuleSearch) {
+  return rule.hostType === search.hostType;
+}
+
+function matchesDomainName(rule: HostRule, search: HostRuleSearch) {
+  return (
+    search.url &&
+    rule.domainName &&
+    URL.parse(search.url).hostname &&
+    URL.parse(search.url).hostname.endsWith(rule.domainName)
+  );
+}
+
+function matchesHostName(rule: HostRule, search: HostRuleSearch) {
+  return (
+    search.url &&
+    rule.hostName &&
+    URL.parse(search.url).hostname === rule.hostName
+  );
 }
 
 function matchesBaseUrl(rule: HostRule, search: HostRuleSearch) {
@@ -56,15 +85,27 @@ export function find(search: HostRuleSearch) {
     return null;
   }
   let res = {} as HostRule;
-  // First, find hostType-only matches
+  // First, apply empty rule matches
+  hostRules
+    .filter(rule => isEmptyRule(rule))
+    .forEach(rule => {
+      res = merge(res, rule);
+    });
+  // Next, find hostType-only matches
   hostRules
     .filter(rule => isHostTypeRule(rule) && matchesHostType(rule, search))
     .forEach(rule => {
       res = merge(res, rule);
     });
+  // Next, find domainName-only matches
+  hostRules
+    .filter(rule => isDomainNameRule(rule) && matchesDomainName(rule, search))
+    .forEach(rule => {
+      res = merge(res, rule);
+    });
   // Next, find hostName-only matches
   hostRules
-    .filter(rule => isHostnameRule(rule) && matchesHostName(rule, search))
+    .filter(rule => isHostNameRule(rule) && matchesHostName(rule, search))
     .forEach(rule => {
       res = merge(res, rule);
     });
@@ -78,13 +119,17 @@ export function find(search: HostRuleSearch) {
   hostRules
     .filter(
       rule =>
+        isMultiRule(rule) &&
         matchesHostType(rule, search) &&
-        (matchesHostName(rule, search) || matchesBaseUrl(rule, search))
+        (matchesDomainName(rule, search) ||
+          matchesHostName(rule, search) ||
+          matchesBaseUrl(rule, search))
     )
     .forEach(rule => {
       res = merge(res, rule);
     });
   delete res.hostType;
+  delete res.domainName;
   delete res.hostName;
   delete res.baseUrl;
   return res;
@@ -105,6 +150,7 @@ export function clear() {
   hostRules = [];
 }
 
+// TODO: deep merge
 function merge(existing: HostRule, additional: HostRule) {
   const locals = { ...additional } as HostRule;
   Object.keys(locals).forEach(key => {

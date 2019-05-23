@@ -5,10 +5,23 @@ describe('util/host-rules', () => {
     clear();
   });
   describe('add()', () => {
-    it('throws if no hostType or hostName or baseUrl', () => {
-      expect(() => add({})).toThrow(
-        'hostRules must contain a hostType, hostName or baseUrl'
-      );
+    it('throws if both domainName and hostName', () => {
+      expect(() =>
+        add({
+          hostType: 'azure',
+          domainName: 'github.com',
+          hostName: 'api.github.com',
+        })
+      ).toThrow('hostRules cannot contain both a domainName and hostName');
+    });
+    it('throws if both domainName and baseUrl', () => {
+      expect(() =>
+        add({
+          hostType: 'azure',
+          domainName: 'github.com',
+          baseUrl: 'https://api.github.com',
+        })
+      ).toThrow('hostRules cannot contain both a domainName and baseUrl');
     });
     it('throws if both hostName and baseUrl', () => {
       expect(() =>
@@ -41,15 +54,23 @@ describe('util/host-rules', () => {
         token: undefined,
       });
       expect(find({ hostType: 'nuget' })).toMatchSnapshot();
+      expect(find({ hostType: 'nuget', url: 'https://nuget.org' })).not.toEqual(
+        {}
+      );
+      expect(find({ hostType: 'nuget', url: 'https://not.nuget.org' })).toEqual(
+        {}
+      );
+      expect(find({ hostType: 'nuget', url: 'https://not-nuget.org' })).toEqual(
+        {}
+      );
+    });
+    it('matches on empty rules', () => {
+      add({
+        json: true,
+      });
       expect(
-        find({ hostType: 'nuget', url: 'https://nuget.org' })
-      ).toMatchSnapshot();
-      expect(
-        find({ hostType: 'nuget', url: 'https://not.nuget.org' })
-      ).toBeNull();
-      expect(
-        find({ hostType: 'nuget', url: 'https://not-nuget.org' })
-      ).toBeNull();
+        find({ hostType: 'nuget', url: 'https://api.github.com' }).token
+      ).toEqual({ json: true });
     });
     it('matches on hostType', () => {
       add({
@@ -59,6 +80,15 @@ describe('util/host-rules', () => {
       expect(
         find({ hostType: 'nuget', url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
+    });
+    it('matches on domainName', () => {
+      add({
+        domainName: 'github.com',
+        token: 'def',
+      });
+      expect(
+        find({ hostType: 'nuget', url: 'https://api.github.com' }).token
+      ).toEqual('def');
     });
     it('matches on hostName', () => {
       add({

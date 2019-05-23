@@ -25,14 +25,7 @@ Object {
 }
 `;
 
-exports[`util/host-rules find() needs exact host matches 1`] = `null`;
-
-exports[`util/host-rules find() needs exact host matches 2`] = `
-Object {
-  "password": "p4$$w0rd",
-  "username": "root",
-}
-`;
+exports[`util/host-rules find() needs exact host matches 1`] = `Object {}`;
 
 exports[`util/host-rules find() returns hosts 1`] = `
 Array [
