@@ -16,6 +16,9 @@ describe('.getArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
+  afterEach(() => {
+    delete global.trustLevel;
+  });
   it('returns if no composer.lock found', async () => {
     expect(
       await composer.getArtifacts('composer.json', [], '{}', config)
@@ -62,6 +65,7 @@ describe('.getArtifacts()', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'New composer.lock');
+    global.trustLevel = 'high';
     expect(
       await composer.getArtifacts('composer.json', [], '{}', config)
     ).not.toBeNull();
