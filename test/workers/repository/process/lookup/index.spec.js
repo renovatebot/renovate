@@ -8,6 +8,7 @@ const nextJson = require('../../../../config/npm/_fixtures/next.json');
 const vueJson = require('../../../../config/npm/_fixtures/vue.json');
 const typescriptJson = require('../../../../config/npm/_fixtures/typescript.json');
 const docker = require('../../../../../lib/datasource/docker');
+const defaults = require('../../../../../lib/config/defaults');
 
 jest.mock('../../../../../lib/datasource/docker');
 
@@ -17,7 +18,7 @@ let config;
 
 describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
-    config = { ...require('../../../../../lib/config/defaults').getConfig() };
+    config = { ...defaults.getConfig() };
     config.manager = 'npm';
     config.versionScheme = 'npm';
     config.rangeStrategy = 'replace';
