@@ -70,7 +70,7 @@ export async function initRepo({
   localDir: string;
 }) {
   logger.debug(`initRepo("${repository}")`);
-  const hostOpts = hostRules.find({
+  const opts = hostRules.find({
     hostType: 'bitbucket',
     url: 'https://api.bitbucket.org/',
   });
@@ -83,7 +83,7 @@ export async function initRepo({
   // Always gitFs
   const url = GitStorage.getUrl({
     gitFs: 'https',
-    auth: `${hostOpts!.username}:${hostOpts!.password}`,
+    auth: `${opts!.username}:${opts!.password}`,
     hostname: 'bitbucket.org',
     repository,
   });
