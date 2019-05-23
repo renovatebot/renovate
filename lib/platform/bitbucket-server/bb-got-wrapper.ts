@@ -10,9 +10,7 @@ let endpoint: string;
 
 async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   const url = URL.resolve(endpoint, path);
-  const opts: IGotApiOptions &
-    hostRules.IPlatformConfig &
-    got.GotJSONOptions = {
+  const opts: IGotApiOptions & hostRules.HostRule & got.GotJSONOptions = {
     // TODO: Move to configurable host rules, or use utils/got
     timeout: 60 * 1000,
     json: true,

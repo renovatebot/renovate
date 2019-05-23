@@ -55,7 +55,7 @@ export function find(search: HostRuleSearch) {
     logger.warn({ search }, 'Invalid hostRules search');
     return null;
   }
-  let res = {};
+  let res = {} as HostRule;
   // First, find hostType-only matches
   hostRules
     .filter(rule => isHostTypeRule(rule) && matchesHostType(rule, search))
@@ -84,11 +84,9 @@ export function find(search: HostRuleSearch) {
     .forEach(rule => {
       res = merge(res, rule);
     });
-  if (res) {
-    delete res.hostType;
-    delete res.hostName;
-    delete res.baseUrl;
-  }
+  delete res.hostType;
+  delete res.hostName;
+  delete res.baseUrl;
   return res;
 }
 
@@ -107,8 +105,8 @@ export function clear() {
   hostRules = [];
 }
 
-function merge(existing: HostRule | null, additional: HostRule) {
-  const locals = { ...additional };
+function merge(existing: HostRule, additional: HostRule) {
+  const locals = { ...additional } as HostRule;
   Object.keys(locals).forEach(key => {
     if (locals[key] === undefined || locals[key] === null) {
       delete locals[key];
