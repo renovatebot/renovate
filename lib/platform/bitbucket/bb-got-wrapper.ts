@@ -6,7 +6,6 @@ import { IGotApi, IGotApiOptions } from '../common';
 let cache: Renovate.IDict<got.Response<any>> = {};
 
 const endpoint = 'https://api.bitbucket.org/';
-const host = 'api.bitbucket.org';
 
 async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   const url = URL.resolve(endpoint, path);

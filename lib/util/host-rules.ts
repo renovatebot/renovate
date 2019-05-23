@@ -1,4 +1,5 @@
 import URL from 'url';
+import merge from 'deepmerge';
 
 export interface HostRule {
   hostType?: string;
@@ -84,7 +85,7 @@ export function find(search: HostRuleSearch) {
     logger.warn({ search }, 'Invalid hostRules search');
     return null;
   }
-  let res = {} as HostRule;
+  let res = ({} as any) as HostRule;
   // First, apply empty rule matches
   hostRules
     .filter(rule => isEmptyRule(rule))
@@ -148,15 +149,4 @@ export function hosts({ hostType }: { hostType: string }) {
 
 export function clear() {
   hostRules = [];
-}
-
-// TODO: deep merge
-function merge(existing: HostRule, additional: HostRule) {
-  const locals = { ...additional } as HostRule;
-  Object.keys(locals).forEach(key => {
-    if (locals[key] === undefined || locals[key] === null) {
-      delete locals[key];
-    }
-  });
-  return { ...existing, ...locals };
 }

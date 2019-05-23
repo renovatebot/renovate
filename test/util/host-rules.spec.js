@@ -69,7 +69,7 @@ describe('util/host-rules', () => {
         json: true,
       });
       expect(
-        find({ hostType: 'nuget', url: 'https://api.github.com' }).token
+        find({ hostType: 'nuget', url: 'https://api.github.com' })
       ).toEqual({ json: true });
     });
     it('matches on hostType', () => {
