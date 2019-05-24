@@ -39,6 +39,16 @@ describe('manager/docker-compose/update', () => {
       const res = updateDependency(railsGemfile, upgrade);
       expect(res).toBeNull();
     });
+    it('uses single quotes', () => {
+      const upgrade = {
+        lineNumber: 0,
+        depName: 'rack-cache',
+        newValue: '~> 1.3',
+      };
+      const gemFile = `gem 'rack-cache', '~> 1.2'`;
+      const res = updateDependency(gemFile, upgrade);
+      expect(res).toEqual(`gem 'rack-cache', '~> 1.3'`);
+    });
     it('returns null if error', () => {
       const res = updateDependency(null, null);
       expect(res).toBeNull();

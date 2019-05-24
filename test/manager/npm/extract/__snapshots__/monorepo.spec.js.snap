@@ -79,3 +79,39 @@ Array [
   },
 ]
 `;
+
+exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings 2`] = `
+Array [
+  Object {
+    "internalPackages": Array [
+      "@org/a",
+      "@org/b",
+    ],
+    "packageFile": "package.json",
+    "yarnWorkspacesPackages": "packages/*",
+  },
+  Object {
+    "hasYarnWorkspaces": true,
+    "internalPackages": Array [
+      "@org/b",
+    ],
+    "lernaClient": undefined,
+    "lernaDir": undefined,
+    "npmLock": undefined,
+    "packageFile": "packages/a/package.json",
+    "packageJsonName": "@org/a",
+    "yarnLock": true,
+  },
+  Object {
+    "internalPackages": Array [
+      "@org/a",
+    ],
+    "lernaClient": undefined,
+    "lernaDir": undefined,
+    "npmLock": undefined,
+    "packageFile": "packages/b/package.json",
+    "packageJsonName": "@org/b",
+    "yarnLock": undefined,
+  },
+]
+`;

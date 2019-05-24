@@ -95,6 +95,14 @@ describe('semver.getNewValue()', () => {
     expect(semver.getNewValue('5.0', 'bump', '5.0.0', '5.1.7')).toEqual('5.1');
     expect(semver.getNewValue('5.0', 'bump', '5.0.0', '6.1.7')).toEqual('6.1');
   });
+  it('bumps greater or equals', () => {
+    expect(semver.getNewValue('>=1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
+      '>=1.1.0'
+    );
+    expect(semver.getNewValue('>= 1.0.0', 'bump', '1.0.0', '1.1.0')).toEqual(
+      '>= 1.1.0'
+    );
+  });
   it('replaces equals', () => {
     expect(semver.getNewValue('=1.0.0', 'replace', '1.0.0', '1.1.0')).toEqual(
       '=1.1.0'

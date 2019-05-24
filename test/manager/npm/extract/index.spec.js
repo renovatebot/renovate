@@ -166,6 +166,7 @@ describe('manager/npm/extract', () => {
           npm: '^8.0.0',
           yarn: 'disabled',
         },
+        main: 'index.js',
       };
       const pJsonStr = JSON.stringify(pJson);
       const res = await npmExtract.extractPackageFile(

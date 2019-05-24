@@ -15,13 +15,16 @@ describe('.getArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
+  afterEach(() => {
+    delete global.trustLevel;
+  });
   it('returns if no Pipfile.lock found', async () => {
     expect(await pipenv.getArtifacts('Pipfile', [], '', config)).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockReturnValueOnce('Current Pipfile.lock');
     exec.mockReturnValueOnce({
-      stdout: '',
+      stdout: 'Locking',
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'Current Pipfile.lock');
@@ -34,6 +37,7 @@ describe('.getArtifacts()', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'New Pipfile.lock');
+    global.trustLevel = 'high';
     expect(
       await pipenv.getArtifacts('Pipfile', [], '{}', config)
     ).not.toBeNull();

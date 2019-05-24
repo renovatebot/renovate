@@ -186,6 +186,7 @@ describe('manager/gradle', () => {
         binarySource: 'docker',
         gitFs: true,
         ...config,
+        gradle: {},
       };
       await manager.extractAllPackageFiles(configWithDocker, ['build.gradle']);
 
