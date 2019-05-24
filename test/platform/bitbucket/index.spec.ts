@@ -143,7 +143,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getFileList()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.getFileList();
@@ -153,7 +153,7 @@ describe('platform/bitbucket', () => {
 
   describe('branchExists()', () => {
     describe('getFileList()', () => {
-      it('sends to gitFs', async () => {
+      it('sends to git', async () => {
         await initRepo();
         await mocked(async () => {
           await bitbucket.branchExists('test');
@@ -163,7 +163,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('isBranchStale()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.isBranchStale('test');
@@ -221,7 +221,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getRepoStatus()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.getRepoStatus();
@@ -230,7 +230,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('deleteBranch()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.deleteBranch('test');
@@ -253,7 +253,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('mergeBranch()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.mergeBranch('test');
@@ -262,7 +262,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getBranchLastCommitTime()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.getBranchLastCommitTime('test');
@@ -431,7 +431,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('commitFilesToBranch()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.commitFilesToBranch('test', [], 'message');
@@ -440,7 +440,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getFile()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.getFile('test.file');
@@ -449,7 +449,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getCommitMessages()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.getCommitMessages();
@@ -458,7 +458,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getAllRenovateBranches()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.getAllRenovateBranches('test');
@@ -467,7 +467,7 @@ describe('platform/bitbucket', () => {
   });
 
   describe('getBranchLastCommitTime()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.getBranchLastCommitTime('test');

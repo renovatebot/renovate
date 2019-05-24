@@ -77,9 +77,8 @@ export async function initRepo({
   config.repository = repository;
   const platformConfig: any = {};
 
-  // Always gitFs
   const url = GitStorage.getUrl({
-    gitFs: 'https',
+    protocol: 'https',
     auth: `${opts!.username}:${opts!.password}`,
     hostname: 'bitbucket.org',
     repository,

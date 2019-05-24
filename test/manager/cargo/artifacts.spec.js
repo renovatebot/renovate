@@ -7,7 +7,6 @@ const cargo = require('../../../lib/manager/cargo/artifacts');
 
 const config = {
   localDir: '/tmp/github/some/repo',
-  gitFs: true,
 };
 
 describe('.getArtifacts()', () => {
@@ -46,27 +45,6 @@ describe('.getArtifacts()', () => {
     ];
     expect(
       await cargo.getArtifacts('Cargo.toml', updatedDeps, '', config)
-    ).toBeNull();
-  });
-  it('returns null if gitFs is not enabled', async () => {
-    platform.getFile.mockReturnValueOnce('Current Cargo.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
-    });
-    fs.readFile = jest.fn(() => 'New Cargo.lock');
-    const noGitFsConfig = {
-      localDir: '/tmp/github/some/repo',
-      gitFs: undefined,
-    };
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
-    expect(
-      await cargo.getArtifacts('Cargo.toml', updatedDeps, '', noGitFsConfig)
     ).toBeNull();
   });
   it('returns updated Cargo.lock', async () => {

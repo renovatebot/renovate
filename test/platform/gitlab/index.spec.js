@@ -173,34 +173,34 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getFileList()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await gitlab.getFileList();
     });
   });
   describe('branchExists()', () => {
     describe('getFileList()', () => {
-      it('sends to gitFs', async () => {
+      it('sends to git', async () => {
         await initRepo();
         await gitlab.branchExists();
       });
     });
   });
   describe('getAllRenovateBranches()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await gitlab.getAllRenovateBranches();
     });
   });
 
   describe('getBranchLastCommitTime()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await gitlab.getBranchLastCommitTime();
     });
   });
   describe('isBranchStale()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await gitlab.isBranchStale();
     });
@@ -369,13 +369,13 @@ describe('platform/gitlab', () => {
     });
   });
   describe('mergeBranch()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await gitlab.mergeBranch('branch');
     });
   });
   describe('deleteBranch()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await gitlab.deleteBranch('branch', true);
     });
@@ -747,13 +747,13 @@ These updates have all been created already. Click a checkbox below to force a r
     });
   });
   describe('getFile()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       await initRepo();
       await gitlab.getFile();
     });
   });
   describe('commitFilesToBranch()', () => {
-    it('sends to gitFs', async () => {
+    it('sends to git', async () => {
       expect.assertions(1);
       await initRepo();
       await gitlab.commitFilesToBranch('some-branch', [{}]);
@@ -761,7 +761,7 @@ These updates have all been created already. Click a checkbox below to force a r
     });
   });
   describe('getCommitMessages()', () => {
-    it('passes to gitFs', async () => {
+    it('passes to git', async () => {
       await initRepo();
       await gitlab.getCommitMessages();
     });

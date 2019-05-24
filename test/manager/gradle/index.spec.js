@@ -112,12 +112,7 @@ describe('manager/gradle', () => {
     });
 
     it('should execute gradlew when available', async () => {
-      const configWithgitFs = {
-        gitFs: true,
-        ...config,
-      };
-
-      await manager.extractAllPackageFiles(configWithgitFs, ['build.gradle']);
+      await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       expect(exec.mock.calls[0][0]).toBe(
         'sh gradlew --init-script renovate-plugin.gradle renovate'
@@ -149,18 +144,6 @@ describe('manager/gradle', () => {
       );
     });
 
-    it('should not write files if gitFs is enabled', async () => {
-      const configWithgitFs = {
-        gitFs: true,
-        ...config,
-      };
-
-      const packageFiles = ['build.gradle', 'foo/build.gradle'];
-      await manager.extractAllPackageFiles(configWithgitFs, packageFiles);
-
-      expect(fs.outputFile).toHaveBeenCalledTimes(0);
-    });
-
     it('should configure the renovate report plugin', async () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
@@ -184,7 +167,6 @@ describe('manager/gradle', () => {
     it('should use dcoker even if gradlew is available', async () => {
       const configWithDocker = {
         binarySource: 'docker',
-        gitFs: true,
         ...config,
         gradle: {},
       };

@@ -147,12 +147,6 @@
       "description": "Whether to update (but not create) branches when not scheduled",
       "type": "boolean"
     },
-    "gitFs": {
-      "description": "Use git for FS operations instead of API. GitHub only.",
-      "type": "string",
-      "enum": ["https", "http", "ssh"],
-      "default": null
-    },
     "persistRepoData": {
       "description": "If set to false, repository data will preserved between runs instead of deleted.",
       "type": "boolean",

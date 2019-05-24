@@ -101,7 +101,6 @@ describe('.getArtifacts()', () => {
           ...config,
           binarySource: 'docker',
           postUpdateOptions: ['gomodTidy'],
-          gitFs: 'https',
         })
       ).toBeNull();
     } finally {

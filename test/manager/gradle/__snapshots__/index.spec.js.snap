@@ -79,7 +79,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 1`] = `[Error: registry-failure]`;
+exports[`manager/gradle extractPackageFile should throw registry failure if gradle execution fails 1`] = `[ReferenceError: cgradlewExists is not defined]`;
 
 exports[`manager/gradle extractPackageFile should use repositories only for current project 1`] = `
 Array [

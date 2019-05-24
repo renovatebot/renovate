@@ -85,23 +85,17 @@ export async function initRepo({
   repository,
   endpoint,
   gitPrivateKey,
-  gitFs,
   localDir,
   bbUseDefaultReviewers,
 }: {
   repository: string;
   endpoint: string;
   gitPrivateKey?: string;
-  gitFs?: string;
   localDir: string;
   bbUseDefaultReviewers?: boolean;
 }) {
   logger.debug(
-    `initRepo("${JSON.stringify(
-      { repository, endpoint, gitFs, localDir },
-      null,
-      2
-    )}")`
+    `initRepo("${JSON.stringify({ repository, endpoint, localDir }, null, 2)}")`
   );
   const opts = hostRules.find({ hostType: defaults.hostType, endpoint });
   api.reset();
@@ -115,10 +109,9 @@ export async function initRepo({
     config.bbUseDefaultReviewers = true;
   }
 
-  // Always gitFs
   const { host, pathname } = url.parse(opts!.endpoint!);
   const gitUrl = GitStorage.getUrl({
-    gitFs: opts!.endpoint!.split(':')[0] as any,
+    protocol: opts!.endpoint!.split(':')[0] as any,
     auth: `${opts!.username}:${opts!.password}`,
     host: `${host}${pathname}${
       pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'

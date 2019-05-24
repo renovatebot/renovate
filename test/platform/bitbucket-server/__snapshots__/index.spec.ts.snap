@@ -220,7 +220,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path commitFilesToBranch() sends to gitFs 1`] = `
+exports[`platform/bitbucket-server endpoint with no path commitFilesToBranch() sends to git 1`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo",
@@ -1590,7 +1590,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path commitFilesToBranch() sends to gitFs 1`] = `
+exports[`platform/bitbucket-server endpoint with path commitFilesToBranch() sends to git 1`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo",
