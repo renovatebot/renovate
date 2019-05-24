@@ -71,7 +71,7 @@ describe('datasource/hex', () => {
       expect(res).toBeDefined();
     });
     it('process public repo without auth', async () => {
-      hostRules.find.mockReturnValueOnce(null);
+      hostRules.find.mockReturnValueOnce({});
       got.mockReturnValueOnce({
         body: res1,
       });

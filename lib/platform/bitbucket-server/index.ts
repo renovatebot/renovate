@@ -103,7 +103,10 @@ export async function initRepo({
       2
     )}")`
   );
-  const opts = hostRules.find({ hostType: defaults.hostType, endpoint });
+  const opts = hostRules.find({
+    hostType: defaults.hostType,
+    url: endpoint,
+  });
   api.reset();
 
   const [projectKey, repositorySlug] = repository.split('/');
@@ -116,9 +119,9 @@ export async function initRepo({
   }
 
   // Always gitFs
-  const { host, pathname } = url.parse(opts!.endpoint!);
+  const { host, pathname } = url.parse(endpoint!);
   const gitUrl = GitStorage.getUrl({
-    gitFs: opts!.endpoint!.split(':')[0] as any,
+    gitFs: endpoint.split(':')[0] as any,
     auth: `${opts!.username}:${opts!.password}`,
     host: `${host}${pathname}${
       pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
