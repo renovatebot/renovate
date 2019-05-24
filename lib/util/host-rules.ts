@@ -63,8 +63,7 @@ function matchesDomainName(rule: HostRule, search: HostRuleSearch) {
   return (
     search.url &&
     rule.domainName &&
-    URL.parse(search.url).hostname &&
-    URL.parse(search.url).hostname.endsWith(rule.domainName)
+    URL.parse(search.url).hostname!.endsWith(rule.domainName)
   );
 }
 

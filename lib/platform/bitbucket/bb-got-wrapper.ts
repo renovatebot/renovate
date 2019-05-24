@@ -13,7 +13,6 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
     // TODO: Move to configurable host rules, or use utils/got
     timeout: 60 * 1000,
     json: true,
-    basic: false,
     ...hostRules.find({ hostType: 'bitbucket', url }),
     ...options,
   };
