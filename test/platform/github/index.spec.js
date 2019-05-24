@@ -49,6 +49,10 @@ describe('platform/github', () => {
     'test/platform/github/_fixtures/graphql/pullrequests-closed.json',
     'utf8'
   );
+  const graphqlIssues = fs.readFileSync(
+    'test/platform/github/_fixtures/graphql/issues.json',
+    'utf8'
+  );
 
   function getRepos(...args) {
     // repo info
@@ -716,20 +720,28 @@ describe('platform/github', () => {
       expect(res).toBeNull();
     });
     it('finds issue', async () => {
-      get.mockReturnValueOnce({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-            state: 'open',
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
           },
-          {
-            number: 2,
-            title: 'title-2',
-            state: 'open',
-          },
-        ],
-      });
+        }),
+      }));
       get.mockReturnValueOnce({ body: { body: 'new-content' } });
       const res = await github.findIssue('title-2');
       expect(res).not.toBeNull();
@@ -737,137 +749,193 @@ describe('platform/github', () => {
   });
   describe('ensureIssue()', () => {
     it('creates issue', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-            state: 'open',
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
           },
-          {
-            number: 2,
-            title: 'title-2',
-            state: 'open',
-          },
-        ],
+        }),
       }));
       const res = await github.ensureIssue('new-title', 'new-content');
       expect(res).toEqual('created');
     });
     it('creates issue if not ensuring only once', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-            state: 'closed',
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'closed',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
           },
-          {
-            number: 2,
-            title: 'title-2',
-            state: 'open',
-          },
-        ],
+        }),
       }));
       const res = await github.ensureIssue('title-1', 'new-content');
       expect(res).toBeNull();
     });
     it('does not create issue if ensuring only once', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-            state: 'closed',
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'closed',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
           },
-          {
-            number: 2,
-            title: 'title-2',
-            state: 'open',
-          },
-        ],
+        }),
       }));
       const once = true;
       const res = await github.ensureIssue('title-1', 'new-content', once);
       expect(res).toBeNull();
     });
     it('closes others if ensuring only once', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-            state: 'closed',
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                nodes: [
+                  {
+                    number: 3,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'closed',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
           },
-          {
-            number: 2,
-            title: 'title-2',
-            state: 'open',
-          },
-          {
-            number: 3,
-            title: 'title-1',
-            state: 'open',
-          },
-        ],
+        }),
       }));
       const once = true;
       const res = await github.ensureIssue('title-1', 'new-content', once);
       expect(res).toBeNull();
     });
     it('updates issue', async () => {
-      get.mockReturnValueOnce({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-            state: 'open',
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
           },
-          {
-            number: 2,
-            title: 'title-2',
-            state: 'open',
-          },
-        ],
-      });
+        }),
+      }));
       get.mockReturnValueOnce({ body: { body: 'new-content' } });
       const res = await github.ensureIssue('title-2', 'newer-content');
       expect(res).toEqual('updated');
     });
     it('skips update if unchanged', async () => {
-      get.mockReturnValueOnce({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-            state: 'open',
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
           },
-          {
-            number: 2,
-            title: 'title-2',
-            state: 'open',
-          },
-        ],
-      });
+        }),
+      }));
       get.mockReturnValueOnce({ body: { body: 'newer-content' } });
       const res = await github.ensureIssue('title-2', 'newer-content');
       expect(res).toBeNull();
     });
     it('deletes if duplicate', async () => {
-      get.mockReturnValueOnce({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-            state: 'open',
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
           },
-          {
-            number: 2,
-            title: 'title-1',
-            state: 'open',
-          },
-        ],
-      });
+        }),
+      }));
       get.mockReturnValueOnce({ body: { body: 'newer-content' } });
       const res = await github.ensureIssue('title-1', 'newer-content');
       expect(res).toBeNull();
@@ -875,19 +943,27 @@ describe('platform/github', () => {
   });
   describe('ensureIssueClosing()', () => {
     it('closes issue', async () => {
-      get.mockImplementationOnce(() => ({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-            state: 'open',
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
           },
-          {
-            number: 2,
-            title: 'title-2',
-            state: 'open',
-          },
-        ],
+        }),
       }));
       await github.ensureIssueClosing('title-2');
     });
