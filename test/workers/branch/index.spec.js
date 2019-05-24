@@ -10,6 +10,7 @@ const statusChecks = require('../../../lib/workers/branch/status-checks');
 const automerge = require('../../../lib/workers/branch/automerge');
 const prWorker = require('../../../lib/workers/pr');
 const getUpdated = require('../../../lib/workers/branch/get-updated');
+const { appSlug } = require('../../../lib/config/app-strings');
 
 jest.mock('../../../lib/workers/branch/get-updated');
 jest.mock('../../../lib/workers/branch/schedule');
@@ -18,6 +19,7 @@ jest.mock('../../../lib/workers/branch/parent');
 jest.mock('../../../lib/manager/npm/post-update');
 jest.mock('../../../lib/workers/branch/status-checks');
 jest.mock('../../../lib/workers/branch/automerge');
+jest.mock('../../../lib/workers/branch/commit');
 jest.mock('../../../lib/workers/pr');
 
 describe('workers/branch', () => {
@@ -33,7 +35,7 @@ describe('workers/branch', () => {
         upgrades: [{ depName: 'some-dep-name' }],
       };
       schedule.isScheduledNow.mockReturnValue(true);
-      commit.commitFilesToBranch = jest.fn(() => true);
+      commit.commitFilesToBranch.mockReturnValue(true);
     });
     afterEach(() => {
       platform.ensureComment.mockClear();
@@ -168,6 +170,7 @@ describe('workers/branch', () => {
         updatedArtifacts: [],
       });
       platform.branchExists.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockReturnValueOnce(false);
       expect(await branchWorker.processBranch(config)).toEqual('no-work');
     });
     it('returns if branch automerged', async () => {
@@ -324,6 +327,113 @@ describe('workers/branch', () => {
         throw new Error('some error');
       });
       await branchWorker.processBranch(config);
+    });
+
+    it('closed pr (dry run)', async () => {
+      platform.branchExists.mockReturnValueOnce(true);
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce({ state: 'closed' });
+      expect(
+        await branchWorker.processBranch({ ...config, dryRun: true })
+      ).toEqual('already-existed');
+    });
+
+    it('branch pr no rebase (dry run)', async () => {
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        state: 'open',
+        canRebase: false,
+      });
+      expect(
+        await branchWorker.processBranch({ ...config, dryRun: true })
+      ).toEqual('pr-edited');
+    });
+
+    it('branch pr no schedule lockfile (dry run)', async () => {
+      getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      });
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      });
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: 'open',
+        body: `- [x] <!-- ${appSlug}-rebase -->`,
+        canRebase: false,
+      });
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockReturnValueOnce(false);
+
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dryRun: true,
+          updateType: 'lockFileMaintenance',
+          parentBranch: undefined,
+          updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
+        })
+      ).toEqual('done');
+    });
+
+    it('branch pr no schedule (dry run)', async () => {
+      getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      });
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      });
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: 'open',
+        body: `- [x] <!-- ${appSlug}-rebase -->`,
+        canRebase: false,
+      });
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      prWorker.ensurePr.mockResolvedValueOnce({});
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          dryRun: true,
+          artifactErrors: [{}],
+        })
+      ).toEqual('done');
+    });
+
+    it('branch pr no schedule', async () => {
+      getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [],
+      });
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      });
+      platform.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: 'open',
+        body: `- [x] <!-- ${appSlug}-rebase -->`,
+        canRebase: false,
+      });
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockReturnValueOnce(false);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          updateType: 'lockFileMaintenance',
+          parentBranch: undefined,
+          updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
+        })
+      ).toEqual('done');
     });
   });
 });
