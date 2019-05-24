@@ -5,6 +5,7 @@ import Git from 'simple-git/promise';
 import URL from 'url';
 
 declare module 'fs-extra' {
+  // eslint-disable-next-line import/prefer-default-export
   export function exists(pathLike: string): Promise<boolean>;
 }
 
@@ -24,7 +25,9 @@ interface ILocalConfig extends IStorageConfig {
 
 class Storage {
   private _config: ILocalConfig = {} as any;
+
   private _git: Git.SimpleGit | undefined;
+
   private _cwd: string | undefined;
 
   private async _resetToBranch(branchName: string) {
@@ -49,14 +52,16 @@ class Storage {
 
   async initRepo(args: IStorageConfig) {
     this.cleanRepo();
-    let config: ILocalConfig = (this._config = { ...args } as any);
-    let cwd = (this._cwd = config.localDir);
+    // eslint-disable-next-line no-multi-assign
+    const config: ILocalConfig = (this._config = { ...args } as any);
+    // eslint-disable-next-line no-multi-assign
+    const cwd = (this._cwd = config.localDir);
     this._config.branchExists = {};
     logger.info('Initialising git repository into ' + cwd);
     const gitHead = join(cwd, '.git/HEAD');
     let clone = true;
 
-    //TODO: move to private class scope
+    // TODO: move to private class scope
     async function determineBaseBranch(git: Git.SimpleGit) {
       // see https://stackoverflow.com/a/44750379/1438522
       try {
@@ -82,7 +87,7 @@ class Storage {
         this._git = Git(cwd).silent(true);
         await this._git.raw(['remote', 'set-url', 'origin', config.url]);
         const fetchStart = process.hrtime();
-        await this._git.fetch(['--depth=2']);
+        await this._git.fetch(['--depth=10']);
         await determineBaseBranch(this._git);
         await this._resetToBranch(config.baseBranch);
         await this._cleanLocalBranches();
@@ -220,7 +225,7 @@ class Storage {
     logger.debug('Setting branchPrefix: ' + branchPrefix);
     this._config.branchPrefix = branchPrefix;
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-    await this._git!.fetch(['origin', ref, '--depth=2']);
+    await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
   }
 
   async getFileList(branchName?: string) {
@@ -403,6 +408,10 @@ class Storage {
         '--force': true,
         '-u': true,
       });
+      // Fetch it after create
+      const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
+      await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
+      this._config.branchExists[branchName] = true;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error commiting files');
       if (err.message.includes('.github/main.workflow')) {
@@ -417,6 +426,7 @@ class Storage {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   cleanRepo() {}
 
   static getUrl({

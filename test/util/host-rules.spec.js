@@ -5,22 +5,22 @@ describe('util/host-rules', () => {
     clear();
   });
   describe('update()', () => {
-    it('throws if no platform ', () => {
+    it('throws if no hostType ', () => {
       expect(() => update({})).toThrow(
-        'Failed to set configuration: no platform or endpoint specified'
+        'Failed to set configuration: no hostType or endpoint specified'
       );
     });
     it('throws if no endpoint ', () => {
-      expect(() => update({ platform: 'azure' })).toThrow(
-        `Failed to configure platform 'azure': no endpoint defined`
+      expect(() => update({ hostType: 'azure' })).toThrow(
+        `Failed to configure hostType 'azure': no endpoint defined`
       );
     });
 
     it('throws if invalid endpoint ', () => {
       expect(() =>
-        update({ platform: 'azure', endpoint: '/some/path' })
+        update({ hostType: 'azure', endpoint: '/some/path' })
       ).toThrow(
-        `Failed to configure platform 'azure': no host for endpoint '/some/path'`
+        `Failed to configure hostType 'azure': no host for endpoint '/some/path'`
       );
     });
     it('supports endpoint-only', () => {
@@ -31,73 +31,44 @@ describe('util/host-rules', () => {
       });
       expect(find({ host: 'some.endpoint' })).toMatchSnapshot();
     });
-    it('uses default endpoint', () => {
-      update({
-        platform: 'github',
-        token: 'token',
-        other: 'data',
-      });
-      expect(find({ platform: 'github' })).toMatchSnapshot();
-      expect(
-        find({ platform: 'github', host: 'api.github.com' })
-      ).toMatchSnapshot();
-      expect(find({ platform: 'github', host: 'example.com' })).toBeNull();
-    });
   });
   describe('find()', () => {
-    it('allows overrides', () => {
-      update({
-        platform: 'github',
-        endpoint: 'endpoint',
-        token: 'token',
-        other: 'data',
-      });
-      const overrides = {
-        token: 'secret',
-        other: null,
-        foo: undefined,
-      };
-      expect(find({ platform: 'github' }, overrides)).toMatchSnapshot();
-      expect(
-        find({ platform: 'github', host: 'api.github.com' }, overrides)
-      ).toMatchSnapshot();
-      expect(
-        find({ platform: 'github', host: 'example.com' }, overrides)
-      ).toMatchSnapshot();
-    });
     it('needs exact host matches', () => {
       update({
-        platform: 'nuget',
+        hostType: 'nuget',
         endpoint: 'endpoint',
         host: 'nuget.org',
         username: 'root',
         password: 'p4$$w0rd',
       });
-      expect(find({ platform: 'nuget', host: 'nuget.org' })).toMatchSnapshot();
+      expect(find({ hostType: 'nuget' })).toMatchSnapshot();
+      expect(find({ hostType: 'nuget', host: 'nuget.org' })).toMatchSnapshot();
       expect(
-        find({ platform: 'nuget', host: 'not.nuget.org' })
+        find({ hostType: 'nuget', host: 'not.nuget.org' })
       ).toMatchSnapshot();
       expect(
-        find({ platform: 'nuget', host: 'not-nuget.org' })
+        find({ hostType: 'nuget', host: 'not-nuget.org' })
       ).toMatchSnapshot();
     });
     it('matches on endpoint', () => {
       update({
-        platform: 'nuget',
+        hostType: 'nuget',
         endpoint: 'https://nuget.local/api',
+        token: 'abc',
       });
       expect(
-        find({ platform: 'nuget', endpoint: 'https://nuget.local/api' })
+        find({ hostType: 'nuget', endpoint: 'https://nuget.local/api' })
       ).toMatchSnapshot();
     });
     it('matches on endpoint subresource', () => {
       update({
-        platform: 'nuget',
+        hostType: 'nuget',
         endpoint: 'https://nuget.local/api',
+        token: 'abc',
       });
       expect(
         find({
-          platform: 'nuget',
+          hostType: 'nuget',
           endpoint: 'https://nuget.local/api/sub-resource',
         })
       ).toMatchSnapshot();

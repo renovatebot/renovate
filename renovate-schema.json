@@ -1159,7 +1159,20 @@
     },
     "hostRules": {
       "description": "Host rules/configuration including credentials",
-      "type": "array"
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "hostType": {
+                "description": "hostType for a package rule. Can be a platform name or a datasource name",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
     },
     "prBodyDefinitions": {
       "description": "Table column definitions for use in PR tables",

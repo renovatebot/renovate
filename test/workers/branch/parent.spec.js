@@ -75,17 +75,6 @@ describe('workers/branch/parent', () => {
       const res = await getParentBranch(config);
       expect(res.parentBranch).toBeUndefined();
     });
-    it('returns undefined if unmergeable and can rebase (gitlab)', async () => {
-      config.isGitLab = true;
-      platform.branchExists.mockReturnValue(true);
-      platform.getBranchPr.mockReturnValue({
-        isConflicted: true,
-        canRebase: true,
-      });
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBeUndefined();
-      expect(platform.deleteBranch).toHaveBeenCalledTimes(1);
-    });
     it('returns branchName if automerge branch and not stale', async () => {
       config.automerge = true;
       config.automergeType = 'branch';

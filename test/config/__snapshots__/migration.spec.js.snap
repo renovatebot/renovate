@@ -121,6 +121,7 @@ Object {
   "patch": Object {
     "automerge": true,
   },
+  "platform": "github",
   "postUpdateOptions": Array [
     "gomodTidy",
   ],

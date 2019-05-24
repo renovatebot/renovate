@@ -520,6 +520,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -679,6 +680,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -699,6 +701,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -719,6 +722,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -786,6 +790,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -826,6 +831,7 @@ Object {
   "canRebase": false,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
+  "isStale": false,
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
@@ -910,11 +916,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path initRepo() no author 1`] = `
+exports[`platform/bitbucket-server endpoint with no path init function should init 1`] = `
 Object {
-  "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
+  "endpoint": "https://stash.renovatebot.com/",
 }
 `;
 
@@ -1886,6 +1890,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2045,6 +2050,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2065,6 +2071,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2085,6 +2092,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2152,6 +2160,7 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
+  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2192,6 +2201,7 @@ Object {
   "canRebase": false,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
+  "isStale": false,
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
@@ -2276,11 +2286,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path initRepo() no author 1`] = `
+exports[`platform/bitbucket-server endpoint with path init function should init 1`] = `
 Object {
-  "isFork": false,
-  "privateRepo": undefined,
-  "repoFullName": "repo",
+  "endpoint": "https://stash.renovatebot.com/",
 }
 `;
 

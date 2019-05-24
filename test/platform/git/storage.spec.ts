@@ -147,7 +147,7 @@ describe('platform/git/storage', () => {
       expect(merged.all).toContain('renovate/future_branch');
     });
     it('should throw if branch merge throws', async () => {
-      await expect(git.mergeBranch('not_found')).rejects.toMatchSnapshot();
+      await expect(git.mergeBranch('not_found')).rejects.toThrow();
     });
   });
   describe('deleteBranch(branchName)', () => {
@@ -289,6 +289,36 @@ describe('platform/git/storage', () => {
       const msg = await git.getCommitMessages();
       expect(msg).toMatchSnapshot();
       expect(msg).toContain('past message2');
+    });
+
+    it('should set branch prefix', async () => {
+      const repo = Git(base.path).silent(true);
+      await repo.checkoutBranch('renovate/test', 'master');
+      await fs.writeFile(base.path + '/test', 'lorem ipsum');
+      await repo.add(['test']);
+      await repo.commit('past message2');
+      await repo.checkout('master');
+
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: base.path,
+      });
+
+      await git.setBranchPrefix('renovate/');
+      expect(await git.branchExists('renovate/test')).toBe(true);
+      const cid = await git.getBranchCommit('renovate/test');
+
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: base.path,
+      });
+
+      await repo.checkout('renovate/test');
+      await repo.commit('past message3', ['--amend']);
+
+      await git.setBranchPrefix('renovate/');
+      expect(await git.branchExists('renovate/test')).toBe(true);
+      expect(await git.getBranchCommit('renovate/test')).not.toEqual(cid);
     });
   });
 });

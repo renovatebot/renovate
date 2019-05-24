@@ -15,6 +15,7 @@ FROM amd64/ubuntu:18.04@sha256:b36667c98cf8f68d4b7f1fb8e01f742c2ed26b5f0c965a788
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
+LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 
 WORKDIR /usr/src/app/
 

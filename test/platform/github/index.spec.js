@@ -3,14 +3,17 @@ const fs = require('fs-extra');
 describe('platform/github', () => {
   let github;
   let get;
+  let hostRules;
   let GitStorage;
   beforeEach(() => {
     // reset module
     jest.resetModules();
     jest.mock('delay');
     jest.mock('../../../lib/platform/github/gh-got-wrapper');
+    jest.mock('../../../lib/util/host-rules');
     get = require('../../../lib/platform/github/gh-got-wrapper');
     github = require('../../../lib/platform/github');
+    hostRules = require('../../../lib/util/host-rules');
     jest.mock('../../../lib/platform/git/storage');
     GitStorage = require('../../../lib/platform/git/storage');
     GitStorage.mockImplementation(() => ({
@@ -33,6 +36,11 @@ describe('platform/github', () => {
       ),
     }));
     delete global.gitAuthor;
+    hostRules.find.mockReturnValue({
+      hostType: 'github',
+      endpoint: 'https://api.github.com',
+      token: 'abc123',
+    });
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
@@ -59,19 +67,40 @@ describe('platform/github', () => {
     return github.getRepos(...args);
   }
 
+  describe('initPlatform()', () => {
+    it('should throw if no token', async () => {
+      await expect(github.initPlatform({})).rejects.toThrow();
+    });
+    it('should throw if user failure', async () => {
+      get.mockImplementationOnce(() => ({}));
+      await expect(github.initPlatform({ token: 'abc123' })).rejects.toThrow();
+    });
+    it('should support default endpoint', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          login: 'renovate-bot',
+        },
+      }));
+      expect(await github.initPlatform({ token: 'abc123' })).toMatchSnapshot();
+    });
+    it('should support custom endpoint', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          login: 'renovate-bot',
+        },
+      }));
+      expect(
+        await github.initPlatform({
+          endpoint: 'https://ghe.renovatebot.com',
+          token: 'abc123',
+        })
+      ).toMatchSnapshot();
+    });
+  });
+
   describe('getRepos', () => {
-    it('should throw an error if no token is provided', async () => {
-      await expect(github.getRepos()).rejects.toThrow(
-        Error('No token found for getRepos')
-      );
-    });
     it('should return an array of repos', async () => {
-      const repos = await getRepos('sometoken');
-      expect(get.mock.calls).toMatchSnapshot();
-      expect(repos).toMatchSnapshot();
-    });
-    it('should support a custom endpoint', async () => {
-      const repos = await getRepos('sometoken', 'someendpoint');
+      const repos = await getRepos();
       expect(get.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
     });
@@ -101,31 +130,6 @@ describe('platform/github', () => {
   }
 
   describe('initRepo', () => {
-    [
-      [undefined, 'mytoken', undefined],
-      [undefined, 'mytoken', 'https://my.custom.endpoint/'],
-      ['myenvtoken', 'myenvtoken', undefined],
-    ].forEach(([envToken, token, endpoint], i) => {
-      it(`should initialise the config for the repo - ${i}`, async () => {
-        if (envToken !== undefined) {
-          process.env.RENOVATE_TOKEN = envToken;
-        }
-        const config = await initRepo({
-          repository: 'some/repo',
-          token,
-          endpoint,
-        });
-        expect(get.mock.calls).toMatchSnapshot();
-        expect(config).toMatchSnapshot();
-      });
-    });
-    it('should throw an error if no token is provided', async () => {
-      await expect(
-        github.initRepo({ repository: 'some/repo' })
-      ).rejects.toThrow(
-        Error('No token found for GitHub repository some/repo')
-      );
-    });
     it('should rebase', async () => {
       function squashInitRepo(...args) {
         // repo info
@@ -144,7 +148,6 @@ describe('platform/github', () => {
       }
       const config = await squashInitRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       expect(config).toMatchSnapshot();
     });
@@ -182,8 +185,6 @@ describe('platform/github', () => {
       }
       const config = await forkInitRepo({
         repository: 'some/repo',
-        token: 'token',
-        endpoint: 'http://1.2.3.4',
         forkMode: true,
       });
       expect(config).toMatchSnapshot();
@@ -226,8 +227,6 @@ describe('platform/github', () => {
       }
       const config = await forkInitRepo({
         repository: 'some/repo',
-        token: 'token',
-        endpoint: 'http://1.2.3.4',
         forkMode: true,
       });
       expect(config).toMatchSnapshot();
@@ -250,7 +249,6 @@ describe('platform/github', () => {
       }
       const config = await mergeInitRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       expect(config).toMatchSnapshot();
     });
@@ -272,7 +270,6 @@ describe('platform/github', () => {
       }
       const config = await mergeInitRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       expect(config).toMatchSnapshot();
     });
@@ -291,7 +288,6 @@ describe('platform/github', () => {
       }
       const config = await mergeInitRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       expect(config).toMatchSnapshot();
     });
@@ -305,7 +301,6 @@ describe('platform/github', () => {
       await expect(
         github.initRepo({
           repository: 'some/repo',
-          token: 'token',
         })
       ).rejects.toThrow();
     });
@@ -318,7 +313,6 @@ describe('platform/github', () => {
       await expect(
         github.initRepo({
           repository: 'some/repo',
-          token: 'token',
         })
       ).rejects.toThrow();
     });
@@ -384,7 +378,6 @@ describe('platform/github', () => {
     it('should return null if no PR exists', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: [],
@@ -395,7 +388,6 @@ describe('platform/github', () => {
     it('should return the PR object', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: [{ number: 91, head: {} }],
@@ -420,7 +412,6 @@ describe('platform/github', () => {
     it('returns success if requiredStatusChecks null', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       const res = await github.getBranchStatus('somebranch', null);
       expect(res).toEqual('success');
@@ -428,7 +419,6 @@ describe('platform/github', () => {
     it('return failed if unsupported requiredStatusChecks', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       const res = await github.getBranchStatus('somebranch', ['foo']);
       expect(res).toEqual('failed');
@@ -436,7 +426,6 @@ describe('platform/github', () => {
     it('should pass through success', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -449,7 +438,6 @@ describe('platform/github', () => {
     it('should pass through failed', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -462,7 +450,6 @@ describe('platform/github', () => {
     it('should fail if a check run has failed', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -495,7 +482,6 @@ describe('platform/github', () => {
     it('should suceed if no status and all passed check runs', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -528,7 +514,6 @@ describe('platform/github', () => {
     it('should fail if a check run has failed', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -589,7 +574,6 @@ describe('platform/github', () => {
     it('returns null', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: [
@@ -615,7 +599,6 @@ describe('platform/github', () => {
     it('returns if already set', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: [
@@ -637,7 +620,6 @@ describe('platform/github', () => {
     it('sets branch status', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: [
@@ -871,7 +853,6 @@ describe('platform/github', () => {
     it('should delete the label', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       await github.deleteLabel(42, 'rebase');
       expect(get.delete.mock.calls).toMatchSnapshot();
@@ -881,7 +862,6 @@ describe('platform/github', () => {
     it('should add the given assignees to the issue', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       await github.addAssignees(42, ['someuser', 'someotheruser']);
       expect(get.post.mock.calls).toMatchSnapshot();
@@ -891,7 +871,6 @@ describe('platform/github', () => {
     it('should add the given reviewers to the PR', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.post.mockReturnValueOnce({});
       await github.addReviewers(42, ['someuser', 'someotheruser']);
@@ -902,7 +881,6 @@ describe('platform/github', () => {
     it('add comment if not found', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockReturnValueOnce({ body: [] });
       await github.ensureComment(42, 'some-subject', 'some\ncontent');
@@ -912,7 +890,6 @@ describe('platform/github', () => {
     it('adds comment if found in closed PR list', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.post.mockImplementationOnce(() => ({
         body: graphqlClosedPullrequests,
@@ -924,7 +901,6 @@ describe('platform/github', () => {
     it('add updates comment if necessary', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
@@ -937,7 +913,6 @@ describe('platform/github', () => {
     it('skips comment', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockReturnValueOnce({
         body: [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }],
@@ -949,7 +924,6 @@ describe('platform/github', () => {
     it('handles comment with no description', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockReturnValueOnce({ body: [{ id: 1234, body: '!merge' }] });
       await github.ensureComment(42, null, '!merge');
@@ -1074,7 +1048,6 @@ describe('platform/github', () => {
       };
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.post.mockImplementationOnce(() => ({
         body: graphqlOpenPullRequests,
@@ -1094,7 +1067,6 @@ describe('platform/github', () => {
     it('should return PR from closed graphql result', async () => {
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.post.mockImplementationOnce(() => ({
         body: graphqlOpenPullRequests,
@@ -1266,7 +1238,6 @@ describe('platform/github', () => {
       };
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -1307,7 +1278,6 @@ describe('platform/github', () => {
       };
       await initRepo({
         repository: 'some/repo',
-        token: 'token',
       });
       get.mockImplementationOnce(() => ({
         body: {
@@ -1410,10 +1380,22 @@ describe('platform/github', () => {
       expect(github.getPrBody(input)).toMatchSnapshot();
     });
     it('returns not-updated pr body for GHE', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          login: 'renovate-bot',
+        },
+      }));
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: 'abc123',
+      });
+      hostRules.find.mockReturnValue({
+        hostType: 'github',
+        endpoint: 'https://github.company.com',
+        token: 'abc123',
+      });
       await initRepo({
         repository: 'some/repo',
-        token: 'some-token',
-        endpoint: 'https://github.company.com/api/v3/',
       });
       const input =
         'https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';

@@ -21,41 +21,6 @@ describe('config/index', () => {
       jest.mock('delay');
       require('delay').mockImplementation(() => Promise.resolve());
     });
-    it('throws for invalid platform', async () => {
-      const env = {};
-      defaultArgv.push('--platform=foo');
-      await expect(configParser.parseConfigs(env, defaultArgv)).rejects.toThrow(
-        Error('Unsupported platform: foo.')
-      );
-    });
-    it('throws for no GitHub token', async () => {
-      const env = { RENOVATE_CONFIG_FILE: '/tmp/does-not-exist' };
-      await expect(configParser.parseConfigs(env, defaultArgv)).rejects.toThrow(
-        Error(
-          'No authentication found for platform https://api.github.com/ (github)'
-        )
-      );
-    });
-    it('throws for no GitLab token', async () => {
-      const env = {
-        RENOVATE_CONFIG_FILE: '/tmp/does-not-exist',
-        RENOVATE_PLATFORM: 'gitlab',
-      };
-      await expect(configParser.parseConfigs(env, defaultArgv)).rejects.toThrow(
-        Error(
-          'No authentication found for platform https://gitlab.com/api/v4/ (gitlab)'
-        )
-      );
-    });
-    it('throws for no Azure DevOps token', async () => {
-      const env = {
-        RENOVATE_CONFIG_FILE: '/tmp/does-not-exist',
-        RENOVATE_PLATFORM: 'azure',
-      };
-      await expect(configParser.parseConfigs(env, defaultArgv)).rejects.toThrow(
-        Error('No authentication found for platform undefined (azure)')
-      );
-    });
     it('supports token in env', async () => {
       const env = { RENOVATE_TOKEN: 'abc' };
       await configParser.parseConfigs(env, defaultArgv);

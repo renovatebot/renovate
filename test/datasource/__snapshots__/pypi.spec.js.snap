@@ -180,8 +180,8 @@ Array [
       "slashes": true,
     },
     Object {
+      "hostType": "pypi",
       "json": true,
-      "platform": "pypi",
     },
   ],
 ]
@@ -205,8 +205,8 @@ Array [
       "slashes": true,
     },
     Object {
+      "hostType": "pypi",
       "json": true,
-      "platform": "pypi",
     },
   ],
 ]
@@ -230,8 +230,8 @@ Array [
       "slashes": true,
     },
     Object {
+      "hostType": "pypi",
       "json": true,
-      "platform": "pypi",
     },
   ],
   Array [
@@ -250,8 +250,8 @@ Array [
       "slashes": true,
     },
     Object {
+      "hostType": "pypi",
       "json": true,
-      "platform": "pypi",
     },
   ],
 ]
