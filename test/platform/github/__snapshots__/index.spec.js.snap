@@ -223,6 +223,7 @@ Object {
   },
   "displayNumber": "Pull Request #1",
   "mergeable": true,
+  "merged_at": "sometime",
   "number": 1,
   "state": "closed",
 }
