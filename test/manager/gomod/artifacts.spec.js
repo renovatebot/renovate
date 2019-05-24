@@ -27,6 +27,10 @@ const config = {
 describe('.getArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    exec.mockResolvedValue({
+      stdout: '',
+      stderror: '',
+    });
   });
   it('returns if no go.sum found', async () => {
     expect(await gomod.getArtifacts('go.mod', [], gomod1, config)).toBeNull();
@@ -81,6 +85,29 @@ describe('.getArtifacts()', () => {
         binarySource: 'docker',
       })
     ).not.toBeNull();
+  });
+  it('supports docker mode with credentials, appMode and trustLevel=high', async () => {
+    hostRules.find.mockReturnValue({
+      token: 'some-token',
+    });
+    platform.getFile.mockResolvedValueOnce('Current go.sum');
+    platform.getRepoStatus.mockResolvedValue({ modified: '' });
+    fs.readFile.mockResolvedValueOnce('New go.sum');
+    try {
+      global.appMode = true;
+      global.trustLevel = 'high';
+      expect(
+        await gomod.getArtifacts('go.mod', [], gomod1, {
+          ...config,
+          binarySource: 'docker',
+          postUpdateOptions: ['gomodTidy'],
+          gitFs: 'https',
+        })
+      ).toBeNull();
+    } finally {
+      delete global.appMode;
+      delete global.trustLevel;
+    }
   });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current go.sum');

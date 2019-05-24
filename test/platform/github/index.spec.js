@@ -285,7 +285,23 @@ describe('platform/github', () => {
         github.initRepo({
           repository: 'some/repo',
         })
-      ).rejects.toThrow();
+      ).rejects.toThrow('not-found');
+    });
+    it('should throw error if renamed', async () => {
+      get.mockReturnValueOnce({
+        body: {
+          fork: true,
+          full_name: 'some/other',
+          owner: {},
+        },
+      });
+      await expect(
+        github.initRepo({
+          gitFs: 'https',
+          includeForks: true,
+          repository: 'some/repo',
+        })
+      ).rejects.toThrow('renamed');
     });
   });
   describe('getRepoForceRebase', () => {
@@ -367,6 +383,28 @@ describe('platform/github', () => {
       await github.setBaseBranch('some-branch');
       expect(get.mock.calls).toMatchSnapshot();
     });
+    it('sets the default base branch', async () => {
+      await initRepo({
+        repository: 'some/repo',
+        defaultBranch: 'some-branch',
+      });
+      get.mockImplementationOnce(() => ({
+        body: {
+          truncated: true,
+          tree: [],
+        },
+      }));
+      // getBranchCommit
+      get.mockImplementationOnce(() => ({
+        body: {
+          object: {
+            sha: '1238',
+          },
+        },
+      }));
+      await github.setBaseBranch();
+      expect(get.mock.calls).toMatchSnapshot();
+    });
   });
   describe('getFileList', () => {
     beforeEach(async () => {
@@ -419,6 +457,15 @@ describe('platform/github', () => {
       }));
       const files = await github.getFileList('npm-branch');
       expect(files).toMatchSnapshot();
+    });
+    it('uses default branch', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          truncated: true,
+          tree: [],
+        },
+      }));
+      expect(await github.getFileList()).toHaveLength(0);
     });
   });
   describe('branchExists(branchName)', () => {
@@ -523,6 +570,27 @@ describe('platform/github', () => {
       expect(await github.isBranchStale('thebranchname')).toBe(true);
     });
   });
+  describe('getPrList()', () => {
+    beforeEach(async () => {
+      await initRepo({
+        repository: 'some/repo',
+      });
+    });
+    it('should return PRs', async () => {
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            number: 91,
+            head: { ref: 'somebranch', repo: {} },
+            state: 'closed',
+            merged_at: '12345',
+          },
+        ],
+      }));
+      expect(await github.getPrList()).toMatchSnapshot();
+      expect(get.mock.calls).toMatchSnapshot();
+    });
+  });
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       await initRepo({
@@ -539,7 +607,7 @@ describe('platform/github', () => {
         repository: 'some/repo',
       });
       get.mockImplementationOnce(() => ({
-        body: [{ number: 91, head: {} }],
+        body: [{ number: 91, head: { ref: 'somebranch' }, state: 'open' }],
       }));
       get.mockImplementationOnce(() => ({
         body: {
@@ -550,8 +618,11 @@ describe('platform/github', () => {
           base: {
             sha: '1234',
           },
+          head: { ref: 'somebranch' },
+          state: 'open',
         },
       }));
+      get.mockResolvedValue({ body: { object: { sha: '12345' } } });
       const pr = await github.getBranchPr('somebranch');
       expect(get.mock.calls).toMatchSnapshot();
       expect(pr).toMatchSnapshot();
@@ -1320,6 +1391,7 @@ describe('platform/github', () => {
         'some-branch',
         'The Title',
         'Hello world',
+        null,
         true
       );
       expect(pr).toMatchSnapshot();

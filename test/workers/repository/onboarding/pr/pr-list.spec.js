@@ -38,6 +38,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
       const branches = [
         {
           prTitle: 'Pin dependencies',
+          baseBranch: 'some-other',
           branchName: 'renovate/pin-dependencies',
           upgrades: [
             {
@@ -64,6 +65,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
               currentValue: '^1.0.0',
               depType: 'devDependencies',
               newValue: '2.0.1',
+              isLockfileUpdate: true,
             },
           ],
         },

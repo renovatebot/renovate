@@ -45,6 +45,9 @@ describe('api/npm', () => {
     };
     return global.renovateCache.rmAll();
   });
+  afterEach(() => {
+    delete process.env.RENOVATE_CACHE_NPM_MINUTES;
+  });
   it('should return null for no versions', async () => {
     const missingVersions = { ...npmResponse };
     missingVersions.versions = {};
@@ -387,6 +390,7 @@ describe('api/npm', () => {
       .get('/foobar')
       .reply(200, npmResponse);
     process.env.REGISTRY = 'https://registry.from-env.com';
+    process.env.RENOVATE_CACHE_NPM_MINUTES = '15';
     global.trustLevel = 'high';
     // eslint-disable-next-line no-template-curly-in-string
     const npmrc = 'registry=${REGISTRY}';

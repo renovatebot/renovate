@@ -8,6 +8,7 @@ const nextJson = require('../../../../config/npm/_fixtures/next.json');
 const vueJson = require('../../../../config/npm/_fixtures/vue.json');
 const typescriptJson = require('../../../../config/npm/_fixtures/typescript.json');
 const docker = require('../../../../../lib/datasource/docker');
+const defaults = require('../../../../../lib/config/defaults');
 
 jest.mock('../../../../../lib/datasource/docker');
 
@@ -17,7 +18,7 @@ let config;
 
 describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
-    config = { ...require('../../../../../lib/config/defaults').getConfig() };
+    config = { ...defaults.getConfig() };
     config.manager = 'npm';
     config.versionScheme = 'npm';
     config.rangeStrategy = 'replace';
@@ -1031,6 +1032,25 @@ describe('workers/repository/process/lookup', () => {
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
       expect(res.updates[0].toVersion).toEqual('1.4.0');
+    });
+    it('is deprecated', async () => {
+      config.currentValue = '1.3.0';
+      config.depName = 'q3';
+      config.datasource = 'npm';
+      const returnJson = {
+        ...JSON.parse(JSON.stringify(qJson)),
+        name: 'q3',
+        deprecated: true,
+        repository: { url: null, directory: 'test' },
+      };
+
+      nock('https://registry.npmjs.org')
+        .get('/q3')
+        .reply(200, returnJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(3);
+      expect(res.updates[0].toVersion).toEqual('1.4.1');
     });
     it('skips unsupported values', async () => {
       config.currentValue = 'alpine';
