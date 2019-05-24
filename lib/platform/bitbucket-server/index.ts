@@ -83,23 +83,21 @@ export function cleanRepo() {
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
-  endpoint,
   gitPrivateKey,
   localDir,
   bbUseDefaultReviewers,
 }: {
   repository: string;
-  endpoint: string;
   gitPrivateKey?: string;
   localDir: string;
   bbUseDefaultReviewers?: boolean;
 }) {
   logger.debug(
-    `initRepo("${JSON.stringify({ repository, endpoint, localDir }, null, 2)}")`
+    `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
   const opts = hostRules.find({
     hostType: defaults.hostType,
-    url: endpoint,
+    url: defaults.endpoint,
   });
   api.reset();
 
@@ -112,9 +110,9 @@ export async function initRepo({
     config.bbUseDefaultReviewers = true;
   }
 
-  const { host, pathname } = url.parse(opts!.endpoint!);
+  const { host, pathname } = url.parse(defaults.endpoint!);
   const gitUrl = GitStorage.getUrl({
-    gitFs: endpoint!.split(':')[0] as any,
+    protocol: defaults.endpoint!.split(':')[0] as any,
     auth: `${opts!.username}:${opts!.password}`,
     host: `${host}${pathname}${
       pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
