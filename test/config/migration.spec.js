@@ -7,6 +7,14 @@ describe('config/migration', () => {
       const config = {
         endpoints: [{}],
         enabled: true,
+        platform: 'github',
+        hostRules: [
+          {
+            platform: 'docker',
+            username: 'some-username',
+            password: 'some-password',
+          },
+        ],
         extends: [':js-app', 'config:library'],
         maintainYarnLock: true,
         onboarding: 'false',
@@ -99,6 +107,7 @@ describe('config/migration', () => {
       expect(migratedConfig.depTypes).not.toBeDefined();
       expect(migratedConfig.automerge).toEqual(false);
       expect(migratedConfig.packageRules).toHaveLength(7);
+      expect(migratedConfig.hostRules).toHaveLength(1);
     });
     it('migrates before and after schedules', () => {
       const config = {

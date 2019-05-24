@@ -6,8 +6,6 @@ import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 
-const platform = 'bitbucket-server';
-
 interface BbsConfig {
   baseBranch: string;
   bbUseDefaultReviewers: boolean;
@@ -25,7 +23,7 @@ interface BbsConfig {
 let config: BbsConfig = {} as any;
 
 const defaults: any = {
-  platform: 'bitbucket-server',
+  hostType: 'bitbucket-server',
 };
 
 export function initPlatform({
@@ -105,7 +103,7 @@ export async function initRepo({
       2
     )}")`
   );
-  const opts = hostRules.find({ platform }, { endpoint });
+  const opts = hostRules.find({ hostType: defaults.hostType, endpoint });
   api.reset();
 
   const [projectKey, repositorySlug] = repository.split('/');

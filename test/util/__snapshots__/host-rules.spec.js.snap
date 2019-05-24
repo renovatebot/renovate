@@ -1,30 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`util/host-rules find() allows overrides 1`] = `
-Object {
-  "endpoint": "endpoint/",
-  "other": "data",
-  "platform": "github",
-  "token": "secret",
-}
-`;
-
-exports[`util/host-rules find() allows overrides 2`] = `
-Object {
-  "token": "secret",
-}
-`;
-
-exports[`util/host-rules find() allows overrides 3`] = `
-Object {
-  "token": "secret",
-}
-`;
-
 exports[`util/host-rules find() matches on endpoint 1`] = `
 Object {
   "endpoint": "https://nuget.local/api/",
-  "platform": "nuget",
+  "hostType": "nuget",
   "token": "abc",
 }
 `;
@@ -32,7 +11,7 @@ Object {
 exports[`util/host-rules find() matches on endpoint subresource 1`] = `
 Object {
   "endpoint": "https://nuget.local/api/",
-  "platform": "nuget",
+  "hostType": "nuget",
   "token": "abc",
 }
 `;
@@ -41,15 +20,25 @@ exports[`util/host-rules find() needs exact host matches 1`] = `
 Object {
   "endpoint": "endpoint/",
   "host": "nuget.org",
+  "hostType": "nuget",
   "password": "p4$$w0rd",
-  "platform": "nuget",
   "username": "root",
 }
 `;
 
-exports[`util/host-rules find() needs exact host matches 2`] = `null`;
+exports[`util/host-rules find() needs exact host matches 2`] = `
+Object {
+  "endpoint": "endpoint/",
+  "host": "nuget.org",
+  "hostType": "nuget",
+  "password": "p4$$w0rd",
+  "username": "root",
+}
+`;
 
 exports[`util/host-rules find() needs exact host matches 3`] = `null`;
+
+exports[`util/host-rules find() needs exact host matches 4`] = `null`;
 
 exports[`util/host-rules update() supports endpoint-only 1`] = `
 Object {

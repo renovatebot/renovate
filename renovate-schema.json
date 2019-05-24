@@ -1095,6 +1095,24 @@
       },
       "$ref": "#"
     },
+    "leiningen": {
+      "description": "Configuration object for renovating Clojure leiningen projects",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)project\\.clj$"],
+        "versionScheme": "maven"
+      },
+      "$ref": "#"
+    },
+    "deps-edn": {
+      "description": "Configuration object for renovating Clojure CLI-based projects (deps.edn)",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)deps\\.edn$"],
+        "versionScheme": "maven"
+      },
+      "$ref": "#"
+    },
     "compatibility": {
       "description": "Configuration object for compatibility",
       "type": "object",
@@ -1169,7 +1187,20 @@
     },
     "hostRules": {
       "description": "Host rules/configuration including credentials",
-      "type": "array"
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "hostType": {
+                "description": "hostType for a package rule. Can be a platform name or a datasource name",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
     },
     "prBodyDefinitions": {
       "description": "Table column definitions for use in PR tables",

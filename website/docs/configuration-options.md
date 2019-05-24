@@ -179,6 +179,8 @@ This is used to manually restrict which versions are possible to upgrade to base
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
+## deps-edn
+
 ## description
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
@@ -325,13 +327,15 @@ Example for configuring `docker` auth:
 {
   "hostRules": [
     {
-      "platform": "docker",
+      "hostType": "docker",
       "username": "<some-username>",
       "password": "<some-password>"
     }
   ]
 }
 ```
+
+### hostType
 
 ## ignoreDeprecated
 
@@ -435,6 +439,8 @@ Add an array of 1 or more strings to `labels` and Renovate will apply these labe
 ## lazyGrouping
 
 The default behaviour for Renovate is to only use group names for branches and PRs when there's more than one dependency in a group. For example you may have defined a dependency group calls "All eslint packages" with a `packagePattern` of `^eslint`, but if the only upgrade available at the time is `eslint-config-airbnb` then it makes more sense for the PR to be named "Upgrade eslint-config-airbnb to version 2.1.4" than to name it "Upgrade All eslint packages". If ever this behaviour is undesirable then you can override it by setting this option to `false`.
+
+## leiningen
 
 ## lockFileMaintenance
 

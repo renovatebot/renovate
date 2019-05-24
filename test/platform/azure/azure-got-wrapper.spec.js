@@ -15,7 +15,7 @@ describe('platform/azure/azure-got-wrapper', () => {
     });
     it('should set token and endpoint', async () => {
       hostRules.update({
-        platform: 'azure',
+        hostType: 'azure',
         token: 'token',
         endpoint: 'https://dev.azure.com/renovate12345',
       });

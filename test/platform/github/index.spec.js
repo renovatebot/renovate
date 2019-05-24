@@ -15,7 +15,7 @@ describe('platform/github', () => {
     hostRules = require('../../../lib/util/host-rules');
     delete global.gitAuthor;
     hostRules.find.mockReturnValue({
-      platform: 'github',
+      hostType: 'github',
       endpoint: 'https://api.github.com',
       token: 'abc123',
     });
@@ -1672,8 +1672,17 @@ describe('platform/github', () => {
       expect(github.getPrBody(input)).toMatchSnapshot();
     });
     it('returns not-updated pr body for GHE', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          login: 'renovate-bot',
+        },
+      }));
+      await github.initPlatform({
+        endpoint: 'https://github.company.com',
+        token: 'abc123',
+      });
       hostRules.find.mockReturnValue({
-        platform: 'github',
+        hostType: 'github',
         endpoint: 'https://github.company.com',
         token: 'abc123',
       });
