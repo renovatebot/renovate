@@ -22,6 +22,9 @@ async function tmpFile() {
 }
 
 describe('lib/manager/pip_setup/extract', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
   describe('extractPackageFile()', () => {
     it('returns found deps', async () => {
       expect(
@@ -42,6 +45,19 @@ describe('lib/manager/pip_setup/extract', () => {
         )
       ).toBeNull();
     });
+    it('catches error', async () => {
+      const fExec = jest.fn(() => {
+        throw new Error('No such file or directory');
+      });
+      jest.doMock('child-process-promise', () => {
+        return {
+          exec: fExec,
+        };
+      });
+      const m = require('../../../lib/manager/pip_setup/extract');
+      await m.extractPackageFile(content, packageFile, config);
+      expect(fExec).toMatchSnapshot();
+    });
   });
 
   describe('parsePythonVersion', () => {
@@ -53,13 +69,27 @@ describe('lib/manager/pip_setup/extract', () => {
     it('returns the python alias to use', async () => {
       expect(pythonVersions.includes(await getPythonAlias())).toBe(true);
     });
+    it('finds python', async () => {
+      const fExec = jest.fn(() =>
+        Promise.resolve({ stderr: 'Python 3.7.15rc1' })
+      );
+      jest.doMock('child-process-promise', () => {
+        return {
+          exec: fExec,
+        };
+      });
+      const m = require('../../../lib/manager/pip_setup/extract');
+      expect(pythonVersions.includes(await m.getPythonAlias())).toBe(true);
+      expect(fExec).toMatchSnapshot();
+    });
   });
   describe('Test for presence of mock lib', () => {
     it('should test if python mock lib is installed', async () => {
+      const cp = jest.requireActual('child-process-promise');
       let isMockInstalled = true;
       // when binarysource === docker
       try {
-        await exec(`python -c "import mock"`);
+        await cp.exec(`python -c "import mock"`);
       } catch (err) {
         isMockInstalled = false;
       }
