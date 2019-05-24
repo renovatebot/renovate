@@ -220,21 +220,6 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path commitFilesToBranch() sends to git 1`] = `
-Array [
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
-    undefined,
-  ],
-]
-`;
-
 exports[`platform/bitbucket-server endpoint with no path createPr() posts PR 1`] = `
 Array [
   Array [
@@ -1586,21 +1571,6 @@ Array [
         "version": 1,
       },
     },
-  ],
-]
-`;
-
-exports[`platform/bitbucket-server endpoint with path commitFilesToBranch() sends to git 1`] = `
-Array [
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
-    undefined,
   ],
 ]
 `;
