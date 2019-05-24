@@ -41,7 +41,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
-    fs.readFile = jest.fn(() => 'Current go.sum');
+    platform.getRepoStatus.mockResolvedValue({ modified: [] });
     expect(await gomod.getArtifacts('go.mod', [], gomod1, config)).toBeNull();
   });
   it('returns updated go.sum', async () => {
@@ -50,6 +50,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
+    platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
     expect(
       await gomod.getArtifacts('go.mod', [], gomod1, config)
@@ -61,6 +62,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
+    platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
     expect(
       await gomod.getArtifacts('go.mod', [], gomod1, {
@@ -78,6 +80,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
+    platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
     expect(
       await gomod.getArtifacts('go.mod', [], gomod1, {
@@ -91,8 +94,10 @@ describe('.getArtifacts()', () => {
       token: 'some-token',
     });
     platform.getFile.mockResolvedValueOnce('Current go.sum');
-    platform.getRepoStatus.mockResolvedValue({ modified: '' });
-    fs.readFile.mockResolvedValueOnce('New go.sum');
+    platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
+    fs.readFile.mockResolvedValue('New go.sum 1');
+    fs.readFile.mockResolvedValue('New go.sum 2');
+    fs.readFile.mockResolvedValue('New go.sum 3');
     try {
       global.appMode = true;
       global.trustLevel = 'high';
@@ -102,7 +107,7 @@ describe('.getArtifacts()', () => {
           binarySource: 'docker',
           postUpdateOptions: ['gomodTidy'],
         })
-      ).toBeNull();
+      ).not.toBeNull();
     } finally {
       delete global.appMode;
       delete global.trustLevel;
