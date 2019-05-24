@@ -167,7 +167,6 @@
     "@typescript-eslint/parser": "1.9.0",
     "chai": "4.2.0",
     "copyfiles": "2.1.0",
-    "coveralls": "3.0.3",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb-base": "13.1.0",

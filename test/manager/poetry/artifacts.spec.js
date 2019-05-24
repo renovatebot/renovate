@@ -13,6 +13,9 @@ describe('.getArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
+  afterEach(() => {
+    delete global.trustLevel;
+  });
   it('returns null if no poetry.lock found', async () => {
     const updatedDeps = [
       {
@@ -59,6 +62,7 @@ describe('.getArtifacts()', () => {
         currentValue: '1.2.3',
       },
     ];
+    global.trustLevel = 'high';
     expect(
       await poetry.getArtifacts('pyproject.toml', updatedDeps, '{}', config)
     ).not.toBeNull();

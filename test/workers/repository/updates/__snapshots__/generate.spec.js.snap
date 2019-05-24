@@ -6,4 +6,41 @@ exports[`workers/repository/updates/generate generateBranchConfig() adds commit 
 [skip-ci]"
 `;
 
+exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially (reversed) 1`] = `
+Object {
+  "automerge": false,
+  "blockedByPin": false,
+  "branchName": "some-branch",
+  "canBeUnpublished": false,
+  "commitMessage": "",
+  "depName": "@types/some-dep",
+  "masterIssueApproval": false,
+  "newValue": "0.5.7",
+  "prTitle": "some-title",
+  "prettyDepType": "dependency",
+  "releaseTimestamp": undefined,
+  "reuseLockFiles": true,
+  "upgrades": Array [
+    Object {
+      "branchName": "some-branch",
+      "commitMessage": "",
+      "depName": "@types/some-dep",
+      "newValue": "0.5.7",
+      "prTitle": "some-title",
+      "prettyDepType": "dependency",
+    },
+    Object {
+      "branchName": "some-branch",
+      "commitMessage": "",
+      "depName": "some-dep",
+      "newValue": "0.6.0",
+      "prTitle": "some-title",
+      "prettyDepType": "dependency",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades 1`] = `"some-title ()"`;
+
 exports[`workers/repository/updates/generate generateBranchConfig() supports manual prTitle 1`] = `"upgrade some-dep"`;
