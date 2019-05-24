@@ -49,10 +49,6 @@ describe('platform/github', () => {
     'test/platform/github/_fixtures/graphql/pullrequests-closed.json',
     'utf8'
   );
-  const graphqlIssues = fs.readFileSync(
-    'test/platform/github/_fixtures/graphql/issues.json',
-    'utf8'
-  );
 
   function getRepos(...args) {
     // repo info
