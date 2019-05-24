@@ -15,8 +15,6 @@ describe('platform/github', () => {
     hostRules = require('../../../lib/util/host-rules');
     delete global.gitAuthor;
     hostRules.find.mockReturnValue({
-      hostType: 'github',
-      endpoint: 'https://api.github.com',
       token: 'abc123',
     });
   });
@@ -1682,8 +1680,6 @@ describe('platform/github', () => {
         token: 'abc123',
       });
       hostRules.find.mockReturnValue({
-        hostType: 'github',
-        endpoint: 'https://github.company.com',
         token: 'abc123',
       });
       await initRepo({

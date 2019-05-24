@@ -33,8 +33,6 @@ describe('platform/gitlab', () => {
       ),
     }));
     hostRules.find.mockReturnValue({
-      platform: 'github',
-      endpoint: 'https://gitlab.com/v4/',
       token: 'abc123',
     });
   });

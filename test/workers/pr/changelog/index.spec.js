@@ -11,6 +11,7 @@ const releaseNotes = require('../../../../lib/workers/pr/changelog/release-notes
 releaseNotes.addReleaseNotes = jest.fn(input => input);
 
 const upgrade = {
+  endpoint: 'https://api.github.com/',
   depName: 'renovate',
   versionScheme: 'semver',
   fromVersion: '1.0.0',
@@ -38,6 +39,7 @@ describe('workers/pr/changelog', () => {
       hostRules.add({
         hostType: 'github',
         baseUrl: 'https://api.github.com/',
+        token: 'abc',
       });
       await global.renovateCache.rmAll();
     });
@@ -163,6 +165,7 @@ describe('workers/pr/changelog', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
+          endpoint: 'https://github-enterprise.example.com/',
         })
       ).toMatchSnapshot();
     });
@@ -170,12 +173,14 @@ describe('workers/pr/changelog', () => {
       hostRules.add({
         hostType: 'github',
         baseUrl: 'https://github-enterprise.example.com/',
+        token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
       expect(
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
+          endpoint: 'https://github-enterprise.example.com/',
         })
       ).toMatchSnapshot();
     });
