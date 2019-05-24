@@ -99,18 +99,6 @@ describe('manager/gradle', () => {
       expect(dependencies).toMatchSnapshot();
     });
 
-    it('should execute gradle with the proper parameters', async () => {
-      await manager.extractAllPackageFiles(config, ['build.gradle']);
-
-      expect(exec.mock.calls[0][0]).toBe(
-        'gradle --init-script renovate-plugin.gradle renovate'
-      );
-      expect(exec.mock.calls[0][1]).toMatchObject({
-        cwd: 'localDir',
-        timeout: 20000,
-      });
-    });
-
     it('should execute gradlew when available', async () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
