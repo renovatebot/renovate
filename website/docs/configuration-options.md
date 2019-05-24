@@ -319,19 +319,29 @@ And then the branchName would be `renovate/eslint` instead.
 
 ## hostRules
 
+The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`. All are optional, but you can only have one of the last three per rule.
+
 Example for configuring `docker` auth:
 
 ```json
 {
   "hostRules": [
     {
-      "hostType": "docker",
+      "domainName": "docker.io",
       "username": "<some-username>",
       "password": "<some-password>"
     }
   ]
 }
 ```
+
+### baseUrl
+
+Renovate will match against all baseUrls. It does not do a "longest match" algorithm so if you want one baseUrl to override another than make sure it occurs _after_ the first one in the order of `hostRules`.
+
+### domainName
+
+### hostName
 
 ### hostType
 
