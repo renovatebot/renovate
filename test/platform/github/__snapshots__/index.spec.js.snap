@@ -191,10 +191,35 @@ Array [
       "paginate": true,
     },
   ],
+  Array [
+    "repos/some/repo/pulls/91",
+  ],
+  Array [
+    "repos/some/repo/git/refs/heads/master",
+  ],
 ]
 `;
 
-exports[`platform/github getBranchPr(branchName) should return the PR object 2`] = `null`;
+exports[`platform/github getBranchPr(branchName) should return the PR object 2`] = `
+Object {
+  "additions": 1,
+  "base": Object {
+    "sha": "1234",
+  },
+  "branchName": "somebranch",
+  "canRebase": true,
+  "commits": 1,
+  "deletions": 1,
+  "displayNumber": "Pull Request #91",
+  "head": Object {
+    "ref": "somebranch",
+  },
+  "isStale": true,
+  "number": 91,
+  "sha": undefined,
+  "state": "open",
+}
+`;
 
 exports[`platform/github getCommitMessages() returns commits messages 1`] = `
 Array [
@@ -453,6 +478,35 @@ Array [
 ]
 `;
 
+exports[`platform/github getPrList() should return PRs 1`] = `
+Array [
+  Object {
+    "branchName": "somebranch",
+    "closed_at": undefined,
+    "createdAt": undefined,
+    "number": 91,
+    "sha": undefined,
+    "sourceRepo": undefined,
+    "state": "merged",
+    "title": undefined,
+  },
+]
+`;
+
+exports[`platform/github getPrList() should return PRs 2`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/pulls?per_page=100&state=all",
+    Object {
+      "paginate": true,
+    },
+  ],
+]
+`;
+
 exports[`platform/github getRepos should return an array of repos 1`] = `
 Array [
   Array [
@@ -603,6 +657,17 @@ Array [
   ],
   Array [
     "repos/some/repo/git/trees/some-branch?recursive=true",
+  ],
+]
+`;
+
+exports[`platform/github setBaseBranch(branchName) sets the default base branch 1`] = `
+Array [
+  Array [
+    "repos/some/repo",
+  ],
+  Array [
+    "repos/some/repo/git/trees/master?recursive=true",
   ],
 ]
 `;
