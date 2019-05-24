@@ -56,7 +56,7 @@ describe('lib/manager/pip_setup/extract', () => {
       });
       const m = require('../../../lib/manager/pip_setup/extract');
       await m.extractPackageFile(content, packageFile, config);
-      expect(fExec).toMatchSnapshot();
+      expect(fExec).toHaveBeenCalledTimes(4);
     });
   });
 

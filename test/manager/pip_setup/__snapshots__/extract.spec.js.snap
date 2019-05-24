@@ -1,47 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/pip_setup/extract extractPackageFile() catches error 1`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "python --version",
-    ],
-    Array [
-      "python3 --version",
-    ],
-    Array [
-      "python3.7 --version",
-    ],
-    Array [
-      "python C:\\\\Users\\\\kriese\\\\projects\\\\gh\\\\renovate\\\\lib\\\\manager\\\\pip_setup\\\\extract.py test/manager/pip_setup/_fixtures/setup.py",
-      Object {
-        "cwd": ".",
-        "shell": true,
-        "timeout": 5000,
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "throw",
-      "value": [Error: No such file or directory],
-    },
-    Object {
-      "type": "throw",
-      "value": [Error: No such file or directory],
-    },
-    Object {
-      "type": "throw",
-      "value": [Error: No such file or directory],
-    },
-    Object {
-      "type": "throw",
-      "value": [Error: No such file or directory],
-    },
-  ],
-}
-`;
-
 exports[`lib/manager/pip_setup/extract extractPackageFile() returns found deps 1`] = `
 Object {
   "deps": Array [
