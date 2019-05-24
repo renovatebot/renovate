@@ -432,7 +432,7 @@ class Storage {
       return `git@${hostname}:${repository}.git`;
     }
     return URL.format({
-      protocol,
+      protocol: protocol || 'https',
       auth,
       hostname,
       host,
