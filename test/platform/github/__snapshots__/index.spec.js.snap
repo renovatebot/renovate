@@ -356,9 +356,24 @@ Object {
 }
 `;
 
-exports[`platform/github initPlatform() should support default endpoint 1`] = `
+exports[`platform/github initPlatform() should support default endpoint no email access 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`platform/github initPlatform() should support default endpoint no email result 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`platform/github initPlatform() should support default endpoint with email 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
 }
 `;

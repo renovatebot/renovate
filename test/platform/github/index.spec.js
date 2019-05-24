@@ -75,11 +75,37 @@ describe('platform/github', () => {
       get.mockImplementationOnce(() => ({}));
       await expect(github.initPlatform({ token: 'abc123' })).rejects.toThrow();
     });
-    it('should support default endpoint', async () => {
+    it('should support default endpoint no email access', async () => {
       get.mockImplementationOnce(() => ({
         body: {
           login: 'renovate-bot',
         },
+      }));
+      expect(await github.initPlatform({ token: 'abc123' })).toMatchSnapshot();
+    });
+    it('should support default endpoint no email result', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          login: 'renovate-bot',
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: [{}],
+      }));
+      expect(await github.initPlatform({ token: 'abc123' })).toMatchSnapshot();
+    });
+    it('should support default endpoint with email', async () => {
+      get.mockImplementationOnce(() => ({
+        body: {
+          login: 'renovate-bot',
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: [
+          {
+            email: 'user@domain.com',
+          },
+        ],
       }));
       expect(await github.initPlatform({ token: 'abc123' })).toMatchSnapshot();
     });
