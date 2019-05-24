@@ -144,7 +144,7 @@ describe('platform/bitbucket-server', () => {
       });
 
       describe('getFileList()', () => {
-        it('sends to git', async () => {
+        it('sends to gitFs', async () => {
           await initRepo();
           await bitbucket.getFileList();
         });
@@ -152,7 +152,7 @@ describe('platform/bitbucket-server', () => {
 
       describe('branchExists()', () => {
         describe('getFileList()', () => {
-          it('sends to git', async () => {
+          it('sends to gitFs', async () => {
             await initRepo();
             await bitbucket.branchExists(undefined as any);
           });
@@ -160,28 +160,28 @@ describe('platform/bitbucket-server', () => {
       });
 
       describe('isBranchStale()', () => {
-        it('sends to git', async () => {
+        it('sends to gitFs', async () => {
           await initRepo();
           await bitbucket.isBranchStale(undefined as any);
         });
       });
 
       describe('deleteBranch()', () => {
-        it('sends to git', async () => {
+        it('sends to gitFs', async () => {
           await initRepo();
           await bitbucket.deleteBranch('branch');
         });
       });
 
       describe('mergeBranch()', () => {
-        it('sends to git', async () => {
+        it('sends to gitFs', async () => {
           await initRepo();
           await bitbucket.mergeBranch('branch');
         });
       });
 
       describe('commitFilesToBranch()', () => {
-        it('sends to git', async () => {
+        it('sends to gitFs', async () => {
           expect.assertions(1);
           await initRepo();
           await bitbucket.commitFilesToBranch('some-branch', [{}], 'message');
@@ -190,21 +190,21 @@ describe('platform/bitbucket-server', () => {
       });
 
       describe('getFile()', () => {
-        it('sends to git', async () => {
+        it('sends to gitFs', async () => {
           await initRepo();
           await bitbucket.getFile('', '');
         });
       });
 
       describe('getAllRenovateBranches()', () => {
-        it('sends to git', async () => {
+        it('sends to gitFs', async () => {
           await initRepo();
           await bitbucket.getAllRenovateBranches('');
         });
       });
 
       describe('getBranchLastCommitTime()', () => {
-        it('sends to git', async () => {
+        it('sends to gitFs', async () => {
           await initRepo();
           await bitbucket.getBranchLastCommitTime('');
         });
@@ -664,7 +664,7 @@ describe('platform/bitbucket-server', () => {
       });
 
       describe('getCommitMessages()', () => {
-        it('sends to git', async () => {
+        it('sends to gitFs', async () => {
           await initRepo();
           await bitbucket.getCommitMessages();
         });

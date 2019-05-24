@@ -171,34 +171,34 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getFileList()', () => {
-    it('sends to git', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
       await gitlab.getFileList();
     });
   });
   describe('branchExists()', () => {
     describe('getFileList()', () => {
-      it('sends to git', async () => {
+      it('sends to gitFs', async () => {
         await initRepo();
         await gitlab.branchExists();
       });
     });
   });
   describe('getAllRenovateBranches()', () => {
-    it('sends to git', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
       await gitlab.getAllRenovateBranches();
     });
   });
 
   describe('getBranchLastCommitTime()', () => {
-    it('sends to git', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
       await gitlab.getBranchLastCommitTime();
     });
   });
   describe('isBranchStale()', () => {
-    it('sends to git', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
       await gitlab.isBranchStale();
     });
@@ -367,13 +367,13 @@ describe('platform/gitlab', () => {
     });
   });
   describe('mergeBranch()', () => {
-    it('sends to git', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
       await gitlab.mergeBranch('branch');
     });
   });
   describe('deleteBranch()', () => {
-    it('sends to git', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
       await gitlab.deleteBranch('branch', true);
     });
@@ -745,13 +745,13 @@ These updates have all been created already. Click a checkbox below to force a r
     });
   });
   describe('getFile()', () => {
-    it('sends to git', async () => {
+    it('sends to gitFs', async () => {
       await initRepo();
       await gitlab.getFile();
     });
   });
   describe('commitFilesToBranch()', () => {
-    it('sends to git', async () => {
+    it('sends to gitFs', async () => {
       expect.assertions(1);
       await initRepo();
       await gitlab.commitFilesToBranch('some-branch', [{}]);
