@@ -132,18 +132,6 @@ describe('manager/gradle', () => {
       expect(exec).toHaveBeenCalledTimes(0);
     });
 
-    it('should write files before extracting', async () => {
-      const packageFiles = ['build.gradle', 'foo/build.gradle'];
-      await manager.extractAllPackageFiles(config, packageFiles);
-
-      expect(toUnix(fs.outputFile.mock.calls[0][0])).toBe(
-        'localDir/build.gradle'
-      );
-      expect(toUnix(fs.outputFile.mock.calls[1][0])).toBe(
-        'localDir/foo/build.gradle'
-      );
-    });
-
     it('should configure the renovate report plugin', async () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
