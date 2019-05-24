@@ -52,7 +52,6 @@ commands:
           name: Coverage
           command: |
             bash <(curl -s https://codecov.io/bash) -Z -C $CIRCLE_SHA1
-            cat ./coverage/lcov.info | yarn coveralls || true
 jobs:
   test_node_10:
     docker:
