@@ -1180,6 +1180,18 @@
               "hostType": {
                 "description": "hostType for a package rule. Can be a platform name or a datasource name",
                 "type": "string"
+              },
+              "domainName": {
+                "description": "Domain name for a host rule. e.g. \"docker.io\"",
+                "type": "string"
+              },
+              "hostName": {
+                "description": "Hostname for a host rule. e.g. \"index.docker.io\"",
+                "type": "string"
+              },
+              "baseUrl": {
+                "description": "baseUrl for a host rule. e.g. \"https://api.github.com/\"",
+                "type": "string"
               }
             }
           }

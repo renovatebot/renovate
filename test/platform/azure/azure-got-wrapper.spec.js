@@ -14,10 +14,10 @@ describe('platform/azure/azure-got-wrapper', () => {
       expect(azure.getCoreApi).toThrow('No token found for azure');
     });
     it('should set token and endpoint', async () => {
-      hostRules.update({
+      hostRules.add({
         hostType: 'azure',
         token: 'token',
-        endpoint: 'https://dev.azure.com/renovate12345',
+        baseUrl: 'https://dev.azure.com/renovate12345',
       });
       azure.setEndpoint('https://dev.azure.com/renovate12345');
       const res = await azure.azureObj();

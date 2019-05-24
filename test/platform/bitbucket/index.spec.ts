@@ -40,8 +40,6 @@ describe('platform/bitbucket', () => {
     // clean up hostRules
     hostRules.clear();
     hostRules.find.mockReturnValue({
-      hostType: 'bitbucket',
-      endpoint: 'https://bitbucket.org',
       username: 'abc',
       password: '123',
     });

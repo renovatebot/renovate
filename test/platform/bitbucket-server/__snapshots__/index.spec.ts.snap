@@ -916,7 +916,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path init function should init 1`] = `
+exports[`platform/bitbucket-server endpoint with no path initPlatform() should init 1`] = `
 Object {
   "endpoint": "https://stash.renovatebot.com/",
 }
@@ -2286,7 +2286,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path init function should init 1`] = `
+exports[`platform/bitbucket-server endpoint with path initPlatform() should init 1`] = `
 Object {
   "endpoint": "https://stash.renovatebot.com/",
 }

@@ -14,9 +14,9 @@ describe('platform/gl-got-wrapper', () => {
 
     // clean up hostRules
     hostRules.clear();
-    hostRules.update({
+    hostRules.add({
       hostType: 'bitbucket',
-      endpoint: 'https://api.bitbucket.org',
+      baseUrl: 'https://api.bitbucket.org',
       token: 'token',
     });
   });
