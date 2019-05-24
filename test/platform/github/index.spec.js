@@ -1133,7 +1133,13 @@ describe('platform/github', () => {
       expect(pr).toBeNull();
     });
     [
-      { number: 1, state: 'closed', base: { sha: '1234' }, mergeable: true },
+      {
+        number: 1,
+        state: 'closed',
+        base: { sha: '1234' },
+        mergeable: true,
+        merged_at: 'sometime',
+      },
       {
         number: 1,
         state: 'open',
