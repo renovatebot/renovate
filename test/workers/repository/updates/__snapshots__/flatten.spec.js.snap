@@ -31,7 +31,6 @@ Array [
     "errors": Array [],
     "excludeCommitPaths": Array [],
     "gitAuthor": null,
-    "gitFs": null,
     "gitPrivateKey": null,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
@@ -142,7 +141,6 @@ Array [
     "errors": Array [],
     "excludeCommitPaths": Array [],
     "gitAuthor": null,
-    "gitFs": null,
     "gitPrivateKey": null,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
@@ -252,7 +250,6 @@ Array [
     "errors": Array [],
     "excludeCommitPaths": Array [],
     "gitAuthor": null,
-    "gitFs": null,
     "gitPrivateKey": null,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
@@ -361,7 +358,6 @@ Array [
     "errors": Array [],
     "excludeCommitPaths": Array [],
     "gitAuthor": null,
-    "gitFs": null,
     "gitPrivateKey": null,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
@@ -474,7 +470,6 @@ Array [
     "errors": Array [],
     "excludeCommitPaths": Array [],
     "gitAuthor": null,
-    "gitFs": null,
     "gitPrivateKey": null,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
@@ -583,7 +578,6 @@ Array [
     "errors": Array [],
     "excludeCommitPaths": Array [],
     "gitAuthor": null,
-    "gitFs": null,
     "gitPrivateKey": null,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
@@ -696,7 +690,6 @@ Array [
     "errors": Array [],
     "excludeCommitPaths": Array [],
     "gitAuthor": null,
-    "gitFs": null,
     "gitPrivateKey": null,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
@@ -807,7 +800,6 @@ Array [
     "errors": Array [],
     "excludeCommitPaths": Array [],
     "gitAuthor": null,
-    "gitFs": null,
     "gitPrivateKey": null,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",
@@ -918,7 +910,6 @@ Array [
     "errors": Array [],
     "excludeCommitPaths": Array [],
     "gitAuthor": null,
-    "gitFs": null,
     "gitPrivateKey": null,
     "group": Object {
       "branchTopic": "{{{groupSlug}}}",

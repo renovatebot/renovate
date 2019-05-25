@@ -36,7 +36,3 @@ Vendoring of Go Modules is done automatically if `vendor/modules.txt` is present
 #### Go binary version
 
 Currently, Renovate will try to keep up with the very latest version of `go`, and it is not configurable. It is planned though to support a configurable version of `go` per-repository soon.
-
-#### gitFs
-
-Go Modules tidying and vendoring are both only possible if [`gitFs`](https://renovatebot.com/docs/self-hosted-configuration/#gitfs) is in use. If you are using the hosted Renovate App, then it should be enabled by default, but if you are self-hosting your Renovate Bot then you will need to configure this.

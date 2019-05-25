@@ -36,6 +36,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
+    platform.getRepoStatus.mockResolvedValue({ modified: ['Pipfile.lock'] });
     fs.readFile = jest.fn(() => 'New Pipfile.lock');
     global.trustLevel = 'high';
     expect(
@@ -48,6 +49,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
+    platform.getRepoStatus.mockResolvedValue({ modified: ['Pipfile.lock'] });
     fs.readFile = jest.fn(() => 'New Pipfile.lock');
     expect(
       await pipenv.getArtifacts('Pipfile', [], '{}', {

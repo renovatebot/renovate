@@ -50,11 +50,6 @@ You probably have no need for this option - it is an experimental setting for th
 
 RFC5322-compliant string if you wish to customise the git author for commits.
 
-## gitFs
-
-This setting is experimental, and works for GitHub repositories only. If enabled, Renovate will `git clone` repos and use `git` for file operations such as creating branches and committing files.
-Set it to a string specifing the transport used by Git (`https`, `http` or `ssh`).
-
 ## gitPrivateKey
 
 ## logFile
@@ -73,7 +68,7 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 
 ## persistRepoData
 
-Set this to true if you wish for Renovate to persist repo data between runs. The intention is that this is used in combination with `gitFs`, allowing Renovate to do a faster `git fetch` between runs rather than `git clone`. It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
+Set this to true if you wish for Renovate to persist repo data between runs. The intention is that this allows Renovate to do a faster `git fetch` between runs rather than `git clone`. It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
 ## platform
 

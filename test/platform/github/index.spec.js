@@ -350,7 +350,6 @@ describe('platform/github', () => {
       });
       await expect(
         github.initRepo({
-          gitFs: 'https',
           includeForks: true,
           repository: 'some/repo',
         })
