@@ -43,6 +43,7 @@ describe('api/npm', () => {
         '0.0.2': '2018-05-07T07:21:53+02:00',
       },
     };
+    nock.cleanAll();
     return global.renovateCache.rmAll();
   });
   afterEach(() => {
