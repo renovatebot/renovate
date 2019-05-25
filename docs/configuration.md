@@ -32,29 +32,11 @@ different set for `frontend/package.json` in the same repository.
 
 ```javascript
 module.exports = {
-  labels: ['upgrade'],
-  repositories: [
-    {
-      repository: 'singapore/repo1',
-      packageRules: [
-        {
-          paths: ['frontend/package.json'],
-          labels: ['upgrade', 'frontend'],
-        },
-      ],
-    },
-    {
-      repository: 'singapore/repo2',
-      labels: ['renovate'],
-    },
-    'singapore/repo3',
-  ],
-  packageRules: [
-    {
-      packageNames: ['jquery'],
-      labels: ['jquery', 'uhoh'],
-    },
-  ],
+  npmrc: '//registry.npmjs.org/:_authToken=abc123',
+  baseDir: '/tmp/renovate',
+  logLevel: 'debug',
+  includeForks: true,
+  gradle: { enabled: false },
 };
 ```
 

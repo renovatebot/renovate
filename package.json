@@ -7,14 +7,18 @@
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
-    "build": "yarn clean && tsc && yarn copy-static-files",
+    "build": "yarn clean && tsc -p tsconfig.app.json && yarn copy-static-files",
     "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
     "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "node -r ts-node/register/transpile-only --inspect-brk lib/renovate.ts",
-    "eslint": "eslint lib test",
-    "eslint-fix": "eslint --fix lib test",
+    "eslint": "run-s eslint:*",
+    "eslint:js": "eslint lib test --ext .js",
+    "eslint:ts": "eslint -c .tslintrc.js lib test --ext .ts",
+    "eslint-fix": "run-s eslint-fix:*",
+    "eslint-fix:js": "eslint --fix  lib test --ext .js",
+    "eslint-fix:ts": "eslint -c .tslintrc.js --fix  lib test --ext .ts",
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "jest-debug": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --inspect-brk node_modules/jest/bin/jest.js",
     "jest-silent": "yarn jest --reporters jest-silent-reporter",
@@ -81,15 +85,15 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^10.13.0 || ^11.0.0"
+    "node": "^10.13.0 || ^12.0.0"
   },
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@renovatebot/docker-registry-client": "3.3.0",
     "@sindresorhus/is": "0.17.0",
-    "@snyk/ruby-semver": "2.0.1",
+    "@snyk/ruby-semver": "2.0.2",
     "@yarnpkg/lockfile": "1.1.0",
-    "azure-devops-node-api": "7.2.0",
+    "azure-devops-node-api": "8.0.0",
     "bunyan": "1.8.12",
     "cacache": "11.3.2",
     "chalk": "2.4.2",
@@ -100,6 +104,7 @@
     "compare-versions": "3.4.0",
     "conventional-commits-detector": "1.0.2",
     "convert-hrtime": "2.0.0",
+    "deepmerge": "3.2.0",
     "delay": "4.2.0",
     "detect-indent": "5.0.0",
     "email-addresses": "3.0.3",
@@ -130,9 +135,9 @@
     "p-all": "2.1.0",
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
-    "pnpm": "3.2.0",
+    "pnpm": "3.3.3",
     "proxy-agent": "3.0.3",
-    "registry-auth-token": "3.3.2",
+    "registry-auth-token": "3.4.0",
     "root-require": "0.3.1",
     "safe-regex": "2.0.2",
     "semver": "6.0.0",
@@ -152,13 +157,15 @@
   },
   "devDependencies": {
     "@types/bunyan": "1.8.6",
-    "@types/jest": "24.0.12",
-    "@types/node": "11.13.10",
-    "@typescript-eslint/eslint-plugin": "1.7.0",
-    "@typescript-eslint/parser": "1.7.0",
-    "babel-plugin-transform-object-rest-spread": "7.0.0-beta.3",
+    "@types/convert-hrtime": "2.0.0",
+    "@types/fs-extra": "7.0.0",
+    "@types/got": "9.4.4",
+    "@types/jest": "24.0.13",
+    "@types/node": "11.13.11",
+    "@types/tmp": "0.1.0",
+    "@typescript-eslint/eslint-plugin": "1.9.0",
+    "@typescript-eslint/parser": "1.9.0",
     "chai": "4.2.0",
-    "codecov": "3.3.0",
     "copyfiles": "2.1.0",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
@@ -167,17 +174,18 @@
     "eslint-plugin-import": "2.17.2",
     "eslint-plugin-promise": "4.1.1",
     "glob": "7.1.4",
-    "husky": "2.2.0",
-    "jest": "24.7.1",
+    "husky": "2.3.0",
+    "jest": "24.8.0",
     "jest-silent-reporter": "0.1.2",
     "mockdate": "2.0.2",
     "nock": "10.0.6",
-    "prettier": "1.17.0",
+    "npm-run-all": "4.1.5",
+    "prettier": "1.17.1",
     "pretty-quick": "1.10.0",
     "rimraf": "2.6.3",
     "semantic-release": "15.13.12",
-    "tmp-promise": "1.0.5",
-    "ts-jest": "24.0.0",
+    "tmp-promise": "2.0.1",
+    "ts-jest": "24.0.2",
     "ts-node": "8.1.0",
     "typescript": "3.4.5"
   },
@@ -190,17 +198,17 @@
     "data",
     "dist"
   ],
-  "babel": {
-    "plugins": [
-      "transform-object-rest-spread"
-    ]
-  },
   "jest": {
+    "globals": {
+      "ts-jest": {
+        "isolatedModules": true
+      }
+    },
     "cacheDirectory": ".cache/jest",
     "coverageDirectory": "./coverage",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "lib/**/*.js",
+      "lib/**/*.{js,ts}",
       "!lib/platform/bitbucket-server/bb-got-wrapper.js",
       "!lib/versioning/maven/index.js",
       "!lib/proxy.js"
@@ -223,7 +231,7 @@
     "preset": "ts-jest/presets/js-with-ts"
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "next"
   },
   "husky": {
     "hooks": {

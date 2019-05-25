@@ -24,8 +24,6 @@ Renovate does not support:
 
 Renovate uses a plugin to search and extract versions from projects. They are then looked up using Maven datasources and patched into PRs the usual way.
 
-It is recommended to use `gitFs` with Gradle, which is not the default setting for GitHub and GitLab. Enabling `gitFs` means that Renovate performs a shallow clone of the repository in order to get access to all the source files necessary, regardless of their name.
-
 ## Maven
 
 Renovate can update dependency versions found in Maven `pom.xml` files.
@@ -44,12 +42,12 @@ Here is an example configuration to work with custom Artifactory servers using a
 	    "enabled": true
 	},
 	"hostRules": [{
-	    "platform": "maven",
+	    "hostType": "maven",
         "endpoint": "https://artifactoryurl1/",
 	    "username": "artifactoryusername",
 	    "password": "artifactorypassword"
 	}, {
-	    "platform": "maven",
+	    "hostType": "maven",
         "endpoint": "https://artifactoryurl2/",
 	    "username": "artifactoryusername",
 	    "password": "artifactorypassword"

@@ -15,6 +15,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
         "headers": Object {
           "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
+        "json": true,
         "password": "some-password",
         "username": "some-username",
       },
@@ -106,6 +107,7 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
         "headers": Object {
           "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
+        "json": true,
         "password": "some-password",
         "username": "some-username",
       },
@@ -197,6 +199,7 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
         "headers": Object {
           "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
+        "json": true,
         "password": "some-password",
         "username": "some-username",
       },
@@ -340,13 +343,21 @@ Array [
     },
   ],
   Array [
+    "https://api.github.com/user/9287/repos?page=3&per_page=100",
+    Object {
+      "headers": Object {},
+      "json": true,
+      "timeout": 10000,
+    },
+  ],
+  Array [
     "https://registry.company.com/v2/",
     Object {
       "throwHttpErrors": false,
     },
   ],
   Array [
-    "https://registry.company.com/v2/node/manifests/1.0.0",
+    "https://registry.company.com/v2/node/manifests/latest",
     Object {
       "headers": Object {
         "accept": "application/vnd.docker.distribution.manifest.v2+json",

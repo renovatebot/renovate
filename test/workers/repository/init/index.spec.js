@@ -1,4 +1,5 @@
 const base = require('../../../../lib/workers/repository/init/base');
+const apis = require('../../../../lib/workers/repository/init/apis');
 const { initRepo } = require('../../../../lib/workers/repository/init');
 
 jest.mock('../../../../lib/workers/repository/onboarding/branch');
@@ -12,6 +13,7 @@ describe('workers/repository/init', () => {
   describe('initRepo', () => {
     it('runs', async () => {
       base.checkBaseBranch.mockReturnValue({});
+      apis.initApis.mockReturnValue({});
       await initRepo({}, null);
     });
   });

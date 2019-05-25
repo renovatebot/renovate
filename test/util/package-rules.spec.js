@@ -17,6 +17,38 @@ describe('applyPackageRules()', () => {
       },
     ],
   };
+  it('applies', () => {
+    const config = {
+      depName: 'a',
+      isBump: true,
+      currentValue: '1.0.0',
+      packageRules: [
+        {
+          packagePatterns: ['*'],
+          matchCurrentVersion: '<= 2.0.0',
+        },
+        {
+          packageNames: ['b'],
+          matchCurrentVersion: '<= 2.0.0',
+        },
+        {
+          excludePackagePatterns: ['*'],
+          packageNames: ['b'],
+        },
+        {
+          updateTypes: ['bump'],
+        },
+        {
+          excludePackageNames: ['a'],
+          packageNames: ['b'],
+        },
+        {
+          matchCurrentVersion: '<= 2.0.0',
+        },
+      ],
+    };
+    expect(applyPackageRules(config)).toMatchSnapshot();
+  });
   it('applies both rules for a', () => {
     const dep = {
       depName: 'a',
@@ -486,5 +518,10 @@ describe('applyPackageRules()', () => {
       depName: 'test',
     });
     expect(res3.x).toBeDefined();
+  });
+  it('empty rules', () => {
+    expect(
+      applyPackageRules({ ...config1, packageRules: null })
+    ).toMatchSnapshot();
   });
 });

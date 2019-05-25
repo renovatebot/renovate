@@ -147,12 +147,6 @@
       "description": "Whether to update (but not create) branches when not scheduled",
       "type": "boolean"
     },
-    "gitFs": {
-      "description": "Use git for FS operations instead of API. GitHub only.",
-      "type": "string",
-      "enum": ["https", "http", "ssh"],
-      "default": null
-    },
     "persistRepoData": {
       "description": "If set to false, repository data will preserved between runs instead of deleted.",
       "type": "boolean",
@@ -299,6 +293,11 @@
         "semver"
       ],
       "default": "semver"
+    },
+    "azureAutoComplete": {
+      "description": "If set to true, Azure DevOps PRs will be set to auto-complete after all (if any) branch policies have been met",
+      "type": "boolean",
+      "default": false
     },
     "azureWorkItemId": {
       "description": "The id of an existing work item on Azure Boards to link to each PR",
@@ -1080,6 +1079,24 @@
       },
       "$ref": "#"
     },
+    "leiningen": {
+      "description": "Configuration object for renovating Clojure leiningen projects",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)project\\.clj$"],
+        "versionScheme": "maven"
+      },
+      "$ref": "#"
+    },
+    "deps-edn": {
+      "description": "Configuration object for renovating Clojure CLI-based projects (deps.edn)",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)deps\\.edn$"],
+        "versionScheme": "maven"
+      },
+      "$ref": "#"
+    },
     "compatibility": {
       "description": "Configuration object for compatibility",
       "type": "object",
@@ -1154,7 +1171,32 @@
     },
     "hostRules": {
       "description": "Host rules/configuration including credentials",
-      "type": "array"
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "hostType": {
+                "description": "hostType for a package rule. Can be a platform name or a datasource name",
+                "type": "string"
+              },
+              "domainName": {
+                "description": "Domain name for a host rule. e.g. \"docker.io\"",
+                "type": "string"
+              },
+              "hostName": {
+                "description": "Hostname for a host rule. e.g. \"index.docker.io\"",
+                "type": "string"
+              },
+              "baseUrl": {
+                "description": "baseUrl for a host rule. e.g. \"https://api.github.com/\"",
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
     },
     "prBodyDefinitions": {
       "description": "Table column definitions for use in PR tables",

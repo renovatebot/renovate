@@ -2,12 +2,14 @@
 
 exports[`platform has a list of supported methods for azure 1`] = `
 Array [
+  "initPlatform",
   "getRepos",
   "cleanRepo",
   "initRepo",
   "getRepoStatus",
   "getRepoForceRebase",
   "setBaseBranch",
+  "setBranchPrefix",
   "getFileList",
   "branchExists",
   "getAllRenovateBranches",
@@ -45,12 +47,14 @@ Array [
 
 exports[`platform has a list of supported methods for github 1`] = `
 Array [
+  "initPlatform",
   "getRepos",
   "cleanRepo",
   "initRepo",
   "getRepoStatus",
   "getRepoForceRebase",
   "setBaseBranch",
+  "setBranchPrefix",
   "getFileList",
   "branchExists",
   "getAllRenovateBranches",
@@ -88,12 +92,14 @@ Array [
 
 exports[`platform has a list of supported methods for gitlab 1`] = `
 Array [
+  "initPlatform",
   "getRepos",
   "cleanRepo",
   "initRepo",
   "getRepoStatus",
   "getRepoForceRebase",
   "setBaseBranch",
+  "setBranchPrefix",
   "getFileList",
   "branchExists",
   "getAllRenovateBranches",
@@ -127,4 +133,19 @@ Array [
   "getCommitMessages",
   "getVulnerabilityAlerts",
 ]
+`;
+
+exports[`platform initializes 1`] = `
+Object {
+  "endpoint": "https://api.bitbucket.org/",
+  "hostRules": Array [
+    Object {
+      "baseUrl": "https://api.bitbucket.org/",
+      "hostType": "bitbucket",
+      "password": "123",
+      "username": "abc",
+    },
+  ],
+  "platform": "bitbucket",
+}
 `;

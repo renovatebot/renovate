@@ -8,12 +8,49 @@
       "program": "${workspaceFolder}/lib/renovate.ts",
       "env": { "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
+      "disableOptimisticBPs": true,
       "runtimeArgs": [
         "--nolazy",
         "--preserve-symlinks",
         "-r",
         "ts-node/register"
       ],
+      "protocol": "inspector",
+      "skipFiles": ["<node_internals>/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest Current File",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "--runInBand",
+        "--collectCoverage=false",
+        "${fileBasenameNoExtension}"
+      ],
+      "env": { "LOG_LEVEL": "debug" },
+      "console": "integratedTerminal",
+      "disableOptimisticBPs": true,
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      },
+      "runtimeArgs": ["--nolazy", "--preserve-symlinks"],
+      "protocol": "inspector",
+      "skipFiles": ["<node_internals>/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest All",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand", "--collectCoverage=false"],
+      "env": { "LOG_LEVEL": "debug" },
+      "console": "integratedTerminal",
+      "disableOptimisticBPs": true,
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      },
+      "runtimeArgs": ["--nolazy", "--preserve-symlinks"],
       "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     }

@@ -75,6 +75,12 @@ Merge commits will employ the standard GitHub "merge commit" API, just like when
 
 Branch push employs GitHub's low-level `git` API to push the Renovate upgrade directly to the head of the base branch (e.g. `master`) to maintain a "clean" history. The downside of this approach is that it implicitly enables the `rebaseStalePrs` setting because otherwise we would risk pushing a bad commit to master. i.e. Renovate won't push the commit to base branch unless the branch is completely up-to-date with `master` and has passed tests, which means that if the default branch is getting updated regularly then it might take several rebases from Renovate until it has a branch commit that is safe to push to `master`.
 
+## azureAutoComplete
+
+Setting this to true will set PRs in Azure DevOps to auto-complete after all (if any) branch policies have been met.
+
+You could also configure this using `packageRules`.
+
 ## azureWorkItemId
 
 When creating a PR in Azure DevOps, some branches can be protected with branch policies to [check for linked work items](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#check-for-linked-work-items). Creating a work item in Azure DevOps is beyond the scope of Renovate, but Renovate can link an already existing work item when creating PRs.
@@ -172,6 +178,8 @@ This is used to manually restrict which versions are possible to upgrade to base
 ## composer
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
+
+## deps-edn
 
 ## description
 
@@ -313,19 +321,31 @@ And then the branchName would be `renovate/eslint` instead.
 
 ## hostRules
 
+The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`. All are optional, but you can only have one of the last three per rule.
+
 Example for configuring `docker` auth:
 
 ```json
 {
   "hostRules": [
     {
-      "platform": "docker",
+      "domainName": "docker.io",
       "username": "<some-username>",
       "password": "<some-password>"
     }
   ]
 }
 ```
+
+### baseUrl
+
+Renovate will match against all baseUrls. It does not do a "longest match" algorithm so if you want one baseUrl to override another than make sure it occurs _after_ the first one in the order of `hostRules`.
+
+### domainName
+
+### hostName
+
+### hostType
 
 ## ignoreDeprecated
 
@@ -429,6 +449,8 @@ Add an array of 1 or more strings to `labels` and Renovate will apply these labe
 ## lazyGrouping
 
 The default behaviour for Renovate is to only use group names for branches and PRs when there's more than one dependency in a group. For example you may have defined a dependency group calls "All eslint packages" with a `packagePattern` of `^eslint`, but if the only upgrade available at the time is `eslint-config-airbnb` then it makes more sense for the PR to be named "Upgrade eslint-config-airbnb to version 2.1.4" than to name it "Upgrade All eslint packages". If ever this behaviour is undesirable then you can override it by setting this option to `false`.
+
+## leiningen
 
 ## lockFileMaintenance
 

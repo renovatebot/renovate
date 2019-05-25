@@ -1,106 +1,147 @@
-const { update, find, clear } = require('../../lib/util/host-rules');
+const { add, find, clear, hosts } = require('../../lib/util/host-rules');
 
 describe('util/host-rules', () => {
   beforeEach(() => {
     clear();
   });
-  describe('update()', () => {
-    it('throws if no platform ', () => {
-      expect(() => update({})).toThrow(
-        'Failed to set configuration: no platform or endpoint specified'
-      );
-    });
-    it('throws if no endpoint ', () => {
-      expect(() => update({ platform: 'azure' })).toThrow(
-        `Failed to configure platform 'azure': no endpoint defined`
-      );
-    });
-
-    it('throws if invalid endpoint ', () => {
+  describe('add()', () => {
+    it('throws if both domainName and hostName', () => {
       expect(() =>
-        update({ platform: 'azure', endpoint: '/some/path' })
-      ).toThrow(
-        `Failed to configure platform 'azure': no host for endpoint '/some/path'`
-      );
+        add({
+          hostType: 'azure',
+          domainName: 'github.com',
+          hostName: 'api.github.com',
+        })
+      ).toThrow('hostRules cannot contain both a domainName and hostName');
     });
-    it('supports endpoint-only', () => {
-      update({
-        endpoint: 'https://some.endpoint',
+    it('throws if both domainName and baseUrl', () => {
+      expect(() =>
+        add({
+          hostType: 'azure',
+          domainName: 'github.com',
+          baseUrl: 'https://api.github.com',
+        })
+      ).toThrow('hostRules cannot contain both a domainName and baseUrl');
+    });
+    it('throws if both hostName and baseUrl', () => {
+      expect(() =>
+        add({
+          hostType: 'azure',
+          hostName: 'api.github.com',
+          baseUrl: 'https://api.github.com',
+        })
+      ).toThrow('hostRules cannot contain both a hostName and baseUrl');
+    });
+    it('supports baseUrl-only', () => {
+      add({
+        baseUrl: 'https://some.endpoint',
         username: 'user1',
         password: 'pass1',
       });
-      expect(find({ host: 'some.endpoint' })).toMatchSnapshot();
-    });
-    it('uses default endpoint', () => {
-      update({
-        platform: 'github',
-        token: 'token',
-        other: 'data',
-      });
-      expect(find({ platform: 'github' })).toMatchSnapshot();
-      expect(
-        find({ platform: 'github', host: 'api.github.com' })
-      ).toMatchSnapshot();
-      expect(find({ platform: 'github', host: 'example.com' })).toBeNull();
+      expect(find({ url: 'https://some.endpoint/v3/' })).toMatchSnapshot();
     });
   });
   describe('find()', () => {
-    it('allows overrides', () => {
-      update({
-        platform: 'github',
-        endpoint: 'endpoint',
-        token: 'token',
-        other: 'data',
-      });
-      const overrides = {
-        token: 'secret',
-        other: null,
-        foo: undefined,
-      };
-      expect(find({ platform: 'github' }, overrides)).toMatchSnapshot();
-      expect(
-        find({ platform: 'github', host: 'api.github.com' }, overrides)
-      ).toMatchSnapshot();
-      expect(
-        find({ platform: 'github', host: 'example.com' }, overrides)
-      ).toMatchSnapshot();
+    it('warns and returns empty for bad search', () => {
+      expect(find({ abc: 'def' })).toEqual({});
     });
     it('needs exact host matches', () => {
-      update({
-        platform: 'nuget',
-        endpoint: 'endpoint',
-        host: 'nuget.org',
+      add({
+        hostType: 'nuget',
+        hostName: 'nuget.org',
         username: 'root',
         password: 'p4$$w0rd',
+        token: undefined,
       });
-      expect(find({ platform: 'nuget', host: 'nuget.org' })).toMatchSnapshot();
+      expect(find({ hostType: 'nuget' })).toMatchSnapshot();
+      expect(find({ hostType: 'nuget', url: 'https://nuget.org' })).not.toEqual(
+        {}
+      );
+      expect(find({ hostType: 'nuget', url: 'https://not.nuget.org' })).toEqual(
+        {}
+      );
+      expect(find({ hostType: 'nuget', url: 'https://not-nuget.org' })).toEqual(
+        {}
+      );
+    });
+    it('matches on empty rules', () => {
+      add({
+        json: true,
+      });
       expect(
-        find({ platform: 'nuget', host: 'not.nuget.org' })
-      ).toMatchSnapshot();
+        find({ hostType: 'nuget', url: 'https://api.github.com' })
+      ).toEqual({ json: true });
+    });
+    it('matches on hostType', () => {
+      add({
+        hostType: 'nuget',
+        token: 'abc',
+      });
       expect(
-        find({ platform: 'nuget', host: 'not-nuget.org' })
+        find({ hostType: 'nuget', url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
     });
-    it('matches on endpoint', () => {
-      update({
-        platform: 'nuget',
-        endpoint: 'https://nuget.local/api',
+    it('matches on domainName', () => {
+      add({
+        domainName: 'github.com',
+        token: 'def',
       });
       expect(
-        find({ platform: 'nuget', endpoint: 'https://nuget.local/api' })
+        find({ hostType: 'nuget', url: 'https://api.github.com' }).token
+      ).toEqual('def');
+    });
+    it('matches on hostName', () => {
+      add({
+        hostName: 'nuget.local',
+        token: 'abc',
+      });
+      expect(
+        find({ hostType: 'nuget', url: 'https://nuget.local/api' })
       ).toMatchSnapshot();
+    });
+    it('matches on hostType and endpoint', () => {
+      add({
+        hostType: 'nuget',
+        baseUrl: 'https://nuget.local/api',
+        token: 'abc',
+      });
+      expect(
+        find({ hostType: 'nuget', url: 'https://nuget.local/api' }).token
+      ).toEqual('abc');
     });
     it('matches on endpoint subresource', () => {
-      update({
-        platform: 'nuget',
-        endpoint: 'https://nuget.local/api',
+      add({
+        hostType: 'nuget',
+        baseUrl: 'https://nuget.local/api',
+        token: 'abc',
       });
       expect(
         find({
-          platform: 'nuget',
-          endpoint: 'https://nuget.local/api/sub-resource',
+          hostType: 'nuget',
+          url: 'https://nuget.local/api/sub-resource',
         })
       ).toMatchSnapshot();
+    });
+    it('returns hosts', () => {
+      add({
+        hostType: 'nuget',
+        token: 'aaaaaa',
+      });
+      add({
+        hostType: 'nuget',
+        baseUrl: 'https://nuget.local/api',
+        token: 'abc',
+      });
+      add({
+        hostType: 'nuget',
+        hostName: 'my.local.registry',
+        token: 'def',
+      });
+      const res = hosts({
+        hostType: 'nuget',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(2);
     });
   });
 });

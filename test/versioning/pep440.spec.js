@@ -136,7 +136,7 @@ describe('pep440.getNewValue()', () => {
   });
 
   it('guards against unsupported rangeStrategy', () => {
-    const invalid = getNewValue('==1.2.3', 'invalid', '1.0.0', '1.2.3');
-    expect(invalid).toBeNull();
+    const invalid = getNewValue('==1.0.0', 'update-lockfile', '1.0.0', '1.2.3');
+    expect(invalid).toEqual('==1.2.3');
   });
 });

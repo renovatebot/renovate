@@ -16,6 +16,24 @@ Object {
 }
 `;
 
+exports[`platform/azure createPr() should create and return a PR object with auto-complete set 1`] = `
+Object {
+  "autoCompleteSetBy": Object {
+    "id": 123,
+  },
+  "branchName": "some-branch",
+  "completionOptions": Object {
+    "deleteSourceBranch": true,
+    "squashMerge": true,
+  },
+  "createdBy": Object {
+    "id": 123,
+  },
+  "displayNumber": "Pull Request #456",
+  "pullRequestId": 456,
+}
+`;
+
 exports[`platform/azure deleteLabel() Should delete a label 1`] = `
 Array [
   Array [],
@@ -100,6 +118,12 @@ Array [
   "prj1/repo1",
   "prj1/repo2",
 ]
+`;
+
+exports[`platform/azure initPlatform() should init 1`] = `
+Object {
+  "endpoint": "https://dev.azure.com/renovate12345/",
+}
 `;
 
 exports[`platform/azure initRepo should initialise the config for a repo 1`] = `

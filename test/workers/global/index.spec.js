@@ -1,6 +1,9 @@
 const globalWorker = require('../../../lib/workers/global');
 const repositoryWorker = require('../../../lib/workers/repository');
 const configParser = require('../../../lib/config');
+const platform = require('../../../lib/platform');
+
+jest.mock('../../../lib/platform');
 
 describe('lib/workers/global', () => {
   beforeEach(() => {
@@ -8,6 +11,7 @@ describe('lib/workers/global', () => {
     configParser.parseConfigs = jest.fn();
     configParser.getRepositoryConfig = jest.fn();
     repositoryWorker.renovateRepository = jest.fn();
+    platform.initPlatform.mockImplementation(input => input);
   });
   it('handles config warnings and errors', async () => {
     configParser.parseConfigs.mockReturnValueOnce({
@@ -30,9 +34,40 @@ describe('lib/workers/global', () => {
       gitAuthor: 'a@b.com',
       enabled: true,
       repositories: ['a', 'b'],
+      hostRules: [
+        {
+          hostType: 'docker',
+          host: 'docker.io',
+          username: 'some-user',
+          password: 'some-password',
+        },
+      ],
     });
     await globalWorker.start();
     expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(2);
+  });
+
+  describe('processes platforms', () => {
+    it('github', async () => {
+      configParser.parseConfigs.mockReturnValueOnce({
+        repositories: ['a'],
+        platform: 'github',
+        endpoint: 'https://github.com/',
+      });
+      await globalWorker.start();
+      expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+      expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
+    });
+    it('gitlab', async () => {
+      configParser.parseConfigs.mockReturnValueOnce({
+        repositories: [{ repository: 'a' }],
+        platform: 'gitlab',
+        endpoint: 'https://my.gitlab.com/',
+      });
+      await globalWorker.start();
+      expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+      expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
+    });
   });
 });

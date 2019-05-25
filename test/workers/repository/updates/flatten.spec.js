@@ -33,6 +33,10 @@ describe('workers/repository/updates/flatten', () => {
             deps: [
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
               { depName: 'foo', updates: [{ newValue: '2.0.0' }] },
+              {
+                updateTypes: ['pin'],
+                updates: [{ newValue: '2.0.0' }],
+              },
             ],
           },
           {
@@ -69,7 +73,7 @@ describe('workers/repository/updates/flatten', () => {
       };
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(8);
+      expect(res).toHaveLength(9);
       expect(
         res.filter(r => r.updateType === 'lockFileMaintenance')
       ).toHaveLength(2);
