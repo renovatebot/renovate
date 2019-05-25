@@ -82,7 +82,7 @@ function matchesBaseUrl(rule: HostRule, search: HostRuleSearch) {
 export function find(search: HostRuleSearch) {
   if (!(search.hostType || search.url)) {
     logger.warn({ search }, 'Invalid hostRules search');
-    return null;
+    return {};
   }
   let res = ({} as any) as HostRule;
   // First, apply empty rule matches
