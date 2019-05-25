@@ -347,6 +347,16 @@ Renovate will match against all baseUrls. It does not do a "longest match" algor
 
 ### hostType
 
+### timeout
+
+Use this figure to adjust the timeout for queries. The default is 60s, which is quite high. To adjust it down to 10s for all queries, do this:
+
+```json
+  "hostRules": [{
+    "timeout": 10000,
+  }]
+```
+
 ## ignoreDeprecated
 
 By default, Renovate won't update any packages to deprecated versions unless the package version was _already_ deprecated. The goal of this is to make sure you don't upgrade from a non-deprecated version to a deprecated one just because it's higher than the current version. If for some reason you wish to _force_ deprecated updates on Renovate, you can set `ignoreDeprecated` to `false`, but this is not recommended for most situations.
