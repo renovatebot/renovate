@@ -143,7 +143,6 @@ Object {
       "baseUrl": "https://api.bitbucket.org/",
       "hostType": "bitbucket",
       "password": "123",
-      "token": "YWJjOjEyMw==",
       "username": "abc",
     },
   ],
