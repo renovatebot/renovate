@@ -231,7 +231,7 @@
     "preset": "ts-jest/presets/js-with-ts"
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "next"
   },
   "husky": {
     "hooks": {
