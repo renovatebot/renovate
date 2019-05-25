@@ -7,7 +7,6 @@ const mix = require('../../../lib/manager/mix/artifacts');
 
 const config = {
   localDir: '/tmp/github/some/repo',
-  gitFs: true,
 };
 
 describe('.getArtifacts()', () => {
@@ -34,7 +33,6 @@ describe('.getArtifacts()', () => {
     ];
     const noLocalDirConfig = {
       localDir: null,
-      gitFs: true,
     };
     expect(
       await mix.getArtifacts('mix.exs', updatedDeps, '', noLocalDirConfig)
@@ -58,27 +56,6 @@ describe('.getArtifacts()', () => {
     ];
     expect(
       await mix.getArtifacts('mix.exs', updatedDeps, '', config)
-    ).toBeNull();
-  });
-  it('returns null if gitFs is not enabled', async () => {
-    platform.getFile.mockReturnValueOnce('Current mix.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
-    });
-    fs.readFile = jest.fn(() => 'New mix.lock');
-    const noGitFsConfig = {
-      localDir: '/tmp/github/some/repo',
-      gitFs: undefined,
-    };
-    const updatedDeps = [
-      {
-        depName: 'plug',
-        currentValue: '1.6.0',
-      },
-    ];
-    expect(
-      await mix.getArtifacts('mix.exs', updatedDeps, '', noGitFsConfig)
     ).toBeNull();
   });
   it('returns updated mix.lock', async () => {
