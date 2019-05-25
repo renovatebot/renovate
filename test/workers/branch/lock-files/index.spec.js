@@ -10,7 +10,9 @@ const lerna = require('../../../../lib/manager/npm/post-update/lerna');
 
 const hostRules = require('../../../../lib/util/host-rules');
 
-hostRules.find = jest.fn(() => 'token-abc');
+hostRules.find = jest.fn(() => ({
+  token: 'abc',
+}));
 
 const {
   // determineLockFileDirs,

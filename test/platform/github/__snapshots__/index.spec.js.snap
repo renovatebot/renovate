@@ -32,46 +32,6 @@ Array [
 ]
 `;
 
-exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a commit to a new branch if the branch does not already exist 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1111",
-  ],
-  Array [
-    "repos/some/repo/branches?per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-]
-`;
-
-exports[`platform/github commitFilesToBranch(branchName, files, message, parentBranch) should add a new commit to the branch 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-  ],
-  Array [
-    "repos/some/repo/git/commits/1111",
-  ],
-  Array [
-    "repos/some/repo/branches?per_page=100",
-    Object {
-      "paginate": true,
-    },
-  ],
-]
-`;
-
 exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
   "branchName": "some-branch",
@@ -103,7 +63,7 @@ Array [
     },
   ],
   Array [
-    "repos/some/repo/statuses/some-sha",
+    "repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
     Object {
       "body": Object {
         "context": "renovate/verify",
@@ -178,8 +138,6 @@ content",
 ]
 `;
 
-exports[`platform/github getBranchLastCommitTime should return a Date 1`] = `2011-04-14T16:00:49.000Z`;
-
 exports[`platform/github getBranchPr(branchName) should return the PR object 1`] = `
 Array [
   Array [
@@ -191,89 +149,34 @@ Array [
       "paginate": true,
     },
   ],
-]
-`;
-
-exports[`platform/github getBranchPr(branchName) should return the PR object 2`] = `null`;
-
-exports[`platform/github getCommitMessages() returns commits messages 1`] = `
-Array [
-  "foo",
-  "bar",
-]
-`;
-
-exports[`platform/github getFile() should return large file via git API 1`] = `
-Array [
   Array [
-    "repos/some/repo",
+    "repos/some/repo/pulls/91",
   ],
   Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/contents/package-lock.json?ref=master",
-  ],
-  Array [
-    "repos/some/repo/git/trees/master",
-  ],
-  Array [
-    "repos/some/repo/git/blobs/some-sha",
+    "repos/some/repo/git/refs/heads/master",
   ],
 ]
 `;
 
-exports[`platform/github getFile() should return large file via git API 2`] = `"{\\"hello\\":\\"workd\\"}"`;
-
-exports[`platform/github getFile() should return null if GitHub returns a 404 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFile() should return null if getFile returns nothing 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFile() should return the encoded file content 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/git/trees/master?recursive=true",
-  ],
-  Array [
-    "repos/some/repo/contents/package.json?ref=master",
-  ],
-]
-`;
-
-exports[`platform/github getFileList should return the files matching the fileName 1`] = `
-Array [
-  "package.json",
-  "some-dir/package.json.some-thing-else",
-  "src/app/package.json",
-  "src/otherapp/package.json",
-]
+exports[`platform/github getBranchPr(branchName) should return the PR object 2`] = `
+Object {
+  "additions": 1,
+  "base": Object {
+    "sha": "1234",
+  },
+  "branchName": "somebranch",
+  "canRebase": true,
+  "commits": 1,
+  "deletions": 1,
+  "displayNumber": "Pull Request #91",
+  "head": Object {
+    "ref": "somebranch",
+  },
+  "isStale": true,
+  "number": 91,
+  "sha": undefined,
+  "state": "open",
+}
 `;
 
 exports[`platform/github getPr(prNo) should return PR from closed graphql result 1`] = `
@@ -320,6 +223,7 @@ Object {
   },
   "displayNumber": "Pull Request #1",
   "mergeable": true,
+  "merged_at": "sometime",
   "number": 1,
   "state": "closed",
 }
@@ -478,9 +382,24 @@ Object {
 }
 `;
 
-exports[`platform/github initPlatform() should support default endpoint 1`] = `
+exports[`platform/github initPlatform() should support default endpoint no email access 1`] = `
 Object {
   "endpoint": "https://api.github.com/",
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`platform/github initPlatform() should support default endpoint no email result 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "renovateUsername": "renovate-bot",
+}
+`;
+
+exports[`platform/github initPlatform() should support default endpoint with email 1`] = `
+Object {
+  "endpoint": "https://api.github.com/",
+  "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
 }
 `;
@@ -525,86 +444,6 @@ Object {
   "isFork": false,
   "privateRepo": false,
 }
-`;
-
-exports[`platform/github mergeBranch(branchName) should perform a branch merge 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName) should perform a branch merge 2`] = `
-Array [
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-    Object {
-      "body": Object {
-        "sha": "1235",
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName) should perform a branch merge 3`] = `Array []`;
-
-exports[`platform/github mergeBranch(branchName) should perform a branch merge 4`] = `Array []`;
-
-exports[`platform/github mergeBranch(branchName) should perform a branch merge 5`] = `
-Array [
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-    undefined,
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName) should throw if branch merge throws 1`] = `[Error: Branch automerge failed]`;
-
-exports[`platform/github mergeBranch(branchName) should throw if branch merge throws 2`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/git/refs/heads/thebranchname",
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName) should throw if branch merge throws 3`] = `
-Array [
-  Array [
-    "repos/some/repo/git/refs/heads/master",
-    Object {
-      "body": Object {
-        "sha": "1235",
-      },
-    },
-  ],
-]
-`;
-
-exports[`platform/github mergeBranch(branchName) should throw if branch merge throws 4`] = `Array []`;
-
-exports[`platform/github mergeBranch(branchName) should throw if branch merge throws 5`] = `Array []`;
-
-exports[`platform/github mergeBranch(branchName) should throw if branch merge throws 6`] = `Array []`;
-
-exports[`platform/github setBaseBranch(branchName) sets the base branch 1`] = `
-Array [
-  Array [
-    "repos/some/repo",
-  ],
-  Array [
-    "repos/some/repo/git/trees/some-branch?recursive=true",
-  ],
-]
 `;
 
 exports[`platform/github updatePr(prNo, title, body) should update the PR 1`] = `

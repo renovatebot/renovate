@@ -18,6 +18,7 @@ With your current configuration, Renovate will create 2 Pull Requests:
 <summary>Pin dependencies</summary>
 
   - Branch name: \`renovate/pin-dependencies\`
+  - Merge into: \`some-other\`
   - Pin [a](https://a) to \`1.1.0\`
   - Pin b to \`1.5.3\`
 
@@ -28,7 +29,7 @@ With your current configuration, Renovate will create 2 Pull Requests:
 <summary>Update a to v2</summary>
 
   - Branch name: \`renovate/a-2.x\`
-  - Upgrade [a](https://a) to \`2.0.1\`
+  - Upgrade [a](https://a) to \`undefined\`
 
 
 </details>
