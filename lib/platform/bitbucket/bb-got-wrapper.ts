@@ -13,7 +13,6 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
     // TODO: Move to configurable host rules, or use utils/got
     timeout: 60 * 1000,
     json: true,
-    ...hostRules.find({ hostType: 'bitbucket', url }),
     ...options,
   };
   const method = (
@@ -25,12 +24,10 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   }
   opts.headers = {
     'user-agent': 'https://github.com/renovatebot/renovate',
-    authorization: opts.token
-      ? `Basic ${opts.token}`
-      : /* istanbul ignore next */ undefined,
     ...opts.headers,
   };
-
+  const { username, password } = hostRules.find({ hostType: 'bitbucket', url });
+  opts.auth = `${username}:${password}`;
   const res = await got(url, opts);
   if (method.toLowerCase() === 'get') {
     cache[path] = res;

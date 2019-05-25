@@ -14,7 +14,6 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
     // TODO: Move to configurable host rules, or use utils/got
     timeout: 60 * 1000,
     json: true,
-    ...hostRules.find({ hostType, url }),
     ...options,
   };
   const method = (
@@ -28,13 +27,10 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   opts.headers = {
     'user-agent': 'https://github.com/renovatebot/renovate',
     'X-Atlassian-Token': 'no-check',
-
-    authorization: opts.token
-      ? /* istanbul ignore next */ `Basic ${opts.token}`
-      : undefined,
     ...opts.headers,
   };
-
+  const { username, password } = hostRules.find({ hostType, url });
+  opts.auth = `${username}:${password}`;
   const res = await got(url, opts);
   // logger.debug(res.body);
   if (method.toLowerCase() === 'get') {
