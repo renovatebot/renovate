@@ -85,3 +85,4 @@ workflows:
             branches:
               only:
                 - master
+                - v17
