@@ -22,7 +22,7 @@ describe('manager/gradle js parser', () => {
   beforeEach(() => {
     fs.mkdir.mockReturnValue(true);
     fs.exists.mockReturnValue(true);
-    fs.readFile.mockImplementation((file) => {
+    fs.readFile.mockImplementation(file => {
       const filepath = path.join(__dirname, '_fixtures', file);
       return realFs.readFileSync(filepath, 'utf8');
     });
@@ -40,6 +40,7 @@ describe('manager/gradle js parser', () => {
       'build.gradle',
     ]);
 
+    // prettier-ignore
     expect(dependencies).toEqual([{
       packageFile: "build.gradle",
       manager: "gradle",
@@ -63,6 +64,7 @@ describe('manager/gradle js parser', () => {
     const dependencies = await manager.extractAllPackageFiles(buildConfig(), [
       'build.gradle',
     ]);
+    // prettier-ignore
     expect(dependencies).toEqual([{
       packageFile: "build.gradle",
       manager: "gradle",
@@ -88,6 +90,7 @@ describe('manager/gradle js parser', () => {
     const dependencies = await manager.extractAllPackageFiles(buildConfig(), [
       'build.gradle',
     ]);
+    // prettier-ignore
     expect(dependencies).toEqual([
       packageFile({
         file: 'build.gradle',
@@ -102,38 +105,41 @@ describe('manager/gradle js parser', () => {
 
   it('should returns plugins defined in subprojects', async () => {
     mockGetFile('subprojects');
-    const config = buildConfig({disableGradleExecution: true});
+    const config = buildConfig({ disableGradleExecution: true });
     const dependencies = await manager.extractAllPackageFiles(config, [
-      'build.gradle', 'subproject1/build.gradle', 'subproject2/build.gradle', 'subproject1/subproject3/build.gradle',
+      'build.gradle',
+      'subproject1/build.gradle',
+      'subproject2/build.gradle',
+      'subproject1/subproject3/build.gradle',
     ]);
 
     expect(dependencies).toEqual([
       packageFile({
         file: 'build.gradle',
-        deps: [plugin('com.jfrog.bintray', '0.4.1'),]
+        deps: [plugin('com.jfrog.bintray', '0.4.1')],
       }),
       packageFile({
         file: 'subproject1/build.gradle',
-        deps: [plugin('no-version-plugin'),]
+        deps: [plugin('no-version-plugin')],
       }),
       packageFile({
         file: 'subproject2/build.gradle',
-        deps: [plugin('com.jfrog.bintray', '0.4.1'),]
+        deps: [plugin('com.jfrog.bintray', '0.4.1')],
       }),
       packageFile({
         file: 'subproject1/subproject3/build.gradle',
-        deps: [plugin('submodule-plugin', '1.2.4'),]
+        deps: [plugin('submodule-plugin', '1.2.4')],
       }),
     ]);
   });
 });
 
-function packageFile({file, deps}) {
+function packageFile({ file, deps }) {
   return {
     packageFile: file,
-    manager: "gradle",
-    datasource: "maven",
-    deps
+    manager: 'gradle',
+    datasource: 'maven',
+    deps,
   };
 }
 
@@ -150,25 +156,33 @@ function plugin(id, version) {
   return dep;
 }
 
-function library({group, name, version}) {
+function library({ group, name, version }) {
   return {
     currentValue: version,
     depGroup: group,
     depName: `${group}:${name}`,
     name,
-    registryUrls: ["https://repo.maven.apache.org/maven2/", "https://jitpack.io"],
+    registryUrls: [
+      'https://repo.maven.apache.org/maven2/',
+      'https://jitpack.io',
+    ],
   };
 }
 
 function mockGetFile(base) {
   const currentDir = __dirname;
-  platform.getFile = (file) => {
+  platform.getFile = file => {
     const filepath = path.join(currentDir, '_fixtures', base, file);
     return realFs.readFileSync(filepath, 'utf8');
   };
 }
 
-function buildConfig({useJsParser = true, disableGradleExecution = false} = {useJsParser: true, disableGradleExecution: false}) {
+function buildConfig(
+  { useJsParser = true, disableGradleExecution = false } = {
+    useJsParser: true,
+    disableGradleExecution: false,
+  }
+) {
   return {
     localDir: 'localDir',
     gradle: {

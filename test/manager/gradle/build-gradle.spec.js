@@ -190,6 +190,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
           id 'com.jfrog.bintray' version '0.4.1' apply false
         }
       `;
+      // prettier-ignore
       const updatedGradleFile = gradle.updateGradleVersion(
         gradleFile,
         { name: 'com.jfrog.bintray', depName: 'Gradle Plugin com.jfrog.bintray', version: '0.4.1' },
@@ -199,8 +200,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
         plugins {
           id 'com.jfrog.bintray' version '1.0.0' apply false
         }
-      `
-      );
+      `);
     });
 
     it('should update a plugin defined in buildscript', () => {
@@ -228,8 +228,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
                 classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0.0'
             }
         }
-      `
-      );
+      `);
     });
   });
 });

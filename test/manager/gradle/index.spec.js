@@ -154,7 +154,10 @@ describe('manager/gradle', () => {
     });
 
     it('should execute gradle only once', async () => {
-      await manager.extractAllPackageFiles(config, ['build.gradle', 'build2.gradle']);
+      await manager.extractAllPackageFiles(config, [
+        'build.gradle',
+        'build2.gradle',
+      ]);
 
       expect(exec).toHaveBeenCalledTimes(1);
     });

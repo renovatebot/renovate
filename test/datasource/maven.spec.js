@@ -102,11 +102,7 @@ describe('datasource/maven', () => {
         ],
       });
       expect(releases.releases).toEqual(
-        generateReleases([
-          '1.8.2',
-          '1.8.3',
-          '1.8.4',
-        ])
+        generateReleases(['1.8.2', '1.8.3', '1.8.4'])
       );
     });
 
