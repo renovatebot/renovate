@@ -20,11 +20,11 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   const method = (
     opts.method || /* istanbul ignore next */ 'get'
   ).toLowerCase();
-  const useCache = opts.useCache;
-  if (method === 'get' && useCache !== false && cache[path]) {
+  if (method === 'get' && opts.useCache !== false && cache[path]) {
     logger.trace({ path }, 'Returning cached result');
     return cache[path];
   }
+  delete opts.useCache;
   opts.headers = {
     'user-agent': 'https://github.com/renovatebot/renovate',
     'X-Atlassian-Token': 'no-check',
