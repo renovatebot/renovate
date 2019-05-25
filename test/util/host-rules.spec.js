@@ -42,8 +42,8 @@ describe('util/host-rules', () => {
     });
   });
   describe('find()', () => {
-    it('warns and returns null for bad search', () => {
-      expect(find({ abc: 'def' })).toBeNull();
+    it('warns and returns empty for bad search', () => {
+      expect(find({ abc: 'def' })).toEqual({});
     });
     it('needs exact host matches', () => {
       add({
