@@ -1,7 +1,15 @@
 const got = require('../../../lib/util/got');
-const get = require('../../../lib/platform/gitlab/gl-got-wrapper');
+const get = require('../../../lib/platform/gitlab/got');
+const hostRules = require('../../../lib/util/host-rules');
 
-describe('platform/gl-got-wrapper', () => {
+jest.mock('../../../lib/util/got');
+
+hostRules.add({
+  hostType: 'gitlab',
+  token: 'abc123',
+});
+
+describe('platform/gitlab/got', () => {
   const body = ['a', 'b'];
   afterEach(() => {
     jest.resetAllMocks();
@@ -52,16 +60,7 @@ describe('platform/gl-got-wrapper', () => {
     const res = await get.post('some-url');
     expect(res.body).toEqual(body);
   });
-  it('returns cached', async () => {
-    get.reset();
-    got.mockReturnValueOnce({
-      body: {},
-    });
-    const res1 = await get('projects/foo');
-    const res2 = await get('projects/foo');
-    expect(res1).toEqual(res2);
-  });
-  it('sets endpoint', () => {
-    get.setEndpoint('https://gitlab.renovatebot.com/api/v4/');
+  it('sets baseUrl', () => {
+    get.setBaseUrl('https://gitlab.renovatebot.com/api/v4/');
   });
 });

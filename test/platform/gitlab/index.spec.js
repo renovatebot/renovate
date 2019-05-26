@@ -6,9 +6,9 @@ describe('platform/gitlab', () => {
   beforeEach(() => {
     // reset module
     jest.resetModules();
-    jest.mock('../../../lib/platform/gitlab/gl-got-wrapper');
+    jest.mock('../../../lib/platform/gitlab/got');
     gitlab = require('../../../lib/platform/gitlab');
-    get = require('../../../lib/platform/gitlab/gl-got-wrapper');
+    get = require('../../../lib/platform/gitlab/got');
     jest.mock('../../../lib/util/host-rules');
     hostRules = require('../../../lib/util/host-rules');
     jest.mock('../../../lib/platform/git/storage');
