@@ -24,7 +24,7 @@ describe('platform/gh-got-wrapper', () => {
     ghGot.mockImplementationOnce(() => ({
       body: '{"data":{',
     }));
-    get.setEndpoint('https://ghe.mycompany.com/api/v3/');
+    get.setBaseUrl('https://ghe.mycompany.com/api/v3/');
     await get.post('graphql', {
       body: 'abc',
     });
