@@ -1,5 +1,5 @@
 const fs = require('fs-extra');
-const ghGot = require('gh-got');
+const ghGot = require('../../../../lib/util/got');
 const {
   addReleaseNotes,
   getReleaseNotes,
@@ -26,7 +26,7 @@ const contentsResponse = [
   { name: 'README.md' },
 ];
 
-jest.mock('gh-got');
+jest.mock('../../../../lib/util/got');
 
 describe('workers/pr/release-notes', () => {
   describe('addReleaseNotes()', () => {
