@@ -25,7 +25,6 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
           "authorization": "Bearer some-token ",
         },
         "json": true,
-        "timeout": 10000,
       },
     ],
     Array [
@@ -40,7 +39,6 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
         },
-        "timeout": 10000,
       },
     ],
   ],
@@ -115,7 +113,6 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
           "authorization": "Bearer some-token ",
         },
         "json": true,
-        "timeout": 10000,
       },
     ],
     Array [
@@ -130,7 +127,6 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
         },
-        "timeout": 10000,
       },
     ],
   ],
@@ -205,7 +201,6 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
           "authorization": "Bearer some-token ",
         },
         "json": true,
-        "timeout": 10000,
       },
     ],
     Array [
@@ -220,7 +215,6 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
         },
-        "timeout": 10000,
       },
     ],
   ],
@@ -284,7 +278,6 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
       Object {
         "headers": Object {},
         "json": true,
-        "timeout": 10000,
       },
     ],
     Array [
@@ -333,7 +326,6 @@ Array [
     Object {
       "headers": Object {},
       "json": true,
-      "timeout": 10000,
     },
   ],
   Array [
@@ -341,7 +333,6 @@ Array [
     Object {
       "headers": Object {},
       "json": true,
-      "timeout": 10000,
     },
   ],
   Array [
@@ -356,7 +347,6 @@ Array [
       "headers": Object {
         "accept": "application/vnd.docker.distribution.manifest.v2+json",
       },
-      "timeout": 10000,
     },
   ],
 ]
