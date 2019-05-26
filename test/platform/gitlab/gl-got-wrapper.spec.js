@@ -1,4 +1,4 @@
-const glGot = require('gl-got');
+const got = require('../../../lib/util/got');
 const get = require('../../../lib/platform/gitlab/gl-got-wrapper');
 
 describe('platform/gl-got-wrapper', () => {
@@ -7,46 +7,46 @@ describe('platform/gl-got-wrapper', () => {
     jest.resetAllMocks();
   });
   it('paginates', async () => {
-    glGot.mockReturnValueOnce({
+    got.mockReturnValueOnce({
       headers: {
         link:
           '<https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=2>; rel="next", <https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
       },
       body: ['a'],
     });
-    glGot.mockReturnValueOnce({
+    got.mockReturnValueOnce({
       headers: {
         link:
           '<https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="next", <https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
       },
       body: ['b', 'c'],
     });
-    glGot.mockReturnValueOnce({
+    got.mockReturnValueOnce({
       headers: {},
       body: ['d'],
     });
     const res = await get('some-url', { paginate: true });
     expect(res.body).toHaveLength(4);
-    expect(glGot).toHaveBeenCalledTimes(3);
+    expect(got).toHaveBeenCalledTimes(3);
   });
   it('attempts to paginate', async () => {
-    glGot.mockReturnValueOnce({
+    got.mockReturnValueOnce({
       headers: {
         link:
           '<https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
       },
       body: ['a'],
     });
-    glGot.mockReturnValueOnce({
+    got.mockReturnValueOnce({
       headers: {},
       body: ['b'],
     });
     const res = await get('some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
-    expect(glGot).toHaveBeenCalledTimes(1);
+    expect(got).toHaveBeenCalledTimes(1);
   });
   it('posts', async () => {
-    glGot.mockImplementationOnce(() => ({
+    got.mockImplementationOnce(() => ({
       body,
     }));
     const res = await get.post('some-url');
@@ -54,7 +54,7 @@ describe('platform/gl-got-wrapper', () => {
   });
   it('returns cached', async () => {
     get.reset();
-    glGot.mockReturnValueOnce({
+    got.mockReturnValueOnce({
       body: {},
     });
     const res1 = await get('projects/foo');
