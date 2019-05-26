@@ -2,6 +2,7 @@ import got from 'got';
 
 export interface IGotApiOptions {
   useCache?: boolean;
+  hostType?: string;
   body?: any;
 }
 

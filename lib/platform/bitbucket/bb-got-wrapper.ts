@@ -1,23 +1,21 @@
 import got from 'got';
 import utilgot from '../../util/got';
 import URL from 'url';
-import * as hostRules from '../../util/host-rules';
 import { IGotApi, IGotApiOptions } from '../common';
 
 const endpoint = 'https://api.bitbucket.org/';
 
 async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   const url = URL.resolve(endpoint, path);
-  const opts: IGotApiOptions & hostRules.HostRule & got.GotJSONOptions = {
+  const opts: IGotApiOptions & got.GotJSONOptions = {
     json: true,
     ...options,
+    hostType: 'bitbucket',
   };
   opts.headers = {
     'user-agent': 'https://github.com/renovatebot/renovate',
     ...opts.headers,
   };
-  const { username, password } = hostRules.find({ hostType: 'bitbucket', url });
-  opts.auth = `${username}:${password}`;
   const res = await utilgot(url, opts);
   return res;
 }
