@@ -13,14 +13,4 @@ describe('logger', () => {
   it('supports logging without metadata', () => {
     logger.debug('some meta');
   });
-  it('sets levels', () => {
-    logger.levels('stdout', 'DEBUG');
-  });
-  it('adds stream', () => {
-    logger.addStream({
-      name: 'logfile',
-      path: 'fatal.log',
-      level: 'fatal',
-    });
-  });
 });

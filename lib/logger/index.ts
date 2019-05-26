@@ -48,17 +48,33 @@ const logFactory = (level: string): any => {
   };
 };
 
-export const logger = {
-  trace: logFactory('trace'),
-  debug: logFactory('debug'),
-  info: logFactory('info'),
-  warn: logFactory('warn'),
-  error: logFactory('error'),
-  fatal: logFactory('fatal'),
-  child: logFactory('child'),
-};
+const loggerLevels: string[] = [
+  'trace',
+  'debug',
+  'info',
+  'warn',
+  'error',
+  'fatal',
+  'child',
+];
+
+// eslint-disable-next-line import/no-mutable-exports
+export const logger: any = {};
+
+loggerLevels.forEach(loggerLevel => {
+  logger[loggerLevel] = logFactory(loggerLevel);
+});
 
 // setMeta overrides existing meta
 export function setMeta(obj: any) {
   meta = { ...obj };
+}
+
+export function levels(name: string, level: Logger.LogLevel): void {
+  loggerLevels.forEach(loggerLevel => {
+    logger[loggerLevel] = (logFactory(loggerLevel) as Logger).levels(
+      name,
+      level
+    );
+  });
 }

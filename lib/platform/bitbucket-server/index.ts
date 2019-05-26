@@ -5,6 +5,7 @@ import api from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
+import { logger } from '../../logger';
 
 interface BbsConfig {
   baseBranch: string;

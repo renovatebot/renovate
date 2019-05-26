@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import { join } from 'path';
 import Git from 'simple-git/promise';
 import URL from 'url';
+import { logger } from '../../logger';
 
 declare module 'fs-extra' {
   // eslint-disable-next-line import/prefer-default-export
