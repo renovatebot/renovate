@@ -31,6 +31,4 @@ for (const x of helpers) {
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
-api.reset = function reset() {};
-
 export default api;
