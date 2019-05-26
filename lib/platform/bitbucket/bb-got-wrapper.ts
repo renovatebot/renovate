@@ -3,20 +3,18 @@ import utilgot from '../../util/got';
 import URL from 'url';
 import { IGotApi, IGotApiOptions } from '../common';
 
-const endpoint = 'https://api.bitbucket.org/';
-
 async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
-  const url = URL.resolve(endpoint, path);
   const opts: IGotApiOptions & got.GotJSONOptions = {
     json: true,
     ...options,
     hostType: 'bitbucket',
+    baseUrl: 'https://api.bitbucket.org/',
   };
   opts.headers = {
     'user-agent': 'https://github.com/renovatebot/renovate',
     ...opts.headers,
   };
-  const res = await utilgot(url, opts);
+  const res = await utilgot(path, opts);
   return res;
 }
 
