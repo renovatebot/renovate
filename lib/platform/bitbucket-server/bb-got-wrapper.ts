@@ -1,24 +1,21 @@
-import { GotJSONOptions, Response } from 'got';
-import URL from 'url';
+import { GotJSONOptions } from 'got';
 import got from '../../util/got';
 import { IGotApi, IGotApiOptions } from '../common';
 
-const hostType = 'bitbucket-server';
-let endpoint: string;
+let baseUrl: string;
 
-async function get(path: string, options: IGotApiOptions & GotJSONOptions) {
-  const url = URL.resolve(endpoint, path);
-  const opts: IGotApiOptions & hostRules.HostRule & GotJSONOptions = {
-    json: true,
+function get(path: string, options: IGotApiOptions & GotJSONOptions) {
+  const opts: IGotApiOptions & GotJSONOptions = {
     ...options,
+    hostType: 'bitbucket-server',
+    baseUrl,
+    json: true,
   };
   opts.headers = {
-    'X-Atlassian-Token': 'no-check',
     ...opts.headers,
+    'X-Atlassian-Token': 'no-check',
   };
-  opts.hostType = 'bitbucket-server';
-  const res = await got(url, opts);
-  return res;
+  return got(path, opts);
 }
 
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
@@ -30,8 +27,8 @@ for (const x of helpers) {
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
-api.setEndpoint = (e: string) => {
-  endpoint = e;
+api.setBaseUrl = (e: string) => {
+  baseUrl = e;
 };
 
 export default api;

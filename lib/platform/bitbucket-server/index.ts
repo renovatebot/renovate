@@ -47,7 +47,7 @@ export function initPlatform({
   const res = {
     endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
   };
-  api.setEndpoint(res.endpoint);
+  api.setBaseUrl(res.endpoint);
   defaults.endpoint = res.endpoint;
   return res;
 }
