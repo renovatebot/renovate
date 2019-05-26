@@ -47,7 +47,7 @@ export function initPlatform({
   const res = {
     endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
   };
-  api.setEndpoint(res.endpoint);
+  api.setBaseUrl(res.endpoint);
   defaults.endpoint = res.endpoint;
   return res;
 }
@@ -76,7 +76,6 @@ export function cleanRepo() {
   if (config.storage) {
     config.storage.cleanRepo();
   }
-  api.reset();
   config = {} as any;
 }
 
@@ -99,7 +98,6 @@ export async function initRepo({
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
-  api.reset();
 
   const [projectKey, repositorySlug] = repository.split('/');
   config = { projectKey, repositorySlug, gitPrivateKey, repository } as any;

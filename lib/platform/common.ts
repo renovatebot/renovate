@@ -34,5 +34,5 @@ export interface IGotApi {
 
   reset(): void;
 
-  setEndpoint(endpoint: string): void;
+  setBaseUrl(endpoint: string): void;
 }
