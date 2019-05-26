@@ -13,7 +13,6 @@ async function get(path: string, options: IGotApiOptions & GotJSONOptions) {
     ...options,
   };
   opts.headers = {
-    'user-agent': 'https://github.com/renovatebot/renovate',
     'X-Atlassian-Token': 'no-check',
     ...opts.headers,
   };
