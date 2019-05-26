@@ -1,4 +1,5 @@
 import got from 'got';
+import utilgot from '../../util/got';
 import URL from 'url';
 import * as hostRules from '../../util/host-rules';
 import { IGotApi, IGotApiOptions } from '../common';
@@ -10,8 +11,6 @@ const endpoint = 'https://api.bitbucket.org/';
 async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   const url = URL.resolve(endpoint, path);
   const opts: IGotApiOptions & hostRules.HostRule & got.GotJSONOptions = {
-    // TODO: Move to configurable host rules, or use utils/got
-    timeout: 60 * 1000,
     json: true,
     ...options,
   };
@@ -28,7 +27,7 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   };
   const { username, password } = hostRules.find({ hostType: 'bitbucket', url });
   opts.auth = `${username}:${password}`;
-  const res = await got(url, opts);
+  const res = await utilgot(url, opts);
   if (method.toLowerCase() === 'get') {
     cache[path] = res;
   }
