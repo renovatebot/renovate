@@ -29,8 +29,7 @@ async function get(path: string, options: IGotApiOptions & GotJSONOptions) {
     'X-Atlassian-Token': 'no-check',
     ...opts.headers,
   };
-  const { username, password } = hostRules.find({ hostType, url });
-  opts.auth = `${username}:${password}`;
+  opts.hostType = 'bitbucket-server';
   const res = await got(url, opts);
   // logger.debug(res.body);
   if (method.toLowerCase() === 'get') {
