@@ -3,8 +3,6 @@ import URL from 'url';
 import got from '../../util/got';
 import { IGotApi, IGotApiOptions } from '../common';
 
-let cache: Renovate.IDict<Response<any>> = {};
-
 const hostType = 'bitbucket-server';
 let endpoint: string;
 
@@ -16,14 +14,6 @@ async function get(path: string, options: IGotApiOptions & GotJSONOptions) {
     json: true,
     ...options,
   };
-  const method = (
-    opts.method || /* istanbul ignore next */ 'get'
-  ).toLowerCase();
-  if (method === 'get' && opts.useCache !== false && cache[path]) {
-    logger.trace({ path }, 'Returning cached result');
-    return cache[path];
-  }
-  delete opts.useCache;
   opts.headers = {
     'user-agent': 'https://github.com/renovatebot/renovate',
     'X-Atlassian-Token': 'no-check',
@@ -31,10 +21,6 @@ async function get(path: string, options: IGotApiOptions & GotJSONOptions) {
   };
   opts.hostType = 'bitbucket-server';
   const res = await got(url, opts);
-  // logger.debug(res.body);
-  if (method.toLowerCase() === 'get') {
-    cache[path] = res;
-  }
   return res;
 }
 
@@ -46,10 +32,6 @@ for (const x of helpers) {
   (api as any)[x] = (url: string, opts: any) =>
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
-
-api.reset = function reset() {
-  cache = {};
-};
 
 api.setEndpoint = (e: string) => {
   endpoint = e;
