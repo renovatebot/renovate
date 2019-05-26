@@ -1,5 +1,5 @@
 const got = require('../../../lib/util/got');
-const get = require('../../../lib/platform/gitlab/got');
+const get = require('../../../lib/platform/gitlab/gl-got-wrapper');
 const hostRules = require('../../../lib/util/host-rules');
 
 jest.mock('../../../lib/util/got');
@@ -9,7 +9,7 @@ hostRules.add({
   token: 'abc123',
 });
 
-describe('platform/gitlab/got', () => {
+describe('platform/gitlab/gl-got-wrapper', () => {
   const body = ['a', 'b'];
   afterEach(() => {
     jest.resetAllMocks();
