@@ -4,8 +4,6 @@ import URL from 'url';
 import * as hostRules from '../../util/host-rules';
 import { IGotApi, IGotApiOptions } from '../common';
 
-let cache: Renovate.IDict<got.Response<any>> = {};
-
 const endpoint = 'https://api.bitbucket.org/';
 
 async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
@@ -14,13 +12,6 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
     json: true,
     ...options,
   };
-  const method = (
-    opts.method || /* istanbul ignore next */ 'get'
-  ).toLowerCase();
-  if (method === 'get' && cache[path]) {
-    logger.trace({ path }, 'Returning cached result');
-    return cache[path];
-  }
   opts.headers = {
     'user-agent': 'https://github.com/renovatebot/renovate',
     ...opts.headers,
@@ -28,9 +19,6 @@ async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
   const { username, password } = hostRules.find({ hostType: 'bitbucket', url });
   opts.auth = `${username}:${password}`;
   const res = await utilgot(url, opts);
-  if (method.toLowerCase() === 'get') {
-    cache[path] = res;
-  }
   return res;
 }
 
@@ -43,8 +31,6 @@ for (const x of helpers) {
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
-api.reset = function reset() {
-  cache = {};
-};
+api.reset = function reset() {};
 
 export default api;
