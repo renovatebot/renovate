@@ -1,20 +1,15 @@
-import got from 'got';
-import utilgot from '../../util/got';
-import URL from 'url';
+import { GotJSONOptions } from 'got';
+import got from '../../util/got';
 import { IGotApi, IGotApiOptions } from '../common';
 
-async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
-  const opts: IGotApiOptions & got.GotJSONOptions = {
-    json: true,
+async function get(path: string, options: IGotApiOptions & GotJSONOptions) {
+  const opts: IGotApiOptions & GotJSONOptions = {
     ...options,
+    json: true,
     hostType: 'bitbucket',
     baseUrl: 'https://api.bitbucket.org/',
   };
-  opts.headers = {
-    'user-agent': 'https://github.com/renovatebot/renovate',
-    ...opts.headers,
-  };
-  const res = await utilgot(path, opts);
+  const res = await got(path, opts);
   return res;
 }
 
