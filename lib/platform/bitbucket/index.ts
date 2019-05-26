@@ -74,7 +74,6 @@ export async function initRepo({
     hostType: 'bitbucket',
     url: 'https://api.bitbucket.org/',
   });
-  api.reset();
   config = {} as any;
   // TODO: get in touch with @rarkins about lifting up the caching into the app layer
   config.repository = repository;
@@ -636,7 +635,6 @@ export function cleanRepo() {
   if (config.storage && config.storage.cleanRepo) {
     config.storage.cleanRepo();
   }
-  api.reset();
   config = {} as any;
 }
 
