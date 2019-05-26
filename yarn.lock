@@ -3040,13 +3040,6 @@ github-url-from-git@1.5.0:
   resolved "https://registry.yarnpkg.com/github-url-from-git/-/github-url-from-git-1.5.0.tgz#f985fedcc0a9aa579dc88d7aff068d55cc6251a0"
   integrity sha1-+YX+3MCpqledyI16/waNVcxiUaA=
 
-gl-got@9.0.3:
-  version "9.0.3"
-  resolved "https://registry.yarnpkg.com/gl-got/-/gl-got-9.0.3.tgz#ceddbbf71f09d9369d9179a35ca919ffb289259b"
-  integrity sha512-qT1Jx80DvD99G/gjG5ZHOEv9RS55mwyRakMhe4U4+BSvoTn0Mjjs01t7mRUHoB6TxaoublB2Bv0IYcXzOgKGrQ==
-  dependencies:
-    got "^9.2.0"
-
 glob-parent@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-3.1.0.tgz#9e6af6299d8d3bd2bd40430832bd113df906c5ae"
@@ -3129,7 +3122,7 @@ globby@^9.0.0:
     pify "^4.0.1"
     slash "^2.0.0"
 
-got@9.6.0, got@^9.2.0, got@^9.5.0:
+got@9.6.0, got@^9.5.0:
   version "9.6.0"
   resolved "https://registry.yarnpkg.com/got/-/got-9.6.0.tgz#edf45e7d67f99545705de1f7bbeeeb121765ed85"
   integrity sha512-R7eWptXuGYxwijs0eV+v3o6+XH1IqVK8dJOEecQfTmkncw9AV4dcw/Dhxi8MdlqPthxxpZyizMzyg8RTmEsG+Q==
