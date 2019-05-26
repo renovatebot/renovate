@@ -238,7 +238,7 @@
     }
   },
   "release": {
-    "branch": "master",
+    "branch": "v17",
     "tagFormat": "${version}"
   }
 }
