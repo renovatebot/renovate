@@ -9,12 +9,8 @@
       "env": { "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
       "disableOptimisticBPs": true,
-      "runtimeArgs": [
-        "--nolazy",
-        "--preserve-symlinks",
-        "-r",
-        "ts-node/register"
-      ],
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
+      "runtimeArgs": ["--nolazy", "--extensions", ".ts,.js"],
       "protocol": "inspector",
       "skipFiles": ["<node_internals>/**/*.js"]
     },
