@@ -6,7 +6,6 @@ jest.mock('../../../lib/util/got');
 jest.mock('delay');
 
 describe('platform/gh-got-wrapper', () => {
-  const body = ['a', 'b'];
   beforeEach(() => {
     jest.resetAllMocks();
     get.reset();
@@ -145,118 +144,6 @@ describe('platform/gh-got-wrapper', () => {
     }
     expect(e).toBeDefined();
     expect(e.message).toEqual('platform-failure');
-  });
-  it('should retry 502s', async () => {
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 502,
-      })
-    );
-    got.mockImplementationOnce(() => ({
-      body,
-    }));
-    const res = await get('some-url');
-    expect(res.body).toEqual(body);
-  });
-  it('should retry 502s until success', async () => {
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 502,
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 502,
-      })
-    );
-    got.mockImplementationOnce(() => ({
-      body,
-    }));
-    const res = await get('some-url');
-    expect(got).toHaveBeenCalledTimes(3);
-    expect(res.body).toEqual(body);
-  });
-  it('should retry until failure', async () => {
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 502,
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 403,
-        message: 'Bad bot.',
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 502,
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 403,
-        message:
-          'You have triggered an abuse detection mechanism. Please wait a few minutes before you try again.',
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 404,
-      })
-    );
-    await expect(get('some-url')).rejects.toEqual({
-      statusCode: 404,
-    });
-  });
-  it('should give up after 5 retries', async () => {
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 502,
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 502,
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 500,
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 500,
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 502,
-      })
-    );
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 403,
-        message: 'Bad bot.',
-      })
-    );
-    await expect(get('some-url')).rejects.toEqual({
-      statusCode: 403,
-      message: 'Bad bot.',
-    });
-  });
-  it('should retry posts', async () => {
-    got.mockImplementationOnce(() =>
-      Promise.reject({
-        statusCode: 502,
-      })
-    );
-    got.mockImplementationOnce(() => ({
-      body,
-    }));
-    const res = await get.post('some-url');
-    expect(res.body).toEqual(body);
   });
   it('should throw platform failure ParseError', async () => {
     got.mockImplementationOnce(() =>
