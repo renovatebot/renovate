@@ -1,8 +1,6 @@
 const upath = require('upath');
 const os = require('os');
 
-jest.mock('gh-got');
-
 const cache = require('../lib/workers/global/cache');
 
 global.platform = jest.genMockFromModule('../lib/platform/github');
