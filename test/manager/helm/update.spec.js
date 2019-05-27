@@ -5,7 +5,7 @@ describe('lib/manager/helm/extract', () => {
     it('returns the same fileContent', () => {
       const fileContent = 'some_content';
       const upgrade = {};
-      expect(updateDependency(content)).toBe(content);
+      expect(updateDependency(fileContent, upgrade)).toBe(fileContent);
     });
   });
 });

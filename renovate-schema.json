@@ -995,6 +995,14 @@
       },
       "$ref": "#"
     },
+    "helm": {
+      "description": "Configuration object for helm (kubernetes package manager) renovation.",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)requirements.ya?ml$"]
+      },
+      "$ref": "#"
+    },
     "circleci": {
       "description": "Configuration object for CircleCI yml renovation. Also inherits settings from `docker` object.",
       "type": "object",
