@@ -721,6 +721,11 @@ describe('platform/github', () => {
           data: {
             repository: {
               issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
                 nodes: [
                   {
                     number: 2,
@@ -750,6 +755,11 @@ describe('platform/github', () => {
           data: {
             repository: {
               issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
                 nodes: [
                   {
                     number: 2,
@@ -776,6 +786,11 @@ describe('platform/github', () => {
           data: {
             repository: {
               issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
                 nodes: [
                   {
                     number: 2,
@@ -802,6 +817,11 @@ describe('platform/github', () => {
           data: {
             repository: {
               issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
                 nodes: [
                   {
                     number: 2,
@@ -829,6 +849,11 @@ describe('platform/github', () => {
           data: {
             repository: {
               issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
                 nodes: [
                   {
                     number: 3,
@@ -861,6 +886,11 @@ describe('platform/github', () => {
           data: {
             repository: {
               issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
                 nodes: [
                   {
                     number: 2,
@@ -888,6 +918,11 @@ describe('platform/github', () => {
           data: {
             repository: {
               issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
                 nodes: [
                   {
                     number: 2,
@@ -915,6 +950,11 @@ describe('platform/github', () => {
           data: {
             repository: {
               issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
                 nodes: [
                   {
                     number: 2,
@@ -944,6 +984,11 @@ describe('platform/github', () => {
           data: {
             repository: {
               issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
                 nodes: [
                   {
                     number: 2,
