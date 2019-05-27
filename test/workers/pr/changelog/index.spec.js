@@ -1,6 +1,6 @@
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
-jest.mock('got');
+jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 
 const hostRules = require('../../../../lib/util/host-rules');
 const ghGot = require('../../../../lib/platform/github/gh-got-wrapper');
