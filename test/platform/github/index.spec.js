@@ -16,7 +16,7 @@ describe('platform/github', () => {
     github = require('../../../lib/platform/github');
     hostRules = require('../../../lib/util/host-rules');
     jest.mock('../../../lib/platform/git/storage');
-    GitStorage = require('../../../lib/platform/git/storage');
+    GitStorage = require('../../../lib/platform/git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),
