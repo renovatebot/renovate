@@ -11,6 +11,7 @@ describe('platform/github', () => {
     jest.mock('delay');
     jest.mock('../../../lib/platform/github/gh-got-wrapper');
     jest.mock('../../../lib/util/host-rules');
+    jest.mock('../../../lib/util/got');
     get = require('../../../lib/platform/github/gh-got-wrapper');
     github = require('../../../lib/platform/github');
     hostRules = require('../../../lib/util/host-rules');
@@ -350,7 +351,6 @@ describe('platform/github', () => {
       });
       await expect(
         github.initRepo({
-          gitFs: 'https',
           includeForks: true,
           repository: 'some/repo',
         })

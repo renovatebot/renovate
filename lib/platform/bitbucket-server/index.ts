@@ -47,7 +47,7 @@ export function initPlatform({
   const res = {
     endpoint: endpoint.replace(/\/?$/, '/'), // always add a trailing slash
   };
-  api.setEndpoint(res.endpoint);
+  api.setBaseUrl(res.endpoint);
   defaults.endpoint = res.endpoint;
   return res;
 }
@@ -76,38 +76,28 @@ export function cleanRepo() {
   if (config.storage) {
     config.storage.cleanRepo();
   }
-  api.reset();
   config = {} as any;
 }
 
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
-  endpoint,
   gitPrivateKey,
-  gitFs,
   localDir,
   bbUseDefaultReviewers,
 }: {
   repository: string;
-  endpoint: string;
   gitPrivateKey?: string;
-  gitFs?: string;
   localDir: string;
   bbUseDefaultReviewers?: boolean;
 }) {
   logger.debug(
-    `initRepo("${JSON.stringify(
-      { repository, endpoint, gitFs, localDir },
-      null,
-      2
-    )}")`
+    `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
   const opts = hostRules.find({
     hostType: defaults.hostType,
-    url: endpoint,
+    url: defaults.endpoint,
   });
-  api.reset();
 
   const [projectKey, repositorySlug] = repository.split('/');
   config = { projectKey, repositorySlug, gitPrivateKey, repository } as any;
@@ -118,10 +108,9 @@ export async function initRepo({
     config.bbUseDefaultReviewers = true;
   }
 
-  // Always gitFs
-  const { host, pathname } = url.parse(endpoint!);
+  const { host, pathname } = url.parse(defaults.endpoint!);
   const gitUrl = GitStorage.getUrl({
-    gitFs: endpoint.split(':')[0] as any,
+    protocol: defaults.endpoint!.split(':')[0] as any,
     auth: `${opts!.username}:${opts!.password}`,
     host: `${host}${pathname}${
       pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'

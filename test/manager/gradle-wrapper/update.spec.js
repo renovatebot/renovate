@@ -1,8 +1,8 @@
 const fs = require('fs');
-const got = require('got');
+const got = require('../../../lib/util/got');
 const dcUpdate = require('../../../lib/manager/gradle-wrapper/update');
 
-jest.mock('got');
+jest.mock('../../../lib/util/got');
 
 const propertiesFile2 = fs.readFileSync(
   'test/datasource/gradle-wrapper/_fixtures/gradle-wrapper-2.properties',

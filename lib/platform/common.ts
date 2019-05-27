@@ -2,6 +2,7 @@ import got from 'got';
 
 export interface IGotApiOptions {
   useCache?: boolean;
+  hostType?: string;
   body?: any;
 }
 
@@ -33,5 +34,5 @@ export interface IGotApi {
 
   reset(): void;
 
-  setEndpoint(endpoint: string): void;
+  setBaseUrl(endpoint: string): void;
 }

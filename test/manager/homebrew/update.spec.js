@@ -1,8 +1,8 @@
-const got = require('got');
 const fs = require('fs');
+const got = require('../../../lib/util/got');
 const { updateDependency } = require('../../../lib/manager/homebrew/update');
 
-jest.mock('got');
+jest.mock('../../../lib/util/got');
 
 const aide = fs.readFileSync('test/manager/homebrew/_fixtures/aide.rb', 'utf8');
 const ibazel = fs.readFileSync(
