@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const got = require('got');
+const got = require('../../../lib/util/got');
 const bazelfile = require('../../../lib/manager/bazel/update');
 
-jest.mock('got');
+jest.mock('../../../lib/util/got');
 
 const content = fs.readFileSync(
   path.resolve('test/manager/bazel/_fixtures/WORKSPACE1'),
@@ -93,7 +93,7 @@ describe('manager/bazel/update', () => {
         res.includes('"aaa09d789f3dba190787f8b4454c7d3c936fe123",  # v1.0.3')
       ).toBe(true);
     });
-    it('updates http archive', async () => {
+    it('updates WORKSPACE http archive', async () => {
       const upgrade = {
         depName: 'io_bazel_rules_go',
         depType: 'http_archive',

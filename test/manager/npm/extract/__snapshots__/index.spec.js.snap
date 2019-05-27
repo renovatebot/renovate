@@ -119,7 +119,7 @@ Object {
   "npmLock": undefined,
   "npmrc": undefined,
   "packageJsonName": undefined,
-  "packageJsonType": "app",
+  "packageJsonType": "library",
   "packageJsonVersion": undefined,
   "pnpmShrinkwrap": undefined,
   "skipInstalls": false,

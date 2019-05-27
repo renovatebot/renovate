@@ -27,7 +27,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*.spec.ts'],
+      files: ['*.spec.js', '*.spec.ts'],
       rules: {
         'global-require': 0,
         'prefer-promise-reject-errors': 0,

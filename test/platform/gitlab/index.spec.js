@@ -33,8 +33,6 @@ describe('platform/gitlab', () => {
       ),
     }));
     hostRules.find.mockReturnValue({
-      platform: 'github',
-      endpoint: 'https://gitlab.com/v4/',
       token: 'abc123',
     });
   });
@@ -761,7 +759,7 @@ These updates have all been created already. Click a checkbox below to force a r
     });
   });
   describe('getCommitMessages()', () => {
-    it('passes to gitFs', async () => {
+    it('passes to git', async () => {
       await initRepo();
       await gitlab.getCommitMessages();
     });

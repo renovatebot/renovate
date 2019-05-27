@@ -91,7 +91,7 @@
     "@renovate/pep440": "0.4.1",
     "@renovatebot/docker-registry-client": "3.3.0",
     "@sindresorhus/is": "0.17.0",
-    "@snyk/ruby-semver": "rarkins/ruby-semver.git#semverfix",
+    "@snyk/ruby-semver": "2.0.2",
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "8.0.0",
     "bunyan": "1.8.12",
@@ -104,15 +104,14 @@
     "compare-versions": "3.4.0",
     "conventional-commits-detector": "1.0.2",
     "convert-hrtime": "2.0.0",
+    "deepmerge": "3.2.0",
     "delay": "4.2.0",
     "detect-indent": "5.0.0",
     "email-addresses": "3.0.3",
     "form-data": "2.3.3",
     "fs-extra": "7.0.1",
     "get-installed-path": "4.0.8",
-    "gh-got": "8.1.0",
     "github-url-from-git": "1.5.0",
-    "gl-got": "9.0.3",
     "got": "9.6.0",
     "handlebars": "4.1.2",
     "ini": "1.3.5",
@@ -166,7 +165,6 @@
     "@typescript-eslint/parser": "1.9.0",
     "chai": "4.2.0",
     "copyfiles": "2.1.0",
-    "coveralls": "3.0.3",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb-base": "13.1.0",
@@ -231,7 +229,7 @@
     "preset": "ts-jest/presets/js-with-ts"
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "next"
   },
   "husky": {
     "hooks": {
@@ -240,6 +238,20 @@
   },
   "release": {
     "branch": "master",
+    "analyzeCommits": {	
+      "preset": "angular",	
+      "releaseRules": [	
+        {	
+          "type": "docs",	
+          "scope": "readme.md",	
+          "release": "patch"	
+        },		
+        {	
+          "type": "build",	
+          "release": "patch"	
+        }	
+      ]	
+    },
     "tagFormat": "${version}"
   }
 }

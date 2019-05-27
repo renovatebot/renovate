@@ -307,13 +307,7 @@ class Storage {
       logger.debug({ branchName }, 'Deleted remote branch');
     } catch (err) /* istanbul ignore next */ {
       logger.info({ branchName, err }, 'Error deleting remote branch');
-      if (err.message.includes('.github/main.workflow')) {
-        logger.warn(
-          'A GitHub bug prevents gitFs + GitHub Actions. Please disable gitFs'
-        );
-      } else {
-        throw new Error('repository-changed');
-      }
+      throw new Error('repository-changed');
     }
     try {
       await this._deleteLocalBranch(branchName);
@@ -414,15 +408,7 @@ class Storage {
       this._config.branchExists[branchName] = true;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error commiting files');
-      if (err.message.includes('.github/main.workflow')) {
-        logger.warn(
-          'A GitHub bug prevents gitFs + GitHub Actions. Please disable gitFs'
-        );
-        throw new Error('disable-gitfs');
-      } else if (err.message.includes('[remote rejected]')) {
-        throw new Error('repository-changed');
-      }
-      throw err;
+      throw new Error('repository-changed');
     }
   }
 
@@ -430,28 +416,23 @@ class Storage {
   cleanRepo() {}
 
   static getUrl({
-    gitFs,
+    protocol,
     auth,
     hostname,
     host,
     repository,
   }: {
-    gitFs?: 'ssh' | 'http' | 'https';
+    protocol?: 'ssh' | 'http' | 'https';
     auth?: string;
     hostname?: string;
     host?: string;
     repository: string;
   }) {
-    let protocol = gitFs || 'https';
-    // istanbul ignore if
-    if (protocol.toString() === 'true') {
-      protocol = 'https';
-    }
     if (protocol === 'ssh') {
       return `git@${hostname}:${repository}.git`;
     }
     return URL.format({
-      protocol,
+      protocol: protocol || 'https',
       auth,
       hostname,
       host,

@@ -67,32 +67,62 @@ Object {
       "currentValue": ">=3.2.1,<4.0",
       "datasource": "pypi",
       "depName": "statsd",
-      "lineNumber": 63,
+      "lineNumber": 62,
     },
     Object {
       "currentValue": ">=2.10.0,<3.0",
       "datasource": "pypi",
       "depName": "requests",
-      "lineNumber": 64,
+      "lineNumber": 63,
       "skipReason": "ignored",
     },
     Object {
       "currentValue": ">=5.27.1,<7.0",
       "datasource": "pypi",
       "depName": "raven",
-      "lineNumber": 65,
+      "lineNumber": 64,
     },
     Object {
       "currentValue": ">=0.15.2,<0.17",
       "datasource": "pypi",
       "depName": "future",
-      "lineNumber": 66,
+      "lineNumber": 65,
     },
     Object {
       "currentValue": ">=1.0.16,<2.0",
       "datasource": "pypi",
       "depName": "ipaddress",
-      "lineNumber": 67,
+      "lineNumber": 66,
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/pip_setup/extract getPythonAlias finds python 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "python --version",
+    ],
+    Array [
+      "python3 --version",
+    ],
+    Array [
+      "python3.7 --version",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+    Object {
+      "type": "return",
+      "value": Promise {},
     },
   ],
 }

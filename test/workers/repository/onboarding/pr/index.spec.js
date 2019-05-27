@@ -63,5 +63,10 @@ describe('workers/repository/onboarding/pr', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
+    it('creates PR (no require config)', async () => {
+      config.requireConfig = false;
+      await ensureOnboardingPr(config, packageFiles, branches);
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+    });
   });
 });

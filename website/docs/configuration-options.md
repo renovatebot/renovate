@@ -179,6 +179,8 @@ This is used to manually restrict which versions are possible to upgrade to base
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
+## deps-edn
+
 ## description
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
@@ -321,13 +323,15 @@ And then the branchName would be `renovate/eslint` instead.
 
 ## hostRules
 
+The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`. All are optional, but you can only have one of the last three per rule.
+
 Example for configuring `docker` auth:
 
 ```json
 {
   "hostRules": [
     {
-      "hostType": "docker",
+      "domainName": "docker.io",
       "username": "<some-username>",
       "password": "<some-password>"
     }
@@ -335,7 +339,25 @@ Example for configuring `docker` auth:
 }
 ```
 
+### baseUrl
+
+Renovate will match against all baseUrls. It does not do a "longest match" algorithm so if you want one baseUrl to override another than make sure it occurs _after_ the first one in the order of `hostRules`.
+
+### domainName
+
+### hostName
+
 ### hostType
+
+### timeout
+
+Use this figure to adjust the timeout for queries. The default is 60s, which is quite high. To adjust it down to 10s for all queries, do this:
+
+```json
+  "hostRules": [{
+    "timeout": 10000,
+  }]
+```
 
 ## ignoreDeprecated
 
@@ -439,6 +461,8 @@ Add an array of 1 or more strings to `labels` and Renovate will apply these labe
 ## lazyGrouping
 
 The default behaviour for Renovate is to only use group names for branches and PRs when there's more than one dependency in a group. For example you may have defined a dependency group calls "All eslint packages" with a `packagePattern` of `^eslint`, but if the only upgrade available at the time is `eslint-config-airbnb` then it makes more sense for the PR to be named "Upgrade eslint-config-airbnb to version 2.1.4" than to name it "Upgrade All eslint packages". If ever this behaviour is undesirable then you can override it by setting this option to `false`.
+
+## leiningen
 
 ## lockFileMaintenance
 

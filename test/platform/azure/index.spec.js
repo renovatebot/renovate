@@ -33,7 +33,6 @@ describe('platform/azure', () => {
       getRepoStatus: jest.fn(),
     }));
     hostRules.find.mockReturnValue({
-      endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
     });
     azure.initPlatform({

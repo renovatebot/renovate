@@ -70,16 +70,17 @@ export async function initRepo({
   localDir: string;
 }) {
   logger.debug(`initRepo("${repository}")`);
-  const opts = hostRules.find({ hostType: 'bitbucket' });
-  api.reset();
+  const opts = hostRules.find({
+    hostType: 'bitbucket',
+    url: 'https://api.bitbucket.org/',
+  });
   config = {} as any;
   // TODO: get in touch with @rarkins about lifting up the caching into the app layer
   config.repository = repository;
   const platformConfig: any = {};
 
-  // Always gitFs
   const url = GitStorage.getUrl({
-    gitFs: 'https',
+    protocol: 'https',
     auth: `${opts!.username}:${opts!.password}`,
     hostname: 'bitbucket.org',
     repository,
@@ -634,7 +635,6 @@ export function cleanRepo() {
   if (config.storage && config.storage.cleanRepo) {
     config.storage.cleanRepo();
   }
-  api.reset();
   config = {} as any;
 }
 
