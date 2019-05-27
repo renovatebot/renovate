@@ -432,10 +432,10 @@
     into-stream "^4.0.0"
     lodash "^4.17.4"
 
-"@sindresorhus/is@0.17.0":
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.17.0.tgz#37d16c3df3a8b4dcc930210ff68ff3ace35f5ab4"
-  integrity sha512-hGqdhem3E9L+BBPpkRZQ9RtSg+MpbGfoDXNxuPFgJtM7/CiZHU+Jit0DywctJOsWV0jAPp9RpO8QB7GSaVZq8A==
+"@sindresorhus/is@0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.17.1.tgz#453b27750f358689c4aa3c9f32d9ace1f0929a79"
+  integrity sha512-kg/maAZD2Z2AHDFp7cY/ACokjUL0e7MaupTtGXkSW2SV4DJQEHdslFUioP0SMccotjwqTdI0b4XH/qZh6CN+kQ==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
