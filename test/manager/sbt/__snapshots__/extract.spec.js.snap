@@ -135,3 +135,29 @@ Object {
   ],
 }
 `;
+
+exports[`lib/manager/terraform/extract extractPackageFile() skips deps when scala version is missing 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "3.0.0",
+      "datasource": "maven",
+      "depName": "org.scalatest:scalatest",
+      "fileReplacePosition": 65,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+      "skipReason": "unsupported",
+    },
+    Object {
+      "currentValue": "1.0.11",
+      "datasource": "maven",
+      "depName": "com.github.gseitz:sbt-release",
+      "fileReplacePosition": 100,
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+  ],
+}
+`;
