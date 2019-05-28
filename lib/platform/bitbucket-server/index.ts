@@ -176,8 +176,9 @@ export async function setBaseBranch(branchName: string = config.defaultBranch) {
   await config.storage.setBaseBranch(branchName);
 }
 
-// istanbul ignore next
-export function setBranchPrefix(branchPrefix: string) {
+export /* istanbul ignore next */ function setBranchPrefix(
+  branchPrefix: string
+) {
   return config.storage.setBranchPrefix(branchPrefix);
 }
 
@@ -275,8 +276,7 @@ export function getBranchLastCommitTime(branchName: string) {
   return config.storage.getBranchLastCommitTime(branchName);
 }
 
-// istanbul ignore next
-export function getRepoStatus() {
+export /* istanbul ignore next */ function getRepoStatus() {
   return config.storage.getRepoStatus();
 }
 
@@ -405,8 +405,7 @@ export async function setBranchStatus(
 //   return [];
 // }
 
-// istanbul ignore next
-export function findIssue(title: string) {
+export /* istanbul ignore next */ function findIssue(title: string) {
   logger.debug(`findIssue(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -414,8 +413,10 @@ export function findIssue(title: string) {
   return null;
 }
 
-// istanbul ignore next
-export function ensureIssue(title: string, body: string) {
+export /* istanbul ignore next */ function ensureIssue(
+  title: string,
+  body: string
+) {
   logger.debug(`ensureIssue(${title}, body={${body}})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -423,15 +424,13 @@ export function ensureIssue(title: string, body: string) {
   return null;
 }
 
-// istanbul ignore next
-export function getIssueList() {
+export /* istanbul ignore next */ function getIssueList() {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return [];
 }
 
-// istanbul ignore next
-export function ensureIssueClosing(title: string) {
+export /* istanbul ignore next */ function ensureIssueClosing(title: string) {
   logger.debug(`ensureIssueClosing(${title})`);
   // TODO: Needs implementation
   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
@@ -622,10 +621,10 @@ export async function ensureCommentRemoval(prNo: number, topic: string) {
 }
 
 // TODO: coverage
-// istanbul ignore next
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getPrList(_args?: any) {
   logger.debug(`getPrList()`);
+  // istanbul ignore next
   if (!config.prList) {
     const values = await utils.accumulateValues(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${
