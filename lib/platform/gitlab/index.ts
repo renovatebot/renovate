@@ -153,8 +153,9 @@ export async function setBaseBranch(branchName = config.baseBranch) {
   await config.storage.setBaseBranch(branchName);
 }
 
-// istanbul ignore next
-export function setBranchPrefix(branchPrefix: string) {
+export /* istanbul ignore next */ function setBranchPrefix(
+  branchPrefix: string
+) {
   return config.storage.setBranchPrefix(branchPrefix);
 }
 
