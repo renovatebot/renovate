@@ -5,7 +5,7 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "0.0.1",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.example:foo",
       "fileReplacePosition": 130,
       "registryUrls": Array [
@@ -19,7 +19,7 @@ Object {
     },
     Object {
       "currentValue": "0.0.2",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.example:bar_2.12",
       "fileReplacePosition": 186,
       "registryUrls": Array [
@@ -33,7 +33,7 @@ Object {
     },
     Object {
       "currentValue": "0.0.3",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.example:baz_2.12",
       "fileReplacePosition": 250,
       "registryUrls": Array [
@@ -47,7 +47,7 @@ Object {
     },
     Object {
       "currentValue": "0.0.4",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.example:qux",
       "fileReplacePosition": 285,
       "registryUrls": Array [
@@ -61,7 +61,7 @@ Object {
     },
     Object {
       "currentValue": "0.0.5",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.example:quux",
       "fileReplacePosition": 344,
       "registryUrls": Array [
@@ -75,7 +75,7 @@ Object {
     },
     Object {
       "currentValue": "0.0.6",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.example:quuz_2.12",
       "depType": "test",
       "fileReplacePosition": 519,
@@ -90,7 +90,7 @@ Object {
     },
     Object {
       "currentValue": "0.0.7",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.example:corge",
       "depType": "Provided",
       "fileReplacePosition": 577,
@@ -105,7 +105,7 @@ Object {
     },
     Object {
       "currentValue": "0.0.8",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.example:grault",
       "depType": "Test",
       "fileReplacePosition": 472,
@@ -120,8 +120,9 @@ Object {
     },
     Object {
       "currentValue": "0.0.9",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.example:waldo",
+      "depType": "plugin",
       "fileReplacePosition": 979,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -141,18 +142,18 @@ Object {
   "deps": Array [
     Object {
       "currentValue": "3.0.0",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "org.scalatest:scalatest",
       "fileReplacePosition": 65,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
       ],
-      "skipReason": "unsupported",
     },
     Object {
       "currentValue": "1.0.11",
-      "datasource": "maven",
+      "datasource": "sbt",
       "depName": "com.github.gseitz:sbt-release",
+      "depType": "plugin",
       "fileReplacePosition": 100,
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
