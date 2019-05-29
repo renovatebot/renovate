@@ -23,7 +23,7 @@ interface ILocalConfig extends IStorageConfig {
   branchPrefix: string;
 }
 
-class Storage {
+export class Storage {
   private _config: ILocalConfig = {} as any;
 
   private _git: Git.SimpleGit | undefined;
@@ -445,4 +445,4 @@ function localName(branchName: string) {
   return branchName.replace(/^origin\//, '');
 }
 
-export = Storage;
+export default Storage;

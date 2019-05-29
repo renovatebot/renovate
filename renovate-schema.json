@@ -1182,6 +1182,11 @@
     "hostRules": {
       "description": "Host rules/configuration including credentials",
       "type": "array",
+      "default": [
+        {
+          "timeout": 60000
+        }
+      ],
       "items": {
         "allOf": [
           {
@@ -1202,6 +1207,10 @@
               "baseUrl": {
                 "description": "baseUrl for a host rule. e.g. \"https://api.github.com/\"",
                 "type": "string"
+              },
+              "timeout": {
+                "description": "timeout (in milliseconds) for queries to external endpoints",
+                "type": "integer"
               }
             }
           }

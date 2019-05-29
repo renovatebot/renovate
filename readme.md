@@ -40,7 +40,7 @@ The easiest way to use Renovate if you are hosted on GitHub.com or GitLab.com is
 For GitHub, go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to install
 it now. A GitHub Marketplace plan is required only for private repositories. [More details on the GitHub App installation](https://renovatebot.com/docs/install-github-app/).
 
-For GitLab, log into [renovatebot.com/dashboard](https://renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project. Currently the GitLab app is free for both pubic and private repositories. [More details on the GitLab App installation](https://renovatebot.com/docs/install-gitlab-app/).
+For GitLab, log into [renovatebot.com/dashboard](https://renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project. Currently the GitLab app is free for both public and private repositories. [More details on the GitLab App installation](https://renovatebot.com/docs/install-gitlab-app/).
 
 ## Configuration
 

@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/gl-got-wrapper returns cached 1`] = `
+Object {
+  "body": Object {},
+}
+`;

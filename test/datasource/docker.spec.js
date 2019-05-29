@@ -102,7 +102,7 @@ describe('api/docker', () => {
         { lookupName: 'some-dep' },
         'some-tag'
       );
-      expect(got.mock.calls[1][1].headers.Authorization).toBe(
+      expect(got.mock.calls[1][1].headers.authorization).toBe(
         'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
       );
       expect(res).toBe('some-digest');

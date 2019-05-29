@@ -43,6 +43,7 @@ describe('api/npm', () => {
         '0.0.2': '2018-05-07T07:21:53+02:00',
       },
     };
+    nock.cleanAll();
     return global.renovateCache.rmAll();
   });
   afterEach(() => {
@@ -232,6 +233,13 @@ describe('api/npm', () => {
     const res = await npm.getPkgReleases({ lookupName: 'foobar' });
     expect(res).toMatchSnapshot();
   });
+  it('should reject name mismatch', async () => {
+    nock('https://registry.npmjs.org')
+      .get('/different')
+      .reply(200, npmResponse);
+    const res = await npm.getPkgReleases({ lookupName: 'different' });
+    expect(res).toBeNull();
+  });
   it('should handle no time', async () => {
     delete npmResponse.time['0.0.2'];
     nock('https://registry.npmjs.org')
@@ -301,19 +309,6 @@ describe('api/npm', () => {
     await expect(npm.getPkgReleases({ lookupName: 'foobar' })).rejects.toThrow(
       Error('registry-failure')
     );
-  });
-  it('should retry when 408 or 5xx', async () => {
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(503);
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(408);
-    nock('https://registry.npmjs.org')
-      .get('/foobar')
-      .reply(200);
-    const res = await npm.getPkgReleases({ lookupName: 'foobar' });
-    expect(res).toMatchSnapshot();
   });
   it('should throw error for others', async () => {
     nock('https://registry.npmjs.org')
