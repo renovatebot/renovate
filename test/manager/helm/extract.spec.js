@@ -2,7 +2,7 @@ const { extractPackageFile } = require('../../../lib/manager/helm/extract');
 
 describe('lib/manager/helm/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns empty array', () => {
+    it('parses simple requirements.yaml correctly', () => {
       const content = `
       dependencies:
         - name: redis
@@ -14,6 +14,18 @@ describe('lib/manager/helm/extract', () => {
       `;
       expect(extractPackageFile(content)).not.toBeNull();
       expect(extractPackageFile(content)).toMatchSnapshot();
+    });
+    it('returns null if requirements.yaml is invalid', () => {
+      const content = `
+      Invalid requirements.yaml content.
+      dependencies:
+      [
+      `;
+      expect(extractPackageFile(content)).toBeNull();
+    });
+    it('returns null if requirements.yaml is empty', () => {
+      const content = '';
+      expect(extractPackageFile(content)).toBeNull();
     });
   });
 });

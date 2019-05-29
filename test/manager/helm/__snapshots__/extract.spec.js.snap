@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/helm/extract extractPackageFile() returns empty array 1`] = `
+exports[`lib/manager/helm/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
 Object {
   "deps": Array [
     Object {

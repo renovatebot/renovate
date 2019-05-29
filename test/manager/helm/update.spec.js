@@ -13,6 +13,18 @@ describe('lib/manager/helm/extract', () => {
           repository: https://kubernetes-charts.storage.googleapis.com/
       `;
       const upgrade = undefined;
+
+      expect(updateDependency(content, upgrade)).toBe(content);
+    });
+    it('returns the same fileContent for invalid requirements.yaml file', () => {
+      const content = `
+       Invalid requirements.yaml content.
+      `;
+      const upgrade = {
+        depName: 'redis',
+        newValue: '0.11.0',
+        repository: 'https://kubernetes-charts.storage.googleapis.com/',
+      };
       expect(updateDependency(content, upgrade)).toBe(content);
     });
     it('returns the same fileContent for empty upgrade', () => {
@@ -58,6 +70,24 @@ describe('lib/manager/helm/extract', () => {
       `;
       const upgrade = {
         depName: 'redis',
+        newValue: '0.11.0',
+        repository: 'https://kubernetes-charts.storage.googleapis.com/',
+      };
+      expect(updateDependency(content, upgrade)).not.toBe(content);
+      expect(updateDependency(content, upgrade)).toMatchSnapshot();
+    });
+    it('upgrades dependency if newValue version value is repeated', () => {
+      const content = `
+      dependencies:
+        - version: 0.9.0
+          name: redis
+          repository: https://kubernetes-charts.storage.googleapis.com/
+        - name: postgresql
+          version: 0.9.0
+          repository: https://kubernetes-charts.storage.googleapis.com/
+      `;
+      const upgrade = {
+        depName: 'postgresql',
         newValue: '0.11.0',
         repository: 'https://kubernetes-charts.storage.googleapis.com/',
       };
