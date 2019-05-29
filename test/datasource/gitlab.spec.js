@@ -1,5 +1,5 @@
 const gitlab = require('../../lib/datasource/gitlab');
-const glGot = require('../../lib/platform/gitlab/gl-got-wrapper');
+const glGot = require('../../lib/platform/gitlab/gl-got-wrapper').api.get;
 
 jest.mock('../../lib/platform/gitlab/gl-got-wrapper');
 jest.mock('../../lib/util/got');
@@ -30,19 +30,19 @@ describe('datasource/gitlab', () => {
       await expect(gitlab.getPreset('some/repo')).rejects.toThrow();
     });
     it('should return the preset', async () => {
-      glGot.mockImplementationOnce(() => ({
+      glGot.mockResolvedValueOnce({
         body: [
           {
             name: 'master',
             default: true,
           },
         ],
-      }));
-      glGot.mockImplementationOnce(() => ({
+      });
+      glGot.mockResolvedValueOnce({
         body: {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         },
-      }));
+      });
       const content = await gitlab.getPreset('some/repo');
       expect(content).toEqual({ foo: 'bar' });
     });

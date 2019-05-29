@@ -26,7 +26,7 @@ describe('platform', () => {
   });
 
   it('has a list of supported methods for gitlab', () => {
-    const gitlabMethods = Object.keys(gitlab);
+    const gitlabMethods = Object.keys(gitlab).sort();
     expect(gitlabMethods).toMatchSnapshot();
   });
 
