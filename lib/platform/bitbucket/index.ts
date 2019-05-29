@@ -133,8 +133,9 @@ export async function setBaseBranch(branchName = config.baseBranch) {
   await getFileList(branchName);
 }
 
-// istanbul ignore next
-export function setBranchPrefix(branchPrefix: string) {
+export /* istanbul ignore next */ function setBranchPrefix(
+  branchPrefix: string
+) {
   return config.storage.setBranchPrefix(branchPrefix);
 }
 
@@ -381,8 +382,7 @@ export async function ensureIssue(title: string, body: string) {
   return null;
 }
 
-// istanbul ignore next
-export function getIssueList() {
+export /* istanbul ignore next */ function getIssueList() {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return [];
@@ -416,8 +416,7 @@ export async function addReviewers(prId: number, reviewers: string[]) {
   });
 }
 
-// istanbul ignore next
-export function deleteLabel() {
+export /* istanbul ignore next */ function deleteLabel() {
   throw new Error('deleteLabel not implemented');
 }
 

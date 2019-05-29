@@ -15,7 +15,7 @@ describe('platform/azure', () => {
     azure = require('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
     azureHelper = require('../../../lib/platform/azure/azure-helper');
-    GitStorage = require('../../../lib/platform/git/storage');
+    GitStorage = require('../../../lib/platform/git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),

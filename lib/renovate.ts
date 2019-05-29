@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-require('./proxy');
-const globalWorker = require('./workers/global');
+import './proxy';
+import * as globalWorker from './workers/global';
 
 (async () => {
   await globalWorker.start();
