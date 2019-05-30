@@ -16,7 +16,16 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab commitFilesToBranch() sends to gitFs 1`] = `Array []`;
+exports[`platform/gitlab commitFilesToBranch() sends to gitFs 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;
 
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 1`] = `
 Object {
