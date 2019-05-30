@@ -37,7 +37,7 @@ export default class Graphql {
     this.repoResultNumEls = numEls;
   }
 
-  async get(cursor = ''): Promise<T> {
+  async get(cursor = ''): Promise<any> {
     const url = 'graphql';
     const headers = {
       accept: 'application/vnd.github.merge-info-preview+json',
@@ -100,7 +100,7 @@ export default class Graphql {
     }
   }
 
-  async getAll(): Promise<T> {
+  async getAll(): Promise<any> {
     let [success, elements, nextCursor] = await this.get('');
     const allElements = [];
 
