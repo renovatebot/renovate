@@ -41,7 +41,7 @@ describe('platform/bitbucket-server', () => {
         jest.spyOn(api, 'put');
         jest.spyOn(api, 'delete');
         bitbucket = require('../../../lib/platform/bitbucket-server');
-        GitStorage = require('../../../lib/platform/git/storage');
+        GitStorage = require('../../../lib/platform/git/storage').Storage;
         GitStorage.mockImplementation(
           () =>
             ({

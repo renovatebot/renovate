@@ -29,29 +29,6 @@ describe('platform/gh-got-wrapper', () => {
     });
     expect(got.mock.calls[0][0].includes('/v3')).toBe(false);
   });
-  it('paginates', async () => {
-    got.mockReturnValueOnce({
-      headers: {
-        link:
-          '<https://api.github.com/search/code?q=addClass+user%3Amozilla&page=2>; rel="next", <https://api.github.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="last"',
-      },
-      body: ['a'],
-    });
-    got.mockReturnValueOnce({
-      headers: {
-        link:
-          '<https://api.github.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="next", <https://api.github.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="last"',
-      },
-      body: ['b', 'c'],
-    });
-    got.mockReturnValueOnce({
-      headers: {},
-      body: ['d'],
-    });
-    const res = await get('some-url', { paginate: true });
-    expect(res.body).toEqual(['a', 'b', 'c', 'd']);
-    expect(got).toHaveBeenCalledTimes(3);
-  });
   it('attempts to paginate', async () => {
     got.mockReturnValueOnce({
       headers: {
