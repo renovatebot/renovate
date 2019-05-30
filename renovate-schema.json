@@ -512,6 +512,7 @@
         "recreateClosed": true,
         "rebaseStalePrs": true,
         "groupName": "Pin Dependencies",
+        "groupSlug": "pin-dependencies",
         "commitMessageAction": "Pin",
         "group": {
           "commitMessageTopic": "dependencies",
