@@ -1,21 +1,17 @@
 import get from './gh-got-wrapper';
 
 export default class Graphql {
-  repoOwner: string;
+  repoOwner: string = '';
 
-  repoName: string;
+  repoName: string = '';
 
-  repoItem: string;
+  repoItem: string = '';
 
-  repoItemFilterBy: string;
+  repoItemFilterBy: string = '';
 
-  repoItemNodeList: string[];
+  repoItemNodeList: string[] = [];
 
-  repoResultNumEls: number;
-
-  constructor(): void {
-    this.repoResultNumEls = 100;
-  }
+  repoResultNumEls: number = 100;
 
   setRepoOwner(owner: string): void {
     this.repoOwner = owner;
@@ -41,7 +37,7 @@ export default class Graphql {
     this.repoResultNumEls = numEls;
   }
 
-  async get(cursor = ''): object {
+  async get(cursor = ''): Promise<T> {
     const url = 'graphql';
     const headers = {
       accept: 'application/vnd.github.merge-info-preview+json',
@@ -76,6 +72,7 @@ export default class Graphql {
     };
 
     try {
+      // prettier-ignore
       const res = JSON.parse((await get.post(url, options)).body);
 
       if (!res.data) {
@@ -85,7 +82,10 @@ export default class Graphql {
           return [false, [], ''];
         }
 
-        this.repoResultNumEls = parseInt(this.repoResultNumEls / 2, 10);
+        this.repoResultNumEls = parseInt(
+          (this.repoResultNumEls / 2).toString(),
+          10
+        );
         return await this.get(cursor);
       }
 
@@ -100,7 +100,7 @@ export default class Graphql {
     }
   }
 
-  async getAll(): object {
+  async getAll(): Promise<T> {
     let [success, elements, nextCursor] = await this.get('');
     const allElements = [];
 
