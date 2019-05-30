@@ -138,7 +138,7 @@
     "registry-auth-token": "3.4.0",
     "root-require": "0.3.1",
     "safe-regex": "2.0.2",
-    "semver": "6.0.0",
+    "semver": "6.1.1",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.4",
     "simple-git": "1.113.0",
