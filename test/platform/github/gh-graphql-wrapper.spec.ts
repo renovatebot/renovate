@@ -1,5 +1,5 @@
-import get from '../../../lib/platform/github/gh-got-wrapper.js';
-import { graphql } from '../../../lib/platform/github/gh-graphql-wrapper';
+import get from '../../../lib/platform/github/gh-got-wrapper';
+import Graphql from '../../../lib/platform/github/gh-graphql-wrapper';
 
 jest.mock('../../../lib/platform/github/gh-got-wrapper');
 
@@ -8,49 +8,49 @@ describe('platform/gh-graphql-wrapper', () => {
     jest.resetAllMocks();
   });
   it('sets repo owner', () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     const repoOwner = 'testRepoOwner';
     gql.setRepoOwner(repoOwner);
 
     expect(gql.repoOwner).toEqual(repoOwner);
   });
   it('sets repo name', () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     const repoName = 'testRepoName';
     gql.setRepoName(repoName);
 
     expect(gql.repoName).toEqual(repoName);
   });
   it('sets repo item', () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     const repoItem = 'testRepoItem';
     gql.setRepoItem(repoItem);
 
     expect(gql.repoItem).toEqual(repoItem);
   });
   it('sets repo item filterBy', () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     const repoItemFilterBy = 'testRepoItemFilterBy';
     gql.setRepoItemFilterBy(repoItemFilterBy);
 
     expect(gql.repoItemFilterBy).toEqual(repoItemFilterBy);
   });
   it('sets repo item node list', () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     const repoItemNodeList = ['number', 'state', 'title', 'body'];
     gql.setRepoItemNodeList(repoItemNodeList);
 
     expect(gql.repoItemNodeList).toEqual(repoItemNodeList);
   });
   it('sets repo result num els', () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     const repoResultNumEls = 50;
     gql.setRepoResultNumEls(repoResultNumEls);
 
     expect(gql.repoResultNumEls).toEqual(repoResultNumEls);
   });
   it('fails when no data in response', async () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     gql.setRepoOwner('testOwner');
     gql.setRepoName('testName');
     gql.setRepoItem('testItem');
@@ -64,11 +64,15 @@ describe('platform/gh-graphql-wrapper', () => {
       }),
     });
 
-    const [success, items, cursor] = await gql.get();
+    const [
+      success,
+      items,
+      cursor,
+    ] = await gql.get(); /* eslint-disable-line @typescript-eslint/no-unused-vars */
     expect(success).toStrictEqual(false);
   });
   it('fails when invalid json in response', async () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     gql.setRepoOwner('testOwner');
     gql.setRepoName('testName');
     gql.setRepoItem('testItem');
@@ -80,11 +84,15 @@ describe('platform/gh-graphql-wrapper', () => {
       body: 'some not json content',
     });
 
-    const [success, items, cursor] = await gql.get();
+    const [
+      success,
+      items,
+      cursor,
+    ] = await gql.get(); /* eslint-disable-line @typescript-eslint/no-unused-vars */
     expect(success).toStrictEqual(false);
   });
   it('retries with half repoResultNumEls when no data in response', async () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     gql.setRepoOwner('testOwner');
     gql.setRepoName('testName');
     gql.setRepoItem('testItem');
@@ -103,7 +111,7 @@ describe('platform/gh-graphql-wrapper', () => {
     expect(get.post).toHaveBeenCalledTimes(7);
   });
   it('returns cursor if hasNextPage', async () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     gql.setRepoOwner('testOwner');
     gql.setRepoName('testName');
     gql.setRepoItem('issues');
@@ -147,11 +155,15 @@ describe('platform/gh-graphql-wrapper', () => {
       }),
     });
 
-    const [success, items, cursor] = await gql.get();
+    const [
+      success,
+      items,
+      cursor,
+    ] = await gql.get(); /* eslint-disable-line @typescript-eslint/no-unused-vars */
     expect(cursor).toStrictEqual(expectedCursor);
   });
   it("doesn't return cursor if not hasNextPage", async () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     gql.setRepoOwner('testOwner');
     gql.setRepoName('testName');
     gql.setRepoItem('issues');
@@ -195,11 +207,15 @@ describe('platform/gh-graphql-wrapper', () => {
       }),
     });
 
-    const [success, items, cursor] = await gql.get();
+    const [
+      success,
+      items,
+      cursor,
+    ] = await gql.get(); /* eslint-disable-line @typescript-eslint/no-unused-vars */
     expect(cursor).toStrictEqual('');
   });
   it('gets all by following paging', async () => {
-    const gql = new graphql();
+    const gql = new Graphql();
     gql.setRepoOwner('testOwner');
     gql.setRepoName('testName');
     gql.setRepoItem('issues');

@@ -1,11 +1,16 @@
-import get from './gh-got-wrapper.js';
+import get from './gh-got-wrapper';
 
-export class graphql {
+export default class Graphql {
   repoOwner: string;
+
   repoName: string;
+
   repoItem: string;
+
   repoItemFilterBy: string;
+
   repoItemNodeList: string[];
+
   repoResultNumEls: number;
 
   constructor(): void {
@@ -80,7 +85,7 @@ export class graphql {
           return [false, [], ''];
         }
 
-        this.repoResultNumEls = parseInt(this.repoResultNumEls / 2);
+        this.repoResultNumEls = parseInt(this.repoResultNumEls / 2, 10);
         return await this.get(cursor);
       }
 
@@ -97,7 +102,7 @@ export class graphql {
 
   async getAll(): object {
     let [success, elements, nextCursor] = await this.get('');
-    let allElements = [];
+    const allElements = [];
 
     while (success) {
       allElements.push(...elements);
