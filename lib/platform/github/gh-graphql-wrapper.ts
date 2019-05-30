@@ -8,6 +8,10 @@ export class graphql {
   repoItemNodeList: string[];
   repoResultNumEls: number;
 
+  constructor(): void {
+    this.repoResultNumEls = 100;
+  }
+
   setRepoOwner(owner: string): void {
     this.repoOwner = owner;
   }
@@ -71,13 +75,13 @@ export class graphql {
 
       if (!res.data) {
         // retry query until numElements == 1
-        if (repoResultNumEls === 1) {
+        if (this.repoResultNumEls === 1) {
           logger.info({ query, res }, 'No graphql res.data');
           return [false, [], ''];
         }
 
         this.repoResultNumEls = parseInt(this.repoResultNumEls / 2);
-        return this.get(cursor);
+        return await this.get(cursor);
       }
 
       const nextCursor = res.data.repository[this.repoItem].pageInfo.hasNextPage
