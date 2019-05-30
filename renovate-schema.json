@@ -1238,7 +1238,7 @@
     "suppressNotifications": {
       "description": "Options to suppress various types of warnings and other notifications",
       "type": "array",
-      "default": []
+      "default": ["deprecationWarningIssues"]
     }
   }
 }
