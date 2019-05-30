@@ -72,8 +72,7 @@ export default class Graphql {
     };
 
     try {
-      // prettier-ignore
-      const res = JSON.parse((await get.post(url, options)).body);
+      const res = JSON.parse((await (get as any).post(url, options)).body);
 
       if (!res.data) {
         // retry query until numElements == 1
