@@ -192,7 +192,7 @@
     "rimraf": "2.6.3",
     "semantic-release": "15.13.12",
     "tmp-promise": "2.0.1",
-    "typescript": "3.4.5"
+    "typescript": "3.5.1"
   },
   "resolutions": {
     "lodash": ">= 4.17.11"
