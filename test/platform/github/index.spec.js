@@ -699,19 +699,36 @@ describe('platform/github', () => {
     });
   });
   describe('findIssue()', () => {
+    beforeEach(() => {
+      get.post.mockImplementationOnce(() => ({
+        body: JSON.stringify({
+          data: {
+            repository: {
+              issues: {
+                pageInfo: {
+                  startCursor: null,
+                  hasNextPage: false,
+                  endCursor: null,
+                },
+                nodes: [
+                  {
+                    number: 2,
+                    state: 'open',
+                    title: 'title-2',
+                  },
+                  {
+                    number: 1,
+                    state: 'open',
+                    title: 'title-1',
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      }));
+    });
     it('returns null if no issue', async () => {
-      get.mockReturnValueOnce({
-        body: [
-          {
-            number: 1,
-            title: 'title-1',
-          },
-          {
-            number: 2,
-            title: 'title-2',
-          },
-        ],
-      });
       const res = await github.findIssue('title-3');
       expect(res).toBeNull();
     });

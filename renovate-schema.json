@@ -511,6 +511,7 @@
         "recreateClosed": true,
         "rebaseStalePrs": true,
         "groupName": "Pin Dependencies",
+        "groupSlug": "pin-dependencies",
         "commitMessageAction": "Pin",
         "group": {
           "commitMessageTopic": "dependencies",
@@ -1237,7 +1238,7 @@
     "suppressNotifications": {
       "description": "Options to suppress various types of warnings and other notifications",
       "type": "array",
-      "default": []
+      "default": ["deprecationWarningIssues"]
     }
   }
 }

@@ -55,17 +55,17 @@ commands:
 jobs:
   test_node_10:
     docker:
-      - image: node:10.15.3@sha256:c5e919a89352d3ce6a883dde54a5d51dde12229c2d11088593cd1f3efefcc16e
+      - image: node:10.16.0@sha256:b050ae5bfcedc1bfd9ad8216c960115cb0f3d2e09ee4e844f80ed39a7632e4ed
     steps:
       - test
   test_node_12:
     docker:
-      - image: node:12@sha256:eb6f9cbfc89811b1141696933c5a15011f636d31ec459bc3d1687d1b11667543
+      - image: node:12@sha256:90285adc307844b632965099129d1f4819300fd7be3bbec3d93c36eb91b6266c
     steps:
       - test
   release:
     docker:
-      - image: node:10.15.3@sha256:c5e919a89352d3ce6a883dde54a5d51dde12229c2d11088593cd1f3efefcc16e
+      - image: node:10.16.0@sha256:b050ae5bfcedc1bfd9ad8216c960115cb0f3d2e09ee4e844f80ed39a7632e4ed
     steps:
       - checkout
       - run: yarn install
