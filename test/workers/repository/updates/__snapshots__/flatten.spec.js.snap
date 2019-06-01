@@ -846,7 +846,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "\`{{{displayFrom}}}\` -> \`{{{displayTo}}}\`",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
@@ -958,7 +958,7 @@ Array [
       "References",
     ],
     "prBodyDefinitions": Object {
-      "Change": "{{#if displayFrom}}\`{{{displayFrom}}}\` -> {{else}}{{#if currentValue}}\`{{{currentValue}}}\` -> {{/if}}{{/if}}{{#if displayTo}}\`{{{displayTo}}}\`{{else}}\`{{{newValue}}}\`{{/if}}",
+      "Change": "\`{{{displayFrom}}}\` -> \`{{{displayTo}}}\`",
       "Current value": "{{{currentValue}}}",
       "New value": "{{{newValue}}}",
       "Package": "{{{depName}}}",
