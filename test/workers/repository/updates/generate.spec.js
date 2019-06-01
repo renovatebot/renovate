@@ -176,6 +176,8 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           lazyGrouping: true,
           isDigest: true,
+          currentDigest: 'abcdefghijklmnopqrstuvwxyz',
+          newDigest: '123abcdefghijklmnopqrstuvwxyz',
           foo: 1,
           newValue: 'abcdef',
           group: {
