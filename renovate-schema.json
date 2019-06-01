@@ -526,10 +526,7 @@
       "default": {
         "branchTopic": "{{{depNameSanitized}}}-digest",
         "commitMessageExtra": "to {{newDigestShort}}",
-        "commitMessageTopic": "{{{depName}}} commit hash",
-        "prBodyDefinitions": {
-          "Change": "`{{{currentValue}}}` -> `{{{newDigestShort}}}`"
-        }
+        "commitMessageTopic": "{{{depName}}} commit hash"
       },
       "$ref": "#"
     },
@@ -797,10 +794,7 @@
       "description": "Configuration object for bazel WORKSPACE renovation",
       "type": "object",
       "default": {
-        "fileMatch": ["(^|/)WORKSPACE$", "\\.bzl$"],
-        "prBodyDefinitions": {
-          "Change": "{{#if currentDigestShort}}`{{{currentDigestShort}}}` -> {{#if isDigest}}`{{{newDigestShort}}}`{{else}}`{{{newVersion}}}`{{/if}}{{else}}`{{{currentValue}}}` -> `{{{newValue}}}`{{/if}}"
-        }
+        "fileMatch": ["(^|/)WORKSPACE$", "\\.bzl$"]
       },
       "$ref": "#"
     },
@@ -1217,7 +1211,7 @@
         "Update": "{{{updateType}}}",
         "Current value": "{{{currentValue}}}",
         "New value": "{{{newValue}}}",
-        "Change": "{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}",
+        "Change": "`{{{displayFrom}}}` -> `{{{displayTo}}}`",
         "References": "{{{references}}}",
         "Package file": "{{{packageFile}}}"
       }

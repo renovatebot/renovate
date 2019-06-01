@@ -176,8 +176,9 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           lazyGrouping: true,
           isDigest: true,
+          currentDigest: 'abcdefghijklmnopqrstuvwxyz',
+          newDigest: '123abcdefghijklmnopqrstuvwxyz',
           foo: 1,
-          newValue: 'abcdef',
           group: {
             foo: 2,
           },
@@ -444,7 +445,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           lazyGrouping: true,
-          newValue: '0.5.7',
+          currentValue: '0.5.7',
           group: {},
         },
         {
