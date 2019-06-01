@@ -69,11 +69,18 @@ Example use:
 
 ## automergeType
 
-Renovate will default to automerging after creating PRs, but you can override that to automerge _without_ PRs. There are two ways to merge branch upgrades: merge commits, and branch push.
+This setting is only applicable if you opt in to set `automerge` to `true` for any of your dependencies.
 
-Merge commits will employ the standard GitHub "merge commit" API, just like when you merge a PR with merge commit setting. The downside of this approach is that you will end up with merge commits and not a nice clean default branch!
+Automerging defaults to doing to using Pull Requests (`automergeType="pr"`), i.e. Renovate first creates a branch, then an associated Pull Request, and then automerges the first time it detects that the Pull Requests status checks are "green". Note: if you have no tests and still want to automerge, don't forget to configure `requiredStatusChecks=null`.
 
-Branch push employs GitHub's low-level `git` API to push the Renovate upgrade directly to the head of the base branch (e.g. `master`) to maintain a "clean" history. The downside of this approach is that it implicitly enables the `rebaseStalePrs` setting because otherwise we would risk pushing a bad commit to master. i.e. Renovate won't push the commit to base branch unless the branch is completely up-to-date with `master` and has passed tests, which means that if the default branch is getting updated regularly then it might take several rebases from Renovate until it has a branch commit that is safe to push to `master`.
+If you prefer that Renovate more silently automerge _without_ Pull Requests at all, you can set `automergeType="branch"`. In this case Renovate will:
+
+- Create the branch
+- Rebase it any time it gets out of date with the base branch
+- Automerge it if it's (a) up-to-date, and (b) passing all tests
+- As a backup, raise a PR only if either tests fail, or they remain pending for too long (default: 24 hours)
+
+The final value for `automergeType` is `pr-comment`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR. If you're not already using `bors-ng` or similar, don't worry about this option.
 
 ## azureAutoComplete
 
