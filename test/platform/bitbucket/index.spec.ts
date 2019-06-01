@@ -7,7 +7,7 @@ describe('platform/bitbucket', () => {
   let api: jest.Mocked<IGotApi>;
   let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
   let GitStorage: jest.Mocked<
-    typeof import('../../../lib/platform/git/storage')
+    import('../../../lib/platform/git/storage').Storage
   > &
     jest.Mock;
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('platform/bitbucket', () => {
     hostRules = require('../../../lib/util/host-rules');
     api = require('../../../lib/platform/bitbucket/bb-got-wrapper').api;
     bitbucket = require('../../../lib/platform/bitbucket');
-    GitStorage = require('../../../lib/platform/git/storage');
+    GitStorage = require('../../../lib/platform/git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),
@@ -40,8 +40,6 @@ describe('platform/bitbucket', () => {
     // clean up hostRules
     hostRules.clear();
     hostRules.find.mockReturnValue({
-      hostType: 'bitbucket',
-      endpoint: 'https://bitbucket.org',
       username: 'abc',
       password: '123',
     });

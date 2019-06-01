@@ -69,11 +69,18 @@ Example use:
 
 ## automergeType
 
-Renovate will default to automerging after creating PRs, but you can override that to automerge _without_ PRs. There are two ways to merge branch upgrades: merge commits, and branch push.
+This setting is only applicable if you opt in to set `automerge` to `true` for any of your dependencies.
 
-Merge commits will employ the standard GitHub "merge commit" API, just like when you merge a PR with merge commit setting. The downside of this approach is that you will end up with merge commits and not a nice clean default branch!
+Automerging defaults to using Pull Requests (`automergeType="pr"`). In that case Renovate first creates a branch, then an associated Pull Request, and then automerges the first time it detects that the Pull Requests status checks are "green". Note: if you have no tests and still want to automerge, don't forget to configure `"requiredStatusChecks": null`.
 
-Branch push employs GitHub's low-level `git` API to push the Renovate upgrade directly to the head of the base branch (e.g. `master`) to maintain a "clean" history. The downside of this approach is that it implicitly enables the `rebaseStalePrs` setting because otherwise we would risk pushing a bad commit to master. i.e. Renovate won't push the commit to base branch unless the branch is completely up-to-date with `master` and has passed tests, which means that if the default branch is getting updated regularly then it might take several rebases from Renovate until it has a branch commit that is safe to push to `master`.
+If you prefer that Renovate more silently automerge _without_ Pull Requests at all, you can set `"automergeType": "branch"`. In this case Renovate will:
+
+- Create the branch, wait for test results
+- Rebase it any time it gets out of date with the base branch
+- Automerge the branch commit if it's: (a) up-to-date with the base branch, and (b) passing all tests
+- As a backup, raise a PR only if either: (a) tests fail, or (b) tests remain pending for too long (default: 24 hours)
+
+The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR. If you're not already using `bors-ng` or similar, don't worry about this option.
 
 ## azureAutoComplete
 
@@ -178,6 +185,8 @@ This is used to manually restrict which versions are possible to upgrade to base
 ## composer
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
+
+## deps-edn
 
 ## description
 
@@ -319,13 +328,15 @@ And then the branchName would be `renovate/eslint` instead.
 
 ## hostRules
 
+The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`. All are optional, but you can only have one of the last three per rule.
+
 Example for configuring `docker` auth:
 
 ```json
 {
   "hostRules": [
     {
-      "hostType": "docker",
+      "domainName": "docker.io",
       "username": "<some-username>",
       "password": "<some-password>"
     }
@@ -333,7 +344,25 @@ Example for configuring `docker` auth:
 }
 ```
 
+### baseUrl
+
+Renovate will match against all baseUrls. It does not do a "longest match" algorithm so if you want one baseUrl to override another than make sure it occurs _after_ the first one in the order of `hostRules`.
+
+### domainName
+
+### hostName
+
 ### hostType
+
+### timeout
+
+Use this figure to adjust the timeout for queries. The default is 60s, which is quite high. To adjust it down to 10s for all queries, do this:
+
+```json
+  "hostRules": [{
+    "timeout": 10000,
+  }]
+```
 
 ## ignoreDeprecated
 
@@ -437,6 +466,8 @@ Add an array of 1 or more strings to `labels` and Renovate will apply these labe
 ## lazyGrouping
 
 The default behaviour for Renovate is to only use group names for branches and PRs when there's more than one dependency in a group. For example you may have defined a dependency group calls "All eslint packages" with a `packagePattern` of `^eslint`, but if the only upgrade available at the time is `eslint-config-airbnb` then it makes more sense for the PR to be named "Upgrade eslint-config-airbnb to version 2.1.4" than to name it "Upgrade All eslint packages". If ever this behaviour is undesirable then you can override it by setting this option to `false`.
+
+## leiningen
 
 ## lockFileMaintenance
 

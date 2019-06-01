@@ -87,8 +87,13 @@ describe('datasource/github', () => {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         },
       }));
-      const content = await github.getPreset('some/repo', 'custom');
-      expect(content).toEqual({ foo: 'bar' });
+      try {
+        global.appMode = true;
+        const content = await github.getPreset('some/repo', 'custom');
+        expect(content).toEqual({ foo: 'bar' });
+      } finally {
+        delete global.appMode;
+      }
     });
   });
   describe('getPkgReleases', () => {

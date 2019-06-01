@@ -23,6 +23,9 @@ Object {
   "composer": Array [
     Object {},
   ],
+  "deps-edn": Array [
+    Object {},
+  ],
   "docker-compose": Array [
     Object {},
   ],
@@ -48,6 +51,9 @@ Object {
     Object {},
   ],
   "kubernetes": Array [
+    Object {},
+  ],
+  "leiningen": Array [
     Object {},
   ],
   "maven": Array [

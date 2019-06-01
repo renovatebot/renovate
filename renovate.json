@@ -37,12 +37,6 @@
     {
       "packageNames": ["semantic-release"],
       "semanticCommitType": "build"
-    },
-    {
-      "packageNames": ["got", "gh-got", "gl-got"],
-      "major": {
-        "groupName": "got packages"
-      }
     }
   ]
 }

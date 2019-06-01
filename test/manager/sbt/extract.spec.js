@@ -2,8 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { extractPackageFile } = require('../../../lib/manager/sbt/extract');
 
-const sbtPath = path.resolve(__dirname, `./_fixtures/sample.sbt`);
-const sbt = fs.readFileSync(sbtPath, 'utf8');
+const sbt = fs.readFileSync(
+  path.resolve(__dirname, `./_fixtures/sample.sbt`),
+  'utf8'
+);
+const sbtMissingScalaVersion = fs.readFileSync(
+  path.resolve(__dirname, `./_fixtures/missing-scala-version.sbt`),
+  'utf8'
+);
 
 describe('lib/manager/terraform/extract', () => {
   describe('extractPackageFile()', () => {
@@ -34,6 +40,9 @@ describe('lib/manager/terraform/extract', () => {
     });
     it('extracts deps for generic use-cases', () => {
       expect(extractPackageFile(sbt)).toMatchSnapshot();
+    });
+    it('skips deps when scala version is missing', () => {
+      expect(extractPackageFile(sbtMissingScalaVersion)).toMatchSnapshot();
     });
   });
 });

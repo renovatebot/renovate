@@ -11,6 +11,8 @@ describe('config/migration', () => {
         hostRules: [
           {
             platform: 'docker',
+            endpoint: 'https://docker.io',
+            host: 'docker.io',
             username: 'some-username',
             password: 'some-password',
           },

@@ -176,8 +176,9 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           lazyGrouping: true,
           isDigest: true,
+          currentDigest: 'abcdefghijklmnopqrstuvwxyz',
+          newDigest: '123abcdefghijklmnopqrstuvwxyz',
           foo: 1,
-          newValue: 'abcdef',
           group: {
             foo: 2,
           },
@@ -444,7 +445,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           lazyGrouping: true,
-          newValue: '0.5.7',
+          currentValue: '0.5.7',
           group: {},
         },
         {
@@ -461,6 +462,29 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
     });
+    it('handles @types specially (reversed)', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          newValue: '0.6.0',
+          group: {},
+        },
+        {
+          depName: '@types/some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          lazyGrouping: true,
+          newValue: '0.5.7',
+          group: {},
+        },
+      ];
+      expect(generateBranchConfig(branch)).toMatchSnapshot();
+    });
     it('overrides schedule for pin PRs', () => {
       const branch = [
         {
@@ -472,6 +496,53 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.schedule).toEqual([]);
+    });
+    it('handles upgrades', () => {
+      const branch = [
+        {
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          hasBaseBranches: true,
+          fileReplacePosition: 5,
+        },
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          isGroup: true,
+          separateMinorPatch: true,
+          updateType: 'minor',
+          fileReplacePosition: 1,
+        },
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          isGroup: true,
+          separateMajorMinor: true,
+          updateType: 'major',
+          fileReplacePosition: 2,
+        },
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          isGroup: true,
+          separateMajorMinor: true,
+          updateType: 'patch',
+          fileReplacePosition: 0,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toMatchSnapshot();
     });
   });
 });

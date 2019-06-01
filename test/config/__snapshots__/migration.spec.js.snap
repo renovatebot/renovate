@@ -21,7 +21,6 @@ Object {
     "config:js-app",
     "config:js-lib",
   ],
-  "gitFs": null,
   "hostRules": Array [
     Object {},
   ],
@@ -31,7 +30,6 @@ Object {
   "includeForks": true,
   "lockFileMaintenance": Object {
     "automerge": true,
-    "gitFs": "https",
     "schedule": "before 5am",
     "trustLevel": "low",
   },
