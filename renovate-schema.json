@@ -1206,7 +1206,7 @@
       "description": "Table column definitions for use in PR tables",
       "type": "object",
       "default": {
-        "Package": "{{{depName}}}",
+        "Package": "{{{depNameLinked}}}",
         "Type": "{{{depType}}}",
         "Update": "{{{updateType}}}",
         "Current value": "{{{currentValue}}}",
@@ -1219,7 +1219,7 @@
     "prBodyColumns": {
       "description": "List of columns to use in PR bodies",
       "type": "array",
-      "default": ["Package", "Type", "Update", "Change", "References"]
+      "default": ["Package", "Type", "Update", "Change"]
     },
     "prBodyNotes": {
       "description": "List of additional notes/templates to be included in the Pull Request bodies.",
