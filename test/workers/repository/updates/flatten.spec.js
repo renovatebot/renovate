@@ -72,7 +72,6 @@ describe('workers/repository/updates/flatten', () => {
         ],
       };
       const res = await flattenUpdates(config, packageFiles);
-      expect(res).toMatchSnapshot();
       expect(res).toHaveLength(9);
       expect(
         res.filter(r => r.updateType === 'lockFileMaintenance')
