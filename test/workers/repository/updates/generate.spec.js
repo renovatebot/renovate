@@ -179,7 +179,6 @@ describe('workers/repository/updates/generate', () => {
           currentDigest: 'abcdefghijklmnopqrstuvwxyz',
           newDigest: '123abcdefghijklmnopqrstuvwxyz',
           foo: 1,
-          newValue: 'abcdef',
           group: {
             foo: 2,
           },
@@ -446,7 +445,7 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
           lazyGrouping: true,
-          newValue: '0.5.7',
+          currentValue: '0.5.7',
           group: {},
         },
         {
