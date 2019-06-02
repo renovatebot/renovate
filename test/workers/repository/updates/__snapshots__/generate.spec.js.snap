@@ -1,9 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/updates/generate generateBranchConfig() adds commit message body 1`] = `
-"Update dependency some-dep to v1.2.0
+"Update dependency some-dep
 
-[skip-ci]"
+[skip-ci]
+
+| datasource | package                     | from | to  |
+| ---------- | --------------------------- | ---- | --- |
+| npm        | ALL (Lock file maintenance) |      |     |
+"
 `;
 
 exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially (reversed) 1`] = `
