@@ -1,9 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/updates/generate generateBranchConfig() adds commit message body 1`] = `
-"Update dependency some-dep to v1.2.0
+"Update dependency some-dep
 
-[skip-ci]"
+[skip-ci]
+
+| datasource | package                     | from | to  |
+| ---------- | --------------------------- | ---- | --- |
+| npm        | ALL (Lock file maintenance) |      |     |
+"
 `;
 
 exports[`workers/repository/updates/generate generateBranchConfig() handles @types specially (reversed) 1`] = `
@@ -14,6 +19,9 @@ Object {
   "canBeUnpublished": false,
   "commitMessage": "",
   "depName": "@types/some-dep",
+  "depNameEscaped": "@types%2fsome-dep",
+  "displayFrom": "",
+  "displayTo": "0.5.7",
   "masterIssueApproval": false,
   "newValue": "0.5.7",
   "prTitle": "some-title",
@@ -25,6 +33,9 @@ Object {
       "branchName": "some-branch",
       "commitMessage": "",
       "depName": "@types/some-dep",
+      "depNameEscaped": "@types%2fsome-dep",
+      "displayFrom": "",
+      "displayTo": "0.5.7",
       "newValue": "0.5.7",
       "prTitle": "some-title",
       "prettyDepType": "dependency",
@@ -33,6 +44,9 @@ Object {
       "branchName": "some-branch",
       "commitMessage": "",
       "depName": "some-dep",
+      "depNameEscaped": "some-dep",
+      "displayFrom": "",
+      "displayTo": "0.6.0",
       "newValue": "0.6.0",
       "prTitle": "some-title",
       "prettyDepType": "dependency",

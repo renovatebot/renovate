@@ -176,8 +176,9 @@ describe('workers/repository/updates/generate', () => {
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
           lazyGrouping: true,
           isDigest: true,
+          currentDigest: 'abcdefghijklmnopqrstuvwxyz',
+          newDigest: '123abcdefghijklmnopqrstuvwxyz',
           foo: 1,
-          newValue: 'abcdef',
           group: {
             foo: 2,
           },
@@ -365,6 +366,7 @@ describe('workers/repository/updates/generate', () => {
       const branch = [
         {
           ...defaultConfig,
+          commitBodyTable: false,
           depName: 'some-dep',
           packageFile: 'foo/bar/package.json',
           semanticCommits: true,
@@ -419,6 +421,12 @@ describe('workers/repository/updates/generate', () => {
           isSingleVersion: true,
           toVersion: '1.2.0',
         },
+        {
+          ...defaultConfig,
+          commitBodyTable: true,
+          datasource: 'npm',
+          updateType: 'lockFileMaintenance',
+        },
       ];
       const res = generateBranchConfig(branch);
       expect(res.commitMessage).toMatchSnapshot();
@@ -439,15 +447,21 @@ describe('workers/repository/updates/generate', () => {
     it('handles @types specially', () => {
       const branch = [
         {
+          commitBodyTable: true,
+          datasource: 'npm',
           depName: '@types/some-dep',
           groupName: null,
           branchName: 'some-branch',
           prTitle: 'some-title',
           lazyGrouping: true,
-          newValue: '0.5.7',
+          currentValue: '0.5.7',
+          fromVersion: '0.5.7',
+          toVersion: '0.5.8',
           group: {},
         },
         {
+          commitBodyTable: true,
+          datasource: 'npm',
           depName: 'some-dep',
           groupName: null,
           branchName: 'some-branch',
