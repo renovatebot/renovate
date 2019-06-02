@@ -661,6 +661,11 @@
       "description": "Commit message body template. Will be appended to commit message, separated by two line returns.",
       "type": "string"
     },
+    "commitBodyTable": {
+      "description": "If enabled, append a table in the commit message body describing all updates in the commit",
+      "type": "boolean",
+      "default": true
+    },
     "commitMessagePrefix": {
       "description": "Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if semanticCommits enabled",
       "type": "string"
