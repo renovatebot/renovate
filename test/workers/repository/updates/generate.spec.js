@@ -423,6 +423,7 @@ describe('workers/repository/updates/generate', () => {
         },
         {
           ...defaultConfig,
+          commitBodyTable: true,
           datasource: 'npm',
           updateType: 'lockFileMaintenance',
         },
