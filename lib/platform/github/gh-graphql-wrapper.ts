@@ -95,7 +95,7 @@ export default class Graphql {
       return [true, res.data.repository[this.repoItem].nodes, nextCursor];
     } catch (err) {
       logger.warn({ query, err }, 'graphql.get error');
-      return [false, [], ''];
+      throw new Error('platform-error');
     }
   }
 

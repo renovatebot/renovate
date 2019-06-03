@@ -71,7 +71,7 @@ describe('platform/gh-graphql-wrapper', () => {
     ] = await gql.get(); /* eslint-disable-line @typescript-eslint/no-unused-vars */
     expect(success).toStrictEqual(false);
   });
-  it('fails when invalid json in response', async () => {
+  it('throws platform-error when invalid json in response', async () => {
     const gql = new Graphql();
     gql.setRepoOwner('testOwner');
     gql.setRepoName('testName');
@@ -84,12 +84,7 @@ describe('platform/gh-graphql-wrapper', () => {
       body: 'some not json content',
     });
 
-    const [
-      success,
-      items,
-      cursor,
-    ] = await gql.get(); /* eslint-disable-line @typescript-eslint/no-unused-vars */
-    expect(success).toStrictEqual(false);
+    await expect(gql.get()).rejects.toThrow('platform-error');
   });
   it('retries with half repoResultNumEls when no data in response', async () => {
     const gql = new Graphql();
