@@ -74,6 +74,67 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
 
 ## END copy Node.js
 
+# Erlang
+
+RUN apt-get update && apt-get install -y autoconf automake dpkg-dev gcc libssl-dev libncurses5-dev && apt-get clean -y
+
+# START copy Erlang from https://github.com/erlang/docker-erlang-otp/blob/master/22/Dockerfile
+
+ENV OTP_VERSION="22.0.1"
+
+RUN set -xe \
+  && OTP_DOWNLOAD_URL="https://github.com/erlang/otp/archive/OTP-${OTP_VERSION}.tar.gz" \
+  && OTP_DOWNLOAD_SHA256="694f133abfca3c7fb8376b223ea484413bcd16b82354f178fba798f37335f163" \
+  && runtimeDeps='libodbc1 \
+    libsctp1 \
+    libwxgtk3.0' \
+  && buildDeps='unixodbc-dev \
+    libsctp-dev \
+    libwxgtk3.0-dev' \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends $runtimeDeps \
+  && apt-get install -y --no-install-recommends $buildDeps \
+  && curl -fSL -o otp-src.tar.gz "$OTP_DOWNLOAD_URL" \
+  && echo "$OTP_DOWNLOAD_SHA256  otp-src.tar.gz" | sha256sum -c - \
+  && export ERL_TOP="/usr/src/otp_src_${OTP_VERSION%%@*}" \
+  && mkdir -vp $ERL_TOP \
+  && tar -xzf otp-src.tar.gz -C $ERL_TOP --strip-components=1 \
+  && rm otp-src.tar.gz \
+  && ( cd $ERL_TOP \
+    && ./otp_build autoconf \
+    && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
+    && ./configure --build="$gnuArch" \
+    && make -j$(nproc) \
+    && make install ) \
+  && find /usr/local -name examples | xargs rm -rf \
+  && apt-get purge -y --auto-remove $buildDeps \
+  && rm -rf $ERL_TOP /var/lib/apt/lists/*
+
+# END copy Erlang
+
+# Elixir
+
+# START copy Elixir from https://github.com/c0b/docker-elixir/blob/master/1.8/Dockerfile
+
+ENV ELIXIR_VERSION="v1.8.2"
+
+RUN set -xe \
+  && ELIXIR_DOWNLOAD_URL="https://github.com/elixir-lang/elixir/archive/${ELIXIR_VERSION}.tar.gz" \
+  && ELIXIR_DOWNLOAD_SHA256="cf9bf0b2d92bc4671431e3fe1d1b0a0e5125f1a942cc4fdf7914b74f04efb835" \
+  && curl -fSL -o elixir-src.tar.gz $ELIXIR_DOWNLOAD_URL \
+  && echo "$ELIXIR_DOWNLOAD_SHA256  elixir-src.tar.gz" | sha256sum -c - \
+  && mkdir -p /usr/local/src/elixir \
+  && tar -xzC /usr/local/src/elixir --strip-components=1 -f elixir-src.tar.gz \
+  && rm elixir-src.tar.gz \
+  && cd /usr/local/src/elixir \
+  && make install clean
+
+# END copy Elixir
+
+# Mix and Rebar
+RUN mix local.hex --force \
+&& mix local.rebar --force
+
 # PHP Composer
 
 RUN apt-get update && apt-get install -y php-cli php-mbstring && apt-get clean
