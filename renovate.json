@@ -22,7 +22,6 @@
     "Update",
     "Type",
     "Change",
-    "References",
     "Sourcegraph"
   ],
   "packageRules": [
