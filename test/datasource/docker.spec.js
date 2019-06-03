@@ -44,10 +44,7 @@ describe('api/docker', () => {
       got.mockReturnValueOnce({
         headers: { 'docker-content-digest': 'some-digest' },
       });
-      const res = await docker.getDigest(
-        { lookupName: 'some-dep' },
-        'some-new-value'
-      );
+      const res = await docker.getDigest({ lookupName: 'some-dep' });
       expect(res).toBe('some-digest');
     });
     it('falls back to body for digest', async () => {
@@ -105,7 +102,7 @@ describe('api/docker', () => {
         { lookupName: 'some-dep' },
         'some-tag'
       );
-      expect(got.mock.calls[1][1].headers.Authorization).toBe(
+      expect(got.mock.calls[1][1].headers.authorization).toBe(
         'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
       );
       expect(res).toBe('some-digest');
@@ -189,7 +186,14 @@ describe('api/docker', () => {
       got.mockReturnValueOnce({
         headers: {},
       });
-      got.mockReturnValueOnce({ headers: {}, body: { tags } });
+      got.mockReturnValueOnce({
+        headers: {
+          link:
+            '<https://api.github.com/user/9287/repos?page=3&per_page=100>; rel="next", ',
+        },
+        body: { tags },
+      });
+      got.mockReturnValueOnce({ headers: {}, body: { tags: ['latest'] } });
       got.mockReturnValueOnce({
         headers: {},
       });

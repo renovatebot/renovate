@@ -1,6 +1,6 @@
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
-jest.mock('got');
+jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 
 const hostRules = require('../../../../lib/util/host-rules');
 const ghGot = require('../../../../lib/platform/github/gh-got-wrapper');
@@ -11,6 +11,7 @@ const releaseNotes = require('../../../../lib/workers/pr/changelog/release-notes
 releaseNotes.addReleaseNotes = jest.fn(input => input);
 
 const upgrade = {
+  endpoint: 'https://api.github.com/',
   depName: 'renovate',
   versionScheme: 'semver',
   fromVersion: '1.0.0',
@@ -35,9 +36,10 @@ describe('workers/pr/changelog', () => {
     beforeEach(async () => {
       ghGot.mockClear();
       hostRules.clear();
-      hostRules.update({
-        platform: 'github',
-        endpoint: 'https://api.github.com/',
+      hostRules.add({
+        hostType: 'github',
+        baseUrl: 'https://api.github.com/',
+        token: 'abc',
       });
       await global.renovateCache.rmAll();
     });
@@ -155,27 +157,30 @@ describe('workers/pr/changelog', () => {
       ).toBeNull();
     });
     it('supports github enterprise and github.com changelog', async () => {
-      hostRules.update({
-        platform: 'github',
+      hostRules.add({
+        hostType: 'github',
         token: 'super_secret',
-        endpoint: 'https://github-enterprise.example.com/',
+        baseUrl: 'https://github-enterprise.example.com/',
       });
       expect(
         await getChangeLogJSON({
           ...upgrade,
+          endpoint: 'https://github-enterprise.example.com/',
         })
       ).toMatchSnapshot();
     });
     it('supports github enterprise and github enterprise changelog', async () => {
-      hostRules.update({
-        platform: 'github',
-        endpoint: 'https://github-enterprise.example.com/',
+      hostRules.add({
+        hostType: 'github',
+        baseUrl: 'https://github-enterprise.example.com/',
+        token: 'abc',
       });
       process.env.GITHUB_ENDPOINT = '';
       expect(
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
+          endpoint: 'https://github-enterprise.example.com/',
         })
       ).toMatchSnapshot();
     });

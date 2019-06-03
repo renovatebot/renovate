@@ -17,17 +17,20 @@ describe('platform/bitbucket-server', () => {
         // reset module
         jest.resetModules();
         jest.mock('delay');
-        jest.mock('got', () => (url: string, options: { method: string }) => {
-          const { method } = options;
-          const body = mockResponses[url] && mockResponses[url][method];
-          if (!body) {
-            return Promise.reject(new Error(`no match for ${method} ${url}`));
+        jest.mock(
+          '../../../lib/util/got',
+          () => (url: string, options: { method: string }) => {
+            const { method } = options;
+            const body = mockResponses[url] && mockResponses[url][method];
+            if (!body) {
+              return Promise.reject(new Error(`no match for ${method} ${url}`));
+            }
+            if (body instanceof Promise) {
+              return body;
+            }
+            return Promise.resolve({ body });
           }
-          if (body instanceof Promise) {
-            return body;
-          }
-          return Promise.resolve({ body });
-        });
+        );
         jest.mock('../../../lib/platform/git/storage');
         jest.mock('../../../lib/util/host-rules');
         hostRules = require('../../../lib/util/host-rules');
@@ -38,7 +41,7 @@ describe('platform/bitbucket-server', () => {
         jest.spyOn(api, 'put');
         jest.spyOn(api, 'delete');
         bitbucket = require('../../../lib/platform/bitbucket-server');
-        GitStorage = require('../../../lib/platform/git/storage');
+        GitStorage = require('../../../lib/platform/git/storage').Storage;
         GitStorage.mockImplementation(
           () =>
             ({
@@ -66,8 +69,6 @@ describe('platform/bitbucket-server', () => {
             ? 'https://stash.renovatebot.com/vcs/'
             : 'https://stash.renovatebot.com';
         hostRules.find.mockReturnValue({
-          platform: 'bitbucket-server',
-          endpoint,
           username: 'abc',
           password: '123',
         });
@@ -84,11 +85,12 @@ describe('platform/bitbucket-server', () => {
 
       function initRepo() {
         return bitbucket.initRepo({
+          endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
         } as any);
       }
 
-      describe('init function', () => {
+      describe('initPlatform()', () => {
         it('should throw if no endpoint', () => {
           expect(() => {
             bitbucket.initPlatform({} as any);
@@ -123,19 +125,6 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(1);
           const res = await initRepo();
           expect(res).toMatchSnapshot();
-        });
-
-        it('sends the host as the endpoint option', async () => {
-          expect.assertions(2);
-          GitStorage.getUrl.mockClear();
-          await bitbucket.initRepo({
-            repository: 'SOME/repo',
-          } as any);
-          expect(GitStorage.getUrl).toHaveBeenCalledTimes(1);
-          expect(GitStorage.getUrl.mock.calls[0][0]).toHaveProperty(
-            'host',
-            `${mockResponses.baseURL.replace('https://', '')}/scm`
-          );
         });
       });
 

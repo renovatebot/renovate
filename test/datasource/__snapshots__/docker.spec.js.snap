@@ -13,20 +13,18 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
       "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/node:pull",
       Object {
         "headers": Object {
-          "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+          "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
-        "password": "some-password",
-        "username": "some-username",
+        "json": true,
       },
     ],
     Array [
       "https://index.docker.io/v2/library/node/tags/list?n=10000",
       Object {
         "headers": Object {
-          "Authorization": "Bearer some-token ",
+          "authorization": "Bearer some-token ",
         },
         "json": true,
-        "timeout": 10000,
       },
     ],
     Array [
@@ -41,7 +39,6 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (explicit
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
         },
-        "timeout": 10000,
       },
     ],
   ],
@@ -104,20 +101,18 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
       "https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/node:pull",
       Object {
         "headers": Object {
-          "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+          "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
-        "password": "some-password",
-        "username": "some-username",
+        "json": true,
       },
     ],
     Array [
       "https://index.docker.io/v2/library/node/tags/list?n=10000",
       Object {
         "headers": Object {
-          "Authorization": "Bearer some-token ",
+          "authorization": "Bearer some-token ",
         },
         "json": true,
-        "timeout": 10000,
       },
     ],
     Array [
@@ -132,7 +127,6 @@ exports[`api/docker getPkgReleases adds library/ prefix for Docker Hub (implicit
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
         },
-        "timeout": 10000,
       },
     ],
   ],
@@ -195,20 +189,18 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
       "https://k8s.gcr.io/v2/token?service=k8s.gcr.io&scope=repository:kubernetes-dashboard-amd64:pull",
       Object {
         "headers": Object {
-          "Authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+          "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
         },
-        "password": "some-password",
-        "username": "some-username",
+        "json": true,
       },
     ],
     Array [
       "https://k8s.gcr.io/v2/kubernetes-dashboard-amd64/tags/list?n=10000",
       Object {
         "headers": Object {
-          "Authorization": "Bearer some-token ",
+          "authorization": "Bearer some-token ",
         },
         "json": true,
-        "timeout": 10000,
       },
     ],
     Array [
@@ -223,7 +215,6 @@ exports[`api/docker getPkgReleases adds no library/ prefix for other registries 
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
         },
-        "timeout": 10000,
       },
     ],
   ],
@@ -287,7 +278,6 @@ exports[`api/docker getPkgReleases uses custom registry in depName 1`] = `
       Object {
         "headers": Object {},
         "json": true,
-        "timeout": 10000,
       },
     ],
     Array [
@@ -336,7 +326,13 @@ Array [
     Object {
       "headers": Object {},
       "json": true,
-      "timeout": 10000,
+    },
+  ],
+  Array [
+    "https://api.github.com/user/9287/repos?page=3&per_page=100",
+    Object {
+      "headers": Object {},
+      "json": true,
     },
   ],
   Array [
@@ -346,12 +342,11 @@ Array [
     },
   ],
   Array [
-    "https://registry.company.com/v2/node/manifests/1.0.0",
+    "https://registry.company.com/v2/node/manifests/latest",
     Object {
       "headers": Object {
         "accept": "application/vnd.docker.distribution.manifest.v2+json",
       },
-      "timeout": 10000,
     },
   ],
 ]

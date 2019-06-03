@@ -147,12 +147,6 @@
       "description": "Whether to update (but not create) branches when not scheduled",
       "type": "boolean"
     },
-    "gitFs": {
-      "description": "Use git for FS operations instead of API. GitHub only.",
-      "type": "string",
-      "enum": ["https", "http", "ssh"],
-      "default": null
-    },
     "persistRepoData": {
       "description": "If set to false, repository data will preserved between runs instead of deleted.",
       "type": "boolean",
@@ -517,6 +511,7 @@
         "recreateClosed": true,
         "rebaseStalePrs": true,
         "groupName": "Pin Dependencies",
+        "groupSlug": "pin-dependencies",
         "commitMessageAction": "Pin",
         "group": {
           "commitMessageTopic": "dependencies",
@@ -531,10 +526,7 @@
       "default": {
         "branchTopic": "{{{depNameSanitized}}}-digest",
         "commitMessageExtra": "to {{newDigestShort}}",
-        "commitMessageTopic": "{{{depName}}} commit hash",
-        "prBodyDefinitions": {
-          "Change": "`{{{currentValue}}}` -> `{{{newDigestShort}}}`"
-        }
+        "commitMessageTopic": "{{{depName}}} commit hash"
       },
       "$ref": "#"
     },
@@ -669,6 +661,11 @@
       "description": "Commit message body template. Will be appended to commit message, separated by two line returns.",
       "type": "string"
     },
+    "commitBodyTable": {
+      "description": "If enabled, append a table in the commit message body describing all updates in the commit",
+      "type": "boolean",
+      "default": false
+    },
     "commitMessagePrefix": {
       "description": "Prefix to add to start of commit messages and PR titles. Uses a semantic prefix if semanticCommits enabled",
       "type": "string"
@@ -785,7 +782,7 @@
         "rollbackPrs": true,
         "versionScheme": "npm",
         "prBodyDefinitions": {
-          "Change": "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}](https://diff.intrinsic.com/{{{depName}}}/{{{fromVersion}}}/{{{toVersion}}})"
+          "Change": "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}](https://renovatebot.com/diffs/npm/{{{depNameEscaped}}}/{{{fromVersion}}}/{{{toVersion}}})"
         }
       },
       "$ref": "#"
@@ -802,10 +799,7 @@
       "description": "Configuration object for bazel WORKSPACE renovation",
       "type": "object",
       "default": {
-        "fileMatch": ["(^|/)WORKSPACE$", "\\.bzl$"],
-        "prBodyDefinitions": {
-          "Change": "{{#if currentDigestShort}}`{{{currentDigestShort}}}` -> {{#if isDigest}}`{{{newDigestShort}}}`{{else}}`{{{newVersion}}}`{{/if}}{{else}}`{{{currentValue}}}` -> `{{{newValue}}}`{{/if}}"
-        }
+        "fileMatch": ["(^|/)WORKSPACE$", "\\.bzl$"]
       },
       "$ref": "#"
     },
@@ -1085,6 +1079,24 @@
       },
       "$ref": "#"
     },
+    "leiningen": {
+      "description": "Configuration object for renovating Clojure leiningen projects",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)project\\.clj$"],
+        "versionScheme": "maven"
+      },
+      "$ref": "#"
+    },
+    "deps-edn": {
+      "description": "Configuration object for renovating Clojure CLI-based projects (deps.edn)",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)deps\\.edn$"],
+        "versionScheme": "maven"
+      },
+      "$ref": "#"
+    },
     "compatibility": {
       "description": "Configuration object for compatibility",
       "type": "object",
@@ -1159,18 +1171,52 @@
     },
     "hostRules": {
       "description": "Host rules/configuration including credentials",
-      "type": "array"
+      "type": "array",
+      "default": [
+        {
+          "timeout": 60000
+        }
+      ],
+      "items": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "hostType": {
+                "description": "hostType for a package rule. Can be a platform name or a datasource name",
+                "type": "string"
+              },
+              "domainName": {
+                "description": "Domain name for a host rule. e.g. \"docker.io\"",
+                "type": "string"
+              },
+              "hostName": {
+                "description": "Hostname for a host rule. e.g. \"index.docker.io\"",
+                "type": "string"
+              },
+              "baseUrl": {
+                "description": "baseUrl for a host rule. e.g. \"https://api.github.com/\"",
+                "type": "string"
+              },
+              "timeout": {
+                "description": "timeout (in milliseconds) for queries to external endpoints",
+                "type": "integer"
+              }
+            }
+          }
+        ]
+      }
     },
     "prBodyDefinitions": {
       "description": "Table column definitions for use in PR tables",
       "type": "object",
       "default": {
-        "Package": "{{{depName}}}",
+        "Package": "{{{depNameLinked}}}",
         "Type": "{{{depType}}}",
         "Update": "{{{updateType}}}",
         "Current value": "{{{currentValue}}}",
         "New value": "{{{newValue}}}",
-        "Change": "{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}",
+        "Change": "`{{{displayFrom}}}` -> `{{{displayTo}}}`",
         "References": "{{{references}}}",
         "Package file": "{{{packageFile}}}"
       }
@@ -1178,7 +1224,7 @@
     "prBodyColumns": {
       "description": "List of columns to use in PR bodies",
       "type": "array",
-      "default": ["Package", "Type", "Update", "Change", "References"]
+      "default": ["Package", "Type", "Update", "Change"]
     },
     "prBodyNotes": {
       "description": "List of additional notes/templates to be included in the Pull Request bodies.",
@@ -1191,7 +1237,7 @@
     "suppressNotifications": {
       "description": "Options to suppress various types of warnings and other notifications",
       "type": "array",
-      "default": []
+      "default": ["deprecationWarningIssues"]
     }
   }
 }

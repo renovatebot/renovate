@@ -36,7 +36,7 @@ describe('lib/workers/global', () => {
       repositories: ['a', 'b'],
       hostRules: [
         {
-          platform: 'docker',
+          hostType: 'docker',
           host: 'docker.io',
           username: 'some-user',
           password: 'some-password',
@@ -46,5 +46,28 @@ describe('lib/workers/global', () => {
     await globalWorker.start();
     expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(2);
+  });
+
+  describe('processes platforms', () => {
+    it('github', async () => {
+      configParser.parseConfigs.mockReturnValueOnce({
+        repositories: ['a'],
+        platform: 'github',
+        endpoint: 'https://github.com/',
+      });
+      await globalWorker.start();
+      expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+      expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
+    });
+    it('gitlab', async () => {
+      configParser.parseConfigs.mockReturnValueOnce({
+        repositories: [{ repository: 'a' }],
+        platform: 'gitlab',
+        endpoint: 'https://my.gitlab.com/',
+      });
+      await globalWorker.start();
+      expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+      expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
+    });
   });
 });

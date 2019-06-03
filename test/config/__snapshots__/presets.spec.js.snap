@@ -698,10 +698,8 @@ exports[`config/presets resolvePreset throws if valid and invalid 3`] = `undefin
 
 exports[`config/presets resolvePreset works with valid 1`] = `
 Object {
-  "description": Array [
-    "Use version pinning (maintain a single version only and not semver ranges)",
-  ],
   "foo": 1,
+  "ignoreDeps": Array [],
   "rangeStrategy": "pin",
 }
 `;

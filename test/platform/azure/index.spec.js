@@ -15,7 +15,7 @@ describe('platform/azure', () => {
     azure = require('../../../lib/platform/azure');
     azureApi = require('../../../lib/platform/azure/azure-got-wrapper');
     azureHelper = require('../../../lib/platform/azure/azure-helper');
-    GitStorage = require('../../../lib/platform/git/storage');
+    GitStorage = require('../../../lib/platform/git/storage').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),
@@ -33,7 +33,6 @@ describe('platform/azure', () => {
       getRepoStatus: jest.fn(),
     }));
     hostRules.find.mockReturnValue({
-      endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
     });
     azure.initPlatform({

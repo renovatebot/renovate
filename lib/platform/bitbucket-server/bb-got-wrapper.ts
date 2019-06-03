@@ -1,50 +1,22 @@
-import got from 'got';
 import URL from 'url';
-import * as hostRules from '../../util/host-rules';
-import { IGotApiOptions, IGotApi } from '../common';
+import { GotJSONOptions } from 'got';
+import got from '../../util/got';
+import { IGotApi, IGotApiOptions } from '../common';
 
-let cache: Renovate.IDict<got.Response<any>> = {};
+let baseUrl: string;
 
-const platform = 'bitbucket-server';
-let endpoint: string;
-
-async function get(path: string, options: IGotApiOptions & got.GotJSONOptions) {
-  const host = URL.parse(path).host || URL.parse(endpoint).host;
-  const opts: IGotApiOptions &
-    hostRules.IPlatformConfig &
-    got.GotJSONOptions = {
-    // TODO: Move to configurable host rules, or use utils/got
-    timeout: 60 * 1000,
-    json: true,
-    basic: false,
-    ...hostRules.find({ platform, host }),
+function get(path: string, options: IGotApiOptions & GotJSONOptions) {
+  const url = URL.resolve(baseUrl, path);
+  const opts: IGotApiOptions & GotJSONOptions = {
     ...options,
+    hostType: 'bitbucket-server',
+    json: true,
   };
-  const url = URL.resolve(endpoint, path);
-  const method = (
-    opts.method || /* istanbul ignore next */ 'get'
-  ).toLowerCase();
-  const useCache = opts.useCache;
-  if (method === 'get' && useCache !== false && cache[path]) {
-    logger.trace({ path }, 'Returning cached result');
-    return cache[path];
-  }
   opts.headers = {
-    'user-agent': 'https://github.com/renovatebot/renovate',
-    'X-Atlassian-Token': 'no-check',
-
-    authorization: opts.token
-      ? /* istanbul ignore next */ `Basic ${opts.token}`
-      : undefined,
     ...opts.headers,
+    'X-Atlassian-Token': 'no-check',
   };
-
-  const res = await got(url, opts);
-  // logger.debug(res.body);
-  if (method.toLowerCase() === 'get') {
-    cache[path] = res;
-  }
-  return res;
+  return got(url, opts);
 }
 
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
@@ -56,12 +28,8 @@ for (const x of helpers) {
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
-api.reset = function reset() {
-  cache = {};
-};
-
-api.setEndpoint = (e: string) => {
-  endpoint = e;
+api.setBaseUrl = (e: string) => {
+  baseUrl = e;
 };
 
 export default api;

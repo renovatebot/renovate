@@ -27,6 +27,10 @@ const config = {
 describe('.getArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    exec.mockResolvedValue({
+      stdout: '',
+      stderror: '',
+    });
   });
   it('returns if no go.sum found', async () => {
     expect(await gomod.getArtifacts('go.mod', [], gomod1, config)).toBeNull();
@@ -37,7 +41,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
-    fs.readFile = jest.fn(() => 'Current go.sum');
+    platform.getRepoStatus.mockResolvedValue({ modified: [] });
     expect(await gomod.getArtifacts('go.mod', [], gomod1, config)).toBeNull();
   });
   it('returns updated go.sum', async () => {
@@ -46,6 +50,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
+    platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
     expect(
       await gomod.getArtifacts('go.mod', [], gomod1, config)
@@ -57,6 +62,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
+    platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
     expect(
       await gomod.getArtifacts('go.mod', [], gomod1, {
@@ -74,6 +80,7 @@ describe('.getArtifacts()', () => {
       stdout: '',
       stderror: '',
     });
+    platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
     expect(
       await gomod.getArtifacts('go.mod', [], gomod1, {
@@ -81,6 +88,30 @@ describe('.getArtifacts()', () => {
         binarySource: 'docker',
       })
     ).not.toBeNull();
+  });
+  it('supports docker mode with credentials, appMode and trustLevel=high', async () => {
+    hostRules.find.mockReturnValue({
+      token: 'some-token',
+    });
+    platform.getFile.mockResolvedValueOnce('Current go.sum');
+    platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
+    fs.readFile.mockResolvedValue('New go.sum 1');
+    fs.readFile.mockResolvedValue('New go.sum 2');
+    fs.readFile.mockResolvedValue('New go.sum 3');
+    try {
+      global.appMode = true;
+      global.trustLevel = 'high';
+      expect(
+        await gomod.getArtifacts('go.mod', [], gomod1, {
+          ...config,
+          binarySource: 'docker',
+          postUpdateOptions: ['gomodTidy'],
+        })
+      ).not.toBeNull();
+    } finally {
+      delete global.appMode;
+      delete global.trustLevel;
+    }
   });
   it('catches errors', async () => {
     platform.getFile.mockReturnValueOnce('Current go.sum');

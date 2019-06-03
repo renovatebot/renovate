@@ -25,6 +25,14 @@ describe('manager/travis/update', () => {
       const res = nodefile.updateDependency('hello: world', upgrade);
       expect(res).toMatchSnapshot();
     });
+    it('it uses double quotes', () => {
+      const upgrade = {
+        currentValue: ['6'],
+        newValue: [6, 8],
+      };
+      const res = nodefile.updateDependency('node_js:\n  - "6"\n', upgrade);
+      expect(res).toMatchSnapshot();
+    });
     it('returns null if error', () => {
       const upgrade = {
         currentValue: [8, 6, 4],

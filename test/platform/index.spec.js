@@ -12,7 +12,12 @@ describe('platform', () => {
     await expect(platform.initPlatform(config)).rejects.toThrow();
   });
   it('initializes', async () => {
-    const config = { platform: 'bitbucket', username: 'abc', password: '123' };
+    const config = {
+      platform: 'bitbucket',
+      gitAuthor: 'user@domain.com',
+      username: 'abc',
+      password: '123',
+    };
     expect(await platform.initPlatform(config)).toMatchSnapshot();
   });
   it('has a list of supported methods for github', () => {
@@ -21,7 +26,7 @@ describe('platform', () => {
   });
 
   it('has a list of supported methods for gitlab', () => {
-    const gitlabMethods = Object.keys(gitlab);
+    const gitlabMethods = Object.keys(gitlab).sort();
     expect(gitlabMethods).toMatchSnapshot();
   });
 

@@ -7,12 +7,14 @@ const cargo = require('../../../lib/manager/cargo/artifacts');
 
 const config = {
   localDir: '/tmp/github/some/repo',
-  gitFs: true,
 };
 
 describe('.getArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+  });
+  afterEach(() => {
+    delete global.trustLevel;
   });
   it('returns null if no Cargo.lock found', async () => {
     const updatedDeps = [
@@ -45,27 +47,6 @@ describe('.getArtifacts()', () => {
       await cargo.getArtifacts('Cargo.toml', updatedDeps, '', config)
     ).toBeNull();
   });
-  it('returns null if gitFs is not enabled', async () => {
-    platform.getFile.mockReturnValueOnce('Current Cargo.lock');
-    exec.mockReturnValueOnce({
-      stdout: '',
-      stderror: '',
-    });
-    fs.readFile = jest.fn(() => 'New Cargo.lock');
-    const noGitFsConfig = {
-      localDir: '/tmp/github/some/repo',
-      gitFs: undefined,
-    };
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
-    expect(
-      await cargo.getArtifacts('Cargo.toml', updatedDeps, '', noGitFsConfig)
-    ).toBeNull();
-  });
   it('returns updated Cargo.lock', async () => {
     platform.getFile.mockReturnValueOnce('Old Cargo.lock');
     exec.mockReturnValueOnce({
@@ -79,6 +60,7 @@ describe('.getArtifacts()', () => {
         currentValue: '1.2.3',
       },
     ];
+    global.trustLevel = 'high';
     expect(
       await cargo.getArtifacts('Cargo.toml', updatedDeps, '{}', config)
     ).not.toBeNull();
