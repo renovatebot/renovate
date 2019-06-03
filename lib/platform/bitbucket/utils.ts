@@ -59,8 +59,7 @@ export async function accumulateValues(
   return accumulator;
 }
 
-// istanbul ignore next
-export function isConflicted(files: any) {
+export /* istanbul ignore next */ function isConflicted(files: any) {
   for (const file of files) {
     for (const chunk of file.chunks) {
       for (const change of chunk.changes) {

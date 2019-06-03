@@ -90,6 +90,7 @@ describe('config/presets', () => {
     });
     it('works with valid', async () => {
       config.foo = 1;
+      config.ignoreDeps = [];
       config.extends = [':pinVersions'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();

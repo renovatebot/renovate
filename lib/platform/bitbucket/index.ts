@@ -70,16 +70,17 @@ export async function initRepo({
   localDir: string;
 }) {
   logger.debug(`initRepo("${repository}")`);
-  const opts = hostRules.find({ hostType: 'bitbucket' });
-  api.reset();
+  const opts = hostRules.find({
+    hostType: 'bitbucket',
+    url: 'https://api.bitbucket.org/',
+  });
   config = {} as any;
   // TODO: get in touch with @rarkins about lifting up the caching into the app layer
   config.repository = repository;
   const platformConfig: any = {};
 
-  // Always gitFs
   const url = GitStorage.getUrl({
-    gitFs: 'https',
+    protocol: 'https',
     auth: `${opts!.username}:${opts!.password}`,
     hostname: 'bitbucket.org',
     repository,
@@ -132,8 +133,9 @@ export async function setBaseBranch(branchName = config.baseBranch) {
   await getFileList(branchName);
 }
 
-// istanbul ignore next
-export function setBranchPrefix(branchPrefix: string) {
+export /* istanbul ignore next */ function setBranchPrefix(
+  branchPrefix: string
+) {
   return config.storage.setBranchPrefix(branchPrefix);
 }
 
@@ -380,8 +382,7 @@ export async function ensureIssue(title: string, body: string) {
   return null;
 }
 
-// istanbul ignore next
-export function getIssueList() {
+export /* istanbul ignore next */ function getIssueList() {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return [];
@@ -415,8 +416,7 @@ export async function addReviewers(prId: number, reviewers: string[]) {
   });
 }
 
-// istanbul ignore next
-export function deleteLabel() {
+export /* istanbul ignore next */ function deleteLabel() {
   throw new Error('deleteLabel not implemented');
 }
 
@@ -634,7 +634,6 @@ export function cleanRepo() {
   if (config.storage && config.storage.cleanRepo) {
     config.storage.cleanRepo();
   }
-  api.reset();
   config = {} as any;
 }
 

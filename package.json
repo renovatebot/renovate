@@ -12,7 +12,7 @@
     "clean-cache": "node bin/clean-cache.js",
     "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
-    "debug": "node -r ts-node/register/transpile-only --inspect-brk lib/renovate.ts",
+    "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",
     "eslint": "run-s eslint:*",
     "eslint:js": "eslint lib test --ext .js",
     "eslint:ts": "eslint -c .tslintrc.js lib test --ext .ts",
@@ -26,7 +26,7 @@
     "lint-fix": "yarn eslint-fix && yarn prettier-fix",
     "prettier": "prettier --list-different \"**/*.{ts,js,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
-    "start": "node -r ts-node/register/transpile-only lib/renovate.ts",
+    "start": "babel-node --extensions \".ts,.js\" -- lib/renovate.ts",
     "test-dirty": "git diff --exit-code",
     "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile && yarn test",
     "test-schema": "bash test/json-schema.sh",
@@ -90,7 +90,7 @@
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@renovatebot/docker-registry-client": "3.3.0",
-    "@sindresorhus/is": "0.17.0",
+    "@sindresorhus/is": "0.17.1",
     "@snyk/ruby-semver": "2.0.2",
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "8.0.0",
@@ -104,15 +104,14 @@
     "compare-versions": "3.4.0",
     "conventional-commits-detector": "1.0.2",
     "convert-hrtime": "2.0.0",
+    "deepmerge": "3.2.0",
     "delay": "4.2.0",
     "detect-indent": "5.0.0",
     "email-addresses": "3.0.3",
     "form-data": "2.3.3",
     "fs-extra": "7.0.1",
     "get-installed-path": "4.0.8",
-    "gh-got": "8.1.0",
     "github-url-from-git": "1.5.0",
-    "gl-got": "9.0.3",
     "got": "9.6.0",
     "handlebars": "4.1.2",
     "ini": "1.3.5",
@@ -123,8 +122,9 @@
     "later": "1.2.0",
     "linkify-markdown": "1.0.0",
     "lodash": "4.17.11",
-    "luxon": "1.13.2",
+    "luxon": "1.16.0",
     "markdown-it": "8.4.2",
+    "markdown-table": "1.1.3",
     "minimatch": "3.0.4",
     "moment": "2.24.0",
     "moment-timezone": "0.5.25",
@@ -134,12 +134,12 @@
     "p-all": "2.1.0",
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
-    "pnpm": "3.3.3",
+    "pnpm": "3.4.1",
     "proxy-agent": "3.0.3",
     "registry-auth-token": "3.4.0",
     "root-require": "0.3.1",
     "safe-regex": "2.0.2",
-    "semver": "6.0.0",
+    "semver": "6.1.1",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.4",
     "simple-git": "1.113.0",
@@ -149,29 +149,37 @@
     "traverse": "0.6.6",
     "upath": "1.1.2",
     "validate-npm-package-name": "3.0.0",
-    "validator": "10.11.0",
+    "validator": "11.0.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
     "yarn": "1.16.0"
   },
   "devDependencies": {
+    "@babel/cli": "7.4.4",
+    "@babel/core": "7.4.5",
+    "@babel/node": "7.4.5",
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-typescript": "7.3.3",
     "@types/bunyan": "1.8.6",
     "@types/convert-hrtime": "2.0.0",
     "@types/fs-extra": "7.0.0",
     "@types/got": "9.4.4",
     "@types/jest": "24.0.13",
-    "@types/node": "11.13.11",
+    "@types/node": "11.13.13",
+    "@types/parse-link-header": "1.0.0",
     "@types/tmp": "0.1.0",
     "@typescript-eslint/eslint-plugin": "1.9.0",
     "@typescript-eslint/parser": "1.9.0",
+    "babel-jest": "24.8.0",
     "chai": "4.2.0",
     "copyfiles": "2.1.0",
-    "coveralls": "3.0.3",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb-base": "13.1.0",
-    "eslint-config-prettier": "4.2.0",
-    "eslint-plugin-import": "2.17.2",
+    "eslint-config-prettier": "4.3.0",
+    "eslint-plugin-import": "2.17.3",
     "eslint-plugin-promise": "4.1.1",
     "glob": "7.1.4",
     "husky": "2.3.0",
@@ -181,13 +189,11 @@
     "nock": "10.0.6",
     "npm-run-all": "4.1.5",
     "prettier": "1.17.1",
-    "pretty-quick": "1.10.0",
+    "pretty-quick": "1.11.0",
     "rimraf": "2.6.3",
     "semantic-release": "15.13.12",
     "tmp-promise": "2.0.1",
-    "ts-jest": "24.0.2",
-    "ts-node": "8.1.0",
-    "typescript": "3.4.5"
+    "typescript": "3.5.1"
   },
   "resolutions": {
     "lodash": ">= 4.17.11"
@@ -199,17 +205,11 @@
     "dist"
   ],
   "jest": {
-    "globals": {
-      "ts-jest": {
-        "isolatedModules": true
-      }
-    },
     "cacheDirectory": ".cache/jest",
     "coverageDirectory": "./coverage",
     "collectCoverage": true,
     "collectCoverageFrom": [
       "lib/**/*.{js,ts}",
-      "!lib/platform/bitbucket-server/bb-got-wrapper.js",
       "!lib/versioning/maven/index.js",
       "!lib/proxy.js"
     ],
@@ -228,7 +228,9 @@
     "snapshotSerializers": [
       "./test/newline-snapshot-serializer.js"
     ],
-    "preset": "ts-jest/presets/js-with-ts"
+    "transform": {
+      "^.+\\.(j|t)s$": "babel-jest"
+    }
   },
   "publishConfig": {
     "tag": "latest"
@@ -240,6 +242,20 @@
   },
   "release": {
     "branch": "master",
+    "analyzeCommits": {
+      "preset": "angular",
+      "releaseRules": [
+        {
+          "type": "docs",
+          "scope": "readme.md",
+          "release": "patch"
+        },
+        {
+          "type": "build",
+          "release": "patch"
+        }
+      ]
+    },
     "tagFormat": "${version}"
   }
 }

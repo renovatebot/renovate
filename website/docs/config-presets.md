@@ -37,8 +37,8 @@ The following namespace is used:
 - `@abc:xyz`: npm package `@abc/renovate-config` and preset `xyz`
 - `github>abc/foo`: github repository `https://github.com/abc/foo` and preset `default`
 - `github>abc/foo:xyz`: github repository `https://github.com/abc/foo` and preset `xyz`
-- `gitlab>abc/foo`: gitlab repository `https://github.com/abc/foo` and preset `default`
-- `gitlab>abc/foo:xyz`: gitlab repository `https://github.com/abc/foo` and preset `xyz`
+- `gitlab>abc/foo`: gitlab repository `https://gitlab.com/abc/foo` and preset `default`
+- `gitlab>abc/foo:xyz`: gitlab repository `https://gitlab.com/abc/foo` and preset `xyz`
 
 In general, GitHub or GitLab-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs. An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 

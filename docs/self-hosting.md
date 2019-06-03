@@ -147,19 +147,9 @@ If you wish to override the base directory to be used (e.g. instead of `/tmp/ren
 
 If you wish to override the cache location specifically then configure a value for `cacheDir` instead.
 
-## gitFs
-
-`gitFs` is the recommended way to perform file operations using Renovate. Using `gitFs` means Renovate does a shallow clone to read and subsequently write files for each repository, instead of using platform-specific APIs to read/write files. Platform APIs are still used for things like Issues and Pull Requests regardless.
-
-`gitFs` is supported for all platforms, and is the only approach for Bitbucket Cloud, Bitbucket Server, and Azure DevOps. It's optional for GitHub and GitLab. In the case of GitLab, it is necessary to set `gitFs=ssh` because GitLab does not support write options via git/https when using a Personal Access Token. In this case you need to make sure that Renovate has access to the SSH private key which is associated with its account.
-
-If you wish for git data to be preserved between Renovate runs, then configure `preserveRepoData` to `true` in your bot config. Doing so means that Renovate needs to do only a `git fetch` each time rather than `git clone`. You can control where this data is stored using the `baseDir` config option mentioned above.
-
 ### Identification and Authorization
 
-`gitFs` means Git is used, which means that commits need a username/email combination. If one is not set for the system that Renovate is run on then you should configure one using the `gitAuthor` configuration option.
-
-It's also possible to sign git commits, but for this you need to set up the GPG key and setting out of band. In short:
+It's possible to sign git commits, but for this you need to set up the GPG key and setting out of band. In short:
 
 - Make sure the private key is added via GPG
 - Tell git about the private key (e.g. `git config --global user.signingkey AABBCCDDEEFF`)

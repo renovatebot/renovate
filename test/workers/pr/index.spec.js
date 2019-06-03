@@ -115,8 +115,8 @@ describe('workers/pr', () => {
       config.depType = 'devDependencies';
       config.depName = 'dummy';
       config.privateRepo = true;
-      config.currentValue = '1.0.0';
-      config.newValue = '1.1.0';
+      config.displayFrom = '1.0.0';
+      config.displayTo = '1.1.0';
       config.updateType = 'minor';
       config.homepage = 'https://dummy.com';
       config.sourceUrl = 'https://github.com/renovateapp/dummy';
@@ -160,13 +160,15 @@ describe('workers/pr', () => {
       config.upgrades = config.upgrades.concat([
         {
           depName: 'a',
-          newDigestShort: 'aaaaaaa',
+          displayFrom: 'zzzzzz',
+          displayTo: 'aaaaaaa',
           prBodyNotes: ['note 1', 'note 2'],
         },
         {
           depName: 'b',
           newDigestShort: 'bbbbbbb',
-          newValue: 'some_new_value',
+          displayFrom: 'some_old_value',
+          displayTo: 'some_new_value',
           updateType: 'pin',
         },
         {
