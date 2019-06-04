@@ -78,9 +78,11 @@ workflows:
   test_and_release:
     jobs:
       - test_node_10
+      - test_node_12
       - release:
           requires:
             - test_node_10
+            - test_node_12
           filters:
             branches:
               only:
