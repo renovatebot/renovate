@@ -64,11 +64,7 @@ describe('platform/gh-graphql-wrapper', () => {
       }),
     });
 
-    const [
-      success,
-      items,
-      cursor,
-    ] = await gql.get(); /* eslint-disable-line @typescript-eslint/no-unused-vars */
+    const [success] = await gql.get();
     expect(success).toStrictEqual(false);
   });
   it('throws platform-error when invalid json in response', async () => {
@@ -150,11 +146,7 @@ describe('platform/gh-graphql-wrapper', () => {
       }),
     });
 
-    const [
-      success,
-      items,
-      cursor,
-    ] = await gql.get(); /* eslint-disable-line @typescript-eslint/no-unused-vars */
+    const cursor = (await gql.get())[2];
     expect(cursor).toStrictEqual(expectedCursor);
   });
   it("doesn't return cursor if not hasNextPage", async () => {
@@ -201,12 +193,7 @@ describe('platform/gh-graphql-wrapper', () => {
         },
       }),
     });
-
-    const [
-      success,
-      items,
-      cursor,
-    ] = await gql.get(); /* eslint-disable-line @typescript-eslint/no-unused-vars */
+    const cursor = (await gql.get())[2];
     expect(cursor).toStrictEqual('');
   });
   it('gets all by following paging', async () => {
