@@ -82,6 +82,9 @@ Object {
       "depName": "pywinusb",
       "depType": "packages",
       "pipenvNestedVersion": true,
+      "registryUrls": Array [
+        "https://pypi.python.org/simple",
+      ],
       "skipReason": "any-version",
     },
     Object {
@@ -140,6 +143,27 @@ Object {
   ],
   "registryUrls": Array [
     "https://pypi.org/simple",
+  ],
+}
+`;
+
+exports[`lib/manager/pipenv/extract extractPackageFile() supports custom index 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "==0.21.0",
+      "datasource": "pypi",
+      "depName": "requests",
+      "depType": "packages",
+      "pipenvNestedVersion": true,
+      "registryUrls": Array [
+        "https://testpypi.python.org/pypi",
+      ],
+    },
+  ],
+  "registryUrls": Array [
+    "https://pypi.python.org/simple",
+    "https://testpypi.python.org/pypi",
   ],
 }
 `;
