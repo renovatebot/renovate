@@ -148,6 +148,8 @@ For example, To add `[skip ci]` to every commit you could configure:
   "commitBody": "[skip ci]"
 ```
 
+## commitBodyTable
+
 ## commitMessage
 
 Editing of `commitMessage` directly is now deprecated and not recommended. Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
