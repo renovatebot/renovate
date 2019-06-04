@@ -1,4 +1,5 @@
 const fs = require('fs');
+const yaml = require('js-yaml');
 const got = require('../../lib/util/got');
 const { getPkgReleases } = require('../../lib/datasource/helm');
 
@@ -12,11 +13,16 @@ jest.mock('../../lib/util/got');
 
 describe('datasource/helm', () => {
   describe('getPkgReleases', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+      global.repoCache = {};
+      return global.renovateCache.rmAll();
+    });
     it('returns null if lookupName was not provided', async () => {
       expect(
         await getPkgReleases({
           lookupName: undefined,
-          repository: 'example-repository.com',
+          helmRepository: 'example-repository.com',
         })
       ).toBeNull();
     });
@@ -24,7 +30,7 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: 'some_chart',
-          repository: undefined,
+          helmRepository: undefined,
         })
       ).toBeNull();
     });
@@ -33,7 +39,7 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: 'non_existent_chart',
-          repository: 'example-repository.com',
+          helmRepository: 'example-repository.com',
         })
       ).toBeNull();
     });
@@ -44,26 +50,34 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: 'non_existent_chart',
-          repository: 'example-repository.com',
+          helmRepository: 'example-repository.com',
         })
       ).toBeNull();
     });
     it('returns null for 404', async () => {
-      got.mockReturnValueOnce(Promise.reject({ statusCode: 404 }));
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 404,
+        })
+      );
       expect(
         await getPkgReleases({
           lookupName: 'some_chart',
-          repository: 'example-repository.com',
+          helmRepository: 'example-repository.com',
         })
       ).toBeNull();
     });
     it('throws for 5xx', async () => {
-      got.mockReturnValueOnce(Promise.reject({ statusCode: 502 }));
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          statusCode: 502,
+        })
+      );
       let e;
       try {
         await getPkgReleases({
           lookupName: 'some_chart',
-          repository: 'example-repository.com',
+          helmRepository: 'example-repository.com',
         });
       } catch (err) {
         e = err;
@@ -78,7 +92,7 @@ describe('datasource/helm', () => {
       expect(
         await getPkgReleases({
           lookupName: 'some_chart',
-          repository: 'example-repository.com',
+          helmRepository: 'example-repository.com',
         })
       ).toBeNull();
     });
@@ -87,7 +101,7 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce(res);
       const releases = await getPkgReleases({
         lookupName: 'non_existent_chart',
-        repository: 'example-repository.com',
+        helmRepository: 'example-repository.com',
       });
       expect(releases).toBeNull();
     });
@@ -101,7 +115,7 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce(res);
       const releases = await getPkgReleases({
         lookupName: 'non_existent_chart',
-        repository: 'example-repository.com',
+        helmRepository: 'example-repository.com',
       });
       expect(releases).toBeNull();
     });
@@ -109,15 +123,35 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce({ body: indexYaml });
       const releases = await getPkgReleases({
         lookupName: 'non_existent_chart',
-        repository: 'example-repository.com',
+        helmRepository: 'example-repository.com',
       });
       expect(releases).toBeNull();
     });
-    it('returns list of versions for normal response', async () => {
+    it('returns list of versions for normal response if index.yaml is not cached', async () => {
       got.mockReturnValueOnce({ body: indexYaml });
       const releases = await getPkgReleases({
         lookupName: 'ambassador',
-        repository: 'example-repository.com',
+        helmRepository: 'example-repository.com',
+      });
+      expect(releases).not.toBeNull();
+      expect(releases).toMatchSnapshot();
+    });
+    it('returns list of versions for normal response if index.yaml is cached', async () => {
+      const repository = 'example-repository.com';
+      const cacheNamespace = 'datasource-helm';
+      const cacheKey = repository;
+      const cacheMinutes = 10;
+      const doc = yaml.safeLoad(indexYaml);
+      await global.renovateCache.set(
+        cacheNamespace,
+        cacheKey,
+        doc,
+        cacheMinutes
+      );
+      got.mockReturnValueOnce({ body: indexYaml });
+      const releases = await getPkgReleases({
+        lookupName: 'ambassador',
+        helmRepository: repository,
       });
       expect(releases).not.toBeNull();
       expect(releases).toMatchSnapshot();

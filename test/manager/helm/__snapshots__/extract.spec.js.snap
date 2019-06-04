@@ -7,13 +7,13 @@ Object {
       "currentValue": "0.9.0",
       "datasource": "helm",
       "depName": "redis",
-      "repository": "https://kubernetes-charts.storage.googleapis.com/",
+      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
     },
     Object {
       "currentValue": "0.8.1",
       "datasource": "helm",
       "depName": "postgresql",
-      "repository": "https://kubernetes-charts.storage.googleapis.com/",
+      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
     },
   ],
 }
