@@ -1,7 +1,7 @@
 const util = require('util');
 const glob = util.promisify(require('glob'));
 
-const ignoredExtensions = ['js', 'ts', 'md', 'pyc'];
+const ignoredExtensions = ['js', 'ts', 'md', 'pyc', 'DS_Store'];
 
 function filterFiles(files) {
   return files.filter(file =>

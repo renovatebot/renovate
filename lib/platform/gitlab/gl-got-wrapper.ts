@@ -13,20 +13,28 @@ async function get(path: string, options: any) {
     json: true,
     ...options,
   };
-
-  const res = await got(path, opts);
-  if (opts.paginate) {
-    // Check if result is paginated
-    try {
-      const linkHeader = parseLinkHeader(res.headers.link as string);
-      if (linkHeader && linkHeader.next) {
-        res.body = res.body.concat((await get(linkHeader.next.url, opts)).body);
+  try {
+    const res = await got(path, opts);
+    if (opts.paginate) {
+      // Check if result is paginated
+      try {
+        const linkHeader = parseLinkHeader(res.headers.link as string);
+        if (linkHeader && linkHeader.next) {
+          res.body = res.body.concat(
+            (await get(linkHeader.next.url, opts)).body
+          );
+        }
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn({ err }, 'Pagination error');
       }
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'Pagination error');
     }
+    return res;
+  } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode >= 500 && err.statusCode < 600) {
+      throw new Error('platform-failure');
+    }
+    throw err;
   }
-  return res;
 }
 
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
