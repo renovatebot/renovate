@@ -5,7 +5,7 @@ jest.mock('isomorphic-git');
 
 const lookupName = 'https://github.com/vapor/vapor.git';
 
-describe('datasource/dart', () => {
+describe('datasource/git-tags', () => {
   describe('getPkgReleases', () => {
     it('returns nil if response is wrong', async () => {
       getRemoteInfo.mockReturnValue(Promise.resolve(null));
