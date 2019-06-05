@@ -124,7 +124,7 @@ export async function initRepo({
       url,
     });
   } catch (err) /* istanbul ignore next */ {
-    logger.debug('Caught initRepo error');
+    logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {
       throw new Error('empty');
     }
