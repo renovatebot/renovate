@@ -32,7 +32,8 @@ describe('datasource/git-tags', () => {
         })
       );
       const versions = await getPkgReleases({ lookupName });
-      expect(versions.sort()).toEqual(['0.0.1', '0.0.2']);
+      const result = versions.releases.map(x => x.version).sort();
+      expect(result).toEqual(['0.0.1', '0.0.2']);
     });
   });
 });
