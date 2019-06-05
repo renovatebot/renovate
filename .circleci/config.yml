@@ -55,17 +55,17 @@ commands:
 jobs:
   test_node_10:
     docker:
-      - image: amd64/node:10.16.0
+      - image: amd64/node:10.16.0@sha256:8396a37b6a731d1950b98a13f7ae0694ad754191276fd247bd66400641c2809d
     steps:
       - test
   test_node_12:
     docker:
-      - image: amd64/node:12.4.0
+      - image: amd64/node:12.4.0@sha256:3567ac48c0997109d018080279d8c6e10d83b8d8a3c3f081d39d76a1781b70b5
     steps:
       - test
   release:
     docker:
-      - image: amd64/node:10.16.0
+      - image: amd64/node:10.16.0@sha256:8396a37b6a731d1950b98a13f7ae0694ad754191276fd247bd66400641c2809d
     steps:
       - checkout
       - run: yarn install
