@@ -498,18 +498,6 @@ describe('workers/repository/updates/generate', () => {
       ];
       expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
-    it('overrides schedule for pin PRs', () => {
-      const branch = [
-        {
-          ...defaultConfig,
-          depName: 'some-dep',
-          schedule: 'before 3am',
-          updateType: 'pin',
-        },
-      ];
-      const res = generateBranchConfig(branch);
-      expect(res.schedule).toEqual([]);
-    });
     it('handles upgrades', () => {
       const branch = [
         {
