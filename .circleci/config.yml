@@ -8,10 +8,10 @@ commands:
           command: |
             python --version
             python3 --version
-            curl https://bootstrap.pypa.io/get-pip.py | python             
+            curl https://bootstrap.pypa.io/get-pip.py | python
             pip --version
             git config --global user.email "bot@renovateapp.com"
-            git config --global user.name "Renovate Bot"      
+            git config --global user.name "Renovate Bot"
             git --version
 
       - run:
@@ -36,7 +36,7 @@ commands:
       - run:
           name: Build
           command: |
-            yarn build  
+            yarn build
 
       - run:
           name: Unit Tests
@@ -46,7 +46,7 @@ commands:
       - run:
           name: E2E Tests
           command: |
-            yarn test-e2e  
+            yarn test-e2e
 
       - run:
           name: Coverage
