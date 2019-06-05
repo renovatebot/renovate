@@ -33,6 +33,9 @@ async function get(path: string, options: any) {
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new Error('platform-failure');
     }
+    if (err.code === 'ECONNRESET') {
+      throw new Error('platform-failure');
+    }
     throw err;
   }
 }
