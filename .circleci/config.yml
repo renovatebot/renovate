@@ -60,7 +60,7 @@ jobs:
       - test
   test_node_12:
     docker:
-      - image: node:12@sha256:90285adc307844b632965099129d1f4819300fd7be3bbec3d93c36eb91b6266c
+      - image: node:12@sha256:908e8182394cb5672465780ed45512d9b78dccd10d674e84158ea65b40bba755
     steps:
       - test
   release:
