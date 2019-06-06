@@ -8,10 +8,10 @@ commands:
           command: |
             python --version
             python3 --version
-            curl https://bootstrap.pypa.io/get-pip.py | python             
+            curl https://bootstrap.pypa.io/get-pip.py | python
             pip --version
             git config --global user.email "bot@renovateapp.com"
-            git config --global user.name "Renovate Bot"      
+            git config --global user.name "Renovate Bot"
             git --version
 
       - run:
@@ -36,7 +36,7 @@ commands:
       - run:
           name: Build
           command: |
-            yarn build  
+            yarn build
 
       - run:
           name: Unit Tests
@@ -46,7 +46,7 @@ commands:
       - run:
           name: E2E Tests
           command: |
-            yarn test-e2e  
+            yarn test-e2e
 
       - run:
           name: Coverage
@@ -55,17 +55,17 @@ commands:
 jobs:
   test_node_10:
     docker:
-      - image: node:10.16.0@sha256:b050ae5bfcedc1bfd9ad8216c960115cb0f3d2e09ee4e844f80ed39a7632e4ed
+      - image: amd64/node:10.16.0@sha256:8396a37b6a731d1950b98a13f7ae0694ad754191276fd247bd66400641c2809d
     steps:
       - test
   test_node_12:
     docker:
-      - image: node:12@sha256:90285adc307844b632965099129d1f4819300fd7be3bbec3d93c36eb91b6266c
+      - image: amd64/node:12.4.0@sha256:3567ac48c0997109d018080279d8c6e10d83b8d8a3c3f081d39d76a1781b70b5
     steps:
       - test
   release:
     docker:
-      - image: node:10.16.0@sha256:b050ae5bfcedc1bfd9ad8216c960115cb0f3d2e09ee4e844f80ed39a7632e4ed
+      - image: amd64/node:10.16.0@sha256:8396a37b6a731d1950b98a13f7ae0694ad754191276fd247bd66400641c2809d
     steps:
       - checkout
       - run: yarn install
