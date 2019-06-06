@@ -107,17 +107,26 @@ export async function initRepo({
     logger.debug('Bot email=' + config.email);
     delete config.prList;
     logger.debug('Enabling Git FS');
-    const { host, protocol } = URL.parse(defaults.endpoint);
     const opts = hostRules.find({
       hostType: defaults.hostType,
       url: defaults.endpoint,
     });
-    const url = GitStorage.getUrl({
-      protocol: protocol!.slice(0, -1) as any,
-      auth: 'oauth2:' + opts.token,
-      host,
-      repository,
-    });
+    let url;
+    if (res.body.http_url_to_repo === null) {
+      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
+      const { host, protocol } = URL.parse(defaults.endpoint);
+      url = GitStorage.getUrl({
+        protocol: protocol!.slice(0, -1) as any,
+        auth: 'oauth2:' + opts.token,
+        host,
+        repository,
+      });
+    } else {
+      logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
+      const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
+      repoUrl.auth = 'oauth2:' + opts.token;
+      url = URL.format(repoUrl);
+    }
     config.storage = new GitStorage();
     await config.storage.initRepo({
       ...config,

@@ -116,6 +116,7 @@ describe('platform/gitlab', () => {
         ({
           body: {
             default_branch: 'master',
+            http_url_to_repo: 'https://gitlab.com/some/repo.git',
           },
         } as any)
     );
@@ -162,6 +163,16 @@ describe('platform/gitlab', () => {
       await expect(
         gitlab.initRepo({ repository: 'some/repo', localDir: '' })
       ).rejects.toThrow(Error('empty'));
+    });
+    it('should fall back if http_url_to_repo is empty', async () => {
+      api.get.mockReturnValue({
+        body: {
+          default_branch: 'master',
+          http_url_to_repo: null,
+        },
+      } as any);
+      await initRepo({ repository: 'some/repo/project', token: 'some-token' });
+      expect(api.get.mock.calls).toMatchSnapshot();
     });
   });
   describe('getRepoForceRebase', () => {
