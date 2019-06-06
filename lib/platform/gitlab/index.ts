@@ -100,11 +100,6 @@ export async function initRepo({
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
-    if (res.body.http_url_to_repo === null) {
-      throw new Error('no http_url_to_repo found');
-    }
-    logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
-    const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
     platformConfig.isFork = !!res.body.forked_from_project;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
@@ -116,11 +111,26 @@ export async function initRepo({
       hostType: defaults.hostType,
       url: defaults.endpoint,
     });
-    repoUrl.auth = 'oauth2:' + opts.token;
+    let url;
+    if (res.body.http_url_to_repo === null) {
+      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
+      const { host, protocol } = URL.parse(defaults.endpoint);
+      url = GitStorage.getUrl({
+        protocol: protocol!.slice(0, -1) as any,
+        auth: 'oauth2:' + opts.token,
+        host,
+        repository,
+      });
+    } else {
+      logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
+      const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
+      repoUrl.auth = 'oauth2:' + opts.token;
+      url = URL.format(repoUrl);
+    }
     config.storage = new GitStorage();
     await config.storage.initRepo({
       ...config,
-      url: URL.format(repoUrl),
+      url,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
