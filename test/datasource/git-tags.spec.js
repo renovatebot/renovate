@@ -6,6 +6,7 @@ jest.mock('isomorphic-git');
 const lookupName = 'https://github.com/vapor/vapor.git';
 
 describe('datasource/git-tags', () => {
+  beforeEach(() => global.renovateCache.rmAll());
   describe('getPkgReleases', () => {
     it('returns nil if response is wrong', async () => {
       getRemoteInfo.mockReturnValue(Promise.resolve(null));
