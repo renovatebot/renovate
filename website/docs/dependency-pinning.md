@@ -103,9 +103,7 @@ Lock files are a great companion to semver ranges _or_ pinning dependencies, bec
 
 #### What a lock file will do for you
 
-A lock file will lock down the exact dependencies and _sub_-dependencies that your project uses, so that everyone running `npm install` or `yarn install` will install the exact same dependencies as the person or bot that last updated the lock file.
-
-To reuse an earlier example, this means that you could have `foobar@^1.1.0` in your `package.json` and be locked to `1.1.0` in your lock file, so that when the broken `foobar@1.2.0` is released, nobody on the team installs it.
+What a lock file does is very confusing and has changed [from version to version](https://stackoverflow.com/a/45566871/). You might reasonably expect that it locks down the exact dependencies and _sub_-dependencies of your projects--so that everyone running `npm install` or `yarn install` will install the exact same dependencies as the person or bot that last updated the lock file--but in fact this is not true. (`npm ci`, available in `npm` 5.7+, *does* do this; as [the blog post explaining the feature notes](https://blog.npmjs.org/post/171556855892/introducing-npm-ci-for-faster-more-reliable) this "ensures reproducible builds … [previously], developers who wanted to ensure that node_modules/ and package.json stayed in sync would have to archive their node_modules folder".)
 
 #### What a lock file doesn't do for you
 
