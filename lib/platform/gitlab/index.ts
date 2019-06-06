@@ -100,6 +100,11 @@ export async function initRepo({
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
+    if (res.body.http_url_to_repo === null) {
+      throw new Error('no http_url_to_repo found');
+    }
+    logger.debug(`${repository} http URL = ${res.body.http_url_to_repo}`);
+    const repoUrl = URL.parse(`${res.body.http_url_to_repo}`);
     platformConfig.isFork = !!res.body.forked_from_project;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
@@ -107,21 +112,15 @@ export async function initRepo({
     logger.debug('Bot email=' + config.email);
     delete config.prList;
     logger.debug('Enabling Git FS');
-    const { host, protocol } = URL.parse(defaults.endpoint);
     const opts = hostRules.find({
       hostType: defaults.hostType,
       url: defaults.endpoint,
     });
-    const url = GitStorage.getUrl({
-      protocol: protocol!.slice(0, -1) as any,
-      auth: 'oauth2:' + opts.token,
-      host,
-      repository,
-    });
+    repoUrl.auth = 'oauth2:' + opts.token;
     config.storage = new GitStorage();
     await config.storage.initRepo({
       ...config,
-      url,
+      url: URL.format(repoUrl),
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
