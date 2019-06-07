@@ -182,7 +182,7 @@
     "eslint-plugin-import": "2.17.3",
     "eslint-plugin-promise": "4.1.1",
     "glob": "7.1.4",
-    "husky": "2.3.0",
+    "husky": "2.4.0",
     "jest": "24.8.0",
     "jest-silent-reporter": "0.1.2",
     "mockdate": "2.0.2",
