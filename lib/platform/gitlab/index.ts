@@ -189,9 +189,7 @@ export async function getBranchPr(branchName: string) {
   if (!(await branchExists(branchName))) {
     return null;
   }
-  const urlString = `projects/${
-    config.repository
-  }/merge_requests?state=opened&per_page=100`;
+  const urlString = `projects/${config.repository}/merge_requests?state=opened&per_page=100`;
   const res = await api.get(urlString, { paginate: true });
   logger.debug(`Got res with ${res.body.length} results`);
   let pr: any = null;
@@ -280,9 +278,7 @@ export async function getBranchStatus(
   // First, get the branch commit SHA
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
-  const url = `projects/${
-    config.repository
-  }/repository/commits/${branchSha}/statuses`;
+  const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
   const res = await api.get(url);
   logger.debug(`Got res with ${res.body.length} results`);
   if (res.body.length === 0) {
@@ -313,9 +309,7 @@ export async function getBranchStatusCheck(
   // First, get the branch commit SHA
   const branchSha = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
-  const url = `projects/${
-    config.repository
-  }/repository/commits/${branchSha}/statuses`;
+  const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
   // cache-bust in case we have rebased
   const res = await api.get(url, { useCache: false });
   logger.debug(`Got res with ${res.body.length} results`);
@@ -511,9 +505,7 @@ async function addComment(issueNo: number, body: string) {
 async function editComment(issueNo: number, commentId: number, body: string) {
   // PUT projects/:owner/:repo/merge_requests/:number/notes/:id
   await api.put(
-    `projects/${
-      config.repository
-    }/merge_requests/${issueNo}/notes/${commentId}`,
+    `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`,
     {
       body: { body },
     }
@@ -586,9 +578,7 @@ export async function ensureCommentRemoval(issueNo: number, topic: string) {
 
 export async function getPrList() {
   if (!config.prList) {
-    const urlString = `projects/${
-      config.repository
-    }/merge_requests?per_page=100`;
+    const urlString = `projects/${config.repository}/merge_requests?per_page=100`;
     const res = await api.get(urlString, { paginate: true });
     config.prList = res.body.map(
       (pr: {
@@ -670,9 +660,7 @@ export async function createPr(
 
 export async function getPr(iid: number) {
   logger.debug(`getPr(${iid})`);
-  const url = `projects/${
-    config.repository
-  }/merge_requests/${iid}?include_diverged_commits_count=1`;
+  const url = `projects/${config.repository}/merge_requests/${iid}?include_diverged_commits_count=1`;
   const pr = (await api.get(url)).body;
   // Harmonize fields with GitHub
   pr.branchName = pr.source_branch;
