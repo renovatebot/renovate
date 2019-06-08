@@ -266,6 +266,17 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab initRepo should fall back if http_url_to_repo is empty 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo%2Fproject",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;
+
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
