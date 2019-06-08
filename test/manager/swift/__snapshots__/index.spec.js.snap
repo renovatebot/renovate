@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/swift extractPackageFile() parses multiple packages 1`] = `
+Object {
+  "datasource": "git-tags",
+  "deps": Array [
+    Object {
+      "currentValue": "1.2.3.4",
+      "depName": "foo",
+      "fileReplacePosition": 987,
+      "skipReason": "not-a-version",
+    },
+    Object {
+      "currentValue": ">=1.2.3.4.5",
+      "depName": "bar",
+      "fileReplacePosition": 1029,
+      "skipReason": "not-a-version",
+    },
+    Object {
+      "currentValue": "1.2.3.4",
+      "depName": "baz",
+      "fileReplacePosition": 1075,
+      "skipReason": "not-a-version",
+    },
+    Object {
+      "currentValue": "0.1.0",
+      "depName": "https://github.com/avito-tech/GraphiteClient.git",
+      "fileReplacePosition": 1177,
+    },
+    Object {
+      "currentValue": "1.0.16",
+      "depName": "https://github.com/IBM-Swift/BlueSignals.git",
+      "fileReplacePosition": 1268,
+    },
+    Object {
+      "currentValue": "3.0.6",
+      "depName": "https://github.com/daltoniam/Starscream.git",
+      "fileReplacePosition": 1439,
+    },
+    Object {
+      "currentValue": "1.4.6",
+      "depName": "https://github.com/httpswift/swifter.git",
+      "fileReplacePosition": 1523,
+    },
+    Object {
+      "currentValue": ">=0.9.6 <1.0.0",
+      "depName": "https://github.com/weichsel/ZIPFoundation/",
+      "fileReplacePosition": 1626,
+    },
+  ],
+  "packageFile": null,
+}
+`;
+
+exports[`lib/manager/swift extractPackageFile() parses package descriptions 1`] = `
+Object {
+  "datasource": "git-tags",
+  "deps": Array [
+    Object {
+      "currentValue": ">=1.2.3 <2.0.0",
+      "depName": "foo",
+      "fileReplacePosition": 33,
+    },
+  ],
+  "packageFile": null,
+}
+`;
+
+exports[`lib/manager/swift extractPackageFile() parses package descriptions 2`] = `
+Object {
+  "datasource": "git-tags",
+  "deps": Array [
+    Object {
+      "currentValue": ">=1.2.3",
+      "depName": "foo",
+      "fileReplacePosition": 33,
+    },
+  ],
+  "packageFile": null,
+}
+`;
+
+exports[`lib/manager/swift extractPackageFile() parses package descriptions 3`] = `
+Object {
+  "datasource": "git-tags",
+  "deps": Array [
+    Object {
+      "currentValue": ">=1.2.3 <=1.2.4",
+      "depName": "foo",
+      "fileReplacePosition": 33,
+    },
+  ],
+  "packageFile": null,
+}
+`;
+
+exports[`lib/manager/swift extractPackageFile() parses package descriptions 4`] = `
+Object {
+  "datasource": "git-tags",
+  "deps": Array [
+    Object {
+      "currentValue": ">=1.2.3 <1.2.4",
+      "depName": "foo",
+      "fileReplacePosition": 33,
+    },
+  ],
+  "packageFile": null,
+}
+`;
+
+exports[`lib/manager/swift extractPackageFile() parses package descriptions 5`] = `
+Object {
+  "datasource": "git-tags",
+  "deps": Array [
+    Object {
+      "currentValue": "<=1.2.3",
+      "depName": "foo",
+      "fileReplacePosition": 33,
+    },
+  ],
+  "packageFile": null,
+}
+`;
+
+exports[`lib/manager/swift extractPackageFile() parses package descriptions 6`] = `
+Object {
+  "datasource": "git-tags",
+  "deps": Array [
+    Object {
+      "currentValue": "<1.2.3",
+      "depName": "foo",
+      "fileReplacePosition": 33,
+    },
+  ],
+  "packageFile": null,
+}
+`;
