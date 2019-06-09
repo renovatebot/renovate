@@ -55,6 +55,40 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
+    it('handles lockFileMaintenance', async () => {
+      config.parentBranch = 'some-branch';
+      config.upgrades.push({
+        manager: 'composer',
+        updateType: 'lockFileMaintenance',
+      });
+      composer.updateArtifacts.mockReturnValue([
+        {
+          file: {
+            name: 'composer.json',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles lockFileMaintenance error', async () => {
+      config.parentBranch = 'some-branch';
+      config.upgrades.push({
+        manager: 'composer',
+        updateType: 'lockFileMaintenance',
+      });
+      composer.updateArtifacts.mockReturnValue([
+        {
+          artifactError: {
+            name: 'composer.lock',
+            stderr: 'some error',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
     it('handles lock file errors', async () => {
       config.parentBranch = 'some-branch';
       config.upgrades.push({

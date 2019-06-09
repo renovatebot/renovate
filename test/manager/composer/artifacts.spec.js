@@ -73,6 +73,21 @@ describe('.updateArtifacts()', () => {
       await composer.updateArtifacts('composer.json', [], '{}', config)
     ).not.toBeNull();
   });
+  it('performs lockFileMaintenance', async () => {
+    platform.getFile.mockReturnValueOnce('Current composer.lock');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'New composer.lock');
+    platform.getRepoStatus.mockResolvedValue({ modified: ['composer.lock'] });
+    expect(
+      await composer.updateArtifacts('composer.json', [], '{}', {
+        ...config,
+        isLockFileMaintenance: true,
+      })
+    ).not.toBeNull();
+  });
   it('supports docker mode', async () => {
     platform.getFile.mockReturnValueOnce('Current composer.lock');
     exec.mockReturnValueOnce({

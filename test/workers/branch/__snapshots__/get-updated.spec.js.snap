@@ -60,3 +60,31 @@ Object {
   ],
 }
 `;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lockFileMaintenance 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "parentBranch": "some-branch",
+  "updatedArtifacts": Array [
+    Object {
+      "contents": "some contents",
+      "name": "composer.json",
+    },
+  ],
+  "updatedPackageFiles": Array [],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lockFileMaintenance error 1`] = `
+Object {
+  "artifactErrors": Array [
+    Object {
+      "name": "composer.lock",
+      "stderr": "some error",
+    },
+  ],
+  "parentBranch": "some-branch",
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [],
+}
+`;
