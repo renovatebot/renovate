@@ -14,7 +14,7 @@ describe('workers/branch/get-updated', () => {
         upgrades: [],
       };
       composer.updateDependency = jest.fn();
-      composer.getArtifacts = jest.fn();
+      composer.updateArtifacts = jest.fn();
       npm.updateDependency = jest.fn();
       platform.getFile.mockReturnValueOnce('existing content');
     });
@@ -44,7 +44,7 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
       });
       composer.updateDependency.mockReturnValue('some new content');
-      composer.getArtifacts.mockReturnValue([
+      composer.updateArtifacts.mockReturnValue([
         {
           file: {
             name: 'composer.json',
@@ -61,7 +61,7 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
       });
       composer.updateDependency.mockReturnValue('some new content');
-      composer.getArtifacts.mockReturnValue([
+      composer.updateArtifacts.mockReturnValue([
         {
           artifactError: {
             name: 'composer.lock',

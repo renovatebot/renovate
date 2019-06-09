@@ -24,7 +24,7 @@ const config = {
   cacheDir: '/tmp/renovate/cache',
 };
 
-describe('.getArtifacts()', () => {
+describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     exec.mockResolvedValue({
@@ -33,7 +33,9 @@ describe('.getArtifacts()', () => {
     });
   });
   it('returns if no go.sum found', async () => {
-    expect(await gomod.getArtifacts('go.mod', [], gomod1, config)).toBeNull();
+    expect(
+      await gomod.updateArtifacts('go.mod', [], gomod1, config)
+    ).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockReturnValueOnce('Current go.sum');
@@ -42,7 +44,9 @@ describe('.getArtifacts()', () => {
       stderror: '',
     });
     platform.getRepoStatus.mockResolvedValue({ modified: [] });
-    expect(await gomod.getArtifacts('go.mod', [], gomod1, config)).toBeNull();
+    expect(
+      await gomod.updateArtifacts('go.mod', [], gomod1, config)
+    ).toBeNull();
   });
   it('returns updated go.sum', async () => {
     platform.getFile.mockReturnValueOnce('Current go.sum');
@@ -53,7 +57,7 @@ describe('.getArtifacts()', () => {
     platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
     expect(
-      await gomod.getArtifacts('go.mod', [], gomod1, config)
+      await gomod.updateArtifacts('go.mod', [], gomod1, config)
     ).not.toBeNull();
   });
   it('supports docker mode without credentials', async () => {
@@ -65,7 +69,7 @@ describe('.getArtifacts()', () => {
     platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
     expect(
-      await gomod.getArtifacts('go.mod', [], gomod1, {
+      await gomod.updateArtifacts('go.mod', [], gomod1, {
         ...config,
         binarySource: 'docker',
       })
@@ -83,7 +87,7 @@ describe('.getArtifacts()', () => {
     platform.getRepoStatus.mockResolvedValue({ modified: ['go.sum'] });
     fs.readFile = jest.fn(() => 'New go.sum');
     expect(
-      await gomod.getArtifacts('go.mod', [], gomod1, {
+      await gomod.updateArtifacts('go.mod', [], gomod1, {
         ...config,
         binarySource: 'docker',
       })
@@ -102,7 +106,7 @@ describe('.getArtifacts()', () => {
       global.appMode = true;
       global.trustLevel = 'high';
       expect(
-        await gomod.getArtifacts('go.mod', [], gomod1, {
+        await gomod.updateArtifacts('go.mod', [], gomod1, {
           ...config,
           binarySource: 'docker',
           postUpdateOptions: ['gomodTidy'],
@@ -119,7 +123,7 @@ describe('.getArtifacts()', () => {
       throw new Error('This update totally doesnt work');
     });
     expect(
-      await gomod.getArtifacts('go.mod', [], gomod1, config)
+      await gomod.updateArtifacts('go.mod', [], gomod1, config)
     ).toMatchSnapshot();
   });
 });
