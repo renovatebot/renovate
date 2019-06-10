@@ -5,6 +5,7 @@ jest.mock('isomorphic-git');
 
 const lookupName = 'vapor';
 const registryUrls = ['https://github.com/vapor/vapor.git'];
+const registryUrlsAlt = ['https://github.com/vapor/vapor/'];
 
 describe('datasource/git-tags', () => {
   beforeEach(() => global.renovateCache.rmAll());
@@ -33,7 +34,10 @@ describe('datasource/git-tags', () => {
           },
         })
       );
-      const versions = await getPkgReleases({ lookupName, registryUrls });
+      const versions = await getPkgReleases({
+        lookupName,
+        registryUrls: registryUrlsAlt,
+      });
       const result = versions.releases.map(x => x.version).sort();
       expect(result).toEqual(['0.0.1', '0.0.2']);
     });
