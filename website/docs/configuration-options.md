@@ -1080,6 +1080,8 @@ Use this field to suppress various types of warnings and other notifications fro
 
 The above config will suppress the comment which is added to a PR whenever you close a PR unmerged.
 
+## swift
+
 ## terraform
 
 Currently Terraform support is limited to Terraform registry sources and github sources that include semver refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.

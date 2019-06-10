@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { extractPackageFile } = require('../../../lib/manager/swift/extract');
+const { updateDependency } = require('../../../lib/manager/swift/update');
 
 const pkgContent = fs.readFileSync(
   path.resolve(__dirname, `./_fixtures/SamplePackage.swift`),
@@ -43,66 +44,161 @@ describe('lib/manager/swift', () => {
       expect(extractPackageFile(`dependencies:[.package(url:"fo`)).toBeNull();
       expect(extractPackageFile(`dependencies:[.package(url:"fo]`)).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo"]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://example.com/something.git"]`
+        )
       ).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo".package(]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git"]`
+        )
       ).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo", ]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git".package(]`
+        )
       ).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo", .package(]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", ]`
+        )
       ).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo", .exact(]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", .package(]`
+        )
       ).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo", from]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", .exact(]`
+        )
       ).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo", from.package(`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from]`
+        )
       ).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo", from:]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from.package(`
+        )
       ).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo", from:.package(`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from:]`
+        )
       ).toBeNull();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo","1.2.3")]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", from:.package(`
+        )
+      ).toBeNull();
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3")]`
+        )
       ).toBeNull();
     });
     it('parses package descriptions', () => {
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo",from:"1.2.3")]`)
-      ).toMatchSnapshot();
-      expect(
-        extractPackageFile(`dependencies:[.package(url:"foo","1.2.3"...)]`)
-      ).toMatchSnapshot();
-      expect(
         extractPackageFile(
-          `dependencies:[.package(url:"foo","1.2.3"..."1.2.4")]`
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git",from:"1.2.3")]`
         )
       ).toMatchSnapshot();
       expect(
         extractPackageFile(
-          `dependencies:[.package(url:"foo","1.2.3"..<"1.2.4")]`
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"...)]`
         )
       ).toMatchSnapshot();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo",..."1.2.3")]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..."1.2.4")]`
+        )
       ).toMatchSnapshot();
       expect(
-        extractPackageFile(`dependencies:[.package(url:"foo",..<"1.2.3")]`)
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git","1.2.3"..<"1.2.4")]`
+        )
+      ).toMatchSnapshot();
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..."1.2.3")]`
+        )
+      ).toMatchSnapshot();
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..<"1.2.3")]`
+        )
       ).toMatchSnapshot();
     });
     it('parses multiple packages', () => {
       expect(extractPackageFile(pkgContent)).toMatchSnapshot();
     });
   });
+  describe('updateDependency()', () => {
+    it('updates successfully', () => {
+      [
+        [
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3")]',
+          '1.2.3',
+          '1.2.4',
+        ],
+        [
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", from: "1.2.3")]',
+          'from: "1.2.3"',
+          'from: "1.2.4"',
+        ],
+        [
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..."1.2.4")]',
+          '"1.2.3"..."1.2.4"',
+          '"1.2.3"..."1.2.5"',
+        ],
+        [
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..<"1.2.4")]',
+          '"1.2.3"..<"1.2.4"',
+          '"1.2.3"..<"1.2.5"',
+        ],
+        [
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..."1.2.4")]',
+          '..."1.2.4"',
+          '..."1.2.5"',
+        ],
+        [
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..<"1.2.4")]',
+          '..<"1.2.4"',
+          '..<"1.2.5"',
+        ],
+      ].forEach(([content, currentValue, newValue]) => {
+        const { deps } = extractPackageFile(content);
+        const [dep] = deps;
+        const upgrade = { ...dep, newValue };
+        const updated = updateDependency(content, upgrade);
+        const replaced = content.replace(currentValue, newValue);
+        expect(updated).toEqual(replaced);
+      });
+    });
+    it('returns content if already updated', () => {
+      const content =
+        'dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3")]';
+      const currentValue = '1.2.3';
+      const newValue = '1.2.4';
+      const { deps } = extractPackageFile(content);
+      const [dep] = deps;
+      const upgrade = { ...dep, newValue };
+      const replaced = content.replace(currentValue, newValue);
+      const updated = updateDependency(replaced, upgrade);
+      expect(updated).toBe(replaced);
+    });
+    it('returns null if content is different', () => {
+      const content =
+        'dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3")]';
+      const currentValue = '1.2.3';
+      const newValue = '1.2.4';
+      const { deps } = extractPackageFile(content);
+      const [dep] = deps;
+      const upgrade = { ...dep, newValue };
+      const replaced = content.replace(currentValue, '1.2.5');
+      expect(updateDependency(replaced, upgrade)).toBe(null);
+    });
+  });
 });
-// TODO: test ranges
-// "a..."  for [a, )
-// "...b"  for (, b]
-// "..<b"  for (, b)

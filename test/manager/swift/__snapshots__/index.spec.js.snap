@@ -2,50 +2,51 @@
 
 exports[`lib/manager/swift extractPackageFile() parses multiple packages 1`] = `
 Object {
-  "datasource": "git-tags",
   "deps": Array [
     Object {
-      "currentValue": "1.2.3.4",
-      "depName": "foo",
-      "fileReplacePosition": 987,
-      "skipReason": "not-a-version",
-    },
-    Object {
-      "currentValue": ">=1.2.3.4.5",
-      "depName": "bar",
-      "fileReplacePosition": 1029,
-      "skipReason": "not-a-version",
-    },
-    Object {
-      "currentValue": "1.2.3.4",
-      "depName": "baz",
-      "fileReplacePosition": 1075,
-      "skipReason": "not-a-version",
-    },
-    Object {
       "currentValue": "0.1.0",
-      "depName": "https://github.com/avito-tech/GraphiteClient.git",
+      "datasource": "gitTags",
+      "depName": "avito-tech/GraphiteClient",
       "fileReplacePosition": 1177,
+      "registryUrls": Array [
+        "https://github.com/avito-tech/GraphiteClient.git",
+      ],
     },
     Object {
       "currentValue": "1.0.16",
-      "depName": "https://github.com/IBM-Swift/BlueSignals.git",
+      "datasource": "gitTags",
+      "depName": "IBM-Swift/BlueSignals",
       "fileReplacePosition": 1268,
+      "registryUrls": Array [
+        "https://github.com/IBM-Swift/BlueSignals.git",
+      ],
     },
     Object {
       "currentValue": "3.0.6",
-      "depName": "https://github.com/daltoniam/Starscream.git",
+      "datasource": "gitTags",
+      "depName": "daltoniam/Starscream",
       "fileReplacePosition": 1439,
+      "registryUrls": Array [
+        "https://github.com/daltoniam/Starscream.git",
+      ],
     },
     Object {
       "currentValue": "1.4.6",
-      "depName": "https://github.com/httpswift/swifter.git",
+      "datasource": "gitTags",
+      "depName": "httpswift/swifter",
       "fileReplacePosition": 1523,
+      "registryUrls": Array [
+        "https://github.com/httpswift/swifter.git",
+      ],
     },
     Object {
-      "currentValue": ">=0.9.6 <1.0.0",
-      "depName": "https://github.com/weichsel/ZIPFoundation/",
+      "currentValue": "from : \\"0.9.6\\"",
+      "datasource": "gitTags",
+      "depName": "weichsel/ZIPFoundation",
       "fileReplacePosition": 1626,
+      "registryUrls": Array [
+        "https://github.com/weichsel/ZIPFoundation/",
+      ],
     },
   ],
   "packageFile": null,
@@ -54,12 +55,15 @@ Object {
 
 exports[`lib/manager/swift extractPackageFile() parses package descriptions 1`] = `
 Object {
-  "datasource": "git-tags",
   "deps": Array [
     Object {
-      "currentValue": ">=1.2.3 <2.0.0",
-      "depName": "foo",
-      "fileReplacePosition": 33,
+      "currentValue": "from:\\"1.2.3\\"",
+      "datasource": "gitTags",
+      "depName": "vapor/vapor",
+      "fileReplacePosition": 64,
+      "registryUrls": Array [
+        "https://github.com/vapor/vapor.git",
+      ],
     },
   ],
   "packageFile": null,
@@ -68,12 +72,15 @@ Object {
 
 exports[`lib/manager/swift extractPackageFile() parses package descriptions 2`] = `
 Object {
-  "datasource": "git-tags",
   "deps": Array [
     Object {
-      "currentValue": ">=1.2.3",
-      "depName": "foo",
-      "fileReplacePosition": 33,
+      "currentValue": "\\"1.2.3\\"...",
+      "datasource": "gitTags",
+      "depName": "vapor/vapor",
+      "fileReplacePosition": 64,
+      "registryUrls": Array [
+        "https://github.com/vapor/vapor.git",
+      ],
     },
   ],
   "packageFile": null,
@@ -82,12 +89,15 @@ Object {
 
 exports[`lib/manager/swift extractPackageFile() parses package descriptions 3`] = `
 Object {
-  "datasource": "git-tags",
   "deps": Array [
     Object {
-      "currentValue": ">=1.2.3 <=1.2.4",
-      "depName": "foo",
-      "fileReplacePosition": 33,
+      "currentValue": "\\"1.2.3\\"...\\"1.2.4\\"",
+      "datasource": "gitTags",
+      "depName": "vapor/vapor",
+      "fileReplacePosition": 64,
+      "registryUrls": Array [
+        "https://github.com/vapor/vapor.git",
+      ],
     },
   ],
   "packageFile": null,
@@ -96,12 +106,15 @@ Object {
 
 exports[`lib/manager/swift extractPackageFile() parses package descriptions 4`] = `
 Object {
-  "datasource": "git-tags",
   "deps": Array [
     Object {
-      "currentValue": ">=1.2.3 <1.2.4",
-      "depName": "foo",
-      "fileReplacePosition": 33,
+      "currentValue": "\\"1.2.3\\"..<\\"1.2.4\\"",
+      "datasource": "gitTags",
+      "depName": "vapor/vapor",
+      "fileReplacePosition": 64,
+      "registryUrls": Array [
+        "https://github.com/vapor/vapor.git",
+      ],
     },
   ],
   "packageFile": null,
@@ -110,12 +123,15 @@ Object {
 
 exports[`lib/manager/swift extractPackageFile() parses package descriptions 5`] = `
 Object {
-  "datasource": "git-tags",
   "deps": Array [
     Object {
-      "currentValue": "<=1.2.3",
-      "depName": "foo",
-      "fileReplacePosition": 33,
+      "currentValue": "...\\"1.2.3\\"",
+      "datasource": "gitTags",
+      "depName": "vapor/vapor",
+      "fileReplacePosition": 64,
+      "registryUrls": Array [
+        "https://github.com/vapor/vapor.git",
+      ],
     },
   ],
   "packageFile": null,
@@ -124,12 +140,15 @@ Object {
 
 exports[`lib/manager/swift extractPackageFile() parses package descriptions 6`] = `
 Object {
-  "datasource": "git-tags",
   "deps": Array [
     Object {
-      "currentValue": "<1.2.3",
-      "depName": "foo",
-      "fileReplacePosition": 33,
+      "currentValue": "..<\\"1.2.3\\"",
+      "datasource": "gitTags",
+      "depName": "vapor/vapor",
+      "fileReplacePosition": 64,
+      "registryUrls": Array [
+        "https://github.com/vapor/vapor.git",
+      ],
     },
   ],
   "packageFile": null,
