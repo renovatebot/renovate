@@ -1245,7 +1245,8 @@
       "type": "object",
       "default": {
         "fileMatch": ["(^|/)Package\\.swift"],
-        "versionScheme": "swift"
+        "versionScheme": "swift",
+        "rangeStrategy": "bump"
       },
       "$ref": "#"
     }
