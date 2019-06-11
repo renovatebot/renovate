@@ -64,7 +64,7 @@ Object {
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles lockFileMaintenance 1`] = `
 Object {
   "artifactErrors": Array [],
-  "parentBranch": "some-branch",
+  "parentBranch": undefined,
   "updatedArtifacts": Array [
     Object {
       "contents": "some contents",
@@ -83,7 +83,7 @@ Object {
       "stderr": "some error",
     },
   ],
-  "parentBranch": "some-branch",
+  "parentBranch": undefined,
   "updatedArtifacts": Array [],
   "updatedPackageFiles": Array [],
 }
