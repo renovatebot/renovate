@@ -107,5 +107,31 @@ describe('config/cli', () => {
         hostRules: [],
       });
     });
+    it('parses json object correctly when empty', () => {
+      argv.push(`--onboarding-config=`);
+      cli.getConfig(argv).should.deep.equal({
+        onboardingConfig: {},
+      });
+    });
+    it('parses json {} object correctly', () => {
+      argv.push(`--onboarding-config={}`);
+      cli.getConfig(argv).should.deep.equal({
+        onboardingConfig: {},
+      });
+    });
+    it('parses json object correctly', () => {
+      argv.push(`--onboarding-config={"extends": ["config:base"]}`);
+      cli.getConfig(argv).should.deep.equal({
+        onboardingConfig: {
+          extends: ['config:base'],
+        },
+      });
+    });
+    it('throws exception for invalid json object', () => {
+      argv.push('--onboarding-config=Hello_World');
+      expect(() => cli.getConfig(argv)).toThrow(
+        Error("Invalid JSON value: 'Hello_World'")
+      );
+    });
   });
 });

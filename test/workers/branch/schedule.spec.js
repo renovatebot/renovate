@@ -202,5 +202,17 @@ describe('workers/branch/schedule', () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
+    it('approves valid weeks of year', () => {
+      config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
+      mockDate.set('2017-01-02T06:00:00.000'); // Locally Monday, 2 January 2017 6am (first Monday of the year)
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('rejects on weeks of year', () => {
+      config.schedule = ['every 2 weeks of the year before 08:00 on Monday'];
+      mockDate.set('2017-01-09T06:00:00.000'); // Locally Monday, 2 January 2017 6am (second Monday of the year)
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(false);
+    });
   });
 });
