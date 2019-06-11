@@ -140,7 +140,7 @@ note 2
 
 :abcd: If you wish to disable git hash updates, add \`\\":disableDigestUpdates\\"\` to the extends array in your config.
 
-:wrench: This Pull Request updates \`package.json\` lock files to use the latest dependency versions.
+:wrench: This Pull Request updates lock files to use the latest dependency versions.
 
 ---
 
