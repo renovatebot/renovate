@@ -48,11 +48,7 @@ export default class Graphql {
     const query = `
     query {
       repository(owner: "${this.repoOwner}", name: "${this.repoName}") {
-        ${this.repoItem}(first: ${
-      this.repoResultNumEls
-    }, after:${afterCursor}, orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: ${
-      this.repoItemFilterBy
-    }) {
+        ${this.repoItem}(first: ${this.repoResultNumEls}, after:${afterCursor}, orderBy: {field: UPDATED_AT, direction: DESC}, filterBy: ${this.repoItemFilterBy}) {
           pageInfo {
             startCursor
             hasNextPage
