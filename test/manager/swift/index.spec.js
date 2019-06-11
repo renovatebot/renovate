@@ -140,41 +140,40 @@ describe('lib/manager/swift', () => {
       [
         [
           'dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3")]',
-          '1.2.3',
           '1.2.4',
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.4")]',
         ],
         [
           'dependencies:[.package(url:"https://github.com/vapor/vapor.git", from: "1.2.3")]',
-          'from: "1.2.3"',
-          'from: "1.2.4"',
+          '1.2.4',
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", from: "1.2.4")]',
         ],
         [
           'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..."1.2.4")]',
-          '"1.2.3"..."1.2.4"',
           '"1.2.3"..."1.2.5"',
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..."1.2.5")]',
         ],
         [
           'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..<"1.2.4")]',
-          '"1.2.3"..<"1.2.4"',
           '"1.2.3"..<"1.2.5"',
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", "1.2.3"..<"1.2.5")]',
         ],
         [
           'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..."1.2.4")]',
-          '..."1.2.4"',
           '..."1.2.5"',
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..."1.2.5")]',
         ],
         [
           'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..<"1.2.4")]',
-          '..<"1.2.4"',
           '..<"1.2.5"',
+          'dependencies:[.package(url:"https://github.com/vapor/vapor.git", ..<"1.2.5")]',
         ],
-      ].forEach(([content, currentValue, newValue]) => {
+      ].forEach(([content, newValue, result]) => {
         const { deps } = extractPackageFile(content);
         const [dep] = deps;
         const upgrade = { ...dep, newValue };
         const updated = updateDependency(content, upgrade);
-        const replaced = content.replace(currentValue, newValue);
-        expect(updated).toEqual(replaced);
+        expect(updated).toEqual(result);
       });
     });
     it('returns content if already updated', () => {
