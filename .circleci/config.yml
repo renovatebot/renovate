@@ -55,7 +55,7 @@ commands:
 jobs:
   test_node_10:
     docker:
-      - image: amd64/node:10.16.0@sha256:8396a37b6a731d1950b98a13f7ae0694ad754191276fd247bd66400641c2809d
+      - image: amd64/node:10.16.0@sha256:7af3328e235a92c949e0b7c3c738b4c3d05ceb82306fddbe75136f2e7842e6f4
     steps:
       - test
   test_node_12:
@@ -65,7 +65,7 @@ jobs:
       - test
   release:
     docker:
-      - image: amd64/node:10.16.0@sha256:8396a37b6a731d1950b98a13f7ae0694ad754191276fd247bd66400641c2809d
+      - image: amd64/node:10.16.0@sha256:7af3328e235a92c949e0b7c3c738b4c3d05ceb82306fddbe75136f2e7842e6f4
     steps:
       - checkout
       - run: yarn install
