@@ -575,6 +575,11 @@
       "type": "boolean",
       "default": false
     },
+    "stabilityThreshold": {
+      "description": "Minimum release date of a version. (ISO 8601 format)",
+      "type": "string",
+      "default": null
+    },
     "prCreation": {
       "description": "When to create the PR for a branch.",
       "type": "string",
