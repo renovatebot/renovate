@@ -1146,10 +1146,10 @@
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
 
-"@types/node@*", "@types/node@11.13.13":
-  version "11.13.13"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.13.13.tgz#a3d2a8a908ce322f24f0f8c88160b44c7dd5c452"
-  integrity sha512-GFWH7e4Q/OGLAO545bupVju+nE1YtLSwYAdLfSzAXnTPqoqKoXCOEtB7Cluvg9B/h2nGLhyzCDyCInYvrOE2nw==
+"@types/node@*", "@types/node@11.13.14":
+  version "11.13.14"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.13.14.tgz#03e9416f7d699d71742e5a1e455def7bd55f8fb9"
+  integrity sha512-9NjFOB6UUGjJLNANmyIouuaN8YPsPgC4DCOd5lU+DL7HSX/RCfzz0JOtHlspEJq1Ll/JUu/8Cm4wzxpZ8w5sjQ==
 
 "@types/node@^8.0.7":
   version "8.10.43"
@@ -7395,10 +7395,10 @@ pn@^1.1.0:
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
   integrity sha512-2qHaIQr2VLRFoxe2nASzsV6ef4yOOH+Fi9FBOVH6cqeSgUnoyySPZkxzLuzd+RYOQTRpROA0ztTMqxROKSb/nA==
 
-pnpm@3.4.1:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-3.4.1.tgz#8dd072d025eabeaa51c67cba76e7373e8b0941b2"
-  integrity sha512-XjKIe2sh817ssTHDGaobbi9YGoiUp+rYfJ3zeuptv2GQNnJ+1e+SHx4uPe2OkXzw9qcnK3VHPjS8+1lSSW7BKQ==
+pnpm@3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-3.5.0.tgz#e4db23cf9db9db6aa0baeb44e7bb47928bd528bf"
+  integrity sha512-0NmDaB6mwqtWbC1+Kax0bMY+nVhVQql8Jm418JdnVmlyHMxg9A8ChJJnqUaBf+49vDiTn0iaeTWXX+q0foDFfQ==
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
