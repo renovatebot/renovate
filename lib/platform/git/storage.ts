@@ -463,11 +463,11 @@ function checkForPlatformFailure(err: Error) {
     'The remote end hung up unexpectedly',
     'access denied or repository not exported',
   ];
-  platformErrorStrings.forEach(errorStr => {
+  for (const errorStr of platformErrorStrings) {
     if (err.message.includes(errorStr)) {
       throw new Error('platform-error');
     }
-  });
+  }
 }
 
 export default Storage;
