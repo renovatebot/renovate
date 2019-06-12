@@ -148,6 +148,12 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
     });
+    it('skips branch if stabilityThreshold lower than latestUpgradeTimestamp', async () => {
+      config.stabilityThreshold = '2019-06-10';
+      config.latestUpgradeTimestamp = '2019-06-11T11:02:25';
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual('pending');
+    });
     it('returns if pr creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [],

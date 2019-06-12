@@ -1064,6 +1064,10 @@ Set this to true if you wish to receive one PR for every separate major version 
 
 This feature is added for people migrating from alternative services who are used to seeing a "verify" status check on PRs. If you'd like to use this then go ahead, but otherwise it's more secure to look for Renovate's [GPG Verified Commits](https://github.com/blog/2144-gpg-signature-verification) instead, because those cannot be spoofed by any other person or service (unlike status checks).
 
+## stabilityThreshold
+
+This setting will specify whether or not to update a package based on the lifetime of the latest version. The update will take place only if the latest version release time is more recent than the specified stability threshold.
+
 ## supportPolicy
 
 Language support is limited to those listed below:
