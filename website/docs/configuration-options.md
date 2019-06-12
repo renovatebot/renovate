@@ -1060,13 +1060,13 @@ By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" 
 
 Set this to true if you wish to receive one PR for every separate major version upgrade of a dependency. e.g. if you are on webpack@v1 currently then default behaviour is a PR for upgrading to webpack@v3 and not for webpack@v2. If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
-## statusCheckVerify
-
-This feature is added for people migrating from alternative services who are used to seeing a "verify" status check on PRs. If you'd like to use this then go ahead, but otherwise it's more secure to look for Renovate's [GPG Verified Commits](https://github.com/blog/2144-gpg-signature-verification) instead, because those cannot be spoofed by any other person or service (unlike status checks).
-
 ## stabilityThreshold
 
 This setting will specify whether or not to update a package based on the lifetime of the latest version. The update will take place only if the latest version release time is less recent than the specified stability threshold.
+
+## statusCheckVerify
+
+This feature is added for people migrating from alternative services who are used to seeing a "verify" status check on PRs. If you'd like to use this then go ahead, but otherwise it's more secure to look for Renovate's [GPG Verified Commits](https://github.com/blog/2144-gpg-signature-verification) instead, because those cannot be spoofed by any other person or service (unlike status checks).
 
 ## supportPolicy
 
