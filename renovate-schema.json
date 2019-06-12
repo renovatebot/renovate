@@ -576,7 +576,7 @@
       "default": false
     },
     "stabilityThreshold": {
-      "description": "Minimum release date of a version. (ISO 8601 format)",
+      "description": "Minimum age for a release to be considered stable. (ISO 8601 duration format)",
       "type": "string",
       "default": null
     },
