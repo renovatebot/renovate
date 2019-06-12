@@ -1,3 +1,4 @@
+const { Settings } = require('luxon');
 const branchWorker = require('../../../lib/workers/branch');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
@@ -148,11 +149,16 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
     });
-    it('skips branch if stabilityThreshold lower than latestUpgradeTimestamp', async () => {
-      config.stabilityThreshold = '2019-06-10';
-      config.latestUpgradeTimestamp = '2019-06-11T11:02:25';
+    it('skips branch if stabilityThreshold duration higher than now - latestUpgradeTimestamp', async () => {
+      const origSettingsNow = Settings.now;
+      // 2019-06-11T00:00:00
+      Settings.now = () => new Date(2019, 5, 11).valueOf();
+      config.stabilityThreshold = 'P1D';
+      // 2019-06-11T00:00:00 - 2019-06-10T11:02:25 < 24hrs(1day)
+      config.latestUpgradeTimestamp = '2019-06-10T11:02:25';
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pending');
+      Settings.now = origSettingsNow;
     });
     it('returns if pr creation limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({

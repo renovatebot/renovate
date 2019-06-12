@@ -1066,7 +1066,7 @@ This feature is added for people migrating from alternative services who are use
 
 ## stabilityThreshold
 
-This setting will specify whether or not to update a package based on the lifetime of the latest version. The update will take place only if the latest version release time is more recent than the specified stability threshold.
+This setting will specify whether or not to update a package based on the lifetime of the latest version. The update will take place only if the latest version release time is less recent than the specified stability threshold.
 
 ## supportPolicy
 
