@@ -41,6 +41,13 @@ describe('workers/repository/error', () => {
         expect(res).toEqual(err);
       });
     });
+    it('rewrites git error', async () => {
+      const gitError = new Error(
+        "fatal: unable to access 'https://**redacted**@gitlab.com/learnox/learnox.git/': The requested URL returned error: 500\n"
+      );
+      const res = await handleError(config, gitError);
+      expect(res).toEqual('platform-failure');
+    });
     it('handles unknown error', async () => {
       const res = await handleError(config, new Error('abcdefg'));
       expect(res).toEqual('unknown-error');
