@@ -458,6 +458,9 @@ function localName(branchName: string) {
 
 // istanbul ignore next
 function checkForPlatformFailure(err: Error) {
+  if (process.env.CIRCLECI) {
+    return;
+  }
   const platformErrorStrings = [
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
