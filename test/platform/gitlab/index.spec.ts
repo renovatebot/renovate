@@ -48,19 +48,44 @@ describe('platform/gitlab', () => {
   });
 
   describe('initPlatform()', () => {
-    it(`should throw if no token`, () => {
-      expect(() => {
-        gitlab.initPlatform({} as any);
-      }).toThrow();
+    it(`should throw if no token`, async () => {
+      await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
     });
-    it(`should default to gitlab.com`, () => {
-      expect(
+    it(`should throw if auth fails`, async () => {
+      // user
+      api.get.mockImplementationOnce(() => {
+        throw new Error('403');
+      });
+      await expect(
         gitlab.initPlatform({ token: 'some-token' } as any)
+      ).rejects.toThrow();
+    });
+    it(`should default to gitlab.com`, async () => {
+      // user
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              email: 'a@b.com',
+            },
+          } as any)
+      );
+      expect(
+        await gitlab.initPlatform({ token: 'some-token' } as any)
       ).toMatchSnapshot();
     });
-    it(`should accept custom endpoint`, () => {
+    it(`should accept custom endpoint`, async () => {
+      // user
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              email: 'a@b.com',
+            },
+          } as any)
+      );
       expect(
-        gitlab.initPlatform({
+        await gitlab.initPlatform({
           endpoint: 'https://gitlab.renovatebot.com',
           token: 'some-token',
         })
