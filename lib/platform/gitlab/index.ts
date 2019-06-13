@@ -95,6 +95,12 @@ export async function initRepo({
       );
       throw new Error('archived');
     }
+    if (res.body.mirror) {
+      logger.info(
+        'Repository is a mirror - throwing error to abort renovation'
+      );
+      throw new Error('mirror');
+    }
     if (res.body.default_branch === null) {
       throw new Error('empty');
     }

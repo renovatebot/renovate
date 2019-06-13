@@ -158,6 +158,12 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({ repository: 'some/repo', localDir: '' })
       ).rejects.toThrow(Error('archived'));
     });
+    it('should throw an error if repository is a mirror', async () => {
+      api.get.mockReturnValue({ body: { mirror: true } } as any);
+      await expect(
+        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+      ).rejects.toThrow(Error('mirror'));
+    });
     it('should throw an error if repository is empty', async () => {
       api.get.mockReturnValue({ body: { default_branch: null } } as any);
       await expect(
