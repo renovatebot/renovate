@@ -131,10 +131,6 @@ RUN set -xe \
 
 # END copy Elixir
 
-# Mix and Rebar
-RUN mix local.hex --force \
-&& mix local.rebar --force
-
 # PHP Composer
 
 RUN apt-get update && apt-get install -y php-cli php-mbstring && apt-get clean
@@ -194,6 +190,11 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
   && rm docker-${DOCKER_VERSION}.tgz
 
 USER ubuntu
+
+# Mix and Rebar
+
+RUN mix local.hex --force \
+&& mix local.rebar --force
 
 # Pipenv
 
