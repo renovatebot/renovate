@@ -45,6 +45,7 @@ const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 interface IGlGotApi
   extends IGotApi<{
     paginate?: boolean;
+    token?: string;
   }> {
   setBaseUrl(url: string): void;
 }
