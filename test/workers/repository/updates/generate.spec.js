@@ -421,12 +421,6 @@ describe('workers/repository/updates/generate', () => {
           isSingleVersion: true,
           toVersion: '1.2.0',
         },
-        {
-          ...defaultConfig,
-          commitBodyTable: true,
-          datasource: 'npm',
-          updateType: 'lockFileMaintenance',
-        },
       ];
       const res = generateBranchConfig(branch);
       expect(res.commitMessage).toMatchSnapshot();
@@ -497,18 +491,6 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       expect(generateBranchConfig(branch)).toMatchSnapshot();
-    });
-    it('overrides schedule for pin PRs', () => {
-      const branch = [
-        {
-          ...defaultConfig,
-          depName: 'some-dep',
-          schedule: 'before 3am',
-          updateType: 'pin',
-        },
-      ];
-      const res = generateBranchConfig(branch);
-      expect(res.schedule).toEqual([]);
     });
     it('handles upgrades', () => {
       const branch = [

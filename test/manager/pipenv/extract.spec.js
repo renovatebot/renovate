@@ -17,6 +17,10 @@ const pipfile4 = fs.readFileSync(
   'test/manager/pipenv/_fixtures/Pipfile4',
   'utf8'
 );
+const pipfile5 = fs.readFileSync(
+  'test/manager/pipenv/_fixtures/Pipfile5',
+  'utf8'
+);
 
 describe('lib/manager/pipenv/extract', () => {
   describe('extractPackageFile()', () => {
@@ -85,6 +89,14 @@ describe('lib/manager/pipenv/extract', () => {
     it('extracts example pipfile', () => {
       const res = extractPackageFile(pipfile4, config);
       expect(res).toMatchSnapshot();
+    });
+    it('supports custom index', () => {
+      const res = extractPackageFile(pipfile5, config);
+      expect(res).toMatchSnapshot();
+      expect(res.registryUrls).toBeDefined();
+      expect(res.registryUrls).toHaveLength(2);
+      expect(res.deps[0].registryUrls).toBeDefined();
+      expect(res.deps[0].registryUrls).toHaveLength(1);
     });
   });
 });

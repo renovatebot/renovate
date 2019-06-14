@@ -51,6 +51,9 @@ describe('versioning/maven/compare', () => {
     expect(compare('1-0-final', '1-0')).toEqual(0);
     expect(compare('1-0', '1.0')).toEqual(0);
     expect(compare('v1.2.3', '1.2.3')).toEqual(0);
+    expect(compare('0.0-1552', '0.0-1552')).toEqual(0);
+    expect(compare('v0.0-1552', '0.0-1552')).toEqual(0);
+    expect(compare('v0.0.1', '0.0.1')).toEqual(0);
   });
   it('returns less than', () => {
     expect(compare('1', '1.1')).toEqual(-1);
@@ -67,6 +70,8 @@ describe('versioning/maven/compare', () => {
     expect(compare('1-ga.1', '1-sp.1')).toEqual(-1);
     expect(compare('1-sp-1', '1-ga-1')).toEqual(-1);
     expect(compare('1-cr1', '1')).toEqual(-1);
+    expect(compare('0.0-1552', '1.10.520')).toEqual(-1);
+    expect(compare('0.0.1', '999')).toEqual(-1);
   });
   it('returns greater than', () => {
     expect(compare('1.1', '1')).toEqual(1);
@@ -83,6 +88,8 @@ describe('versioning/maven/compare', () => {
     expect(compare('1-sp.1', '1-ga.1')).toEqual(1);
     expect(compare('1-ga-1', '1-sp-1')).toEqual(1);
     expect(compare('1', '1-cr1')).toEqual(1);
+    expect(compare('1.10.520', '0.0-1552')).toEqual(1);
+    expect(compare('999', '0.0.1')).toEqual(1);
   });
 
   const invalidRanges = [

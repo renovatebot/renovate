@@ -8,9 +8,9 @@ let baseUrl: string;
 function get(path: string, options: IGotApiOptions & GotJSONOptions) {
   const url = URL.resolve(baseUrl, path);
   const opts: IGotApiOptions & GotJSONOptions = {
-    ...options,
     hostType: 'bitbucket-server',
     json: true,
+    ...options,
   };
   opts.headers = {
     ...opts.headers,

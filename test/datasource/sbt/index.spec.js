@@ -157,7 +157,7 @@ describe('datasource/sbt', () => {
         releases: [{ version: '1.2.3' }],
       });
     });
-    it('fetches sbg plugins', async () => {
+    it('fetches sbt plugins', async () => {
       expect(
         await getPkgReleases({
           datasource: 'sbt',

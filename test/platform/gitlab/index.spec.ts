@@ -48,19 +48,44 @@ describe('platform/gitlab', () => {
   });
 
   describe('initPlatform()', () => {
-    it(`should throw if no token`, () => {
-      expect(() => {
-        gitlab.initPlatform({} as any);
-      }).toThrow();
+    it(`should throw if no token`, async () => {
+      await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
     });
-    it(`should default to gitlab.com`, () => {
-      expect(
+    it(`should throw if auth fails`, async () => {
+      // user
+      api.get.mockImplementationOnce(() => {
+        throw new Error('403');
+      });
+      await expect(
         gitlab.initPlatform({ token: 'some-token' } as any)
+      ).rejects.toThrow();
+    });
+    it(`should default to gitlab.com`, async () => {
+      // user
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              email: 'a@b.com',
+            },
+          } as any)
+      );
+      expect(
+        await gitlab.initPlatform({ token: 'some-token' } as any)
       ).toMatchSnapshot();
     });
-    it(`should accept custom endpoint`, () => {
+    it(`should accept custom endpoint`, async () => {
+      // user
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              email: 'a@b.com',
+            },
+          } as any)
+      );
       expect(
-        gitlab.initPlatform({
+        await gitlab.initPlatform({
           endpoint: 'https://gitlab.renovatebot.com',
           token: 'some-token',
         })
@@ -116,6 +141,7 @@ describe('platform/gitlab', () => {
         ({
           body: {
             default_branch: 'master',
+            http_url_to_repo: 'https://gitlab.com/some/repo.git',
           },
         } as any)
     );
@@ -157,11 +183,27 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({ repository: 'some/repo', localDir: '' })
       ).rejects.toThrow(Error('archived'));
     });
+    it('should throw an error if repository is a mirror', async () => {
+      api.get.mockReturnValue({ body: { mirror: true } } as any);
+      await expect(
+        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+      ).rejects.toThrow(Error('mirror'));
+    });
     it('should throw an error if repository is empty', async () => {
       api.get.mockReturnValue({ body: { default_branch: null } } as any);
       await expect(
         gitlab.initRepo({ repository: 'some/repo', localDir: '' })
       ).rejects.toThrow(Error('empty'));
+    });
+    it('should fall back if http_url_to_repo is empty', async () => {
+      api.get.mockReturnValue({
+        body: {
+          default_branch: 'master',
+          http_url_to_repo: null,
+        },
+      } as any);
+      await initRepo({ repository: 'some/repo/project', token: 'some-token' });
+      expect(api.get.mock.calls).toMatchSnapshot();
     });
   });
   describe('getRepoForceRebase', () => {

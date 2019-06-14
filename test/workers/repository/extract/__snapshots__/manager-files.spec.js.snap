@@ -5,7 +5,7 @@ Array [
   Object {
     "deps": Array [],
     "ignoreNpmrcFile": undefined,
-    "lernaClient": "npm",
+    "lernaClient": "yarn",
     "lernaDir": ".",
     "lernaPackages": undefined,
     "manager": "npm",

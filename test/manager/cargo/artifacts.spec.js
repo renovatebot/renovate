@@ -9,7 +9,7 @@ const config = {
   localDir: '/tmp/github/some/repo',
 };
 
-describe('.getArtifacts()', () => {
+describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -24,11 +24,13 @@ describe('.getArtifacts()', () => {
       },
     ];
     expect(
-      await cargo.getArtifacts('Cargo.toml', updatedDeps, '', config)
+      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '', config)
     ).toBeNull();
   });
   it('returns null if updatedDeps is empty', async () => {
-    expect(await cargo.getArtifacts('Cargo.toml', [], '', config)).toBeNull();
+    expect(
+      await cargo.updateArtifacts('Cargo.toml', [], '', config)
+    ).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockReturnValueOnce('Current Cargo.lock');
@@ -44,7 +46,7 @@ describe('.getArtifacts()', () => {
       },
     ];
     expect(
-      await cargo.getArtifacts('Cargo.toml', updatedDeps, '', config)
+      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '', config)
     ).toBeNull();
   });
   it('returns updated Cargo.lock', async () => {
@@ -62,7 +64,7 @@ describe('.getArtifacts()', () => {
     ];
     global.trustLevel = 'high';
     expect(
-      await cargo.getArtifacts('Cargo.toml', updatedDeps, '{}', config)
+      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', config)
     ).not.toBeNull();
   });
   it('catches errors', async () => {
@@ -77,7 +79,7 @@ describe('.getArtifacts()', () => {
       },
     ];
     expect(
-      await cargo.getArtifacts('Cargo.toml', updatedDeps, '{}', config)
+      await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', config)
     ).toMatchSnapshot();
   });
 });

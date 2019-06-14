@@ -170,9 +170,7 @@ export async function deleteBranch(branchName: string, closePr?: boolean) {
     const pr = await findPr(branchName, null, 'open');
     if (pr) {
       await api.post(
-        `/2.0/repositories/${config.repository}/pullrequests/${
-          pr.number
-        }/decline`
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
       );
     }
   }
@@ -395,6 +393,7 @@ export async function ensureIssueClosing(title: string) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function addAssignees(_prNr: number, _assignees: string[]) {
   // Bitbucket supports "participants" and "reviewers" so does not seem to have the concept of "assignee"
   logger.warn('Cannot add assignees');
@@ -420,6 +419,7 @@ export /* istanbul ignore next */ function deleteLabel() {
   throw new Error('deleteLabel not implemented');
 }
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export function ensureComment(
   _prNo: number,
   _topic: string | null,
@@ -434,6 +434,7 @@ export function ensureCommentRemoval(_prNo: number, _topic: string) {
   // The api does not support removing comments
   return Promise.resolve();
 }
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string) {

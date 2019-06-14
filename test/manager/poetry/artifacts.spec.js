@@ -9,7 +9,7 @@ const config = {
   localDir: '/tmp/github/some/repo',
 };
 
-describe('.getArtifacts()', () => {
+describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -24,12 +24,12 @@ describe('.getArtifacts()', () => {
       },
     ];
     expect(
-      await poetry.getArtifacts('pyproject.toml', updatedDeps, '', config)
+      await poetry.updateArtifacts('pyproject.toml', updatedDeps, '', config)
     ).toBeNull();
   });
   it('returns null if updatedDeps is empty', async () => {
     expect(
-      await poetry.getArtifacts('pyproject.toml', [], '', config)
+      await poetry.updateArtifacts('pyproject.toml', [], '', config)
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
@@ -46,7 +46,7 @@ describe('.getArtifacts()', () => {
       },
     ];
     expect(
-      await poetry.getArtifacts('pyproject.toml', updatedDeps, '', config)
+      await poetry.updateArtifacts('pyproject.toml', updatedDeps, '', config)
     ).toBeNull();
   });
   it('returns updated poetry.lock', async () => {
@@ -64,7 +64,7 @@ describe('.getArtifacts()', () => {
     ];
     global.trustLevel = 'high';
     expect(
-      await poetry.getArtifacts('pyproject.toml', updatedDeps, '{}', config)
+      await poetry.updateArtifacts('pyproject.toml', updatedDeps, '{}', config)
     ).not.toBeNull();
   });
   it('catches errors', async () => {
@@ -79,7 +79,7 @@ describe('.getArtifacts()', () => {
       },
     ];
     expect(
-      await poetry.getArtifacts('pyproject.toml', updatedDeps, '{}', config)
+      await poetry.updateArtifacts('pyproject.toml', updatedDeps, '{}', config)
     ).toMatchSnapshot();
   });
 });

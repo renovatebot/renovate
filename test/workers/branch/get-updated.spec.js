@@ -14,7 +14,7 @@ describe('workers/branch/get-updated', () => {
         upgrades: [],
       };
       composer.updateDependency = jest.fn();
-      composer.getArtifacts = jest.fn();
+      composer.updateArtifacts = jest.fn();
       npm.updateDependency = jest.fn();
       platform.getFile.mockReturnValueOnce('existing content');
     });
@@ -44,11 +44,45 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
       });
       composer.updateDependency.mockReturnValue('some new content');
-      composer.getArtifacts.mockReturnValue([
+      composer.updateArtifacts.mockReturnValue([
         {
           file: {
             name: 'composer.json',
             contents: 'some contents',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles lockFileMaintenance', async () => {
+      // config.parentBranch = 'some-branch';
+      config.upgrades.push({
+        manager: 'composer',
+        updateType: 'lockFileMaintenance',
+      });
+      composer.updateArtifacts.mockReturnValue([
+        {
+          file: {
+            name: 'composer.json',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles lockFileMaintenance error', async () => {
+      // config.parentBranch = 'some-branch';
+      config.upgrades.push({
+        manager: 'composer',
+        updateType: 'lockFileMaintenance',
+      });
+      composer.updateArtifacts.mockReturnValue([
+        {
+          artifactError: {
+            name: 'composer.lock',
+            stderr: 'some error',
           },
         },
       ]);
@@ -61,7 +95,7 @@ describe('workers/branch/get-updated', () => {
         manager: 'composer',
       });
       composer.updateDependency.mockReturnValue('some new content');
-      composer.getArtifacts.mockReturnValue([
+      composer.updateArtifacts.mockReturnValue([
         {
           artifactError: {
             name: 'composer.lock',
