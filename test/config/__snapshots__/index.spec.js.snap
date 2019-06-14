@@ -8,6 +8,9 @@ Object {
   "commitMessageTopic": null,
   "enabled": false,
   "groupName": null,
+  "prBodyDefinitions": Object {
+    "Change": "All locks refreshed",
+  },
   "rebaseStalePrs": true,
   "recreateClosed": true,
   "schedule": Array [

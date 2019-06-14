@@ -4,10 +4,10 @@ import { IGotApi, IGotApiOptions } from '../common';
 
 async function get(path: string, options: IGotApiOptions & GotJSONOptions) {
   const opts: IGotApiOptions & GotJSONOptions = {
-    ...options,
     json: true,
     hostType: 'bitbucket',
     baseUrl: 'https://api.bitbucket.org/',
+    ...options,
   };
   const res = await got(path, opts);
   return res;

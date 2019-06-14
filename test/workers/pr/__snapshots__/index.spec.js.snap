@@ -30,9 +30,9 @@ Array [
   "Update dependency dummy to v1.1.0",
   "This PR contains the following updates:
 
-| Package | Type | Update | Change | References |
-|---|---|---|---|---|
-| dummy | devDependencies | pin | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/tree/HEAD/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| Package | Type | Update | Change |
+|---|---|---|---|
+| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | pin | \`1.0.0\` -> \`1.1.0\` |
 
 :pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` your config if you instead don't wish to pin dependencies.
 
@@ -79,9 +79,9 @@ Array [
   "Update dependency dummy to v1.1.0",
   "This PR contains the following updates:
 
-| Package | Type | Update | Change | References |
-|---|---|---|---|---|
-| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/tree/HEAD/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| Package | Type | Update | Change |
+|---|---|---|---|
+| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |
 
 ---
 
@@ -126,13 +126,13 @@ Array [
   "Update dependency dummy to v1.1.0",
   "This PR contains the following updates:
 
-| Package | Type | Update | Change | References |
-|---|---|---|---|---|
-| dummy | devDependencies | lockFileMaintenance | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/tree/HEAD/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
-| a |  |  | \`aaaaaaa\` |  |
-| b |  | pin | \`some_new_value@bbbbbbb\` |  |
-| c |  |  |  |  |
-| d |  | lockFileMaintenance |  |  |
+| Package | Type | Update | Change |
+|---|---|---|---|
+| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | lockFileMaintenance | \`1.0.0\` -> \`1.1.0\` |
+| a |  |  | \`zzzzzz\` -> \`aaaaaaa\` |
+| b |  | pin | \`some_old_value\` -> \`some_new_value\` |
+| c |  |  | \`\` -> \`\` |
+| d |  | lockFileMaintenance | \`\` -> \`\` |
 
 note 1
 
@@ -140,7 +140,7 @@ note 2
 
 :abcd: If you wish to disable git hash updates, add \`\\":disableDigestUpdates\\"\` to the extends array in your config.
 
-:wrench: This Pull Request updates \`package.json\` lock files to use the latest dependency versions.
+:wrench: This Pull Request updates lock files to use the latest dependency versions.
 
 ---
 
@@ -190,9 +190,9 @@ Array [
   "Update dependency dummy to v1.1.0",
   "This PR contains the following updates:
 
-| Package | Type | Update | Change | References |
-|---|---|---|---|---|
-| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/tree/HEAD/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| Package | Type | Update | Change |
+|---|---|---|---|
+| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |
 
 ---
 
@@ -235,9 +235,9 @@ exports[`workers/pr ensurePr should return modified existing PR 1`] = `
 Object {
   "body": "This PR contains the following updates:
 
-| Package | Type | Update | Change | References |
-|---|---|---|---|---|
-| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/tree/HEAD/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| Package | Type | Update | Change |
+|---|---|---|---|
+| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |
 
 ---
 
@@ -277,9 +277,9 @@ exports[`workers/pr ensurePr should return modified existing PR title 1`] = `
 Object {
   "body": "This PR contains the following updates:
 
-| Package | Type | Update | Change | References |
-|---|---|---|---|---|
-| dummy | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` | [homepage](https://dummy.com), [source](https://github.com/renovateapp/dummy/tree/HEAD/packages/a), [changelog](https://github.com/renovateapp/dummy/changelog.md) |
+| Package | Type | Update | Change |
+|---|---|---|---|
+| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |
 
 ---
 

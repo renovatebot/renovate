@@ -11,7 +11,7 @@ const config = {
   cacheDir: '/tmp/renovate/cache',
 };
 
-describe('.getArtifacts()', () => {
+describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -19,7 +19,7 @@ describe('.getArtifacts()', () => {
     delete global.trustLevel;
   });
   it('returns if no Pipfile.lock found', async () => {
-    expect(await pipenv.getArtifacts('Pipfile', [], '', config)).toBeNull();
+    expect(await pipenv.updateArtifacts('Pipfile', [], '', config)).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockReturnValueOnce('Current Pipfile.lock');
@@ -28,7 +28,9 @@ describe('.getArtifacts()', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'Current Pipfile.lock');
-    expect(await pipenv.getArtifacts('Pipfile', [], '{}', config)).toBeNull();
+    expect(
+      await pipenv.updateArtifacts('Pipfile', [], '{}', config)
+    ).toBeNull();
   });
   it('returns updated Pipfile.lock', async () => {
     platform.getFile.mockReturnValueOnce('Current Pipfile.lock');
@@ -40,7 +42,7 @@ describe('.getArtifacts()', () => {
     fs.readFile = jest.fn(() => 'New Pipfile.lock');
     global.trustLevel = 'high';
     expect(
-      await pipenv.getArtifacts('Pipfile', [], '{}', config)
+      await pipenv.updateArtifacts('Pipfile', [], '{}', config)
     ).not.toBeNull();
   });
   it('supports docker mode', async () => {
@@ -52,7 +54,7 @@ describe('.getArtifacts()', () => {
     platform.getRepoStatus.mockResolvedValue({ modified: ['Pipfile.lock'] });
     fs.readFile = jest.fn(() => 'New Pipfile.lock');
     expect(
-      await pipenv.getArtifacts('Pipfile', [], '{}', {
+      await pipenv.updateArtifacts('Pipfile', [], '{}', {
         ...config,
         binarySource: 'docker',
       })
@@ -64,7 +66,7 @@ describe('.getArtifacts()', () => {
       throw new Error('not found');
     });
     expect(
-      await pipenv.getArtifacts('Pipfile', [], '{}', config)
+      await pipenv.updateArtifacts('Pipfile', [], '{}', config)
     ).toMatchSnapshot();
   });
 });

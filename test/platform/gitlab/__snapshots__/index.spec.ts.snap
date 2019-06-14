@@ -246,16 +246,29 @@ Array [
 exports[`platform/gitlab initPlatform() should accept custom endpoint 1`] = `
 Object {
   "endpoint": "https://gitlab.renovatebot.com/",
+  "gitAuthor": "a@b.com",
 }
 `;
 
 exports[`platform/gitlab initPlatform() should default to gitlab.com 1`] = `
 Object {
   "endpoint": "https://gitlab.com/api/v4/",
+  "gitAuthor": "a@b.com",
 }
 `;
 
 exports[`platform/gitlab initRepo should escape all forward slashes in project names 1`] = `
+Array [
+  Array [
+    "projects/some%2Frepo%2Fproject",
+  ],
+  Array [
+    "user",
+  ],
+]
+`;
+
+exports[`platform/gitlab initRepo should fall back if http_url_to_repo is empty 1`] = `
 Array [
   Array [
     "projects/some%2Frepo%2Fproject",

@@ -12,7 +12,7 @@ const config = {
   cacheDir: '/tmp/renovate/cache',
 };
 
-describe('.getArtifacts()', () => {
+describe('.updateArtifacts()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -21,7 +21,7 @@ describe('.getArtifacts()', () => {
   });
   it('returns if no composer.lock found', async () => {
     expect(
-      await composer.getArtifacts('composer.json', [], '{}', config)
+      await composer.updateArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
@@ -33,7 +33,7 @@ describe('.getArtifacts()', () => {
     fs.readFile = jest.fn(() => 'Current composer.lock');
     platform.getRepoStatus.mockResolvedValue({ modified: [] });
     expect(
-      await composer.getArtifacts('composer.json', [], '{}', config)
+      await composer.updateArtifacts('composer.json', [], '{}', config)
     ).toBeNull();
   });
   it('uses hostRules to write auth.json', async () => {
@@ -57,7 +57,7 @@ describe('.getArtifacts()', () => {
     });
     platform.getRepoStatus.mockResolvedValue({ modified: [] });
     expect(
-      await composer.getArtifacts('composer.json', [], '{}', authConfig)
+      await composer.updateArtifacts('composer.json', [], '{}', authConfig)
     ).toBeNull();
   });
   it('returns updated composer.lock', async () => {
@@ -70,7 +70,22 @@ describe('.getArtifacts()', () => {
     global.trustLevel = 'high';
     platform.getRepoStatus.mockResolvedValue({ modified: ['composer.lock'] });
     expect(
-      await composer.getArtifacts('composer.json', [], '{}', config)
+      await composer.updateArtifacts('composer.json', [], '{}', config)
+    ).not.toBeNull();
+  });
+  it('performs lockFileMaintenance', async () => {
+    platform.getFile.mockReturnValueOnce('Current composer.lock');
+    exec.mockReturnValueOnce({
+      stdout: '',
+      stderror: '',
+    });
+    fs.readFile = jest.fn(() => 'New composer.lock');
+    platform.getRepoStatus.mockResolvedValue({ modified: ['composer.lock'] });
+    expect(
+      await composer.updateArtifacts('composer.json', [], '{}', {
+        ...config,
+        isLockFileMaintenance: true,
+      })
     ).not.toBeNull();
   });
   it('supports docker mode', async () => {
@@ -81,7 +96,7 @@ describe('.getArtifacts()', () => {
     });
     fs.readFile = jest.fn(() => 'New composer.lock');
     expect(
-      await composer.getArtifacts('composer.json', [], '{}', {
+      await composer.updateArtifacts('composer.json', [], '{}', {
         ...config,
         binarySource: 'docker',
       })
@@ -93,7 +108,7 @@ describe('.getArtifacts()', () => {
       throw new Error('not found');
     });
     expect(
-      await composer.getArtifacts('composer.json', [], '{}', config)
+      await composer.updateArtifacts('composer.json', [], '{}', config)
     ).toMatchSnapshot();
   });
   it('catches unmet requirements errors', async () => {
@@ -104,7 +119,7 @@ describe('.getArtifacts()', () => {
       );
     });
     expect(
-      await composer.getArtifacts('composer.json', [], '{}', config)
+      await composer.updateArtifacts('composer.json', [], '{}', config)
     ).toMatchSnapshot();
   });
   it('throws for disk space', async () => {
@@ -115,7 +130,7 @@ describe('.getArtifacts()', () => {
       );
     });
     await expect(
-      composer.getArtifacts('composer.json', [], '{}', config)
+      composer.updateArtifacts('composer.json', [], '{}', config)
     ).rejects.toThrow();
   });
 });

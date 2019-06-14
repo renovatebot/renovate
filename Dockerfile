@@ -1,4 +1,4 @@
-FROM node:lts-alpine@sha256:aa28f3b6b4087b3f289bebaca8d3fb82b93137ae739aa67df3a04892d521958e AS tsbuild
+FROM amd64/node:10.16.0-alpine@sha256:f59303fb3248e5d992586c76cc83e1d3700f641cbcd7c0067bc7ad5bb2e5b489 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
