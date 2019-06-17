@@ -8,7 +8,6 @@ jest.mock('delay');
 describe('platform/gh-got-wrapper', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    get.reset();
     delete global.appMode;
     delay.mockImplementation(() => Promise.resolve());
   });
