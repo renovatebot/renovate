@@ -138,6 +138,7 @@ Array [
 exports[`platform initializes 1`] = `
 Object {
   "endpoint": "https://api.bitbucket.org/",
+  "gitAuthor": "user@domain.com",
   "hostRules": Array [
     Object {
       "hostName": "api.bitbucket.org",
