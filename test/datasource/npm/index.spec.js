@@ -366,8 +366,13 @@ describe('api/npm', () => {
     const dep = {
       name: 'abc123',
     };
-    await global.renovateCache.set('datasource-npm', 'foobar', dep, 10);
-    const res = await npm.getPkgReleases({ lookupName: 'foobar' });
+    await global.renovateCache.set(
+      'datasource-npm',
+      'https://registry.npmjs.org/abc123',
+      dep,
+      10
+    );
+    const res = await npm.getPkgReleases({ lookupName: 'abc123' });
     expect(res).toEqual(dep);
   });
   it('should fetch package info from custom registry', async () => {
