@@ -32,13 +32,38 @@ describe('datasource/github', () => {
       );
       expect(res).toBe('abcdef');
     });
-    it('returns tagged digest', async () => {
-      ghGot.mockReturnValueOnce({ body: { object: { sha: 'ddd111' } } });
+    it('returns commit digest', async () => {
+      ghGot.mockReturnValueOnce({
+        body: { object: { type: 'commit', sha: 'ddd111' } },
+      });
       const res = await github.getDigest(
         { depName: 'some-dep', lookupName: 'some/dep' },
         'v1.2.0'
       );
       expect(res).toBe('ddd111');
+    });
+    it('returns tagged commit digest', async () => {
+      ghGot.mockReturnValueOnce({
+        body: { object: { type: 'tag', url: 'some-url' } },
+      });
+      ghGot.mockReturnValueOnce({
+        body: { object: { type: 'commit', sha: 'ddd111' } },
+      });
+      const res = await github.getDigest(
+        { depName: 'some-dep', lookupName: 'some/dep' },
+        'v1.2.0'
+      );
+      expect(res).toBe('ddd111');
+    });
+    it('warns if unknown ref', async () => {
+      ghGot.mockReturnValueOnce({
+        body: { object: { sha: 'ddd111' } },
+      });
+      const res = await github.getDigest(
+        { depName: 'some-dep', lookupName: 'some/dep' },
+        'v1.2.0'
+      );
+      expect(res).toBeNull();
     });
     it('returns null for missed tagged digest', async () => {
       ghGot.mockReturnValueOnce({});
