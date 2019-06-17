@@ -1,7 +1,9 @@
 const fs = require('fs');
-const yaml = require('js-yaml');
 const got = require('../../lib/util/got');
-const { getPkgReleases } = require('../../lib/datasource/helm');
+const {
+  getPkgReleases,
+  getRepositoryData,
+} = require('../../lib/datasource/helm');
 
 // Truncated index.yaml file
 const indexYaml = fs.readFileSync(
@@ -141,14 +143,14 @@ describe('datasource/helm', () => {
       const cacheNamespace = 'datasource-helm';
       const cacheKey = repository;
       const cacheMinutes = 10;
-      const doc = yaml.safeLoad(indexYaml);
+      got.mockReturnValueOnce({ body: indexYaml });
+      const repositoryData = await getRepositoryData(repository);
       await global.renovateCache.set(
         cacheNamespace,
         cacheKey,
-        doc,
+        repositoryData,
         cacheMinutes
       );
-      got.mockReturnValueOnce({ body: indexYaml });
       const releases = await getPkgReleases({
         lookupName: 'ambassador',
         helmRepository: repository,
