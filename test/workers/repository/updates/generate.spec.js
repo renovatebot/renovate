@@ -421,12 +421,6 @@ describe('workers/repository/updates/generate', () => {
           isSingleVersion: true,
           toVersion: '1.2.0',
         },
-        {
-          ...defaultConfig,
-          commitBodyTable: true,
-          datasource: 'npm',
-          updateType: 'lockFileMaintenance',
-        },
       ];
       const res = generateBranchConfig(branch);
       expect(res.commitMessage).toMatchSnapshot();

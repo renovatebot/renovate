@@ -63,7 +63,7 @@ Example use:
 {
   "automerge": true,
   "automergeType": "pr-comment",
-  "automergeComment": "@bors: r+"
+  "automergeComment": "bors: r+"
 }
 ```
 
