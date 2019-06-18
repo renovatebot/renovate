@@ -980,7 +980,7 @@
       "description": "Configuration object for Dockerfile renovation",
       "type": "object",
       "default": {
-        "fileMatch": ["(^|/)Dockerfile$"]
+        "fileMatch": ["(^|/)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"]
       },
       "$ref": "#"
     },
