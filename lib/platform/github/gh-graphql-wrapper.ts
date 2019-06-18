@@ -70,7 +70,7 @@ export default class Graphql {
     try {
       const res = JSON.parse((await (get as any).post(url, options)).body);
 
-      if (!res.data) {
+      if (!res.data && !res.errors) {
         // retry query until numElements == 1
         if (this.repoResultNumEls === 1) {
           logger.info({ query, res }, 'No graphql res.data');
