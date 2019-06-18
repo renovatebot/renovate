@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk g
 
 # START copy Node.js from https://github.com/nodejs/docker-node/blob/master/10/jessie/Dockerfile
 
-ENV NODE_VERSION 10.15.1
+ENV NODE_VERSION 10.16.0
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
@@ -78,7 +78,7 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
 
 RUN apt-get update && apt-get install -y php-cli php-mbstring && apt-get clean
 
-ENV COMPOSER_VERSION=1.7.2
+ENV COMPOSER_VERSION=1.8.6
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 
@@ -155,7 +155,7 @@ RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.15.2
+ENV YARN_VERSION=1.16.0
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 

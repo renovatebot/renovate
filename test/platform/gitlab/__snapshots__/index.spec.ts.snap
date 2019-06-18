@@ -246,12 +246,14 @@ Array [
 exports[`platform/gitlab initPlatform() should accept custom endpoint 1`] = `
 Object {
   "endpoint": "https://gitlab.renovatebot.com/",
+  "gitAuthor": "a@b.com",
 }
 `;
 
 exports[`platform/gitlab initPlatform() should default to gitlab.com 1`] = `
 Object {
   "endpoint": "https://gitlab.com/api/v4/",
+  "gitAuthor": "a@b.com",
 }
 `;
 

@@ -22,7 +22,7 @@ const defaults = {
   endpoint: 'https://gitlab.com/api/v4/',
 };
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
   token,
 }: {
@@ -41,7 +41,15 @@ export function initPlatform({
     res.endpoint = defaults.endpoint;
     logger.info('Using default GitLab endpoint: ' + res.endpoint);
   }
-  // TODO: Add a connection check that endpoint/token combination are valid
+  try {
+    res.gitAuthor = (await api.get(`user`, { token })).body.email;
+  } catch (err) {
+    logger.info(
+      { err },
+      'Error authenticating with GitLab. Check that your token includes "user" permissions'
+    );
+    throw new Error('Init: Authentication failure');
+  }
   return res;
 }
 
@@ -94,6 +102,12 @@ export async function initRepo({
         'Repository is archived - throwing error to abort renovation'
       );
       throw new Error('archived');
+    }
+    if (res.body.mirror) {
+      logger.info(
+        'Repository is a mirror - throwing error to abort renovation'
+      );
+      throw new Error('mirror');
     }
     if (res.body.default_branch === null) {
       throw new Error('empty');
