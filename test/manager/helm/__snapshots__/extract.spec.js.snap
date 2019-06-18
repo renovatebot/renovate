@@ -2,6 +2,7 @@
 
 exports[`lib/manager/helm/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
 Object {
+  "chartName": "example",
   "datasource": "helm",
   "deps": Array [
     Object {
