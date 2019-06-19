@@ -71,6 +71,7 @@ export class Storage {
             .replace('refs/remotes/origin/', '')
             .trim();
       } catch (err) /* istanbul ignore next */ {
+        checkForPlatformFailure(err);
         if (
           err.message.startsWith(
             'fatal: ref refs/remotes/origin/HEAD is not a symbolic ref'
@@ -122,6 +123,7 @@ export class Storage {
       const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
       logger.debug({ latestCommitDate }, 'latest commit');
     } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
       if (err.message.includes('does not have any commits yet')) {
         throw new Error('empty');
       }
@@ -141,6 +143,7 @@ export class Storage {
         await this._git!.raw(['config', 'user.name', global.gitAuthor.name]);
         await this._git!.raw(['config', 'user.email', global.gitAuthor.email]);
       } catch (err) /* istanbul ignore next */ {
+        checkForPlatformFailure(err);
         logger.debug({ err }, 'Error setting git config');
         throw new Error('temporary-error');
       }
@@ -200,6 +203,7 @@ export class Storage {
         await this._git!.checkout([branchName, '-f']);
         await this._git!.reset('hard');
       } catch (err) /* istanbul ignore next */ {
+        checkForPlatformFailure(err);
         if (
           err.message.includes(
             'unknown revision or path not in the working tree'
@@ -264,14 +268,15 @@ export class Storage {
         ]);
         await this._git!.fetch(['origin', branchName, '--depth=2']);
       } catch (err) {
-        // do nothing
+        checkForPlatformFailure(err);
       }
     }
     try {
       await this._git!.raw(['show-branch', 'origin/' + branchName]);
       this._config.branchExists[branchName] = true;
       return true;
-    } catch (ex) {
+    } catch (err) {
+      checkForPlatformFailure(err);
       this._config.branchExists[branchName] = false;
       return false;
     }
@@ -306,6 +311,7 @@ export class Storage {
       await this._git!.raw(['push', '--delete', 'origin', branchName]);
       logger.debug({ branchName }, 'Deleted remote branch');
     } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
       logger.info({ branchName, err }, 'Error deleting remote branch');
       throw new Error('repository-changed');
     }
@@ -314,6 +320,7 @@ export class Storage {
       // istanbul ignore next
       logger.debug({ branchName }, 'Deleted local branch');
     } catch (err) {
+      checkForPlatformFailure(err);
       logger.debug({ branchName }, 'No local branch to delete');
     }
     this._config.branchExists[branchName] = false;
@@ -335,7 +342,8 @@ export class Storage {
         'origin/' + branchName,
       ]);
       return new Date(Date.parse(time));
-    } catch (ex) {
+    } catch (err) {
+      checkForPlatformFailure(err);
       return new Date();
     }
   }
@@ -353,7 +361,8 @@ export class Storage {
         'origin/' + (branchName || this._config.baseBranch) + ':' + filePath,
       ]);
       return content;
-    } catch (ex) {
+    } catch (err) {
+      checkForPlatformFailure(err);
       return null;
     }
   }
@@ -393,6 +402,7 @@ export class Storage {
           try {
             await this._git!.rm([f]);
           } catch (err) /* istanbul ignore next */ {
+            checkForPlatformFailure(err);
             logger.debug({ err }, 'Cannot delete ' + f);
           }
         }
@@ -407,6 +417,7 @@ export class Storage {
       await this._git!.fetch(['origin', ref, '--depth=2', '--force']);
       this._config.branchExists[branchName] = true;
     } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
       logger.debug({ err }, 'Error commiting files');
       throw new Error('repository-changed');
     }
@@ -443,6 +454,24 @@ export class Storage {
 
 function localName(branchName: string) {
   return branchName.replace(/^origin\//, '');
+}
+
+// istanbul ignore next
+function checkForPlatformFailure(err: Error) {
+  if (process.env.CIRCLECI) {
+    return;
+  }
+  const platformErrorStrings = [
+    'The requested URL returned error: 5',
+    'The remote end hung up unexpectedly',
+    'access denied or repository not exported',
+    'Could not write new index file',
+  ];
+  for (const errorStr of platformErrorStrings) {
+    if (err.message.includes(errorStr)) {
+      throw new Error('platform-error');
+    }
+  }
 }
 
 export default Storage;
