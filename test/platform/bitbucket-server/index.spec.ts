@@ -630,14 +630,10 @@ describe('platform/bitbucket-server', () => {
         it('throws conflicted', async () => {
           expect.assertions(3);
           await initRepo();
-          api.post.mockReturnValueOnce(
-            Promise.reject({
-              statusCode: 409,
-            })
-          );
-          await expect(bitbucket.mergePr(5, 'branch')).rejects.toThrow(
-            'repository-changed'
-          );
+          api.post.mockRejectedValueOnce({
+            statusCode: 409,
+          });
+          expect(await bitbucket.mergePr(5, 'branch')).toBeFalsy();
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.post.mock.calls).toMatchSnapshot();
         });
