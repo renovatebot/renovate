@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/helm/extract extractPackageFile() doesn't fail if Chart.yaml is invalid 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "0.9.0",
+      "depName": "redis",
+      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
+    },
+    Object {
+      "currentValue": "0.8.1",
+      "depName": "postgresql",
+      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/helm/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
 Object {
   "chartName": "example",
@@ -14,6 +32,26 @@ Object {
       "currentValue": "0.8.1",
       "depName": "postgresql",
       "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/helm/extract extractPackageFile() skips local dependencies 1`] = `
+Object {
+  "chartName": "example",
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "0.9.0",
+      "depName": "redis",
+      "helmRepository": "https://kubernetes-charts.storage.googleapis.com/",
+    },
+    Object {
+      "currentValue": "0.8.1",
+      "depName": "postgresql",
+      "helmRepository": "file:///some/local/path/",
+      "skipReason": "local-dependency",
     },
   ],
 }
