@@ -878,7 +878,8 @@ export async function mergePr(prNo: number, branchName: string) {
     if (err.statusCode === 404) {
       throw new Error('not-found');
     } else if (err.statusCode === 409) {
-      throw new Error('repository-changed');
+      logger.warn({ err }, `Failed to merge PR`);
+      return false;
     } else {
       logger.warn({ err }, `Failed to merge PR`);
       return false;
