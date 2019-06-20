@@ -31,9 +31,10 @@ describe('lib/manager/pip_requirements/extract', () => {
       expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts dependencies', () => {
-      const res = extractPackageFile(requirements1, config).deps;
+      const res = extractPackageFile(requirements1, config);
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res.registryUrls).toEqual(['http://example.com/private-pypi/']);
+      expect(res.deps).toHaveLength(3);
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(requirements2, config).deps;

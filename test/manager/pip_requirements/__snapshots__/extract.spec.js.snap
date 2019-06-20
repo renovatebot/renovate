@@ -1,38 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
-Array [
-  Object {
-    "currentValue": "==0.3.1",
-    "datasource": "pypi",
-    "depName": "some-package",
-    "fromVersion": "0.3.1",
-    "lineNumber": 2,
-    "registryUrls": Array [
-      "http://example.com/private-pypi/",
-    ],
-  },
-  Object {
-    "currentValue": "==1.0.0",
-    "datasource": "pypi",
-    "depName": "some-other-package",
-    "fromVersion": "1.0.0",
-    "lineNumber": 3,
-    "registryUrls": Array [
-      "http://example.com/private-pypi/",
-    ],
-  },
-  Object {
-    "currentValue": "==1.9",
-    "datasource": "pypi",
-    "depName": "not_semver",
-    "fromVersion": "1.9",
-    "lineNumber": 4,
-    "registryUrls": Array [
-      "http://example.com/private-pypi/",
-    ],
-  },
-]
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "==0.3.1",
+      "datasource": "pypi",
+      "depName": "some-package",
+      "fromVersion": "0.3.1",
+      "lineNumber": 2,
+    },
+    Object {
+      "currentValue": "==1.0.0",
+      "datasource": "pypi",
+      "depName": "some-other-package",
+      "fromVersion": "1.0.0",
+      "lineNumber": 3,
+    },
+    Object {
+      "currentValue": "==1.9",
+      "datasource": "pypi",
+      "depName": "not_semver",
+      "fromVersion": "1.9",
+      "lineNumber": 4,
+    },
+  ],
+  "registryUrls": Array [
+    "http://example.com/private-pypi/",
+  ],
+}
 `;
 
 exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts multiple dependencies 1`] = `
