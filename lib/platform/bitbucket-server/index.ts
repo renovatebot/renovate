@@ -254,6 +254,8 @@ export async function deleteBranch(branchName: string, closePr = false) {
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/decline?version=${pr.version}`
       );
 
+      // wait for pr change propagation
+      await delay(1000);
       await getPr(pr.number, true);
     }
   }
@@ -850,6 +852,8 @@ export async function updatePr(
         },
       }
     );
+    // wait for pr change propagation
+    await delay(1000);
     await getPr(prNo, true);
   } catch (err) {
     if (err.statusCode === 404) {
@@ -875,6 +879,8 @@ export async function mergePr(prNo: number, branchName: string) {
     await api.post(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
     );
+    // wait for pr change propagation
+    await delay(1000);
     await getPr(prNo, true);
   } catch (err) {
     if (err.statusCode === 404) {
