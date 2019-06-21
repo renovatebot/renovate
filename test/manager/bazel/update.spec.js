@@ -182,20 +182,5 @@ http_archive(
       expect(res.indexOf('0.5.0')).toBe(-1);
       expect(res.indexOf('0.6.2')).not.toBe(-1);
     });
-    it('handles http archive error', async () => {
-      const upgrade = {
-        depName: 'io_bazel_rules_go',
-        depType: 'http_archive',
-        repo: 'bazelbuild/rules_go',
-        def: `http_archive(\n    name = "io_bazel_rules_go",\n    url = "https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz",\n    sha256 = "341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c",\n)`,
-        currentValue: '0.7.1',
-        newValue: '0.8.1',
-      };
-      got.mockImplementationOnce(() => {
-        throw new Error('some error');
-      });
-      const res = await bazelfile.updateDependency(content, upgrade);
-      expect(res).toBeNull();
-    });
   });
 });
