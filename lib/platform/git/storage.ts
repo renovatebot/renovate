@@ -465,6 +465,7 @@ function checkForPlatformFailure(err: Error) {
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
     'access denied or repository not exported',
+    'Could not write new index file',
   ];
   for (const errorStr of platformErrorStrings) {
     if (err.message.includes(errorStr)) {

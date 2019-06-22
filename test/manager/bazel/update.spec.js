@@ -1,8 +1,9 @@
 const fs = require('fs');
+const hasha = require('hasha');
 const path = require('path');
-const got = require('../../../lib/util/got');
 const bazelfile = require('../../../lib/manager/bazel/update');
 
+jest.mock('hasha');
 jest.mock('../../../lib/util/got');
 
 const content = fs.readFileSync(
@@ -30,6 +31,9 @@ git_repository(
 
 describe('manager/bazel/update', () => {
   describe('updateDependency', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
     it('updates tag', async () => {
       const upgrade = {
         depName: 'build_bazel_rules_nodejs',
@@ -102,9 +106,13 @@ describe('manager/bazel/update', () => {
         currentValue: '0.7.1',
         newValue: '0.8.1',
       };
-      got.mockReturnValueOnce({ body: '' });
+      hasha.fromStream.mockImplementationOnce(() => {
+        throw new Error('not found');
+      });
+      hasha.fromStream.mockImplementationOnce(() => 'abc123');
       const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
+      expect(res.includes('abc123')).toBe(true);
       expect(res.indexOf('0.8.1')).not.toBe(-1);
     });
     it('updates http archive with content other then WORKSPACE', async () => {
@@ -121,7 +129,7 @@ describe('manager/bazel/update', () => {
         currentValue: '0.6.0',
         newValue: '0.8.0',
       };
-      got.mockReturnValueOnce({ body: '' });
+      hasha.fromStream.mockReturnValueOnce('abc123');
       const res = await bazelfile.updateDependency(
         fileWithBzlExtension,
         upgrade
@@ -137,7 +145,7 @@ describe('manager/bazel/update', () => {
         def: `http_archive(\n  name="distroless",\n  sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",\n  strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",\n  urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]\n)`,
         newDigest: '033387ac8853e6cc1cd47df6c346bc53cbc490d8',
       };
-      got.mockReturnValueOnce({ body: '' });
+      hasha.fromStream.mockReturnValueOnce('abc123');
       const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
     });
@@ -150,8 +158,10 @@ describe('manager/bazel/update', () => {
         currentValue: '0.7.1',
         newValue: '0.8.1',
       };
-      got.mockReturnValueOnce(null);
-      got.mockReturnValueOnce({ body: '' });
+      hasha.fromStream.mockImplementationOnce(() => {
+        throw new Error('not found');
+      });
+      hasha.fromStream.mockImplementationOnce(() => 'abc123');
       const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
       expect(res.indexOf('0.8.1')).not.toBe(-1);
@@ -176,26 +186,11 @@ http_archive(
         currentValue: '0.5.0',
         newValue: '0.6.2',
       };
-      got.mockReturnValueOnce({ body: '' });
+      hasha.fromStream.mockReturnValueOnce('abc123');
       const res = await bazelfile.updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
       expect(res.indexOf('0.5.0')).toBe(-1);
       expect(res.indexOf('0.6.2')).not.toBe(-1);
-    });
-    it('handles http archive error', async () => {
-      const upgrade = {
-        depName: 'io_bazel_rules_go',
-        depType: 'http_archive',
-        repo: 'bazelbuild/rules_go',
-        def: `http_archive(\n    name = "io_bazel_rules_go",\n    url = "https://github.com/bazelbuild/rules_go/releases/download/0.7.1/rules_go-0.7.1.tar.gz",\n    sha256 = "341d5eacef704415386974bc82a1783a8b7ffbff2ab6ba02375e1ca20d9b031c",\n)`,
-        currentValue: '0.7.1',
-        newValue: '0.8.1',
-      };
-      got.mockImplementationOnce(() => {
-        throw new Error('some error');
-      });
-      const res = await bazelfile.updateDependency(content, upgrade);
-      expect(res).toBeNull();
     });
   });
 });
