@@ -90,7 +90,7 @@ Then, make sure your fork is up to date with `master` each time before creating 
 
 ## Tips and tricks
 
-#### Runnign Renovate against forked repositories
+#### Running Renovate against forked repositories
 
 Quite often, the quickest way for you to test or fix something is to fork an existing repository.
 However, by default Renovate skips over repositories that are forked.
@@ -103,7 +103,7 @@ Option 2: Run Renovate with the CLI flag `--renovate-fork=true`
 
 Usually, `debug` is good enough to troubleshoot most problems or verify functionality.
 
-When logging at debug, it's usually easiest to view the logs in a text editor, so in that case you can run like this:
+When logging at debug, it's usually easiest to view the logs in a text editor, so in that case, you can run like this:
 
 ```
 $ rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
@@ -127,3 +127,11 @@ It's really easy to debug Renovate using Chrome's inspect tool. Try like this:
 2. Add a `debugger;` statement somewhere in the source code where you want to start debugging
 3. Run Renovate using `yarn debug ...` instead of `yarn start ...`
 4. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
+
+If you are using VS Code, try like this:
+
+1. Open file .vscode/launch.json.
+2. In configuration named `debug`, add `RENOVATE_TOKEN` with your personal access token in `env` key.
+3. In the same configuration, add the repo you want to test against in `args` key.
+4. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`.
+5. Wait for your breakpoint to be triggered.

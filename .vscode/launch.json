@@ -12,7 +12,8 @@
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
       "runtimeArgs": ["--nolazy", "--extensions", ".ts,.js"],
       "protocol": "inspector",
-      "skipFiles": ["<node_internals>/**/*.js"]
+      "skipFiles": ["<node_internals>/**/*.js"],
+      "args": []
     },
     {
       "type": "node",
