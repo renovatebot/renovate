@@ -1,7 +1,6 @@
 import { GotJSONOptions } from 'got';
 import got from '../../util/got';
 import { IGotApi, IGotApiOptions } from '../common';
-import { logger } from '../../logger';
 
 async function get(path: string, options: IGotApiOptions & GotJSONOptions) {
   const opts: IGotApiOptions & GotJSONOptions = {

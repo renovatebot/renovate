@@ -12,6 +12,7 @@ const stdout: Logger.Stream = {
   name: 'stdout',
   level: (process.env.LOG_LEVEL as Logger.LogLevel) || 'info',
   stream: process.stdout,
+  type: 'raw',
 };
 
 if (process.env.LOG_FORMAT !== 'json') {
@@ -71,10 +72,5 @@ export function setMeta(obj: any) {
 }
 
 export function levels(name: string, level: Logger.LogLevel): void {
-  loggerLevels.forEach(loggerLevel => {
-    logger[loggerLevel] = (logFactory(loggerLevel) as Logger).levels(
-      name,
-      level
-    );
-  });
+  bunyanLogger.levels(name, level);
 }
