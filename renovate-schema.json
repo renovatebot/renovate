@@ -290,7 +290,8 @@
         "pep440",
         "poetry",
         "ruby",
-        "semver"
+        "semver",
+        "swift"
       ],
       "default": "semver"
     },
@@ -1241,6 +1242,16 @@
       "description": "Options to suppress various types of warnings and other notifications",
       "type": "array",
       "default": ["deprecationWarningIssues"]
+    },
+    "swift": {
+      "description": "Configuration for Package.swift files",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)Package\\.swift"],
+        "versionScheme": "swift",
+        "rangeStrategy": "bump"
+      },
+      "$ref": "#"
     }
   }
 }
