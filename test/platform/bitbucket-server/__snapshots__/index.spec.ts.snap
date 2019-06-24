@@ -1016,24 +1016,6 @@ Array [
       "useCache": true,
     },
   ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
-    Object {
-      "useCache": false,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-    Object {
-      "useCache": false,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-    Object {
-      "useCache": false,
-    },
-  ],
 ]
 `;
 
@@ -1286,24 +1268,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
     Object {
       "useCache": true,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
-    Object {
-      "useCache": false,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-    Object {
-      "useCache": false,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-    Object {
-      "useCache": false,
     },
   ],
 ]
@@ -2506,24 +2470,6 @@ Array [
       "useCache": true,
     },
   ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
-    Object {
-      "useCache": false,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-    Object {
-      "useCache": false,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-    Object {
-      "useCache": false,
-    },
-  ],
 ]
 `;
 
@@ -2776,24 +2722,6 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
     Object {
       "useCache": true,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
-    Object {
-      "useCache": false,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-    Object {
-      "useCache": false,
-    },
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-    Object {
-      "useCache": false,
     },
   ],
 ]
