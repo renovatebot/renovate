@@ -63,7 +63,7 @@ const loggerLevels: string[] = [
 ];
 
 // eslint-disable-next-line import/no-mutable-exports
-export const logger: any = {};
+export let logger: Renovate.ILogger;
 
 loggerLevels.forEach(loggerLevel => {
   logger[loggerLevel] = logFactory(loggerLevel);
