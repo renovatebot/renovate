@@ -1,6 +1,9 @@
 const { logger } = require('../../lib/logger');
 
 describe('logger', () => {
+  beforeAll(() => {
+    jest.resetModules();
+  });
   it('inits', () => {
     expect(logger).toBeDefined();
   });

@@ -4,7 +4,10 @@ const os = require('os');
 const cache = require('../lib/workers/global/cache');
 
 global.platform = jest.genMockFromModule('../lib/platform/github');
-global.logger = require('./logger/_fixtures');
+jest.mock('../lib/logger');
+
+// TODO: to bwe removed! Used to temporary fix logger undefined test failures
+global.logger = require('../lib/logger');
 
 global.repoCache = {};
 

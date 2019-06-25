@@ -12,13 +12,13 @@ const stdout: Logger.Stream = {
   name: 'stdout',
   level: (process.env.LOG_LEVEL as Logger.LogLevel) || 'info',
   stream: process.stdout,
-  type: 'raw',
 };
 
 if (process.env.LOG_FORMAT !== 'json') {
   const prettyStdOut = new PrettyStdout();
   prettyStdOut.pipe(process.stdout);
   stdout.stream = prettyStdOut;
+  stdout.type = 'raw';
 }
 
 const bunyanLogger: any = Logger.createLogger({
@@ -27,6 +27,9 @@ const bunyanLogger: any = Logger.createLogger({
     body: configSerializer,
     cmd: cmdSerializer,
     config: configSerializer,
+    migratedConfig: configSerializer,
+    originalConfig: configSerializer,
+    presetConfig: configSerializer,
     err: errSerializer,
   },
   streams: [stdout],
