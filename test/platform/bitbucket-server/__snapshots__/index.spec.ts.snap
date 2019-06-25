@@ -16,9 +16,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -28,9 +34,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
@@ -80,9 +92,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -136,9 +154,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -186,9 +210,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -551,9 +581,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -749,9 +785,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -761,9 +803,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -773,9 +821,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -817,9 +871,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -946,21 +1006,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
-      "useCache": false,
+      "useCache": true,
     },
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -989,9 +1043,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1026,9 +1086,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1057,9 +1123,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1188,21 +1260,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
-      "useCache": false,
+      "useCache": true,
     },
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1245,9 +1311,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1296,9 +1368,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1341,9 +1419,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1386,9 +1470,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -1398,9 +1488,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": false,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": false,
+    },
   ],
 ]
 `;
@@ -1450,9 +1546,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1506,9 +1608,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1556,9 +1664,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -1921,9 +2035,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2119,9 +2239,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -2131,9 +2257,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
@@ -2143,9 +2275,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2187,9 +2325,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2316,21 +2460,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
-      "useCache": false,
+      "useCache": true,
     },
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2359,9 +2497,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2396,9 +2540,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2427,9 +2577,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2558,21 +2714,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
     Object {
-      "useCache": false,
+      "useCache": true,
     },
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  ],
-  Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2615,9 +2765,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2666,9 +2822,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
@@ -2711,9 +2873,15 @@ Array [
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
+    Object {
+      "useCache": true,
+    },
   ],
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
+    Object {
+      "useCache": true,
+    },
   ],
 ]
 `;
