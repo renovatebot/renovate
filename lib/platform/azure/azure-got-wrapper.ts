@@ -1,17 +1,10 @@
-const azure = require('azure-devops-node-api');
-const hostRules = require('../../util/host-rules');
+import * as azure from 'azure-devops-node-api';
+import * as hostRules from '../../util/host-rules';
 
 const hostType = 'azure';
-let endpoint;
+let endpoint: string;
 
-module.exports = {
-  azureObj,
-  gitApi,
-  getCoreApi,
-  setEndpoint,
-};
-
-function azureObj() {
+export function azureObj() {
   const config = hostRules.find({ hostType, url: endpoint });
   if (!(config && config.token)) {
     throw new Error(`No token found for azure`);
@@ -20,14 +13,14 @@ function azureObj() {
   return new azure.WebApi(endpoint, authHandler);
 }
 
-function gitApi() {
+export function gitApi() {
   return azureObj().getGitApi();
 }
 
-function getCoreApi() {
+export function getCoreApi() {
   return azureObj().getCoreApi();
 }
 
-function setEndpoint(e) {
+export function setEndpoint(e: string) {
   endpoint = e;
 }
