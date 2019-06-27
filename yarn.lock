@@ -3810,10 +3810,10 @@ glob@^6.0.1:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-global-agent@1.12.2:
-  version "1.12.2"
-  resolved "https://registry.yarnpkg.com/global-agent/-/global-agent-1.12.2.tgz#5ffacf5e03e682eff89e2e807ed46b55db4c79f8"
-  integrity sha512-loclwYQMkHPEsfWDOc6hqBMHzXPQytt6mPy905HoaqUmEtNLwUeglNgqwyr7vqOt23ja9rn7BhPS6BUFKq7SMA==
+global-agent@1.13.0:
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/global-agent/-/global-agent-1.13.0.tgz#ad0a01774885f7e5a4a8e69dd8bb461b64e333a4"
+  integrity sha512-F/xlOBOx/oqO7s9riWPN2Aj3uYQdJpTHctM4fOunENZJtqeM+ZQIZAagdaYPbmNln9EodyQuvOugqk9g27qQjw==
   dependencies:
     core-js "^3.1.4"
     es6-error "^4.1.1"
