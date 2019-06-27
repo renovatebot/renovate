@@ -21,7 +21,7 @@ describe('platform', () => {
     expect(await platform.initPlatform(config)).toMatchSnapshot();
   });
   it('has a list of supported methods for github', () => {
-    const githubMethods = Object.keys(github);
+    const githubMethods = Object.keys(github).sort();
     expect(githubMethods).toMatchSnapshot();
   });
 

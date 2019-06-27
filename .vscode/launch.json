@@ -24,7 +24,7 @@
         "--collectCoverage=false",
         "${fileBasenameNoExtension}"
       ],
-      "env": { "LOG_LEVEL": "debug" },
+      "env": { "NODE_ENV": "test", "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
       "disableOptimisticBPs": true,
       "windows": {
@@ -40,7 +40,7 @@
       "name": "Jest All",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
       "args": ["--runInBand", "--collectCoverage=false"],
-      "env": { "LOG_LEVEL": "debug" },
+      "env": { "NODE_ENV": "test", "LOG_LEVEL": "debug" },
       "console": "integratedTerminal",
       "disableOptimisticBPs": true,
       "windows": {
