@@ -1,6 +1,6 @@
 describe('platform/azure/azure-got-wrapper', () => {
-  let hostRules;
-  let azure;
+  let hostRules: typeof import('../../../lib/util/host-rules');
+  let azure: typeof import('../../../lib/platform/azure/azure-got-wrapper');
   beforeEach(() => {
     // reset module
     jest.resetModules();
