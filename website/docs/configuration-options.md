@@ -976,7 +976,7 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 
 ## reviewers
 
-Must be valid usernames. If on GitHub and assigning a *team* to review, use the prefix `team:`, e.g. a string like `team:someteam`.
+Must be valid usernames. If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
 
 ## rollbackPrs
 
