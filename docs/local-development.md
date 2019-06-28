@@ -130,12 +130,13 @@ It's really easy to debug Renovate using Chrome's inspect tool. Try like this:
 
 If you are using VS Code, try like this:
 
-1. Open file .vscode/launch.json and in configuration named `debug`, add the repo you want to test against in `args` key.
-2. In `config.js`, add `token` with your personal access token. It would look like this:
+1. In the configuration file, i.e `config.js` in the root directory of the project, add `token` with your personal access token.
+2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
 
 ```javascript
 module.exports = {
   token: 'xxxxxxxx',
+  repositories: ['r4harry/testrepo1'],
 };
 ```
 
