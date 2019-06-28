@@ -22,6 +22,9 @@ Array [
     "projects/some%2Frepo",
   ],
   Array [
+    "projects/some%2Frepo/repository/files/renovate.json?ref=master",
+  ],
+  Array [
     "user",
   ],
 ]
@@ -263,6 +266,9 @@ Array [
     "projects/some%2Frepo%2Fproject",
   ],
   Array [
+    "projects/some%2Frepo%2Fproject/repository/files/renovate.json?ref=undefined",
+  ],
+  Array [
     "user",
   ],
 ]
@@ -274,6 +280,9 @@ Array [
     "projects/some%2Frepo%2Fproject",
   ],
   Array [
+    "projects/some%2Frepo%2Fproject/repository/files/renovate.json?ref=master",
+  ],
+  Array [
     "user",
   ],
 ]
@@ -283,6 +292,9 @@ exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
 Array [
   Array [
     "projects/some%2Frepo",
+  ],
+  Array [
+    "projects/some%2Frepo/repository/files/renovate.json?ref=master",
   ],
   Array [
     "user",

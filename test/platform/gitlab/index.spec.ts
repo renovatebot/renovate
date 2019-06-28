@@ -145,6 +145,16 @@ describe('platform/gitlab', () => {
           },
         } as any)
     );
+    // Check if renovate disabled in renovate.json
+    api.get.mockImplementationOnce(
+      () =>
+        ({
+          body: {
+            content: Buffer.from('{"enabled": true}').toString('base64'),
+          },
+        } as any)
+    );
+    // getBranchCommit
     // user
     api.get.mockImplementationOnce(
       () =>
@@ -164,6 +174,28 @@ describe('platform/gitlab', () => {
   }
 
   describe('initRepo', () => {
+    it(`should throw error if disabled in renovate.json`, async () => {
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              default_branch: 'master',
+              http_url_to_repo: 'https://gitlab.com/some/repo.git',
+            },
+          } as any)
+      );
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              content: Buffer.from('{"enabled": false}').toString('base64'),
+            },
+          } as any)
+      );
+      await expect(
+        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+      ).rejects.toThrow(Error('disabled'));
+    });
     it(`should escape all forward slashes in project names`, async () => {
       api.get.mockReturnValue({ body: [] } as any);
       await initRepo({ repository: 'some/repo/project', token: 'some-token' });
