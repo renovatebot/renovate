@@ -901,7 +901,7 @@ export async function addReviewers(prNo: number, reviewers: string[]) {
     .filter(e => e.startsWith('team:'))
     .map(e => e.replace(/^team:/, ''));
 
-  await get.post(
+  await api.post(
     `repos/${config.parentRepo ||
       config.repository}/pulls/${prNo}/requested_reviewers`,
     {
