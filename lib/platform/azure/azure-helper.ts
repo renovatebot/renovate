@@ -1,25 +1,10 @@
-// @ts-nocheck
-
-const azureApi = require('./azure-got-wrapper');
-
-module.exports = {
-  getBranchNameWithoutRefsheadsPrefix,
-  getRefs,
-  getAzureBranchObj,
-  getChanges,
-  getNewBranchName,
-  getFile,
-  max4000Chars,
-  getRenovatePRFormat,
-  getCommitDetails,
-  getProjectAndRepo,
-};
+import * as azureApi from './azure-got-wrapper';
 
 /**
  *
  * @param {string} branchName
  */
-function getNewBranchName(branchName) {
+export function getNewBranchName(branchName?: string) {
   if (branchName && !branchName.startsWith('refs/heads/')) {
     return `refs/heads/${branchName}`;
   }
@@ -30,10 +15,10 @@ function getNewBranchName(branchName) {
  *
  * @param {string} branchPath
  */
-function getBranchNameWithoutRefsheadsPrefix(branchPath) {
+export function getBranchNameWithoutRefsheadsPrefix(branchPath: string) {
   if (!branchPath) {
     logger.error(`getBranchNameWithoutRefsheadsPrefix(${branchPath})`);
-    return null;
+    return undefined;
   }
   if (!branchPath.startsWith('refs/heads/')) {
     logger.trace(
@@ -48,10 +33,10 @@ function getBranchNameWithoutRefsheadsPrefix(branchPath) {
  *
  * @param {string} branchPath
  */
-function getBranchNameWithoutRefsPrefix(branchPath) {
+function getBranchNameWithoutRefsPrefix(branchPath?: string) {
   if (!branchPath) {
     logger.error(`getBranchNameWithoutRefsPrefix(${branchPath})`);
-    return null;
+    return undefined;
   }
   if (!branchPath.startsWith('refs/')) {
     logger.trace(
@@ -67,12 +52,12 @@ function getBranchNameWithoutRefsPrefix(branchPath) {
  * @param {string} repoId
  * @param {string} branchName
  */
-async function getRefs(repoId, branchName) {
+export async function getRefs(repoId: string, branchName?: string) {
   logger.debug(`getRefs(${repoId}, ${branchName})`);
   const azureApiGit = await azureApi.gitApi();
   const refs = await azureApiGit.getRefs(
     repoId,
-    null,
+    undefined,
     getBranchNameWithoutRefsPrefix(branchName)
   );
   return refs;
@@ -83,7 +68,11 @@ async function getRefs(repoId, branchName) {
  * @param {string} branchName
  * @param {string} from
  */
-async function getAzureBranchObj(repoId, branchName, from) {
+export async function getAzureBranchObj(
+  repoId: string,
+  branchName: string,
+  from?: string
+) {
   const fromBranchName = getNewBranchName(from);
   const refs = await getRefs(repoId, fromBranchName);
   if (refs.length === 0) {
@@ -107,7 +96,12 @@ async function getAzureBranchObj(repoId, branchName, from) {
  * @param {string} repository
  * @param {string} branchName
  */
-async function getChanges(files, repoId, repository, branchName) {
+export async function getChanges(
+  files: any,
+  repoId: any,
+  repository: any,
+  branchName: any
+) {
   const changes = [];
   for (const file of files) {
     // Add or update
@@ -144,14 +138,19 @@ async function getChanges(files, repoId, repository, branchName) {
  * @param {string} filePath
  * @param {string} branchName
  */
-async function getFile(repoId, repository, filePath, branchName) {
+export async function getFile(
+  repoId: string,
+  repository: any,
+  filePath: string,
+  branchName: any
+) {
   logger.trace(`getFile(filePath=${filePath}, branchName=${branchName})`);
   const azureApiGit = await azureApi.gitApi();
   const item = await azureApiGit.getItemText(
     repoId,
     filePath,
-    null,
-    null,
+    undefined,
+    undefined,
     0, // because we look for 1 file
     false,
     false,
@@ -183,11 +182,11 @@ async function getFile(repoId, repository, filePath, branchName) {
   return null; // no file found
 }
 
-async function streamToString(stream) {
-  const chunks = [];
+async function streamToString(stream: NodeJS.ReadableStream) {
+  const chunks: string[] = [];
   /* eslint-disable promise/avoid-new */
-  const p = await new Promise(resolve => {
-    stream.on('data', chunk => {
+  const p = await new Promise<string>(resolve => {
+    stream.on('data', (chunk: any) => {
       chunks.push(chunk.toString());
     });
     stream.on('end', () => {
@@ -201,15 +200,20 @@ async function streamToString(stream) {
  *
  * @param {string} str
  */
-function max4000Chars(str) {
+export function max4000Chars(str: string) {
   if (str && str.length >= 4000) {
     return str.substring(0, 3999);
   }
   return str;
 }
 
-function getRenovatePRFormat(azurePr) {
-  const pr = azurePr;
+export function getRenovatePRFormat(azurePr: {
+  pullRequestId: any;
+  description: any;
+  status: number;
+  mergeStatus: number;
+}) {
+  const pr = azurePr as any;
 
   pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
   pr.number = azurePr.pullRequestId;
@@ -249,7 +253,7 @@ function getRenovatePRFormat(azurePr) {
   return pr;
 }
 
-async function getCommitDetails(commit, repoId) {
+export async function getCommitDetails(commit: string, repoId: string) {
   logger.debug(`getCommitDetails(${commit}, ${repoId})`);
   const azureApiGit = await azureApi.gitApi();
   const results = await azureApiGit.getCommit(commit, repoId);
@@ -260,7 +264,7 @@ async function getCommitDetails(commit, repoId) {
  *
  * @param {string} str
  */
-function getProjectAndRepo(str) {
+export function getProjectAndRepo(str: string) {
   logger.trace(`getProjectAndRepo(${str})`);
   const strSplited = str.split(`/`);
   if (strSplited.length === 1) {
