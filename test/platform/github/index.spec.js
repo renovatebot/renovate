@@ -155,6 +155,26 @@ describe('platform/github', () => {
   }
 
   describe('initRepo', () => {
+    it('should throw err if disabled in renovate.json', async () => {
+      // repo info
+      get.mockImplementationOnce(() => ({
+        body: {
+          owner: {
+            login: 'theowner',
+          },
+        },
+      }));
+      get.mockImplementationOnce(() => ({
+        body: {
+          content: Buffer.from('{"enabled": false}').toString('base64'),
+        },
+      }));
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+        })
+      ).rejects.toThrow('disabled');
+    });
     it('should rebase', async () => {
       function squashInitRepo(...args) {
         // repo info
@@ -188,6 +208,11 @@ describe('platform/github', () => {
             allow_rebase_merge: true,
             allow_squash_merge: true,
             allow_merge_commit: true,
+          },
+        }));
+        get.mockImplementationOnce(() => ({
+          body: {
+            content: Buffer.from('{"enabled": true}').toString('base64'),
           },
         }));
         // getBranchCommit
@@ -226,6 +251,11 @@ describe('platform/github', () => {
             allow_rebase_merge: true,
             allow_squash_merge: true,
             allow_merge_commit: true,
+          },
+        }));
+        get.mockImplementationOnce(() => ({
+          body: {
+            content: Buffer.from('{"enabled": true}').toString('base64'),
           },
         }));
         // getBranchCommit
@@ -1539,7 +1569,7 @@ describe('platform/github', () => {
       };
       expect(await github.mergePr(pr)).toBe(true);
       expect(get.put).toHaveBeenCalledTimes(1);
-      expect(get).toHaveBeenCalledTimes(1);
+      expect(get).toHaveBeenCalledTimes(2);
     });
     it('should handle merge error', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -1554,7 +1584,7 @@ describe('platform/github', () => {
       });
       expect(await github.mergePr(pr)).toBe(false);
       expect(get.put).toHaveBeenCalledTimes(1);
-      expect(get).toHaveBeenCalledTimes(1);
+      expect(get).toHaveBeenCalledTimes(2);
     });
   });
   describe('getPrBody(input)', () => {
