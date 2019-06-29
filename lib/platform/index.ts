@@ -1,7 +1,8 @@
-const URL = require('url');
-const addrs = require('email-addresses');
-const hostRules = require('../util/host-rules');
+import URL from 'url';
+import addrs from 'email-addresses';
+import * as hostRules from '../util/host-rules';
 
+// TODO: move to definitions: platform.allowedValues
 /* eslint-disable global-require */
 const platforms = new Map([
   ['azure', require('./azure')],
@@ -12,11 +13,12 @@ const platforms = new Map([
 ]);
 /* eslint-enable global-require */
 
-function setPlatformApi(platform) {
+// TODO: lazy load platform
+export function setPlatformApi(platform: string) {
   global.platform = platforms.get(platform);
 }
 
-async function initPlatform(config) {
+export async function initPlatform(config: any) {
   setPlatformApi(config.platform);
   if (!global.platform) {
     const supportedPlatforms = [...platforms.keys()].join(', ');
@@ -24,7 +26,8 @@ async function initPlatform(config) {
       `Init: Platform "${config.platform}" not found. Must be one of: ${supportedPlatforms}`
     );
   }
-  const platformInfo = await global.platform.initPlatform(config);
+  // TODO: types
+  const platformInfo: any = await global.platform.initPlatform(config);
   const returnConfig = { ...config, ...platformInfo };
   let gitAuthor;
   if (config && config.gitAuthor) {
@@ -37,9 +40,9 @@ async function initPlatform(config) {
     logger.info('Using platform gitAuthor: ' + platformInfo.gitAuthor);
     gitAuthor = platformInfo.gitAuthor;
   }
-  let gitAuthorParsed;
+  let gitAuthorParsed: addrs.ParsedMailbox | null = null;
   try {
-    gitAuthorParsed = addrs.parseOneAddress(gitAuthor);
+    gitAuthorParsed = addrs.parseOneAddress(gitAuthor) as addrs.ParsedMailbox;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ gitAuthor, err }, 'Error parsing gitAuthor');
   }
@@ -51,7 +54,8 @@ async function initPlatform(config) {
     name: gitAuthorParsed.name,
     email: gitAuthorParsed.address,
   };
-  const platformRule = {
+  // TODO: types
+  const platformRule: any = {
     hostType: returnConfig.platform,
     hostName: URL.parse(returnConfig.endpoint).hostname,
   };
@@ -66,8 +70,3 @@ async function initPlatform(config) {
   hostRules.add(platformRule);
   return returnConfig;
 }
-
-module.exports = {
-  initPlatform,
-  setPlatformApi,
-};
