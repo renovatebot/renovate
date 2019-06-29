@@ -135,12 +135,12 @@ describe('manager/bazel/update', () => {
       const upgrade = {
         depName: 'bazel_skylib',
         depType: 'http_archive',
-        repo: 'bazelbuild/bazel-skylib',
+        repo: 'bazelbuild/bazel-skyfoo',
         def: `http_archive(
-            name = "bazel_skylib",
+            name = "bazel_skyfoo",
             sha256 = "eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867",
-            strip_prefix = "bazel-skylib-0.6.0",
-            urls = ["https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz"],
+            strip_prefix = "bazel-skyfoo-0.6.0",
+            urls = ["https://github.com/bazelbuild/bazel-skyfoo/archive/0.6.0.tar.gz"],
           )`,
         currentValue: '0.6.0',
         newValue: '0.8.0',
