@@ -31,7 +31,7 @@ describe('platform', () => {
   });
 
   it('has a list of supported methods for azure', () => {
-    const azureMethods = Object.keys(azure);
+    const azureMethods = Object.keys(azure).sort();
     expect(azureMethods).toMatchSnapshot();
   });
 

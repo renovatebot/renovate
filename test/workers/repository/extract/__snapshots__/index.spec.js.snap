@@ -92,6 +92,9 @@ Object {
   "sbt": Array [
     Object {},
   ],
+  "swift": Array [
+    Object {},
+  ],
   "terraform": Array [
     Object {},
   ],
