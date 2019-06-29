@@ -177,7 +177,7 @@ export async function initRepo({
   config.renovateUsername = renovateUsername;
   config.localDir = localDir;
   config.repository = repository;
-  [config.repositoryOwner, config.repositoryOwner] = repository.split('/');
+  [config.repositoryOwner, config.repositoryName] = repository.split('/');
   config.gitPrivateKey = gitPrivateKey;
   // platformConfig is passed back to the app layer and contains info about the platform they require
   const platformConfig: { privateRepo: boolean; isFork: boolean } = {} as any;
