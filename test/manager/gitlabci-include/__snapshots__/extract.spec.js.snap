@@ -5,22 +5,28 @@ Array [
   Object {
     "currentValue": "1.0.0",
     "datasource": "gitlab",
-    "depHost": "http://gitlab.test",
     "depName": "mikebryant/include-source-example",
     "depType": "repository",
+    "registryUrls": Array [
+      "http://gitlab.test",
+    ],
   },
   Object {
     "currentValue": "master",
     "datasource": "gitlab",
-    "depHost": "http://gitlab.test",
     "depName": "mikebryant/include-source-example2",
     "depType": "repository",
+    "registryUrls": Array [
+      "http://gitlab.test",
+    ],
   },
   Object {
     "datasource": "gitlab",
-    "depHost": "http://gitlab.test",
     "depName": "mikebryant/include-source-example3",
     "depType": "repository",
+    "registryUrls": Array [
+      "http://gitlab.test",
+    ],
     "skipReason": "unknown-version",
   },
 ]
