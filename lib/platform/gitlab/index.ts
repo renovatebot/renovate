@@ -469,11 +469,14 @@ export async function ensureIssueClosing(title: string) {
 export async function addAssignees(iid: number, assignees: string[]) {
   logger.debug(`Adding assignees ${assignees} to #${iid}`);
   try {
-    const assigneeId = (await api.get(`users?username=${assignees[0]}`)).body[0]
-      .id;
-    let url = `projects/${config.repository}/merge_requests/${iid}`;
-    url += `?assignee_id=${assigneeId}`;
-    await api.put(url);
+    const assigneeIds = await Promise.all(
+      assignees.map(async assignee => {
+        return (await api.get(`users?username=${assignee}`)).body[0].id;
+      })
+    );
+    const url = `projects/${config.repository}/merge_requests/${iid}`;
+    const body = { assignee_ids: assigneeIds };
+    await api.put(url, { body });
   } catch (err) {
     logger.error({ iid, assignees }, 'Failed to add assignees');
   }

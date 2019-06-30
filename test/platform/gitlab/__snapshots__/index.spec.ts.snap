@@ -3,18 +3,19 @@
 exports[`platform/gitlab addAssignees(issueNo, assignees) should add the given assignees to the issue 1`] = `
 Array [
   Array [
-    "projects/undefined/merge_requests/42?assignee_id=123",
+    "projects/undefined/merge_requests/42",
+    Object {
+      "body": Object {
+        "assignee_ids": Array [
+          123,
+        ],
+      },
+    },
   ],
 ]
 `;
 
-exports[`platform/gitlab addAssignees(issueNo, assignees) should warn if more than one assignee 1`] = `
-Array [
-  Array [
-    "projects/undefined/merge_requests/42?assignee_id=123",
-  ],
-]
-`;
+exports[`platform/gitlab addAssignees(issueNo, assignees) should warn if more than one assignee 1`] = `Array []`;
 
 exports[`platform/gitlab commitFilesToBranch() sends to gitFs 1`] = `
 Array [
