@@ -1,10 +1,10 @@
 import * as Logger from 'bunyan';
 
-const is = require('@sindresorhus/is');
-const PrettyStdout = require('./pretty-stdout').RenovateStream;
-const configSerializer = require('./config-serializer');
-const errSerializer = require('./err-serializer');
-const cmdSerializer = require('./cmd-serializer');
+import is from '@sindresorhus/is';
+import { RenovateStream } from './pretty-stdout';
+import configSerializer from './config-serializer';
+import errSerializer from './err-serializer';
+import cmdSerializer from './cmd-serializer';
 
 let meta = {};
 
@@ -15,13 +15,14 @@ const stdout: Logger.Stream = {
 };
 
 if (process.env.LOG_FORMAT !== 'json') {
-  const prettyStdOut = new PrettyStdout();
+  // TODO: typings
+  const prettyStdOut = new RenovateStream() as any;
   prettyStdOut.pipe(process.stdout);
   stdout.stream = prettyStdOut;
   stdout.type = 'raw';
 }
 
-const bunyanLogger: any = Logger.createLogger({
+const bunyanLogger = Logger.createLogger({
   name: 'renovate',
   serializers: {
     body: configSerializer,
@@ -35,35 +36,48 @@ const bunyanLogger: any = Logger.createLogger({
   streams: [stdout],
 });
 
-const logFactory = (level: string): any => {
-  return (p1: any, p2: any): Logger => {
-    (global as any).renovateError =
-      (global as any).renovateError || level === 'error' || level === 'fatal';
+const logFactory = (level: Logger.LogLevelString): any => {
+  return (p1: any, p2: any): void => {
+    global.renovateError =
+      global.renovateError || level === 'error' || level === 'fatal';
     if (p2) {
       // meta and msg provided
-      return bunyanLogger[level]({ ...meta, ...p1 }, p2);
+      bunyanLogger[level]({ ...meta, ...p1 }, p2);
     }
     if (is.string(p1)) {
       // only message provided
-      return bunyanLogger[level](meta, p1);
+      bunyanLogger[level](meta, p1);
     }
     // only meta provided
-    return bunyanLogger[level]({ ...meta, ...p1 });
+    bunyanLogger[level]({ ...meta, ...p1 });
   };
 };
 
-const loggerLevels: string[] = [
+const loggerLevels: Logger.LogLevelString[] = [
   'trace',
   'debug',
   'info',
   'warn',
   'error',
   'fatal',
-  'child',
 ];
 
-// eslint-disable-next-line import/no-mutable-exports
-export let logger: Renovate.ILogger;
+interface ILogger {
+  trace(msg: string): void;
+  trace(meta: Record<string, any>, msg?: string): void;
+  debug(msg: string): void;
+  debug(meta: Record<string, any>, msg?: string): void;
+  info(msg: string): void;
+  info(meta: Record<string, any>, msg?: string): void;
+  warn(msg: string): void;
+  warn(meta: Record<string, any>, msg?: string): void;
+  error(msg: string): void;
+  error(meta: Record<string, any>, msg?: string): void;
+  fatal(msg: string): void;
+  fatal(meta: Record<string, any>, msg?: string): void;
+}
+
+export const logger: ILogger = {} as any;
 
 loggerLevels.forEach(loggerLevel => {
   logger[loggerLevel] = logFactory(loggerLevel);
