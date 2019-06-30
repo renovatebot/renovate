@@ -12,7 +12,7 @@ Object {
       "version": "v1.1.0",
     },
   ],
-  "sourceUrl": "undefined/some/dep",
+  "sourceUrl": "https://gitlab.com/some/dep",
 }
 `;
 
@@ -28,6 +28,6 @@ Object {
       "version": "v1.1.0",
     },
   ],
-  "sourceUrl": "undefined/some/dep2",
+  "sourceUrl": "https://gitlab.com/some/dep2",
 }
 `;
