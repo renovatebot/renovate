@@ -73,6 +73,7 @@ describe('datasource/gitlab', () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       glGot.mockReturnValueOnce({ headers: {}, body });
       const res = await datasource.getPkgReleases({
+        registryUrls: ['https://gitlab.company.com/api/v4/'],
         datasource: 'gitlab',
         depName: 'some/dep2',
       });
