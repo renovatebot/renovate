@@ -161,6 +161,7 @@ exports[`platform/bitbucket getBranchPr() bitbucket finds PR for branch 1`] = `
 Object {
   "body": "summary",
   "branchName": "branch",
+  "canMerge": true,
   "canRebase": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
@@ -176,6 +177,7 @@ exports[`platform/bitbucket getPr() exists 1`] = `
 Object {
   "body": "summary",
   "branchName": "branch",
+  "canMerge": true,
   "canRebase": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",

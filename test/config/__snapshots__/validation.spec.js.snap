@@ -87,7 +87,7 @@ Array [
     "depName": "Configuration Error",
     "message": "packageRules:
         You have included an unsupported manager in a package rule. Your list: foo. 
-        Supported managers are: (ansible, bazel, buildkite, bundler, cargo, circleci, composer, deps-edn, docker-compose, dockerfile, github-actions, gitlabci, gitlabci-include, gomod, gradle, gradle-wrapper, kubernetes, leiningen, maven, meteor, npm, nuget, nvm, pip_requirements, pip_setup, pipenv, poetry, pub, sbt, terraform, travis, ruby-version, homebrew).",
+        Supported managers are: (ansible, bazel, buildkite, bundler, cargo, circleci, composer, deps-edn, docker-compose, dockerfile, github-actions, gitlabci, gitlabci-include, gomod, gradle, gradle-wrapper, kubernetes, leiningen, maven, meteor, npm, nuget, nvm, pip_requirements, pip_setup, pipenv, poetry, pub, sbt, swift, terraform, travis, ruby-version, homebrew).",
   },
 ]
 `;
