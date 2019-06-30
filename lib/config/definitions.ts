@@ -1304,6 +1304,17 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'esy',
+    description: 'Configuration object for esy package.json renovation',
+    stage: 'package',
+    type: 'object',
+    default: {
+      fileMatch: ['(^|/)package.json$'],
+      versionScheme: 'npm',
+    },
+    mergeable: true,
+  },
+  {
     name: 'meteor',
     description: 'Configuration object for meteor package.js renovation',
     stage: 'package',

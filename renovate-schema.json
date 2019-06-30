@@ -833,6 +833,15 @@
       },
       "$ref": "#"
     },
+    "esy": {
+      "description": "Configuration object for esy package.json renovation",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)package.json$"],
+        "versionScheme": "npm"
+      },
+      "$ref": "#"
+    },
     "meteor": {
       "description": "Configuration object for meteor package.js renovation",
       "type": "object",
