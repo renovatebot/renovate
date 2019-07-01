@@ -273,6 +273,8 @@ See https://docs.renovatebot.com/private-modules for details on how this is used
 
 Extend this if you wish to configure rules specifically for `engines` definitions. Currently only `node` is supported.
 
+## esy
+
 ## excludeCommitPaths
 
 Be careful you know what you're doing with this option. The initial intended use is to allow the user to exclude certain dependencies from being added/removed/modified when "vendoring" dependencies. Example:
