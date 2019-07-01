@@ -36,7 +36,7 @@ With your current configuration, Renovate will create 2 Pull Requests:
 
 <br />
 
-:children_crossing: Branch creation will be limited to maximum 1 per hour, so it doesn't swamp any CI resources or spam the project. See docs for \`prhourlylimit\` for details.
+🚸 Branch creation will be limited to maximum 1 per hour, so it doesn't swamp any CI resources or spam the project. See docs for \`prhourlylimit\` for details.
 
 "
 `;
