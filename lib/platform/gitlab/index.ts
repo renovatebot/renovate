@@ -17,6 +17,7 @@ let config: {
   email: string;
   prList: any[];
   issueList: any[];
+  optimizeForDisabled: boolean;
 } = {} as any;
 
 const defaults = {
@@ -88,13 +89,16 @@ export function cleanRepo() {
 export async function initRepo({
   repository,
   localDir,
+  optimizeForDisabled,
 }: {
   repository: string;
   localDir: string;
+  optimizeForDisabled: boolean;
 }) {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
+  config.optimizeForDisabled = optimizeForDisabled;
   let res;
   const platformConfig: PlatformConfig = {} as any;
   try {
@@ -114,21 +118,23 @@ export async function initRepo({
     if (res.body.default_branch === null) {
       throw new Error('empty');
     }
-    let renovateConfig;
-    try {
-      renovateConfig = JSON.parse(
-        Buffer.from(
-          (await api.get(
-            `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
-          )).body.content,
-          'base64'
-        ).toString()
-      );
-    } catch (err) {
-      // Do nothing
-    }
-    if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error('disabled');
+    if (config.optimizeForDisabled) {
+      let renovateConfig;
+      try {
+        renovateConfig = JSON.parse(
+          Buffer.from(
+            (await api.get(
+              `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
+            )).body.content,
+            'base64'
+          ).toString()
+        );
+      } catch (err) {
+        // Do nothing
+      }
+      if (renovateConfig && renovateConfig.enabled === false) {
+        throw new Error('disabled');
+      }
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;

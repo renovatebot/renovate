@@ -145,15 +145,6 @@ describe('platform/gitlab', () => {
           },
         } as any)
     );
-    // Check if renovate disabled in renovate.json
-    api.get.mockImplementationOnce(
-      () =>
-        ({
-          body: {
-            content: Buffer.from('{"enabled": true}').toString('base64'),
-          },
-        } as any)
-    );
     // getBranchCommit
     // user
     api.get.mockImplementationOnce(
@@ -170,6 +161,7 @@ describe('platform/gitlab', () => {
     return gitlab.initRepo({
       repository: 'some/repo',
       localDir: '',
+      optimizeForDisabled: false,
     });
   }
 
@@ -193,7 +185,11 @@ describe('platform/gitlab', () => {
           } as any)
       );
       await expect(
-        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: true,
+        })
       ).rejects.toThrow(Error('disabled'));
     });
     it(`should escape all forward slashes in project names`, async () => {
@@ -206,25 +202,41 @@ describe('platform/gitlab', () => {
         throw new Error('always error');
       });
       await expect(
-        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
       ).rejects.toThrow(Error('always error'));
     });
     it('should throw an error if repository is archived', async () => {
       api.get.mockReturnValue({ body: { archived: true } } as any);
       await expect(
-        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
       ).rejects.toThrow(Error('archived'));
     });
     it('should throw an error if repository is a mirror', async () => {
       api.get.mockReturnValue({ body: { mirror: true } } as any);
       await expect(
-        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
       ).rejects.toThrow(Error('mirror'));
     });
     it('should throw an error if repository is empty', async () => {
       api.get.mockReturnValue({ body: { default_branch: null } } as any);
       await expect(
-        gitlab.initRepo({ repository: 'some/repo', localDir: '' })
+        gitlab.initRepo({
+          repository: 'some/repo',
+          localDir: '',
+          optimizeForDisabled: false,
+        })
       ).rejects.toThrow(Error('empty'));
     });
     it('should fall back if http_url_to_repo is empty', async () => {

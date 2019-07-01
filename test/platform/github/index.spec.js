@@ -172,6 +172,7 @@ describe('platform/github', () => {
       await expect(
         github.initRepo({
           repository: 'some/repo',
+          optimizeForDisabled: true,
         })
       ).rejects.toThrow('disabled');
     });
@@ -210,11 +211,6 @@ describe('platform/github', () => {
             allow_merge_commit: true,
           },
         }));
-        get.mockImplementationOnce(() => ({
-          body: {
-            content: Buffer.from('{"enabled": true}').toString('base64'),
-          },
-        }));
         // getBranchCommit
         get.mockImplementationOnce(() => ({
           body: {
@@ -251,11 +247,6 @@ describe('platform/github', () => {
             allow_rebase_merge: true,
             allow_squash_merge: true,
             allow_merge_commit: true,
-          },
-        }));
-        get.mockImplementationOnce(() => ({
-          body: {
-            content: Buffer.from('{"enabled": true}').toString('base64'),
           },
         }));
         // getBranchCommit
@@ -1569,7 +1560,7 @@ describe('platform/github', () => {
       };
       expect(await github.mergePr(pr)).toBe(true);
       expect(get.put).toHaveBeenCalledTimes(1);
-      expect(get).toHaveBeenCalledTimes(2);
+      expect(get).toHaveBeenCalledTimes(1);
     });
     it('should handle merge error', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
@@ -1584,7 +1575,7 @@ describe('platform/github', () => {
       });
       expect(await github.mergePr(pr)).toBe(false);
       expect(get.put).toHaveBeenCalledTimes(1);
-      expect(get).toHaveBeenCalledTimes(2);
+      expect(get).toHaveBeenCalledTimes(1);
     });
   });
   describe('getPrBody(input)', () => {

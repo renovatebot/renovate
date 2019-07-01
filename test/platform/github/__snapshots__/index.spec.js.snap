@@ -144,9 +144,6 @@ Array [
     "repos/some/repo",
   ],
   Array [
-    "repos/some/repo/contents/renovate.json",
-  ],
-  Array [
     "repos/some/repo/pulls?per_page=100&state=all",
     Object {
       "paginate": true,
