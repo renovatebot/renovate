@@ -1,10 +1,10 @@
 // Code originally derived from https://github.com/hadfieldn/node-bunyan-prettystream but since heavily edited
 // Neither fork nor original repo appear to be maintained
 
-const { Stream } = require('stream');
-const util = require('util');
-const chalk = require('chalk');
-const stringify = require('json-stringify-pretty-compact');
+import * as util from 'util';
+import { Stream } from 'stream';
+import chalk from 'chalk';
+import stringify from 'json-stringify-pretty-compact';
 
 const bunyanFields = [
   'name',
@@ -25,7 +25,7 @@ const metaFields = [
   'branch',
 ];
 
-const levels = {
+const levels: Record<number, string> = {
   10: chalk.gray('TRACE'),
   20: chalk.blue('DEBUG'),
   30: chalk.green(' INFO'),
@@ -34,12 +34,12 @@ const levels = {
   60: chalk.bgRed('FATAL'),
 };
 
-function indent(str, leading = false) {
+export function indent(str: string, leading = false) {
   const prefix = leading ? '       ' : '';
   return prefix + str.split(/\r?\n/).join('\n       ');
 }
 
-function getMeta(rec) {
+export function getMeta(rec: IRecord) {
   if (!rec) {
     return '';
   }
@@ -55,7 +55,7 @@ function getMeta(rec) {
   return chalk.gray(res);
 }
 
-function getDetails(rec) {
+export function getDetails(rec: IRecord) {
   if (!rec) {
     return '';
   }
@@ -76,7 +76,7 @@ function getDetails(rec) {
 }
 
 // istanbul ignore next
-function formatRecord(rec) {
+export function formatRecord(rec: IRecord) {
   const level = levels[rec.level];
   const msg = `${indent(rec.msg)}`;
   const meta = getMeta(rec);
@@ -84,26 +84,28 @@ function formatRecord(rec) {
   return util.format('%s: %s%s\n%s', level, msg, meta, details);
 }
 
-class RenovateStream {
+export class RenovateStream extends Stream {
+  readable: boolean;
+
+  writable: boolean;
+
   constructor() {
+    super();
     this.readable = true;
     this.writable = true;
     Stream.call(this);
   }
 
   // istanbul ignore next
-  write(data) {
+  write(data: IRecord) {
     this.emit('data', formatRecord(data));
     return true;
   }
 }
 
-util.inherits(RenovateStream, Stream);
-
-module.exports = {
-  indent,
-  getMeta,
-  getDetails,
-  formatRecord,
-  RenovateStream,
-};
+interface IRecord {
+  level: number;
+  msg: string;
+  module?: string;
+  [prop: string]: any;
+}
