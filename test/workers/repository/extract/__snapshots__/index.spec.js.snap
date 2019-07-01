@@ -35,6 +35,9 @@ Object {
   "droneci": Array [
     Object {},
   ],
+  "esy": Array [
+    Object {},
+  ],
   "github-actions": Array [
     Object {},
   ],
