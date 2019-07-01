@@ -98,7 +98,6 @@ export async function initRepo({
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
-  config.optimizeForDisabled = optimizeForDisabled;
   let res;
   const platformConfig: PlatformConfig = {} as any;
   try {
@@ -118,7 +117,7 @@ export async function initRepo({
     if (res.body.default_branch === null) {
       throw new Error('empty');
     }
-    if (config.optimizeForDisabled) {
+    if (optimizeForDisabled) {
       let renovateConfig;
       try {
         renovateConfig = JSON.parse(
