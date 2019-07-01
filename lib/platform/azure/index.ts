@@ -112,8 +112,9 @@ export function getRepoForceRebase() {
   return false;
 }
 
-// istanbul ignore next
-export async function setBaseBranch(branchName = config.baseBranch) {
+export /* istanbul ignore next */ async function setBaseBranch(
+  branchName = config.baseBranch
+) {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
@@ -122,70 +123,67 @@ export async function setBaseBranch(branchName = config.baseBranch) {
   await getFileList(branchName);
 }
 
-// istanbul ignore next
-export function setBranchPrefix(branchPrefix: string) {
+export /* istanbul ignore next */ function setBranchPrefix(
+  branchPrefix: string
+) {
   return config.storage.setBranchPrefix(branchPrefix);
 }
 
 // Search
 
-// istanbul ignore next
-export function getFileList(branchName: string) {
+export /* istanbul ignore next */ function getFileList(branchName: string) {
   return config.storage.getFileList(branchName);
 }
 
 // Branch
 
-// istanbul ignore next
-export function branchExists(branchName: string) {
+export /* istanbul ignore next */ function branchExists(branchName: string) {
   return config.storage.branchExists(branchName);
 }
 
-// istanbul ignore next
-export function getAllRenovateBranches(branchPrefix: string) {
+export /* istanbul ignore next */ function getAllRenovateBranches(
+  branchPrefix: string
+) {
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-// istanbul ignore next
-export function isBranchStale(branchName: string) {
+export /* istanbul ignore next */ function isBranchStale(branchName: string) {
   return config.storage.isBranchStale(branchName);
 }
 
-// istanbul ignore next
-export function getFile(filePath: string, branchName: string) {
+export /* istanbul ignore next */ function getFile(
+  filePath: string,
+  branchName: string
+) {
   return config.storage.getFile(filePath, branchName);
 }
 
-// istanbul ignore next
-export async function deleteBranch(
+export /* istanbul ignore next */ async function deleteBranch(
   branchName: string,
   abandonAssociatedPr = false
 ) {
   await config.storage.deleteBranch(branchName);
-  // istanbul ignore if
   if (abandonAssociatedPr) {
     const pr = await getBranchPr(branchName);
     await abandonPr(pr.number);
   }
 }
 
-// istanbul ignore next
-export function getBranchLastCommitTime(branchName: string) {
+export /* istanbul ignore next */ function getBranchLastCommitTime(
+  branchName: string
+) {
   return config.storage.getBranchLastCommitTime(branchName);
 }
 
-// istanbul ignore next
-export function getRepoStatus() {
+export /* istanbul ignore next */ function getRepoStatus() {
   return config.storage.getRepoStatus();
 }
 
-// istanbul ignore next
-export function mergeBranch(branchName: string) {
+export /* istanbul ignore next */ function mergeBranch(branchName: string) {
   return config.storage.mergeBranch(branchName);
 }
 
-// istanbul ignore next
-export function commitFilesToBranch(
+export /* istanbul ignore next */ function commitFilesToBranch(
   branchName: string,
   files: any[],
   message: string,
@@ -199,8 +197,7 @@ export function commitFilesToBranch(
   );
 }
 
-// istanbul ignore next
-export function getCommitMessages() {
+export /* istanbul ignore next */ function getCommitMessages() {
   return config.storage.getCommitMessages();
 }
 
@@ -477,21 +474,17 @@ export function getPrBody(input: string) {
     .replace('</details>', '');
 }
 
-// istanbul ignore next
-export function findIssue() {
+export /* istanbul ignore next */ function findIssue() {
   logger.warn(`findIssue() is not implemented`);
 }
 
-// istanbul ignore next
-export function ensureIssue() {
+export /* istanbul ignore next */ function ensureIssue() {
   logger.warn(`ensureIssue() is not implemented`);
 }
 
-// istanbul ignore next
-export function ensureIssueClosing() {}
+export /* istanbul ignore next */ function ensureIssueClosing() {}
 
-// istanbul ignore next
-export function getIssueList() {
+export /* istanbul ignore next */ function getIssueList() {
   logger.debug(`getIssueList()`);
   // TODO: Needs implementation
   return [];
@@ -573,8 +566,10 @@ export async function addReviewers(prNo: number, reviewers: string[]) {
   );
 }
 
-// istanbul ignore next
-export async function deleteLabel(prNumber: number, label: string) {
+export /* istanbul ignore next */ async function deleteLabel(
+  prNumber: number,
+  label: string
+) {
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
