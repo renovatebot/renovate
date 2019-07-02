@@ -190,7 +190,7 @@
     "prettier": "1.18.0",
     "pretty-quick": "1.11.0",
     "rimraf": "2.6.3",
-    "semantic-release": "15.13.12",
+    "semantic-release": "15.13.18",
     "tmp-promise": "2.0.1",
     "typescript": "3.5.1"
   },
