@@ -43,13 +43,13 @@ const logFactory = (level: Logger.LogLevelString): any => {
     if (p2) {
       // meta and msg provided
       bunyanLogger[level]({ ...meta, ...p1 }, p2);
-    }
-    if (is.string(p1)) {
+    } else if (is.string(p1)) {
       // only message provided
       bunyanLogger[level](meta, p1);
+    } else {
+      // only meta provided
+      bunyanLogger[level](meta, p1);
     }
-    // only meta provided
-    bunyanLogger[level]({ ...meta, ...p1 });
   };
 };
 

@@ -93,7 +93,6 @@ export class RenovateStream extends Stream {
     super();
     this.readable = true;
     this.writable = true;
-    Stream.call(this);
   }
 
   // istanbul ignore next
