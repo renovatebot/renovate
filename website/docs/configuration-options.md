@@ -188,6 +188,28 @@ This is used to manually restrict which versions are possible to upgrade to base
 
 Warning: composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
 
+### repositories
+
+Add custom repositories as you would do in your [composer.json](https://getcomposer.org/doc/04-schema.md#repositories)
+
+Currently special handled types are vcs and git (vcs being an alias for git). Everything else will be handled as a registry url.
+
+Repositories configured in composer.json take preceedence over the config entries.
+Repositories with type git will use gitTags as datasource instead of packagist
+
+```json
+"repositories": [
+    {
+        "type": "composer",
+        "url": "http://packages.example.com"
+    },
+    {
+        "type": "git",
+        "url": "https://github.com/Seldaek/monolog"
+    }
+]
+```
+
 ## deps-edn
 
 ## description
