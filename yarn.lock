@@ -1101,10 +1101,10 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/got@9.4.4":
-  version "9.4.4"
-  resolved "https://registry.yarnpkg.com/@types/got/-/got-9.4.4.tgz#78129553f6a41715df601db43532cd0b87a55d3f"
-  integrity sha512-IGAJokJRE9zNoBdY5csIwN4U5qQn+20HxC0kM+BbUdfTKIXa7bOX/pdhy23NnLBRP8Wvyhx7X5e6EHJs+4d8HA==
+"@types/got@9.6.0":
+  version "9.6.0"
+  resolved "https://registry.yarnpkg.com/@types/got/-/got-9.6.0.tgz#bba73ff0a46b2691ddb3d86e89f8b2f43ebb829d"
+  integrity sha512-t00QebxBllcawe7uMxi9jsfWfbki4+/zpJEPyoGWjUvnFOy4EkAzoYOI2UJt2+Fx0yIcDX2+us93k6ensKTddA==
   dependencies:
     "@types/node" "*"
     "@types/tough-cookie" "*"
