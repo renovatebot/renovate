@@ -540,6 +540,7 @@ export async function getPr(prNo: number) {
     const commits = await utils.accumulateValues(pr.links.commits.href);
     if (commits.length === 1) {
       res.canRebase = true;
+      res.canMerge = true;
     }
   }
   if (await branchExists(pr.source.branch.name)) {

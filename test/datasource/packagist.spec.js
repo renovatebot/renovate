@@ -89,10 +89,22 @@ describe('datasource/packagist', () => {
       });
       expect(res).toMatchSnapshot();
     });
+    it('handles timeouts', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          code: 'ETIMEDOUT',
+        })
+      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'vendor/package-name2',
+      });
+      expect(res).toBeNull();
+    });
     it('handles auth rejections', async () => {
       got.mockImplementationOnce(() =>
         Promise.reject({
-          statusCode: 401,
+          statusCode: 403,
         })
       );
       const res = await datasource.getPkgReleases({

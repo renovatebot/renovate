@@ -34,7 +34,7 @@ Array [
 |---|---|---|---|
 | [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | pin | \`1.0.0\` -> \`1.1.0\` |
 
-:pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` your config if you instead don't wish to pin dependencies.
+📌 **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` your config if you instead don't wish to pin dependencies.
 
 ---
 
@@ -53,13 +53,13 @@ Array [
 
 ### Renovate configuration
 
-:date: **Schedule**: \\"before 5am\\" in timezone some timezone.
+📅 **Schedule**: \\"before 5am\\" in timezone some timezone.
 
-:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
+🚦 **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
 
-:recycle: **Rebasing**: Whenever PR is stale, or if you modify the PR title to begin with \\"\`rebase!\`\\".
+♻️ **Rebasing**: Whenever PR is stale, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+🔕 **Ignore**: Close this PR and you won't be reminded about this update again.
 
 ---
 
@@ -100,13 +100,13 @@ Array [
 
 ### Renovate configuration
 
-:date: **Schedule**: \\"before 5am\\" (UTC).
+📅 **Schedule**: \\"before 5am\\" (UTC).
 
-:vertical_traffic_light: **Automerge**: Enabled.
+🚦 **Automerge**: Enabled.
 
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
+♻️ **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+🔕 **Ignore**: Close this PR and you won't be reminded about this update again.
 
 ---
 
@@ -138,9 +138,9 @@ note 1
 
 note 2
 
-:abcd: If you wish to disable git hash updates, add \`\\":disableDigestUpdates\\"\` to the extends array in your config.
+🔡 If you wish to disable git hash updates, add \`\\":disableDigestUpdates\\"\` to the extends array in your config.
 
-:wrench: This Pull Request updates lock files to use the latest dependency versions.
+🔧 This Pull Request updates lock files to use the latest dependency versions.
 
 ---
 
@@ -164,13 +164,13 @@ note 2
 
 ### Renovate configuration
 
-:date: **Schedule**: At any time (no schedule defined).
+📅 **Schedule**: At any time (no schedule defined).
 
-:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
+🚦 **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
 
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
+♻️ **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/config-help/issues) if that's undesired.
+👻 **Immortal**: This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/config-help/issues) if that's undesired.
 
 ---
 
@@ -211,13 +211,13 @@ Array [
 
 ### Renovate configuration
 
-:date: **Schedule**: At any time (no schedule defined).
+📅 **Schedule**: At any time (no schedule defined).
 
-:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
+🚦 **Automerge**: Disabled by config. Please merge this manually once you are satisfied.
 
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
+♻️ **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+🔕 **Ignore**: Close this PR and you won't be reminded about this update again.
 
 ---
 
@@ -256,13 +256,13 @@ Object {
 
 ### Renovate configuration
 
-:date: **Schedule**: \\"before 5am\\" (UTC).
+📅 **Schedule**: \\"before 5am\\" (UTC).
 
-:vertical_traffic_light: **Automerge**: Enabled.
+🚦 **Automerge**: Enabled.
 
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
+♻️ **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+🔕 **Ignore**: Close this PR and you won't be reminded about this update again.
 
 ---
 
@@ -298,13 +298,13 @@ Object {
 
 ### Renovate configuration
 
-:date: **Schedule**: \\"before 5am\\" (UTC).
+📅 **Schedule**: \\"before 5am\\" (UTC).
 
-:vertical_traffic_light: **Automerge**: Enabled.
+🚦 **Automerge**: Enabled.
 
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
+♻️ **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
 
-:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
+🔕 **Ignore**: Close this PR and you won't be reminded about this update again.
 
 ---
 

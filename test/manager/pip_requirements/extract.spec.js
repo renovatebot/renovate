@@ -31,9 +31,10 @@ describe('lib/manager/pip_requirements/extract', () => {
       expect(extractPackageFile('nothing here', config)).toBeNull();
     });
     it('extracts dependencies', () => {
-      const res = extractPackageFile(requirements1, config).deps;
+      const res = extractPackageFile(requirements1, config);
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res.registryUrls).toEqual(['http://example.com/private-pypi/']);
+      expect(res.deps).toHaveLength(3);
     });
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(requirements2, config).deps;
@@ -45,10 +46,13 @@ describe('lib/manager/pip_requirements/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(5);
     });
-    it('handles extras', () => {
-      const res = extractPackageFile(requirements4, config).deps;
+    it('handles extras and complex index url', () => {
+      const res = extractPackageFile(requirements4, config);
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res.registryUrls).toEqual([
+        'https://artifactory.company.com/artifactory/api/pypi/python/simple',
+      ]);
+      expect(res.deps).toHaveLength(3);
     });
   });
 });

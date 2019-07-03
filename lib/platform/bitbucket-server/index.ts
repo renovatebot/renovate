@@ -18,6 +18,8 @@ interface BbsConfig {
   repository: string;
   repositorySlug: string;
   storage: GitStorage;
+
+  prVersions: Map<number, number>;
 }
 
 let config: BbsConfig = {} as any;
@@ -25,6 +27,13 @@ let config: BbsConfig = {} as any;
 const defaults: any = {
   hostType: 'bitbucket-server',
 };
+
+/* istanbul ignore next */
+function updatePrVersion(pr: number, version: number) {
+  const res = Math.max(config.prVersions.get(pr) || 0, version);
+  config.prVersions.set(pr, res);
+  return res;
+}
 
 export function initPlatform({
   endpoint,
@@ -100,7 +109,13 @@ export async function initRepo({
   });
 
   const [projectKey, repositorySlug] = repository.split('/');
-  config = { projectKey, repositorySlug, gitPrivateKey, repository } as any;
+  config = {
+    projectKey,
+    repositorySlug,
+    gitPrivateKey,
+    repository,
+    prVersions: new Map<number, number>(),
+  } as any;
 
   /* istanbul ignore else */
   if (bbUseDefaultReviewers !== false) {
@@ -250,11 +265,11 @@ export async function deleteBranch(branchName: string, closePr = false) {
     // getBranchPr
     const pr = await getBranchPr(branchName);
     if (pr) {
-      await api.post(
+      const { body } = await api.post(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/decline?version=${pr.version}`
       );
 
-      await getPr(pr.number, true);
+      updatePrVersion(pr, body);
     }
   }
   return config.storage.deleteBranch(branchName);
@@ -731,6 +746,8 @@ export async function createPr(
     ...utils.prInfo(prInfoRes.body),
   };
 
+  updatePrVersion(pr.number, pr.version);
+
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -759,15 +776,19 @@ export async function getPr(prNo: number, refreshCache?: boolean) {
     ),
   };
 
+  pr.version = updatePrVersion(pr.number, pr.version);
+
   if (pr.state === 'open') {
     const mergeRes = await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
+      { useCache: !refreshCache }
     );
     pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;
 
     const prCommits = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
+      { useCache: !refreshCache }
     )).body;
 
     if (prCommits.totalCount === 1) {
@@ -837,7 +858,7 @@ export async function updatePr(
       throw Object.assign(new Error('not-found'), { statusCode: 404 });
     }
 
-    await api.put(
+    const { body } = await api.put(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       {
         body: {
@@ -848,7 +869,8 @@ export async function updatePr(
         },
       }
     );
-    await getPr(prNo, true);
+
+    updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
       throw new Error('not-found');
@@ -870,10 +892,10 @@ export async function mergePr(prNo: number, branchName: string) {
     if (!pr) {
       throw Object.assign(new Error('not-found'), { statusCode: 404 });
     }
-    await api.post(
+    const { body } = await api.post(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
     );
-    await getPr(prNo, true);
+    updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
       throw new Error('not-found');

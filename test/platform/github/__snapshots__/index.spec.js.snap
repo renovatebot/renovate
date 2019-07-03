@@ -26,6 +26,9 @@ Array [
           "someuser",
           "someotheruser",
         ],
+        "team_reviewers": Array [
+          "someteam",
+        ],
       },
     },
   ],

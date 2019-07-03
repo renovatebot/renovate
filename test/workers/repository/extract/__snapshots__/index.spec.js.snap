@@ -38,6 +38,9 @@ Object {
   "gitlabci": Array [
     Object {},
   ],
+  "gitlabci-include": Array [
+    Object {},
+  ],
   "gomod": Array [
     Object {},
   ],
@@ -90,6 +93,9 @@ Object {
     Object {},
   ],
   "sbt": Array [
+    Object {},
+  ],
+  "swift": Array [
     Object {},
   ],
   "terraform": Array [
