@@ -1,9 +1,8 @@
-const { logger } = require('../../lib/logger');
+import { logger, setMeta, levels } from '../../lib/logger';
+
+jest.unmock('../../lib/logger');
 
 describe('logger', () => {
-  beforeAll(() => {
-    jest.resetModules();
-  });
   it('inits', () => {
     expect(logger).toBeDefined();
   });
@@ -15,5 +14,13 @@ describe('logger', () => {
   });
   it('supports logging without metadata', () => {
     logger.debug('some meta');
+  });
+
+  it('sets meta', () => {
+    setMeta({ any: 'test' });
+  });
+
+  it('sets level', () => {
+    levels('stdout', 'debug');
   });
 });

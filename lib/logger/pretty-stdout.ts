@@ -75,7 +75,6 @@ export function getDetails(rec: IRecord) {
     .join(',\n')}\n`;
 }
 
-// istanbul ignore next
 export function formatRecord(rec: IRecord) {
   const level = levels[rec.level];
   const msg = `${indent(rec.msg)}`;
@@ -102,9 +101,8 @@ export class RenovateStream extends Stream {
   }
 }
 
-interface IRecord {
+export interface IRecord extends Record<string, any> {
   level: number;
   msg: string;
   module?: string;
-  [prop: string]: any;
 }
