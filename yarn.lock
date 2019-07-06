@@ -1728,6 +1728,11 @@ boolean@^0.2.0:
   resolved "https://registry.yarnpkg.com/boolean/-/boolean-0.2.0.tgz#808dff32ce1c87b828cc381428dc3b158d4f85cb"
   integrity sha512-mDcM3ChboDuhv4glLXEH1us7jMiWXRSs3R13Okoo+kkFOlLIjvF1y88507wTfDf9zsuv0YffSDFUwX95VAT/mg==
 
+boolean@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/boolean/-/boolean-1.0.0.tgz#45764b4aac187a050995b0a33d7579b6759f0dfd"
+  integrity sha512-IB1lgIywn37N9Aff8CciCblVpMUflgL42vyxPUH0IvaDdIi/QwBHKv1lq/HOkATHCfa7c4MbMYJ7Bo7hGuoI+w==
+
 bops@~0.0.6:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/bops/-/bops-0.0.7.tgz#b4a0a5a839a406454af0fe05a8b91a7a766a54e2"
@@ -3831,11 +3836,12 @@ glob@^6.0.1:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-global-agent@1.13.1:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/global-agent/-/global-agent-1.13.1.tgz#e4ec5a02536ef4073acd1299e5bff8ab63344f05"
-  integrity sha512-LNU/fVB9OAOvrSGXSKgeq1ug3S8ZSs7hNmLPcOD0kJ5TennpnYnVWipYTYa5M/kIpY3fXPFYgqr9hx10Tis3BQ==
+global-agent@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/global-agent/-/global-agent-2.0.0.tgz#54dadd7d9b5df140752f732de6415ffa87f22a22"
+  integrity sha512-UxnV7o81DW5aNEg3AjmAbJI7PsXLrJZn3KM/eHDfxjKsLHB4RC2QzSajfTadPqYQCzaOd+Wb8zjvaiHiwwqPUQ==
   dependencies:
+    boolean "^1.0.0"
     core-js "^3.1.4"
     es6-error "^4.1.1"
     matcher "^2.0.0"
