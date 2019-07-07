@@ -110,7 +110,7 @@
     "fs-extra": "8.1.0",
     "get-installed-path": "4.0.8",
     "github-url-from-git": "1.5.0",
-    "global-agent": "1.13.1",
+    "global-agent": "2.0.0",
     "got": "9.6.0",
     "handlebars": "4.1.2",
     "hasha": "5.0.0",
