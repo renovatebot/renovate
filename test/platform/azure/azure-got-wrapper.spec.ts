@@ -1,6 +1,8 @@
+import * as _hostRules from '../../../lib/util/host-rules';
+
 describe('platform/azure/azure-got-wrapper', () => {
-  let hostRules: typeof import('../../../lib/util/host-rules');
   let azure: typeof import('../../../lib/platform/azure/azure-got-wrapper');
+  let hostRules: typeof _hostRules;
   beforeEach(() => {
     // reset module
     jest.resetModules();
@@ -20,6 +22,7 @@ describe('platform/azure/azure-got-wrapper', () => {
         baseUrl: 'https://dev.azure.com/renovate12345',
       });
       azure.setEndpoint('https://dev.azure.com/renovate12345');
+
       const res = await azure.azureObj();
 
       delete res.rest.client.userAgent;

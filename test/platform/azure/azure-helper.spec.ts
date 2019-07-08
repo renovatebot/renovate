@@ -1,4 +1,4 @@
-const { Readable } = require('stream');
+import { Readable } from 'stream';
 
 describe('platform/azure/helpers', () => {
   let azureHelper: typeof import('../../../lib/platform/azure/azure-helper');
