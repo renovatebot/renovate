@@ -1071,7 +1071,11 @@ describe('platform/github', () => {
         repository: 'some/repo',
       });
       get.post.mockReturnValueOnce({});
-      await github.addReviewers(42, ['someuser', 'someotheruser']);
+      await github.addReviewers(42, [
+        'someuser',
+        'someotheruser',
+        'team:someteam',
+      ]);
       expect(get.post.mock.calls).toMatchSnapshot();
     });
   });

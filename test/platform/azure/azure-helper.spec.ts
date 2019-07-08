@@ -1,8 +1,10 @@
-const { Readable } = require('stream');
+import { Readable } from 'stream';
 
 describe('platform/azure/helpers', () => {
-  let azureHelper;
-  let azureApi;
+  let azureHelper: typeof import('../../../lib/platform/azure/azure-helper');
+  let azureApi: jest.Mocked<
+    typeof import('../../../lib/platform/azure/azure-got-wrapper')
+  >;
 
   beforeEach(() => {
     // reset module
@@ -30,9 +32,11 @@ describe('platform/azure/helpers', () => {
       );
       expect(res).toBe(`testBB`);
     });
-    it('should log error and return null', () => {
-      const res = azureHelper.getBranchNameWithoutRefsheadsPrefix();
-      expect(res).toBeNull();
+    it('should log error and return undefined', () => {
+      const res = azureHelper.getBranchNameWithoutRefsheadsPrefix(
+        undefined as any
+      );
+      expect(res).toBeUndefined();
     });
     it('should return the input', () => {
       const res = azureHelper.getBranchNameWithoutRefsheadsPrefix('testBB');
@@ -42,23 +46,32 @@ describe('platform/azure/helpers', () => {
 
   describe('getRef', () => {
     it('should get the ref', async () => {
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getRefs: jest.fn(() => [{ objectId: 132 }]),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getRefs: jest.fn(() => [{ objectId: 132 }]),
+          } as any)
+      );
       const res = await azureHelper.getRefs('123', 'branch');
       expect(res).toMatchSnapshot();
     });
     it('should get 0 ref', async () => {
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getRefs: jest.fn(() => []),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getRefs: jest.fn(() => []),
+          } as any)
+      );
       const res = await azureHelper.getRefs('123');
       expect(res.length).toBe(0);
     });
     it('should get the ref', async () => {
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getRefs: jest.fn(() => [{ objectId: '132' }]),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getRefs: jest.fn(() => [{ objectId: '132' }]),
+          } as any)
+      );
       const res = await azureHelper.getRefs('123', 'refs/head/branch1');
       expect(res).toMatchSnapshot();
     });
@@ -66,9 +79,12 @@ describe('platform/azure/helpers', () => {
 
   describe('getAzureBranchObj', () => {
     it('should be the branch object formated', async () => {
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getRefs: jest.fn(() => [{ objectId: '132' }]),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getRefs: jest.fn(() => [{ objectId: '132' }]),
+          } as any)
+      );
       const res = await azureHelper.getAzureBranchObj(
         '123',
         'branchName',
@@ -77,9 +93,12 @@ describe('platform/azure/helpers', () => {
       expect(res).toMatchSnapshot();
     });
     it('should be the branch object formated', async () => {
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getRefs: jest.fn(() => []),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getRefs: jest.fn(() => []),
+          } as any)
+      );
       const res = await azureHelper.getAzureBranchObj('123', 'branchName');
       expect(res).toMatchSnapshot();
     });
@@ -101,9 +120,12 @@ describe('platform/azure/helpers', () => {
         },
       });
 
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => mockEventStream),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemText: jest.fn(() => mockEventStream),
+          } as any)
+      );
 
       const res = await azureHelper.getChanges(
         [
@@ -119,9 +141,12 @@ describe('platform/azure/helpers', () => {
       expect(res).toMatchSnapshot();
     });
     it('should be get the commit obj formated (file to create)', async () => {
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => null),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemText: jest.fn(() => null),
+          } as any)
+      );
 
       const res = await azureHelper.getChanges(
         [
@@ -154,9 +179,12 @@ describe('platform/azure/helpers', () => {
         },
       });
 
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => mockEventStream),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemText: jest.fn(() => mockEventStream),
+          } as any)
+      );
 
       const res = await azureHelper.getFile(
         '123',
@@ -182,9 +210,12 @@ describe('platform/azure/helpers', () => {
         },
       });
 
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => mockEventStream),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemText: jest.fn(() => mockEventStream),
+          } as any)
+      );
 
       const res = await azureHelper.getFile(
         '123',
@@ -210,9 +241,12 @@ describe('platform/azure/helpers', () => {
         },
       });
 
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => mockEventStream),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemText: jest.fn(() => mockEventStream),
+          } as any)
+      );
 
       const res = await azureHelper.getFile(
         '123',
@@ -224,11 +258,14 @@ describe('platform/azure/helpers', () => {
     });
 
     it('should return null because the file is not readable', async () => {
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getItemText: jest.fn(() => ({
-          readable: false,
-        })),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getItemText: jest.fn(() => ({
+              readable: false,
+            })),
+          } as any)
+      );
 
       const res = await azureHelper.getFile(
         '123',
@@ -257,33 +294,36 @@ describe('platform/azure/helpers', () => {
 
   describe('getRenovatePRFormat', () => {
     it('should be formated (closed)', () => {
-      const res = azureHelper.getRenovatePRFormat({ status: 2 });
+      const res = azureHelper.getRenovatePRFormat({ status: 2 } as any);
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (closed v2)', () => {
-      const res = azureHelper.getRenovatePRFormat({ status: 3 });
+      const res = azureHelper.getRenovatePRFormat({ status: 3 } as any);
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (not closed)', () => {
-      const res = azureHelper.getRenovatePRFormat({ status: 1 });
+      const res = azureHelper.getRenovatePRFormat({ status: 1 } as any);
       expect(res).toMatchSnapshot();
     });
 
     it('should be formated (isConflicted)', () => {
-      const res = azureHelper.getRenovatePRFormat({ mergeStatus: 2 });
+      const res = azureHelper.getRenovatePRFormat({ mergeStatus: 2 } as any);
       expect(res).toMatchSnapshot();
     });
   });
 
   describe('getCommitDetails', () => {
     it('should get commit details', async () => {
-      azureApi.gitApi.mockImplementationOnce(() => ({
-        getCommit: jest.fn(() => ({
-          parents: ['123456'],
-        })),
-      }));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getCommit: jest.fn(() => ({
+              parents: ['123456'],
+            })),
+          } as any)
+      );
       const res = await azureHelper.getCommitDetails('123', '123456');
       expect(res).toMatchSnapshot();
     });
