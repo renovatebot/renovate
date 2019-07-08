@@ -3,7 +3,7 @@
     "javascript",
     { "language": "typescript", "autoFix": true }
   ],
-  "eslint.options": { "configFile": ".tslintrc.js" },
+  "eslint.options": { "configFile": ".eslintrc.js" },
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
