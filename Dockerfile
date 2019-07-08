@@ -163,7 +163,7 @@ ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.
 
 COPY package.json .
 COPY yarn.lock .
-RUN yarn install --production && yarn cache clean
+RUN yarn install --production --frozen-lockfile && yarn cache clean
 COPY --from=tsbuild dist dist
 COPY bin bin
 COPY data data
