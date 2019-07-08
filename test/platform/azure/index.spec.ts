@@ -1,4 +1,7 @@
+import * as _hostRules from '../../../lib/util/host-rules';
+
 describe('platform/azure', () => {
+  let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: jest.Mocked<typeof import('../../../lib/platform/azure')>;
   let azureApi: jest.Mocked<
     typeof import('../../../lib/platform/azure/azure-got-wrapper')
@@ -6,7 +9,6 @@ describe('platform/azure', () => {
   let azureHelper: jest.Mocked<
     typeof import('../../../lib/platform/azure/azure-helper')
   >;
-  let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
   let GitStorage;
   beforeEach(() => {
     // reset module
