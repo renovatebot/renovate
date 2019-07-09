@@ -613,15 +613,19 @@ const mapPullRequests = (pr: {
   createdAt: pr.created_at,
 });
 
-export async function getPrList() {
+async function fetchPrList() {
+  const query = new URLSearchParams({
+    per_page: '100',
+    author_id: `${authorId}`,
+  });
+  const urlString = `projects/${config.repository}/merge_requests`;
+  const res = await api.get(urlString, { query, paginate: true });
+  return res.body.map(mapPullRequests);
+}
+
+export function getPrList() {
   if (!config.prList) {
-    const query = new URLSearchParams({
-      per_page: '100',
-      author_id: `${authorId}`,
-    });
-    const urlString = `projects/${config.repository}/merge_requests`;
-    const res = await api.get(urlString, { query, paginate: true });
-    config.prList = res.body.map(mapPullRequests);
+    config.prList = fetchPrList();
   }
   return config.prList;
 }
