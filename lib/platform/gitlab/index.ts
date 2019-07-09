@@ -211,9 +211,9 @@ export async function getBranchPr(branchName: string) {
     per_page: '100',
     state: 'opened',
     source_branch: branchName,
-  });
-  const urlString = `projects/${config.repository}/merge_requests`;
-  const res = await api.get(urlString, { query, paginate: true });
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
+  const res = await api.get(urlString, { paginate: true });
   logger.debug(`Got res with ${res.body.length} results`);
   let pr: any = null;
   res.body.forEach((result: { source_branch: string }) => {
@@ -613,15 +613,19 @@ const mapPullRequests = (pr: {
   createdAt: pr.created_at,
 });
 
+async function fetchPrList() {
+  const query = new URLSearchParams({
+    per_page: '100',
+    author_id: `${authorId}`,
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
+  const res = await api.get(urlString, { paginate: true });
+  return res.body.map(mapPullRequests);
+}
+
 export async function getPrList() {
   if (!config.prList) {
-    const query = new URLSearchParams({
-      per_page: '100',
-      author_id: `${authorId}`,
-    });
-    const urlString = `projects/${config.repository}/merge_requests`;
-    const res = await api.get(urlString, { query, paginate: true });
-    config.prList = res.body.map(mapPullRequests);
+    config.prList = await fetchPrList();
   }
   return config.prList;
 }

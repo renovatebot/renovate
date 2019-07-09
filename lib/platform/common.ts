@@ -4,7 +4,6 @@ export interface IGotApiOptions {
   useCache?: boolean;
   hostType?: string;
   body?: any;
-  query?: string | { [key: string]: string | number } | URLSearchParams;
 }
 
 export interface IGotApi<TOptions extends object = any> {
