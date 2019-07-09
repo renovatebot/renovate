@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`platform/gitea getRepos should return an array of repos 1`] = `Array []`;
+
+exports[`platform/gitea getRepos should return an array of repos 2`] = `Object {}`;
+
+exports[`platform/gitea initPlatform() should accept custom endpoint 1`] = `
+Object {
+  "endpoint": "https://gitea.renovatebot.com/",
+  "gitAuthor": "a@b.com",
+}
+`;
+
+exports[`platform/gitea initPlatform() should default to try.gitea.com 1`] = `
+Object {
+  "endpoint": "https://try.gitea.com/api/v1/",
+  "gitAuthor": "a@b.com",
+}
+`;
+
+exports[`platform/gitea initPlatform() should default to try.gitea.com 2`] = `
+Array [
+  Array [
+    "user?token=some-token",
+  ],
+]
+`;

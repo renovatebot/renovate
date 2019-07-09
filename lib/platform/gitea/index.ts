@@ -1,25 +1,8 @@
-import URL from 'url';
-import is from '@sindresorhus/is';
-
 import api from './gl-got-wrapper';
-import * as hostRules from '../../util/host-rules';
-import GitStorage from '../git/storage';
-import { PlatformConfig } from '../common';
-
-let config: {
-  storage: GitStorage;
-  repository: string;
-  localDir: string;
-  defaultBranch: string;
-  baseBranch: string;
-  email: string;
-  prList: any[];
-  issueList: any[];
-} = {} as any;
 
 const defaults = {
   hostType: 'gitlab',
-  endpoint: 'https://gitlab.com/api/v4/',
+  endpoint: 'https://try.gitea.com/api/v1/',
 };
 
 export async function initPlatform({
@@ -29,9 +12,26 @@ export async function initPlatform({
   endpoint: string;
   token: string;
 }) {
+  if (!token) {
+    throw new Error('Init: You must configure a GitLab personal access token');
+  }
   logger.debug(`initPlatform('${endpoint}, '${token})`);
   logger.warn('Unimplemented in Gitea: initPlatform');
   const res = {} as any;
+  if (endpoint) {
+    res.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
+    api.setBaseUrl(res.endpoint);
+    defaults.endpoint = res.endpoint;
+  } else {
+    res.endpoint = defaults.endpoint;
+    logger.info('Using default Gitea endpoint: ' + res.endpoint);
+  }
+  try {
+    res.gitAuthor = (await api.get(`user?token=${token}`)).body.email;
+  } catch (err) {
+    logger.info({ err }, 'Error authenticating with Gitea. Check your token');
+    throw new Error('Init: Authentication failure');
+  }
   return res;
 }
 
@@ -40,4 +40,8 @@ export async function getRepos() {
   logger.info('Autodiscovering GitLab repositories');
   logger.warn('Unimplemented in Gitea: getRepos');
   return {};
+}
+
+export function cleanRepo() {
+  logger.warn('Unimplemented in Gitea: cleanRepo');
 }
