@@ -102,7 +102,7 @@
       "default": true
     },
     "optimizeForDisabled": {
-      "description": "Set to true to first check for disabling in renovate.json before cloning",
+      "description": "Set to true to first check for disabling in config before cloning",
       "type": "boolean",
       "default": false
     },
