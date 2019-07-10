@@ -1,7 +1,4 @@
 declare namespace Renovate {
-  interface IDict<T> {
-    [key: string]: T;
-  }
 }
 
 declare interface Error {
