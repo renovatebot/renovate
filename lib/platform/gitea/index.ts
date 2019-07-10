@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 
 import api from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
@@ -163,11 +164,48 @@ export async function initRepo({
   return platformConfig;
 }
 
+// Issue
+
+export async function getIssueList() {
+  if (!config.issueList) {
+    const res = await api.get(`repos/${config.repository}/issues?state=open`, {
+      useCache: false,
+    });
+    // istanbul ignore if
+    if (!is.array(res.body)) {
+      logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
+      return [];
+    }
+    config.issueList = res.body.map((i: { iid: number; title: string }) => ({
+      iid: i.iid,
+      title: i.title,
+    }));
+  }
+  return config.issueList;
+}
+
+export async function ensureIssueClosing(title: string) {
+  logger.debug(`ensureIssueClosing()`);
+  const issueList = await getIssueList();
+  for (const issue of issueList) {
+    if (issue.title === title) {
+      logger.info({ issue }, 'Closing issue');
+      await api.put(`repos/${config.repository}/issues/${issue.iid}`, {
+        body: { state_event: 'close' },
+      });
+    }
+  }
+}
+
 // Search
 
 // Get full file list
 export function getFileList(branchName = config.baseBranch) {
   return config.storage.getFileList(branchName);
+}
+
+export function getFile(filePath: string, branchName?: string) {
+  return config.storage.getFile(filePath, branchName);
 }
 
 export function getCommitMessages() {
