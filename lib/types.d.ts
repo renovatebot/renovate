@@ -1,5 +1,4 @@
-declare namespace Renovate {
-}
+declare namespace Renovate {}
 
 declare interface Error {
   validationError?: string;
