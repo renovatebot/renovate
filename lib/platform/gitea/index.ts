@@ -162,3 +162,7 @@ export async function initRepo({
   }
   return platformConfig;
 }
+
+export function getCommitMessages() {
+  return config.storage.getCommitMessages();
+}
