@@ -211,9 +211,9 @@ export async function getBranchPr(branchName: string) {
     per_page: '100',
     state: 'opened',
     source_branch: branchName,
-  });
-  const urlString = `projects/${config.repository}/merge_requests`;
-  const res = await api.get(urlString, { query, paginate: true });
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
+  const res = await api.get(urlString, { paginate: true });
   logger.debug(`Got res with ${res.body.length} results`);
   let pr: any = null;
   res.body.forEach((result: { source_branch: string }) => {
@@ -617,15 +617,15 @@ async function fetchPrList() {
   const query = new URLSearchParams({
     per_page: '100',
     author_id: `${authorId}`,
-  });
-  const urlString = `projects/${config.repository}/merge_requests`;
-  const res = await api.get(urlString, { query, paginate: true });
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
+  const res = await api.get(urlString, { paginate: true });
   return res.body.map(mapPullRequests);
 }
 
-export function getPrList() {
+export async function getPrList() {
   if (!config.prList) {
-    config.prList = fetchPrList();
+    config.prList = await fetchPrList();
   }
   return config.prList;
 }
