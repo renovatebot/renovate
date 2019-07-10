@@ -197,6 +197,18 @@ export async function ensureIssueClosing(title: string) {
   }
 }
 
+export async function setBaseBranch(branchName = config.baseBranch) {
+  logger.debug(`Setting baseBranch to ${branchName}`);
+  config.baseBranch = branchName;
+  await config.storage.setBaseBranch(branchName);
+}
+
+export /* istanbul ignore next */ function setBranchPrefix(
+  branchPrefix: string
+) {
+  return config.storage.setBranchPrefix(branchPrefix);
+}
+
 // Search
 
 // Get full file list
@@ -210,4 +222,9 @@ export function getFile(filePath: string, branchName?: string) {
 
 export function getCommitMessages() {
   return config.storage.getCommitMessages();
+}
+
+export function getVulnerabilityAlerts() {
+  logger.warn('Unimplemented in Gitea: getVulnerabilityAlerts');
+  return [];
 }

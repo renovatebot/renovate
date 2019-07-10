@@ -61,3 +61,14 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/gitea setBaseBranch(branchName) sets the base branch 1`] = `
+Array [
+  Array [
+    "repos/some%2Frepo",
+  ],
+  Array [
+    "user?token=tok",
+  ],
+]
+`;
