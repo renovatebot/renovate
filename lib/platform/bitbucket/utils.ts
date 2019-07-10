@@ -1,5 +1,5 @@
 import url from 'url';
-import api from './bb-got-wrapper';
+import { api } from './bb-got-wrapper';
 
 export function repoInfoTransformer(repoInfoBody: any) {
   return {

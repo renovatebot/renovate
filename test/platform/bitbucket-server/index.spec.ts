@@ -1,6 +1,6 @@
 import responses from './_fixtures/responses';
 import { IGotApi } from '../../../lib/platform/common';
-import Storage from '../../../lib/platform/git/storage';
+import { Storage } from '../../../lib/platform/git/storage';
 
 type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
 
