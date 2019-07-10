@@ -39,3 +39,25 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/gitea initRepo should escape all forward slashes in project names 1`] = `
+Array [
+  Array [
+    "repos/some%2Frepo%2Fproject",
+  ],
+  Array [
+    "user?token=some-token",
+  ],
+]
+`;
+
+exports[`platform/gitea initRepo should fall back if html_url is empty 1`] = `
+Array [
+  Array [
+    "repos/some%2Frepo%2Fproject",
+  ],
+  Array [
+    "user?token=some-token",
+  ],
+]
+`;

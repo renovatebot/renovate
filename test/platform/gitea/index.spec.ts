@@ -146,7 +146,7 @@ describe('platform/gitea', () => {
         ({
           body: {
             default_branch: 'master',
-            http_url_to_repo: 'https://gitea.com/some/repo.git',
+            html_url: 'https://gitea.com/some/repo.git',
           },
         } as any)
     );
@@ -165,6 +165,7 @@ describe('platform/gitea', () => {
     return gitea.initRepo({
       repository: 'some/repo',
       localDir: '',
+      token: 'tok',
     });
   }
 
@@ -179,32 +180,32 @@ describe('platform/gitea', () => {
         throw new Error('always error');
       });
       await expect(
-        gitea.initRepo({ repository: 'some/repo', localDir: '' })
+        gitea.initRepo({ repository: 'some/repo', localDir: '', token: 'tok' })
       ).rejects.toThrow(Error('always error'));
     });
     it('should throw an error if repository is archived', async () => {
       api.get.mockReturnValue({ body: { archived: true } } as any);
       await expect(
-        gitea.initRepo({ repository: 'some/repo', localDir: '' })
+        gitea.initRepo({ repository: 'some/repo', localDir: '', token: 'tok' })
       ).rejects.toThrow(Error('archived'));
     });
     it('should throw an error if repository is a mirror', async () => {
       api.get.mockReturnValue({ body: { mirror: true } } as any);
       await expect(
-        gitea.initRepo({ repository: 'some/repo', localDir: '' })
+        gitea.initRepo({ repository: 'some/repo', localDir: '', token: 'tok' })
       ).rejects.toThrow(Error('mirror'));
     });
     it('should throw an error if repository is empty', async () => {
       api.get.mockReturnValue({ body: { default_branch: null } } as any);
       await expect(
-        gitea.initRepo({ repository: 'some/repo', localDir: '' })
+        gitea.initRepo({ repository: 'some/repo', localDir: '', token: 'tok' })
       ).rejects.toThrow(Error('empty'));
     });
-    it('should fall back if http_url_to_repo is empty', async () => {
+    it('should fall back if html_url is empty', async () => {
       api.get.mockReturnValue({
         body: {
           default_branch: 'master',
-          http_url_to_repo: null,
+          html_url: null,
         },
       } as any);
       await initRepo({ repository: 'some/repo/project', token: 'some-token' });

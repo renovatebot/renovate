@@ -1,7 +1,24 @@
+import URL from 'url';
+
 import api from './gl-got-wrapper';
+import * as hostRules from '../../util/host-rules';
+import GitStorage from '../git/storage';
+import { PlatformConfig } from '../common';
+
+let config: {
+  storage: GitStorage;
+  repository: string;
+  localDir: string;
+  defaultBranch: string;
+  baseBranch: string;
+  email: string;
+  prList: any[];
+  issueList: any[];
+  token: string;
+} = {} as any;
 
 const defaults = {
-  hostType: 'gitlab',
+  hostType: 'gitea',
   endpoint: 'https://gitea.com/api/v1/',
 };
 
@@ -13,7 +30,7 @@ export async function initPlatform({
   token: string;
 }) {
   if (!token) {
-    throw new Error('Init: You must configure a GitLab personal access token');
+    throw new Error('Init: You must configure a Gitea personal access token');
   }
   const res = {} as any;
   if (endpoint) {
@@ -50,6 +67,98 @@ export async function getRepos() {
   }
 }
 
+function urlEscape(str: string) {
+  return str ? str.replace(/\//g, '%2F') : str;
+}
+
 export function cleanRepo() {
   logger.warn('Unimplemented in Gitea: cleanRepo');
+}
+
+// Initialize Gitea by getting base branch
+export async function initRepo({
+  repository,
+  localDir,
+  token,
+}: {
+  repository: string;
+  localDir: string;
+  token: string;
+}) {
+  config = {} as any;
+  config.repository = urlEscape(repository);
+  config.localDir = localDir;
+  config.token = token;
+  let res;
+  const platformConfig: PlatformConfig = {} as any;
+  try {
+    res = await api.get(`repos/${config.repository}`);
+    if (res.body.archived) {
+      logger.info(
+        'Repository is archived - throwing error to abort renovation'
+      );
+      throw new Error('archived');
+    }
+    if (res.body.mirror) {
+      logger.info(
+        'Repository is a mirror - throwing error to abort renovation'
+      );
+      throw new Error('mirror');
+    }
+    if (res.body.default_branch === null) {
+      logger.info('Repository is empty - throwing error to abort renovation');
+      throw new Error('empty');
+    }
+    config.defaultBranch = res.body.default_branch;
+    config.baseBranch = config.defaultBranch;
+    platformConfig.isFork = !!res.body.fork;
+    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    // Discover our user email
+    config.email = (await api.get(`user?token=${config.token}`)).body.email;
+    logger.debug('Bot email=' + config.email);
+    delete config.prList;
+    logger.debug('Enabling Git FS');
+    const opts = hostRules.find({
+      hostType: defaults.hostType,
+      url: defaults.endpoint,
+    });
+    let url;
+    if (res.body.html_url === null) {
+      logger.debug('no html_url found. Falling back to old behaviour.');
+      const { host, protocol } = URL.parse(defaults.endpoint);
+      url = GitStorage.getUrl({
+        protocol: protocol!.slice(0, -1) as any,
+        auth: 'oauth2:' + opts.token,
+        host,
+        repository,
+      });
+    } else {
+      logger.debug(`${repository} http URL = ${res.body.html_url}`);
+      const repoUrl = URL.parse(`${res.body.html_url}`);
+      repoUrl.auth = 'oauth2:' + opts.token;
+      url = URL.format(repoUrl);
+    }
+    config.storage = new GitStorage();
+    await config.storage.initRepo({
+      ...config,
+      url,
+    });
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Caught initRepo error');
+    if (err.message.includes('HEAD is not a symbolic ref')) {
+      throw new Error('empty');
+    }
+    if (['archived', 'empty'].includes(err.message)) {
+      throw err;
+    }
+    if (err.statusCode === 401) {
+      throw new Error('forbidden');
+    }
+    if (err.statusCode === 404) {
+      throw new Error('not-found');
+    }
+    logger.info({ err }, 'Unknown Gitea initRepo error');
+    throw err;
+  }
+  return platformConfig;
 }
