@@ -62,7 +62,7 @@ const loggerLevels: Logger.LogLevelString[] = [
   'fatal',
 ];
 
-interface ILogger {
+interface Logger {
   trace(msg: string): void;
   trace(meta: Record<string, any>, msg?: string): void;
   debug(msg: string): void;
@@ -77,7 +77,7 @@ interface ILogger {
   fatal(meta: Record<string, any>, msg?: string): void;
 }
 
-export const logger: ILogger = {} as any;
+export const logger: Logger = {} as any;
 
 loggerLevels.forEach(loggerLevel => {
   logger[loggerLevel] = logFactory(loggerLevel);
