@@ -37,6 +37,18 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
   });
 
+  it('should returns a file updated with keeping a classifier and an extension if the version is found', () => {
+    const gradleFile = "runtime (  'junit:junit:4.0:javadoc@jar'  )";
+    const updatedGradleFile = gradle.updateGradleVersion(
+      gradleFile,
+      { group: 'junit', name: 'junit', version: '4.0' },
+      '5.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      "runtime (  'junit:junit:5.0:javadoc@jar'  )"
+    );
+  });
+
   it('returns a file updated if the version defined as map is found', () => {
     const gradleFile = `compile group  : 'mysql'               ,
                name   : 'mysql-connector-java',

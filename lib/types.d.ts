@@ -1,6 +1,6 @@
 declare namespace Renovate {
   // TODO: refactor logger
-  interface ILogger {
+  interface Logger {
     trace(...args: any[]): void;
     debug(...args: any[]): void;
     info(...args: any[]): void;
@@ -11,14 +11,10 @@ declare namespace Renovate {
 
     setMeta(obj: any): void;
   }
-
-  interface IDict<T> {
-    [key: string]: T;
-  }
 }
 
 // eslint-disable-next-line no-var, vars-on-top
-declare var logger: Renovate.ILogger;
+declare var logger: Renovate.Logger;
 
 declare interface Error {
   validationError?: string;
@@ -28,6 +24,6 @@ declare interface Error {
 declare namespace NodeJS {
   interface Global {
     gitAuthor?: { name: string; email: string };
-    logger: Renovate.ILogger;
+    logger: Renovate.Logger;
   }
 }
