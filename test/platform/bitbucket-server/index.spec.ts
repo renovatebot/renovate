@@ -1,5 +1,5 @@
 import responses from './_fixtures/responses';
-import { IGotApi } from '../../../lib/platform/common';
+import { GotApi } from '../../../lib/platform/common';
 import { Storage } from '../../../lib/platform/git/storage';
 
 type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
@@ -8,7 +8,7 @@ describe('platform/bitbucket-server', () => {
   Object.entries(responses).forEach(([scenarioName, mockResponses]) => {
     describe(scenarioName, () => {
       let bitbucket: typeof import('../../../lib/platform/bitbucket-server');
-      let api: jest.Mocked<IGotApi>;
+      let api: jest.Mocked<GotApi>;
       let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
       let GitStorage: jest.Mock<Storage> & {
         getUrl: jest.MockInstance<any, any>;

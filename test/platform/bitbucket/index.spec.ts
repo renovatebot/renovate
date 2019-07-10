@@ -1,10 +1,10 @@
 import URL from 'url';
 import responses from './_fixtures/responses';
-import { IGotApi } from '../../../lib/platform/common';
+import { GotApi } from '../../../lib/platform/common';
 
 describe('platform/bitbucket', () => {
   let bitbucket: typeof import('../../../lib/platform/bitbucket');
-  let api: jest.Mocked<IGotApi>;
+  let api: jest.Mocked<GotApi>;
   let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
   let GitStorage: jest.Mocked<
     import('../../../lib/platform/git/storage').Storage
