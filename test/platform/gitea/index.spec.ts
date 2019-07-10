@@ -62,7 +62,7 @@ describe('platform/gitea', () => {
         gitea.initPlatform({ token: 'some-token' } as any)
       ).rejects.toThrow();
     });
-    it(`should default to try.gitea.com`, async () => {
+    it(`should default to gitea.com`, async () => {
       // user
       api.get.mockImplementationOnce(
         () =>

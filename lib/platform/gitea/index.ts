@@ -2,7 +2,7 @@ import api from './gl-got-wrapper';
 
 const defaults = {
   hostType: 'gitlab',
-  endpoint: 'https://try.gitea.com/api/v1/',
+  endpoint: 'https://gitea.com/api/v1/',
 };
 
 export async function initPlatform({
@@ -15,8 +15,6 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
-  logger.debug(`initPlatform('${endpoint}, '${token})`);
-  logger.warn('Unimplemented in Gitea: initPlatform');
   const res = {} as any;
   if (endpoint) {
     res.endpoint = endpoint.replace(/\/?$/, '/'); // always add a trailing slash
@@ -37,9 +35,18 @@ export async function initPlatform({
 
 // Get all repositories that the user has access to
 export async function getRepos() {
-  logger.info('Autodiscovering GitLab repositories');
-  logger.warn('Unimplemented in Gitea: getRepos');
-  return {};
+  logger.info('Autodiscovering Gitea repositories');
+  try {
+    // TODO : check paginate capabilities
+    // const url = `repos?membership=true&per_page=100`;
+    const url = `repos/search/`;
+    const res = await api.get(url, { paginate: true });
+    logger.info(`Discovered ${res.body.data.length} project(s)`);
+    return res.body.data.map((repo: { full_name: string }) => repo.full_name);
+  } catch (err) {
+    logger.error({ err }, `Gitea getRepos error`);
+    throw err;
+  }
 }
 
 export function cleanRepo() {

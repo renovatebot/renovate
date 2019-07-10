@@ -11,14 +11,14 @@ Object {
 }
 `;
 
-exports[`platform/gitea initPlatform() should default to try.gitea.com 1`] = `
+exports[`platform/gitea initPlatform() should default to gitea.com 1`] = `
 Object {
-  "endpoint": "https://try.gitea.com/api/v1/",
+  "endpoint": "https://gitea.com/api/v1/",
   "gitAuthor": "a@b.com",
 }
 `;
 
-exports[`platform/gitea initPlatform() should default to try.gitea.com 2`] = `
+exports[`platform/gitea initPlatform() should default to gitea.com 2`] = `
 Array [
   Array [
     "user?token=some-token",
