@@ -39,7 +39,7 @@ export function indent(str: string, leading = false) {
   return prefix + str.split(/\r?\n/).join('\n       ');
 }
 
-export function getMeta(rec: IRecord) {
+export function getMeta(rec: BunyanRecord) {
   if (!rec) {
     return '';
   }
@@ -55,7 +55,7 @@ export function getMeta(rec: IRecord) {
   return chalk.gray(res);
 }
 
-export function getDetails(rec: IRecord) {
+export function getDetails(rec: BunyanRecord) {
   if (!rec) {
     return '';
   }
@@ -75,7 +75,7 @@ export function getDetails(rec: IRecord) {
     .join(',\n')}\n`;
 }
 
-export function formatRecord(rec: IRecord) {
+export function formatRecord(rec: BunyanRecord) {
   const level = levels[rec.level];
   const msg = `${indent(rec.msg)}`;
   const meta = getMeta(rec);
@@ -95,13 +95,13 @@ export class RenovateStream extends Stream {
   }
 
   // istanbul ignore next
-  write(data: IRecord) {
+  write(data: BunyanRecord) {
     this.emit('data', formatRecord(data));
     return true;
   }
 }
 
-export interface IRecord extends Record<string, any> {
+export interface BunyanRecord extends Record<string, any> {
   level: number;
   msg: string;
   module?: string;
