@@ -102,14 +102,16 @@ describe('platform/gitea', () => {
       api.get.mockImplementationOnce(
         () =>
           ({
-            body: [
-              {
-                path_with_namespace: 'a/b',
-              },
-              {
-                path_with_namespace: 'c/d',
-              },
-            ],
+            body: {
+              data: [
+                {
+                  full_name: 'a/b',
+                },
+                {
+                  full_name: 'c/d',
+                },
+              ],
+            },
           } as any)
       );
       return gitea.getRepos();

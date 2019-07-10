@@ -1,8 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/gitea getRepos should return an array of repos 1`] = `Array []`;
+exports[`platform/gitea getRepos should return an array of repos 1`] = `
+Array [
+  Array [
+    "repos/search/",
+    Object {
+      "paginate": true,
+    },
+  ],
+]
+`;
 
-exports[`platform/gitea getRepos should return an array of repos 2`] = `Object {}`;
+exports[`platform/gitea getRepos should return an array of repos 2`] = `
+Array [
+  "a/b",
+  "c/d",
+]
+`;
 
 exports[`platform/gitea initPlatform() should accept custom endpoint 1`] = `
 Object {

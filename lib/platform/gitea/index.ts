@@ -38,6 +38,7 @@ export async function getRepos() {
   logger.info('Autodiscovering Gitea repositories');
   try {
     // TODO : check paginate capabilities
+    // TODO : limit to user repositories (add uid parameter ?)
     // const url = `repos?membership=true&per_page=100`;
     const url = `repos/search/`;
     const res = await api.get(url, { paginate: true });
