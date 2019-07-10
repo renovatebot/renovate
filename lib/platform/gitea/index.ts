@@ -216,6 +216,13 @@ export function getFileList(branchName = config.baseBranch) {
   return config.storage.getFileList(branchName);
 }
 
+// Branch
+
+// Returns true if branch exists, otherwise false
+export function branchExists(branchName: string) {
+  return config.storage.branchExists(branchName);
+}
+
 export function getFile(filePath: string, branchName?: string) {
   return config.storage.getFile(filePath, branchName);
 }
