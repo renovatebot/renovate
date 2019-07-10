@@ -163,6 +163,13 @@ export async function initRepo({
   return platformConfig;
 }
 
+// Search
+
+// Get full file list
+export function getFileList(branchName = config.baseBranch) {
+  return config.storage.getFileList(branchName);
+}
+
 export function getCommitMessages() {
   return config.storage.getCommitMessages();
 }
