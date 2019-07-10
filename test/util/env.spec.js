@@ -22,9 +22,4 @@ describe('getUntrustedEnvVariable', () => {
     expect(getUntrustedEnv(['LANG'])).toHaveProperty(...envVars, 'LANG');
     delete process.env.LANG;
   });
-  it('returns environMent variables if in lower case', () => {
-    process.env.lang = 'lang';
-    expect(getUntrustedEnv(['LANG'])).toHaveProperty(...envVars, 'LANG');
-    delete process.env.lang;
-  });
 });
