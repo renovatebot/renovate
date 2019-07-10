@@ -1,7 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 
-import api from './gl-got-wrapper';
+import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { PlatformConfig } from '../common';
