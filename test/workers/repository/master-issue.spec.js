@@ -326,5 +326,46 @@ describe('workers/repository/master-issue', () => {
       // same with dry run
       await dryRun(branches, platform, 0, 0, 0, 2);
     });
+
+    it('checks an issue with 3 PR in approval', async () => {
+      const branches = [
+        {
+          prTitle: 'pr1',
+          upgrades: [{ depName: 'dep1' }],
+          res: 'needs-pr-approval',
+          branchName: 'branchName1',
+        },
+        {
+          prTitle: 'pr2',
+          upgrades: [{ depName: 'dep2' }, { depName: 'dep3' }],
+          res: 'needs-pr-approval',
+          branchName: 'branchName2',
+        },
+        {
+          prTitle: 'pr3',
+          upgrades: [{ depName: 'dep3' }],
+          res: 'needs-pr-approval',
+          branchName: 'branchName3',
+        },
+      ];
+      config.masterIssue = true;
+      config.masterIssuePrApproval = true;
+      await masterIssue.ensureMasterIssue(config, branches);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0]).toBe(
+        config.masterIssueTitle
+      );
+      expect(platform.ensureIssue.mock.calls[0][1]).toBe(
+        fs.readFileSync(
+          'test/workers/repository/_fixtures/master-issue_with_3_PR_in_approval.txt',
+          'utf8'
+        )
+      );
+      expect(platform.findPr).toHaveBeenCalledTimes(0);
+
+      // same with dry run
+      await dryRun(branches, platform);
+    });
   });
 });

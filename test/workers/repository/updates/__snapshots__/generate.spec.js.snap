@@ -18,6 +18,7 @@ Object {
   "displayFrom": "",
   "displayTo": "0.6.0",
   "masterIssueApproval": false,
+  "masterIssuePrApproval": false,
   "newValue": "0.6.0",
   "prTitle": "some-title",
   "prettyDepType": "dependency",

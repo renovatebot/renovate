@@ -61,10 +61,12 @@ function matchesHostType(rule: HostRule, search: HostRuleSearch) {
 }
 
 function matchesDomainName(rule: HostRule, search: HostRuleSearch) {
+  const hostname = search.url && URL.parse(search.url).hostname;
   return (
     search.url &&
     rule.domainName &&
-    URL.parse(search.url).hostname!.endsWith(rule.domainName)
+    hostname &&
+    hostname.endsWith(rule.domainName)
   );
 }
 

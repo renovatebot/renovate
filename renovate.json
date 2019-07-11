@@ -6,6 +6,7 @@
     ":label(ready)",
     "group:linters",
     ":masterIssueApproval",
+    ":maintainLockFilesWeekly",
     ":assignee(rarkins)"
   ],
   "postUpdateOptions": ["yarnDedupeHighest"],
