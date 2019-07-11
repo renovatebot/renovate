@@ -223,8 +223,132 @@ export function branchExists(branchName: string) {
   return config.storage.branchExists(branchName);
 }
 
+// Returns the Pull Request for a branch. Null if not exists.
+export async function getBranchPr(branchName: string) {
+  logger.debug(`getBranchPr(${branchName})`);
+  // istanbul ignore if
+  if (!(await branchExists(branchName))) {
+    return null;
+  }
+  // TODO: check paginate
+  // TODO: check per_page parameter
+  const urlString = `repos/${config.repository}/pulls?state=open&per_page=100`;
+  const res = await api.get(urlString, { paginate: true });
+  logger.debug(`Got res with ${res.body.length} results`);
+  let pr: any = null;
+  res.body.forEach((result: { head: { label: string } }) => {
+    if (result.head.label === branchName) {
+      pr = result;
+    }
+  });
+  if (!pr) {
+    return null;
+  }
+  return getPr(pr.id);
+}
+
 export function getFile(filePath: string, branchName?: string) {
   return config.storage.getFile(filePath, branchName);
+}
+
+// Returns the combined status for a branch.
+export async function getBranchStatus(
+  branchName: string,
+  requiredStatusChecks?: string[] | null
+) {
+  logger.debug(`getBranchStatus(${branchName})`);
+  if (!requiredStatusChecks) {
+    // null means disable status checks, so it always succeeds
+    return 'success';
+  }
+  if (Array.isArray(requiredStatusChecks) && requiredStatusChecks.length) {
+    // This is Unsupported
+    logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
+    return 'failed';
+  }
+
+  if (!(await branchExists(branchName))) {
+    throw new Error('repository-changed');
+  }
+
+  // First, get the branch commit SHA
+  const branchSha = await config.storage.getBranchCommit(branchName);
+  // Now, check the statuses for that commit
+  const url = `repos/${config.repository}/commits/${branchSha}/statuses`;
+  const res = await api.get(url);
+  logger.debug(`Got res with ${res.body.length} results`);
+  if (res.body.length === 0) {
+    // Return 'pending' if we have no status checks
+    return 'pending';
+  }
+  let status = 'success';
+  // Return 'success' if all are success
+  res.body.forEach((check: { status: string; allow_failure?: boolean }) => {
+    // If one is failed then don't overwrite that
+    if (status !== 'failure') {
+      if (!check.allow_failure) {
+        if (check.status === 'failed') {
+          status = 'failure';
+        } else if (check.status !== 'success') {
+          ({ status } = check);
+        }
+      }
+    }
+  });
+  return status;
+}
+
+export async function getPr(id: number) {
+  logger.debug(`getPr(${id})`);
+
+  // TODO: include_diverged_commits_count ????
+  const url = `repos/${config.repository}/pulls/${id}?include_diverged_commits_count=1`;
+  const pr = (await api.get(url)).body;
+  // Harmonize fields with GitHub
+  pr.branchName = pr.head.label;
+  pr.number = pr.id;
+  pr.displayNumber = `Merge Request #${pr.id}`;
+  pr.body = pr.description;
+  // TODO: check this state :
+  pr.isStale = pr.diverged_commits_count > 0;
+  // TODO: check merge status values
+  if (!pr.mergeable) {
+    logger.debug('pr cannot be merged');
+    pr.canMerge = false;
+    pr.isConflicted = true;
+  } else if (pr.state === 'open') {
+    const branchStatus = await getBranchStatus(pr.branchName, []);
+    if (branchStatus === 'success') {
+      pr.canMerge = true;
+    }
+  }
+  // Check if the most recent branch commit is by us
+  // If not then we don't allow it to be rebased, in case someone's changes would be lost
+  const branchUrl = `repos/${config.repository}/branches/${urlEscape(
+    pr.branchName
+  )}`;
+  try {
+    const branch = (await api.get(branchUrl)).body;
+    const branchCommitEmail =
+      branch && branch.commit ? branch.commit.author.eemail : null;
+    // istanbul ignore if
+    if (branchCommitEmail === config.email) {
+      pr.canRebase = true;
+    } else {
+      logger.debug(
+        { branchCommitEmail, configEmail: config.email, id: pr.id },
+        'Last committer to branch does not match bot email, so PR cannot be rebased.'
+      );
+      pr.canRebase = false;
+    }
+  } catch (err) {
+    logger.debug({ err }, 'Error getting PR branch');
+    if (pr.state === 'open' || err.statusCode !== 404) {
+      logger.warn({ err }, 'Error getting PR branch');
+      pr.isConflicted = true;
+    }
+  }
+  return pr;
 }
 
 export function getCommitMessages() {
