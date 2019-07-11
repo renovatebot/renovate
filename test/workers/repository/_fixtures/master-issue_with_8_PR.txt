@@ -2,7 +2,7 @@ This [master issue](https://renovatebot.com/blog/master-issue) contains a list o
 
 ## Pending Approval
 
-These PRs will be created by Renovate only once you click their checkbox below.
+These branches will be created by Renovate only once you click their checkbox below.
 
  - [ ] <!-- approve-branch=branchName1 -->pr1
  - [ ] <!-- approve-branch=branchName2 -->pr2
