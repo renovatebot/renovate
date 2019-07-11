@@ -198,7 +198,7 @@ describe('workers/branch', () => {
       });
       platform.branchExists.mockReturnValueOnce(true);
       automerge.tryBranchAutomerge.mockReturnValueOnce('failed');
-      prWorker.ensurePr.mockReturnValueOnce('needs-approval');
+      prWorker.ensurePr.mockReturnValueOnce('needs-pr-approval');
       expect(await branchWorker.processBranch(config)).toEqual(
         'needs-pr-approval'
       );
