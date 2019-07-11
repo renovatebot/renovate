@@ -63,7 +63,7 @@ describe('logger/pretty-stdout', () => {
   });
   describe('formatRecord(rec)', () => {
     it('formats record', () => {
-      const rec: prettyStdout.IRecord = {
+      const rec: prettyStdout.BunyanRecord = {
         level: 10,
         msg: 'test message',
         v: 0,

@@ -1,4 +1,4 @@
-import * as Logger from 'bunyan';
+import * as bunyan from 'bunyan';
 
 import is from '@sindresorhus/is';
 import { RenovateStream } from './pretty-stdout';
@@ -8,9 +8,9 @@ import cmdSerializer from './cmd-serializer';
 
 let meta = {};
 
-const stdout: Logger.Stream = {
+const stdout: bunyan.Stream = {
   name: 'stdout',
-  level: (process.env.LOG_LEVEL as Logger.LogLevel) || 'info',
+  level: (process.env.LOG_LEVEL as bunyan.LogLevel) || 'info',
   stream: process.stdout,
 };
 
@@ -22,7 +22,7 @@ if (process.env.LOG_FORMAT !== 'json') {
   stdout.type = 'raw';
 }
 
-const bunyanLogger = Logger.createLogger({
+const bunyanLogger = bunyan.createLogger({
   name: 'renovate',
   serializers: {
     body: configSerializer,
@@ -36,7 +36,7 @@ const bunyanLogger = Logger.createLogger({
   streams: [stdout],
 });
 
-const logFactory = (level: Logger.LogLevelString): any => {
+const logFactory = (level: bunyan.LogLevelString): any => {
   return (p1: any, p2: any): void => {
     global.renovateError =
       global.renovateError || level === 'error' || level === 'fatal';
@@ -53,7 +53,7 @@ const logFactory = (level: Logger.LogLevelString): any => {
   };
 };
 
-const loggerLevels: Logger.LogLevelString[] = [
+const loggerLevels: bunyan.LogLevelString[] = [
   'trace',
   'debug',
   'info',
@@ -88,6 +88,6 @@ export function setMeta(obj: any) {
   meta = { ...obj };
 }
 
-export function levels(name: string, level: Logger.LogLevel): void {
+export function levels(name: string, level: bunyan.LogLevel): void {
   bunyanLogger.levels(name, level);
 }
