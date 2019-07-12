@@ -21,6 +21,11 @@ const requirements4 = fs.readFileSync(
   'utf8'
 );
 
+const requirements5 = fs.readFileSync(
+  'test/manager/pip_requirements/_fixtures/requirements5.txt',
+  'utf8'
+);
+
 describe('lib/manager/pip_requirements/extract', () => {
   describe('extractPackageFile()', () => {
     let config;
@@ -53,6 +58,15 @@ describe('lib/manager/pip_requirements/extract', () => {
         'https://artifactory.company.com/artifactory/api/pypi/python/simple',
       ]);
       expect(res.deps).toHaveLength(3);
+    });
+    it('handles extra index url', () => {
+      const res = extractPackageFile(requirements5, config);
+      expect(res).toMatchSnapshot();
+      expect(res.registryUrls).toEqual([
+        'https://artifactory.company.com/artifactory/api/pypi/python/simple',
+        'http://example.com/private-pypi/',
+      ]);
+      expect(res.deps).toHaveLength(6);
     });
   });
 });
