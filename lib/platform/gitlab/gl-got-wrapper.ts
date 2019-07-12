@@ -1,6 +1,6 @@
 import parseLinkHeader from 'parse-link-header';
 
-import { IGotApi } from '../common';
+import { GotApi } from '../common';
 import got from '../../util/got';
 
 const hostType = 'gitlab';
@@ -33,7 +33,10 @@ async function get(path: string, options: any) {
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new Error('platform-failure');
     }
-    if (err.code === 'ECONNRESET') {
+    if (
+      err.code === 'ECONNRESET' ||
+      err.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
+    ) {
       throw new Error('platform-failure');
     }
     throw err;
@@ -42,15 +45,15 @@ async function get(path: string, options: any) {
 
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 
-interface IGlGotApi
-  extends IGotApi<{
+interface GlGotApi
+  extends GotApi<{
     paginate?: boolean;
     token?: string;
   }> {
   setBaseUrl(url: string): void;
 }
 
-export const api: IGlGotApi = {} as any;
+export const api: GlGotApi = {} as any;
 
 for (const x of helpers) {
   (api as any)[x] = (url: string, opts: any) =>

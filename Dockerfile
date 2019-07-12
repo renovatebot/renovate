@@ -1,8 +1,8 @@
-FROM amd64/node:10.16.0-alpine@sha256:f59303fb3248e5d992586c76cc83e1d3700f641cbcd7c0067bc7ad5bb2e5b489 AS tsbuild
+FROM amd64/node:10.16.0@sha256:7af3328e235a92c949e0b7c3c738b4c3d05ceb82306fddbe75136f2e7842e6f4 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 COPY lib lib
 COPY tsconfig.json tsconfig.json
@@ -11,7 +11,7 @@ COPY tsconfig.app.json tsconfig.app.json
 RUN yarn build
 
 
-FROM amd64/ubuntu:18.04@sha256:b36667c98cf8f68d4b7f1fb8e01f742c2ed26b5f0c965a788e98dfe589a4b3e4
+FROM amd64/ubuntu:18.04@sha256:eb70667a801686f914408558660da753cde27192cd036148e58258819b927395
 
 LABEL maintainer="Rhys Arkins <rhys@arkins.net>"
 LABEL name="renovate"
@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends openjdk-8-jdk g
 
 # START copy Node.js from https://github.com/nodejs/docker-node/blob/master/10/jessie/Dockerfile
 
-ENV NODE_VERSION 10.15.1
+ENV NODE_VERSION 10.16.0
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
   && case "${dpkgArch##*-}" in \
@@ -103,7 +103,7 @@ ENV PATH $PATH:/opt/elixir-${ELIXIR_VERSION}/bin
 
 RUN apt-get update && apt-get install -y php-cli php-mbstring && apt-get clean
 
-ENV COMPOSER_VERSION=1.7.2
+ENV COMPOSER_VERSION=1.8.6
 
 RUN php -r "copy('https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar', '/usr/local/bin/composer');"
 
@@ -185,7 +185,7 @@ RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.15.2
+ENV YARN_VERSION=1.16.0
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 
@@ -193,7 +193,7 @@ ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.
 
 COPY package.json .
 COPY yarn.lock .
-RUN yarn install --production && yarn cache clean
+RUN yarn install --production --frozen-lockfile && yarn cache clean
 COPY --from=tsbuild dist dist
 COPY bin bin
 COPY data data

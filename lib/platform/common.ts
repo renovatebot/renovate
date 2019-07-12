@@ -1,35 +1,35 @@
 import got from 'got';
 
-export interface IGotApiOptions {
+export interface GotApiOptions {
   useCache?: boolean;
   hostType?: string;
   body?: any;
 }
 
-export interface IGotApi<TOptions extends object = any> {
+export interface GotApi<TOptions extends object = any> {
   get<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
+    options?: GotApiOptions & TOptions
   ): Promise<got.Response<T>>;
   post<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
+    options?: GotApiOptions & TOptions
   ): Promise<got.Response<T>>;
   put<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
+    options?: GotApiOptions & TOptions
   ): Promise<got.Response<T>>;
   patch<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
+    options?: GotApiOptions & TOptions
   ): Promise<got.Response<T>>;
   head<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
+    options?: GotApiOptions & TOptions
   ): Promise<got.Response<T>>;
   delete<T extends object = any>(
     url: string,
-    options?: IGotApiOptions & TOptions
+    options?: GotApiOptions & TOptions
   ): Promise<got.Response<T>>;
 
   reset(): void;

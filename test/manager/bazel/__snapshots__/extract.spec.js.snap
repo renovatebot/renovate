@@ -17,6 +17,7 @@ Array [
     "depName": "hasura",
     "depType": "container_pull",
     "lookupName": "hasura/graphql-engine",
+    "versionScheme": "docker",
   },
 ]
 `;

@@ -1,7 +1,7 @@
 import url from 'url';
 import delay from 'delay';
 
-import api from './bb-got-wrapper';
+import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
@@ -18,6 +18,8 @@ interface BbsConfig {
   repository: string;
   repositorySlug: string;
   storage: GitStorage;
+
+  prVersions: Map<number, number>;
 }
 
 let config: BbsConfig = {} as any;
@@ -25,6 +27,13 @@ let config: BbsConfig = {} as any;
 const defaults: any = {
   hostType: 'bitbucket-server',
 };
+
+/* istanbul ignore next */
+function updatePrVersion(pr: number, version: number) {
+  const res = Math.max(config.prVersions.get(pr) || 0, version);
+  config.prVersions.set(pr, res);
+  return res;
+}
 
 export function initPlatform({
   endpoint,
@@ -100,7 +109,13 @@ export async function initRepo({
   });
 
   const [projectKey, repositorySlug] = repository.split('/');
-  config = { projectKey, repositorySlug, gitPrivateKey, repository } as any;
+  config = {
+    projectKey,
+    repositorySlug,
+    gitPrivateKey,
+    repository,
+    prVersions: new Map<number, number>(),
+  } as any;
 
   /* istanbul ignore else */
   if (bbUseDefaultReviewers !== false) {
@@ -129,7 +144,9 @@ export async function initRepo({
 
   try {
     const info = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }`
     )).body;
     platformConfig.privateRepo = info.is_private;
     platformConfig.isFork = !!info.parent;
@@ -137,7 +154,9 @@ export async function initRepo({
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
     config.defaultBranch = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/branches/default`
     )).body.displayId;
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
@@ -250,11 +269,13 @@ export async function deleteBranch(branchName: string, closePr = false) {
     // getBranchPr
     const pr = await getBranchPr(branchName);
     if (pr) {
-      await api.post(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/decline?version=${pr.version}`
+      const { body } = await api.post(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${
+          config.repositorySlug
+        }/pull-requests/${pr.number}/decline?version=${pr.version}`
       );
 
-      await getPr(pr.number, true);
+      updatePrVersion(pr, body);
     }
   }
   return config.storage.deleteBranch(branchName);
@@ -451,7 +472,9 @@ export async function addReviewers(prNo: number, reviewers: string[]) {
     const reviewersSet = new Set([...pr.reviewers, ...reviewers]);
 
     await api.put(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/pull-requests/${prNo}`,
       {
         body: {
           title: pr.title,
@@ -484,7 +507,9 @@ export function deleteLabel(issueNo: number, label: string) {
 async function getComments(prNo: number) {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/activities
   let comments = await utils.accumulateValues(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/activities`
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${
+      config.repositorySlug
+    }/pull-requests/${prNo}/activities`
   );
 
   comments = comments
@@ -502,7 +527,9 @@ async function getComments(prNo: number) {
 async function addComment(prNo: number, text: string) {
   // POST /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments
   await api.post(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments`,
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${
+      config.repositorySlug
+    }/pull-requests/${prNo}/comments`,
     {
       body: { text },
     }
@@ -512,7 +539,9 @@ async function addComment(prNo: number, text: string) {
 async function getCommentVersion(prNo: number, commentId: number) {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
   const { version } = (await api.get(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${
+      config.repositorySlug
+    }/pull-requests/${prNo}/comments/${commentId}`
   )).body;
 
   return version;
@@ -523,7 +552,9 @@ async function editComment(prNo: number, commentId: number, text: string) {
 
   // PUT /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
   await api.put(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`,
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${
+      config.repositorySlug
+    }/pull-requests/${prNo}/comments/${commentId}`,
     {
       body: { text, version },
     }
@@ -535,7 +566,9 @@ async function deleteComment(prNo: number, commentId: number) {
 
   // DELETE /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
   await api.delete(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}?version=${version}`
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${
+      config.repositorySlug
+    }/pull-requests/${prNo}/comments/${commentId}?version=${version}`
   );
 }
 
@@ -609,7 +642,9 @@ export async function getPrList(_args?: any) {
   // istanbul ignore next
   if (!config.prList) {
     const values = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?state=ALL&limit=100`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/pull-requests?state=ALL&limit=100`
     );
 
     config.prList = values.map(utils.prInfo);
@@ -679,11 +714,15 @@ export async function createPr(
   if (config.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
     const { id } = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }`
     )).body;
 
     const defReviewers = (await api.get(
-      `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/reviewers?sourceRefId=refs/heads/${branchName}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
+      `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/reviewers?sourceRefId=refs/heads/${branchName}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
     )).body;
 
     reviewers = defReviewers.map((u: { name: string }) => ({
@@ -705,7 +744,9 @@ export async function createPr(
   let prInfoRes;
   try {
     prInfoRes = await api.post(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/pull-requests`,
       { body }
     );
   } catch (err) /* istanbul ignore next */ {
@@ -731,6 +772,8 @@ export async function createPr(
     ...utils.prInfo(prInfoRes.body),
   };
 
+  updatePrVersion(pr.number, pr.version);
+
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -747,7 +790,9 @@ export async function getPr(prNo: number, refreshCache?: boolean) {
   }
 
   const res = await api.get(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${
+      config.repositorySlug
+    }/pull-requests/${prNo}`,
     { useCache: !refreshCache }
   );
 
@@ -759,15 +804,23 @@ export async function getPr(prNo: number, refreshCache?: boolean) {
     ),
   };
 
+  pr.version = updatePrVersion(pr.number, pr.version);
+
   if (pr.state === 'open') {
     const mergeRes = await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/pull-requests/${prNo}/merge`,
+      { useCache: !refreshCache }
     );
     pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;
 
     const prCommits = (await api.get(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/pull-requests/${prNo}/commits?withCounts=true`,
+      { useCache: !refreshCache }
     )).body;
 
     if (prCommits.totalCount === 1) {
@@ -819,7 +872,9 @@ export async function getPrFiles(prNo: number) {
 
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/changes
   const values = await utils.accumulateValues(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/changes?withComments=false`
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${
+      config.repositorySlug
+    }/pull-requests/${prNo}/changes?withComments=false`
   );
   return values.map((f: { path: string }) => f.path.toString);
 }
@@ -837,8 +892,10 @@ export async function updatePr(
       throw Object.assign(new Error('not-found'), { statusCode: 404 });
     }
 
-    await api.put(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
+    const { body } = await api.put(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/pull-requests/${prNo}`,
       {
         body: {
           title,
@@ -848,7 +905,8 @@ export async function updatePr(
         },
       }
     );
-    await getPr(prNo, true);
+
+    updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
       throw new Error('not-found');
@@ -870,15 +928,18 @@ export async function mergePr(prNo: number, branchName: string) {
     if (!pr) {
       throw Object.assign(new Error('not-found'), { statusCode: 404 });
     }
-    await api.post(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge?version=${pr.version}`
+    const { body } = await api.post(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${
+        config.repositorySlug
+      }/pull-requests/${prNo}/merge?version=${pr.version}`
     );
-    await getPr(prNo, true);
+    updatePrVersion(prNo, body.version);
   } catch (err) {
     if (err.statusCode === 404) {
       throw new Error('not-found');
     } else if (err.statusCode === 409) {
-      throw new Error('repository-changed');
+      logger.warn({ err }, `Failed to merge PR`);
+      return false;
     } else {
       logger.warn({ err }, `Failed to merge PR`);
       return false;

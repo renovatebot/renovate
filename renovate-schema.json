@@ -290,7 +290,8 @@
         "pep440",
         "poetry",
         "ruby",
-        "semver"
+        "semver",
+        "swift"
       ],
       "default": "semver"
     },
@@ -578,7 +579,7 @@
     "prCreation": {
       "description": "When to create the PR for a branch.",
       "type": "string",
-      "enum": ["immediate", "not-pending", "status-success"],
+      "enum": ["immediate", "not-pending", "status-success", "approval"],
       "default": "immediate"
     },
     "prNotPendingHours": {
@@ -990,7 +991,7 @@
       "description": "Configuration object for Dockerfile renovation",
       "type": "object",
       "default": {
-        "fileMatch": ["(^|/)Dockerfile$"]
+        "fileMatch": ["(^|/)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"]
       },
       "$ref": "#"
     },
@@ -1157,6 +1158,14 @@
       },
       "$ref": "#"
     },
+    "gitlabci-include": {
+      "description": "Configuration object for GitLab CI yml renovation for include.",
+      "type": "object",
+      "default": {
+        "fileMatch": ["^\\.gitlab-ci\\.yml$"]
+      },
+      "$ref": "#"
+    },
     "dotnet": {
       "description": "Configuration object for .NET language",
       "type": "object",
@@ -1251,6 +1260,16 @@
       "description": "Options to suppress various types of warnings and other notifications",
       "type": "array",
       "default": ["deprecationWarningIssues"]
+    },
+    "swift": {
+      "description": "Configuration for Package.swift files",
+      "type": "object",
+      "default": {
+        "fileMatch": ["(^|/)Package\\.swift"],
+        "versionScheme": "swift",
+        "rangeStrategy": "bump"
+      },
+      "$ref": "#"
     }
   }
 }

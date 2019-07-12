@@ -1,5 +1,5 @@
 import parseDiff from 'parse-diff';
-import api from './bb-got-wrapper';
+import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
@@ -170,7 +170,9 @@ export async function deleteBranch(branchName: string, closePr?: boolean) {
     const pr = await findPr(branchName, null, 'open');
     if (pr) {
       await api.post(
-        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
+        `/2.0/repositories/${config.repository}/pullrequests/${
+          pr.number
+        }/decline`
       );
     }
   }
@@ -540,6 +542,7 @@ export async function getPr(prNo: number) {
     const commits = await utils.accumulateValues(pr.links.commits.href);
     if (commits.length === 1) {
       res.canRebase = true;
+      res.canMerge = true;
     }
   }
   if (await branchExists(pr.source.branch.name)) {

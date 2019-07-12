@@ -9,14 +9,14 @@ declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
 }
 
-interface IStorageConfig {
+interface StorageConfig {
   localDir: string;
   baseBranch?: string;
   url: string;
   gitPrivateKey?: string;
 }
 
-interface ILocalConfig extends IStorageConfig {
+interface LocalConfig extends StorageConfig {
   baseBranch: string;
   baseBranchSha: string;
   branchExists: { [branch: string]: boolean };
@@ -24,7 +24,7 @@ interface ILocalConfig extends IStorageConfig {
 }
 
 export class Storage {
-  private _config: ILocalConfig = {} as any;
+  private _config: LocalConfig = {} as any;
 
   private _git: Git.SimpleGit | undefined;
 
@@ -50,10 +50,10 @@ export class Storage {
     }
   }
 
-  async initRepo(args: IStorageConfig) {
+  async initRepo(args: StorageConfig) {
     this.cleanRepo();
     // eslint-disable-next-line no-multi-assign
-    const config: ILocalConfig = (this._config = { ...args } as any);
+    const config: LocalConfig = (this._config = { ...args } as any);
     // eslint-disable-next-line no-multi-assign
     const cwd = (this._cwd = config.localDir);
     this._config.branchExists = {};
@@ -462,9 +462,11 @@ function checkForPlatformFailure(err: Error) {
     return;
   }
   const platformErrorStrings = [
+    'gnutls_handshake() failed',
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
     'access denied or repository not exported',
+    'Could not write new index file',
   ];
   for (const errorStr of platformErrorStrings) {
     if (err.message.includes(errorStr)) {

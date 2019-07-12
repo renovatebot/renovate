@@ -60,7 +60,7 @@ jobs:
       - test
   test_node_12:
     docker:
-      - image: amd64/node:12.4.0@sha256:037bdec2ce002e81700100d246d687bc9cf2fc04d03713f28d2ad28dd68bd1d5
+      - image: amd64/node:12.5.0@sha256:78acf4f4a80d23f94546bf80c174b182c43c1ca88befa9bfbc36878085e14ecf
     steps:
       - test
   release:
@@ -68,7 +68,7 @@ jobs:
       - image: amd64/node:10.16.0@sha256:7af3328e235a92c949e0b7c3c738b4c3d05ceb82306fddbe75136f2e7842e6f4
     steps:
       - checkout
-      - run: yarn install
+      - run: yarn install --frozen-lockfile
       - run: yarn build
       - run: yarn semantic-release
       - run: curl -X POST -d '{}' $NETLIFY_DEPLOY_WEBHOOK
