@@ -4,7 +4,7 @@ import pAll from 'p-all';
 
 import got from '../../util/got';
 import { maskToken } from '../../util/mask';
-import { IGotApi } from '../common';
+import { GotApi } from '../common';
 
 const hostType = 'github';
 let baseUrl = 'https://api.github.com/';
@@ -165,5 +165,5 @@ get.setBaseUrl = (u: string) => {
   baseUrl = u;
 };
 
-export const api: IGotApi = get as any;
+export const api: GotApi = get as any;
 export default api;

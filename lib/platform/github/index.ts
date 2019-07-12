@@ -3,7 +3,7 @@ import delay from 'delay';
 import semver from 'semver';
 import URL from 'url';
 
-import api from './gh-got-wrapper';
+import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 

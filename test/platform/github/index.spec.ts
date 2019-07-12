@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
-import { IGotApi } from '../../../lib/platform/common';
+import { GotApi } from '../../../lib/platform/common';
 
 describe('platform/github', () => {
   let github: typeof import('../../../lib/platform/github');
-  let api: jest.Mocked<IGotApi>;
+  let api: jest.Mocked<GotApi>;
   let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
   let GitStorage: jest.Mock<typeof import('../../../lib/platform/git/storage')>;
   beforeEach(async () => {

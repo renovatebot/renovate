@@ -1,7 +1,7 @@
 import delay from 'delay';
 import { Response } from 'got';
 import got from '../../../lib/util/got';
-import api from '../../../lib/platform/github/gh-got-wrapper';
+import { api } from '../../../lib/platform/github/gh-got-wrapper';
 
 jest.mock('../../../lib/util/got');
 jest.mock('delay');
