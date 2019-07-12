@@ -75,12 +75,21 @@ describe('lib/manager/pip_requirements/extract', () => {
       ]);
       expect(res.deps).toHaveLength(6);
     });
-    it('handles extra index url and defaults without index', () => {
+    it('handles extra index url and defaults without index to config', () => {
       const res = extractPackageFile(requirements6, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toEqual([
         'http://example.com/private-pypi/',
         'AnExistingDefaultUrl',
+      ]);
+      expect(res.deps).toHaveLength(6);
+    });
+    it('handles extra index url and defaults without index to pypi', () => {
+      const res = extractPackageFile(requirements6, 'unused_file_name', {});
+      expect(res).toMatchSnapshot();
+      expect(res.registryUrls).toEqual([
+        'http://example.com/private-pypi/',
+        'https://pypi.org/pypi/',
       ]);
       expect(res.deps).toHaveLength(6);
     });
