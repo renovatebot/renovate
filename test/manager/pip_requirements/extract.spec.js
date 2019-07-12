@@ -69,7 +69,10 @@ describe('lib/manager/pip_requirements/extract', () => {
     it('handles extra index url', () => {
       const res = extractPackageFile(requirements5, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
-      expect(res.registryUrls).toEqual(['http://example.com/private-pypi/']);
+      expect(res.registryUrls).toEqual([
+        'https://artifactory.company.com/artifactory/api/pypi/python/simple',
+        'http://example.com/private-pypi/',
+      ]);
       expect(res.deps).toHaveLength(6);
     });
     it('handles extra index url and defaults without index', () => {
