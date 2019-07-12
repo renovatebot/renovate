@@ -202,6 +202,8 @@ export class Storage {
         }
         await this._git!.checkout([branchName, '-f']);
         await this._git!.reset('hard');
+        const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
+        logger.debug({ branchName, latestCommitDate }, 'latest commit');
       } catch (err) /* istanbul ignore next */ {
         checkForPlatformFailure(err);
         if (
