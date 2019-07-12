@@ -579,7 +579,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/gomod/extract extractPackageFile() extracts single-line requires 1`] = `
+exports[`lib/manager/gomod/extract extractPackageFile() extracts single-line requires and replace 1`] = `
 Array [
   Object {
     "currentValue": "v0.7.0",
@@ -635,6 +635,14 @@ Array [
     "depNameShort": "Azure/azure-sdk-for-go",
     "depType": "require",
     "lineNumber": 8,
+  },
+  Object {
+    "currentValue": "v0.0.0",
+    "datasource": "go",
+    "depName": "github.com/pravesht/gocql",
+    "depNameShort": "pravesht/gocql",
+    "depType": "replace",
+    "lineNumber": 11,
   },
 ]
 `;

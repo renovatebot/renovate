@@ -11,6 +11,7 @@ describe('manager/gomod/update', () => {
         depName: 'github.com/pkg/errors',
         lineNumber: 2,
         newValue: 'v0.8.0',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).not.toEqual(gomod1);
@@ -21,6 +22,7 @@ describe('manager/gomod/update', () => {
         depName: 'github.com/pkg/errors',
         lineNumber: 2,
         newValue: 'v0.8.0',
+        depType: 'require',
       };
       const res1 = goUpdate.updateDependency(gomod1, upgrade1);
       expect(res1).not.toEqual(gomod1);
@@ -29,6 +31,7 @@ describe('manager/gomod/update', () => {
         depName: 'github.com/aws/aws-sdk-go',
         lineNumber: 3,
         newValue: 'v1.15.36',
+        depType: 'require',
       };
       const res2 = goUpdate.updateDependency(res1, upgrade2);
       expect(res2).not.toEqual(res1);
@@ -51,6 +54,7 @@ describe('manager/gomod/update', () => {
         updateType: 'major',
         currentValue: 'v0.7.0',
         newValue: 'v2.0.0',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).not.toEqual(gomod2);
@@ -65,6 +69,7 @@ describe('manager/gomod/update', () => {
         updateType: 'major',
         currentValue: 'v1.0.0',
         newValue: 'v2.0.0',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).toMatchSnapshot();
@@ -92,6 +97,7 @@ describe('manager/gomod/update', () => {
         lineNumber: 8,
         multiLine: true,
         newValue: 'v1.8.0',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
@@ -103,6 +109,7 @@ describe('manager/gomod/update', () => {
         lineNumber: 57,
         multiLine: true,
         newValue: 'v4.8.0',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).toMatchSnapshot();
@@ -118,6 +125,7 @@ describe('manager/gomod/update', () => {
         newValue: 'v2.0.0',
         newMajor: 2,
         updateType: 'major',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
@@ -133,6 +141,7 @@ describe('manager/gomod/update', () => {
         newValue: 'v3.0.0',
         newMajor: 3,
         updateType: 'major',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
@@ -148,6 +157,7 @@ describe('manager/gomod/update', () => {
         updateType: 'digest',
         currentDigest: '14d3d4c51834',
         newDigest: '123456123456abcdef',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).not.toEqual(gomod2);
@@ -163,6 +173,7 @@ describe('manager/gomod/update', () => {
         updateType: 'digest',
         currentDigest: 'abcdefabcdef',
         newDigest: '14d3d4c51834000000',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).toEqual(gomod2);
@@ -172,6 +183,7 @@ describe('manager/gomod/update', () => {
         depName: 'github.com/fatih/color',
         lineNumber: 8,
         newValue: 'v1.8.0',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod2, upgrade);
       expect(res).toBeNull();
@@ -181,11 +193,23 @@ describe('manager/gomod/update', () => {
         depName: 'github.com/Azure/azure-sdk-for-go',
         lineNumber: 8,
         newValue: 'v26.0.0',
+        depType: 'require',
       };
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).not.toEqual(gomod1);
       // Assert that the version still contains +incompatible tag.
       expect(res.includes(upgrade.newValue + '+incompatible')).toBe(true);
+    });
+    it('handles replace line', () => {
+      const upgrade = {
+        depName: 'github.com/pravesht/gocql',
+        lineNumber: 11,
+        newValue: 'v0.0.1',
+        depType: 'replace',
+      };
+      const res = goUpdate.updateDependency(gomod1, upgrade);
+      expect(res).not.toEqual(gomod1);
+      expect(res.includes(upgrade.newValue)).toBe(true);
     });
   });
 });

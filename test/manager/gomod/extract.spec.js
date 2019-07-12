@@ -13,11 +13,12 @@ describe('lib/manager/gomod/extract', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', config)).toBeNull();
     });
-    it('extracts single-line requires', () => {
+    it('extracts single-line requires and replace', () => {
       const res = extractPackageFile(gomod1, config).deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(7);
+      expect(res).toHaveLength(8);
       expect(res.filter(e => e.skipReason)).toHaveLength(1);
+      expect(res.filter(e => e.depType === 'replace')).toHaveLength(1);
     });
     it('extracts multi-line requires', () => {
       const res = extractPackageFile(gomod2, config).deps;
