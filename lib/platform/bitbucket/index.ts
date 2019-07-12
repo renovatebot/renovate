@@ -170,9 +170,7 @@ export async function deleteBranch(branchName: string, closePr?: boolean) {
     const pr = await findPr(branchName, null, 'open');
     if (pr) {
       await api.post(
-        `/2.0/repositories/${config.repository}/pullrequests/${
-          pr.number
-        }/decline`
+        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
       );
     }
   }
