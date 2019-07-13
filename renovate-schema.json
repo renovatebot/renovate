@@ -584,7 +584,7 @@
     "prCreation": {
       "description": "When to create the PR for a branch.",
       "type": "string",
-      "enum": ["immediate", "not-pending", "status-success"],
+      "enum": ["immediate", "not-pending", "status-success", "approval"],
       "default": "immediate"
     },
     "prNotPendingHours": {

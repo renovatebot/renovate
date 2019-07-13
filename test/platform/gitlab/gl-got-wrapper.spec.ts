@@ -1,5 +1,5 @@
 import got from '../../../lib/util/got';
-import api from '../../../lib/platform/gitlab/gl-got-wrapper';
+import { api } from '../../../lib/platform/gitlab/gl-got-wrapper';
 import * as hostRules from '../../../lib/util/host-rules';
 
 jest.mock('../../../lib/util/got');

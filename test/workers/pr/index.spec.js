@@ -146,6 +146,12 @@ describe('workers/pr', () => {
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBeNull();
     });
+    it('should return needs-approval if prCreation set to approval', async () => {
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      config.prCreation = 'approval';
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toBe('needs-pr-approval');
+    });
     it('should create PR if success', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');
       config.prCreation = 'status-success';

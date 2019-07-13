@@ -6,6 +6,9 @@ beforeEach(() => {
 
 describe('workers/repository/validate', () => {
   describe('validatePrs()', () => {
+    it('returns if disabled', async () => {
+      await validate.validatePrs({ suppressNotifications: ['prValidation'] });
+    });
     it('catches error', async () => {
       platform.getPrList.mockReturnValueOnce([
         {
