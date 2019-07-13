@@ -71,6 +71,7 @@ spec:
                   valueFrom:
                     secretKeyRef:
                       key: github-token
+                      name: renovate-env
                 - name: RENOVATE_AUTODISCOVER
                   valueFrom:
                     secretKeyRef:
