@@ -28,5 +28,7 @@ declare namespace NodeJS {
     logger: Renovate.Logger;
 
     renovateVersion: string;
+    // TODO: declare interface for all platforms
+    platform: typeof import('./platform/github');
   }
 }
