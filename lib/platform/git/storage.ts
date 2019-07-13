@@ -169,7 +169,9 @@ export class Storage {
   // Return the commit SHA for a branch
   async getBranchCommit(branchName: string) {
     if (!(await this.branchExists(branchName))) {
-      throw Error('Cannot fetch commit for branch that does not exist');
+      throw Error(
+        'Cannot fetch commit for branch that does not exist: ' + branchName
+      );
     }
     const res = await this._git!.revparse(['origin/' + branchName]);
     return res.trim();
@@ -188,7 +190,8 @@ export class Storage {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
         throw new Error(
-          'Cannot set baseBranch to something that does not exist'
+          'Cannot set baseBranch to something that does not exist: ' +
+            branchName
         );
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
@@ -293,7 +296,9 @@ export class Storage {
 
   async isBranchStale(branchName: string) {
     if (!(await this.branchExists(branchName))) {
-      throw Error('Cannot check staleness for branch that does not exist');
+      throw Error(
+        'Cannot check staleness for branch that does not exist: ' + branchName
+      );
     }
     const branches = await this._git!.branch([
       '--remotes',
