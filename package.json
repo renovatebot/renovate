@@ -192,7 +192,7 @@
     "pretty-quick": "1.11.1",
     "rimraf": "2.6.3",
     "semantic-release": "15.13.18",
-    "tmp-promise": "2.0.1",
+    "tmp-promise": "2.0.2",
     "typescript": "3.5.1"
   },
   "resolutions": {
