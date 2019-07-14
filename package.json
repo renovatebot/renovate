@@ -163,7 +163,7 @@
     "@types/bunyan": "1.8.6",
     "@types/convert-hrtime": "2.0.0",
     "@types/fs-extra": "8.0.0",
-    "@types/got": "9.6.0",
+    "@types/got": "9.6.1",
     "@types/jest": "24.0.15",
     "@types/node": "11.13.15",
     "@types/parse-link-header": "1.0.0",
