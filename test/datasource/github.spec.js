@@ -1,6 +1,7 @@
+import ghGot from '../../lib/platform/github/gh-got-wrapper';
+
 const datasource = require('../../lib/datasource');
 const github = require('../../lib/datasource/github');
-const ghGot = require('../../lib/platform/github/gh-got-wrapper');
 const got = require('../../lib/util/got');
 const hostRules = require('../../lib/util/host-rules');
 

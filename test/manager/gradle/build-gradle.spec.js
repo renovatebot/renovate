@@ -37,6 +37,23 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
   });
 
+  it('should returns a file updated with keeping an extension if the version is found', () => {
+    const gradleFile =
+      "runtime (  'com.crashlytics.sdk.android:crashlytics:2.8.0@aar'  )";
+    const updatedGradleFile = gradle.updateGradleVersion(
+      gradleFile,
+      {
+        group: 'com.crashlytics.sdk.android',
+        name: 'crashlytics',
+        version: '2.8.0',
+      },
+      '2.10.1'
+    );
+    expect(updatedGradleFile).toEqual(
+      "runtime (  'com.crashlytics.sdk.android:crashlytics:2.10.1@aar'  )"
+    );
+  });
+
   it('should returns a file updated with keeping a classifier and an extension if the version is found', () => {
     const gradleFile = "runtime (  'junit:junit:4.0:javadoc@jar'  )";
     const updatedGradleFile = gradle.updateGradleVersion(

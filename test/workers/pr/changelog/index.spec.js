@@ -1,9 +1,9 @@
+import ghGot from '../../../../lib/platform/github/gh-got-wrapper';
+
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
-jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 
 const hostRules = require('../../../../lib/util/host-rules');
-const ghGot = require('../../../../lib/platform/github/gh-got-wrapper');
 
 const { getChangeLogJSON } = require('../../../../lib/workers/pr/changelog');
 const releaseNotes = require('../../../../lib/workers/pr/changelog/release-notes');

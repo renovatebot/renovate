@@ -5,8 +5,10 @@ import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { PlatformConfig } from '../common';
+import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';
 
+const defaultConfigFile = configFileNames[0];
 let config: {
   storage: GitStorage;
   repository: string;
@@ -16,6 +18,7 @@ let config: {
   email: string;
   prList: any[];
   issueList: any[];
+  optimizeForDisabled: boolean;
 } = {} as any;
 
 const defaults = {
@@ -91,9 +94,11 @@ export function cleanRepo() {
 export async function initRepo({
   repository,
   localDir,
+  optimizeForDisabled,
 }: {
   repository: string;
   localDir: string;
+  optimizeForDisabled: boolean;
 }) {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -116,6 +121,24 @@ export async function initRepo({
     }
     if (res.body.default_branch === null) {
       throw new Error('empty');
+    }
+    if (optimizeForDisabled) {
+      let renovateConfig;
+      try {
+        renovateConfig = JSON.parse(
+          Buffer.from(
+            (await api.get(
+              `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
+            )).body.content,
+            'base64'
+          ).toString()
+        );
+      } catch (err) {
+        // Do nothing
+      }
+      if (renovateConfig && renovateConfig.enabled === false) {
+        throw new Error('disabled');
+      }
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
@@ -164,6 +187,9 @@ export async function initRepo({
     }
     if (err.statusCode === 404) {
       throw new Error('not-found');
+    }
+    if (err.message === 'disabled') {
+      throw err;
     }
     logger.info({ err }, 'Unknown GitLab initRepo error');
     throw err;
