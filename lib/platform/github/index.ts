@@ -147,6 +147,7 @@ export async function initRepo({
   localDir,
   includeForks,
   renovateUsername,
+  optimizeForDisabled,
 }: {
   endpoint: string;
   repository: string;
@@ -156,6 +157,7 @@ export async function initRepo({
   localDir: string;
   includeForks: boolean;
   renovateUsername: string;
+  optimizeForDisabled: boolean;
 }) {
   logger.debug(`initRepo("${repository}")`);
   logger.info('Authenticated as user: ' + renovateUsername);
@@ -218,6 +220,24 @@ export async function initRepo({
       );
       throw new Error('archived');
     }
+    if (optimizeForDisabled) {
+      let renovateConfig;
+      try {
+        renovateConfig = JSON.parse(
+          Buffer.from(
+            (await api.get(
+              `repos/${config.repository}/contents/${defaultConfigFile}`
+            )).body.content,
+            'base64'
+          ).toString()
+        );
+      } catch (err) {
+        // Do nothing
+      }
+      if (renovateConfig && renovateConfig.enabled === false) {
+        throw new Error('disabled');
+      }
+    }
     platformConfig.privateRepo = res.body.private === true;
     platformConfig.isFork = res.body.fork === true;
     const owner = res.body.owner.login;
@@ -253,6 +273,9 @@ export async function initRepo({
       throw new Error('blocked');
     }
     if (err.message === 'fork') {
+      throw err;
+    }
+    if (err.message === 'disabled') {
       throw err;
     }
     if (err.message === 'Response code 451 (Unavailable for Legal Reasons)') {

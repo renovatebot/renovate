@@ -192,6 +192,33 @@ describe('platform/github', () => {
   }
 
   describe('initRepo', () => {
+    it('should throw err if disabled in renovate.json', async () => {
+      // repo info
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              owner: {
+                login: 'theowner',
+              },
+            },
+          } as any)
+      );
+      api.get.mockImplementationOnce(
+        () =>
+          ({
+            body: {
+              content: Buffer.from('{"enabled": false}').toString('base64'),
+            },
+          } as any)
+      );
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          optimizeForDisabled: true,
+        } as any)
+      ).rejects.toThrow('disabled');
+    });
     it('should rebase', async () => {
       function squashInitRepo(args: any) {
         // repo info
