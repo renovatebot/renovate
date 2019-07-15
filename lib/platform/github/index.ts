@@ -513,7 +513,6 @@ export function getFile(filePath: string, branchName?: string) {
 }
 
 // istanbul ignore next
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function deleteBranch(branchName: string, closePr = false) {
   return config.storage.deleteBranch(branchName);
 }
