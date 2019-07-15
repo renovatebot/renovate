@@ -29,6 +29,12 @@ interface Pr {
   branchName: string;
   number: number;
   comments: Comment[];
+
+  createdAt: string;
+
+  sha: string;
+
+  sourceRepo: string;
 }
 
 interface RepoConfig {
@@ -507,7 +513,8 @@ export function getFile(filePath: string, branchName?: string) {
 }
 
 // istanbul ignore next
-export function deleteBranch(branchName: string) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function deleteBranch(branchName: string, closePr = false) {
   return config.storage.deleteBranch(branchName);
 }
 
@@ -665,7 +672,7 @@ export async function setBranchStatus(
   context: string,
   description: string,
   state: string,
-  targetUrl: string
+  targetUrl?: string
 ) {
   // istanbul ignore if
   if (config.parentRepo) {
@@ -1274,7 +1281,7 @@ async function getOpenPrs() {
         json: false,
       };
       const res = JSON.parse((await api.post(url, options)).body);
-      const prNumbers = [];
+      const prNumbers: number[] = [];
       // istanbul ignore if
       if (!res.data) {
         logger.info({ query, res }, 'No graphql res.data');
@@ -1399,7 +1406,7 @@ async function getClosedPrs() {
         json: false,
       };
       const res = JSON.parse((await api.post(url, options)).body);
-      const prNumbers = [];
+      const prNumbers: number[] = [];
       // istanbul ignore if
       if (!res.data) {
         logger.info(
@@ -1555,7 +1562,7 @@ export async function getPrFiles(prNo: number) {
   return files.map((f: { filename: string }) => f.filename);
 }
 
-export async function updatePr(prNo: number, title: string, body: string) {
+export async function updatePr(prNo: number, title: string, body?: string) {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const patchBody: any = { title };
   if (body) {
