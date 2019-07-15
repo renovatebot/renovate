@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "strict": true,
+    "noImplicitAny": false /* required for js files */,
     "outDir": "./dist",
     "target": "es2018",
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "module": "commonjs",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
