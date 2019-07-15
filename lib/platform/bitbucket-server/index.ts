@@ -5,6 +5,7 @@ import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
+import { logger } from '../../logger';
 
 interface BbsConfig {
   baseBranch: string;
@@ -20,6 +21,8 @@ interface BbsConfig {
   storage: GitStorage;
 
   prVersions: Map<number, number>;
+
+  username: string;
 }
 
 let config: BbsConfig = {} as any;
@@ -115,6 +118,7 @@ export async function initRepo({
     gitPrivateKey,
     repository,
     prVersions: new Map<number, number>(),
+    username: opts!.username,
   } as any;
 
   /* istanbul ignore else */
@@ -623,8 +627,13 @@ export async function getPrList(_args?: any) {
   logger.debug(`getPrList()`);
   // istanbul ignore next
   if (!config.prList) {
+    const query = new URLSearchParams({
+      state: 'ALL',
+      'role.1': 'AUTHOR',
+      'username.1': config.username,
+    }).toString();
     const values = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?state=ALL&limit=100`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
     );
 
     config.prList = values.map(utils.prInfo);

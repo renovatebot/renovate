@@ -1,5 +1,6 @@
 import URL from 'url';
 import merge from 'deepmerge';
+import { logger } from '../logger';
 
 export interface HostRule {
   hostType?: string;

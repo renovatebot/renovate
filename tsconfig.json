@@ -15,5 +15,5 @@
     "types": ["node", "jest"]
   },
   "include": ["lib/**/*", "test/**/*"],
-  "exclude": ["node_modules", "./.cache", "./dist"]
+  "exclude": ["node_modules", "./.cache", "./dist", "**/__mocks__/*"]
 }

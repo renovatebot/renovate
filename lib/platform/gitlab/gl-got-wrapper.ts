@@ -2,6 +2,7 @@ import parseLinkHeader from 'parse-link-header';
 
 import { GotApi } from '../common';
 import got from '../../util/got';
+import { logger } from '../../logger';
 
 const hostType = 'gitlab';
 let baseUrl = 'https://gitlab.com/api/v4/';
