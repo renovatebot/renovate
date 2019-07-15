@@ -132,7 +132,6 @@
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
     "pnpm": "3.5.7",
-    "proxy-agent": "3.0.3",
     "registry-auth-token": "4.0.0",
     "safe-regex": "2.0.2",
     "semver": "6.2.0",
