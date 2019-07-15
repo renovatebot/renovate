@@ -1,0 +1,10 @@
+# Repositories
+--index-url https://artifactory.company.com/artifactory/api/pypi/python/simple --trusted-host artifactory.company.com --default-timeout 600
+--extra-index-url http://example.com/private-pypi/
+# Packages
+Django[argon2]==2.0.12
+celery [redis]==4.1.1
+foo [bar] == 3.2.1 # handles extra white space
+some-package==0.3.1
+some-other-package==1.0.0
+not_semver==1.9
