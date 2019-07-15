@@ -38,7 +38,9 @@ describe('lib/manager/pip_requirements/extract', () => {
       config = { registryUrls: ['AnExistingDefaultUrl'] };
     });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBeNull();
+      expect(
+        extractPackageFile('nothing here', 'requirements.txt', config)
+      ).toBeNull();
     });
     it('extracts dependencies', () => {
       const res = extractPackageFile(requirements1, 'unused_file_name', config);
@@ -79,8 +81,8 @@ describe('lib/manager/pip_requirements/extract', () => {
       const res = extractPackageFile(requirements6, 'unused_file_name', config);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toEqual([
-        'http://example.com/private-pypi/',
         'AnExistingDefaultUrl',
+        'http://example.com/private-pypi/',
       ]);
       expect(res.deps).toHaveLength(6);
     });
@@ -88,8 +90,8 @@ describe('lib/manager/pip_requirements/extract', () => {
       const res = extractPackageFile(requirements6, 'unused_file_name', {});
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toEqual([
-        'http://example.com/private-pypi/',
         'https://pypi.org/pypi/',
+        'http://example.com/private-pypi/',
       ]);
       expect(res.deps).toHaveLength(6);
     });
