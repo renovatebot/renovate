@@ -5,6 +5,7 @@ import pAll from 'p-all';
 import got from '../../util/got';
 import { maskToken } from '../../util/mask';
 import { GotApi } from '../common';
+import { logger } from '../../logger';
 
 const hostType = 'github';
 let baseUrl = 'https://api.github.com/';

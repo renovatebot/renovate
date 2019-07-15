@@ -1,6 +1,7 @@
 import URL from 'url';
 import addrs from 'email-addresses';
 import * as hostRules from '../util/host-rules';
+import { logger } from '../logger';
 
 // TODO: move to definitions: platform.allowedValues
 /* eslint-disable global-require */

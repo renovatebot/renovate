@@ -6,6 +6,7 @@ import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { PlatformConfig } from '../common';
 import { configFileNames } from '../../config/app-strings';
+import { logger } from '../../logger';
 
 const defaultConfigFile = configFileNames[0];
 let config: {
