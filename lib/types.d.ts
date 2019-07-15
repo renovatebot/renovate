@@ -34,9 +34,17 @@ declare namespace NodeJS {
     repoCache: Record<string, any>;
 
     trustLevel?: string;
+
+    updateRubyGemsVersions?: Promise<void>;
   }
 }
 
 declare let platform: typeof import('./platform/github');
 
 declare let renovateCache: Renovate.Cache;
+
+// can't use `resolveJsonModule` because it will copy json files and change dist path
+declare module '*.json' {
+  const value: any;
+  export = value;
+}
