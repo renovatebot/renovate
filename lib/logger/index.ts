@@ -88,6 +88,12 @@ export function setMeta(obj: any) {
   meta = { ...obj };
 }
 
+export /* istanbul ignore next */ function addStream(
+  stream: bunyan.Stream
+): void {
+  bunyanLogger.addStream(stream);
+}
+
 export function levels(name: string, level: bunyan.LogLevel): void {
   bunyanLogger.levels(name, level);
 }
