@@ -1,10 +1,10 @@
-import _ghGot from '../../../../lib/platform/github/gh-got-wrapper';
+import { api } from '../../../../lib/platform/github/gh-got-wrapper';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
 
 /** @type any */
-const ghGot = _ghGot;
+const ghGot = api.get;
 
 const hostRules = require('../../../../lib/util/host-rules');
 
@@ -53,7 +53,7 @@ describe('workers/pr/changelog', () => {
           fromVersion: null,
         })
       ).toBeNull();
-      expect(ghGot.get).toHaveBeenCalledTimes(0);
+      expect(ghGot).toHaveBeenCalledTimes(0);
     });
     it('returns null if no fromVersion', async () => {
       expect(
@@ -62,7 +62,7 @@ describe('workers/pr/changelog', () => {
           sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         })
       ).toBeNull();
-      expect(ghGot.get).toHaveBeenCalledTimes(0);
+      expect(ghGot).toHaveBeenCalledTimes(0);
     });
     it('returns null if fromVersion equals toVersion', async () => {
       expect(
@@ -72,7 +72,7 @@ describe('workers/pr/changelog', () => {
           toVersion: '1.0.0',
         })
       ).toBeNull();
-      expect(ghGot.get).toHaveBeenCalledTimes(0);
+      expect(ghGot).toHaveBeenCalledTimes(0);
     });
     it('skips invalid repos', async () => {
       expect(
@@ -90,7 +90,7 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('uses GitHub tags', async () => {
-      ghGot.get.mockReturnValueOnce(
+      ghGot.mockReturnValueOnce(
         Promise.resolve({
           body: [
             { name: '0.9.0' },
@@ -109,7 +109,7 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('filters unnecessary warns', async () => {
-      ghGot.get.mockImplementation(() => {
+      ghGot.mockImplementation(() => {
         throw new Error('Unknown Github Repo');
       });
       expect(
