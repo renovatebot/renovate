@@ -1,9 +1,13 @@
 jest.mock('fs-extra');
 jest.mock('child-process-promise');
 
+/** @type any */
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
 const cargo = require('../../../lib/manager/cargo/artifacts');
+
+/** @type any */
+const platform = global.platform;
 
 const config = {
   localDir: '/tmp/github/some/repo',

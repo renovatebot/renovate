@@ -1,6 +1,10 @@
 const fs = require('fs');
 const masterIssue = require('../../../lib/workers/repository/master-issue');
 
+/** @type any */
+const platform = global.platform;
+
+/** @type any */
 let config;
 beforeEach(() => {
   jest.resetAllMocks();

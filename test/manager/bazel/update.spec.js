@@ -1,4 +1,5 @@
 const fs = require('fs');
+/** @type any */
 const hasha = require('hasha');
 const path = require('path');
 const bazelfile = require('../../../lib/manager/bazel/update');

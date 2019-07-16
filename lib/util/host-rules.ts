@@ -6,6 +6,7 @@ export interface HostRule {
   hostType?: string;
   domainName?: string;
   hostName?: string;
+  json?: true;
   baseUrl?: string;
   token?: string;
   username?: string;
@@ -31,7 +32,7 @@ export function add(params: HostRule) {
 
 export interface HostRuleSearch {
   hostType?: string;
-  url: string;
+  url?: string;
 }
 
 function isEmptyRule(rule: HostRule) {

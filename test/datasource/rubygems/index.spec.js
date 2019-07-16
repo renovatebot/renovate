@@ -34,7 +34,7 @@ describe('datasource/rubygems', () => {
     };
 
     beforeEach(() => {
-      process.env.RENOVATE_SKIP_CACHE = true;
+      process.env.RENOVATE_SKIP_CACHE = 'true';
       jest.resetAllMocks();
     });
 

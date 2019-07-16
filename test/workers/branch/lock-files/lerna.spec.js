@@ -3,6 +3,9 @@ const lernaHelper = require('../../../../lib/manager/npm/post-update/lerna');
 
 jest.mock('child-process-promise');
 
+/** @type any */
+const platform = global.platform;
+
 describe('generateLockFiles()', () => {
   it('returns if no lernaClient', async () => {
     const res = await lernaHelper.generateLockFiles(undefined, 'some-dir', {});

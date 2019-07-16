@@ -1,14 +1,22 @@
 const branchWorker = require('../../../lib/workers/branch');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
+/** @type any */
 const schedule = require('../../../lib/workers/branch/schedule');
+/** @type any */
 const checkExisting = require('../../../lib/workers/branch/check-existing');
+/** @type any */
 const parent = require('../../../lib/workers/branch/parent');
+/** @type any */
 const npmPostExtract = require('../../../lib/manager/npm/post-update');
+/** @type any */
 const commit = require('../../../lib/workers/branch/commit');
 const statusChecks = require('../../../lib/workers/branch/status-checks');
+/** @type any */
 const automerge = require('../../../lib/workers/branch/automerge');
+/** @type any */
 const prWorker = require('../../../lib/workers/pr');
+/** @type any */
 const getUpdated = require('../../../lib/workers/branch/get-updated');
 const { appSlug } = require('../../../lib/config/app-strings');
 
@@ -21,6 +29,9 @@ jest.mock('../../../lib/workers/branch/status-checks');
 jest.mock('../../../lib/workers/branch/automerge');
 jest.mock('../../../lib/workers/branch/commit');
 jest.mock('../../../lib/workers/pr');
+
+/** @type any */
+const platform = global.platform;
 
 describe('workers/branch', () => {
   describe('processBranch', () => {

@@ -25,27 +25,21 @@ const otherYamlFile = fs.readFileSync(
 
 describe('lib/manager/kubernetes/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
-    beforeEach(() => {
-      config = {
-        fileMatch: ['(^|/)[^/]*\\.yaml$'],
-      };
-    });
     it('returns null for empty', () => {
-      expect(extractPackageFile(kubernetesConfigMapFile, config)).toBeNull();
+      expect(extractPackageFile(kubernetesConfigMapFile)).toBeNull();
     });
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(kubernetesImagesFile, config);
+      const res = extractPackageFile(kubernetesImagesFile);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });
     it('extracts image line in a YAML array', () => {
-      const res = extractPackageFile(kubernetesArraySyntaxFile, config);
+      const res = extractPackageFile(kubernetesArraySyntaxFile);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
     });
     it('ignores non-Kubernetes YAML files', () => {
-      expect(extractPackageFile(otherYamlFile, config)).toBeNull();
+      expect(extractPackageFile(otherYamlFile)).toBeNull();
     });
   });
 });

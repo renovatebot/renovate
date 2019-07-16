@@ -1,5 +1,9 @@
 const moment = require('moment');
+/** @type any */
 const limits = require('../../../../lib/workers/repository/process/limits');
+
+/** @type any */
+const platform = global.platform;
 
 let config;
 beforeEach(() => {

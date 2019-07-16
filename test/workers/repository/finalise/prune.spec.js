@@ -1,5 +1,9 @@
 const cleanup = require('../../../../lib/workers/repository/finalise/prune');
 
+/** @type any */
+const platform = global.platform;
+
+/** @type any */
 let config;
 beforeEach(() => {
   jest.resetAllMocks();

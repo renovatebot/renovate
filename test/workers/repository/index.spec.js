@@ -1,4 +1,5 @@
 const { renovateRepository } = require('../../../lib/workers/repository/index');
+/** @type any */
 const process = require('../../../lib/workers/repository/process');
 
 jest.mock('../../../lib/workers/repository/init');

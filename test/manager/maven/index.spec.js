@@ -8,6 +8,9 @@ const {
   updateDependency,
 } = require('../../../lib/manager/maven/index');
 
+/** @type any */
+const platform = global.platform;
+
 const pomContent = fs.readFileSync(
   'test/manager/maven/_fixtures/simple.pom.xml',
   'utf8'

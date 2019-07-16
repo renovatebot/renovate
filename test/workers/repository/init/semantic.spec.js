@@ -1,3 +1,4 @@
+/** @type any */
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
@@ -9,6 +10,9 @@ beforeEach(() => {
 const {
   detectSemanticCommits,
 } = require('../../../../lib/workers/repository/init/semantic');
+
+/** @type any */
+const platform = global.platform;
 
 describe('workers/repository/init/semantic', () => {
   describe('detectSemanticCommits()', () => {
