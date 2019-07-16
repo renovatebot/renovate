@@ -1175,6 +1175,76 @@ describe('platform/github', () => {
       const res = await github.ensureIssue('title-1', 'newer-content');
       expect(res).toBeNull();
     });
+    it('creates issue if recreate flag true and issue is not open', async () => {
+      api.post.mockImplementationOnce(
+        () =>
+          ({
+            body: JSON.stringify({
+              data: {
+                repository: {
+                  issues: {
+                    pageInfo: {
+                      startCursor: null,
+                      hasNextPage: false,
+                      endCursor: null,
+                    },
+                    nodes: [
+                      {
+                        number: 2,
+                        state: 'close',
+                        title: 'title-2',
+                      },
+                    ],
+                  },
+                },
+              },
+            }),
+          } as any)
+      );
+      api.get.mockReturnValueOnce({ body: { body: 'new-content' } } as any);
+      const res = await github.ensureIssue(
+        'title-2',
+        'new-content',
+        false,
+        true
+      );
+      expect(res).toEqual('created');
+    });
+    it('does not create issue if recreate flag true and issue is already open', async () => {
+      api.post.mockImplementationOnce(
+        () =>
+          ({
+            body: JSON.stringify({
+              data: {
+                repository: {
+                  issues: {
+                    pageInfo: {
+                      startCursor: null,
+                      hasNextPage: false,
+                      endCursor: null,
+                    },
+                    nodes: [
+                      {
+                        number: 2,
+                        state: 'open',
+                        title: 'title-2',
+                      },
+                    ],
+                  },
+                },
+              },
+            }),
+          } as any)
+      );
+      api.get.mockReturnValueOnce({ body: { body: 'new-content' } } as any);
+      const res = await github.ensureIssue(
+        'title-2',
+        'new-content',
+        false,
+        true
+      );
+      expect(res).toEqual(null);
+    });
   });
   describe('ensureIssueClosing()', () => {
     it('closes issue', async () => {
