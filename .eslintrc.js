@@ -25,6 +25,7 @@ module.exports = {
     'no-underscore-dangle': 0,
 
     // TODO: fix lint
+    'import/prefer-default-export': 1,
     '@typescript-eslint/camelcase': 'off', // disabled until ??
     '@typescript-eslint/no-var-requires': 'off', // disable until all files converted to typescript
     '@typescript-eslint/no-use-before-define': 'off', // disable until all files converted to typescript
