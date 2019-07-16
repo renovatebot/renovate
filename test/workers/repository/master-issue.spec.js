@@ -16,6 +16,7 @@ beforeEach(() => {
 
 async function dryRun(
   branches,
+  // eslint-disable-next-line no-shadow
   platform,
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0,

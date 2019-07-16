@@ -16,7 +16,7 @@ describe('workers/repository/init', () => {
     it('runs', async () => {
       base.checkBaseBranch.mockReturnValue({});
       apis.initApis.mockReturnValue({});
-      await initRepo({} /*, null */);
+      await initRepo({});
     });
   });
 });
