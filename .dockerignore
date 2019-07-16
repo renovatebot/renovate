@@ -4,5 +4,6 @@
 !hooks
 !lib
 !bin/yarn*
+!bin/config-validator.js
 !tsconfig*.json
 !data
