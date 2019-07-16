@@ -24,6 +24,10 @@ const requirements5 = fs.readFileSync(
   'test/manager/composer/_fixtures/composer5.json',
   'utf8'
 );
+const requirements5Lock = fs.readFileSync(
+  'test/manager/composer/_fixtures/composer5.lock',
+  'utf8'
+);
 
 describe('lib/manager/composer/extract', () => {
   describe('extractPackageFile()', () => {
@@ -56,7 +60,8 @@ describe('lib/manager/composer/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(1);
     });
-    it('extracts object repositories and registryUrls', async () => {
+    it('extracts object repositories and registryUrls with lock file', async () => {
+      platform.getFile.mockReturnValueOnce(requirements5Lock);
       const res = await extractPackageFile(requirements5, packageFile);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(1);

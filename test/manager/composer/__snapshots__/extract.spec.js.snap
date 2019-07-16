@@ -640,9 +640,9 @@ Object {
 }
 `;
 
-exports[`lib/manager/composer/extract extractPackageFile() extracts object repositories and registryUrls 1`] = `
+exports[`lib/manager/composer/extract extractPackageFile() extracts object repositories and registryUrls with lock file 1`] = `
 Object {
-  "composerLock": false,
+  "composerLock": "composer.lock",
   "deps": Array [
     Object {
       "currentValue": "*",
@@ -657,6 +657,7 @@ Object {
       "datasource": "gitTags",
       "depName": "awesome/vcs",
       "depType": "require",
+      "lockedVersion": "1.1.0",
       "lookupName": "https://my-vcs.example/my-vcs-repo",
       "skipReason": "unsupported-constraint",
     },
@@ -665,6 +666,7 @@ Object {
       "datasource": "gitTags",
       "depName": "awesome/git",
       "depType": "require",
+      "lockedVersion": "1.2.0",
       "lookupName": "git@my-git.example:my-git-repo",
     },
   ],
