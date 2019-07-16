@@ -513,7 +513,7 @@ export function getFile(filePath: string, branchName?: string) {
 }
 
 // istanbul ignore next
-export function deleteBranch(branchName: string, closePr = false) {
+export function deleteBranch(branchName: string, closePr?: boolean) {
   return config.storage.deleteBranch(branchName);
 }
 
