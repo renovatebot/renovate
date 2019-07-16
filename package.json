@@ -18,7 +18,7 @@
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "jest-debug": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --inspect-brk node_modules/jest/bin/jest.js",
     "jest-silent": "cross-env NODE_ENV=test yarn jest --reporters jest-silent-reporter",
-    "lint": "run-s eslint prettier",
+    "lint": "run-s type-check eslint prettier",
     "lint-fix": "run-s eslint-fix prettier-fix",
     "prettier": "prettier --list-different \"**/*.{ts,js,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
@@ -26,7 +26,7 @@
     "test-dirty": "git diff --exit-code",
     "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile && yarn test",
     "test-schema": "bash test/json-schema.sh",
-    "test": "run-s lint test-schema type-check jest",
+    "test": "run-s lint test-schema jest",
     "type-check": "tsc --noEmit"
   },
   "repository": {
