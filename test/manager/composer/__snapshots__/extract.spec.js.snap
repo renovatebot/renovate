@@ -9,6 +9,7 @@ Object {
       "datasource": "packagist",
       "depName": "php",
       "depType": "require",
+      "lookupName": "php",
       "skipReason": "unsupported",
     },
     Object {
@@ -16,6 +17,7 @@ Object {
       "datasource": "packagist",
       "depName": "symfony/assetic-bundle",
       "depType": "require",
+      "lookupName": "symfony/assetic-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -23,6 +25,7 @@ Object {
       "datasource": "packagist",
       "depName": "symfony/monolog-bundle",
       "depType": "require",
+      "lookupName": "symfony/monolog-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -30,6 +33,7 @@ Object {
       "datasource": "packagist",
       "depName": "symfony/swiftmailer-bundle",
       "depType": "require",
+      "lookupName": "symfony/swiftmailer-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -37,18 +41,21 @@ Object {
       "datasource": "packagist",
       "depName": "symfony/symfony",
       "depType": "require",
+      "lookupName": "symfony/symfony",
     },
     Object {
       "currentValue": "2.2.2",
       "datasource": "packagist",
       "depName": "doctrine/common",
       "depType": "require",
+      "lookupName": "doctrine/common",
     },
     Object {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-bundle",
       "depType": "require",
+      "lookupName": "doctrine/doctrine-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -56,6 +63,7 @@ Object {
       "datasource": "packagist",
       "depName": "doctrine/doctrine-fixtures-bundle",
       "depType": "require",
+      "lookupName": "doctrine/doctrine-fixtures-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -63,12 +71,14 @@ Object {
       "datasource": "packagist",
       "depName": "doctrine/orm",
       "depType": "require",
+      "lookupName": "doctrine/orm",
     },
     Object {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "exercise/elastica-bundle",
       "depType": "require",
+      "lookupName": "exercise/elastica-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -76,6 +86,7 @@ Object {
       "datasource": "packagist",
       "depName": "friendsofsymfony/rest-bundle",
       "depType": "require",
+      "lookupName": "friendsofsymfony/rest-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -83,6 +94,7 @@ Object {
       "datasource": "packagist",
       "depName": "friendsofsymfony/user-bundle",
       "depType": "require",
+      "lookupName": "friendsofsymfony/user-bundle",
       "skipReason": "any-version",
     },
     Object {
@@ -90,6 +102,7 @@ Object {
       "datasource": "packagist",
       "depName": "fzaninotto/faker",
       "depType": "require",
+      "lookupName": "fzaninotto/faker",
       "skipReason": "any-version",
     },
     Object {
@@ -97,12 +110,14 @@ Object {
       "datasource": "packagist",
       "depName": "jms/di-extra-bundle",
       "depType": "require",
+      "lookupName": "jms/di-extra-bundle",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "jms/payment-core-bundle",
       "depType": "require",
+      "lookupName": "jms/payment-core-bundle",
       "skipReason": "any-version",
     },
     Object {
@@ -110,12 +125,14 @@ Object {
       "datasource": "packagist",
       "depName": "jms/security-extra-bundle",
       "depType": "require",
+      "lookupName": "jms/security-extra-bundle",
     },
     Object {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-menu-bundle",
       "depType": "require",
+      "lookupName": "knplabs/knp-menu-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -123,6 +140,7 @@ Object {
       "datasource": "packagist",
       "depName": "knplabs/knp-paginator-bundle",
       "depType": "require",
+      "lookupName": "knplabs/knp-paginator-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -130,6 +148,7 @@ Object {
       "datasource": "packagist",
       "depName": "liip/imagine-bundle",
       "depType": "require",
+      "lookupName": "liip/imagine-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -137,6 +156,7 @@ Object {
       "datasource": "packagist",
       "depName": "merk/dough-bundle",
       "depType": "require",
+      "lookupName": "merk/dough-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -144,6 +164,7 @@ Object {
       "datasource": "packagist",
       "depName": "sensio/distribution-bundle",
       "depType": "require",
+      "lookupName": "sensio/distribution-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -151,6 +172,7 @@ Object {
       "datasource": "packagist",
       "depName": "sensio/framework-extra-bundle",
       "depType": "require",
+      "lookupName": "sensio/framework-extra-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -158,6 +180,7 @@ Object {
       "datasource": "packagist",
       "depName": "sensio/generator-bundle",
       "depType": "require",
+      "lookupName": "sensio/generator-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -165,6 +188,7 @@ Object {
       "datasource": "packagist",
       "depName": "simplethings/entity-audit-bundle",
       "depType": "require",
+      "lookupName": "simplethings/entity-audit-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -172,6 +196,7 @@ Object {
       "datasource": "packagist",
       "depName": "stof/doctrine-extensions-bundle",
       "depType": "require",
+      "lookupName": "stof/doctrine-extensions-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -179,6 +204,7 @@ Object {
       "datasource": "packagist",
       "depName": "twig/extensions",
       "depType": "require",
+      "lookupName": "twig/extensions",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -186,12 +212,14 @@ Object {
       "datasource": "packagist",
       "depName": "behat/behat",
       "depType": "require-dev",
+      "lookupName": "behat/behat",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/behat-bundle",
       "depType": "require-dev",
+      "lookupName": "behat/behat-bundle",
       "skipReason": "any-version",
     },
     Object {
@@ -199,6 +227,7 @@ Object {
       "datasource": "packagist",
       "depName": "behat/mink-bundle",
       "depType": "require-dev",
+      "lookupName": "behat/mink-bundle",
       "skipReason": "any-version",
     },
     Object {
@@ -206,6 +235,7 @@ Object {
       "datasource": "packagist",
       "depName": "behat/sahi-client",
       "depType": "require-dev",
+      "lookupName": "behat/sahi-client",
       "skipReason": "any-version",
     },
     Object {
@@ -213,6 +243,7 @@ Object {
       "datasource": "packagist",
       "depName": "behat/common-contexts",
       "depType": "require-dev",
+      "lookupName": "behat/common-contexts",
       "skipReason": "any-version",
     },
   ],
@@ -228,6 +259,7 @@ Object {
       "datasource": "packagist",
       "depName": "php",
       "depType": "require",
+      "lookupName": "php",
       "skipReason": "unsupported",
     },
     Object {
@@ -235,6 +267,7 @@ Object {
       "datasource": "packagist",
       "depName": "symfony/assetic-bundle",
       "depType": "require",
+      "lookupName": "symfony/assetic-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -242,6 +275,7 @@ Object {
       "datasource": "packagist",
       "depName": "symfony/monolog-bundle",
       "depType": "require",
+      "lookupName": "symfony/monolog-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -249,6 +283,7 @@ Object {
       "datasource": "packagist",
       "depName": "symfony/swiftmailer-bundle",
       "depType": "require",
+      "lookupName": "symfony/swiftmailer-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -256,18 +291,21 @@ Object {
       "datasource": "packagist",
       "depName": "symfony/symfony",
       "depType": "require",
+      "lookupName": "symfony/symfony",
     },
     Object {
       "currentValue": "2.2.2",
       "datasource": "packagist",
       "depName": "doctrine/common",
       "depType": "require",
+      "lookupName": "doctrine/common",
     },
     Object {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-bundle",
       "depType": "require",
+      "lookupName": "doctrine/doctrine-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -275,6 +313,7 @@ Object {
       "datasource": "packagist",
       "depName": "doctrine/doctrine-fixtures-bundle",
       "depType": "require",
+      "lookupName": "doctrine/doctrine-fixtures-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -282,12 +321,14 @@ Object {
       "datasource": "packagist",
       "depName": "doctrine/orm",
       "depType": "require",
+      "lookupName": "doctrine/orm",
     },
     Object {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "exercise/elastica-bundle",
       "depType": "require",
+      "lookupName": "exercise/elastica-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -295,6 +336,7 @@ Object {
       "datasource": "packagist",
       "depName": "friendsofsymfony/rest-bundle",
       "depType": "require",
+      "lookupName": "friendsofsymfony/rest-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -302,6 +344,7 @@ Object {
       "datasource": "packagist",
       "depName": "friendsofsymfony/user-bundle",
       "depType": "require",
+      "lookupName": "friendsofsymfony/user-bundle",
       "skipReason": "any-version",
     },
     Object {
@@ -309,6 +352,7 @@ Object {
       "datasource": "packagist",
       "depName": "fzaninotto/faker",
       "depType": "require",
+      "lookupName": "fzaninotto/faker",
       "skipReason": "any-version",
     },
     Object {
@@ -316,12 +360,14 @@ Object {
       "datasource": "packagist",
       "depName": "jms/di-extra-bundle",
       "depType": "require",
+      "lookupName": "jms/di-extra-bundle",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "jms/payment-core-bundle",
       "depType": "require",
+      "lookupName": "jms/payment-core-bundle",
       "skipReason": "any-version",
     },
     Object {
@@ -329,12 +375,14 @@ Object {
       "datasource": "packagist",
       "depName": "jms/security-extra-bundle",
       "depType": "require",
+      "lookupName": "jms/security-extra-bundle",
     },
     Object {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-menu-bundle",
       "depType": "require",
+      "lookupName": "knplabs/knp-menu-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -342,6 +390,7 @@ Object {
       "datasource": "packagist",
       "depName": "knplabs/knp-paginator-bundle",
       "depType": "require",
+      "lookupName": "knplabs/knp-paginator-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -349,6 +398,7 @@ Object {
       "datasource": "packagist",
       "depName": "liip/imagine-bundle",
       "depType": "require",
+      "lookupName": "liip/imagine-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -356,6 +406,7 @@ Object {
       "datasource": "packagist",
       "depName": "merk/dough-bundle",
       "depType": "require",
+      "lookupName": "merk/dough-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -363,6 +414,7 @@ Object {
       "datasource": "packagist",
       "depName": "sensio/distribution-bundle",
       "depType": "require",
+      "lookupName": "sensio/distribution-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -370,6 +422,7 @@ Object {
       "datasource": "packagist",
       "depName": "sensio/framework-extra-bundle",
       "depType": "require",
+      "lookupName": "sensio/framework-extra-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -377,6 +430,7 @@ Object {
       "datasource": "packagist",
       "depName": "sensio/generator-bundle",
       "depType": "require",
+      "lookupName": "sensio/generator-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -384,6 +438,7 @@ Object {
       "datasource": "packagist",
       "depName": "simplethings/entity-audit-bundle",
       "depType": "require",
+      "lookupName": "simplethings/entity-audit-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -391,6 +446,7 @@ Object {
       "datasource": "packagist",
       "depName": "stof/doctrine-extensions-bundle",
       "depType": "require",
+      "lookupName": "stof/doctrine-extensions-bundle",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -398,6 +454,7 @@ Object {
       "datasource": "packagist",
       "depName": "twig/extensions",
       "depType": "require",
+      "lookupName": "twig/extensions",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -405,12 +462,14 @@ Object {
       "datasource": "packagist",
       "depName": "behat/behat",
       "depType": "require-dev",
+      "lookupName": "behat/behat",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/behat-bundle",
       "depType": "require-dev",
+      "lookupName": "behat/behat-bundle",
       "skipReason": "any-version",
     },
     Object {
@@ -418,6 +477,7 @@ Object {
       "datasource": "packagist",
       "depName": "behat/mink-bundle",
       "depType": "require-dev",
+      "lookupName": "behat/mink-bundle",
       "skipReason": "any-version",
     },
     Object {
@@ -425,6 +485,7 @@ Object {
       "datasource": "packagist",
       "depName": "behat/sahi-client",
       "depType": "require-dev",
+      "lookupName": "behat/sahi-client",
       "skipReason": "any-version",
     },
     Object {
@@ -432,6 +493,7 @@ Object {
       "datasource": "packagist",
       "depName": "behat/common-contexts",
       "depType": "require-dev",
+      "lookupName": "behat/common-contexts",
       "skipReason": "any-version",
     },
   ],
@@ -448,6 +510,7 @@ Object {
       "datasource": "packagist",
       "depName": "php",
       "depType": "require",
+      "lookupName": "php",
       "skipReason": "unsupported",
     },
     Object {
@@ -455,12 +518,14 @@ Object {
       "datasource": "packagist",
       "depName": "composer/installers",
       "depType": "require",
+      "lookupName": "composer/installers",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "johnpbloch/wordpress",
       "depType": "require",
+      "lookupName": "johnpbloch/wordpress",
       "skipReason": "any-version",
     },
     Object {
@@ -468,18 +533,21 @@ Object {
       "datasource": "packagist",
       "depName": "vlucas/phpdotenv",
       "depType": "require",
+      "lookupName": "vlucas/phpdotenv",
     },
     Object {
       "currentValue": "^1.0",
       "datasource": "packagist",
       "depName": "oscarotero/env",
       "depType": "require",
+      "lookupName": "oscarotero/env",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-plugin/tinymce-advanced",
       "depType": "require",
+      "lookupName": "wpackagist-plugin/tinymce-advanced",
       "skipReason": "any-version",
     },
     Object {
@@ -487,6 +555,7 @@ Object {
       "datasource": "packagist",
       "depName": "wpackagist-plugin/acf-content-analysis-for-yoast-seo",
       "depType": "require",
+      "lookupName": "wpackagist-plugin/acf-content-analysis-for-yoast-seo",
       "skipReason": "any-version",
     },
     Object {
@@ -494,6 +563,7 @@ Object {
       "datasource": "packagist",
       "depName": "wpackagist-plugin/duplicate-post",
       "depType": "require",
+      "lookupName": "wpackagist-plugin/duplicate-post",
       "skipReason": "any-version",
     },
     Object {
@@ -501,6 +571,7 @@ Object {
       "datasource": "packagist",
       "depName": "wpackagist-plugin/simple-image-sizes",
       "depType": "require",
+      "lookupName": "wpackagist-plugin/simple-image-sizes",
       "skipReason": "any-version",
     },
     Object {
@@ -508,6 +579,7 @@ Object {
       "datasource": "packagist",
       "depName": "wpackagist-plugin/wordpress-seo",
       "depType": "require",
+      "lookupName": "wpackagist-plugin/wordpress-seo",
       "skipReason": "any-version",
     },
     Object {
@@ -515,6 +587,7 @@ Object {
       "datasource": "packagist",
       "depName": "wpackagist-plugin/timber-library",
       "depType": "require",
+      "lookupName": "wpackagist-plugin/timber-library",
       "skipReason": "any-version",
     },
     Object {
@@ -522,6 +595,7 @@ Object {
       "datasource": "packagist",
       "depName": "wp-sync-db/wp-sync-db",
       "depType": "require",
+      "lookupName": "wp-sync-db/wp-sync-db",
       "skipReason": "any-version",
     },
     Object {
@@ -529,6 +603,7 @@ Object {
       "datasource": "packagist",
       "depName": "asha23/wp-seed-timber",
       "depType": "require",
+      "lookupName": "asha23/wp-seed-timber",
       "skipReason": "any-version",
     },
   ],
@@ -565,6 +640,43 @@ Object {
 }
 `;
 
+exports[`lib/manager/composer/extract extractPackageFile() extracts object repositories and registryUrls 1`] = `
+Object {
+  "composerLock": false,
+  "deps": Array [
+    Object {
+      "currentValue": "*",
+      "datasource": "packagist",
+      "depName": "aws/aws-sdk-php",
+      "depType": "require",
+      "lookupName": "aws/aws-sdk-php",
+      "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": "dev-trunk",
+      "datasource": "gitTags",
+      "depName": "awesome/vcs",
+      "depType": "require",
+      "lookupName": "https://my-vcs.example/my-vcs-repo",
+      "skipReason": "unsupported-constraint",
+    },
+    Object {
+      "currentValue": ">=7.0.2",
+      "datasource": "gitTags",
+      "depName": "awesome/git",
+      "depType": "require",
+      "lookupName": "git@my-git.example:my-git-repo",
+    },
+  ],
+  "registryUrls": Array [
+    Object {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
 Object {
   "composerLock": false,
@@ -574,6 +686,7 @@ Object {
       "datasource": "packagist",
       "depName": "aws/aws-sdk-php",
       "depType": "require",
+      "lookupName": "aws/aws-sdk-php",
       "skipReason": "any-version",
     },
     Object {
@@ -581,6 +694,7 @@ Object {
       "datasource": "packagist",
       "depName": "wpackagist-plugin/akismet",
       "depType": "require",
+      "lookupName": "wpackagist-plugin/akismet",
       "skipReason": "unsupported-constraint",
     },
     Object {
@@ -588,13 +702,52 @@ Object {
       "datasource": "packagist",
       "depName": "wpackagist-plugin/wordpress-seo",
       "depType": "require",
+      "lookupName": "wpackagist-plugin/wordpress-seo",
     },
     Object {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "wpackagist-theme/hueman",
       "depType": "require",
+      "lookupName": "wpackagist-theme/hueman",
       "skipReason": "any-version",
+    },
+  ],
+  "registryUrls": Array [
+    Object {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/composer/extract extractPackageFile() extracts repositories and registryUrls 1`] = `
+Object {
+  "composerLock": false,
+  "deps": Array [
+    Object {
+      "currentValue": "*",
+      "datasource": "packagist",
+      "depName": "aws/aws-sdk-php",
+      "depType": "require",
+      "lookupName": "aws/aws-sdk-php",
+      "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": "dev-trunk",
+      "datasource": "gitTags",
+      "depName": "awesome/vcs",
+      "depType": "require",
+      "lookupName": "https://my-vcs.example/my-vcs-repo",
+      "skipReason": "unsupported-constraint",
+    },
+    Object {
+      "currentValue": ">=7.0.2",
+      "datasource": "gitTags",
+      "depName": "awesome/git",
+      "depType": "require",
+      "lookupName": "https://my-git.example/my-git-repo",
     },
   ],
   "registryUrls": Array [
