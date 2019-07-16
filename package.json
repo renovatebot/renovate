@@ -26,7 +26,8 @@
     "test-dirty": "git diff --exit-code",
     "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile && yarn test",
     "test-schema": "bash test/json-schema.sh",
-    "test": "yarn lint && yarn test-schema && yarn jest"
+    "test": "yarn lint && yarn test-schema && yarn jest",
+    "type-check": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
