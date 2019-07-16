@@ -15,7 +15,7 @@ module.exports = {
     project: './tsconfig.json',
   },
   rules: {
-    'import/no-unresolved': 0, // only required for js, see overrides
+    'import/no-unresolved': 0, // done by typescript
     'require-await': 'error',
     'no-use-before-define': 0,
     'no-restricted-syntax': 0,
@@ -41,16 +41,4 @@ module.exports = {
       },
     ], // disable until proper interfaced api
   },
-  overrides: [
-    {
-      // TODO: should be removed in near future, uses around ~50% lint time
-      files: ['*.js'],
-      rules: {
-        'import/no-unresolved': [
-          'error',
-          { commonjs: true, caseSensitive: true },
-        ],
-      },
-    },
-  ],
 };
