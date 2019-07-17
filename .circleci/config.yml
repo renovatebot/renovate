@@ -32,6 +32,7 @@ commands:
           command: |
             yarn lint
             yarn test-schema
+            yarn type-check
 
       - run:
           name: Build

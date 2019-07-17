@@ -1,4 +1,4 @@
-const configSerializer = require('../../lib/logger/err-serializer');
+import configSerializer from '../../lib/logger/err-serializer';
 
 describe('logger/err-serializer', () => {
   it('expands errors', () => {

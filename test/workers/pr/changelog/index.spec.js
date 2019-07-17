@@ -1,7 +1,10 @@
-import ghGot from '../../../../lib/platform/github/gh-got-wrapper';
+import { api } from '../../../../lib/platform/github/gh-got-wrapper';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
+
+/** @type any */
+const ghGot = api.get;
 
 const hostRules = require('../../../../lib/util/host-rules');
 
