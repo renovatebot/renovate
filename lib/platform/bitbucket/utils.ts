@@ -9,6 +9,7 @@ export function repoInfoTransformer(repoInfoBody: any) {
     owner: repoInfoBody.owner.username,
     mainbranch: repoInfoBody.mainbranch.name,
     mergeMethod: 'merge',
+    has_issues: repoInfoBody.has_issues,
   };
 }
 

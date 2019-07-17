@@ -12,11 +12,14 @@ interface Config {
   baseCommitSHA: string;
   defaultBranch: string;
   fileList: any[];
+  has_issues: boolean;
   mergeMethod: string;
   owner: string;
   prList: any[];
   repository: string;
   storage: GitStorage;
+
+  username: string;
 }
 
 let config: Config = {} as any;
@@ -75,9 +78,12 @@ export async function initRepo({
     hostType: 'bitbucket',
     url: 'https://api.bitbucket.org/',
   });
-  config = {} as any;
+  config = {
+    repository,
+    username: opts!.username,
+  } as any;
+
   // TODO: get in touch with @rarkins about lifting up the caching into the app layer
-  config.repository = repository;
   const platformConfig: any = {};
 
   const url = GitStorage.getUrl({
@@ -101,11 +107,16 @@ export async function initRepo({
     platformConfig.privateRepo = info.privateRepo;
     platformConfig.isFork = info.isFork;
     platformConfig.repoFullName = info.repoFullName;
-    config.owner = info.owner;
+
+    Object.assign(config, {
+      owner: info.owner,
+      defaultBranch: info.mainbranch,
+      baseBranch: info.mainbranch,
+      mergeMethod: info.mergeMethod,
+      has_issues: info.has_issues,
+    });
+
     logger.debug(`${repository} owner = ${config.owner}`);
-    config.defaultBranch = info.mainbranch;
-    config.baseBranch = config.defaultBranch;
-    config.mergeMethod = info.mergeMethod;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       throw new Error('not-found');
@@ -296,12 +307,11 @@ export async function setBranchStatus(
 
 async function findOpenIssues(title: string) {
   try {
-    const currentUser = (await api.get('/2.0/user')).body.username;
     const filter = encodeURIComponent(
       [
         `title=${JSON.stringify(title)}`,
         '(state = "new" OR state = "open")',
-        `reporter.username="${currentUser}"`,
+        `reporter.username="${config.username}"`,
       ].join(' AND ')
     );
     return (
@@ -310,13 +320,17 @@ async function findOpenIssues(title: string) {
       )).body.values || /* istanbul ignore next */ []
     );
   } catch (err) /* istanbul ignore next */ {
-    logger.warn('Error finding issues');
+    logger.warn({ err }, 'Error finding issues');
     return [];
   }
 }
 
 export async function findIssue(title: string) {
   logger.debug(`findIssue(${title})`);
+  if (!config.has_issues) {
+    logger.warn('Issues are disabled');
+    return null;
+  }
   const issues = await findOpenIssues(title);
   if (!issues.length) {
     return null;
@@ -339,6 +353,10 @@ async function closeIssue(issueNumber: number) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
+  if (!config.has_issues) {
+    logger.warn('Issues are disabled');
+    return null;
+  }
   try {
     const issues = await findOpenIssues(title);
     if (issues.length) {
@@ -381,13 +399,32 @@ export async function ensureIssue(title: string, body: string) {
   return null;
 }
 
-export /* istanbul ignore next */ function getIssueList() {
+export /* istanbul ignore next */ async function getIssueList() {
   logger.debug(`getIssueList()`);
-  // TODO: Needs implementation
-  return [];
+  if (!config.has_issues) {
+    logger.warn('Issues are disabled');
+    return [];
+  }
+  try {
+    const filter = encodeURIComponent(
+      [`reporter.username="${config.username}"`].join(' AND ')
+    );
+    return (
+      (await api.get(
+        `/2.0/repositories/${config.repository}/issues?q=${filter}`
+      )).body.values || /* istanbul ignore next */ []
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error finding issues');
+    return [];
+  }
 }
 
 export async function ensureIssueClosing(title: string) {
+  if (!config.has_issues) {
+    logger.warn('Issues are disabled');
+    return;
+  }
   const issues = await findOpenIssues(title);
   for (const issue of issues) {
     await closeIssue(issue.id);
