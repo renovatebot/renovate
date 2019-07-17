@@ -1,9 +1,14 @@
+/** @type any */
 const composer = require('../../../lib/manager/composer');
+/** @type any */
 const npm = require('../../../lib/manager/npm');
 const {
   getUpdatedPackageFiles,
 } = require('../../../lib/workers/branch/get-updated');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
+
+/** @type any */
+const platform = global.platform;
 
 describe('workers/branch/get-updated', () => {
   describe('getUpdatedPackageFiles()', () => {

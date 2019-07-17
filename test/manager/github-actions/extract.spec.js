@@ -10,15 +10,11 @@ const workflow1 = fs.readFileSync(
 
 describe('lib/manager/github-actions/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
-    beforeEach(() => {
-      config = {};
-    });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBeNull();
+      expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('extracts multiple image lines from docker_container', () => {
-      const res = extractPackageFile(workflow1, config);
+      const res = extractPackageFile(workflow1);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });

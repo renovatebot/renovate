@@ -1,11 +1,17 @@
 const validate = require('../../../../lib/workers/repository/finalise/validate');
 
+/** @type any */
+const platform = global.platform;
+
 beforeEach(() => {
   jest.resetAllMocks();
 });
 
 describe('workers/repository/validate', () => {
   describe('validatePrs()', () => {
+    it('returns if disabled', async () => {
+      await validate.validatePrs({ suppressNotifications: ['prValidation'] });
+    });
     it('catches error', async () => {
       platform.getPrList.mockReturnValueOnce([
         {

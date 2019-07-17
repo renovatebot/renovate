@@ -1,10 +1,10 @@
 const npm = require('../../lib/datasource/npm');
 const presets = require('../../lib/config/presets');
-const presetDefaults = require('./npm/_fixtures/renovate-config-default');
-const presetPackages = require('./npm/_fixtures/renovate-config-packages');
-const presetGroup = require('./npm/_fixtures/renovate-config-group');
-const presetMonorepo = require('./npm/_fixtures/renovate-config-monorepo');
-const presetIkatyang = require('./npm/_fixtures/renovate-config-ikatyang');
+const presetDefaults = require('./npm/_fixtures/renovate-config-default.json');
+const presetPackages = require('./npm/_fixtures/renovate-config-packages.json');
+const presetGroup = require('./npm/_fixtures/renovate-config-group.json');
+const presetMonorepo = require('./npm/_fixtures/renovate-config-monorepo.json');
+const presetIkatyang = require('./npm/_fixtures/renovate-config-ikatyang.json');
 
 npm.getPreset = jest.fn((dep, presetName) => {
   if (dep === 'renovate-config-default') {

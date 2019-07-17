@@ -1,14 +1,20 @@
-const URL = require('url');
-const parseLinkHeader = require('parse-link-header');
-const pAll = require('p-all');
+import URL from 'url';
+import parseLinkHeader from 'parse-link-header';
+import pAll from 'p-all';
 
-const got = require('../../util/got');
-const { maskToken } = require('../../util/mask');
+import got from '../../util/got';
+import { maskToken } from '../../util/mask';
+import { GotApi } from '../common';
+import { logger } from '../../logger';
 
 const hostType = 'github';
 let baseUrl = 'https://api.github.com/';
 
-async function get(path, options, okToRetry = true) {
+async function get(
+  path: string,
+  options?: any,
+  okToRetry = true
+): Promise<any> {
   const opts = {
     hostType,
     baseUrl,
@@ -55,14 +61,14 @@ async function get(path, options, okToRetry = true) {
         const queue = pageNumbers.map(page => () => {
           const nextUrl = URL.parse(linkHeader.next.url, true);
           delete nextUrl.search;
-          nextUrl.query.page = page;
+          nextUrl.query.page = page.toString();
           return get(
             URL.format(nextUrl),
             { ...opts, paginate: false },
             okToRetry
           );
         });
-        const pages = await pAll(queue, { concurrency: 5 });
+        const pages = await pAll<{ body: any[] }>(queue, { concurrency: 5 });
         res.body = res.body.concat(
           ...pages.filter(Boolean).map(page => page.body)
         );
@@ -140,6 +146,15 @@ async function get(path, options, okToRetry = true) {
         throw new Error('platform-failure');
       }
       throw new Error('bad-credentials');
+    } else if (err.statusCode === 422) {
+      if (
+        err.body &&
+        err.body.errors &&
+        err.body.errors.find((e: any) => e.code === 'invalid')
+      ) {
+        throw new Error('repository-changed');
+      }
+      throw new Error('platform-failure');
     }
     throw err;
   }
@@ -148,7 +163,7 @@ async function get(path, options, okToRetry = true) {
 const helpers = ['get', 'post', 'put', 'patch', 'head', 'delete'];
 
 for (const x of helpers) {
-  get[x] = (url, opts) =>
+  (get as any)[x] = (url: string, opts: any) =>
     get(url, Object.assign({}, opts, { method: x.toUpperCase() }));
 }
 
@@ -156,8 +171,9 @@ get.setAppMode = function setAppMode() {
   // no-op
 };
 
-get.setBaseUrl = u => {
+get.setBaseUrl = (u: string) => {
   baseUrl = u;
 };
 
-module.exports = get;
+export const api: GotApi = get as any;
+export default api;

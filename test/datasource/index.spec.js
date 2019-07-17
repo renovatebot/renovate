@@ -1,4 +1,5 @@
 const datasource = require('../../lib/datasource');
+/** @type any */
 const npmDatasource = require('../../lib/datasource/npm');
 
 jest.mock('../../lib/datasource/docker');

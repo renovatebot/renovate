@@ -3,6 +3,7 @@ import * as azureApi from './azure-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import { appSlug } from '../../config/app-strings';
 import GitStorage from '../git/storage';
+import { logger } from '../../logger';
 
 interface RepoConfig {
   storage: GitStorage;

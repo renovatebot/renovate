@@ -1,3 +1,4 @@
+/** @type any */
 const managerFiles = require('../../../../lib/workers/repository/extract/manager-files');
 const {
   extractAllDependencies,

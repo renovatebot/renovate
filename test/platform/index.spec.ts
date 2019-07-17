@@ -1,10 +1,10 @@
-const github = require('../../lib/platform/github');
-const gitlab = require('../../lib/platform/gitlab');
-const azure = require('../../lib/platform/azure');
-const bitbucket = require('../../lib/platform/bitbucket');
-const bitbucketServer = require('../../lib/platform/bitbucket-server');
+import * as github from '../../lib/platform/github';
+import * as gitlab from '../../lib/platform/gitlab';
+import * as azure from '../../lib/platform/azure';
+import * as bitbucket from '../../lib/platform/bitbucket';
+import * as bitbucketServer from '../../lib/platform/bitbucket-server';
 
-const platform = require('../../lib/platform');
+import * as platform from '../../lib/platform';
 
 describe('platform', () => {
   it('throws if wrong platform', async () => {
@@ -21,7 +21,7 @@ describe('platform', () => {
     expect(await platform.initPlatform(config)).toMatchSnapshot();
   });
   it('has a list of supported methods for github', () => {
-    const githubMethods = Object.keys(github);
+    const githubMethods = Object.keys(github).sort();
     expect(githubMethods).toMatchSnapshot();
   });
 

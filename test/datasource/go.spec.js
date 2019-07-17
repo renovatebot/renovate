@@ -1,4 +1,5 @@
 const got = require('../../lib/util/got');
+/** @type any */
 const github = require('../../lib/datasource/github');
 const go = require('../../lib/datasource/go');
 

@@ -101,6 +101,11 @@
       "type": "boolean",
       "default": true
     },
+    "optimizeForDisabled": {
+      "description": "Set to true to first check for disabling in config before cloning",
+      "type": "boolean",
+      "default": false
+    },
     "masterIssue": {
       "description": "Whether to create a \"Master Issue\" within the repository.",
       "type": "boolean",

@@ -3,7 +3,7 @@ const got = require('../../lib/util/got');
 const datasource = require('../../lib/datasource');
 
 jest.mock('../../lib/util/got');
-
+/** @type any */
 const consulData = fs.readFileSync(
   'test/datasource/terraform/_fixtures/registry-consul.json'
 );
