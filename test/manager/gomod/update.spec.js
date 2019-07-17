@@ -200,7 +200,7 @@ describe('manager/gomod/update', () => {
       // Assert that the version still contains +incompatible tag.
       expect(res.includes(upgrade.newValue + '+incompatible')).toBe(true);
     });
-    it('handles replace line', () => {
+    it('handles replace line with minor version update', () => {
       const upgrade = {
         depName: 'github.com/pravesht/gocql',
         lineNumber: 11,
@@ -210,6 +210,36 @@ describe('manager/gomod/update', () => {
       const res = goUpdate.updateDependency(gomod1, upgrade);
       expect(res).not.toEqual(gomod1);
       expect(res.includes(upgrade.newValue)).toBe(true);
+    });
+    it('handles replace line with major version update', () => {
+      const upgrade = {
+        depName: 'github.com/pravesht/gocql',
+        lineNumber: 11,
+        newValue: 'v2.0.0',
+        depType: 'replace',
+        currentValue: 'v0.7.0',
+        newMajor: 2,
+        updateType: 'major',
+      };
+      const res = goUpdate.updateDependency(gomod1, upgrade);
+      expect(res).not.toEqual(gomod1);
+      expect(res.includes(upgrade.newValue)).toBe(true);
+    });
+    it('handles replace line with digest', () => {
+      const upgrade = {
+        depName: 'github.com/pravesht/gocql',
+        lineNumber: 11,
+        newValue: 'v2.0.0',
+        depType: 'replace',
+        currentValue: 'v0.7.0',
+        newMajor: 2,
+        updateType: 'digest',
+        currentDigest: '14d3d4c51834',
+        newDigest: '123456123456abcdef',
+      };
+      const res = goUpdate.updateDependency(gomod1, upgrade);
+      expect(res).not.toEqual(gomod1);
+      expect(res.includes(upgrade.newDigest.substring(0, 12))).toBe(true);
     });
   });
 });
