@@ -565,6 +565,44 @@ Object {
 }
 `;
 
+exports[`lib/manager/composer/extract extractPackageFile() extracts object repositories and registryUrls with lock file 1`] = `
+Object {
+  "composerLock": "composer.lock",
+  "deps": Array [
+    Object {
+      "currentValue": "*",
+      "datasource": "packagist",
+      "depName": "aws/aws-sdk-php",
+      "depType": "require",
+      "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": "dev-trunk",
+      "datasource": "gitTags",
+      "depName": "awesome/vcs",
+      "depType": "require",
+      "lockedVersion": "1.1.0",
+      "lookupName": "https://my-vcs.example/my-vcs-repo",
+      "skipReason": "unsupported-constraint",
+    },
+    Object {
+      "currentValue": ">=7.0.2",
+      "datasource": "gitTags",
+      "depName": "awesome/git",
+      "depType": "require",
+      "lockedVersion": "1.2.0",
+      "lookupName": "git@my-git.example:my-git-repo",
+    },
+  ],
+  "registryUrls": Array [
+    Object {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
 Object {
   "composerLock": false,
@@ -595,6 +633,42 @@ Object {
       "depName": "wpackagist-theme/hueman",
       "depType": "require",
       "skipReason": "any-version",
+    },
+  ],
+  "registryUrls": Array [
+    Object {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/composer/extract extractPackageFile() extracts repositories and registryUrls 1`] = `
+Object {
+  "composerLock": false,
+  "deps": Array [
+    Object {
+      "currentValue": "*",
+      "datasource": "packagist",
+      "depName": "aws/aws-sdk-php",
+      "depType": "require",
+      "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": "dev-trunk",
+      "datasource": "gitTags",
+      "depName": "awesome/vcs",
+      "depType": "require",
+      "lookupName": "https://my-vcs.example/my-vcs-repo",
+      "skipReason": "unsupported-constraint",
+    },
+    Object {
+      "currentValue": ">=7.0.2",
+      "datasource": "gitTags",
+      "depName": "awesome/git",
+      "depType": "require",
+      "lookupName": "https://my-git.example/my-git-repo",
     },
   ],
   "registryUrls": Array [
