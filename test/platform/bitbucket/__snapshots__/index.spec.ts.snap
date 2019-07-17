@@ -66,10 +66,7 @@ Array [
     undefined,
   ],
   Array [
-    "/2.0/user",
-  ],
-  Array [
-    "/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+    "/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   ],
 ]
 `;
@@ -94,10 +91,7 @@ Array [
 exports[`platform/bitbucket ensureIssue() noop for existing issue 1`] = `
 Array [
   Array [
-    "/2.0/user",
-  ],
-  Array [
-    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   ],
 ]
 `;
@@ -105,10 +99,7 @@ Array [
 exports[`platform/bitbucket ensureIssue() updates existing issues 1`] = `
 Array [
   Array [
-    "/2.0/user",
-  ],
-  Array [
-    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   ],
 ]
 `;
@@ -118,10 +109,7 @@ exports[`platform/bitbucket ensureIssue() updates existing issues 2`] = `Array [
 exports[`platform/bitbucket ensureIssueClosing() does not throw 1`] = `
 Array [
   Array [
-    "/2.0/user",
-  ],
-  Array [
-    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   ],
 ]
 `;
@@ -138,10 +126,7 @@ Object {
 exports[`platform/bitbucket findIssue() does not throw 2`] = `
 Array [
   Array [
-    "/2.0/user",
-  ],
-  Array [
-    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22nobody%22",
+    "/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   ],
 ]
 `;

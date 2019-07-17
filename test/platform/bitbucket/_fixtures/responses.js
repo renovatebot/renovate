@@ -21,6 +21,7 @@ const issue = {
 const repo = {
   is_private: false,
   full_name: 'some/repo',
+  has_issues: true,
   owner: { username: 'some' },
   mainbranch: { name: 'master' },
 };

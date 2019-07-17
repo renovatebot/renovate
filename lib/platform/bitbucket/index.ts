@@ -313,6 +313,8 @@ async function findOpenIssues(title: string) {
 
 export async function findIssue(title: string) {
   logger.debug(`findIssue(${title})`);
+
+  /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled');
     return null;
@@ -339,6 +341,8 @@ async function closeIssue(issueNumber: number) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
+
+  /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled');
     return null;
@@ -387,6 +391,8 @@ export async function ensureIssue(title: string, body: string) {
 
 export /* istanbul ignore next */ async function getIssueList() {
   logger.debug(`getIssueList()`);
+
+  /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled');
     return [];
@@ -410,6 +416,7 @@ export /* istanbul ignore next */ async function getIssueList() {
 }
 
 export async function ensureIssueClosing(title: string) {
+  /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled');
     return;
