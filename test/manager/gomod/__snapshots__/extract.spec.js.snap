@@ -579,6 +579,74 @@ Array [
 ]
 `;
 
+exports[`lib/manager/gomod/extract extractPackageFile() extracts single-line requires 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.7.0",
+    "datasource": "go",
+    "depName": "github.com/pkg/errors",
+    "depNameShort": "pkg/errors",
+    "depType": "require",
+    "lineNumber": 2,
+  },
+  Object {
+    "currentValue": "v1.15.21",
+    "datasource": "go",
+    "depName": "github.com/aws/aws-sdk-go",
+    "depNameShort": "aws/aws-sdk-go",
+    "depType": "require",
+    "lineNumber": 3,
+  },
+  Object {
+    "currentValue": "v1.0.0",
+    "datasource": "go",
+    "depName": "github.com/davecgh/go-spew",
+    "depNameShort": "davecgh/go-spew",
+    "depType": "require",
+    "lineNumber": 4,
+  },
+  Object {
+    "currentValue": "v1.0.0",
+    "datasource": "go",
+    "depName": "golang.org/x/foo",
+    "depNameShort": "golang.org/x/foo",
+    "depType": "require",
+    "lineNumber": 5,
+  },
+  Object {
+    "currentValue": "abcdef1",
+    "depName": "github.com/rarkins/foo",
+    "depType": "require",
+    "lineNumber": 6,
+    "skipReason": "unsupported-version",
+  },
+  Object {
+    "currentValue": "v1.0.0",
+    "datasource": "go",
+    "depName": "gopkg.in/russross/blackfriday.v1",
+    "depNameShort": "russross/blackfriday",
+    "depType": "require",
+    "lineNumber": 7,
+  },
+  Object {
+    "currentValue": "v25.1.0+incompatible",
+    "datasource": "go",
+    "depName": "github.com/Azure/azure-sdk-for-go",
+    "depNameShort": "Azure/azure-sdk-for-go",
+    "depType": "require",
+    "lineNumber": 8,
+  },
+  Object {
+    "currentValue": "v0.0.0",
+    "datasource": "go",
+    "depName": "github.com/pravesht/gocql",
+    "depNameShort": "pravesht/gocql",
+    "depType": "replace",
+    "lineNumber": 11,
+  },
+]
+`;
+
 exports[`lib/manager/gomod/extract extractPackageFile() extracts single-line requires and replace 1`] = `
 Array [
   Object {
