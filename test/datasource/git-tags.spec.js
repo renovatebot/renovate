@@ -1,3 +1,4 @@
+/** @type any */
 const simpleGit = require('simple-git/promise');
 const { getPkgReleases } = require('../../lib/datasource/git-tags');
 

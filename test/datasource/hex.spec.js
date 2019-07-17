@@ -1,5 +1,6 @@
 const fs = require('fs');
 const got = require('../../lib/util/got');
+/** @type any */
 const hostRules = require('../../lib/util/host-rules');
 const { getPkgReleases } = require('../../lib/datasource/hex');
 
@@ -49,7 +50,7 @@ describe('datasource/hex', () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      expect(await getPkgReleases('some_package')).toBeNull();
+      expect(await getPkgReleases({ lookupName: 'some_package' })).toBeNull();
     });
     it('returns null with wrong auth token', async () => {
       hostRules.find.mockReturnValueOnce({ token: 'this_simple_token' });

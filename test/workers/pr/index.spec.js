@@ -1,8 +1,13 @@
 const prWorker = require('../../../lib/workers/pr');
+/** @type any */
 const changelogHelper = require('../../../lib/workers/pr/changelog');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 jest.mock('../../../lib/workers/pr/changelog');
+
+/** @type any */
+const platform = global.platform;
+
 changelogHelper.getChangeLogJSON = jest.fn();
 changelogHelper.getChangeLogJSON.mockReturnValue({
   project: {
@@ -98,6 +103,7 @@ describe('workers/pr', () => {
     });
   });
   describe('ensurePr', () => {
+    /** @type any */
     let config;
     const existingPr = {
       displayNumber: 'Existing PR',

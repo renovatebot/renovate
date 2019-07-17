@@ -1,6 +1,8 @@
 const globalWorker = require('../../../lib/workers/global');
 const repositoryWorker = require('../../../lib/workers/repository');
+/** @type any */
 const configParser = require('../../../lib/config');
+/** @type any */
 const platform = require('../../../lib/platform');
 
 jest.mock('../../../lib/platform');

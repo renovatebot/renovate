@@ -4,6 +4,7 @@ jest.mock('../../../../lib/platform/github');
 
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {
+    /** @type any */
     let config;
     beforeEach(() => {
       config = require('../../../config/config/_fixtures');

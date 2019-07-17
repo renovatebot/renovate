@@ -1,6 +1,7 @@
 const {
   processRepo,
 } = require('../../../../lib/workers/repository/process/index');
+/** @type any */
 const extractUpdate = require('../../../../lib/workers/repository/process/extract-update');
 
 jest.mock('../../../../lib/workers/repository/process/extract-update');
