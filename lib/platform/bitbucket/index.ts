@@ -6,23 +6,9 @@ import { logger } from '../../logger';
 import GitStorage from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { appSlug } from '../../config/app-strings';
+import * as comments from './comments';
 
-interface Config {
-  baseBranch: string;
-  baseCommitSHA: string;
-  defaultBranch: string;
-  fileList: any[];
-  has_issues: boolean;
-  mergeMethod: string;
-  owner: string;
-  prList: any[];
-  repository: string;
-  storage: GitStorage;
-
-  username: string;
-}
-
-let config: Config = {} as any;
+let config: utils.Config = {} as any;
 
 export function initPlatform({
   endpoint,
@@ -460,22 +446,18 @@ export /* istanbul ignore next */ function deleteLabel() {
   throw new Error('deleteLabel not implemented');
 }
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export function ensureComment(
-  _prNo: number,
-  _topic: string | null,
-  _content: string
+  prNo: number,
+  topic: string | null,
+  content: string
 ) {
   // https://developer.atlassian.com/bitbucket/api/2/reference/search?q=pullrequest+comment
-  logger.warn('Comment functionality not implemented yet');
-  return Promise.resolve();
+  return comments.ensureComment(config, prNo, topic, content);
 }
 
-export function ensureCommentRemoval(_prNo: number, _topic: string) {
-  // The api does not support removing comments
-  return Promise.resolve();
+export function ensureCommentRemoval(prNo: number, topic: string) {
+  return comments.ensureCommentRemoval(config, prNo, topic);
 }
-/* eslint-enable @typescript-eslint/no-unused-vars */
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string) {
