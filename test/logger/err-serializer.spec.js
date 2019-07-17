@@ -13,6 +13,7 @@ describe('logger/err-serializer', () => {
         headers: {
           authorization: 'Bearer abc',
         },
+        auth: 'test:token',
       },
     };
     expect(configSerializer(err)).toMatchSnapshot();
