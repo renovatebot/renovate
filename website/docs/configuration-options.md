@@ -911,6 +911,11 @@ If you set `prCreation=not-pending`, then Renovate will wait until tests are non
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
+## pruneStaleBranches
+
+Set to `false` to disable deleting orphan branches and autoclosing PRs.
+Defaults to `true`.
+
 ## pub
 
 ## python
