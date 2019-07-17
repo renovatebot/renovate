@@ -1265,6 +1265,11 @@
         "rangeStrategy": "bump"
       },
       "$ref": "#"
+    },
+    "pruneStaleBranches": {
+      "description": "Enable or disable pruning of stale branches",
+      "type": "boolean",
+      "default": true
     }
   }
 }
