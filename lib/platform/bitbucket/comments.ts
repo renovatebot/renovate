@@ -7,7 +7,9 @@ interface Comment {
   id: number;
 }
 
-async function getComments(config: Config, prNo: number) {
+export type CommentsConfig = Pick<Config, 'repository'>;
+
+async function getComments(config: CommentsConfig, prNo: number) {
   const comments = await accumulateValues<Comment>(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`
   );
@@ -16,7 +18,7 @@ async function getComments(config: Config, prNo: number) {
   return comments;
 }
 
-async function addComment(config: Config, prNo: number, raw: string) {
+async function addComment(config: CommentsConfig, prNo: number, raw: string) {
   await api.post(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
     {
@@ -26,7 +28,7 @@ async function addComment(config: Config, prNo: number, raw: string) {
 }
 
 async function editComment(
-  config: Config,
+  config: CommentsConfig,
   prNo: number,
   commentId: number,
   raw: string
@@ -39,14 +41,18 @@ async function editComment(
   );
 }
 
-async function deleteComment(config: Config, prNo: number, commentId: number) {
+async function deleteComment(
+  config: CommentsConfig,
+  prNo: number,
+  commentId: number
+) {
   await api.delete(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments/${commentId}`
   );
 }
 
 export async function ensureComment(
-  config: Config,
+  config: CommentsConfig,
   prNo: number,
   topic: string | null,
   content: string
@@ -92,7 +98,7 @@ export async function ensureComment(
 }
 
 export async function ensureCommentRemoval(
-  config: Config,
+  config: CommentsConfig,
   prNo: number,
   topic: string
 ) {
