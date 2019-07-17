@@ -57,6 +57,7 @@ describe('workers/repository/finalise/prune', () => {
     });
     it('does nothing on prune stale branches disabled', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
+      config.dryRun = false;
       config.pruneStaleBranches = false;
       platform.getAllRenovateBranches.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
