@@ -9,15 +9,11 @@ const sample = fs.readFileSync(
 
 describe('lib/manager/mix/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
-    beforeEach(() => {
-      config = {};
-    });
     it('returns empty for invalid dependency file', () => {
-      expect(extractPackageFile('nothing here', config)).toMatchSnapshot();
+      expect(extractPackageFile('nothing here')).toMatchSnapshot();
     });
     it('extracts all dependencies', () => {
-      const res = extractPackageFile(sample, config).deps;
+      const res = extractPackageFile(sample).deps;
       expect(res).toMatchSnapshot();
     });
   });
