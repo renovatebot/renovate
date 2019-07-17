@@ -8,6 +8,9 @@ const {
   updateDependency,
 } = require('../../../lib/manager/maven/index');
 
+/** @type any */
+const platform = global.platform;
+
 const pomContent = fs.readFileSync(
   'test/manager/maven/_fixtures/simple.pom.xml',
   'utf8'
@@ -42,12 +45,7 @@ describe('manager/maven', () => {
     it('should return package files info', async () => {
       platform.getFile.mockReturnValueOnce(pomContent);
       const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
-      expect(packages).toHaveLength(1);
-
-      const pkg = packages[0];
-      expect(pkg.packageFile).toEqual('random.pom.xml');
-      expect(pkg.datasource).toEqual('maven');
-      expect(pkg.deps).not.toBeNull();
+      expect(packages).toMatchSnapshot();
     });
   });
 

@@ -1,19 +1,26 @@
-const delay = require('delay');
-const got = require('../../../lib/util/got');
-const get = require('../../../lib/platform/github/gh-got-wrapper');
+import delay from 'delay';
+import { Response } from 'got';
+import got from '../../../lib/util/got';
+import { api } from '../../../lib/platform/github/gh-got-wrapper';
 
 jest.mock('../../../lib/util/got');
 jest.mock('delay');
+
+const get: <T extends object = any>(
+  path: string,
+  options?: any,
+  okToRetry?: boolean
+) => Promise<Response<T>> = api as any;
 
 describe('platform/gh-got-wrapper', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     delete global.appMode;
-    delay.mockImplementation(() => Promise.resolve());
+    (delay as any).mockImplementation(() => Promise.resolve());
   });
   it('supports app mode', async () => {
     global.appMode = true;
-    await get('some-url', { headers: { accept: 'some-accept' } });
+    await api.get('some-url', { headers: { accept: 'some-accept' } });
     expect(got.mock.calls[0][1].headers.accept).toBe(
       'application/vnd.github.machine-man-preview+json, some-accept'
     );
@@ -22,8 +29,8 @@ describe('platform/gh-got-wrapper', () => {
     got.mockImplementationOnce(() => ({
       body: '{"data":{',
     }));
-    get.setBaseUrl('https://ghe.mycompany.com/api/v3/');
-    await get.post('graphql', {
+    api.setBaseUrl('https://ghe.mycompany.com/api/v3/');
+    await api.post('graphql', {
       body: 'abc',
     });
     expect(got.mock.calls[0][0].includes('/v3')).toBe(false);
@@ -47,7 +54,7 @@ describe('platform/gh-got-wrapper', () => {
       headers: {},
       body: ['d'],
     });
-    const res = await get('some-url', { paginate: true });
+    const res = await api.get('some-url', { paginate: true });
     expect(res.body).toEqual(['a', 'b', 'c', 'd']);
     expect(got).toHaveBeenCalledTimes(3);
   });
@@ -63,7 +70,7 @@ describe('platform/gh-got-wrapper', () => {
       headers: {},
       body: ['b'],
     });
-    const res = await get('some-url', { paginate: true });
+    const res = await api.get('some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
     expect(got).toHaveBeenCalledTimes(1);
   });
@@ -75,7 +82,7 @@ describe('platform/gh-got-wrapper', () => {
           'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
       })
     );
-    await expect(get('some-url')).rejects.toThrow();
+    await expect(api.get('some-url')).rejects.toThrow();
   });
   it('should throw Bad credentials', async () => {
     got.mockImplementationOnce(() =>
@@ -86,7 +93,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     let e;
     try {
-      await get('some-url');
+      await api.get('some-url');
     } catch (err) {
       e = err;
     }
@@ -105,7 +112,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     let e;
     try {
-      await get('some-url');
+      await api.get('some-url');
     } catch (err) {
       e = err;
     }
@@ -121,7 +128,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     let e;
     try {
-      await get('some-url', {}, 0);
+      await get('some-url', {}, false);
     } catch (err) {
       e = err;
     }
@@ -137,7 +144,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     let e;
     try {
-      await get('some-url', {}, 0);
+      await get('some-url', {}, false);
     } catch (err) {
       e = err;
     }
@@ -152,7 +159,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     let e;
     try {
-      await get('some-url', {}, 0);
+      await get('some-url', {}, false);
     } catch (err) {
       e = err;
     }
@@ -168,7 +175,7 @@ describe('platform/gh-got-wrapper', () => {
     );
     let e;
     try {
-      await get('some-url', {}, 0);
+      await get('some-url', {}, false);
     } catch (err) {
       e = err;
     }

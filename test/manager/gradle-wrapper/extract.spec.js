@@ -14,23 +14,17 @@ const propertiesFile2 = fs.readFileSync(
 
 describe('lib/manager/gradle-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
-
-    beforeEach(() => {
-      config = {};
-    });
-
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBeNull();
+      expect(extractPackageFile('nothing here')).toBeNull();
     });
 
     it('extracts bin version line', () => {
-      const res = extractPackageFile(propertiesFile1, config);
+      const res = extractPackageFile(propertiesFile1);
       expect(res.deps).toMatchSnapshot();
     });
 
     it('extracts all version line', () => {
-      const res = extractPackageFile(propertiesFile2, config);
+      const res = extractPackageFile(propertiesFile2);
       expect(res.deps).toMatchSnapshot();
     });
   });

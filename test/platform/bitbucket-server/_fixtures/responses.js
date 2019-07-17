@@ -154,7 +154,7 @@ function generateServerResponses(endpoint) {
     [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`]: {
       POST: generatePR(endpoint, 'SOME', 'repo'),
     },
-    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100`]: {
+    [`${endpoint}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`]: {
       GET: {
         isLastPage: true,
         values: [generatePR(endpoint, 'SOME', 'repo')],

@@ -1,4 +1,4 @@
-const { handleError } = require('../../../lib/workers/repository/error');
+import handleError from '../../../lib/workers/repository/error';
 
 jest.mock('../../../lib/workers/repository/error-config');
 

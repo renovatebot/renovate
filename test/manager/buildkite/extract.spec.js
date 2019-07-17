@@ -22,30 +22,26 @@ const pipeline4 = fs.readFileSync(
 
 describe('lib/manager/buildkite/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
-    beforeEach(() => {
-      config = {};
-    });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBeNull();
+      expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('extracts simple single plugin', () => {
-      const res = extractPackageFile(pipeline1, config).deps;
+      const res = extractPackageFile(pipeline1).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
     });
     it('extracts multiple plugins in same file', () => {
-      const res = extractPackageFile(pipeline2, config).deps;
+      const res = extractPackageFile(pipeline2).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
     it('adds skipReason', () => {
-      const res = extractPackageFile(pipeline3, config).deps;
+      const res = extractPackageFile(pipeline3).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
     });
     it('extracts arrays of plugins', () => {
-      const res = extractPackageFile(pipeline4, config).deps;
+      const res = extractPackageFile(pipeline4).deps;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2); // TODO: should be 4
     });

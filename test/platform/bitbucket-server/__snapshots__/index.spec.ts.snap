@@ -259,7 +259,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -490,7 +490,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -519,7 +519,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -534,7 +534,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -570,7 +570,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
   Array [
@@ -961,7 +961,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1713,7 +1713,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1944,7 +1944,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1973,7 +1973,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1988,7 +1988,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -2024,7 +2024,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
   Array [
@@ -2415,7 +2415,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]

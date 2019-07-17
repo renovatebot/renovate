@@ -3,6 +3,9 @@ const {
   rebaseOnboardingBranch,
 } = require('../../../../../lib/workers/repository/onboarding/branch/rebase');
 
+/** @type any */
+const platform = global.platform;
+
 describe('workers/repository/onboarding/branch/rebase', () => {
   describe('rebaseOnboardingBranch()', () => {
     let config;

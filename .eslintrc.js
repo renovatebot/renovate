@@ -1,6 +1,7 @@
 module.exports = {
   env: {
     node: true,
+    jest: true,
   },
   extends: [
     'plugin:promise/recommended',
@@ -14,7 +15,7 @@ module.exports = {
     project: './tsconfig.json',
   },
   rules: {
-    'import/no-unresolved': 0, // only required for js, see overrides
+    'import/no-unresolved': 0, // done by typescript
     'require-await': 'error',
     'no-use-before-define': 0,
     'no-restricted-syntax': 0,
@@ -24,6 +25,7 @@ module.exports = {
     'no-underscore-dangle': 0,
 
     // TODO: fix lint
+    'import/prefer-default-export': 1,
     '@typescript-eslint/camelcase': 'off', // disabled until ??
     '@typescript-eslint/no-var-requires': 'off', // disable until all files converted to typescript
     '@typescript-eslint/no-use-before-define': 'off', // disable until all files converted to typescript
@@ -31,17 +33,13 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 0,
     '@typescript-eslint/no-explicit-any': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
-  },
-  overrides: [
-    {
-      // TODO: should be removed in near future, uses around ~50% lint time
-      files: ['*.js'],
-      rules: {
-        'import/no-unresolved': [
-          'error',
-          { commonjs: true, caseSensitive: true },
-        ],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        vars: 'all',
+        args: 'none',
+        ignoreRestSiblings: false,
       },
-    },
-  ],
+    ], // disable until proper interfaced api
+  },
 };

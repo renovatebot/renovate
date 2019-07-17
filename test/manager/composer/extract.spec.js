@@ -1,6 +1,9 @@
 const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/composer/extract');
 
+/** @type any */
+const platform = global.platform;
+
 const requirements1 = fs.readFileSync(
   'test/manager/composer/_fixtures/composer1.json',
   'utf8'
