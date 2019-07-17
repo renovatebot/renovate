@@ -3,6 +3,9 @@ const path = require('path');
 const npmExtract = require('../../../../lib/manager/npm/extract');
 const defaultConfig = require('../../../../lib/config/defaults').getConfig();
 
+/** @type any */
+const platform = global.platform;
+
 function readFixture(fixture) {
   return fs.readFileSync(
     path.resolve(__dirname, `../_fixtures/${fixture}`),

@@ -1,6 +1,9 @@
 const fs = require('fs');
 const { getNpmLock } = require('../../../../lib/manager/npm/extract/npm');
 
+/** @type any */
+const platform = global.platform;
+
 describe('manager/npm/extract/npm', () => {
   describe('.getNpmLock()', () => {
     it('returns empty if failed to parse', async () => {

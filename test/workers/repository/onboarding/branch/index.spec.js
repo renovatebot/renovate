@@ -5,6 +5,9 @@ const {
 
 jest.mock('../../../../../lib/workers/repository/onboarding/branch/rebase');
 
+/** @type any */
+const platform = global.platform;
+
 describe('workers/repository/onboarding/branch', () => {
   describe('checkOnboardingBranch', () => {
     let config;

@@ -1,11 +1,16 @@
 const {
   getManagerPackageFiles,
 } = require('../../../../lib/workers/repository/extract/manager-files');
+/** @type any */
 const fileMatch = require('../../../../lib/workers/repository/extract/file-match');
 const npm = require('../../../../lib/manager/npm');
+/** @type any */
 const dockerfile = require('../../../../lib/manager/dockerfile');
 
 jest.mock('../../../../lib/workers/repository/extract/file-match');
+
+/** @type any */
+const platform = global.platform;
 
 describe('workers/repository/extract/manager-files', () => {
   describe('getManagerPackageFiles()', () => {

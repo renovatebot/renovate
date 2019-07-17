@@ -4,6 +4,9 @@ const {
   ensureOnboardingPr,
 } = require('../../../../../lib/workers/repository/onboarding/pr');
 
+/** @type any */
+const platform = global.platform;
+
 describe('workers/repository/onboarding/pr', () => {
   describe('ensureOnboardingPr()', () => {
     let config;

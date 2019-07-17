@@ -1,3 +1,4 @@
+/** @type any */
 const cli = require('../../lib/config/cli.js');
 const getArgv = require('./config/_fixtures/argv');
 
