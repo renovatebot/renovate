@@ -2,6 +2,9 @@ const {
   raiseConfigWarningIssue,
 } = require('../../../lib/workers/repository/error-config');
 
+/** @type any */
+const platform = global.platform;
+
 let config;
 beforeEach(() => {
   jest.resetAllMocks();

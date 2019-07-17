@@ -1,5 +1,6 @@
 const datasource = require('../../lib/datasource');
 const gitlab = require('../../lib/datasource/gitlab');
+/** @type any */
 const glGot = require('../../lib/platform/gitlab/gl-got-wrapper').api.get;
 
 jest.mock('../../lib/platform/gitlab/gl-got-wrapper');

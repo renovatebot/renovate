@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/branch/package-js .updateDependency(fileContent, depName, currentValue, newValue) handles alternative quotes and white space 1`] = `
-"Package.describe({
+"// @ts-nocheck
+Package.describe({
     \\"name\\": \\"steffo:meteor-accounts-saml\\",
     \\"summary\\": \\"SAML Login (SP) for Meteor. Works with OpenAM, OpenIDP and provides Single Logout.\\",
     \\"version\\": \\"0.0.1\\",
@@ -31,7 +32,8 @@ Npm.depends({
 `;
 
 exports[`workers/branch/package-js .updateDependency(fileContent, depName, currentValue, newValue) replaces a dependency value 1`] = `
-"Package.describe({
+"// @ts-nocheck
+Package.describe({
 	'name': 'steffo:meteor-accounts-saml',
 	'summary': 'SAML Login (SP) for Meteor. Works with OpenAM, OpenIDP and provides Single Logout.',
 	'version': '0.0.1',

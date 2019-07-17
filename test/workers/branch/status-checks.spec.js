@@ -3,6 +3,9 @@ const {
 } = require('../../../lib/workers/branch/status-checks');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
+/** @type any */
+const platform = global.platform;
+
 describe('workers/branch/status-checks', () => {
   describe('setUnpublishable', () => {
     let config;

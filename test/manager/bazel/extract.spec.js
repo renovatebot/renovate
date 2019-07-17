@@ -13,24 +13,20 @@ const fileWithBzlExtension = fs.readFileSync(
 
 describe('lib/manager/bazel/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
-    beforeEach(() => {
-      config = {};
-    });
     it('returns empty if fails to parse', () => {
-      const res = extractPackageFile('blahhhhh:foo:@what\n', config);
+      const res = extractPackageFile('blahhhhh:foo:@what\n');
       expect(res).toBeNull();
     });
     it('returns empty if cannot parse dependency', () => {
-      const res = extractPackageFile('git_repository(\n  nothing\n)\n', config);
+      const res = extractPackageFile('git_repository(\n  nothing\n)\n');
       expect(res).toBeNull();
     });
     it('extracts multiple types of dependencies', () => {
-      const res = extractPackageFile(workspaceFile, config);
+      const res = extractPackageFile(workspaceFile);
       expect(res.deps).toMatchSnapshot();
     });
     it('extracts dependencies from *.bzl files', () => {
-      const res = extractPackageFile(fileWithBzlExtension, config);
+      const res = extractPackageFile(fileWithBzlExtension);
       expect(res.deps).toMatchSnapshot();
     });
 
@@ -44,8 +40,7 @@ describe('lib/manager/bazel/extract', () => {
           # v1.0.0-alpha31.cli-migrations 11/28
           digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
           tag="v1.0.0-alpha31.cli-migrations"
-        )`,
-        config
+        )`
       );
       expect(res.deps).toMatchSnapshot();
     });
@@ -59,8 +54,7 @@ go_repository(
   remote = "https://github.com/test/uuid-fork",
   commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
 )
-        `,
-        config
+        `
       );
       expect(successStory.deps[0].datasource).toBe('go');
       expect(successStory.deps[0].lookupName).toBe('github.com/test/uuid-fork');
@@ -73,8 +67,7 @@ go_repository(
   remote = "https://github.com/test/uuid.git#branch",
   commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
 )
-        `,
-        config
+        `
       );
       expect(badStory.deps[0].skipReason).toBe('unsupported-remote');
 
@@ -86,8 +79,7 @@ go_repository(
   remote = "https://github.mycompany.com/test/uuid",
   commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
 )
-        `,
-        config
+        `
       );
       expect(gheStory.deps[0].skipReason).toBe('unsupported-remote');
 
@@ -99,8 +91,7 @@ go_repository(
   remote = "https://gitlab.com/test/uuid",
   commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
 )
-        `,
-        config
+        `
       );
       expect(gitlabRemote.deps[0].skipReason).toBe('unsupported-remote');
     });

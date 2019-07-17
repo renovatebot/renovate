@@ -11,7 +11,15 @@ describe('getChildProcess environment when trustlevel set to low', () => {
     envVars.forEach(env => delete process.env[env]);
   });
   it('returns default environment variables', () => {
-    expect(getChildProcessEnv()).toHaveProperty(...envVars);
+    expect(getChildProcessEnv()).toMatchInlineSnapshot(`
+      Object {
+        "HOME": "HOME",
+        "HTTPS_PROXY": "HTTPS_PROXY",
+        "HTTP_PROXY": "HTTP_PROXY",
+        "NO_PROXY": "NO_PROXY",
+        "PATH": "PATH",
+      }
+    `);
   });
   it('returns environment variable only if defined', () => {
     delete process.env.PATH;
@@ -19,7 +27,16 @@ describe('getChildProcess environment when trustlevel set to low', () => {
   });
   it('returns custom environment variables if passed and defined', () => {
     process.env.LANG = 'LANG';
-    expect(getChildProcessEnv(['LANG'])).toHaveProperty(...envVars, 'LANG');
+    expect(getChildProcessEnv(['LANG'])).toMatchInlineSnapshot(`
+      Object {
+        "HOME": "HOME",
+        "HTTPS_PROXY": "HTTPS_PROXY",
+        "HTTP_PROXY": "HTTP_PROXY",
+        "LANG": "LANG",
+        "NO_PROXY": "NO_PROXY",
+        "PATH": "PATH",
+      }
+    `);
     delete process.env.LANG;
   });
 
