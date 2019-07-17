@@ -824,7 +824,7 @@ export async function ensureIssue(
   title: string,
   body: string,
   once = false,
-  recreate = false
+  reopen = true
 ) {
   logger.debug(`ensureIssue()`);
   try {
@@ -837,7 +837,7 @@ export async function ensureIssue(
           logger.debug('Issue already closed - skipping recreation');
           return null;
         }
-        if (!recreate) {
+        if (reopen) {
           logger.info('Reopening previously closed issue');
         }
         issue = issues[issues.length - 1];
@@ -855,7 +855,7 @@ export async function ensureIssue(
         logger.info('Issue is open and up to date - nothing to do');
         return null;
       }
-      if (!recreate) {
+      if (reopen) {
         logger.info('Patching issue');
         await api.patch(
           `repos/${config.parentRepo || config.repository}/issues/${

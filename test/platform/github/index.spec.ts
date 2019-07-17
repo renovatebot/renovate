@@ -1175,7 +1175,7 @@ describe('platform/github', () => {
       const res = await github.ensureIssue('title-1', 'newer-content');
       expect(res).toBeNull();
     });
-    it('creates issue if recreate flag true and issue is not open', async () => {
+    it('creates issue if reopen flag false and issue is not open', async () => {
       api.post.mockImplementationOnce(
         () =>
           ({
@@ -1206,11 +1206,11 @@ describe('platform/github', () => {
         'title-2',
         'new-content',
         false,
-        true
+        false
       );
       expect(res).toEqual('created');
     });
-    it('does not create issue if recreate flag true and issue is already open', async () => {
+    it('does not create issue if reopen flag false and issue is already open', async () => {
       api.post.mockImplementationOnce(
         () =>
           ({
@@ -1241,7 +1241,7 @@ describe('platform/github', () => {
         'title-2',
         'new-content',
         false,
-        true
+        false
       );
       expect(res).toEqual(null);
     });
