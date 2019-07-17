@@ -67,6 +67,14 @@ module.exports = {
   '/2.0/repositories/some/repo/pullrequests/5/commits': {
     values: [{}],
   },
+  '/2.0/repositories/some/repo/pullrequests/5/comments': {
+    values: [
+      { id: 21, content: { raw: '### some-subject\n\nblablabla' } },
+      { id: 22, content: { raw: '!merge' } }
+    ],
+  },
+  '/2.0/repositories/some/repo/pullrequests/5/comments/21': {},
+  '/2.0/repositories/some/repo/pullrequests/5/comments/22': {},
   '/2.0/repositories/some/repo/refs/branches': {
     values: [
       { name: 'master' },
