@@ -392,6 +392,27 @@ describe('platform/bitbucket', () => {
       await initRepo();
       expect(await getPr(5)).toMatchSnapshot();
     });
+
+    it('canRebase', async () => {
+      expect.assertions(4);
+      await initRepo();
+      const author = global.gitAuthor;
+      try {
+        await mocked(async () => {
+          expect(await bitbucket.getPr(3)).toMatchSnapshot();
+
+          global.gitAuthor = { email: 'bot@renovateapp.com', name: 'bot' };
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
+
+          global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
+          expect(await bitbucket.getPr(5)).toMatchSnapshot();
+
+          expect(api.get.mock.calls).toMatchSnapshot();
+        });
+      } finally {
+        global.gitAuthor = author;
+      }
+    });
   });
 
   describe('getPrFiles()', () => {

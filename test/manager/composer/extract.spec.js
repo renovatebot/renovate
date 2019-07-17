@@ -16,6 +16,18 @@ const requirements3 = fs.readFileSync(
   'test/manager/composer/_fixtures/composer3.json',
   'utf8'
 );
+const requirements4 = fs.readFileSync(
+  'test/manager/composer/_fixtures/composer4.json',
+  'utf8'
+);
+const requirements5 = fs.readFileSync(
+  'test/manager/composer/_fixtures/composer5.json',
+  'utf8'
+);
+const requirements5Lock = fs.readFileSync(
+  'test/manager/composer/_fixtures/composer5.lock',
+  'utf8'
+);
 
 describe('lib/manager/composer/extract', () => {
   describe('extractPackageFile()', () => {
@@ -42,6 +54,17 @@ describe('lib/manager/composer/extract', () => {
       const res = await extractPackageFile(requirements3, packageFile);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(3);
+    });
+    it('extracts repositories and registryUrls', async () => {
+      const res = await extractPackageFile(requirements4, packageFile);
+      expect(res).toMatchSnapshot();
+      expect(res.registryUrls).toHaveLength(1);
+    });
+    it('extracts object repositories and registryUrls with lock file', async () => {
+      platform.getFile.mockReturnValueOnce(requirements5Lock);
+      const res = await extractPackageFile(requirements5, packageFile);
+      expect(res).toMatchSnapshot();
+      expect(res.registryUrls).toHaveLength(1);
     });
     it('extracts dependencies with lock file', async () => {
       platform.getFile.mockReturnValueOnce('some content');

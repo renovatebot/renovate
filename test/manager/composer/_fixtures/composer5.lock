@@ -1,0 +1,28 @@
+{
+  "_readme": [
+    "This file locks the dependencies of your project to a known state",
+    "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+    "This file is @generated automatically"
+  ],
+  "content-hash": "h34j5h3p3g4ug34u34543j5h34j53h5j",
+  "packages": [
+    {
+      "name": "awesome/vcs",
+      "version": "1.1.0",
+      "source": {
+        "type": "git",
+        "url": "https://my-vcs.example/my-vcs-repo",
+        "reference": "3j5b345j3b45j345j345h34j5h345j34h5j34h5j"
+      }
+    },
+    {
+      "name": "awesome/git",
+      "version": "1.2.0",
+      "source": {
+        "type": "git",
+        "url": "git@my-git.example/awesome.git",
+        "reference": "3j5b345j3b45j345j345h34j5h345j34h5j34h5j"
+      }
+    }
+  ]
+}
