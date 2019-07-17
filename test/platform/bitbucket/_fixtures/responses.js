@@ -21,6 +21,7 @@ const issue = {
 const repo = {
   is_private: false,
   full_name: 'some/repo',
+  has_issues: true,
   owner: { username: 'some' },
   mainbranch: { name: 'master' },
 };
@@ -66,6 +67,14 @@ module.exports = {
   '/2.0/repositories/some/repo/pullrequests/5/commits': {
     values: [{}],
   },
+  '/2.0/repositories/some/repo/pullrequests/5/comments': {
+    values: [
+      { id: 21, content: { raw: '### some-subject\n\nblablabla' } },
+      { id: 22, content: { raw: '!merge' } }
+    ],
+  },
+  '/2.0/repositories/some/repo/pullrequests/5/comments/21': {},
+  '/2.0/repositories/some/repo/pullrequests/5/comments/22': {},
   '/2.0/repositories/some/repo/refs/branches': {
     values: [
       { name: 'master' },

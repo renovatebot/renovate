@@ -1,5 +1,21 @@
 import url from 'url';
 import { api } from './bb-got-wrapper';
+import { Storage } from '../git/storage';
+
+export interface Config {
+  baseBranch: string;
+  baseCommitSHA: string;
+  defaultBranch: string;
+  fileList: any[];
+  has_issues: boolean;
+  mergeMethod: string;
+  owner: string;
+  prList: any[];
+  repository: string;
+  storage: Storage;
+
+  username: string;
+}
 
 export function repoInfoTransformer(repoInfoBody: any) {
   return {
@@ -9,6 +25,7 @@ export function repoInfoTransformer(repoInfoBody: any) {
     owner: repoInfoBody.owner.username,
     mainbranch: repoInfoBody.mainbranch.name,
     mergeMethod: 'merge',
+    has_issues: repoInfoBody.has_issues,
   };
 }
 
@@ -40,13 +57,13 @@ const addMaxLength = (inputUrl: string, pagelen = 100) => {
   return maxedUrl;
 };
 
-export async function accumulateValues(
+export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
   options?: any,
   pagelen?: number
 ) {
-  let accumulator: any[] = [];
+  let accumulator: T[] = [];
   let nextUrl = addMaxLength(reqUrl, pagelen);
   const lowerCaseMethod = method.toLocaleLowerCase();
 
