@@ -55,5 +55,17 @@ describe('workers/repository/finalise/prune', () => {
       expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
+    it('does nothing on prune stale branches disabled', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      config.pruneStaleBranches = false;
+      platform.getAllRenovateBranches.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.findPr.mockReturnValueOnce({ title: 'foo' });
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(platform.getAllRenovateBranches).toHaveBeenCalledTimes(1);
+      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
   });
 });
