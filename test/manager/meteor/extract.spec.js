@@ -13,16 +13,12 @@ const input01Content = readFixture('package-1.js');
 
 describe('lib/manager/meteor/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
-    beforeEach(() => {
-      config = {};
-    });
     it('returns empty if fails to parse', () => {
-      const res = extractPackageFile('blahhhhh:foo:@what\n', config);
+      const res = extractPackageFile('blahhhhh:foo:@what\n');
       expect(res).toBeNull();
     });
     it('returns results', () => {
-      const res = extractPackageFile(input01Content, config);
+      const res = extractPackageFile(input01Content);
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
     });

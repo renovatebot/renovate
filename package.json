@@ -7,9 +7,10 @@
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
-    "build": "yarn clean && tsc -p tsconfig.app.json && yarn copy-static-files",
+    "build": "run-s clean compile copy-static-files",
     "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
+    "compile": "tsc -p tsconfig.app.json",
     "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",
@@ -18,15 +19,16 @@
     "jest": "yarn clean-cache && cross-env NODE_ENV=test LOG_LEVEL=fatal jest",
     "jest-debug": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --inspect-brk node_modules/jest/bin/jest.js",
     "jest-silent": "cross-env NODE_ENV=test yarn jest --reporters jest-silent-reporter",
-    "lint": "yarn eslint && yarn prettier",
-    "lint-fix": "yarn eslint-fix && yarn prettier-fix",
+    "lint": "run-s eslint prettier",
+    "lint-fix": "run-s eslint-fix prettier-fix",
     "prettier": "prettier --list-different \"**/*.{ts,js,json,md}\"",
     "prettier-fix": "prettier --write \"**/*.{ts,js,json,md}\"",
     "start": "babel-node --extensions \".ts,.js\" -- lib/renovate.ts",
     "test-dirty": "git diff --exit-code",
     "test-e2e": "npm pack && cd e2e && yarn install --no-lockfile && yarn test",
     "test-schema": "bash test/json-schema.sh",
-    "test": "yarn lint && yarn test-schema && yarn jest"
+    "test": "run-s lint test-schema type-check jest",
+    "type-check": "tsc --noEmit"
   },
   "repository": {
     "type": "git",

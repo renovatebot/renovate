@@ -1,6 +1,9 @@
 const fs = require('fs');
 const { extractPackageFile } = require('../../../lib/manager/bundler/extract');
 
+/** @type any */
+const platform = global.platform;
+
 const railsGemfile = fs.readFileSync(
   'test/manager/bundler/_fixtures/Gemfile.rails',
   'utf8'

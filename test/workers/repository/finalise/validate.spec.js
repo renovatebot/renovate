@@ -1,5 +1,8 @@
 const validate = require('../../../../lib/workers/repository/finalise/validate');
 
+/** @type any */
+const platform = global.platform;
+
 beforeEach(() => {
   jest.resetAllMocks();
 });

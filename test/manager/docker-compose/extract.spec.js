@@ -10,15 +10,11 @@ const yamlFile = fs.readFileSync(
 
 describe('lib/manager/docker-compose/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
-    beforeEach(() => {
-      config = {};
-    });
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', config)).toBeNull();
+      expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(yamlFile, config);
+      const res = extractPackageFile(yamlFile);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(8);
     });

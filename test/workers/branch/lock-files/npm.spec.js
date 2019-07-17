@@ -6,6 +6,7 @@ jest.mock('get-installed-path');
 
 getInstalledPath.mockImplementation(() => null);
 
+/** @type any */
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
 const npmHelper = require('../../../../lib/manager/npm/post-update/npm');
