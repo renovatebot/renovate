@@ -6,31 +6,33 @@ export interface GotApiOptions {
   body?: any;
 }
 
+export type GotResponse<T extends object = any> = got.Response<T>;
+
 export interface GotApi<TOptions extends object = any> {
   get<T extends object = any>(
     url: string,
     options?: GotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+  ): Promise<GotResponse<T>>;
   post<T extends object = any>(
     url: string,
     options?: GotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+  ): Promise<GotResponse<T>>;
   put<T extends object = any>(
     url: string,
     options?: GotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+  ): Promise<GotResponse<T>>;
   patch<T extends object = any>(
     url: string,
     options?: GotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+  ): Promise<GotResponse<T>>;
   head<T extends object = any>(
     url: string,
     options?: GotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+  ): Promise<GotResponse<T>>;
   delete<T extends object = any>(
     url: string,
     options?: GotApiOptions & TOptions
-  ): Promise<got.Response<T>>;
+  ): Promise<GotResponse<T>>;
 
   reset(): void;
 

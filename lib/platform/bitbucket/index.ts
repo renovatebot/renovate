@@ -1,4 +1,5 @@
 import parseDiff from 'parse-diff';
+import addrs from 'email-addresses';
 import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
@@ -549,6 +550,9 @@ async function isPrConflicted(prNo: number) {
   return utils.isConflicted(parseDiff(diff));
 }
 
+interface Commit {
+  author: { raw: string };
+}
 // Gets details for a PR
 export async function getPr(prNo: number) {
   const pr = (await api.get(
@@ -567,10 +571,43 @@ export async function getPr(prNo: number) {
 
   if (utils.prStates.open.includes(pr.state)) {
     res.isConflicted = await isPrConflicted(prNo);
-    const commits = await utils.accumulateValues(pr.links.commits.href);
-    if (commits.length === 1) {
-      res.canRebase = true;
-      res.canMerge = true;
+
+    // TODO: Is that correct? Should we check getBranchStatus like gitlab?
+    res.canMerge = !res.isConflicted;
+
+    // we only want the first commit, because size tells us the overall number
+    const { body } = await api.get<utils.PagedResult<Commit>>(
+      pr.links.commits.href + '?pagelen=1'
+    );
+
+    if (body.size === 1) {
+      if (global.gitAuthor) {
+        const author = addrs.parseOneAddress(
+          body.values[0].author.raw
+        ) as addrs.ParsedMailbox;
+        if (author.address === global.gitAuthor.email) {
+          logger.debug(
+            { prNo },
+            '1 commit matches configured gitAuthor so can rebase'
+          );
+          pr.canRebase = true;
+        } else {
+          logger.debug(
+            { prNo },
+            '1 commit and not by configured gitAuthor so cannot rebase'
+          );
+          pr.canRebase = false;
+        }
+      } else {
+        logger.debug(
+          { prNo },
+          '1 commit and no configured gitAuthor so can rebase'
+        );
+        pr.canRebase = true;
+      }
+    } else {
+      logger.debug({ prNo }, `${body.size} commits so cannot rebase`);
+      pr.canRebase = false;
     }
   }
   if (await branchExists(pr.source.branch.name)) {

@@ -1,5 +1,5 @@
-const pr = {
-  id: 5,
+const pr = id => ({
+  id,
   source: { branch: { name: 'branch' } },
   title: 'title',
   summary: { raw: 'summary' },
@@ -8,10 +8,10 @@ const pr = {
   links: {
     commits: {
       href:
-        'https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits',
+        `https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/${id}/commits`,
     },
   },
-};
+});
 const issue = {
   id: 25,
   title: 'title',
@@ -44,9 +44,14 @@ module.exports = {
     values: [issue, { ...issue, id: 26 }],
   },
   '/2.0/repositories/some/repo/pullrequests': {
-    values: [pr],
+    values: [pr(5)],
   },
-  '/2.0/repositories/some/repo/pullrequests/5': pr,
+  '/2.0/repositories/some/repo/pullrequests/3': pr(3),
+  '/2.0/repositories/some/repo/pullrequests/3/commits': {
+    size: 2,
+  },
+  '/2.0/repositories/some/repo/pullrequests/3/diff': ' ',
+  '/2.0/repositories/some/repo/pullrequests/5': pr(5),
   '/2.0/repositories/some/repo/pullrequests/5/diff': `
     diff --git a/requirements.txt b/requirements.txt
     index 7e08d70..f5283ca 100644
@@ -65,7 +70,8 @@ module.exports = {
     .trim()
     .replace(/^\s+/g, ''),
   '/2.0/repositories/some/repo/pullrequests/5/commits': {
-    values: [{}],
+    size: 1,
+    values: [{ author: { raw: 'Renovate Bot <bot@renovateapp.com>' } }],
   },
   '/2.0/repositories/some/repo/pullrequests/5/comments': {
     values: [

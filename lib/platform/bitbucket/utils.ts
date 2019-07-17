@@ -1,6 +1,7 @@
 import url from 'url';
 import { api } from './bb-got-wrapper';
 import { Storage } from '../git/storage';
+import { GotResponse } from '../common';
 
 export interface Config {
   baseBranch: string;
@@ -15,6 +16,12 @@ export interface Config {
   storage: Storage;
 
   username: string;
+}
+
+export interface PagedResult<T = any> {
+  size: number;
+  next?: string;
+  values: T[];
 }
 
 export function repoInfoTransformer(repoInfoBody: any) {
@@ -68,7 +75,10 @@ export async function accumulateValues<T = any>(
   const lowerCaseMethod = method.toLocaleLowerCase();
 
   while (typeof nextUrl !== 'undefined') {
-    const { body } = await (api as any)[lowerCaseMethod](nextUrl, options);
+    const { body } = (await api[lowerCaseMethod](
+      nextUrl,
+      options
+    )) as GotResponse<PagedResult<T>>;
     accumulator = [...accumulator, ...body.values];
     nextUrl = body.next;
   }
