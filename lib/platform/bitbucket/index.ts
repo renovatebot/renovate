@@ -407,7 +407,10 @@ export /* istanbul ignore next */ async function getIssueList() {
   }
   try {
     const filter = encodeURIComponent(
-      [`reporter.username="${config.username}"`].join(' AND ')
+      [
+        '(state = "new" OR state = "open")',
+        `reporter.username="${config.username}"`,
+      ].join(' AND ')
     );
     return (
       (await api.get(
