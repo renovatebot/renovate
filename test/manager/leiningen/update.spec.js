@@ -13,7 +13,7 @@ const leinProjectClj = fs.readFileSync(
 
 describe('manager/leiningen/update', () => {
   it('updatePackageFile', () => {
-    const { deps } = extractPackageFile(leinProjectClj, 'project.clj');
+    const { deps } = extractPackageFile(leinProjectClj);
     const dep = deps.pop();
     const upgrade = {
       ...dep,

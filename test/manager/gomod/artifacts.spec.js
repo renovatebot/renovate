@@ -2,10 +2,15 @@ jest.mock('fs-extra');
 jest.mock('child-process-promise');
 jest.mock('../../../lib/util/host-rules');
 
+/** @type any */
 const fs = require('fs-extra');
 const { exec } = require('child-process-promise');
 const gomod = require('../../../lib/manager/gomod/artifacts');
+/** @type any */
 const hostRules = require('../../../lib/util/host-rules');
+
+/** @type any */
+const platform = global.platform;
 
 const gomod1 = `module github.com/renovate-tests/gomod1
 

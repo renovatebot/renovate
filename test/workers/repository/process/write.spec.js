@@ -1,7 +1,9 @@
 const {
   writeUpdates,
 } = require('../../../../lib/workers/repository/process/write');
+/** @type any */
 const branchWorker = require('../../../../lib/workers/branch');
+/** @type any */
 const limits = require('../../../../lib/workers/repository/process/limits');
 
 branchWorker.processBranch = jest.fn();

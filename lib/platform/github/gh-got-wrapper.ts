@@ -146,6 +146,15 @@ async function get(
         throw new Error('platform-failure');
       }
       throw new Error('bad-credentials');
+    } else if (err.statusCode === 422) {
+      if (
+        err.body &&
+        err.body.errors &&
+        err.body.errors.find((e: any) => e.code === 'invalid')
+      ) {
+        throw new Error('repository-changed');
+      }
+      throw new Error('platform-failure');
     }
     throw err;
   }

@@ -11,7 +11,7 @@ const depsEdn = fs.readFileSync(
 
 describe('manager/deps-edn/update', () => {
   it('updateDependency', () => {
-    const { deps } = extractPackageFile(depsEdn, 'deps.edn');
+    const { deps } = extractPackageFile(depsEdn);
     const dep = deps.pop();
     const upgrade = {
       ...dep,

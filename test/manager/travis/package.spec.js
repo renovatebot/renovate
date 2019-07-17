@@ -1,5 +1,6 @@
 const node = require('../../../lib/manager/travis/package');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
+/** @type any */
 const githubDatasource = require('../../../lib/datasource/github');
 
 jest.mock('../../../lib/datasource/github');

@@ -1,3 +1,4 @@
+/** @type any */
 const docker = require('../../lib/versioning/docker');
 const semver = require('../../lib/versioning/semver');
 
@@ -110,6 +111,7 @@ describe('docker.', () => {
         ['2.0.1', '1.2.3'],
         ['1.2.3', '0.9.5'],
       ].forEach(pair => {
+        // @ts-ignore
         expect(docker.sortVersions(...pair)).toBe(semver.sortVersions(...pair));
       });
     });

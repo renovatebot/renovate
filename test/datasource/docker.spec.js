@@ -1,6 +1,7 @@
 const got = require('../../lib/util/got');
 const docker = require('../../lib/datasource/docker');
 const { getPkgReleases } = require('../../lib/datasource');
+/** @type any */
 const hostRules = require('../../lib/util/host-rules');
 
 jest.mock('../../lib/util/got');

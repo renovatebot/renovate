@@ -6,12 +6,15 @@ const hostRules = require('../../lib/util/host-rules');
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
+/** @type any */
 const includesJson = fs.readFileSync(
   'test/datasource/packagist/_fixtures/includes.json'
 );
+/** @type any */
 const beytJson = fs.readFileSync(
   'test/datasource/packagist/_fixtures/1beyt.json'
 );
+/** @type any */
 const mailchimpJson = fs.readFileSync(
   'test/datasource/packagist/_fixtures/mailchimp-api.json'
 );

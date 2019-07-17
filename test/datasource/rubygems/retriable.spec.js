@@ -4,7 +4,7 @@ describe('datasource/rubygems/retriable', () => {
   const { RENOVATE_RUBYGEMS_RETRY_DELAY_STEP } = process.env;
 
   beforeEach(() => {
-    process.env.RENOVATE_RUBYGEMS_RETRY_DELAY_STEP = 1;
+    process.env.RENOVATE_RUBYGEMS_RETRY_DELAY_STEP = '1';
   });
 
   it('returns 0 when numberOfRetries equals 0', () => {
