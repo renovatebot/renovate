@@ -132,6 +132,28 @@ describe('manager/bazel/update', () => {
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
     });
+    it('updates finds url instead of urls', async () => {
+      const upgrade = {
+        depName: 'bazel_skylib',
+        depType: 'http_archive',
+        repo: 'bazelbuild/bazel-skylib',
+        def: `http_archive(
+            name = "bazel_skylib",
+            sha256 = "eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867",
+            strip_prefix = "bazel-skylib-0.6.0",
+            url = "https://github.com/bazelbuild/bazel-skylib/archive/0.6.0.tar.gz",
+          )`,
+        currentValue: '0.6.0',
+        newValue: '0.8.0',
+      };
+      hasha.fromStream.mockReturnValueOnce('abc123');
+      const res = await bazelfile.updateDependency(
+        fileWithBzlExtension,
+        upgrade
+      );
+      expect(res).not.toEqual(fileWithBzlExtension);
+      expect(res.indexOf('0.8.0')).not.toBe(-1);
+    });
     it('returns null if no urls resolve hashes', async () => {
       const upgrade = {
         depName: 'bazel_skylib',
