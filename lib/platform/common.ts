@@ -47,6 +47,8 @@ export interface PlatformConfig {
 }
 
 export interface RepoConfig {
+  bbUseDefaultReviewers?: boolean;
+  gitPrivateKey?: string;
   localDir: string;
   optimizeForDisabled?: boolean;
   repository: string;
