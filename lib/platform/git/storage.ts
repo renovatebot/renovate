@@ -478,7 +478,7 @@ function checkForPlatformFailure(err: Error) {
   ];
   for (const errorStr of platformErrorStrings) {
     if (err.message.includes(errorStr)) {
-      throw new Error('platform-error');
+      throw new Error('platform-failure');
     }
   }
 }
