@@ -41,12 +41,13 @@ export interface GotApi<TOptions extends object = any> {
 
 export interface PlatformConfig {
   isFork: boolean;
-  privateRepo?: boolean;
+  privateRepo: boolean;
   // do we need this?
-  repoFullName: string;
+  repoFullName?: string;
 }
 
 export interface RepoConfig {
+  azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitPrivateKey?: string;
   localDir: string;

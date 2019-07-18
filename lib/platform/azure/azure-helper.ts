@@ -97,22 +97,12 @@ export async function getAzureBranchObj(
  * @param {string} repository
  * @param {string} branchName
  */
-export async function getChanges(
-  files: any,
-  repoId: any,
-  repository: any,
-  branchName: any
-) {
+export async function getChanges(files: any, repoId: any, branchName: any) {
   const changes = [];
   for (const file of files) {
     // Add or update
     let changeType = 1;
-    const fileAlreadyThere = await getFile(
-      repoId,
-      repository,
-      file.name,
-      branchName
-    );
+    const fileAlreadyThere = await getFile(repoId, file.name, branchName);
     if (fileAlreadyThere) {
       changeType = 2;
     }
@@ -135,15 +125,13 @@ export async function getChanges(
 /**
  * if no branchName, look globaly
  * @param {string} repoId
- * @param {string} repository
  * @param {string} filePath
  * @param {string} branchName
  */
 export async function getFile(
   repoId: string,
-  repository: any,
   filePath: string,
-  branchName: any
+  branchName: string
 ) {
   logger.trace(`getFile(filePath=${filePath}, branchName=${branchName})`);
   const azureApiGit = await azureApi.gitApi();

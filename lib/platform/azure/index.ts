@@ -4,8 +4,9 @@ import * as hostRules from '../../util/host-rules';
 import { appSlug } from '../../config/app-strings';
 import GitStorage from '../git/storage';
 import { logger } from '../../logger';
+import { RepoConfig, PlatformConfig } from '../common';
 
-interface RepoConfig {
+interface Config {
   storage: GitStorage;
   repoForceRebase: boolean;
   mergeMethod: string;
@@ -20,7 +21,7 @@ interface RepoConfig {
   repository: string;
 }
 
-let config: RepoConfig = {} as any;
+let config: Config = {} as any;
 
 const defaults: any = {
   hostType: 'azure',
@@ -59,16 +60,10 @@ export async function initRepo({
   repository,
   localDir,
   azureWorkItemId,
-}: {
-  repository: string;
-  localDir: string;
-  azureWorkItemId: any;
-}) {
+  optimizeForDisabled,
+}: RepoConfig) {
   logger.debug(`initRepo("${repository}")`);
-  config.repository = repository;
-  config.fileList = null;
-  config.prList = null;
-  config.azureWorkItemId = azureWorkItemId;
+  config = { repository, azureWorkItemId } as any;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   const names = azureHelper.getProjectAndRepo(repository);
@@ -88,6 +83,27 @@ export async function initRepo({
   config.baseCommitSHA = await getBranchCommit(config.baseBranch);
   config.mergeMethod = 'merge';
   config.repoForceRebase = false;
+
+  if (optimizeForDisabled) {
+    interface RenovateConfig {
+      enabled: boolean;
+    }
+    let renovateConfig: RenovateConfig;
+    try {
+      const json = await azureHelper.getFile(
+        repo.id,
+        'renovate.json',
+        config.defaultBranch
+      );
+      renovateConfig = JSON.parse(json);
+    } catch {
+      // Do nothing
+    }
+    if (renovateConfig && renovateConfig.enabled === false) {
+      throw new Error('disabled');
+    }
+  }
+
   config.storage = new GitStorage();
   const [projectName, repoName] = repository.split('/');
   const opts = hostRules.find({
@@ -102,7 +118,7 @@ export async function initRepo({
     localDir,
     url,
   });
-  const platformConfig = {
+  const platformConfig: PlatformConfig = {
     privateRepo: true,
     isFork: false,
   };
