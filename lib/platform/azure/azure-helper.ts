@@ -66,8 +66,9 @@ export async function getRefs(repoId: string, branchName?: string) {
 
 /**
  *
- * @param {string} branchName
- * @param {string} from
+ * @param repoId
+ * @param branchName
+ * @param from
  */
 export async function getAzureBranchObj(
   repoId: string,
@@ -88,16 +89,12 @@ export async function getAzureBranchObj(
     oldObjectId: refs[0].objectId,
   };
 }
-/**
- *
- * @param {string} msg
- * @param {string} filePath
- * @param {string} fileContent
- * @param {string} repoId
- * @param {string} repository
- * @param {string} branchName
- */
-export async function getChanges(files: any, repoId: any, branchName: any) {
+
+export async function getChanges(
+  files: { name: string; contents: any }[],
+  repoId: string,
+  branchName: string
+) {
   const changes = [];
   for (const file of files) {
     // Add or update

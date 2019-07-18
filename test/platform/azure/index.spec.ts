@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { Readable } from 'stream';
 import * as _hostRules from '../../../lib/util/host-rules';
 import { RepoConfig } from '../../../lib/platform/common';
 
