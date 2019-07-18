@@ -8,6 +8,7 @@ import GitStorage from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { appSlug } from '../../config/app-strings';
 import * as comments from './comments';
+import { RepoConfig, PlatformConfig } from '../common';
 
 let config: utils.Config = {} as any;
 
@@ -56,10 +57,8 @@ export async function getRepos() {
 export async function initRepo({
   repository,
   localDir,
-}: {
-  repository: string;
-  localDir: string;
-}) {
+  optimizeForDisabled,
+}: RepoConfig) {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: 'bitbucket',
@@ -71,26 +70,31 @@ export async function initRepo({
   } as any;
 
   // TODO: get in touch with @rarkins about lifting up the caching into the app layer
-  const platformConfig: any = {};
-
-  const url = GitStorage.getUrl({
-    protocol: 'https',
-    auth: `${opts!.username}:${opts!.password}`,
-    hostname: 'bitbucket.org',
-    repository,
-  });
-
-  config.storage = new GitStorage();
-  await config.storage.initRepo({
-    ...config,
-    localDir,
-    url,
-  });
+  const platformConfig: PlatformConfig = {} as any;
 
   try {
     const info = utils.repoInfoTransformer(
       (await api.get(`/2.0/repositories/${repository}`)).body
     );
+
+    if (optimizeForDisabled) {
+      interface RenovateConfig {
+        enabled: boolean;
+      }
+
+      let renovateConfig: RenovateConfig;
+      try {
+        renovateConfig = (await api.get<RenovateConfig>(
+          `/2.0/repositories/${repository}/src/${info.mainbranch}/renovate.json`
+        )).body;
+      } catch {
+        // Do nothing
+      }
+      if (renovateConfig && renovateConfig.enabled === false) {
+        throw new Error('disabled');
+      }
+    }
+
     platformConfig.privateRepo = info.privateRepo;
     platformConfig.isFork = info.isFork;
     platformConfig.repoFullName = info.repoFullName;
@@ -111,8 +115,21 @@ export async function initRepo({
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
-  delete config.prList;
-  delete config.fileList;
+
+  const url = GitStorage.getUrl({
+    protocol: 'https',
+    auth: `${opts!.username}:${opts!.password}`,
+    hostname: 'bitbucket.org',
+    repository,
+  });
+
+  config.storage = new GitStorage();
+  await config.storage.initRepo({
+    ...config,
+    localDir,
+    url,
+  });
+
   await Promise.all([getPrList(), getFileList()]);
   return platformConfig;
 }

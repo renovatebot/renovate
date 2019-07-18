@@ -41,4 +41,13 @@ export interface GotApi<TOptions extends object = any> {
 
 export interface PlatformConfig {
   isFork: boolean;
+  privateRepo?: boolean;
+  // do we need this?
+  repoFullName: string;
+}
+
+export interface RepoConfig {
+  localDir: string;
+  optimizeForDisabled?: boolean;
+  repository: string;
 }
