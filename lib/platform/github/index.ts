@@ -1061,6 +1061,9 @@ export async function ensureComment(
     }
     return true;
   } catch (err) /* istanbul ignore next */ {
+    if (err.message === 'platform-failure') {
+      throw err;
+    }
     if (
       err.message === 'Unable to create comment because issue is locked. (403)'
     ) {
