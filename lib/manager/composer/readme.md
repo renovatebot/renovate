@@ -133,7 +133,11 @@ Details: https://getcomposer.org/doc/05-repositories.md#hosting-your-own
 
 #### Will users need the capability to specify a custom host/registry to look up? Can it be found within the package files, or within other files inside the repository, or would it require Renovate configuration?
 
-Yes. There is an optional [`repositories`](https://getcomposer.org/doc/05-repositories.md#repository) field allowed at the root of any composer file. There should usually be no need to override this by config.
+Yes. There is an optional [`repositories`](https://getcomposer.org/doc/05-repositories.md#repository) field allowed at the root of any composer file.
+
+Users can use composer plugins in their projects, that can add additional repository info, which is not visible in the composer.json file itsself.
+The command for this would be something like `$composer->getRepositoryManager()->addRepository($repository)`.
+More info can be found in the composer [apidoc](https://getcomposer.org/apidoc/master/Composer/Repository/RepositoryManager.html)
 
 ---
 

@@ -1,0 +1,14 @@
+{
+  "composer": {
+    "customRepositories": {
+      "custom-registry": {
+        "type": "composer",
+        "url": "https://custom-registry.org"
+      },
+      "custom-config/injected": {
+        "type": "git",
+        "url": "ssh://git@my-example-git.com:injected.git"
+      }
+    }
+  }
+}

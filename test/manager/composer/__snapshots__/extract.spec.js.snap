@@ -679,3 +679,38 @@ Object {
   ],
 }
 `;
+
+exports[`lib/manager/composer/extract extractPackageFile() extracts repositories from config 1`] = `
+Object {
+  "composerLock": false,
+  "deps": Array [
+    Object {
+      "currentValue": "*",
+      "datasource": "packagist",
+      "depName": "aws/aws-sdk-php",
+      "depType": "require",
+      "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": "dev-trunk",
+      "datasource": "packagist",
+      "depName": "awesome/vcs",
+      "depType": "require",
+      "skipReason": "unsupported-constraint",
+    },
+    Object {
+      "currentValue": ">=7.0.2",
+      "datasource": "gitTags",
+      "depName": "custom-config/injected",
+      "depType": "require",
+      "lookupName": "ssh://git@my-example-git.com:injected.git",
+    },
+  ],
+  "registryUrls": Array [
+    Object {
+      "type": "composer",
+      "url": "https://custom-registry.org",
+    },
+  ],
+}
+`;

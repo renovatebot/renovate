@@ -1,0 +1,15 @@
+{
+  "name": "acme/git-sources",
+  "description": "Fetch Packages via git",
+
+  "require": {
+      "aws/aws-sdk-php":"*",
+      "awesome/vcs":"dev-trunk",
+      "custom-config/injected":">=7.0.2"
+  },
+  "autoload": {
+      "psr-0": {
+          "Acme": "src/"
+      }
+  }
+}
