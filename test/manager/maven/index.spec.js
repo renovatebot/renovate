@@ -95,6 +95,26 @@ describe('manager/maven', () => {
       expect(pomContent).toBe(updatedContent);
     });
 
+    it('should not touch content if new and old versions are equal', async () => {
+      platform.getFile.mockReturnValueOnce(pomContent);
+      const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
+      const dep1 = selectDep(deps, 'org.example:quux');
+      const dep2 = selectDep(deps, 'org.example:quux-test');
+
+      const upgrade1 = { ...dep1, newValue: '2.0.0', groupName: 'quuxVersion' };
+      const previouslyUpdatedContent = updateDependency(pomContent, upgrade1);
+      expect(previouslyUpdatedContent).toEqual(
+        pomContent.replace('1.2.3.4', '2.0.0')
+      );
+
+      const upgrade2 = { ...dep2, newValue: '1.9.9', groupName: 'quuxVersion' };
+      const updatedContent = updateDependency(
+        previouslyUpdatedContent,
+        upgrade2
+      );
+      expect(updatedContent).toBe(previouslyUpdatedContent);
+    });
+
     it('should return null if current versions in content and upgrade are not same', () => {
       const currentValue = '1.2.2';
       const newValue = '1.2.4';
