@@ -3676,17 +3676,17 @@ glob@^6.0.1:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-global-agent@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/global-agent/-/global-agent-2.0.0.tgz#54dadd7d9b5df140752f732de6415ffa87f22a22"
-  integrity sha512-UxnV7o81DW5aNEg3AjmAbJI7PsXLrJZn3KM/eHDfxjKsLHB4RC2QzSajfTadPqYQCzaOd+Wb8zjvaiHiwwqPUQ==
+global-agent@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/global-agent/-/global-agent-2.0.1.tgz#c466058a04acaa610b805bf12d1e3bed19dc4546"
+  integrity sha512-2iGb96/51XxsekctZR4IiP7SoWuGEkmFpsyySasq3RFmvIwDCQJzatB2NqK0sk7h2hVYQdRphL52lrO5grF/jg==
   dependencies:
     boolean "^1.0.0"
     core-js "^3.1.4"
     es6-error "^4.1.1"
     matcher "^2.0.0"
     roarr "^2.13.2"
-    semver "^6.1.2"
+    semver "^6.2.0"
     serialize-error "^4.1.0"
 
 global-dirs@^0.1.0:
@@ -7845,7 +7845,7 @@ semver@5.5.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.5.0.tgz#dc4bbc7a6ca9d916dee5d43516f0092b58f7b8ab"
   integrity sha512-4SJ3dm0WAwWy/NVeioZh5AntkdJoWKxHxcmyP622fOkgHa4z3R0TdBJICINyaSDE6uNwVc8gZr+ZinwZAH4xIA==
 
-semver@6.2.0, semver@^6.0.0, semver@^6.1.1, semver@^6.1.2:
+semver@6.2.0, semver@^6.0.0, semver@^6.1.1, semver@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.2.0.tgz#4d813d9590aaf8a9192693d6c85b9344de5901db"
   integrity sha512-jdFC1VdUGT/2Scgbimf7FSx9iJLXoqfglSF+gJeuNWVpiE37OIbc1jywR/GJyFdz3mnkz2/id0L0J/cr0izR5A==
