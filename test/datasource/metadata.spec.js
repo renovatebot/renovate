@@ -20,8 +20,8 @@ describe('TEST addMetaData()', () => {
     };
     const datasource = 'pypi';
     const lookupName = 'django';
-    const result = addMetaData(dep, datasource, lookupName);
-    expect(result).toMatchSnapshot();
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
   });
 
   it('Should handle manualSourceUrls', () => {
@@ -38,8 +38,8 @@ describe('TEST addMetaData()', () => {
     };
     const datasource = 'pypi';
     const lookupName = 'coverage';
-    const result = addMetaData(dep, datasource, lookupName);
-    expect(result).toMatchSnapshot();
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
   });
 
   it('Should parse sourceUrl correctly', () => {
@@ -57,7 +57,7 @@ describe('TEST addMetaData()', () => {
     };
     const datasource = 'pypi';
     const lookupName = 'django-filter';
-    const result = addMetaData(dep, datasource, lookupName);
-    expect(result).toMatchSnapshot();
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
   });
 });
