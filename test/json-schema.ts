@@ -2,9 +2,7 @@ import shell from 'shelljs';
 
 shell.exec('yarn create-json-schema');
 
-const res = shell
-  .exec('git status --porcelain', { silent: true })
-  .grep('renovate-schema.json');
+const res = shell.exec('git status --porcelain', { silent: true });
 
 if (res.code === 0 && !res.includes('renovate-schema.json')) {
   shell.echo('PASS: renovate-schema.json is up to date');
