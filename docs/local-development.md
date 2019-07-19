@@ -3,6 +3,14 @@
 This document serves to give tips and tricks on how to run Renovate locally to add features or fix bugs.
 Please submit PRs to improve it if you think anything is unclear or you can think of something that should be added.
 
+## General notes
+
+We are currently migrating to [typescript](https://www.typescriptlang.org), so please write all new files as `ts` files
+and feel free to help us to convert existing files.
+
+If you have to modify existing `js` files, please use modern [esm](https://nodejs.org/api/esm.html) `imports`
+and `exports`. We will transpile them to `commonjs` on build.
+
 ## Install
 
 #### Fork and Clone
@@ -52,7 +60,7 @@ If this is working then in future you can create other test repos to verify your
 
 ## Tests
 
-You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on TravisCI. `yarn test` runs an `eslint` check, a `prettier` check, and then all the unit tests using `jest`.
+You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on CircleCI. `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
 ## Jest
 
