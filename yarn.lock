@@ -6929,10 +6929,10 @@ pn@^1.1.0:
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
   integrity sha512-2qHaIQr2VLRFoxe2nASzsV6ef4yOOH+Fi9FBOVH6cqeSgUnoyySPZkxzLuzd+RYOQTRpROA0ztTMqxROKSb/nA==
 
-pnpm@3.5.7:
-  version "3.5.7"
-  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-3.5.7.tgz#b99cc77bb6ca8412e66ba74da7bc810757905e8f"
-  integrity sha512-RmUJo7V8mSw9Tu8hRhi4tXagjO3+S/qHdDkAtYxZA/v9fvG3ux1aSiKcIeOmN4A1FCRHG7xy/sfFQC1lhSm5uQ==
+pnpm@3.6.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/pnpm/-/pnpm-3.6.0.tgz#d9726da5b1373bbfb28105168d8cb654ff7c3bdb"
+  integrity sha512-tjBYCFDvnGdA/FHlOfLn4WZ2Iy1JO8GRFem0RkbtbKO91Z9Jz8v2oYQYkMspY7/7lCBbjQA8+eUatTUu3d6eqw==
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
