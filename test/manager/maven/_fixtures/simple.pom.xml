@@ -99,6 +99,11 @@
       <version>${quuxVersion}</version>
     </dependency>
     <dependency>
+      <groupId>${quuxGroup}</groupId>
+      <artifactId>${quuxId}-test</artifactId>
+      <version>${quuxVersion}</version>
+    </dependency>
+    <dependency>
       <groupId>org.example</groupId>
       <artifactId>quuz</artifactId>
       <version>1.2.3</version>

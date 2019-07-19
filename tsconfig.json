@@ -1,19 +1,21 @@
 {
   "compilerOptions": {
     "strict": true,
+    "noImplicitAny": false /* required for js files */,
+    "strictNullChecks": false /* required for js files */,
     "outDir": "./dist",
     "target": "es2018",
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "module": "commonjs",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true,
+    "resolveJsonModule": false,
     "isolatedModules": true,
     "lib": ["es2018"],
     "types": ["node", "jest"]
   },
   "include": ["lib/**/*", "test/**/*"],
-  "exclude": ["node_modules", "./.cache", "./dist"]
+  "exclude": ["node_modules", "./.cache", "./dist", "**/__mocks__/*"]
 }

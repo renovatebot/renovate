@@ -1,3 +1,4 @@
+// @ts-nocheck
 Package.describe({
 	'name': 'steffo:meteor-accounts-saml',
 	'summary': 'SAML Login (SP) for Meteor. Works with OpenAM, OpenIDP and provides Single Logout.',

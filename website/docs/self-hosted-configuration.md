@@ -64,6 +64,8 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 
 ## onboardingConfig
 
+## optimizeForDisabled
+
 ## password
 
 ## persistRepoData

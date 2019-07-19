@@ -1,11 +1,14 @@
-import URL from 'url';
+import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 
-import api from './gl-got-wrapper';
+import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
 import { PlatformConfig } from '../common';
+import { configFileNames } from '../../config/app-strings';
+import { logger } from '../../logger';
 
+const defaultConfigFile = configFileNames[0];
 let config: {
   storage: GitStorage;
   repository: string;
@@ -15,12 +18,15 @@ let config: {
   email: string;
   prList: any[];
   issueList: any[];
+  optimizeForDisabled: boolean;
 } = {} as any;
 
 const defaults = {
   hostType: 'gitlab',
   endpoint: 'https://gitlab.com/api/v4/',
 };
+
+let authorId: number;
 
 export async function initPlatform({
   endpoint,
@@ -42,7 +48,9 @@ export async function initPlatform({
     logger.info('Using default GitLab endpoint: ' + res.endpoint);
   }
   try {
-    res.gitAuthor = (await api.get(`user`, { token })).body.email;
+    const user = (await api.get(`user`, { token })).body;
+    res.gitAuthor = user.email;
+    authorId = user.id;
   } catch (err) {
     logger.info(
       { err },
@@ -86,9 +94,11 @@ export function cleanRepo() {
 export async function initRepo({
   repository,
   localDir,
+  optimizeForDisabled,
 }: {
   repository: string;
   localDir: string;
+  optimizeForDisabled: boolean;
 }) {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -111,6 +121,24 @@ export async function initRepo({
     }
     if (res.body.default_branch === null) {
       throw new Error('empty');
+    }
+    if (optimizeForDisabled) {
+      let renovateConfig;
+      try {
+        renovateConfig = JSON.parse(
+          Buffer.from(
+            (await api.get(
+              `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
+            )).body.content,
+            'base64'
+          ).toString()
+        );
+      } catch (err) {
+        // Do nothing
+      }
+      if (renovateConfig && renovateConfig.enabled === false) {
+        throw new Error('disabled');
+      }
     }
     config.defaultBranch = res.body.default_branch;
     config.baseBranch = config.defaultBranch;
@@ -160,6 +188,9 @@ export async function initRepo({
     if (err.statusCode === 404) {
       throw new Error('not-found');
     }
+    if (err.message === 'disabled') {
+      throw err;
+    }
     logger.info({ err }, 'Unknown GitLab initRepo error');
     throw err;
   }
@@ -203,7 +234,12 @@ export async function getBranchPr(branchName: string) {
   if (!(await branchExists(branchName))) {
     return null;
   }
-  const urlString = `projects/${config.repository}/merge_requests?state=opened&per_page=100`;
+  const query = new URLSearchParams({
+    per_page: '100',
+    state: 'opened',
+    source_branch: branchName,
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
   const res = await api.get(urlString, { paginate: true });
   logger.debug(`Got res with ${res.body.length} results`);
   let pr: any = null;
@@ -590,25 +626,33 @@ export async function ensureCommentRemoval(issueNo: number, topic: string) {
   }
 }
 
+const mapPullRequests = (pr: {
+  iid: number;
+  source_branch: string;
+  title: string;
+  state: string;
+  created_at: string;
+}) => ({
+  number: pr.iid,
+  branchName: pr.source_branch,
+  title: pr.title,
+  state: pr.state === 'opened' ? 'open' : pr.state,
+  createdAt: pr.created_at,
+});
+
+async function fetchPrList() {
+  const query = new URLSearchParams({
+    per_page: '100',
+    author_id: `${authorId}`,
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
+  const res = await api.get(urlString, { paginate: true });
+  return res.body.map(mapPullRequests);
+}
+
 export async function getPrList() {
   if (!config.prList) {
-    const urlString = `projects/${config.repository}/merge_requests?per_page=100`;
-    const res = await api.get(urlString, { paginate: true });
-    config.prList = res.body.map(
-      (pr: {
-        iid: number;
-        source_branch: string;
-        title: string;
-        state: string;
-        created_at: string;
-      }) => ({
-        number: pr.iid,
-        branchName: pr.source_branch,
-        title: pr.title,
-        state: pr.state === 'opened' ? 'open' : pr.state,
-        createdAt: pr.created_at,
-      })
-    );
+    config.prList = await fetchPrList();
   }
   return config.prList;
 }

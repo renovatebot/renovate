@@ -4,6 +4,7 @@ const datasource = require('../../lib/datasource');
 
 jest.mock('../../lib/util/got');
 
+/** @type any */
 const res1 = fs.readFileSync(
   'test/datasource/pypi/_fixtures/azure-cli-monitor.json'
 );

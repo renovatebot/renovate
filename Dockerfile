@@ -1,8 +1,8 @@
-FROM amd64/node:10.16.0-alpine@sha256:f59303fb3248e5d992586c76cc83e1d3700f641cbcd7c0067bc7ad5bb2e5b489 AS tsbuild
+FROM amd64/node:10.16.0@sha256:2901e1fa26d1f430c93178cef3e3c024ec71c66f31c5decec45c4f6e9e164ce4 AS tsbuild
 
 COPY package.json .
 COPY yarn.lock .
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 COPY lib lib
 COPY tsconfig.json tsconfig.json
@@ -163,7 +163,7 @@ ENV PATH="/home/ubuntu/.yarn/bin:/home/ubuntu/.config/yarn/global/node_modules/.
 
 COPY package.json .
 COPY yarn.lock .
-RUN yarn install --production && yarn cache clean
+RUN yarn install --production --frozen-lockfile && yarn cache clean
 COPY --from=tsbuild dist dist
 COPY bin bin
 COPY data data

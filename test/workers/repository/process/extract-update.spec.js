@@ -1,6 +1,7 @@
 const {
   extractAndUpdate,
 } = require('../../../../lib/workers/repository/process/extract-update');
+/** @type any */
 const branchify = require('../../../../lib/workers/repository/updates/branchify');
 
 jest.mock('../../../../lib/workers/repository/process/write');

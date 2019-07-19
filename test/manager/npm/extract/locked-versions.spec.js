@@ -2,7 +2,9 @@ const {
   getLockedVersions,
 } = require('../../../../lib/manager/npm/extract/locked-versions');
 
+/** @type any */
 const npm = require('../../../../lib/manager/npm/extract/npm');
+/** @type any */
 const yarn = require('../../../../lib/manager/npm/extract/yarn');
 
 jest.mock('../../../../lib/manager/npm/extract/npm');

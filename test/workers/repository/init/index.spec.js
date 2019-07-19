@@ -1,4 +1,6 @@
+/** @type any */
 const base = require('../../../../lib/workers/repository/init/base');
+/** @type any */
 const apis = require('../../../../lib/workers/repository/init/apis');
 const { initRepo } = require('../../../../lib/workers/repository/init');
 
@@ -14,7 +16,7 @@ describe('workers/repository/init', () => {
     it('runs', async () => {
       base.checkBaseBranch.mockReturnValue({});
       apis.initApis.mockReturnValue({});
-      await initRepo({}, null);
+      await initRepo({});
     });
   });
 });

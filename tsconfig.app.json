@@ -2,7 +2,7 @@
   "extends": "./tsconfig",
   "compilerOptions": {
     "resolveJsonModule": false,
-    "isolatedModules": false,
+    "isolatedModules": true,
     "sourceMap": false,
     "types": ["node"]
   },

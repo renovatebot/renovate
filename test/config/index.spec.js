@@ -1,7 +1,9 @@
 const argv = require('./config/_fixtures/argv');
+/** @type any */
 const defaultConfig = require('../../lib/config/defaults').getConfig();
+/** @type any */
 const npm = require('../../lib/datasource/npm');
-const presetDefaults = require('./npm/_fixtures/renovate-config-default');
+const presetDefaults = require('./npm/_fixtures/renovate-config-default.json');
 
 npm.getPkgReleases = jest.fn(() => ({
   'renovate-config':
@@ -19,6 +21,7 @@ describe('config/index', () => {
       configParser = require('../../lib/config/index.js');
       defaultArgv = argv();
       jest.mock('delay');
+      // @ts-ignore
       require('delay').mockImplementation(() => Promise.resolve());
     });
     it('supports token in env', async () => {

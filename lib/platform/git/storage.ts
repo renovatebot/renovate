@@ -3,20 +3,21 @@ import fs from 'fs-extra';
 import { join } from 'path';
 import Git from 'simple-git/promise';
 import URL from 'url';
+import { logger } from '../../logger';
 
 declare module 'fs-extra' {
   // eslint-disable-next-line import/prefer-default-export
   export function exists(pathLike: string): Promise<boolean>;
 }
 
-interface IStorageConfig {
+interface StorageConfig {
   localDir: string;
   baseBranch?: string;
   url: string;
   gitPrivateKey?: string;
 }
 
-interface ILocalConfig extends IStorageConfig {
+interface LocalConfig extends StorageConfig {
   baseBranch: string;
   baseBranchSha: string;
   branchExists: { [branch: string]: boolean };
@@ -24,7 +25,7 @@ interface ILocalConfig extends IStorageConfig {
 }
 
 export class Storage {
-  private _config: ILocalConfig = {} as any;
+  private _config: LocalConfig = {} as any;
 
   private _git: Git.SimpleGit | undefined;
 
@@ -50,10 +51,10 @@ export class Storage {
     }
   }
 
-  async initRepo(args: IStorageConfig) {
+  async initRepo(args: StorageConfig) {
     this.cleanRepo();
     // eslint-disable-next-line no-multi-assign
-    const config: ILocalConfig = (this._config = { ...args } as any);
+    const config: LocalConfig = (this._config = { ...args } as any);
     // eslint-disable-next-line no-multi-assign
     const cwd = (this._cwd = config.localDir);
     this._config.branchExists = {};
@@ -169,7 +170,9 @@ export class Storage {
   // Return the commit SHA for a branch
   async getBranchCommit(branchName: string) {
     if (!(await this.branchExists(branchName))) {
-      throw Error('Cannot fetch commit for branch that does not exist');
+      throw Error(
+        'Cannot fetch commit for branch that does not exist: ' + branchName
+      );
     }
     const res = await this._git!.revparse(['origin/' + branchName]);
     return res.trim();
@@ -188,7 +191,8 @@ export class Storage {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
         throw new Error(
-          'Cannot set baseBranch to something that does not exist'
+          'Cannot set baseBranch to something that does not exist: ' +
+            branchName
         );
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
@@ -202,6 +206,8 @@ export class Storage {
         }
         await this._git!.checkout([branchName, '-f']);
         await this._git!.reset('hard');
+        const latestCommitDate = (await this._git!.log({ n: 1 })).latest.date;
+        logger.debug({ branchName, latestCommitDate }, 'latest commit');
       } catch (err) /* istanbul ignore next */ {
         checkForPlatformFailure(err);
         if (
@@ -291,7 +297,9 @@ export class Storage {
 
   async isBranchStale(branchName: string) {
     if (!(await this.branchExists(branchName))) {
-      throw Error('Cannot check staleness for branch that does not exist');
+      throw Error(
+        'Cannot check staleness for branch that does not exist: ' + branchName
+      );
     }
     const branches = await this._git!.branch([
       '--remotes',
@@ -470,7 +478,7 @@ function checkForPlatformFailure(err: Error) {
   ];
   for (const errorStr of platformErrorStrings) {
     if (err.message.includes(errorStr)) {
-      throw new Error('platform-error');
+      throw new Error('platform-failure');
     }
   }
 }

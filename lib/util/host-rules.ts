@@ -1,14 +1,18 @@
 import URL from 'url';
 import merge from 'deepmerge';
+import { logger } from '../logger';
 
 export interface HostRule {
   hostType?: string;
   domainName?: string;
   hostName?: string;
+  json?: true;
   baseUrl?: string;
   token?: string;
   username?: string;
   password?: string;
+
+  timeout?: number;
 }
 
 let hostRules: HostRule[] = [];
@@ -28,7 +32,7 @@ export function add(params: HostRule) {
 
 export interface HostRuleSearch {
   hostType?: string;
-  url: string;
+  url?: string;
 }
 
 function isEmptyRule(rule: HostRule) {
@@ -60,10 +64,12 @@ function matchesHostType(rule: HostRule, search: HostRuleSearch) {
 }
 
 function matchesDomainName(rule: HostRule, search: HostRuleSearch) {
+  const hostname = search.url && URL.parse(search.url).hostname;
   return (
     search.url &&
     rule.domainName &&
-    URL.parse(search.url).hostname!.endsWith(rule.domainName)
+    hostname &&
+    hostname.endsWith(rule.domainName)
   );
 }
 

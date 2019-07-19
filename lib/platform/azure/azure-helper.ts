@@ -1,4 +1,5 @@
 import * as azureApi from './azure-got-wrapper';
+import { logger } from '../../logger';
 
 /**
  *

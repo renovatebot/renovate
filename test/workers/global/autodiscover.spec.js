@@ -27,7 +27,7 @@ describe('lib/workers/global/autodiscover', () => {
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() => []);
+    ghApi.getRepos = jest.fn(() => Promise.resolve([]));
     const res = await autodiscoverRepositories(config);
     expect(res).toEqual(config);
   });
@@ -37,7 +37,7 @@ describe('lib/workers/global/autodiscover', () => {
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() => [{}, {}]);
+    ghApi.getRepos = jest.fn(() => Promise.resolve([{}, {}]));
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toHaveLength(2);
   });
@@ -48,7 +48,9 @@ describe('lib/workers/global/autodiscover', () => {
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() => ['project/repo', 'project/another-repo']);
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['project/repo', 'project/another-repo'])
+    );
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(['project/repo']);
   });
@@ -59,10 +61,9 @@ describe('lib/workers/global/autodiscover', () => {
     hostRules.find = jest.fn(() => ({
       token: 'abc',
     }));
-    ghApi.getRepos = jest.fn(() => [
-      'another-project/repo',
-      'another-project/another-repo',
-    ]);
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['another-project/repo', 'another-project/another-repo'])
+    );
     const res = await autodiscoverRepositories(config);
     expect(res).toEqual(config);
   });
