@@ -470,6 +470,7 @@ function checkForPlatformFailure(err: Error) {
     return;
   }
   const platformErrorStrings = [
+    'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
     'The remote end hung up unexpectedly',
