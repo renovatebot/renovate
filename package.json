@@ -180,7 +180,7 @@
     "eslint": "6.0.1",
     "eslint-config-airbnb-typescript": "4.0.1",
     "eslint-config-prettier": "6.0.0",
-    "eslint-plugin-import": "2.18.0",
+    "eslint-plugin-import": "2.18.2",
     "eslint-plugin-promise": "4.2.1",
     "glob": "7.1.4",
     "husky": "3.0.0",
