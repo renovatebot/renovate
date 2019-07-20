@@ -134,6 +134,34 @@ describe('manager/npm/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('finds "npmClient":"npm" in lerna.json', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === 'lerna.json') {
+          return '{ "npmClient": "npm" }';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('finds "npmClient":"yarn" in lerna.json', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === 'lerna.json') {
+          return '{ "npmClient": "yarn" }';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
     it('finds complex yarn workspaces', async () => {
       platform.getFile = jest.fn(fileName => {
         if (fileName === 'lerna.json') {
