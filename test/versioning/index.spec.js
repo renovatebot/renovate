@@ -6,6 +6,10 @@ const supportedSchemes = getOptions().find(
 ).allowedValues;
 
 describe('versioning.get(versionScheme)', () => {
+  it('has api', () => {
+    expect(Object.keys(versioning.get('semver')).sort()).toMatchSnapshot();
+  });
+
   it('should fallback to semver', () => {
     expect(versioning.get(undefined)).toBe(versioning.get('semver'));
     expect(versioning.get('unknown')).toBe(versioning.get('semver'));
