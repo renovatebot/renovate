@@ -1,3 +1,5 @@
+import swift from '../../lib/versioning/swift';
+
 const {
   getNewValue,
   isValid,
@@ -5,7 +7,7 @@ const {
   maxSatisfyingVersion,
   isLessThanRange,
   matches,
-} = require('../../lib/versioning/swift');
+} = swift;
 
 describe('isValid(input)', () => {
   it('understands Swift version ranges', () => {
@@ -78,6 +80,7 @@ describe('getNewValue()', () => {
       ['..."1.2.4"', 'auto', '1.2.3', '1.2.5', '..."1.2.5"'],
       ['..<"1.2.4"', 'auto', '1.2.3', '1.2.5', '..<"1.2.5"'],
     ].forEach(([range, strategy, fromVersion, toVersion, result]) => {
+      // @ts-ignore
       const newValue = getNewValue(range, strategy, fromVersion, toVersion);
       expect(newValue).toEqual(result);
     });

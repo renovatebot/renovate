@@ -1,4 +1,4 @@
-const semver = require('../../lib/versioning/hex');
+import { api as semver } from '../../lib/versioning/hex';
 
 describe('lib/versioning/hex', () => {
   describe('semver.matches()', () => {

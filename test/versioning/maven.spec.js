@@ -1,9 +1,11 @@
-const {
+import {
   compare,
   parseRange,
   rangeToStr,
   autoExtendMavenRange,
-} = require('../../lib/versioning/maven/compare');
+} from '../../lib/versioning/maven/compare';
+import maven from '../../lib/versioning/maven';
+
 const {
   isValid,
   isVersion,
@@ -13,7 +15,7 @@ const {
   getPatch,
   matches,
   getNewValue,
-} = require('../../lib/versioning/maven/index');
+} = maven;
 
 describe('versioning/maven/compare', () => {
   it('returns equality', () => {
@@ -251,7 +253,7 @@ describe('versioning/maven/index', () => {
   it('returns valid', () => {
     expect(isValid('1.0.0')).toBe(true);
     expect(isValid('[1.12.6,1.18.6]')).toBe(true);
-    expect(isValid()).toBe(false);
+    expect(isValid(undefined)).toBe(false);
   });
   it('validates version string', () => {
     expect(isVersion('')).toBe(false);

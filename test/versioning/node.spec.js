@@ -1,4 +1,4 @@
-const nodever = require('../../lib/versioning/node');
+import { api as nodever } from '../../lib/versioning/node';
 
 describe('semver.getNewValue()', () => {
   it('returns normalized toVersion', () => {

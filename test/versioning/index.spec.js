@@ -1,7 +1,9 @@
-const versioning = require('../../lib/versioning');
-const supportedSchemes = require('../../lib/config/definitions')
-  .getOptions()
-  .find(option => option.name === 'versionScheme').allowedValues;
+import * as versioning from '../../lib/versioning';
+import { getOptions } from '../../lib/config/definitions';
+
+const supportedSchemes = getOptions().find(
+  option => option.name === 'versionScheme'
+).allowedValues;
 
 describe('versioning.get(versionScheme)', () => {
   it('should fallback to semver', () => {

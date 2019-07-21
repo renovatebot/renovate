@@ -1,15 +1,15 @@
-const fs = require('fs-extra');
+import { readdir, readFile } from 'fs-extra';
 
 describe('versioning readmes', () => {
   it('has same questions for all version schemes', async () => {
-    const managers = (await fs.readdir('lib/versioning')).filter(
+    const managers = (await readdir('lib/versioning')).filter(
       item => !item.includes('.')
     );
     let expectedHeaders;
     for (const manager of managers) {
       let readme;
       try {
-        readme = await fs.readFile(
+        readme = await readFile(
           'lib/versioning/' + manager + '/readme.md',
           'utf8'
         );

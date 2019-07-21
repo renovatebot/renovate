@@ -1,4 +1,4 @@
-const semver = require('../../lib/versioning/composer');
+import { api as semver } from '../../lib/versioning/composer';
 
 describe('semver.getPatch(input)', () => {
   it('gets patch', () => {

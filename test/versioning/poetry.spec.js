@@ -1,4 +1,4 @@
-const semver = require('../../lib/versioning/poetry');
+import { api as semver } from '../../lib/versioning/poetry';
 
 describe('semver.isValid(input)', () => {
   it('should return null for irregular versions', () => {

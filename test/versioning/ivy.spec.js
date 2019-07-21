@@ -1,11 +1,12 @@
-const {
+import {
   REV_TYPE_LATEST,
   REV_TYPE_SUBREV,
   REV_TYPE_RANGE,
   parseDynamicRevision,
-} = require('../../lib/versioning/ivy/parse');
+} from '../../lib/versioning/ivy/parse';
+import ivy from '../../lib/versioning/ivy';
 
-const { isVersion, matches } = require('../../lib/versioning/ivy/index');
+const { isVersion, matches } = ivy;
 
 describe('versioning/ivy/match', () => {
   it('parses dynamic revisions', () => {

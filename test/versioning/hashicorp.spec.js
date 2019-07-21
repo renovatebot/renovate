@@ -1,4 +1,4 @@
-const semver = require('../../lib/versioning/hashicorp');
+import { api as semver } from '../../lib/versioning/hashicorp';
 
 describe('semver.matches()', () => {
   it('handles tilde greater than', () => {
