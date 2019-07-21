@@ -230,7 +230,7 @@
     }
   },
   "publishConfig": {
-    "tag": "latest"
+    "tag": "stable"
   },
   "husky": {
     "hooks": {
@@ -238,7 +238,7 @@
     }
   },
   "release": {
-    "branch": "master",
+    "branch": "stable",
     "analyzeCommits": {
       "preset": "angular",
       "releaseRules": [
