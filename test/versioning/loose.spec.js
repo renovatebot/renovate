@@ -1,6 +1,13 @@
 import loose from '../../lib/versioning/loose';
 
 describe('loose.', () => {
+  describe('isVersion', () => {
+    ['1.1', '1.3.RC2', '2.1-rc2'].forEach(version => {
+      it(version, () => {
+        expect(loose.isVersion(version)).toMatchSnapshot();
+      });
+    });
+  });
   describe('isValid(version)', () => {
     it('it must support varied precision, from 1 to 6 sections', () => {
       [
