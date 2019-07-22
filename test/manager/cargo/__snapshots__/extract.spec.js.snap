@@ -8,7 +8,6 @@ Array [
     "depName": "libc",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/libc",
   },
   Object {
     "currentValue": "1.0.4",
@@ -16,7 +15,6 @@ Array [
     "depName": "bitflags",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/bitflags",
   },
   Object {
     "currentValue": "=0.1",
@@ -24,7 +22,6 @@ Array [
     "depName": "pcap-sys",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/pcap-sys",
     "skipReason": "path-dependency",
   },
   Object {
@@ -33,7 +30,6 @@ Array [
     "depName": "pnet",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/pnet",
   },
   Object {
     "currentValue": "0.1.0",
@@ -41,7 +37,6 @@ Array [
     "depName": "git_dep_with_version",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/git_dep_with_version",
     "skipReason": "git-dependency",
   },
   Object {
@@ -50,7 +45,6 @@ Array [
     "depName": "git_dep",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/git_dep",
     "skipReason": "git-dependency",
   },
   Object {
@@ -59,7 +53,6 @@ Array [
     "depName": "same_version_1__",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/same_version_1__",
   },
   Object {
     "currentValue": "0.0.0",
@@ -67,7 +60,6 @@ Array [
     "depName": "same_version_1_",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/same_version_1_",
   },
   Object {
     "currentValue": "0.0.0",
@@ -75,7 +67,6 @@ Array [
     "depName": "same_version_1",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/same_version_1",
   },
   Object {
     "currentValue": "0.4.2",
@@ -83,7 +74,6 @@ Array [
     "depName": "dep1",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep1",
   },
   Object {
     "currentValue": "=0.3.6",
@@ -91,7 +81,6 @@ Array [
     "depName": "winapi",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/winapi",
     "target": "cfg(windows)",
   },
   Object {
@@ -100,7 +89,6 @@ Array [
     "depName": "wasm-bindgen",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/wasm-bindgen",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -109,7 +97,6 @@ Array [
     "depName": "js-sys",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/js-sys",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -118,7 +105,6 @@ Array [
     "depName": "js_relative_import",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/js_relative_import",
     "skipReason": "path-dependency",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
@@ -128,7 +114,6 @@ Array [
     "depName": "web-sys",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/web-sys",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
 ]
@@ -142,7 +127,6 @@ Array [
     "depName": "amethyst_animation",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_animation",
     "skipReason": "path-dependency",
   },
   Object {
@@ -151,7 +135,6 @@ Array [
     "depName": "amethyst_assets",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_assets",
     "skipReason": "path-dependency",
   },
   Object {
@@ -160,7 +143,6 @@ Array [
     "depName": "amethyst_audio",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_audio",
     "skipReason": "path-dependency",
   },
   Object {
@@ -169,7 +151,6 @@ Array [
     "depName": "amethyst_config",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_config",
     "skipReason": "path-dependency",
   },
   Object {
@@ -178,7 +159,6 @@ Array [
     "depName": "amethyst_core",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_core",
     "skipReason": "path-dependency",
   },
   Object {
@@ -187,7 +167,6 @@ Array [
     "depName": "amethyst_controls",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_controls",
     "skipReason": "path-dependency",
   },
   Object {
@@ -196,7 +175,6 @@ Array [
     "depName": "amethyst_locale",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_locale",
     "skipReason": "path-dependency",
   },
   Object {
@@ -205,7 +183,6 @@ Array [
     "depName": "amethyst_renderer",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_renderer",
     "skipReason": "path-dependency",
   },
   Object {
@@ -214,7 +191,6 @@ Array [
     "depName": "amethyst_input",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_input",
     "skipReason": "path-dependency",
   },
   Object {
@@ -223,7 +199,6 @@ Array [
     "depName": "amethyst_ui",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_ui",
     "skipReason": "path-dependency",
   },
   Object {
@@ -232,7 +207,6 @@ Array [
     "depName": "amethyst_utils",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_utils",
     "skipReason": "path-dependency",
   },
   Object {
@@ -241,7 +215,6 @@ Array [
     "depName": "derivative",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/derivative",
   },
   Object {
     "currentValue": "0.5",
@@ -249,7 +222,6 @@ Array [
     "depName": "fern",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/fern",
   },
   Object {
     "currentValue": "0.4",
@@ -257,7 +229,6 @@ Array [
     "depName": "log",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/log",
   },
   Object {
     "currentValue": "1.0.1",
@@ -265,7 +236,6 @@ Array [
     "depName": "rayon",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/rayon",
   },
   Object {
     "currentValue": "0.1",
@@ -273,7 +243,6 @@ Array [
     "depName": "rustc_version_runtime",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/rustc_version_runtime",
   },
   Object {
     "currentValue": "0.15",
@@ -281,7 +250,6 @@ Array [
     "depName": "winit",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/winit",
   },
   Object {
     "currentValue": "0.1",
@@ -289,7 +257,6 @@ Array [
     "depName": "thread_profiler",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/thread_profiler",
   },
   Object {
     "currentValue": "0.2",
@@ -297,7 +264,6 @@ Array [
     "depName": "amethyst_gltf",
     "depType": "dev-dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_gltf",
     "skipReason": "path-dependency",
   },
   Object {
@@ -306,7 +272,6 @@ Array [
     "depName": "env_logger",
     "depType": "dev-dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/env_logger",
   },
   Object {
     "currentValue": "0.6",
@@ -314,7 +279,6 @@ Array [
     "depName": "genmesh",
     "depType": "dev-dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/genmesh",
   },
   Object {
     "currentValue": "0.2",
@@ -322,7 +286,6 @@ Array [
     "depName": "ron",
     "depType": "dev-dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/ron",
   },
   Object {
     "currentValue": "1.0",
@@ -330,7 +293,6 @@ Array [
     "depName": "serde",
     "depType": "dev-dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/serde",
   },
   Object {
     "currentValue": "1.0",
@@ -338,7 +300,6 @@ Array [
     "depName": "serde_derive",
     "depType": "dev-dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/serde_derive",
   },
   Object {
     "currentValue": "0.1",
@@ -346,7 +307,6 @@ Array [
     "depName": "vergen",
     "depType": "build-dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/vergen",
   },
 ]
 `;
@@ -359,7 +319,6 @@ Array [
     "depName": "wasm-bindgen",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/wasm-bindgen",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -368,7 +327,6 @@ Array [
     "depName": "js-sys",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/js-sys",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -377,7 +335,6 @@ Array [
     "depName": "js_relative_import",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/js_relative_import",
     "skipReason": "path-dependency",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
@@ -387,7 +344,6 @@ Array [
     "depName": "web-sys",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/web-sys",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
 ]
@@ -401,7 +357,6 @@ Array [
     "depName": "pcap-sys",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/pcap-sys",
     "skipReason": "path-dependency",
   },
   Object {
@@ -410,7 +365,6 @@ Array [
     "depName": "pnet",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/pnet",
   },
   Object {
     "currentValue": "1.2",
@@ -418,7 +372,6 @@ Array [
     "depName": "dep1",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep1",
     "skipReason": "path-dependency",
   },
   Object {
@@ -427,7 +380,6 @@ Array [
     "depName": "dep2",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep2",
     "skipReason": "path-dependency",
   },
   Object {
@@ -436,7 +388,6 @@ Array [
     "depName": "dep3",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep3",
     "skipReason": "path-dependency",
   },
   Object {
@@ -445,7 +396,6 @@ Array [
     "depName": "dep4",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep4",
     "skipReason": "unknown-version",
   },
   Object {
@@ -454,7 +404,6 @@ Array [
     "depName": "dep5",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep5",
   },
   Object {
     "currentValue": "",
@@ -462,7 +411,6 @@ Array [
     "depName": "dep6",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/dep6",
     "skipReason": "invalid-dependency-specification",
   },
 ]
@@ -476,7 +424,6 @@ Array [
     "depName": "dep1",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep1",
     "skipReason": "path-dependency",
   },
   Object {
@@ -485,7 +432,6 @@ Array [
     "depName": "dep2",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep2",
     "skipReason": "path-dependency",
   },
   Object {
@@ -494,7 +440,6 @@ Array [
     "depName": "dep3",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep3",
     "skipReason": "path-dependency",
   },
   Object {
@@ -503,7 +448,6 @@ Array [
     "depName": "dep4",
     "depType": "dependencies",
     "nestedVersion": true,
-    "purl": "pkg:cargo/dep4",
     "skipReason": "path-dependency",
   },
   Object {
@@ -512,7 +456,6 @@ Array [
     "depName": "dep5",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/dep5",
     "skipReason": "path-dependency",
   },
   Object {
@@ -521,7 +464,6 @@ Array [
     "depName": "dep7",
     "depType": "dependencies",
     "nestedVersion": false,
-    "purl": "pkg:cargo/dep7",
     "skipReason": "invalid-dependency-specification",
   },
 ]
