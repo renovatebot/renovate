@@ -1,4 +1,7 @@
 declare module 'github-url-from-git' {
-  function parse(uri: string): string;
+  interface Options {
+    extraBaseUrls?: string[];
+  }
+  function parse(uri: string, options?: Options): string;
   export = parse;
 }
