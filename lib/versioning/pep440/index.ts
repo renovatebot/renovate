@@ -1,6 +1,7 @@
 import * as pep440 from '@renovate/pep440';
 import { filter } from '@renovate/pep440/lib/specifier';
 import { getNewValue } from './range';
+import { VersioningApi } from '../common';
 
 const {
   compare: sortVersions,
@@ -15,7 +16,7 @@ const {
   eq: equals,
 } = pep440;
 
-const isStable = input => {
+const isStable = (input: string) => {
   const version = explain(input);
   if (!version) {
     return false;
@@ -24,26 +25,25 @@ const isStable = input => {
 };
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = input => validRange(input);
+export const isValid = (input: string) => validRange(input);
 
-const maxSatisfyingVersion = (versions, range) => {
+const maxSatisfyingVersion = (versions: string[], range: string) => {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
 };
 
-const minSatisfyingVersion = (versions, range) => {
+const minSatisfyingVersion = (versions: string[], range: string) => {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[0];
 };
 
-export const isSingleVersion = constraint =>
+export const isSingleVersion = (constraint: string) =>
   isVersion(constraint) ||
   (constraint.startsWith('==') && isVersion(constraint.substring(2).trim()));
 
 export { matches };
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
