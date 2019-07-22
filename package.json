@@ -7,10 +7,11 @@
     "renovate-config-validator": "bin/config-validator.js"
   },
   "scripts": {
-    "build": "run-s clean compile copy-static-files",
+    "build": "run-s clean compile:* copy-static-files",
     "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
-    "compile": "tsc -p tsconfig.app.json",
+    "compile:ts": "tsc -p tsconfig.app.json",
+    "compile:dts": "tsc -p tsconfig.dts.json",
     "copy-static-files": "copyfiles -u 1 lib/**/*.json lib/**/*.py dist/",
     "create-json-schema": "node bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",

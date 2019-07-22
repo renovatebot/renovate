@@ -17,6 +17,12 @@ import {
 
 const defaultConfigFile = configFileNames[0];
 
+interface PlatformConfig {
+  gitAuthor: string;
+  renovateUsername: string;
+  endpoint: string;
+}
+
 interface Comment {
   id: number;
   body: string;
@@ -78,11 +84,6 @@ export async function initPlatform({
 }) {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
-  }
-  interface PlatformConfig {
-    gitAuthor: string;
-    renovateUsername: string;
-    endpoint: string;
   }
 
   const res: PlatformConfig = {} as any;
