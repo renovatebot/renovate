@@ -10,7 +10,7 @@ describe('manager/docker-compose/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        lineNumber: 18,
+        managerData: { lineNumber: 18 },
         depName: 'postgres',
         newValue: '9.6.8',
         newDigest: 'sha256:abcdefghijklmnop',
@@ -21,7 +21,7 @@ describe('manager/docker-compose/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
-        lineNumber: 4,
+        managerData: { lineNumber: 4 },
         depName: 'quay.io/something/redis',
         newValue: 'alpine',
       };
@@ -30,7 +30,7 @@ describe('manager/docker-compose/update', () => {
     });
     it('returns null if mismatch', () => {
       const upgrade = {
-        lineNumber: 17,
+        managerData: { lineNumber: 17 },
         newFrom: 'postgres:9.6.8@sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);

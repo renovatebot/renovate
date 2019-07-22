@@ -15,7 +15,7 @@ describe('manager/kubernetes/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        lineNumber: 18,
+        managerData: { lineNumber: 18 },
         depName: 'nginx',
         newValue: '1.15.1',
         newDigest: 'sha256:abcdefghijklmnop',
@@ -26,7 +26,7 @@ describe('manager/kubernetes/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
-        lineNumber: 46,
+        managerData: { lineNumber: 46 },
         depName: 'k8s.gcr.io/kube-proxy-amd64',
         newValue: 'v1.11.1',
       };
@@ -35,7 +35,7 @@ describe('manager/kubernetes/update', () => {
     });
     it('returns null if mismatch', () => {
       const upgrade = {
-        lineNumber: 1,
+        managerData: { lineNumber: 1 },
         newFrom: 'k8s.gcr.io/kube-proxy-amd64:v1.11.1',
       };
       const res = dcUpdate.updateDependency(yamlFile, upgrade);
@@ -47,7 +47,7 @@ describe('manager/kubernetes/update', () => {
     });
     it('replaces image inside YAML array', () => {
       const upgrade = {
-        lineNumber: 14,
+        managerData: { lineNumber: 14 },
         depName: 'quay.io/external_storage/local-volume-provisioner',
         newValue: 'v2.2.0',
       };
