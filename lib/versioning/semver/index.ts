@@ -1,5 +1,6 @@
 import semver from 'semver';
 import stable from 'semver-stable';
+import { RangeStrategy, VersioningApi } from '../common';
 
 const { is: isStable } = stable;
 
@@ -18,16 +19,20 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isVersion = input => valid(input);
+export const isVersion = (input: string) => valid(input);
 
 export { isVersion as isValid, maxSatisfyingVersion };
 
-function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
+function getNewValue(
+  _currentValue: string,
+  _rangeStrategy: RangeStrategy,
+  _fromVersion: string,
+  toVersion: string
+) {
   return toVersion;
 }
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
