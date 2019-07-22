@@ -5453,7 +5453,7 @@ lodash.without@~4.4.0:
   resolved "https://registry.yarnpkg.com/lodash.without/-/lodash.without-4.4.0.tgz#3cd4574a00b67bae373a94b748772640507b7aac"
   integrity sha1-PNRXSgC2e643OpS3SHcmQFB7eqw=
 
-lodash@4.17.15, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.1:
+lodash@4.17.15, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.4, lodash@^4.2.1:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
@@ -5980,16 +5980,16 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-nock@11.0.0-beta.23:
-  version "11.0.0-beta.23"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-11.0.0-beta.23.tgz#e18d1d9b11e7444f8a4925331f5f4b6172b770e4"
-  integrity sha512-D03++S4wWPxqM3XUXaHTvU9TrwjypaSrroVK1k7CT3w95i93js2TUwZ3KvR08pbmO23bG747RK4LVl7vEemteQ==
+nock@11.0.0-beta.27:
+  version "11.0.0-beta.27"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-11.0.0-beta.27.tgz#5e7dca8b74c794db1e7dafed7dfe1a97189c2420"
+  integrity sha512-zhKQHORiqlwew8Bufthfil1kYzSeCthDvDSBb8mePllftt72jmmpW5vxxJyiYlxOINx9+AJ5EkCps7XVl7O1KQ==
   dependencies:
     chai "^4.1.2"
     debug "^4.1.0"
     deep-equal "^1.0.0"
     json-stringify-safe "^5.0.1"
-    lodash "^4.17.5"
+    lodash "^4.17.13"
     mkdirp "^0.5.0"
     propagate "^2.0.0"
     qs "^6.5.1"
