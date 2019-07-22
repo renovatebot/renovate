@@ -12,6 +12,7 @@ const {
   getMinor,
   getPatch,
   matches,
+  getNewValue,
 } = require('../../lib/versioning/maven/index');
 
 describe('versioning/maven/compare', () => {
@@ -325,5 +326,25 @@ describe('versioning/maven/index', () => {
     expect(matches('1', '(0,1),(1,2)')).toBe(false);
     expect(matches('1.0.0.RC9.2', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toBe(false);
     expect(matches('1.0.0-RC14', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toBe(true);
+  });
+  it('pins maven ranges', () => {
+    const sample = [
+      ['[1.2.3]', '1.2.3', '1.2.4'],
+      ['[1.0.0,1.2.3]', '1.0.0', '1.2.4'],
+      ['[1.0.0,1.2.23]', '1.0.0', '1.2.23'],
+      ['(,1.0]', '0.0.1', '2.0'],
+      ['],1.0]', '0.0.1', '2.0'],
+      ['(,1.0)', '0.1', '2.0'],
+      ['],1.0[', '2.0', '],2.0['],
+      ['[1.0,1.2],[1.3,1.5)', '1.0', '1.2.4'],
+      ['[1.0,1.2],[1.3,1.5[', '1.0', '1.2.4'],
+      ['[1.2.3,)', '1.2.3', '1.2.4'],
+      ['[1.2.3,[', '1.2.3', '1.2.4'],
+    ];
+    sample.forEach(([currentValue, fromVersion, toVersion]) => {
+      expect(getNewValue(currentValue, 'pin', fromVersion, toVersion)).toEqual(
+        toVersion
+      );
+    });
   });
 });
