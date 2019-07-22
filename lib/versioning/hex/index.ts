@@ -1,6 +1,7 @@
 import npm, { isValid as _isValid } from '../npm';
+import { VersioningApi, RangeStrategy } from '../common';
 
-function hex2npm(input) {
+function hex2npm(input: string) {
   return input
     .replace(/~>\s*(\d+\.\d+)$/, '^$1')
     .replace(/~>\s*(\d+\.\d+\.\d+)/, '~$1')
@@ -9,7 +10,7 @@ function hex2npm(input) {
     .replace(/!=\s*(\d+\.\d+(\.\d+.*)?)/, '>$1 <$1');
 }
 
-function npm2hex(input) {
+function npm2hex(input: string) {
   const res = input
     .split(' ')
     .map(str => str.trim())
@@ -30,23 +31,26 @@ function npm2hex(input) {
   return output;
 }
 
-const isLessThanRange = (version, range) =>
+const isLessThanRange = (version: string, range: string) =>
   npm.isLessThanRange(hex2npm(version), hex2npm(range));
 
-const isValid = input => _isValid(hex2npm(input));
+const isValid = (input: string) => _isValid(hex2npm(input));
 
-const matches = (version, range) =>
+const matches = (version: string, range: string) =>
   npm.matches(hex2npm(version), hex2npm(range));
 
-/** @type any */
-const maxSatisfyingVersion = (versions, range) =>
+const maxSatisfyingVersion = (versions: string[], range: string) =>
   npm.maxSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
 
-/** @type any */
-const minSatisfyingVersion = (versions, range) =>
+const minSatisfyingVersion = (versions: string[], range: string) =>
   npm.minSatisfyingVersion(versions.map(hex2npm), hex2npm(range));
 
-const getNewValue = (currentValue, rangeStrategy, fromVersion, toVersion) => {
+const getNewValue = (
+  currentValue: string,
+  rangeStrategy: RangeStrategy,
+  fromVersion: string,
+  toVersion: string
+) => {
   let newSemver = npm.getNewValue(
     hex2npm(currentValue),
     rangeStrategy,
@@ -57,15 +61,14 @@ const getNewValue = (currentValue, rangeStrategy, fromVersion, toVersion) => {
   if (currentValue.match(/~>\s*(\d+\.\d+)$/))
     newSemver = newSemver.replace(
       /\^\s*(\d+\.\d+)/,
-      (str, p1) => '~> ' + p1.slice(0, -2)
+      (_str, p1) => '~> ' + p1.slice(0, -2)
     );
   else newSemver = newSemver.replace(/~\s*(\d+\.\d+\.\d)/, '~> $1');
 
   return newSemver;
 };
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   ...npm,
   isLessThanRange,
   isValid,
