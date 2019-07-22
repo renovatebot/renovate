@@ -33,7 +33,7 @@ describe('manager/pip_requirements/update', () => {
     it('replaces existing value', () => {
       const upgrade = {
         depName: 'some-package',
-        lineNumber: 2,
+        managerData: { lineNumber: 2 },
         newValue: '==1.0.1',
       };
       const res = updateDependency(requirements, upgrade);
@@ -48,7 +48,7 @@ describe('manager/pip_requirements/update', () => {
     it('replaces existing value with comment', () => {
       const upgrade = {
         depName: 'psycopg2',
-        lineNumber: 3,
+        managerData: { lineNumber: 3 },
         newValue: '==2.4.6',
       };
       const res = updateDependency(requirements3, upgrade);
@@ -60,7 +60,7 @@ describe('manager/pip_requirements/update', () => {
     it('replaces existing value with extras', () => {
       const upgrade = {
         depName: 'celery',
-        lineNumber: 1,
+        managerData: { lineNumber: 1 },
         newValue: '==4.1.2',
       };
       const res = updateDependency(requirements4, upgrade);
@@ -71,7 +71,7 @@ describe('manager/pip_requirements/update', () => {
     it('handles dependencies in different lines in setup.py', () => {
       const upgrade = {
         depName: 'requests',
-        lineNumber: 64,
+        managerData: { lineNumber: 64 },
         newValue: '>=2.11.0',
       };
       const res = updateDependency(setupPy1, upgrade);
@@ -82,7 +82,7 @@ describe('manager/pip_requirements/update', () => {
     it('handles multiple dependencies in same lines in setup.py', () => {
       const upgrade = {
         depName: 'pycryptodome',
-        lineNumber: 60,
+        managerData: { lineNumber: 60 },
         newValue: '==3.8.0',
       };
       const res = updateDependency(setupPy2, upgrade);

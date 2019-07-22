@@ -3,73 +3,74 @@
 exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
-    "currentDepTag": "quay.io/something/redis:alpine",
     "currentDigest": undefined,
-    "currentFrom": "quay.io/something/redis:alpine",
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
-    "lineNumber": 4,
+    "managerData": Object {
+      "lineNumber": 4,
+    },
   },
   Object {
     "commitMessageTopic": "Node.js",
-    "currentDepTag": "node:10.0.0",
     "currentDigest": undefined,
-    "currentFrom": "node:10.0.0",
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
-    "lineNumber": 18,
+    "managerData": Object {
+      "lineNumber": 18,
+    },
   },
   Object {
-    "currentDepTag": "postgres:9.4.0",
     "currentDigest": undefined,
-    "currentFrom": "postgres:9.4.0",
     "currentValue": "9.4.0",
     "datasource": "docker",
     "depName": "postgres",
-    "lineNumber": 21,
+    "managerData": Object {
+      "lineNumber": 21,
+    },
   },
   Object {
-    "currentDepTag": "dockersamples/examplevotingapp_vote:before",
     "currentDigest": undefined,
-    "currentFrom": "dockersamples/examplevotingapp_vote:before",
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_vote",
-    "lineNumber": 31,
+    "managerData": Object {
+      "lineNumber": 31,
+    },
   },
   Object {
-    "currentDepTag": "dockersamples/examplevotingapp_result:before",
     "currentDigest": undefined,
-    "currentFrom": "dockersamples/examplevotingapp_result:before",
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_result",
-    "lineNumber": 46,
+    "managerData": Object {
+      "lineNumber": 46,
+    },
   },
   Object {
-    "currentDepTag": "dockersamples/examplevotingapp_worker",
     "currentDigest": undefined,
-    "currentFrom": "dockersamples/examplevotingapp_worker",
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_worker",
-    "lineNumber": 62,
+    "managerData": Object {
+      "lineNumber": 62,
+    },
   },
   Object {
-    "currentDepTag": "dockersamples/visualizer:stable",
     "currentDigest": undefined,
-    "currentFrom": "dockersamples/visualizer:stable",
     "currentValue": "stable",
     "datasource": "docker",
     "depName": "dockersamples/visualizer",
-    "lineNumber": 79,
+    "managerData": Object {
+      "lineNumber": 79,
+    },
   },
   Object {
-    "currentFrom": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "datasource": "docker",
-    "lineNumber": 90,
+    "managerData": Object {
+      "lineNumber": 90,
+    },
     "skipReason": "contains-variable",
   },
 ]

@@ -10,7 +10,7 @@ describe('manager/gitlabci/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        lineNumber: 36,
+        managerData: { lineNumber: 36 },
         depType: 'image',
         depName: 'hadolint/hadolint',
         newValue: '7.0.0',
@@ -23,7 +23,7 @@ describe('manager/gitlabci/update', () => {
     it('returns same', () => {
       const upgrade = {
         depType: 'image',
-        lineNumber: 36,
+        managerData: { lineNumber: 36 },
         depName: 'hadolint/hadolint',
         newValue: 'latest',
       };
@@ -32,7 +32,7 @@ describe('manager/gitlabci/update', () => {
     });
     it('returns null if mismatch', () => {
       const upgrade = {
-        lineNumber: 17,
+        managerData: { lineNumber: 17 },
         depType: 'image',
         depName: 'postgres',
         newValue: '9.6.8',
@@ -43,7 +43,7 @@ describe('manager/gitlabci/update', () => {
     });
     it('replaces image-name value', () => {
       const upgrade = {
-        lineNumber: 102,
+        managerData: { lineNumber: 102 },
         depType: 'image-name',
         depName: 'image-name-test',
         newValue: '1.35',
@@ -53,7 +53,7 @@ describe('manager/gitlabci/update', () => {
     });
     it('returns same image-name value', () => {
       const upgrade = {
-        lineNumber: 102,
+        managerData: { lineNumber: 102 },
         depType: 'image-name',
         depName: 'image-name-test',
         newValue: '1.15',
@@ -63,7 +63,7 @@ describe('manager/gitlabci/update', () => {
     });
     it('replaces service-image update', () => {
       const upgrade = {
-        lineNumber: 55,
+        managerData: { lineNumber: 55 },
         depType: 'service-image',
         depName: 'hadolint/hadolint',
         newValue: '7.0.0',
@@ -75,7 +75,7 @@ describe('manager/gitlabci/update', () => {
     });
     it('returns null if service-image mismatch', () => {
       const upgrade = {
-        lineNumber: 17,
+        managerData: { lineNumber: 17 },
         depType: 'service-image',
         depName: 'postgres',
         newValue: '9.6.8',
@@ -87,7 +87,7 @@ describe('manager/gitlabci/update', () => {
     it('returns service-image same', () => {
       const upgrade = {
         depType: 'serviceimage',
-        lineNumber: 55,
+        managerData: { lineNumber: 55 },
         depName: 'docker',
         newValue: 'dind',
       };

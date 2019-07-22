@@ -3,64 +3,64 @@
 exports[`lib/manager/gitlabci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
-    "currentDepTag": "hadolint/hadolint:latest",
     "currentDigest": undefined,
-    "currentFrom": "hadolint/hadolint:latest",
     "currentValue": "latest",
     "datasource": "docker",
     "depName": "hadolint/hadolint",
     "depType": "image",
-    "lineNumber": 36,
+    "managerData": Object {
+      "lineNumber": 36,
+    },
   },
   Object {
-    "currentDepTag": "docker:latest",
     "currentDigest": undefined,
-    "currentFrom": "docker:latest",
     "currentValue": "latest",
     "datasource": "docker",
     "depName": "docker",
     "depType": "image",
-    "lineNumber": 53,
+    "managerData": Object {
+      "lineNumber": 53,
+    },
   },
   Object {
-    "currentDepTag": "docker:dind",
     "currentDigest": undefined,
-    "currentFrom": "docker:dind",
     "currentValue": "dind",
     "datasource": "docker",
     "depName": "docker",
     "depType": "service-image",
-    "lineNumber": 55,
+    "managerData": Object {
+      "lineNumber": 55,
+    },
   },
   Object {
-    "currentDepTag": "docker:latest",
     "currentDigest": undefined,
-    "currentFrom": "docker:latest",
     "currentValue": "latest",
     "datasource": "docker",
     "depName": "docker",
     "depType": "image",
-    "lineNumber": 75,
+    "managerData": Object {
+      "lineNumber": 75,
+    },
   },
   Object {
-    "currentDepTag": "docker:dind",
     "currentDigest": undefined,
-    "currentFrom": "docker:dind",
     "currentValue": "dind",
     "datasource": "docker",
     "depName": "docker",
     "depType": "service-image",
-    "lineNumber": 77,
+    "managerData": Object {
+      "lineNumber": 77,
+    },
   },
   Object {
-    "currentDepTag": "image-name-test:1.15",
     "currentDigest": undefined,
-    "currentFrom": "image-name-test:1.15",
     "currentValue": "1.15",
     "datasource": "docker",
     "depName": "image-name-test",
     "depType": "image-name",
-    "lineNumber": 102,
+    "managerData": Object {
+      "lineNumber": 102,
+    },
   },
 ]
 `;
