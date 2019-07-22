@@ -1,8 +1,9 @@
 import { coerce } from 'semver';
 import { logger } from '../../logger';
 import npm, { isVersion as _isVersion, isValid as _isValid } from '../npm';
+import { VersioningApi, RangeStrategy } from '../common';
 
-function padZeroes(input) {
+function padZeroes(input: string) {
   const sections = input.split('.');
   while (sections.length < 3) {
     sections.push('0');
@@ -10,7 +11,7 @@ function padZeroes(input) {
   return sections.join('.');
 }
 
-function composer2npm(input) {
+function composer2npm(input: string) {
   if (_isVersion(input)) {
     return input;
   }
@@ -25,47 +26,57 @@ function composer2npm(input) {
   return output;
 }
 
-const equals = (a, b) => npm.equals(composer2npm(a), composer2npm(b));
+const equals = (a: string, b: string) =>
+  npm.equals(composer2npm(a), composer2npm(b));
 
-const getMajor = version => npm.getMajor(coerce(composer2npm(version)));
+const getMajor = (version: string) =>
+  npm.getMajor(coerce(composer2npm(version)));
 
-const getMinor = version => npm.getMinor(coerce(composer2npm(version)));
+const getMinor = (version: string) =>
+  npm.getMinor(coerce(composer2npm(version)));
 
-const getPatch = version => npm.getPatch(coerce(composer2npm(version)));
+const getPatch = (version: string) =>
+  npm.getPatch(coerce(composer2npm(version)));
 
-const isGreaterThan = (a, b) =>
+const isGreaterThan = (a: string, b: string) =>
   npm.isGreaterThan(composer2npm(a), composer2npm(b));
 
-const isLessThanRange = (version, range) =>
+const isLessThanRange = (version: string, range: string) =>
   npm.isLessThanRange(composer2npm(version), composer2npm(range));
 
-const isSingleVersion = input =>
+const isSingleVersion = (input: string) =>
   input && npm.isSingleVersion(composer2npm(input));
 
-const isStable = version => version && npm.isStable(composer2npm(version));
+const isStable = (version: string) =>
+  version && npm.isStable(composer2npm(version));
 
-export const isValid = input => input && _isValid(composer2npm(input));
+export const isValid = (input: string) =>
+  input && _isValid(composer2npm(input));
 
-export const isVersion = input => input && _isVersion(composer2npm(input));
+export const isVersion = (input: string) =>
+  input && _isVersion(composer2npm(input));
 
-const matches = (version, range) =>
+const matches = (version: string, range: string) =>
   npm.matches(composer2npm(version), composer2npm(range));
 
-/** @type any */
-const maxSatisfyingVersion = (versions, range) =>
+const maxSatisfyingVersion = (versions: string[], range: string) =>
   npm.maxSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
 
-/** @type any */
-const minSatisfyingVersion = (versions, range) =>
+const minSatisfyingVersion = (versions: string[], range: string) =>
   npm.minSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
 
-function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
+function getNewValue(
+  currentValue: string,
+  rangeStrategy: RangeStrategy,
+  fromVersion: string,
+  toVersion: string
+) {
   if (rangeStrategy === 'pin') {
     return toVersion;
   }
   const toMajor = getMajor(toVersion);
   const toMinor = getMinor(toVersion);
-  let newValue;
+  let newValue: string;
   if (isVersion(currentValue)) {
     newValue = toVersion;
   } else if (
@@ -127,12 +138,11 @@ function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
   return newValue;
 }
 
-function sortVersions(a, b) {
+function sortVersions(a: string, b: string) {
   return npm.sortVersions(composer2npm(a), composer2npm(b));
 }
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
