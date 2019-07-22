@@ -636,5 +636,13 @@ Array [
     "depType": "require",
     "lineNumber": 8,
   },
+  Object {
+    "currentValue": "v0.0.0",
+    "datasource": "go",
+    "depName": "github.com/pravesht/gocql",
+    "depNameShort": "pravesht/gocql",
+    "depType": "replace",
+    "lineNumber": 11,
+  },
 ]
 `;
