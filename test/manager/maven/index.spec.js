@@ -95,7 +95,7 @@ describe('manager/maven', () => {
       expect(pomContent).toBe(updatedContent);
     });
 
-    it('should not touch content if new and old versions are equal', async () => {
+    it('should not touch content for the second update of grouped dependency', async () => {
       platform.getFile.mockReturnValueOnce(pomContent);
       const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
       const dep1 = selectDep(deps, 'org.example:quux');

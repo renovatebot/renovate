@@ -9,3 +9,5 @@ require gopkg.in/russross/blackfriday.v1 v1.0.0
 require github.com/Azure/azure-sdk-for-go v25.1.0+incompatible
 
 replace github.com/pkg/errors => ../errors
+replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
+

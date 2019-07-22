@@ -40,6 +40,7 @@ module.exports = {
   '/2.0/repositories/some/empty/issues': {
     values: [],
   },
+  '/2.0/repositories/some/empty/src/master/renovate.json': { enabled: false },
   '/2.0/repositories/some/repo/issues': {
     values: [issue, { ...issue, id: 26 }],
   },
