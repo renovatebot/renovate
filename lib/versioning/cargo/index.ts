@@ -1,6 +1,7 @@
 import npm, { isValid as _isValid, isVersion as _isVersion } from '../npm';
+import { VersioningApi, RangeStrategy } from '../common';
 
-function convertToCaret(item) {
+function convertToCaret(item: string) {
   // In Cargo, "1.2.3" doesn't mean exactly 1.2.3, it means >= 1.2.3 < 2.0.0
   if (isVersion(item)) {
     // NOTE: Partial versions like '1.2' don't get converted to '^1.2'
@@ -11,17 +12,17 @@ function convertToCaret(item) {
   return item.trim();
 }
 
-function cargo2npm(input) {
+function cargo2npm(input: string) {
   let versions = input.split(',');
   versions = versions.map(convertToCaret);
   return versions.join(' ');
 }
 
-function notEmpty(s) {
+function notEmpty(s: string) {
   return s !== '';
 }
 
-function npm2cargo(input) {
+function npm2cargo(input: string) {
   // Note: this doesn't remove the ^
   const res = input
     .split(' ')
@@ -37,24 +38,23 @@ function npm2cargo(input) {
   return res.join(', ');
 }
 
-const isLessThanRange = (version, range) =>
+const isLessThanRange = (version: string, range: string) =>
   npm.isLessThanRange(version, cargo2npm(range));
 
-export const isValid = input => _isValid(cargo2npm(input));
+export const isValid = (input: string) => _isValid(cargo2npm(input));
 
-const isVersion = input => _isVersion(input);
+const isVersion = (input: string) => _isVersion(input);
 
-const matches = (version, range) => npm.matches(version, cargo2npm(range));
+const matches = (version: string, range: string) =>
+  npm.matches(version, cargo2npm(range));
 
-/** @type any */
-const maxSatisfyingVersion = (versions, range) =>
+const maxSatisfyingVersion = (versions: string[], range: string) =>
   npm.maxSatisfyingVersion(versions, cargo2npm(range));
 
-/** @type any */
-const minSatisfyingVersion = (versions, range) =>
+const minSatisfyingVersion = (versions: string[], range: string) =>
   npm.minSatisfyingVersion(versions, cargo2npm(range));
 
-const isSingleVersion = constraint =>
+const isSingleVersion = (constraint: string) =>
   constraint.trim().startsWith('=') &&
   isVersion(
     constraint
@@ -63,7 +63,12 @@ const isSingleVersion = constraint =>
       .trim()
   );
 
-function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
+function getNewValue(
+  currentValue: string,
+  rangeStrategy: RangeStrategy,
+  fromVersion: string,
+  toVersion: string
+) {
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
@@ -86,8 +91,7 @@ function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
   return newCargo;
 }
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   ...npm,
   getNewValue,
   isLessThanRange,
