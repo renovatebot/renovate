@@ -29,10 +29,7 @@ export interface Package {
 }
 
 export interface PackageDependency extends Package {
-  purl?: string;
-  nestedVersion?: boolean;
   target?: string;
-  lineNumber?: number;
   def?: string;
   lookupType?: string;
   repo?: string;
