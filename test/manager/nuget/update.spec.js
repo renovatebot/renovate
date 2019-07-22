@@ -10,7 +10,7 @@ describe('manager/nuget/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        lineNumber: 13,
+        managerData: { lineNumber: 13 },
         newVersion: '5.0.0',
       };
       const res = nugetUpdater.updateDependency(csProj, upgrade);
@@ -18,7 +18,7 @@ describe('manager/nuget/update', () => {
     });
     it('keeps intact when same version', () => {
       const upgrade = {
-        lineNumber: 13,
+        managerData: { lineNumber: 13 },
         newVersion: '4.1.0',
       };
       const res = nugetUpdater.updateDependency(csProj, upgrade);

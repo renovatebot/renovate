@@ -14,7 +14,7 @@ describe('manager/ansible/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value from docker_container', () => {
       const upgrade = {
-        lineNumber: 4,
+        managerData: { lineNumber: 4 },
         depName: 'busybox',
         newValue: '1.29.3',
         newDigest: 'sha256:abcdefghijklmnop',
@@ -25,7 +25,7 @@ describe('manager/ansible/update', () => {
     });
     it('replaces existing value from docker_service', () => {
       const upgrade = {
-        lineNumber: 8,
+        managerData: { lineNumber: 8 },
         depName: 'sameersbn/gitlab',
         newValue: '11.5.1',
         newDigest: 'sha256:abcdefghijklmnop',
@@ -36,7 +36,7 @@ describe('manager/ansible/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
-        lineNumber: 38,
+        managerData: { lineNumber: 38 },
         depName: 'sameersbn/redis',
         newValue: '4.0.9-1',
       };
@@ -45,7 +45,7 @@ describe('manager/ansible/update', () => {
     });
     it('returns null if mismatch', () => {
       const upgrade = {
-        lineNumber: 52,
+        managerData: { lineNumber: 52 },
         newFrom: 'registry:2.6.2@sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);

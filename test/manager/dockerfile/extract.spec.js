@@ -136,8 +136,8 @@ describe('lib/manager/dockerfile/extract', () => {
         res[2].depType === 'final',
         res[1].depType === 'stage',
         res[0].depType === 'stage',
-        res[2].lineNumber > res[1].lineNumber,
-        res[2].lineNumber > res[0].lineNumber,
+        res[2].managerData.lineNumber > res[1].managerData.lineNumber,
+        res[2].managerData.lineNumber > res[0].managerData.lineNumber,
       ].every(Boolean);
       expect(passed).toBe(true);
     });

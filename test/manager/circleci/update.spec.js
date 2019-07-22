@@ -14,7 +14,7 @@ describe('manager/circleci/update', () => {
   describe('updateDependency', () => {
     it('replaces existing value', () => {
       const upgrade = {
-        lineNumber: 65,
+        managerData: { lineNumber: 65 },
         depType: 'docker',
         depName: 'node',
         newValue: '8.10.0',
@@ -26,7 +26,7 @@ describe('manager/circleci/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
-        lineNumber: 12,
+        managerData: { lineNumber: 12 },
         depType: 'docker',
         depName: 'node',
       };
@@ -35,7 +35,7 @@ describe('manager/circleci/update', () => {
     });
     it('returns null if mismatch', () => {
       const upgrade = {
-        lineNumber: 17,
+        managerData: { lineNumber: 17 },
         depType: 'docker',
         depName: 'postgres',
         newValue: '9.6.8',
@@ -53,7 +53,7 @@ describe('manager/circleci/update', () => {
         currentValue: '4.1.0',
         depName: 'release-workflows',
         depType: 'orb',
-        lineNumber: 3,
+        managerData: { lineNumber: 3 },
         newValue: '4.2.0',
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);
@@ -65,7 +65,7 @@ describe('manager/circleci/update', () => {
         currentValue: '4.0.0',
         depName: 'release-workflows',
         depType: 'orb',
-        lineNumber: 3,
+        managerData: { lineNumber: 3 },
         newValue: '4.1.0',
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);
@@ -76,7 +76,7 @@ describe('manager/circleci/update', () => {
         currentValue: '4.1.0',
         depName: 'release-workflows',
         depType: 'orb',
-        lineNumber: 2,
+        managerData: { lineNumber: 2 },
         newValue: '4.2.0',
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);
@@ -86,7 +86,7 @@ describe('manager/circleci/update', () => {
       const upgrade = {
         currentValue: '4.1.0',
         depName: 'release-workflows',
-        lineNumber: 3,
+        managerData: { lineNumber: 3 },
         newValue: '4.2.0',
       };
       const res = dcUpdate.updateDependency(yamlFile2, upgrade);

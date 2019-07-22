@@ -10,7 +10,7 @@ describe('manager/github-actions/update', () => {
   describe('updateDependency', () => {
     it('replaces existing uses value', () => {
       const upgrade = {
-        lineNumber: 11,
+        managerData: { lineNumber: 11 },
         depName: 'replicated/dockerfilelint',
         newDigest: 'sha256:abcdefghijklmnop',
       };
@@ -20,7 +20,7 @@ describe('manager/github-actions/update', () => {
     });
     it('returns same', () => {
       const upgrade = {
-        lineNumber: 11,
+        managerData: { lineNumber: 11 },
         depName: 'replicated/dockerfilelint',
       };
       const res = dcUpdate.updateDependency(workflow1, upgrade);
@@ -28,7 +28,7 @@ describe('manager/github-actions/update', () => {
     });
     it('returns null if mismatch', () => {
       const upgrade = {
-        lineNumber: 12,
+        managerData: { lineNumber: 12 },
         newFrom: 'registry:2.6.2@sha256:abcdefghijklmnop',
       };
       const res = dcUpdate.updateDependency(workflow1, upgrade);
