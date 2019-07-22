@@ -1,7 +1,7 @@
 import { satisfies } from '@snyk/ruby-semver';
 import bump from './bump';
 
-export default ({ to, range }) => {
+export default ({ to, range }: { range: string; to: string }) => {
   if (satisfies(to, range)) {
     return range;
   }

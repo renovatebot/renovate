@@ -3,7 +3,12 @@ import { parse as _parse } from '@snyk/ruby-semver/lib/ruby/gem-requirement';
 import { logger } from '../../logger';
 import { EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE } from './operator';
 
-const parse = range => {
+export interface Range {
+  version: string;
+  operator: string;
+}
+
+const parse = (range: string): Range => {
   const regExp = /^([^\d\s]+)?\s?([0-9a-zA-Z-.-]+)$/g;
 
   const value = (range || '').trim();
@@ -15,9 +20,16 @@ const parse = range => {
   };
 };
 
-const ltr = (version, range) => {
-  const gemVersion = create(version);
-  const requirements = range.split(',').map(_parse);
+interface GemVersion {
+  release(): GemVersion;
+  compare(ver: GemVersion): number;
+  bump(): GemVersion;
+}
+type GemRequirement = [string, GemVersion];
+
+const ltr = (version: string, range: string) => {
+  const gemVersion: GemVersion = create(version);
+  const requirements: GemRequirement[] = range.split(',').map(_parse);
 
   const results = requirements.map(([operator, ver]) => {
     switch (operator) {
