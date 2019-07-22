@@ -1,6 +1,7 @@
 import * as generic from '../loose/generic';
+import { VersioningApi } from '../common';
 
-function parse(version) {
+function parse(version: string) {
   const versionPieces = version.replace(/^v/, '').split('-');
   const prefix = versionPieces.shift();
   const suffix = versionPieces.join('-');
@@ -11,12 +12,12 @@ function parse(version) {
   return { release, suffix };
 }
 
-function valueToVersion(value) {
+function valueToVersion(value: string) {
   // Remove any suffix after '-', e.g. '-alpine'
   return value ? value.split('-')[0] : value;
 }
 
-function compare(version1, vervion2) {
+function compare(version1: string, vervion2: string) {
   const parsed1 = parse(version1);
   const parsed2 = parse(vervion2);
   // istanbul ignore if
@@ -42,7 +43,7 @@ function compare(version1, vervion2) {
   return parsed2.suffix.localeCompare(parsed1.suffix);
 }
 
-function isCompatible(version, range) {
+function isCompatible(version: string, range: string) {
   const parsed1 = parse(version);
   const parsed2 = parse(range);
   return (
@@ -51,8 +52,7 @@ function isCompatible(version, range) {
   );
 }
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   ...generic.create({
     parse,
     compare,
