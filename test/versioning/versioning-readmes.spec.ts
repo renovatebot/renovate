@@ -5,9 +5,9 @@ describe('versioning readmes', () => {
     const managers = (await readdir('lib/versioning')).filter(
       item => !item.includes('.')
     );
-    let expectedHeaders;
+    let expectedHeaders: string[];
     for (const manager of managers) {
-      let readme;
+      let readme: string;
       try {
         readme = await readFile(
           'lib/versioning/' + manager + '/readme.md',
