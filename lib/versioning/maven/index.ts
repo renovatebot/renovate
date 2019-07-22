@@ -115,7 +115,7 @@ const maxSatisfyingVersion = (versions: string[], range: string) => {
 
 function getNewValue(
   currentValue: string,
-  _rangeStrategy: RangeStrategy,
+  rangeStrategy: RangeStrategy,
   _fromVersion: string,
   toVersion: string
 ) {
