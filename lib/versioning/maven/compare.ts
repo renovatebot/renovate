@@ -4,7 +4,14 @@ const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
 const TYPE_NUMBER = 'TYPE_NUMBER';
 const TYPE_QUALIFIER = 'TYPE_QUALIFIER';
 
-function iterateChars(str, cb) {
+interface Token {
+  prefix: string;
+  type: typeof TYPE_NUMBER | typeof TYPE_QUALIFIER;
+  val: number | string;
+  isTransition?: boolean;
+}
+
+function iterateChars(str: string, cb: (p: string, n: string) => void) {
   let prev = null;
   let next = null;
   for (let i = 0; i < str.length; i += 1) {
@@ -15,22 +22,22 @@ function iterateChars(str, cb) {
   cb(prev, null);
 }
 
-function isDigit(char) {
+function isDigit(char: string) {
   return /^\d$/.test(char);
 }
 
-function isLetter(char) {
+function isLetter(char: string) {
   return /^[a-z]$/i.test(char);
 }
 
-function isTransition(prevChar, nextChar) {
+function isTransition(prevChar: string, nextChar: string) {
   return (
     (isDigit(prevChar) && isLetter(nextChar)) ||
     (isLetter(prevChar) && isDigit(nextChar))
   );
 }
 
-function iterateTokens(versionStr, cb) {
+function iterateTokens(versionStr: string, cb: (token: Token) => void) {
   let currentPrefix = PREFIX_HYPHEN;
   let currentVal = '';
 
@@ -74,21 +81,21 @@ function iterateTokens(versionStr, cb) {
   });
 }
 
-function isNull(token) {
+function isNull(token: Token) {
   const val = token.val;
   return val === 0 || val === '' || val === 'final' || val === 'ga';
 }
 
-const zeroToken = {
+const zeroToken: Token = {
   prefix: PREFIX_HYPHEN,
   type: TYPE_NUMBER,
   val: 0,
   isTransition: false,
 };
 
-function tokenize(versionStr) {
-  let buf = [];
-  let result = [];
+function tokenize(versionStr: string) {
+  let buf: Token[] = [];
+  let result: Token[] = [];
   let leadingZero = true;
   iterateTokens(versionStr.toLowerCase().replace(/^v/i, ''), token => {
     if (token.prefix === PREFIX_HYPHEN) {
@@ -107,7 +114,7 @@ function tokenize(versionStr) {
   return result.length ? result : [zeroToken];
 }
 
-function nullFor(token) {
+function nullFor(token: Token): Token {
   return {
     prefix: token.prefix,
     type: token.prefix === PREFIX_DOT ? TYPE_NUMBER : TYPE_QUALIFIER,
@@ -115,7 +122,7 @@ function nullFor(token) {
   };
 }
 
-function commonOrder(token) {
+function commonOrder(token: Token) {
   if (token.prefix === PREFIX_DOT && token.type === TYPE_QUALIFIER) {
     return 0;
   }
@@ -128,7 +135,7 @@ function commonOrder(token) {
   return 3;
 }
 
-function qualifierOrder(token) {
+function qualifierOrder(token: Token) {
   const val = token.val;
   if (val === 'alpha' || (token.isTransition && val === 'a')) {
     return 1;
@@ -154,7 +161,7 @@ function qualifierOrder(token) {
   return null;
 }
 
-function qualifierCmp(left, right) {
+function qualifierCmp(left: Token, right: Token) {
   const leftOrder = qualifierOrder(left);
   const rightOrder = qualifierOrder(right);
   if (leftOrder && rightOrder) {
@@ -176,7 +183,7 @@ function qualifierCmp(left, right) {
   return 1;
 }
 
-function tokenCmp(left, right) {
+function tokenCmp(left: Token, right: Token) {
   if (left.prefix === right.prefix) {
     if (left.type === TYPE_NUMBER && right.type === TYPE_NUMBER) {
       if (left.val === right.val) {
@@ -207,7 +214,7 @@ function tokenCmp(left, right) {
   return 1;
 }
 
-function compare(left, right) {
+function compare(left: string, right: string) {
   const leftTokens = tokenize(left);
   const rightTokens = tokenize(right);
   const length = Math.max(leftTokens.length, rightTokens.length);
@@ -220,7 +227,7 @@ function compare(left, right) {
   return 0;
 }
 
-function isVersion(version) {
+function isVersion(version: string) {
   // istanbul ignore if
   if (!version) return false;
   if (!/^[a-z0-9.-]+$/i.test(version)) return false;
@@ -230,7 +237,7 @@ function isVersion(version) {
   return !!tokens.length;
 }
 
-function isValid(str) {
+function isValid(str: string) {
   if (!str) {
     return false;
   }
@@ -240,8 +247,17 @@ function isValid(str) {
 const INCLUDING_POINT = 'INCLUDING_POINT';
 const EXCLUDING_POINT = 'EXCLUDING_POINT';
 
-function parseRange(rangeStr) {
-  function emptyInterval() {
+interface Range {
+  leftType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT;
+  leftValue: string;
+  leftBracket: string;
+  rightType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT;
+  rightValue: string;
+  rightBracket: string;
+}
+
+function parseRange(rangeStr: string) {
+  function emptyInterval(): Range {
     return {
       leftType: null,
       leftValue: null,
@@ -253,7 +269,7 @@ function parseRange(rangeStr) {
   }
 
   const commaSplit = rangeStr.split(',');
-  let result = [];
+  let result: Range[] = [];
   let interval = emptyInterval();
 
   commaSplit.forEach(subStr => {
@@ -306,38 +322,41 @@ function parseRange(rangeStr) {
   if (!result || !result.length) return null;
 
   const lastIdx = result.length - 1;
-  let prevValue = null;
-  return result.reduce((acc, range, idx) => {
-    const { leftType, leftValue, rightType, rightValue } = range;
+  let prevValue: string = null;
+  return result.reduce(
+    (acc, range, idx) => {
+      const { leftType, leftValue, rightType, rightValue } = range;
 
-    if (idx === 0 && leftValue === '') {
-      if (leftType === EXCLUDING_POINT && isVersion(rightValue)) {
-        prevValue = rightValue;
-        return [...acc, { ...range, leftValue: null }];
+      if (idx === 0 && leftValue === '') {
+        if (leftType === EXCLUDING_POINT && isVersion(rightValue)) {
+          prevValue = rightValue;
+          return [...acc, { ...range, leftValue: null }];
+        }
+        return null;
       }
-      return null;
-    }
-    if (idx === lastIdx && rightValue === '') {
-      if (rightType === EXCLUDING_POINT && isVersion(leftValue)) {
+      if (idx === lastIdx && rightValue === '') {
+        if (rightType === EXCLUDING_POINT && isVersion(leftValue)) {
+          if (prevValue && compare(prevValue, leftValue) === 1) return null;
+          return [...acc, { ...range, rightValue: null }];
+        }
+        return null;
+      }
+      if (isVersion(leftValue) && isVersion(rightValue)) {
+        if (compare(leftValue, rightValue) === 1) return null;
         if (prevValue && compare(prevValue, leftValue) === 1) return null;
-        return [...acc, { ...range, rightValue: null }];
+        prevValue = rightValue;
+        return [...acc, range];
       }
       return null;
-    }
-    if (isVersion(leftValue) && isVersion(rightValue)) {
-      if (compare(leftValue, rightValue) === 1) return null;
-      if (prevValue && compare(prevValue, leftValue) === 1) return null;
-      prevValue = rightValue;
-      return [...acc, range];
-    }
-    return null;
-  }, []);
+    },
+    [] as Range[]
+  );
 }
 
-function rangeToStr(fullRange) {
+function rangeToStr(fullRange: Range[]) {
   if (fullRange === null) return null;
 
-  const valToStr = val => (val === null ? '' : val);
+  const valToStr = (val: string) => (val === null ? '' : val);
 
   if (fullRange.length === 1) {
     const { leftBracket, rightBracket, leftValue, rightValue } = fullRange[0];
@@ -362,10 +381,10 @@ function rangeToStr(fullRange) {
   return intervals.join(',');
 }
 
-function autoExtendMavenRange(currentRepresentation, newValue) {
+function autoExtendMavenRange(currentRepresentation: string, newValue: string) {
   const range = parseRange(currentRepresentation);
   if (!range) return currentRepresentation;
-  const isPoint = vals => {
+  const isPoint = (vals: Range[]) => {
     if (vals.length !== 1) return false;
     const { leftType, leftValue, rightType, rightValue } = vals[0];
     return (
@@ -402,7 +421,7 @@ function autoExtendMavenRange(currentRepresentation, newValue) {
   return rangeToStr(range);
 }
 
-function isSubversion(majorVersion, minorVersion) {
+function isSubversion(majorVersion: string, minorVersion: string) {
   const majorTokens = tokenize(majorVersion);
   const minorTokens = tokenize(minorVersion);
 

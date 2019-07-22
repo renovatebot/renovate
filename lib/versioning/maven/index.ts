@@ -10,10 +10,11 @@ import {
   parseRange,
   EXCLUDING_POINT,
 } from './compare';
+import { RangeStrategy, VersioningApi } from '../common';
 
-const equals = (a, b) => compare(a, b) === 0;
+const equals = (a: string, b: string) => compare(a, b) === 0;
 
-function matches(a, b) {
+function matches(a: string, b: string) {
   if (!b) return false;
   if (isVersion(b)) return equals(a, b);
   const ranges = parseRange(b);
@@ -44,28 +45,28 @@ function matches(a, b) {
   }, false);
 }
 
-const getMajor = version => {
+const getMajor = (version: string) => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const majorToken = tokens[0];
-    return majorToken.val;
+    return +majorToken.val;
   }
   return null;
 };
 
-const getMinor = version => {
+const getMinor = (version: string) => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
     if (minorToken && minorToken.type === TYPE_NUMBER) {
-      return minorToken.val;
+      return +minorToken.val;
     }
     return 0;
   }
   return null;
 };
 
-const getPatch = version => {
+const getPatch = (version: string) => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const minorToken = tokens[1];
@@ -75,16 +76,16 @@ const getPatch = version => {
       minorToken.type === TYPE_NUMBER &&
       patchToken.type === TYPE_NUMBER
     ) {
-      return patchToken.val;
+      return +patchToken.val;
     }
     return 0;
   }
   return null;
 };
 
-const isGreaterThan = (a, b) => compare(a, b) === 1;
+const isGreaterThan = (a: string, b: string) => compare(a, b) === 1;
 
-const isStable = version => {
+const isStable = (version: string) => {
   if (isVersion(version)) {
     const tokens = tokenize(version);
     const qualToken = tokens.find(token => token.type === TYPE_QUALIFIER);
@@ -102,7 +103,7 @@ const isStable = version => {
   return null;
 };
 
-const maxSatisfyingVersion = (versions, range) => {
+const maxSatisfyingVersion = (versions: string[], range: string) => {
   return versions.reduce((result, version) => {
     if (matches(version, range)) {
       if (!result) return version;
@@ -112,7 +113,12 @@ const maxSatisfyingVersion = (versions, range) => {
   }, null);
 };
 
-function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
+function getNewValue(
+  currentValue: string,
+  _rangeStrategy: RangeStrategy,
+  _fromVersion: string,
+  toVersion: string
+) {
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return toVersion;
   }
@@ -121,8 +127,7 @@ function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
 
 export { isValid };
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
