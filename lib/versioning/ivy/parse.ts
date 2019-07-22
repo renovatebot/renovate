@@ -1,10 +1,16 @@
-const { isSingleVersion, parseRange, rangeToStr } = require('../maven/compare');
+import { isSingleVersion, parseRange, rangeToStr } from '../maven/compare';
 
 const REV_TYPE_LATEST = 'REV_TYPE_LATEST';
 const REV_TYPE_SUBREV = 'REV_TYPE_SUBREVISION';
 const REV_TYPE_RANGE = 'REV_TYPE_RANGE';
 
-function parseDynamicRevision(str) {
+export interface Revision {
+  type: typeof REV_TYPE_LATEST | typeof REV_TYPE_RANGE | typeof REV_TYPE_SUBREV;
+
+  value: string;
+}
+
+function parseDynamicRevision(str: string): Revision {
   if (!str) return null;
 
   const LATEST_REGEX = /^latest\.|^latest$/i;
@@ -38,7 +44,7 @@ function parseDynamicRevision(str) {
   return null;
 }
 
-module.exports = {
+export {
   REV_TYPE_LATEST,
   REV_TYPE_SUBREV,
   REV_TYPE_RANGE,

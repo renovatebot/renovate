@@ -1,4 +1,11 @@
 import maven from '../maven';
+import { TYPE_QUALIFIER, tokenize, isSubversion } from '../maven/compare';
+import {
+  REV_TYPE_LATEST,
+  REV_TYPE_SUBREV,
+  parseDynamicRevision,
+} from './parse';
+import { VersioningApi } from '../common';
 
 const {
   equals,
@@ -15,22 +22,14 @@ const {
   sortVersions,
 } = maven;
 
-const { TYPE_QUALIFIER, tokenize, isSubversion } = require('../maven/compare');
-
-const {
-  REV_TYPE_LATEST,
-  REV_TYPE_SUBREV,
-  parseDynamicRevision,
-} = require('./parse');
-
-function isVersion(str) {
+function isVersion(str: string) {
   if (!str) {
     return false;
   }
   return isSingleVersion(str) || !!parseDynamicRevision(str);
 }
 
-function matches(a, b) {
+function matches(a: string, b: string) {
   if (!a) return false;
   if (!b) return false;
   const dynamicRevision = parseDynamicRevision(b);
@@ -56,8 +55,7 @@ function matches(a, b) {
   return mavenMatches(a, value);
 }
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,

@@ -4,12 +4,24 @@ const PREFIX_HYPHEN = 'PREFIX_HYPHEN';
 const TYPE_NUMBER = 'TYPE_NUMBER';
 const TYPE_QUALIFIER = 'TYPE_QUALIFIER';
 
-interface Token {
+export interface BaseToken {
   prefix: string;
   type: typeof TYPE_NUMBER | typeof TYPE_QUALIFIER;
   val: number | string;
   isTransition?: boolean;
 }
+
+export interface NumberToken extends BaseToken {
+  type: typeof TYPE_NUMBER;
+  val: number;
+}
+
+export interface QualifierToken extends BaseToken {
+  type: typeof TYPE_QUALIFIER;
+  val: string;
+}
+
+export type Token = NumberToken | QualifierToken;
 
 function iterateChars(str: string, cb: (p: string, n: string) => void) {
   let prev = null;
@@ -86,7 +98,7 @@ function isNull(token: Token) {
   return val === 0 || val === '' || val === 'final' || val === 'ga';
 }
 
-const zeroToken: Token = {
+const zeroToken: NumberToken = {
   prefix: PREFIX_HYPHEN,
   type: TYPE_NUMBER,
   val: 0,
@@ -115,11 +127,17 @@ function tokenize(versionStr: string) {
 }
 
 function nullFor(token: Token): Token {
-  return {
-    prefix: token.prefix,
-    type: token.prefix === PREFIX_DOT ? TYPE_NUMBER : TYPE_QUALIFIER,
-    val: token.prefix === PREFIX_DOT ? 0 : '',
-  };
+  return token.prefix === PREFIX_DOT
+    ? {
+        prefix: token.prefix,
+        type: TYPE_NUMBER,
+        val: 0,
+      }
+    : {
+        prefix: token.prefix,
+        type: TYPE_QUALIFIER,
+        val: '',
+      };
 }
 
 function commonOrder(token: Token) {
@@ -247,7 +265,7 @@ function isValid(str: string) {
 const INCLUDING_POINT = 'INCLUDING_POINT';
 const EXCLUDING_POINT = 'EXCLUDING_POINT';
 
-interface Range {
+export interface Range {
   leftType: typeof INCLUDING_POINT | typeof EXCLUDING_POINT;
   leftValue: string;
   leftBracket: string;
