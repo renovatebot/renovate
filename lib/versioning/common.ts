@@ -3,6 +3,7 @@ import { SemVer, Range } from 'semver';
 export type RangeStrategy =
   | 'auto'
   | 'bump'
+  | 'future'
   | 'pin'
   | 'replace'
   | 'update-lockfile'
