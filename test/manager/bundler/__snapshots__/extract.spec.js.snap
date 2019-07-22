@@ -92,7 +92,7 @@ Object {
         "doc",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 32,
       },
     },
     Object {
@@ -103,7 +103,7 @@ Object {
         "doc",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 33,
       },
     },
     Object {
@@ -112,7 +112,7 @@ Object {
         "doc",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 34,
       },
       "skipReason": "no-version",
     },
@@ -124,7 +124,7 @@ Object {
         "doc",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 35,
       },
     },
     Object {
@@ -170,7 +170,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 49,
       },
       "skipReason": "no-version",
     },
@@ -180,7 +180,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 50,
       },
       "skipReason": "no-version",
     },
@@ -190,7 +190,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 51,
       },
       "skipReason": "no-version",
     },
@@ -200,7 +200,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 52,
       },
       "skipReason": "no-version",
     },
@@ -210,7 +210,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 53,
       },
       "skipReason": "no-version",
     },
@@ -220,7 +220,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 54,
       },
       "skipReason": "no-version",
     },
@@ -230,7 +230,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 55,
       },
       "skipReason": "no-version",
     },
@@ -240,7 +240,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 56,
       },
       "skipReason": "no-version",
     },
@@ -250,7 +250,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 57,
       },
       "skipReason": "no-version",
     },
@@ -260,7 +260,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 58,
       },
       "skipReason": "no-version",
     },
@@ -270,7 +270,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 59,
       },
       "skipReason": "no-version",
     },
@@ -280,7 +280,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 64,
       },
       "skipReason": "no-version",
     },
@@ -290,7 +290,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 66,
       },
       "skipReason": "no-version",
     },
@@ -302,7 +302,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 67,
       },
     },
     Object {
@@ -311,7 +311,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 69,
       },
       "skipReason": "no-version",
     },
@@ -321,7 +321,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 71,
       },
       "skipReason": "no-version",
     },
@@ -331,7 +331,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 73,
       },
       "skipReason": "no-version",
     },
@@ -341,7 +341,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 74,
       },
       "skipReason": "no-version",
     },
@@ -351,7 +351,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 75,
       },
       "skipReason": "no-version",
     },
@@ -361,7 +361,7 @@ Object {
         "storage",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 80,
       },
       "skipReason": "no-version",
     },
@@ -373,7 +373,7 @@ Object {
         "storage",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 81,
       },
     },
     Object {
@@ -382,7 +382,7 @@ Object {
         "storage",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 82,
       },
       "skipReason": "no-version",
     },
@@ -394,7 +394,7 @@ Object {
         "storage",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 84,
       },
     },
     Object {
@@ -417,7 +417,7 @@ Object {
         "ujs",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 92,
       },
       "skipReason": "no-version",
     },
@@ -427,7 +427,7 @@ Object {
         "ujs",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 93,
       },
       "skipReason": "no-version",
     },
@@ -437,7 +437,7 @@ Object {
         "test",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 101,
       },
       "skipReason": "no-version",
     },
@@ -447,7 +447,7 @@ Object {
         "test",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 102,
       },
       "skipReason": "no-version",
     },
@@ -477,7 +477,7 @@ Object {
         "test",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 109,
       },
       "skipReason": "no-version",
     },
@@ -684,7 +684,7 @@ Object {
         "optional => true",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 14,
       },
       "skipReason": "no-version",
     },
@@ -695,7 +695,7 @@ Object {
         "optional => true",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 15,
       },
       "skipReason": "no-version",
     },
