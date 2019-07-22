@@ -1,12 +1,12 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/bazel/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/bazel/extract';
 
-const workspaceFile = fs.readFileSync(
+const workspaceFile = readFileSync(
   'test/manager/bazel/_fixtures/WORKSPACE1',
   'utf8'
 );
 
-const fileWithBzlExtension = fs.readFileSync(
+const fileWithBzlExtension = readFileSync(
   'test/manager/bazel/_fixtures/repositories.bzl',
   'utf8'
 );

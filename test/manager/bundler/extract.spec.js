@@ -1,19 +1,19 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/bundler/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/bundler/extract';
 
 /** @type any */
 const platform = global.platform;
 
-const railsGemfile = fs.readFileSync(
+const railsGemfile = readFileSync(
   'test/manager/bundler/_fixtures/Gemfile.rails',
   'utf8'
 );
-const railsGemfileLock = fs.readFileSync(
+const railsGemfileLock = readFileSync(
   'test/manager/bundler/_fixtures/Gemfile.rails.lock',
   'utf8'
 );
 
-const sourceGroupGemfile = fs.readFileSync(
+const sourceGroupGemfile = readFileSync(
   'test/manager/bundler/_fixtures/Gemfile.sourceGroup',
   'utf8'
 );

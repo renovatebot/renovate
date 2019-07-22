@@ -1,9 +1,7 @@
-const fs = require('fs');
-const {
-  extractPackageFile,
-} = require('../../../lib/manager/dockerfile/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/dockerfile/extract';
 
-const d1 = fs.readFileSync(
+const d1 = readFileSync(
   'test/manager/dockerfile/_fixtures/Dockerfile1',
   'utf8'
 );

@@ -1,21 +1,19 @@
-const fs = require('fs');
-const {
-  extractPackageFile,
-} = require('../../../lib/manager/buildkite/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/buildkite/extract';
 
-const pipeline1 = fs.readFileSync(
+const pipeline1 = readFileSync(
   'test/manager/buildkite/_fixtures/pipeline1.yml',
   'utf8'
 );
-const pipeline2 = fs.readFileSync(
+const pipeline2 = readFileSync(
   'test/manager/buildkite/_fixtures/pipeline2.yml',
   'utf8'
 );
-const pipeline3 = fs.readFileSync(
+const pipeline3 = readFileSync(
   'test/manager/buildkite/_fixtures/pipeline3.yml',
   'utf8'
 );
-const pipeline4 = fs.readFileSync(
+const pipeline4 = readFileSync(
   'test/manager/buildkite/_fixtures/pipeline4.yml',
   'utf8'
 );

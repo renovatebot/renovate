@@ -1,11 +1,11 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/ansible/extract');
+import { readFileSync } from 'fs';
+import extractPackageFile from '../../../lib/manager/ansible/extract';
 
-const yamlFile1 = fs.readFileSync(
+const yamlFile1 = readFileSync(
   'test/manager/ansible/_fixtures/main1.yaml',
   'utf8'
 );
-const yamlFile2 = fs.readFileSync(
+const yamlFile2 = readFileSync(
   'test/manager/ansible/_fixtures/main2.yaml',
   'utf8'
 );

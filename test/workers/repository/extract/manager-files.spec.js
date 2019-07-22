@@ -8,6 +8,7 @@ const npm = require('../../../../lib/manager/npm');
 const dockerfile = require('../../../../lib/manager/dockerfile');
 
 jest.mock('../../../../lib/workers/repository/extract/file-match');
+jest.mock('../../../../lib/manager/dockerfile');
 
 /** @type any */
 const platform = global.platform;

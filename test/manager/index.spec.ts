@@ -1,4 +1,4 @@
-const manager = require('../../lib/manager');
+import * as manager from '../../lib/manager';
 
 describe('manager', () => {
   describe('get()', () => {
@@ -18,10 +18,14 @@ describe('manager', () => {
   });
   describe('extractAllPackageFiles()', () => {
     it('returns null', () => {
-      expect(manager.extractAllPackageFiles('dockerfile', [])).toBeNull();
+      expect(
+        manager.extractAllPackageFiles('dockerfile', {} as any, [])
+      ).toBeNull();
     });
     it('returns non-null', () => {
-      expect(manager.extractAllPackageFiles('npm', {}, [])).not.toBeNull();
+      expect(
+        manager.extractAllPackageFiles('npm', {} as any, [])
+      ).not.toBeNull();
     });
   });
 });
