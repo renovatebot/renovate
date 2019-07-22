@@ -1,6 +1,7 @@
 import * as semver from 'semver';
 import { is as isStable } from 'semver-stable';
 import { getNewValue } from './range';
+import { VersioningApi } from '../common';
 
 const {
   compare: sortVersions,
@@ -18,15 +19,14 @@ const {
 } = semver;
 
 // If this is left as an alias, inputs like "17.04.0" throw errors
-export const isValid = input => validRange(input);
-export const isVersion = input => valid(input);
+export const isValid = (input: string) => validRange(input);
+export const isVersion = (input: string) => valid(input);
 
-const isSingleVersion = constraint =>
+const isSingleVersion = (constraint: string) =>
   isVersion(constraint) ||
   (constraint.startsWith('=') && isVersion(constraint.substring(1).trim()));
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,

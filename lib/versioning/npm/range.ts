@@ -9,10 +9,16 @@ import {
 } from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
+import { RangeStrategy } from '../common';
 
 export { getNewValue };
 
-function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
+function getNewValue(
+  currentValue: string,
+  rangeStrategy: RangeStrategy,
+  fromVersion: string,
+  toVersion: string
+) {
   if (rangeStrategy === 'pin' || isVersion(currentValue)) {
     return toVersion;
   }
