@@ -1,6 +1,7 @@
 import semver from 'semver';
 import stable from 'semver-stable';
 import { toSemverRange, getNewValue } from './range';
+import { VersioningApi } from '../common';
 
 const { is: isStable } = stable;
 
@@ -19,21 +20,19 @@ const {
   eq: equals,
 } = semver;
 
-/** @type any */
-export const isValid = input =>
+export const isValid = (input: string) =>
   !!valid(input) || !!validRange(toSemverRange(input));
-export const isVersion = input => !!valid(input);
-/** @type any */
-const maxSatisfyingVersion = (versions, range) =>
+export const isVersion = (input: string) => !!valid(input);
+const maxSatisfyingVersion = (versions: string[], range: string) =>
   maxSatisfying(versions, toSemverRange(range));
-/** @type any */
-const minSatisfyingVersion = (versions, range) =>
+const minSatisfyingVersion = (versions: string[], range: string) =>
   minSatisfying(versions, toSemverRange(range));
-const isLessThanRange = (version, range) => ltr(version, toSemverRange(range));
-const matches = (version, range) => satisfies(version, toSemverRange(range));
+const isLessThanRange = (version: string, range: string) =>
+  ltr(version, toSemverRange(range));
+const matches = (version: string, range: string) =>
+  satisfies(version, toSemverRange(range));
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   equals,
   getMajor,
   getMinor,
