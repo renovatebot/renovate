@@ -1,24 +1,23 @@
-/* eslint no-plusplus: 0 default-case: 0 */
-const parse = require('github-url-from-git');
-const URL = require('url');
-const { logger } = require('../../logger');
+/* eslint no-plusplus: 0  */
+import parse from 'github-url-from-git';
+import { parse as _parse } from 'url';
+import { logger } from '../../logger';
+import { PackageDependency, PackageFile } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
+export { extractPackageFile };
 
-function parseUrl(urlString) {
+function parseUrl(urlString: string) {
   // istanbul ignore if
   if (!urlString) {
     return null;
   }
-  const url = URL.parse(urlString);
+  const url = _parse(urlString);
   if (url.host !== 'github.com') {
     return null;
   }
   const path = url.path.split('/').slice(1);
   const repo = path[0] + '/' + path[1];
-  let currentValue = null;
+  let currentValue: string = null;
   if (path[2] === 'releases' && path[3] === 'download') {
     currentValue = path[4];
   }
@@ -32,7 +31,7 @@ function parseUrl(urlString) {
   return null;
 }
 
-function findBalancedParenIndex(longString) {
+function findBalancedParenIndex(longString: string) {
   /**
    * Minimalistic string parser with single task -> find last char in def.
    * It treats [)] as the last char.
@@ -57,13 +56,16 @@ function findBalancedParenIndex(longString) {
       case '"':
         if (i > 1 && arr.slice(i - 2, i).every(prev => char === prev))
           intShouldNotBeOdd++;
+        break;
+      default:
+        break;
     }
 
     return !parenNestingDepth && !(intShouldNotBeOdd % 2) && char === ')';
   });
 }
 
-function parseContent(content) {
+function parseContent(content: string) {
   return [
     'container_pull',
     'http_archive',
@@ -82,32 +84,32 @@ function parseContent(content) {
         })
         .filter(Boolean),
     ],
-    []
+    [] as string[]
   );
 }
 
-function extractPackageFile(content) {
+function extractPackageFile(content: string): PackageFile {
   const definitions = parseContent(content);
   if (!definitions.length) {
     logger.debug('No matching WORKSPACE definitions found');
     return null;
   }
   logger.debug({ definitions }, `Found ${definitions.length} definitions`);
-  const deps = [];
+  const deps: PackageDependency[] = [];
   definitions.forEach(def => {
     logger.debug({ def }, 'Checking bazel definition');
     const [depType] = def.split('(', 1);
-    const dep = { depType, managerData: { def } };
-    let depName;
-    let importpath;
-    let remote;
-    let currentValue;
-    let commit;
-    let url;
-    let sha256;
-    let digest;
-    let repository;
-    let registry;
+    const dep: PackageDependency  = { depType, managerData: { def } };
+    let depName: string;
+    let importpath: string;
+    let remote: string;
+    let currentValue: string;
+    let commit: string;
+    let url: string;
+    let sha256: string;
+    let digest: string;
+    let repository: string;
+    let registry: string;
     let match = def.match(/name\s*=\s*"([^"]+)"/);
     if (match) {
       [, depName] = match;

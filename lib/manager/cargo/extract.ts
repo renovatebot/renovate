@@ -1,16 +1,32 @@
-const toml = require('toml');
-const { logger } = require('../../logger');
-const semver = require('../../versioning/cargo');
+import { parse } from 'toml';
+import { logger } from '../../logger';
+import { isValid } from '../../versioning/cargo';
+import { PackageDependency, PackageFile } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
+export { extractPackageFile };
 
-function extractPackageFile(content, fileName) {
+interface CargoDep {
+  path: any;
+  git: any;
+  version: any;
+}
+type CargoDeps = Record<string, CargoDep | string>;
+
+interface CargoSection {
+  dependencies: CargoDeps;
+  'dev-dependencies': CargoDeps;
+  'build-dependencies': CargoDeps;
+}
+
+interface CargoConfig extends CargoSection {
+  target: Record<string, CargoSection>;
+}
+
+function extractPackageFile(content: string, fileName: string): PackageFile {
   logger.trace(`cargo.extractPackageFile(${fileName})`);
-  let parsedContent;
+  let parsedContent: CargoConfig;
   try {
-    parsedContent = toml.parse(content);
+    parsedContent = parse(content);
   } catch (err) {
     logger.debug({ err }, 'Error parsing Cargo.toml file');
     return null;
@@ -24,7 +40,7 @@ function extractPackageFile(content, fileName) {
   */
   const targetSection = parsedContent.target;
   // An array of all dependencies in the target section
-  let targetDeps = [];
+  let targetDeps: PackageDependency[] = [];
   if (targetSection) {
     const targets = Object.keys(targetSection);
     targets.forEach(target => {
@@ -50,20 +66,24 @@ function extractPackageFile(content, fileName) {
   return { deps };
 }
 
-function extractFromSection(parsedContent, section, target) {
-  const deps = [];
+function extractFromSection(
+  parsedContent: CargoSection,
+  section: keyof CargoSection,
+  target?: string
+) {
+  const deps: PackageDependency[] = [];
   const sectionContent = parsedContent[section];
   if (!sectionContent) {
     return [];
   }
   Object.keys(sectionContent).forEach(depName => {
-    let skipReason;
+    let skipReason: string;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
     if (typeof currentValue !== 'string') {
-      const version = sectionContent[depName].version;
-      const path = sectionContent[depName].path;
-      const git = sectionContent[depName].git;
+      const version = currentValue.version;
+      const path = currentValue.path;
+      const git = currentValue.git;
       if (version) {
         currentValue = version;
         nestedVersion = true;
@@ -84,16 +104,16 @@ function extractFromSection(parsedContent, section, target) {
         skipReason = 'invalid-dependency-specification';
       }
     }
-    const dep = {
+    const dep: PackageDependency = {
       depName,
       depType: section,
-      currentValue,
+      currentValue: currentValue as any,
       managerData: { nestedVersion },
       datasource: 'cargo',
     };
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (!semver.isValid(dep.currentValue)) {
+    } else if (!isValid(dep.currentValue)) {
       dep.skipReason = 'unknown-version';
     }
     if (target) {

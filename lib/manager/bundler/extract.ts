@@ -1,12 +1,14 @@
-const { logger } = require('../../logger');
-const { isValid } = require('../../versioning/ruby');
+import { logger } from '../../logger';
+import { isValid } from '../../versioning/ruby';
+import { PackageFile, PackageDependency } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
+export { extractPackageFile };
 
-async function extractPackageFile(content, fileName) {
-  const res = {
+async function extractPackageFile(
+  content: string,
+  fileName?: string
+): Promise<PackageFile> {
+  const res: PackageFile = {
     registryUrls: [],
     deps: [],
   };
@@ -14,7 +16,7 @@ async function extractPackageFile(content, fileName) {
   const delimiters = ['"', "'"];
   for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
     const line = lines[lineNumber];
-    let sourceMatch;
+    let sourceMatch: RegExpMatchArray;
     for (const delimiter of delimiters) {
       sourceMatch =
         sourceMatch ||
@@ -25,7 +27,7 @@ async function extractPackageFile(content, fileName) {
     if (sourceMatch) {
       res.registryUrls.push(sourceMatch[1]);
     }
-    let rubyMatch;
+    let rubyMatch: RegExpMatchArray;
     for (const delimiter of delimiters) {
       rubyMatch =
         rubyMatch ||
@@ -36,8 +38,8 @@ async function extractPackageFile(content, fileName) {
     if (rubyMatch) {
       res.compatibility = { ruby: rubyMatch[1] };
     }
-    let gemMatch;
-    let gemDelimiter;
+    let gemMatch: RegExpMatchArray;
+    let gemDelimiter: string;
     for (const delimiter of delimiters) {
       const gemMatchRegex = `^gem ${delimiter}([^${delimiter}]+)${delimiter}(,\\s+${delimiter}([^${delimiter}]+)${delimiter}){0,2}`;
       if (line.match(new RegExp(gemMatchRegex))) {
@@ -46,7 +48,7 @@ async function extractPackageFile(content, fileName) {
       }
     }
     if (gemMatch) {
-      const dep = {
+      const dep: PackageDependency = {
         depName: gemMatch[1],
         managerData: { lineNumber },
       };

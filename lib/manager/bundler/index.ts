@@ -1,7 +1,7 @@
-const { extractPackageFile } = require('./extract');
-const { updateDependency } = require('./update');
-const { updateArtifacts } = require('./artifacts');
-const { getRangeStrategy } = require('./range');
+import { extractPackageFile } from './extract';
+import { updateDependency } from './update';
+import { updateArtifacts } from './artifacts';
+import { getRangeStrategy } from './range';
 
 const language = 'ruby';
 
@@ -10,7 +10,7 @@ const language = 'ruby';
  * The best way to understand them in more detail is to look at the existing managers and find one that matches most closely what you need to do.
  */
 
-module.exports = {
+export {
   extractPackageFile, // Mandatory unless extractAllPackageFiles is used instead
   updateArtifacts, // Optional
   getRangeStrategy, // Optional

@@ -1,12 +1,11 @@
-const { logger } = require('../../logger');
-const { isVersion } = require('../../versioning/semver');
+import { logger } from '../../logger';
+import { isVersion } from '../../versioning/semver';
+import { PackageFile, PackageDependency } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
+export { extractPackageFile };
 
-function extractPackageFile(content) {
-  const deps = [];
+function extractPackageFile(content: string): PackageFile {
+  const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
@@ -21,8 +20,8 @@ function extractPackageFile(content) {
           logger.trace('depLineMatch');
           lineNumber += 1;
           const [, depName, currentValue] = depLineMatch;
-          let skipReason;
-          let repo;
+          let skipReason: string;
+          let repo: string;
           if (depName.startsWith('https://') || depName.startsWith('git@')) {
             logger.debug({ dependency: depName }, 'Skipping git plugin');
             skipReason = 'git-plugin';
@@ -46,7 +45,7 @@ function extractPackageFile(content) {
               skipReason = 'unknown';
             }
           }
-          const dep = {
+          const dep: PackageDependency = {
             managerData: { lineNumber },
             depName,
             currentValue,

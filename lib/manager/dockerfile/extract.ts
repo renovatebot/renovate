@@ -1,12 +1,7 @@
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
+import { PackageDependency, PackageFile } from '../common';
 
-module.exports = {
-  splitImageParts,
-  getDep,
-  extractPackageFile,
-};
-
-function splitImageParts(currentFrom) {
+export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
     return {
       skipReason: 'contains-variable',
@@ -14,8 +9,8 @@ function splitImageParts(currentFrom) {
   }
   const [currentDepTag, currentDigest] = currentFrom.split('@');
   const depTagSplit = currentDepTag.split(':');
-  let depName;
-  let currentValue;
+  let depName: string;
+  let currentValue: string;
   if (
     depTagSplit.length === 1 ||
     depTagSplit[depTagSplit.length - 1].includes('/')
@@ -25,7 +20,7 @@ function splitImageParts(currentFrom) {
     currentValue = depTagSplit.pop();
     depName = depTagSplit.join(':');
   }
-  const dep = {
+  const dep: PackageDependency = {
     depName,
     currentValue,
     currentDigest,
@@ -33,8 +28,7 @@ function splitImageParts(currentFrom) {
   return dep;
 }
 
-function getDep(currentFrom) {
-  /** @type any */
+export function getDep(currentFrom: string) {
   const dep = splitImageParts(currentFrom);
   dep.datasource = 'docker';
   if (
@@ -47,9 +41,9 @@ function getDep(currentFrom) {
   return dep;
 }
 
-function extractPackageFile(content) {
-  const deps = [];
-  const stageNames = [];
+export function extractPackageFile(content: string): PackageFile {
+  const deps: PackageDependency[] = [];
+  const stageNames: string[] = [];
   let lineNumber = 0;
   for (const fromLine of content.split('\n')) {
     const fromMatch = fromLine.match(/^FROM /i);
