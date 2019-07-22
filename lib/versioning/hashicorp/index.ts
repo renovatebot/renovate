@@ -1,4 +1,4 @@
-import npm, { isValid as _isValid } from '../npm';
+import { api as npm } from '../npm';
 import { VersioningApi, RangeStrategy } from '../common';
 
 function hashicorp2npm(input: string) {
@@ -9,7 +9,7 @@ function hashicorp2npm(input: string) {
 const isLessThanRange = (version: string, range: string) =>
   npm.isLessThanRange(hashicorp2npm(version), hashicorp2npm(range));
 
-export const isValid = (input: string) => _isValid(hashicorp2npm(input));
+export const isValid = (input: string) => npm.isValid(hashicorp2npm(input));
 
 const matches = (version: string, range: string) =>
   npm.matches(hashicorp2npm(version), hashicorp2npm(range));

@@ -1,6 +1,6 @@
 import { parseRange } from 'semver-utils';
 import { major, minor } from 'semver';
-import npm, { isVersion as _isVersion, isValid as _isValid } from '../npm';
+import { api as npm } from '../npm';
 import { RangeStrategy, VersioningApi } from '../common';
 
 function notEmpty(s: string) {
@@ -40,9 +40,9 @@ function npm2poetry(input: string) {
 const isLessThanRange = (version: string, range: string) =>
   npm.isLessThanRange(version, poetry2npm(range));
 
-export const isValid = (input: string) => _isValid(poetry2npm(input));
+export const isValid = (input: string) => npm.isValid(poetry2npm(input));
 
-const isVersion = (input: string) => _isVersion(input);
+const isVersion = (input: string) => npm.isVersion(input);
 const matches = (version: string, range: string) =>
   npm.matches(version, poetry2npm(range));
 

@@ -1,6 +1,6 @@
 import { coerce } from 'semver';
 import { logger } from '../../logger';
-import npm, { isVersion as _isVersion, isValid as _isValid } from '../npm';
+import { api as npm } from '../npm';
 import { VersioningApi, RangeStrategy } from '../common';
 
 function padZeroes(input: string) {
@@ -12,10 +12,10 @@ function padZeroes(input: string) {
 }
 
 function composer2npm(input: string) {
-  if (_isVersion(input)) {
+  if (npm.isVersion(input)) {
     return input;
   }
-  if (_isVersion(padZeroes(input))) {
+  if (npm.isVersion(padZeroes(input))) {
     return padZeroes(input);
   }
   let output = input;
@@ -51,10 +51,10 @@ const isStable = (version: string) =>
   version && npm.isStable(composer2npm(version));
 
 export const isValid = (input: string) =>
-  input && _isValid(composer2npm(input));
+  input && npm.isValid(composer2npm(input));
 
 export const isVersion = (input: string) =>
-  input && _isVersion(composer2npm(input));
+  input && npm.isVersion(composer2npm(input));
 
 const matches = (version: string, range: string) =>
   npm.matches(composer2npm(version), composer2npm(range));
@@ -80,8 +80,8 @@ function getNewValue(
   if (isVersion(currentValue)) {
     newValue = toVersion;
   } else if (
-    _isVersion(padZeroes(toVersion)) &&
-    _isValid(currentValue) &&
+    npm.isVersion(padZeroes(toVersion)) &&
+    npm.isValid(currentValue) &&
     composer2npm(currentValue) === currentValue
   ) {
     newValue = npm.getNewValue(

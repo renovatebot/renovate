@@ -1,4 +1,4 @@
-import npm, { isValid as _isValid, isVersion as _isVersion } from '../npm';
+import { api as npm } from '../npm';
 import { VersioningApi, RangeStrategy } from '../common';
 
 function convertToCaret(item: string) {
@@ -41,9 +41,9 @@ function npm2cargo(input: string) {
 const isLessThanRange = (version: string, range: string) =>
   npm.isLessThanRange(version, cargo2npm(range));
 
-export const isValid = (input: string) => _isValid(cargo2npm(input));
+export const isValid = (input: string) => npm.isValid(cargo2npm(input));
 
-const isVersion = (input: string) => _isVersion(input);
+const isVersion = (input: string) => npm.isVersion(input);
 
 const matches = (version: string, range: string) =>
   npm.matches(version, cargo2npm(range));

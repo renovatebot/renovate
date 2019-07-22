@@ -1,4 +1,4 @@
-import npm, { isValid as _isValid } from '../npm';
+import { api as npm } from '../npm';
 import { VersioningApi, RangeStrategy } from '../common';
 
 function hex2npm(input: string) {
@@ -34,7 +34,7 @@ function npm2hex(input: string) {
 const isLessThanRange = (version: string, range: string) =>
   npm.isLessThanRange(hex2npm(version), hex2npm(range));
 
-const isValid = (input: string) => _isValid(hex2npm(input));
+const isValid = (input: string) => npm.isValid(hex2npm(input));
 
 const matches = (version: string, range: string) =>
   npm.matches(hex2npm(version), hex2npm(range));
