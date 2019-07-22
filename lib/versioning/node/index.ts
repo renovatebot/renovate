@@ -1,6 +1,12 @@
 import npm, { isVersion, isValid } from '../npm';
+import { RangeStrategy, VersioningApi } from '../common';
 
-function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
+function getNewValue(
+  currentValue: string,
+  rangeStrategy: RangeStrategy,
+  fromVersion: string,
+  toVersion: string
+) {
   const res = npm.getNewValue(
     currentValue,
     rangeStrategy,
@@ -16,7 +22,7 @@ function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
 
 export { isValid };
 
-export const api = {
+export const api: VersioningApi = {
   ...npm,
   getNewValue,
 };
