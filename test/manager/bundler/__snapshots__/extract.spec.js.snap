@@ -71,7 +71,10 @@ Object {
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 32,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 32,
+      },
     },
     Object {
       "currentValue": "~> 3.2.3",
@@ -80,14 +83,20 @@ Object {
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 33,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 33,
+      },
     },
     Object {
       "depName": "w3c_validators",
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 34,
+      "lineNumber": 2,
+      "managerData": Object {
+        "lineNumber": 34,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -97,7 +106,10 @@ Object {
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 35,
+      "lineNumber": 3,
+      "managerData": Object {
+        "lineNumber": 35,
+      },
     },
     Object {
       "depName": "dalli",
@@ -131,7 +143,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 49,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 49,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -139,7 +154,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 50,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 50,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -147,7 +165,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 51,
+      "lineNumber": 2,
+      "managerData": Object {
+        "lineNumber": 51,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -155,7 +176,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 52,
+      "lineNumber": 3,
+      "managerData": Object {
+        "lineNumber": 52,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -163,7 +187,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 53,
+      "lineNumber": 4,
+      "managerData": Object {
+        "lineNumber": 53,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -171,7 +198,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 54,
+      "lineNumber": 5,
+      "managerData": Object {
+        "lineNumber": 54,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -179,7 +209,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 55,
+      "lineNumber": 6,
+      "managerData": Object {
+        "lineNumber": 55,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -187,7 +220,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 56,
+      "lineNumber": 7,
+      "managerData": Object {
+        "lineNumber": 56,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -195,7 +231,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 57,
+      "lineNumber": 8,
+      "managerData": Object {
+        "lineNumber": 57,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -203,7 +242,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 58,
+      "lineNumber": 9,
+      "managerData": Object {
+        "lineNumber": 58,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -211,7 +253,10 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 59,
+      "lineNumber": 10,
+      "managerData": Object {
+        "lineNumber": 59,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -219,7 +264,10 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 64,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 64,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -227,7 +275,10 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 66,
+      "lineNumber": 2,
+      "managerData": Object {
+        "lineNumber": 66,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -237,14 +288,20 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 67,
+      "lineNumber": 3,
+      "managerData": Object {
+        "lineNumber": 67,
+      },
     },
     Object {
       "depName": "redis-namespace",
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 69,
+      "lineNumber": 5,
+      "managerData": Object {
+        "lineNumber": 69,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -252,7 +309,10 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 71,
+      "lineNumber": 7,
+      "managerData": Object {
+        "lineNumber": 71,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -260,7 +320,10 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 73,
+      "lineNumber": 9,
+      "managerData": Object {
+        "lineNumber": 73,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -268,7 +331,10 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 74,
+      "lineNumber": 10,
+      "managerData": Object {
+        "lineNumber": 74,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -276,7 +342,10 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 75,
+      "lineNumber": 11,
+      "managerData": Object {
+        "lineNumber": 75,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -284,7 +353,10 @@ Object {
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 80,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 80,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -294,14 +366,20 @@ Object {
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 81,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 81,
+      },
     },
     Object {
       "depName": "azure-storage",
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 82,
+      "lineNumber": 2,
+      "managerData": Object {
+        "lineNumber": 82,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -311,7 +389,10 @@ Object {
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 84,
+      "lineNumber": 4,
+      "managerData": Object {
+        "lineNumber": 84,
+      },
     },
     Object {
       "depName": "aws-sdk-sns",
@@ -328,7 +409,10 @@ Object {
       "depTypes": Array [
         "ujs",
       ],
-      "lineNumber": 92,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 92,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -336,7 +420,10 @@ Object {
       "depTypes": Array [
         "ujs",
       ],
-      "lineNumber": 93,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 93,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -344,7 +431,10 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 101,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 101,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -352,7 +442,10 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 102,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 102,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -360,7 +453,10 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 105,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 101,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -368,7 +464,10 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 106,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 102,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -376,26 +475,38 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 109,
+      "lineNumber": 8,
+      "managerData": Object {
+        "lineNumber": 109,
+      },
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 1.8.1",
       "datasource": "rubygems",
       "depName": "nokogiri",
-      "lineNumber": 113,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 113,
+      },
     },
     Object {
       "currentValue": ">=1.4.6",
       "datasource": "rubygems",
       "depName": "racc",
-      "lineNumber": 116,
+      "lineNumber": 3,
+      "managerData": Object {
+        "lineNumber": 116,
+      },
     },
     Object {
       "currentValue": "~> 1.3.6",
       "datasource": "rubygems",
       "depName": "sqlite3",
-      "lineNumber": 119,
+      "lineNumber": 6,
+      "managerData": Object {
+        "lineNumber": 119,
+      },
     },
     Object {
       "currentValue": ">= 0.18.0",
@@ -404,7 +515,10 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 122,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 113,
+      },
     },
     Object {
       "currentValue": ">= 0.4.10",
@@ -413,11 +527,17 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 123,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 114,
+      },
     },
     Object {
       "depName": "activerecord-jdbcsqlite3-adapter",
-      "lineNumber": 129,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 128,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -425,7 +545,10 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 131,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 128,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -433,14 +556,20 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 132,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 129,
+      },
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
-      "lineNumber": 135,
+      "lineNumber": 6,
+      "managerData": Object {
+        "lineNumber": 134,
+      },
     },
     Object {
       "currentValue": ">= 1.3.0",
@@ -449,7 +578,10 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 137,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 128,
+      },
     },
     Object {
       "currentValue": ">= 1.3.0",
@@ -458,23 +590,35 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 138,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 129,
+      },
     },
     Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "psych",
-      "lineNumber": 146,
+      "lineNumber": 2,
+      "managerData": Object {
+        "lineNumber": 146,
+      },
     },
     Object {
       "currentValue": "~> 2.2",
       "datasource": "rubygems",
       "depName": "ruby-oci8",
-      "lineNumber": 152,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 151,
+      },
     },
     Object {
       "depName": "activerecord-oracle_enhanced-adapter",
-      "lineNumber": 154,
+      "lineNumber": 3,
+      "managerData": Object {
+        "lineNumber": 154,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -508,7 +652,10 @@ Object {
   "deps": Array [
     Object {
       "depName": "some_internal_gem",
-      "lineNumber": 4,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 4,
+      },
       "registryUrls": Array [
         "https://gems.example.com",
       ],
@@ -516,7 +663,10 @@ Object {
     },
     Object {
       "depName": "another_internal_gem",
-      "lineNumber": 5,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 5,
+      },
       "registryUrls": Array [
         "https://gems.example.com",
       ],
@@ -525,12 +675,18 @@ Object {
     Object {
       "currentValue": "latest",
       "depName": "ruby-debug",
-      "lineNumber": 9,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 9,
+      },
       "skipReason": "invalid-value",
     },
     Object {
       "depName": "sqlite3",
-      "lineNumber": 10,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 10,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -539,7 +695,10 @@ Object {
         "development",
         "optional => true",
       ],
-      "lineNumber": 14,
+      "lineNumber": 0,
+      "managerData": Object {
+        "lineNumber": 14,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -548,7 +707,10 @@ Object {
         "development",
         "optional => true",
       ],
-      "lineNumber": 15,
+      "lineNumber": 1,
+      "managerData": Object {
+        "lineNumber": 15,
+      },
       "skipReason": "no-version",
     },
   ],
