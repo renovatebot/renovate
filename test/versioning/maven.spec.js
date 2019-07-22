@@ -261,6 +261,7 @@ describe('versioning/maven/index', () => {
     expect(isVersion('0')).toBe(true);
     expect(isVersion('0.1-2-sp')).toBe(true);
     expect(isVersion('1-final')).toBe(true);
+    expect(isVersion('1-foo')).toBe(true);
     expect(isVersion('v1.0.0')).toBe(true);
     expect(isVersion('x1.0.0')).toBe(true);
     expect(isVersion('2.1.1.RELEASE')).toBe(true);
@@ -274,6 +275,7 @@ describe('versioning/maven/index', () => {
   it('checks if version is stable', () => {
     expect(isStable('')).toBeNull();
     expect(isStable('foobar')).toBe(false);
+    expect(isStable('final')).toBe(true);
     expect(isStable('1')).toBe(true);
     expect(isStable('1.2')).toBe(true);
     expect(isStable('1.2.3')).toBe(true);
@@ -281,6 +283,9 @@ describe('versioning/maven/index', () => {
     expect(isStable('v1.2.3.4')).toBe(true);
     expect(isStable('1-alpha-1')).toBe(false);
     expect(isStable('1-b1')).toBe(false);
+    expect(isStable('1-foo')).toBe(false);
+    expect(isStable('1-final-1.0.0')).toBe(true);
+    expect(isStable('1-release')).toBe(true);
     expect(isStable('1.final')).toBe(true);
     expect(isStable('1.0milestone1')).toBe(false);
     expect(isStable('1-sp')).toBe(true);
@@ -328,6 +333,16 @@ describe('versioning/maven/index', () => {
     expect(matches('1', '(0,1),(1,2)')).toBe(false);
     expect(matches('1.0.0.RC9.2', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toBe(false);
     expect(matches('1.0.0-RC14', '(,1.0.0.RC9.2),(1.0.0.RC9.2,)')).toBe(true);
+    expect(matches('0', '')).toBe(false);
+    expect(matches('1', '1')).toBe(true);
+    expect(matches('1', '(1')).toBe(false);
+  });
+
+  it('api', () => {
+    expect(maven.isGreaterThan('1.1', '1')).toBe(true);
+    expect(maven.maxSatisfyingVersion(['1'], '1')).toBe('1');
+    expect(maven.getNewValue('1', null, null, '1.1')).toBe('1.1');
+    expect(maven.getNewValue('[1.2.3,]', null, null, '1.2.4')).toBe('[1.2.3,]');
   });
   it('pins maven ranges', () => {
     const sample = [
