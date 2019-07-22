@@ -91,11 +91,11 @@ const isStable = (version: string) => {
     const qualToken = tokens.find(token => token.type === TYPE_QUALIFIER);
     if (qualToken) {
       const val = qualToken.val;
-      if (val === 'final') return true;
-      if (val === 'ga') return true;
-      if (val === 'release') return true;
-      if (val === 'sp') return true;
-      // istanbul ignore next
+      // TODO: Can this if be removed, we never get here
+      // istanbul ignore if
+      if (val === 'final' || val === 'ga') return true;
+
+      if (val === 'release' || val === 'sp') return true;
       return false;
     }
     return true;

@@ -246,7 +246,6 @@ function compare(left: string, right: string) {
 }
 
 function isVersion(version: string) {
-  // istanbul ignore if
   if (!version) return false;
   if (!/^[a-z0-9.-]+$/i.test(version)) return false;
   if (/^[.-]/.test(version)) return false;
