@@ -67,7 +67,6 @@ Array [
     "lineNumber": 79,
   },
   Object {
-    "currentFrom": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "datasource": "docker",
     "lineNumber": 90,
     "skipReason": "contains-variable",
