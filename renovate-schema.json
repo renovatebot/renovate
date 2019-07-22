@@ -462,11 +462,6 @@
       "type": "boolean",
       "default": true
     },
-    "unstablePattern": {
-      "description": "Regex for identifying unstable versions (docker only)",
-      "type": "string",
-      "format": "regex"
-    },
     "followTag": {
       "description": "If defined, packages will follow this release tag exactly.",
       "type": "string"
