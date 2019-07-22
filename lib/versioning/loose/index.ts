@@ -1,8 +1,9 @@
 import * as generic from './generic';
+import { VersioningApi } from '../common';
 
 const pattern = /^v?(\d+(?:\.\d+)*)(.*)$/;
 
-function parse(version) {
+function parse(version: string) {
   const matches = pattern.exec(version);
   if (!matches) {
     return null;
@@ -15,7 +16,7 @@ function parse(version) {
   return { release, suffix: suffix || '' };
 }
 
-function compare(version1, vervion2) {
+function compare(version1: string, vervion2: string) {
   const parsed1 = parse(version1);
   const parsed2 = parse(vervion2);
   // istanbul ignore if
@@ -41,8 +42,7 @@ function compare(version1, vervion2) {
   return parsed1.suffix.localeCompare(parsed2.suffix);
 }
 
-/** @type import('../common').VersioningApi */
-export const api = generic.create({
+export const api: VersioningApi = generic.create({
   parse,
   compare,
 });
