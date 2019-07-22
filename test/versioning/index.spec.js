@@ -15,18 +15,23 @@ describe('versioning.get(versionScheme)', () => {
     expect(versioning.get('unknown')).toBe(versioning.get('semver'));
   });
 
-  it('should return the same interface', () => {
+  describe('should return the same interface', () => {
     const optionalFunctions = ['isLessThanRange', 'valueToVersion'];
     const npmApi = Object.keys(versioning.get('semver'))
       .filter(val => !optionalFunctions.includes(val))
       .sort();
-    for (const supportedScheme of supportedSchemes.filter(
-      scheme => scheme !== 'npm'
-    )) {
-      const schemeKeys = Object.keys(versioning.get(supportedScheme))
-        .filter(val => !optionalFunctions.includes(val))
-        .sort();
-      expect(schemeKeys).toEqual(npmApi);
+    for (const supportedScheme of supportedSchemes) {
+      it(supportedScheme, () => {
+        const schemeKeys = Object.keys(versioning.get(supportedScheme))
+          .filter(val => !optionalFunctions.includes(val))
+          .sort();
+        expect(schemeKeys).toEqual(npmApi);
+        expect(
+          Object.keys(
+            require('../../lib/versioning/' + supportedScheme).api
+          ).sort()
+        ).toEqual(Object.keys(versioning.get(supportedScheme)).sort());
+      });
     }
   });
 });
