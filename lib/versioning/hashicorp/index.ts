@@ -1,27 +1,31 @@
 import npm, { isValid as _isValid } from '../npm';
+import { VersioningApi, RangeStrategy } from '../common';
 
-function hashicorp2npm(input) {
+function hashicorp2npm(input: string) {
   // The only case incompatible with semver is a "short" ~>, e.g. ~> 1.2
   return input.replace(/~>(\s*\d+\.\d+$)/, '^$1').replace(',', '');
 }
 
-const isLessThanRange = (version, range) =>
+const isLessThanRange = (version: string, range: string) =>
   npm.isLessThanRange(hashicorp2npm(version), hashicorp2npm(range));
 
-export const isValid = input => _isValid(hashicorp2npm(input));
+export const isValid = (input: string) => _isValid(hashicorp2npm(input));
 
-const matches = (version, range) =>
+const matches = (version: string, range: string) =>
   npm.matches(hashicorp2npm(version), hashicorp2npm(range));
 
-/** @type any */
-const maxSatisfyingVersion = (versions, range) =>
+const maxSatisfyingVersion = (versions: string[], range: string) =>
   npm.maxSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
 
-/** @type any */
-const minSatisfyingVersion = (versions, range) =>
+const minSatisfyingVersion = (versions: string[], range: string) =>
   npm.minSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
 
-function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
+function getNewValue(
+  currentValue: string,
+  rangeStrategy: RangeStrategy,
+  fromVersion: string,
+  toVersion: string
+) {
   // handle specia. ~> 1.2 case
   if (currentValue.match(/(~>\s*)\d+\.\d+$/)) {
     return currentValue.replace(
@@ -32,8 +36,7 @@ function getNewValue(currentValue, rangeStrategy, fromVersion, toVersion) {
   return npm.getNewValue(currentValue, rangeStrategy, fromVersion, toVersion);
 }
 
-/** @type import('../common').VersioningApi */
-export const api = {
+export const api: VersioningApi = {
   ...npm,
   isLessThanRange,
   isValid,
