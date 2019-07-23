@@ -43,7 +43,7 @@ function parseRepositories(
           repositories[name] = repo;
           break;
         default:
-          registryUrls.push({ url: repo.url, type: repo.type });
+          registryUrls.push(repo);
       }
     });
   } catch (e) /* istanbul ignore next */ {

@@ -7,6 +7,8 @@ const {
 } = require('../../../lib/workers/branch/get-updated');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
+jest.mock('../../../lib/manager/composer');
+
 /** @type any */
 const platform = global.platform;
 
@@ -18,8 +20,6 @@ describe('workers/branch/get-updated', () => {
         ...defaultConfig,
         upgrades: [],
       };
-      composer.updateDependency = jest.fn();
-      composer.updateArtifacts = jest.fn();
       npm.updateDependency = jest.fn();
       platform.getFile.mockReturnValueOnce('existing content');
     });
