@@ -1,15 +1,12 @@
-const { logger } = require('../../logger');
-const { isVersion } = require('../../versioning/semver');
+import { logger } from '../../logger';
+import { isVersion } from '../../versioning/semver';
+import { PackageDependency, PackageFile } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function getDep(lineNumber, match, type) {
+function getDep(lineNumber: number, match: RegExpMatchArray, type: string) {
   const [, , currentValue] = match;
   let [, depName] = match;
   depName = depName.replace(/"/g, '');
-  const dep = {
+  const dep: PackageDependency = {
     managerData: {
       lineNumber,
     },
@@ -38,9 +35,9 @@ function getDep(lineNumber, match, type) {
   return dep;
 }
 
-function extractPackageFile(content) {
+export function extractPackageFile(content: string): PackageFile {
   logger.trace({ content }, 'gomod.extractPackageFile()');
-  const deps = [];
+  const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {

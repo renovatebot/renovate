@@ -1,11 +1,11 @@
-const YAWN = require('yawn-yaml/cjs');
-const { logger } = require('../../logger');
+import YAWN from 'yawn-yaml';
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(currentFileContent, upgrade) {
+export function updateDependency(
+  currentFileContent: string,
+  upgrade: Upgrade
+): string {
   try {
     const { depName, newValue } = upgrade;
 

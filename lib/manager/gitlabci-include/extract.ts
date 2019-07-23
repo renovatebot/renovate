@@ -1,16 +1,17 @@
 import is from '@sindresorhus/is';
+import yaml from 'js-yaml';
+import { logger } from '../../logger';
+import { PackageDependency, ManagerConfig, PackageFile } from '../common';
 
-const yaml = require('js-yaml');
-
-const { logger } = require('../../logger');
-
-export { extractPackageFile };
-
-function extractDepFromInclude(includeObj) {
+function extractDepFromInclude(includeObj: {
+  file: any;
+  project: string;
+  ref: string;
+}) {
   if (!includeObj.file || !includeObj.project) {
     return null;
   }
-  const dep = {
+  const dep: PackageDependency = {
     datasource: 'gitlab',
     depName: includeObj.project,
     depType: 'repository',
@@ -23,8 +24,12 @@ function extractDepFromInclude(includeObj) {
   return dep;
 }
 
-function extractPackageFile(content, packageFile, config) {
-  const deps = [];
+export function extractPackageFile(
+  content: string,
+  _packageFile: string,
+  config: ManagerConfig
+): PackageFile {
+  const deps: PackageDependency[] = [];
   try {
     const doc = yaml.safeLoad(content);
     if (doc.include && is.array(doc.include)) {

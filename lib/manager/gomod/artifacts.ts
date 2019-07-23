@@ -1,24 +1,21 @@
-const fs = require('fs-extra');
-const upath = require('upath');
-const { exec } = require('../../util/exec');
-const hostRules = require('../../util/host-rules');
-const { getChildProcessEnv } = require('../../util/env');
-const { logger } = require('../../logger');
+import { ensureDir, outputFile, readFile } from 'fs-extra';
+import { join, dirname } from 'upath';
+import { exec } from '../../util/exec';
+import { find } from '../../util/host-rules';
+import { getChildProcessEnv } from '../../util/env';
+import { logger } from '../../logger';
+import { ManagerConfig, UpdateArtifactsResult } from '../common';
 
-module.exports = {
-  updateArtifacts,
-};
-
-async function updateArtifacts(
-  goModFileName,
-  updatedDeps,
-  newGoModContent,
-  config
-) {
+export async function updateArtifacts(
+  goModFileName: string,
+  _updatedDeps: string[],
+  newGoModContent: string,
+  config: ManagerConfig
+): Promise<UpdateArtifactsResult[]> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
   process.env.GOPATH =
-    process.env.GOPATH || upath.join(config.cacheDir, './others/go');
-  await fs.ensureDir(process.env.GOPATH);
+    process.env.GOPATH || join(config.cacheDir, './others/go');
+  await ensureDir(process.env.GOPATH);
   logger.debug('Using GOPATH: ' + process.env.GOPATH);
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
   const existingGoSumContent = await platform.getFile(sumFileName);
@@ -26,11 +23,11 @@ async function updateArtifacts(
     logger.debug('No go.sum found');
     return null;
   }
-  const cwd = upath.join(config.localDir, upath.dirname(goModFileName));
-  let stdout;
-  let stderr;
+  const cwd = join(config.localDir, dirname(goModFileName));
+  let stdout: string;
+  let stderr: string;
   try {
-    const localGoModFileName = upath.join(config.localDir, goModFileName);
+    const localGoModFileName = join(config.localDir, goModFileName);
     const massagedGoMod = newGoModContent.replace(
       /\n(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
       '\n// renovate-replace $1'
@@ -38,12 +35,12 @@ async function updateArtifacts(
     if (massagedGoMod !== newGoModContent) {
       logger.debug('Removed some relative replace statements from go.mod');
     }
-    await fs.outputFile(localGoModFileName, massagedGoMod);
-    const localGoSumFileName = upath.join(config.localDir, sumFileName);
+    await outputFile(localGoModFileName, massagedGoMod);
+    const localGoSumFileName = join(config.localDir, sumFileName);
     const customEnv = ['GOPATH', 'GOPROXY'];
     const env = getChildProcessEnv(customEnv);
     const startTime = process.hrtime();
-    let cmd;
+    let cmd: string;
     if (config.binarySource === 'docker') {
       logger.info('Running go via docker');
       cmd = `docker run --rm `;
@@ -54,7 +51,7 @@ async function updateArtifacts(
       cmd += '-e CGO_ENABLED=0 ';
       cmd += `-w ${cwd} `;
       cmd += `renovate/go `;
-      const credentials = hostRules.find({
+      const credentials = find({
         hostType: 'github',
         url: 'https://api.github.com/',
       });
@@ -116,11 +113,11 @@ async function updateArtifacts(
     res.push({
       file: {
         name: sumFileName,
-        contents: await fs.readFile(localGoSumFileName, 'utf8'),
+        contents: await readFile(localGoSumFileName, 'utf8'),
       },
     });
-    const vendorDir = upath.join(upath.dirname(goModFileName), 'vendor/');
-    const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
+    const vendorDir = join(dirname(goModFileName), 'vendor/');
+    const vendorModulesFileName = join(vendorDir, 'modules.txt');
     // istanbul ignore if
     if (await platform.getFile(vendorModulesFileName)) {
       args = 'mod vendor';
@@ -158,11 +155,11 @@ async function updateArtifacts(
       status = await platform.getRepoStatus();
       for (const f of status.modified.concat(status.not_added)) {
         if (f.startsWith(vendorDir)) {
-          const localModified = upath.join(config.localDir, f);
+          const localModified = join(config.localDir, f);
           res.push({
             file: {
               name: f,
-              contents: await fs.readFile(localModified, 'utf8'),
+              contents: await readFile(localModified, 'utf8'),
             },
           });
         }
@@ -176,7 +173,7 @@ async function updateArtifacts(
         });
       }
     }
-    const finalGoModContent = (await fs.readFile(
+    const finalGoModContent = (await readFile(
       localGoModFileName,
       'utf8'
     )).replace(/\/\/ renovate-replace /g, '');

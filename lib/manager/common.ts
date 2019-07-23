@@ -1,12 +1,19 @@
 import { RangeStrategy } from '../versioning';
 
+export type Result<T> = T | Promise<T>;
+
 export interface ManagerConfig {
+  gradle?: { timeout?: number };
+  binarySource?: string;
+  cacheDir?: any;
   depType?: string;
+  endpoint?: string;
 
   localDir?: string;
   manager?: string;
 
   packageJsonType?: 'app';
+  postUpdateOptions?: string[];
 
   rangeStrategy?: RangeStrategy;
 }
@@ -20,6 +27,7 @@ export interface PackageFile {
   composerJsonType?: string;
   composerLock?: boolean | string;
   compatibility?: Record<string, string>;
+  datasource?: string;
   registryUrls?: (string | Registry)[];
   deps: PackageDependency[];
   manager?: string;
@@ -42,6 +50,7 @@ export interface PackageDependency extends Package {
   currentDigestShort?: string;
   datasource?: string;
   def?: string;
+  depNameShort?: string;
   digestOneAndOnly?: boolean;
   fileReplacePosition?: number;
   lockedVersion?: string;
@@ -58,9 +67,19 @@ export interface PackageDependency extends Package {
 }
 
 export interface Upgrade extends Package {
+  newMajor?: number;
+  updateType?: string;
   newDigest?: string;
   newFrom?: string;
   newValue?: string;
+}
+
+export interface UpdateArtifactsResult {
+  file?: { name: string; contents: string };
+  artifactError?: {
+    lockFile?: string;
+    stderr?: string;
+  };
 }
 
 export interface ManagerApi {
@@ -70,13 +89,13 @@ export interface ManagerApi {
   extractAllPackageFiles?(
     config: ManagerConfig,
     files: string[]
-  ): PackageFile[];
+  ): Result<PackageFile[]>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
     config?: ManagerConfig
-  ): PackageFile | Promise<PackageFile>;
+  ): Result<PackageFile>;
 
   getPackageUpdates(config: ManagerConfig): any[];
 
@@ -84,10 +103,10 @@ export interface ManagerApi {
 
   updateArtifacts?(
     packageFileName: string,
-    updatedDeps: any,
+    updatedDeps: string[],
     newPackageFileContent: string,
     config: ManagerConfig
-  ): any;
+  ): Result<UpdateArtifactsResult[]>;
 
   updateDependency(fileContent: string, upgrade: Upgrade): string;
 }

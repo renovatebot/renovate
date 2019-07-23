@@ -1,11 +1,11 @@
-const { DateTime } = require('luxon');
-const { logger } = require('../../logger');
+import { DateTime } from 'luxon';
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(currentFileContent, upgrade) {
+export function updateDependency(
+  currentFileContent: string,
+  upgrade: Upgrade
+): string {
   try {
     logger.debug(`gomod.updateDependency: ${upgrade.newValue}`);
     const { depName, depType } = upgrade;
@@ -28,7 +28,7 @@ function updateDependency(currentFileContent, upgrade) {
       );
       return null;
     }
-    let updateLineExp;
+    let updateLineExp: RegExp;
     if (depType === 'replace') {
       updateLineExp = new RegExp(
         /^(replace\s+[^\s]+[\s]+[=][>]+\s+)([^\s]+\s+)([^\s]+)/
@@ -44,7 +44,7 @@ function updateDependency(currentFileContent, upgrade) {
       logger.debug('No image line found');
       return null;
     }
-    let newLine;
+    let newLine: string;
     if (upgrade.updateType === 'digest') {
       const newDigestRightSized = upgrade.newDigest.substring(
         0,
