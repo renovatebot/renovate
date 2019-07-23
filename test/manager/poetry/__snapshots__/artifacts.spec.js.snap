@@ -1,10 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`.updateArtifacts() catches errors 1`] = `
-Object {
-  "lockFileError": Object {
-    "lockFile": "poetry.lock",
-    "stderr": "not found",
+Array [
+  Object {
+    "lockFileError": Object {
+      "lockFile": "poetry.lock",
+      "stderr": "not found",
+    },
   },
-}
+]
 `;
