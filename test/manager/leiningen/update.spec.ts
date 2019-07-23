@@ -1,13 +1,11 @@
 /* eslint-disable no-template-curly-in-string */
-const fs = require('fs');
-const path = require('path');
-const {
-  extractPackageFile,
-} = require('../../../lib/manager/leiningen/extract');
-const { updateDependency } = require('../../../lib/manager/leiningen/update');
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { extractPackageFile } from '../../../lib/manager/leiningen/extract';
+import { updateDependency } from '../../../lib/manager/leiningen/update';
 
-const leinProjectClj = fs.readFileSync(
-  path.resolve(__dirname, `./_fixtures/project.clj`),
+const leinProjectClj = readFileSync(
+  resolve(__dirname, `./_fixtures/project.clj`),
   'utf8'
 );
 

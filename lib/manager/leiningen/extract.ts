@@ -1,8 +1,9 @@
-const { DEFAULT_MAVEN_REPO } = require('../maven/extract');
+import { DEFAULT_MAVEN_REPO } from '../maven/extract';
+import { PackageDependency, PackageFile } from '../common';
 
-const DEFAULT_CLOJARS_REPO = 'https://clojars.org/repo/';
+export const DEFAULT_CLOJARS_REPO = 'https://clojars.org/repo/';
 
-function trimAtKey(str, kwName) {
+export function trimAtKey(str: string, kwName: string) {
   const regex = new RegExp(`:${kwName}(?=\\s)`);
   const keyOffset = str.search(regex);
   if (keyOffset < 0) return null;
@@ -12,23 +13,32 @@ function trimAtKey(str, kwName) {
   return withSpaces.slice(valueOffset);
 }
 
-function expandDepName(name) {
+export function expandDepName(name: string) {
   return name.indexOf('/') === -1 ? `${name}:${name}` : name.replace('/', ':');
 }
 
-function extractFromVectors(str, offset = 0, ctx = {}) {
+export interface ExtractContext {
+  depType?: string;
+  registryUrls?: string[];
+}
+
+export function extractFromVectors(
+  str: string,
+  offset = 0,
+  ctx: ExtractContext = {}
+): PackageDependency[] {
   if (str.indexOf('[') !== 0) return [];
   let balance = 0;
-  const result = [];
+  const result: PackageDependency[] = [];
   let idx = 0;
   let vecPos = 0;
   let artifactId = '';
   let version = '';
-  let fileReplacePosition = null;
+  let fileReplacePosition: number = null;
 
-  const isSpace = ch => ch && /[\s,]/.test(ch);
+  const isSpace = (ch: string) => ch && /[\s,]/.test(ch);
 
-  const cleanStrLiteral = s => s.replace(/^"/, '').replace(/"$/, '');
+  const cleanStrLiteral = (s: string) => s.replace(/^"/, '').replace(/"$/, '');
 
   const yieldDep = () => {
     if (artifactId && version && fileReplacePosition) {
@@ -79,7 +89,7 @@ function extractFromVectors(str, offset = 0, ctx = {}) {
   return result;
 }
 
-function extractLeinRepos(content) {
+function extractLeinRepos(content: string) {
   const result = [DEFAULT_CLOJARS_REPO, DEFAULT_MAVEN_REPO];
 
   const repoContent = trimAtKey(
@@ -111,9 +121,9 @@ function extractLeinRepos(content) {
   return result;
 }
 
-function extractPackageFile(content) {
-  const collect = (key, ctx) => {
-    let result = [];
+export function extractPackageFile(content: string): PackageFile {
+  const collect = (key: string, ctx: ExtractContext) => {
+    let result: PackageDependency[] = [];
     let restContent = trimAtKey(content, key);
     while (restContent) {
       const offset = content.length - restContent.length;
@@ -125,7 +135,7 @@ function extractPackageFile(content) {
 
   const registryUrls = extractLeinRepos(content);
 
-  const deps = [
+  const deps: PackageDependency[] = [
     ...collect('dependencies', {
       depType: 'dependencies',
       registryUrls,
@@ -150,11 +160,3 @@ function extractPackageFile(content) {
 
   return { deps };
 }
-
-module.exports = {
-  trimAtKey,
-  extractFromVectors,
-  expandDepName,
-  DEFAULT_CLOJARS_REPO,
-  extractPackageFile,
-};

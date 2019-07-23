@@ -1,14 +1,14 @@
 /* eslint-disable no-template-curly-in-string */
-const fs = require('fs');
-const path = require('path');
-const {
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import {
   trimAtKey,
   extractFromVectors,
   extractPackageFile,
-} = require('../../../lib/manager/leiningen/extract');
+} from '../../../lib/manager/leiningen/extract';
 
-const leinProjectClj = fs.readFileSync(
-  path.resolve(__dirname, `./_fixtures/project.clj`),
+const leinProjectClj = readFileSync(
+  resolve(__dirname, `./_fixtures/project.clj`),
   'utf8'
 );
 
