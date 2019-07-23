@@ -1,32 +1,28 @@
-const upath = require('upath');
-const process = require('process');
-const fs = require('fs-extra');
-const { exec } = require('../../util/exec');
-const { getChildProcessEnv } = require('../../util/env');
+import { parse, join } from 'upath';
+import { hrtime } from 'process';
+import { outputFile, readFile } from 'fs-extra';
+import { exec } from '../../util/exec';
+import { getChildProcessEnv } from '../../util/env';
+import { logger } from '../../logger';
+import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 
-const { logger } = require('../../logger');
-
-module.exports = {
-  updateArtifacts,
-};
-
-async function updateArtifacts(
-  packageFileName,
-  updatedDeps,
-  newPackageFileContent,
-  config
-) {
+export async function updateArtifacts(
+  packageFileName: string,
+  updatedDeps: string[],
+  newPackageFileContent: string,
+  config: UpdateArtifactsConfig
+): Promise<UpdateArtifactsResult[]> {
   await logger.debug(`poetry.updateArtifacts(${packageFileName})`);
   if (updatedDeps === undefined || updatedDeps.length < 1) {
     logger.debug('No updated poetry deps - returning null');
     return null;
   }
-  const subDirectory = upath.parse(packageFileName).dir;
-  const lockFileName = upath.join(subDirectory, 'poetry.lock');
+  const subDirectory = parse(packageFileName).dir;
+  const lockFileName = join(subDirectory, 'poetry.lock');
   let existingLockFileContent = await platform.getFile(lockFileName);
-  let oldLockFileName;
+  let oldLockFileName: string;
   if (!existingLockFileContent) {
-    oldLockFileName = upath.join(subDirectory, 'pyproject.lock');
+    oldLockFileName = join(subDirectory, 'pyproject.lock');
     existingLockFileContent = await platform.getFile(oldLockFileName);
     // istanbul ignore if
     if (existingLockFileContent) {
@@ -36,17 +32,17 @@ async function updateArtifacts(
       return null;
     }
   }
-  const localPackageFileName = upath.join(config.localDir, packageFileName);
-  const localLockFileName = upath.join(config.localDir, lockFileName);
-  let stdout;
-  let stderr;
-  const startTime = process.hrtime();
+  const localPackageFileName = join(config.localDir, packageFileName);
+  const localLockFileName = join(config.localDir, lockFileName);
+  let stdout: string;
+  let stderr: string;
+  const startTime = hrtime();
   try {
-    await fs.outputFile(localPackageFileName, newPackageFileContent);
+    await outputFile(localPackageFileName, newPackageFileContent);
     logger.debug(`Updating ${lockFileName}`);
-    const cwd = upath.join(config.localDir, subDirectory);
+    const cwd = join(config.localDir, subDirectory);
     const env = getChildProcessEnv();
-    let cmd;
+    let cmd: string;
     // istanbul ignore if
     if (config.binarySource === 'docker') {
       logger.info('Running poetry via docker');
@@ -69,19 +65,19 @@ async function updateArtifacts(
         env,
       }));
     }
-    const duration = process.hrtime(startTime);
+    const duration = hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
     logger.info(
       { seconds, type: `${lockFileName}`, stdout, stderr },
       'Updated lockfile'
     );
     logger.debug(`Returning updated ${lockFileName}`);
-    const newPoetryLockContent = await fs.readFile(localLockFileName, 'utf8');
+    const newPoetryLockContent = await readFile(localLockFileName, 'utf8');
     if (existingLockFileContent === newPoetryLockContent) {
       logger.debug(`${lockFileName} is unchanged`);
       return null;
     }
-    let fileName;
+    let fileName: string;
     // istanbul ignore if
     if (oldLockFileName) {
       fileName = oldLockFileName;

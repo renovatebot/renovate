@@ -1,12 +1,12 @@
-const fs = require('fs');
-const { updateDependency } = require('../../../lib/manager/poetry/update');
+import { readFileSync } from 'fs';
+import { updateDependency } from '../../../lib/manager/poetry/update';
 
-const pyproject1toml = fs.readFileSync(
+const pyproject1toml = readFileSync(
   'test/manager/poetry/_fixtures/pyproject.1.toml',
   'utf8'
 );
 
-const pyproject2toml = fs.readFileSync(
+const pyproject2toml = readFileSync(
   'test/manager/poetry/_fixtures/pyproject.2.toml',
   'utf8'
 );

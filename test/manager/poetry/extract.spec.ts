@@ -1,27 +1,27 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/poetry/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/poetry/extract';
 
-const pyproject1toml = fs.readFileSync(
+const pyproject1toml = readFileSync(
   'test/manager/poetry/_fixtures/pyproject.1.toml',
   'utf8'
 );
 
-const pyproject2toml = fs.readFileSync(
+const pyproject2toml = readFileSync(
   'test/manager/poetry/_fixtures/pyproject.2.toml',
   'utf8'
 );
 
-const pyproject3toml = fs.readFileSync(
+const pyproject3toml = readFileSync(
   'test/manager/poetry/_fixtures/pyproject.3.toml',
   'utf8'
 );
 
-const pyproject4toml = fs.readFileSync(
+const pyproject4toml = readFileSync(
   'test/manager/poetry/_fixtures/pyproject.4.toml',
   'utf8'
 );
 
-const pyproject5toml = fs.readFileSync(
+const pyproject5toml = readFileSync(
   'test/manager/poetry/_fixtures/pyproject.5.toml',
   'utf8'
 );

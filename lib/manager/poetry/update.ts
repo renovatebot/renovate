@@ -1,20 +1,22 @@
-const _ = require('lodash');
-const toml = require('toml');
-
-const { logger } = require('../../logger');
-
-module.exports = {
-  updateDependency,
-};
+import { isEqual } from 'lodash';
+import { parse } from 'toml';
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
+import { PoetryFile } from './types';
 
 // TODO: Maybe factor out common code from pipenv.updateDependency and poetry.updateDependency
 // Return true if the match string is found at index in content
-function matchAt(content, index, match) {
+function matchAt(content: string, index: number, match: string) {
   return content.substring(index, index + match.length) === match;
 }
 
 // Replace oldString with newString at location index of content
-function replaceAt(content, index, oldString, newString) {
+function replaceAt(
+  content: string,
+  index: number,
+  oldString: string,
+  newString: string
+) {
   logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
     content.substr(0, index) +
@@ -23,14 +25,17 @@ function replaceAt(content, index, oldString, newString) {
   );
 }
 
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade<{ nestedVersion?: boolean }>
+): string {
   logger.trace({ config: upgrade }, 'poetry.updateDependency()');
   if (!upgrade) {
     return null;
   }
   const { depType, depName, newValue, managerData } = upgrade;
   const { nestedVersion } = managerData;
-  const parsedContents = toml.parse(fileContent);
+  const parsedContents: PoetryFile = parse(fileContent);
   if (!parsedContents.tool.poetry[depType]) {
     logger.info(
       { config: upgrade },
@@ -38,7 +43,7 @@ function updateDependency(fileContent, upgrade) {
     );
     return null;
   }
-  let oldVersion;
+  let oldVersion: string;
   if (nestedVersion) {
     const oldDep = parsedContents.tool.poetry[depType][depName];
     if (!oldDep) {
@@ -84,7 +89,7 @@ function updateDependency(fileContent, upgrade) {
         newString
       );
       // Compare the parsed toml structure of old and new
-      if (_.isEqual(parsedContents, toml.parse(testContent))) {
+      if (isEqual(parsedContents, parse(testContent))) {
         newFileContent = testContent;
         break;
       } else {

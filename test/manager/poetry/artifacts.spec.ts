@@ -1,14 +1,13 @@
+import _fs from 'fs-extra';
+import { exec as _exec } from '../../../lib/util/exec';
+import { updateArtifacts } from '../../../lib/manager/poetry/artifacts';
+
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 
-/** @type any */
-const fs = require('fs-extra');
-/** @type any */
-const { exec } = require('../../../lib/util/exec');
-const poetry = require('../../../lib/manager/poetry/artifacts');
-
-/** @type any */
-const platform = global.platform;
+const platform: any = global.platform;
+const exec: any = _exec;
+const fs: any = _fs;
 
 const config = {
   localDir: '/tmp/github/some/repo',
@@ -22,20 +21,13 @@ describe('.updateArtifacts()', () => {
     delete global.trustLevel;
   });
   it('returns null if no poetry.lock found', async () => {
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
+    const updatedDeps = ['dep1'];
     expect(
-      await poetry.updateArtifacts('pyproject.toml', updatedDeps, '', config)
+      await updateArtifacts('pyproject.toml', updatedDeps, '', config)
     ).toBeNull();
   });
   it('returns null if updatedDeps is empty', async () => {
-    expect(
-      await poetry.updateArtifacts('pyproject.toml', [], '', config)
-    ).toBeNull();
+    expect(await updateArtifacts('pyproject.toml', [], '', config)).toBeNull();
   });
   it('returns null if unchanged', async () => {
     platform.getFile.mockReturnValueOnce('Current poetry.lock');
@@ -44,14 +36,9 @@ describe('.updateArtifacts()', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'Current poetry.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
+    const updatedDeps = ['dep1'];
     expect(
-      await poetry.updateArtifacts('pyproject.toml', updatedDeps, '', config)
+      await updateArtifacts('pyproject.toml', updatedDeps, '', config)
     ).toBeNull();
   });
   it('returns updated poetry.lock', async () => {
@@ -61,15 +48,10 @@ describe('.updateArtifacts()', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'New poetry.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
+    const updatedDeps = ['dep1'];
     global.trustLevel = 'high';
     expect(
-      await poetry.updateArtifacts('pyproject.toml', updatedDeps, '{}', config)
+      await updateArtifacts('pyproject.toml', updatedDeps, '{}', config)
     ).not.toBeNull();
   });
   it('catches errors', async () => {
@@ -77,14 +59,9 @@ describe('.updateArtifacts()', () => {
     fs.outputFile = jest.fn(() => {
       throw new Error('not found');
     });
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
+    const updatedDeps = ['dep1'];
     expect(
-      await poetry.updateArtifacts('pyproject.toml', updatedDeps, '{}', config)
+      await updateArtifacts('pyproject.toml', updatedDeps, '{}', config)
     ).toMatchSnapshot();
   });
 });

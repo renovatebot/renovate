@@ -1,16 +1,17 @@
-const toml = require('toml');
-const semver = require('../../versioning/poetry');
-const { logger } = require('../../logger');
+import { parse } from 'toml';
+import { isValid } from '../../versioning/poetry';
+import { logger } from '../../logger';
+import { PackageFile, PackageDependency } from '../common';
+import { PoetryFile, PoetrySection } from './types';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(content, fileName) {
+export function extractPackageFile(
+  content: string,
+  fileName: string
+): PackageFile {
   logger.trace(`poetry.extractPackageFile(${fileName})`);
-  let pyprojectfile;
+  let pyprojectfile: PoetryFile;
   try {
-    pyprojectfile = toml.parse(content);
+    pyprojectfile = parse(content);
   } catch (err) {
     logger.debug({ err }, 'Error parsing pyproject.toml file');
     return null;
@@ -30,20 +31,23 @@ function extractPackageFile(content, fileName) {
   return { deps };
 }
 
-function extractFromSection(parsedFile, section) {
+function extractFromSection(
+  parsedFile: PoetryFile,
+  section: keyof PoetrySection
+): PackageDependency[] {
   const deps = [];
   const sectionContent = parsedFile.tool.poetry[section];
   if (!sectionContent) {
     return [];
   }
   Object.keys(sectionContent).forEach(depName => {
-    let skipReason;
+    let skipReason: string;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
     if (typeof currentValue !== 'string') {
-      const version = sectionContent[depName].version;
-      const path = sectionContent[depName].path;
-      const git = sectionContent[depName].git;
+      const version = currentValue.version;
+      const path = currentValue.path;
+      const git = currentValue.git;
       if (version) {
         currentValue = version;
         nestedVersion = true;
@@ -64,16 +68,16 @@ function extractFromSection(parsedFile, section) {
         skipReason = 'multiple-constraint-dep';
       }
     }
-    const dep = {
+    const dep: PackageDependency = {
       depName,
       depType: section,
-      currentValue,
+      currentValue: currentValue as string,
       managerData: { nestedVersion },
       datasource: 'pypi',
     };
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (!semver.isValid(dep.currentValue)) {
+    } else if (!isValid(dep.currentValue)) {
       dep.skipReason = 'unknown-version';
     }
     deps.push(dep);
