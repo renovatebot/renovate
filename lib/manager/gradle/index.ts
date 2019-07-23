@@ -12,14 +12,14 @@ import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
-import { PackageFile, ManagerConfig, Upgrade } from '../common';
+import { PackageFile, ExtractConfig, Upgrade } from '../common';
 
 const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
 const TIMEOUT_CODE = 143;
 
 export async function extractAllPackageFiles(
-  config: ManagerConfig,
+  config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[]> {
   if (!packageFiles.some(packageFile => packageFile === 'build.gradle')) {
@@ -79,7 +79,7 @@ function buildGradleDependency(config: Upgrade): GraddleDependency {
   return { group: config.depGroup, name: config.name, version: config.version };
 }
 
-async function executeGradle(config: ManagerConfig) {
+async function executeGradle(config: ExtractConfig) {
   let stdout: string;
   let stderr: string;
   const gradleTimeout =
@@ -113,7 +113,7 @@ async function executeGradle(config: ManagerConfig) {
   logger.info('Gradle report complete');
 }
 
-async function getGradleCommandLine(config: ManagerConfig) {
+async function getGradleCommandLine(config: ExtractConfig) {
   let cmd: string;
   const gradlewExists = await exists(config.localDir + '/gradlew');
   if (config.binarySource === 'docker') {

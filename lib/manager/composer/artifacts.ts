@@ -1,20 +1,18 @@
 import is from '@sindresorhus/is';
+import URL from 'url';
+import fs from 'fs-extra';
+import upath from 'upath';
 import { exec } from '../../util/exec';
+import { UpdateArtifactsConfig, Registry } from '../common';
+import { logger } from '../../logger';
+import * as hostRules from '../../util/host-rules';
+import { getChildProcessEnv } from '../../util/env';
 
-const URL = require('url');
-const fs = require('fs-extra');
-const upath = require('upath');
-const { logger } = require('../../logger');
-const hostRules = require('../../util/host-rules');
-const { getChildProcessEnv } = require('../../util/env');
-
-export { updateArtifacts };
-
-async function updateArtifacts(
-  packageFileName,
-  updatedDeps,
-  newPackageFileContent,
-  config
+export async function updateArtifacts(
+  packageFileName: string,
+  updatedDeps: string[],
+  newPackageFileContent: string,
+  config: UpdateArtifactsConfig
 ) {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
   process.env.COMPOSER_CACHE_DIR =
@@ -30,8 +28,8 @@ async function updateArtifacts(
   }
   const cwd = upath.join(config.localDir, upath.dirname(packageFileName));
   await fs.ensureDir(upath.join(cwd, 'vendor'));
-  let stdout;
-  let stderr;
+  let stdout: string;
+  let stderr: string;
   try {
     const localPackageFileName = upath.join(config.localDir, packageFileName);
     await fs.outputFile(localPackageFileName, newPackageFileContent);
@@ -63,7 +61,7 @@ async function updateArtifacts(
     try {
       // istanbul ignore else
       if (is.array(config.registryUrls)) {
-        for (const regUrl of config.registryUrls) {
+        for (const regUrl of config.registryUrls as Registry[]) {
           if (regUrl.url) {
             const { host } = URL.parse(regUrl.url);
             const hostRule = hostRules.find({
@@ -98,7 +96,7 @@ async function updateArtifacts(
     }
     const env = getChildProcessEnv(['COMPOSER_CACHE_DIR']);
     const startTime = process.hrtime();
-    let cmd;
+    let cmd: string;
     if (config.binarySource === 'docker') {
       logger.info('Running composer via docker');
       cmd = `docker run --rm `;

@@ -22,12 +22,7 @@ describe('.updateArtifacts()', () => {
     delete global.trustLevel;
   });
   it('returns null if no Cargo.lock found', async () => {
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
+    const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts('Cargo.toml', updatedDeps, '', config)
     ).toBeNull();
@@ -44,12 +39,7 @@ describe('.updateArtifacts()', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'Current Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
+    const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts('Cargo.toml', updatedDeps, '', config)
     ).toBeNull();
@@ -61,12 +51,7 @@ describe('.updateArtifacts()', () => {
       stderror: '',
     });
     fs.readFile = jest.fn(() => 'New Cargo.lock');
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
+    const updatedDeps = ['dep1'];
     global.trustLevel = 'high';
     expect(
       await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', config)
@@ -77,12 +62,7 @@ describe('.updateArtifacts()', () => {
     fs.outputFile = jest.fn(() => {
       throw new Error('not found');
     });
-    const updatedDeps = [
-      {
-        depName: 'dep1',
-        currentValue: '1.2.3',
-      },
-    ];
+    const updatedDeps = ['dep1'];
     expect(
       await cargo.updateArtifacts('Cargo.toml', updatedDeps, '{}', config)
     ).toMatchSnapshot();

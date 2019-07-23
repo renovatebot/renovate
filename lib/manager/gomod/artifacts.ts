@@ -4,13 +4,13 @@ import { exec } from '../../util/exec';
 import { find } from '../../util/host-rules';
 import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
-import { ManagerConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts(
   goModFileName: string,
   _updatedDeps: string[],
   newGoModContent: string,
-  config: ManagerConfig
+  config: UpdateArtifactsConfig
 ): Promise<UpdateArtifactsResult[]> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
   process.env.GOPATH =

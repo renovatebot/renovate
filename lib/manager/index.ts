@@ -1,4 +1,9 @@
-import { ManagerApi, ManagerConfig } from './common';
+import {
+  ManagerApi,
+  ExtractConfig,
+  RangeConfig,
+  PackageUpdateConfig,
+} from './common';
 
 const managerList = [
   'ansible',
@@ -62,7 +67,7 @@ export const getManagerList = () => managerList;
 
 export function extractAllPackageFiles(
   manager: string,
-  config: ManagerConfig,
+  config: ExtractConfig,
   files: string[]
 ) {
   return managers[manager] && get(manager, 'extractAllPackageFiles')
@@ -70,7 +75,10 @@ export function extractAllPackageFiles(
     : null;
 }
 
-export function getPackageUpdates(manager: string, config: ManagerConfig) {
+export function getPackageUpdates(
+  manager: string,
+  config: PackageUpdateConfig
+) {
   return managers[manager] && get(manager, 'getPackageUpdates')
     ? get(manager, 'getPackageUpdates')(config)
     : null;
@@ -80,14 +88,14 @@ export function extractPackageFile(
   manager: string,
   content: string,
   fileName?: string,
-  config?: ManagerConfig
+  config?: ExtractConfig
 ) {
   return managers[manager] && get(manager, 'extractPackageFile')
     ? get(manager, 'extractPackageFile')(content, fileName, config)
     : null;
 }
 
-export function getRangeStrategy(config: ManagerConfig) {
+export function getRangeStrategy(config: RangeConfig) {
   const { manager, rangeStrategy } = config;
   if (managers[manager].getRangeStrategy) {
     // Use manager's own function if it exists

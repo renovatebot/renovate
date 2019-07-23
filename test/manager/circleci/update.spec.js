@@ -1,11 +1,11 @@
-const fs = require('fs');
-const dcUpdate = require('../../../lib/manager/circleci/update');
+import { readFileSync } from 'fs';
+import * as dcUpdate from '../../../lib/manager/circleci/update';
 
-const yamlFile = fs.readFileSync(
+const yamlFile = readFileSync(
   'test/manager/circleci/_fixtures/config.yml',
   'utf8'
 );
-const yamlFile2 = fs.readFileSync(
+const yamlFile2 = readFileSync(
   'test/manager/circleci/_fixtures/config2.yml',
   'utf8'
 );

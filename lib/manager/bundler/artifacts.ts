@@ -10,14 +10,14 @@ import {
   matches,
   sortVersions,
 } from '../../versioning/ruby';
-import { ManagerConfig } from '../common';
+import { UpdateArtifactsConfig } from '../common';
 
 // istanbul ignore next
 export async function updateArtifacts(
   packageFileName: string,
   updatedDeps: string[],
   newPackageFileContent: string,
-  config: ManagerConfig
+  config: UpdateArtifactsConfig
 ) {
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if

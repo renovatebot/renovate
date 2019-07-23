@@ -3,20 +3,44 @@ import { RangeStrategy } from '../versioning';
 export type Result<T> = T | Promise<T>;
 
 export interface ManagerConfig {
-  compatibility?: Record<string, string>;
-  gradle?: { timeout?: number };
   binarySource?: string;
-  cacheDir?: any;
-  depType?: string;
-  endpoint?: string;
-
   localDir?: string;
-  manager?: string;
+}
 
-  packageJsonType?: 'app';
+export interface ExtractConfig extends ManagerConfig {
+  gradle?: { timeout?: number };
+  endpoint?: string;
+}
+
+export interface UpdateArtifactsConfig extends ManagerConfig {
+  isLockFileMaintenance?: boolean;
+  compatibility?: Record<string, string>;
+  cacheDir?: string;
   postUpdateOptions?: string[];
+  registryUrls?: (string | Registry)[];
+}
 
+export interface PackageUpdateConfig {
+  currentValue?: string;
   rangeStrategy?: RangeStrategy;
+  supportPolicy?: string[];
+}
+
+export interface PackageUpdateResult {
+  newValue: string[];
+  newMajor: string;
+  isRange: boolean;
+  sourceUrl: string;
+}
+
+export interface RangeConfig {
+  composerJsonType?: 'composer-plugin' | 'library' | 'metapackage' | 'project';
+  currentValue?: string;
+  depName?: string;
+  depType?: string;
+  manager?: string;
+  packageJsonType?: 'app' | 'library';
+  rangeStrategy: RangeStrategy;
 }
 
 export interface Registry {
@@ -39,10 +63,13 @@ export interface PackageFile {
 export interface Package<T> {
   currentValue?: string;
   currentDigest?: string;
+  def?: string;
   depName?: string;
   depType?: string;
 
   managerData?: T;
+  repo?: string;
+  target?: string;
   versionScheme?: string;
 }
 
@@ -50,7 +77,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;
-  def?: string;
   depNameShort?: string;
   digestOneAndOnly?: boolean;
   fileReplacePosition?: number;
@@ -59,17 +85,12 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   lookupType?: string;
   remote?: string;
   registryUrls?: string[];
-  repo?: string;
-
   rangeStrategy?: RangeStrategy;
-
   skipReason?: string;
-  target?: string;
 }
 
 export interface Upgrade<T = Record<string, any>> extends Package<T> {
   currentVersion?: string;
-  def?: string;
   depGroup?: string;
   name?: string;
   newDigest?: string;
@@ -77,8 +98,6 @@ export interface Upgrade<T = Record<string, any>> extends Package<T> {
   newMajor?: number;
   newValue?: string;
   packageFile?: string;
-  repo?: string;
-  target?: string;
   updateType?: string;
   version?: string;
 }
@@ -99,25 +118,25 @@ export interface ManagerApi {
   supportsLockFileMaintenance?: boolean;
 
   extractAllPackageFiles?(
-    config: ManagerConfig,
+    config: ExtractConfig,
     files: string[]
   ): Result<PackageFile[]>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
-    config?: ManagerConfig
+    config?: ExtractConfig
   ): Result<PackageFile>;
 
-  getPackageUpdates(config: ManagerConfig): any[];
+  getPackageUpdates(config: PackageUpdateConfig): PackageUpdateResult[];
 
-  getRangeStrategy(config: ManagerConfig): RangeStrategy;
+  getRangeStrategy(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
     packageFileName: string,
     updatedDeps: string[],
     newPackageFileContent: string,
-    config: ManagerConfig
+    config: UpdateArtifactsConfig
   ): Result<UpdateArtifactsResult[]>;
 
   updateDependency(fileContent: string, upgrade: Upgrade): string;

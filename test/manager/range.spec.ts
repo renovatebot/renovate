@@ -1,13 +1,13 @@
 import { getRangeStrategy } from '../../lib/manager';
-import { ManagerConfig } from '../../lib/manager/common';
+import { RangeConfig } from '../../lib/manager/common';
 
 describe('getRangeStrategy', () => {
   it('returns same if not auto', () => {
-    const config: ManagerConfig = { manager: 'npm', rangeStrategy: 'widen' };
+    const config: RangeConfig = { manager: 'npm', rangeStrategy: 'widen' };
     expect(getRangeStrategy(config)).toEqual('widen');
   });
   it('returns manager strategy', () => {
-    const config: ManagerConfig = {
+    const config: RangeConfig = {
       manager: 'npm',
       rangeStrategy: 'auto',
       depType: 'dependencies',
@@ -16,14 +16,14 @@ describe('getRangeStrategy', () => {
     expect(getRangeStrategy(config)).toEqual('pin');
   });
   it('defaults to replace', () => {
-    const config: ManagerConfig = {
+    const config: RangeConfig = {
       manager: 'circleci',
       rangeStrategy: 'auto',
     };
     expect(getRangeStrategy(config)).toEqual('replace');
   });
   it('returns rangeStrategy if not auto', () => {
-    const config: ManagerConfig = {
+    const config: RangeConfig = {
       manager: 'circleci',
       rangeStrategy: 'future',
     };

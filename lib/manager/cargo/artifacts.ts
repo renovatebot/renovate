@@ -4,13 +4,13 @@ import { outputFile, readFile } from 'fs-extra';
 import { exec } from '../../util/exec';
 import { getChildProcessEnv } from '../../util/env';
 import { logger } from '../../logger';
-import { ManagerConfig, UpdateArtifactsResult } from '../common';
+import { UpdateArtifactsConfig, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts(
   packageFileName: string,
   updatedDeps: string[],
   newPackageFileContent: string,
-  config: ManagerConfig
+  config: UpdateArtifactsConfig
 ): Promise<UpdateArtifactsResult[]> {
   await logger.debug(`cargo.updateArtifacts(${packageFileName})`);
   if (updatedDeps === undefined || updatedDeps.length < 1) {
@@ -36,7 +36,7 @@ export async function updateArtifacts(
       const dep = updatedDeps[i];
       // Update dependency `${dep}` in Cargo.lock file corresponding to Cargo.toml file located
       // at ${localPackageFileName} path
-      let cmd;
+      let cmd: string;
       // istanbul ignore if
       if (config.binarySource === 'docker') {
         logger.info('Running cargo via docker');
