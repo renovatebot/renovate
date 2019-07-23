@@ -1,8 +1,8 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/gomod/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/gomod/extract';
 
-const gomod1 = fs.readFileSync('test/manager/gomod/_fixtures/1/go.mod', 'utf8');
-const gomod2 = fs.readFileSync('test/manager/gomod/_fixtures/2/go.mod', 'utf8');
+const gomod1 = readFileSync('test/manager/gomod/_fixtures/1/go.mod', 'utf8');
+const gomod2 = readFileSync('test/manager/gomod/_fixtures/2/go.mod', 'utf8');
 
 describe('lib/manager/gomod/extract', () => {
   describe('extractPackageFile()', () => {
