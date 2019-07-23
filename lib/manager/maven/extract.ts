@@ -1,12 +1,13 @@
-const path = require('path');
-const { XmlDocument } = require('xmldoc');
-const { isValid } = require('../../versioning/maven');
-const { logger } = require('../../logger');
+import { basename, dirname, normalize, join } from 'path';
+import { XmlDocument, XmlElement } from 'xmldoc';
+import { isValid } from '../../versioning/maven';
+import { logger } from '../../logger';
+import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 
-const DEFAULT_MAVEN_REPO = 'https://repo.maven.apache.org/maven2';
+export const DEFAULT_MAVEN_REPO = 'https://repo.maven.apache.org/maven2';
 
-function parsePom(raw) {
-  let project;
+export function parsePom(raw: string) {
+  let project: XmlDocument;
   try {
     project = new XmlDocument(raw);
   } catch (e) {
@@ -18,11 +19,17 @@ function parsePom(raw) {
   return project;
 }
 
-function containsPlaceholder(str) {
+export function containsPlaceholder(str: string) {
   return /\${.*?}/g.test(str);
 }
 
-function depFromNode(node) {
+interface MavenProp {
+  val: string;
+  fileReplacePosition: number;
+  packageFile: string;
+}
+
+function depFromNode(node: XmlElement): PackageDependency {
   if (!node.valueWithPath) return null;
   const groupId = node.valueWithPath('groupId');
   const artifactId = node.valueWithPath('artifactId');
@@ -44,21 +51,28 @@ function depFromNode(node) {
   return null;
 }
 
-function deepExtract(node, result = [], isRoot = true) {
-  const dep = depFromNode(node);
+function deepExtract(
+  node: XmlElement,
+  result = [],
+  isRoot = true
+): PackageDependency[] {
+  const dep = depFromNode(node as XmlElement);
   if (dep && !isRoot) {
     result.push(dep);
   }
   if (node.children) {
     for (const child of node.children) {
-      deepExtract(child, result, false);
+      deepExtract(child as XmlElement, result, false);
     }
   }
   return result;
 }
 
-function applyProps(dep, props) {
-  const replaceAll = str =>
+function applyProps(
+  dep: PackageDependency<Record<string, any>>,
+  props: MavenProp
+) {
+  const replaceAll = (str: string) =>
     str.replace(/\${.*?}/g, substr => {
       const propKey = substr.slice(2, -1).trim();
       const propValue = props[propKey];
@@ -85,7 +99,7 @@ function applyProps(dep, props) {
     return substr;
   });
 
-  const result = {
+  const result: PackageDependency = {
     ...dep,
     depName,
     registryUrls,
@@ -109,35 +123,36 @@ function applyProps(dep, props) {
   return result;
 }
 
-function resolveParentFile(packageFile, parentPath) {
+function resolveParentFile(packageFile: string, parentPath: string) {
   let parentFile = 'pom.xml';
   let parentDir = parentPath;
-  const parentBasename = path.basename(parentPath);
+  const parentBasename = basename(parentPath);
   if (parentBasename === 'pom.xml' || /\.pom\.xml$/.test(parentBasename)) {
     parentFile = parentBasename;
-    parentDir = path.dirname(parentPath);
+    parentDir = dirname(parentPath);
   }
-  const dir = path.dirname(packageFile);
-  return path.normalize(path.join(dir, parentDir, parentFile));
+  const dir = dirname(packageFile);
+  return normalize(join(dir, parentDir, parentFile));
 }
 
-function extractPackage(rawContent, packageFile = null) {
+export function extractPackage(rawContent: string, packageFile: string = null) {
   if (!rawContent) return null;
 
   const project = parsePom(rawContent);
   if (!project) return null;
 
-  const result = {
+  const result: PackageFile = {
     datasource: 'maven',
     packageFile,
+    deps: [],
   };
 
   result.deps = deepExtract(project);
 
   const propsNode = project.childNamed('properties');
-  const props = {};
+  const props: Record<string, MavenProp> = {};
   if (propsNode && propsNode.children) {
-    for (const propNode of propsNode.children) {
+    for (const propNode of propsNode.children as XmlElement[]) {
       const key = propNode.name;
       const val = propNode.val && propNode.val.trim();
       if (key && val) {
@@ -172,11 +187,11 @@ function extractPackage(rawContent, packageFile = null) {
   return result;
 }
 
-function resolveProps(packages) {
-  const packageFileNames = [];
-  const extractedPackages = {};
-  const extractedDeps = {};
-  const extractedProps = {};
+export function resolveProps(packages: PackageFile[]): PackageFile[] {
+  const packageFileNames: string[] = [];
+  const extractedPackages: Record<string, PackageFile> = {};
+  const extractedDeps: Record<string, PackageDependency[]> = {};
+  const extractedProps: Record<string, MavenProp> = {};
   packages.forEach(pkg => {
     const name = pkg.packageFile;
     packageFileNames.push(name);
@@ -188,7 +203,7 @@ function resolveProps(packages) {
   // and merge them in reverse order,
   // which allows inheritance/overriding.
   packageFileNames.forEach(name => {
-    const hierarchy = [];
+    const hierarchy: Record<string, MavenProp>[] = [];
     let pkg = extractedPackages[name];
     while (pkg) {
       hierarchy.unshift(pkg.mavenProps);
@@ -225,8 +240,11 @@ function cleanResult(packageFiles) {
   return packageFiles;
 }
 
-async function extractAllPackageFiles(config, packageFiles) {
-  const packages = [];
+export async function extractAllPackageFiles(
+  _config: ExtractConfig,
+  packageFiles: string[]
+): Promise<PackageFile[]> {
+  const packages: PackageFile[] = [];
   for (const packageFile of packageFiles) {
     const content = await platform.getFile(packageFile);
     if (content) {
@@ -243,12 +261,3 @@ async function extractAllPackageFiles(config, packageFiles) {
 
   return cleanResult(resolveProps(packages));
 }
-
-module.exports = {
-  containsPlaceholder,
-  parsePom,
-  extractPackage,
-  resolveProps,
-  extractAllPackageFiles,
-  DEFAULT_MAVEN_REPO,
-};

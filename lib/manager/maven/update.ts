@@ -1,11 +1,11 @@
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateAtPosition,
-  updateDependency,
-};
-
-function updateAtPosition(fileContent, upgrade, endingAnchor = '"') {
+export function updateAtPosition(
+  fileContent: string,
+  upgrade: Upgrade,
+  endingAnchor = '"'
+) {
   const { depName, currentValue, newValue, fileReplacePosition } = upgrade;
   const leftPart = fileContent.slice(0, fileReplacePosition);
   const rightPart = fileContent.slice(fileReplacePosition);
@@ -24,7 +24,7 @@ function updateAtPosition(fileContent, upgrade, endingAnchor = '"') {
   return null;
 }
 
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(fileContent: string, upgrade: Upgrade) {
   const offset = fileContent.indexOf('<');
   const spaces = fileContent.slice(0, offset);
   const restContent = fileContent.slice(offset);

@@ -1,34 +1,34 @@
-const fs = require('fs');
-const {
+import { readFileSync } from 'fs';
+import {
   extractPackage,
   resolveProps,
-} = require('../../../lib/manager/maven/extract');
-const {
+} from '../../../lib/manager/maven/extract';
+import {
   extractAllPackageFiles,
   updateDependency,
-} = require('../../../lib/manager/maven/index');
+} from '../../../lib/manager/maven/index';
+import { PackageDependency } from '../../../lib/manager/common';
 
-/** @type any */
-const platform = global.platform;
+const platform: any = global.platform;
 
-const pomContent = fs.readFileSync(
+const pomContent = readFileSync(
   'test/manager/maven/_fixtures/simple.pom.xml',
   'utf8'
 );
-const pomParent = fs.readFileSync(
+const pomParent = readFileSync(
   'test/manager/maven/_fixtures/parent.pom.xml',
   'utf8'
 );
-const pomChild = fs.readFileSync(
+const pomChild = readFileSync(
   'test/manager/maven/_fixtures/child.pom.xml',
   'utf8'
 );
-const origContent = fs.readFileSync(
+const origContent = readFileSync(
   'test/manager/maven/_fixtures/grouping.pom.xml',
   'utf8'
 );
 
-function selectDep(deps, name = 'org.example:quuz') {
+function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find(dep => dep.depName === name);
 }
 

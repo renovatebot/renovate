@@ -56,8 +56,9 @@ export interface PackageFile {
   registryUrls?: (string | Registry)[];
   deps: PackageDependency[];
   manager?: string;
-
+  mavenProps?: Record<string, any>;
   packageFile?: string;
+  parent?: string;
 }
 
 export interface Package<T> {
@@ -67,7 +68,9 @@ export interface Package<T> {
   def?: string;
   depName?: string;
   depType?: string;
+  fileReplacePosition?: number;
   gradleWrapperType?: string;
+  groupName?: string;
   lineNumber?: number;
   managerData?: T;
   ownerName?: string;
@@ -85,10 +88,10 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   datasource?: string;
   depNameShort?: string;
   digestOneAndOnly?: boolean;
-  fileReplacePosition?: number;
   lockedVersion?: string;
   lookupName?: string;
   lookupType?: string;
+  propSource?: string;
   remote?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
