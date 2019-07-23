@@ -1,12 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const meteorUpdater = require('../../../lib/manager/meteor/update');
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { updateDependency } from '../../../lib/manager/meteor/update';
 
-function readFixture(fixture) {
-  return fs.readFileSync(
-    path.resolve(__dirname, `./_fixtures/${fixture}`),
-    'utf8'
-  );
+function readFixture(fixture: string) {
+  return readFileSync(resolve(__dirname, `./_fixtures/${fixture}`), 'utf8');
 }
 
 const input01Content = readFixture('package-1.js');
@@ -20,10 +17,7 @@ describe('workers/branch/package-js', () => {
         currentValue: '0.1.19',
         newValue: '0.22.1',
       };
-      const testContent = meteorUpdater.updateDependency(
-        input01Content,
-        upgrade
-      );
+      const testContent = updateDependency(input01Content, upgrade);
       expect(testContent).toMatchSnapshot();
     });
     it('handles alternative quotes and white space', () => {
@@ -32,10 +26,7 @@ describe('workers/branch/package-js', () => {
         currentValue: '0.1.19',
         newValue: '0.22.1',
       };
-      const testContent = meteorUpdater.updateDependency(
-        input02Content,
-        upgrade
-      );
+      const testContent = updateDependency(input02Content, upgrade);
       expect(testContent).toMatchSnapshot();
     });
     it('handles the case where the desired version is already supported', () => {
@@ -44,11 +35,8 @@ describe('workers/branch/package-js', () => {
         currentValue: '0.2.0',
         newValue: '0.2.0',
       };
-      const testContent = meteorUpdater.updateDependency(
-        input01Content,
-        upgrade
-      );
-      testContent.should.equal(input01Content);
+      const testContent = updateDependency(input01Content, upgrade);
+      expect(testContent).toEqual(input01Content);
     });
   });
 });

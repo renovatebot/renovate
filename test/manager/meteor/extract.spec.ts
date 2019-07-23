@@ -1,12 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const { extractPackageFile } = require('../../../lib/manager/meteor/extract');
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { extractPackageFile } from '../../../lib/manager/meteor/extract';
 
-function readFixture(fixture) {
-  return fs.readFileSync(
-    path.resolve(__dirname, `./_fixtures/${fixture}`),
-    'utf8'
-  );
+function readFixture(fixture: string) {
+  return readFileSync(resolve(__dirname, `./_fixtures/${fixture}`), 'utf8');
 }
 
 const input01Content = readFixture('package-1.js');

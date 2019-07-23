@@ -1,11 +1,8 @@
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
+import { PackageFile, PackageDependency } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(content) {
-  let deps = [];
+export function extractPackageFile(content: string): PackageFile {
+  let deps: PackageDependency[] = [];
   const npmDepends = content.match(/\nNpm\.depends\({([\s\S]*?)}\);/);
   if (!npmDepends) {
     return null;

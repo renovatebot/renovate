@@ -1,10 +1,7 @@
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(fileContent: string, upgrade: Upgrade) {
   const { depName, currentValue, newValue } = upgrade;
   logger.debug(`meteor.updateDependency(): ${depName} = ${newValue}`);
   const regexReplace = new RegExp(
