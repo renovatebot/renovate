@@ -12,5 +12,7 @@ module.exports = {
     'import/no-extraneous-dependencies': 0,
     'import/no-named-as-default-member': 0,
     'global-require': 0,
+
+    '@typescript-eslint/no-object-literal-type-assertion': 0,
   },
 };
