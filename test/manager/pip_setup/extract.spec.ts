@@ -1,23 +1,22 @@
-const fs = require('fs');
-const tmp = require('tmp-promise');
-const { relative } = require('path');
-const { exec } = require('../../../lib/util/exec');
-const {
+import { readFileSync } from 'fs';
+import { file as _file } from 'tmp-promise';
+import { relative } from 'path';
+import { exec } from '../../../lib/util/exec';
+import {
   extractPackageFile,
   parsePythonVersion,
   getPythonAlias,
   pythonVersions,
-  // extractSetupFile,
-} = require('../../../lib/manager/pip_setup/extract');
+} from '../../../lib/manager/pip_setup/extract';
 
 const packageFile = 'test/manager/pip_setup/_fixtures/setup.py';
-const content = fs.readFileSync(packageFile, 'utf8');
+const content = readFileSync(packageFile, 'utf8');
 const config = {
   localDir: '.',
 };
 
 async function tmpFile() {
-  const file = await tmp.file({ postfix: '.py' });
+  const file = await _file({ postfix: '.py' });
   return relative('.', file.path);
 }
 

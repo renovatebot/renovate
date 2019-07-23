@@ -1,25 +1,19 @@
-const { join } = require('upath');
-const { exec } = require('../../util/exec');
-const { logger } = require('../../logger');
-const { isSkipComment } = require('../../util/ignore');
-const { dependencyPattern } = require('../pip_requirements/extract');
+import { join } from 'upath';
+import { exec } from '../../util/exec';
+import { logger } from '../../logger';
+import { isSkipComment } from '../../util/ignore';
+import { dependencyPattern } from '../pip_requirements/extract';
+import { ExtractConfig, PackageFile, PackageDependency } from '../common';
 
-const pythonVersions = ['python', 'python3', 'python3.7'];
-let pythonAlias = null;
-module.exports = {
-  extractPackageFile,
-  extractSetupFile,
-  parsePythonVersion,
-  getPythonAlias,
-  pythonVersions,
-};
+export const pythonVersions = ['python', 'python3', 'python3.7'];
+let pythonAlias: string = null;
 
-function parsePythonVersion(str) {
+export function parsePythonVersion(str: string) {
   const arr = str.split(' ')[1].split('.');
   return [parseInt(arr[0], 10), parseInt(arr[1], 10)];
 }
 
-async function getPythonAlias() {
+export async function getPythonAlias() {
   if (pythonAlias) {
     return pythonAlias;
   }
@@ -37,10 +31,17 @@ async function getPythonAlias() {
   }
   return pythonAlias;
 }
-
-async function extractSetupFile(content, packageFile, config) {
+interface PythonSetup {
+  extras_require: string[];
+  install_requires: string[];
+}
+export async function extractSetupFile(
+  _content: string,
+  packageFile: string,
+  config: ExtractConfig
+): Promise<PythonSetup> {
   const cwd = config.localDir;
-  let cmd;
+  let cmd: string;
   const args = [join(__dirname, 'extract.py'), packageFile];
   // istanbul ignore if
   if (config.binarySource === 'docker') {
@@ -84,16 +85,20 @@ async function extractSetupFile(content, packageFile, config) {
   return JSON.parse(res.stdout);
 }
 
-async function extractPackageFile(content, packageFile, config) {
+export async function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig
+): Promise<PackageFile> {
   logger.debug('pip_setup.extractPackageFile()');
-  let setup;
+  let setup: PythonSetup;
   try {
     setup = await extractSetupFile(content, packageFile, config);
   } catch (err) {
     logger.warn({ err, content, packageFile }, 'Failed to read setup.py file');
     return null;
   }
-  const requires = [];
+  const requires: string[] = [];
   if (setup.install_requires) {
     requires.push(...setup.install_requires);
   }
@@ -111,7 +116,7 @@ async function extractPackageFile(content, packageFile, config) {
         return null;
       }
       const rawline = lines[lineNumber];
-      let dep = {};
+      let dep: PackageDependency = {};
       const [, comment] = rawline.split('#').map(part => part.trim());
       if (isSkipComment(comment)) {
         dep.skipReason = 'ignored';

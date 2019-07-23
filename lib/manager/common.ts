@@ -5,6 +5,7 @@ export type Result<T> = T | Promise<T>;
 export interface ManagerConfig {
   binarySource?: string;
   localDir?: string;
+  registryUrls?: (string | Registry)[];
 }
 
 export interface ExtractConfig extends ManagerConfig {
@@ -18,7 +19,6 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   compatibility?: Record<string, string>;
   cacheDir?: string;
   postUpdateOptions?: string[];
-  registryUrls?: (string | Registry)[];
 }
 
 export interface PackageUpdateConfig {
@@ -89,6 +89,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   datasource?: string;
   depNameShort?: string;
   digestOneAndOnly?: boolean;
+  fromVersion?: string;
   lockedVersion?: string;
   lookupName?: string;
   lookupType?: string;

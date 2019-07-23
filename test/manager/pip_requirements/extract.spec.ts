@@ -1,32 +1,30 @@
-const fs = require('fs');
-const {
-  extractPackageFile,
-} = require('../../../lib/manager/pip_requirements/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/pip_requirements/extract';
 
-const requirements1 = fs.readFileSync(
+const requirements1 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements1.txt',
   'utf8'
 );
-const requirements2 = fs.readFileSync(
+const requirements2 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements2.txt',
   'utf8'
 );
-const requirements3 = fs.readFileSync(
+const requirements3 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements3.txt',
   'utf8'
 );
 
-const requirements4 = fs.readFileSync(
+const requirements4 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements4.txt',
   'utf8'
 );
 
-const requirements5 = fs.readFileSync(
+const requirements5 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements5.txt',
   'utf8'
 );
 
-const requirements6 = fs.readFileSync(
+const requirements6 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements6.txt',
   'utf8'
 );

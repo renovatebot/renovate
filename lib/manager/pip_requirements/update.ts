@@ -1,11 +1,11 @@
-const { logger } = require('../../logger');
-const { dependencyPattern } = require('./extract');
+import { logger } from '../../logger';
+import { dependencyPattern } from './extract';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade<{ lineNumber: number }>
+): string {
   try {
     logger.debug(`pip_requirements.updateDependency(): ${upgrade.newValue}`);
     const lines = fileContent.split('\n');

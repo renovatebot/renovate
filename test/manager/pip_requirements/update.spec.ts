@@ -1,29 +1,27 @@
-const fs = require('fs');
-const {
-  updateDependency,
-} = require('../../../lib/manager/pip_requirements/update');
+import { readFileSync } from 'fs';
+import { updateDependency } from '../../../lib/manager/pip_requirements/update';
 
-const requirements = fs.readFileSync(
+const requirements = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements1.txt',
   'utf8'
 );
 
-const requirements3 = fs.readFileSync(
+const requirements3 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements3.txt',
   'utf8'
 );
 
-const requirements4 = fs.readFileSync(
+const requirements4 = readFileSync(
   'test/manager/pip_requirements/_fixtures/requirements4.txt',
   'utf8'
 );
 
-const setupPy1 = fs.readFileSync(
+const setupPy1 = readFileSync(
   'test/manager/pip_setup/_fixtures/setup.py',
   'utf-8'
 );
 
-const setupPy2 = fs.readFileSync(
+const setupPy2 = readFileSync(
   'test/manager/pip_setup/_fixtures/setup-2.py',
   'utf-8'
 );

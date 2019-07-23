@@ -1,26 +1,31 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
-const packagePattern = '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
-const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
-const rangePattern = require('@renovate/pep440/lib/specifier').RANGE_PATTERN;
+import { RANGE_PATTERN as rangePattern } from '@renovate/pep440/lib/specifier';
+import { logger } from '../../logger';
+import { isSkipComment } from '../../util/ignore';
+import { isValid, isSingleVersion } from '../../versioning/pep440';
+import {
+  ExtractConfig,
+  Registry,
+  PackageDependency,
+  PackageFile,
+} from '../common';
 
-const { logger } = require('../../logger');
-const { isSkipComment } = require('../../util/ignore');
+export const packagePattern =
+  '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
+const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 
 const specifierPartPattern = `\\s*${rangePattern.replace(/\?<\w+>/g, '?:')}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
-const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
-const { isValid, isSingleVersion } = require('../../versioning/pep440');
+export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
-module.exports = {
-  dependencyPattern,
-  packagePattern,
-  extractPackageFile,
-};
-
-function extractPackageFile(content, _, config) {
+export function extractPackageFile(
+  content: string,
+  _: string,
+  config: ExtractConfig
+) {
   logger.trace('pip_requirements.extractPackageFile()');
 
-  let indexUrl;
+  let indexUrl: string;
   const extraUrls = [];
   content.split('\n').forEach(line => {
     if (line.startsWith('--index-url ')) {
@@ -33,7 +38,7 @@ function extractPackageFile(content, _, config) {
       extraUrls.push(extraUrl);
     }
   });
-  let registryUrls = [];
+  let registryUrls: (string | Registry)[] = [];
   if (indexUrl) {
     // index url in file takes precedence
     registryUrls.push(indexUrl);
@@ -50,7 +55,7 @@ function extractPackageFile(content, _, config) {
   const deps = content
     .split('\n')
     .map((rawline, lineNumber) => {
-      let dep = {};
+      let dep: PackageDependency = {};
       const [line, comment] = rawline.split('#').map(part => part.trim());
       if (isSkipComment(comment)) {
         dep.skipReason = 'ignored';
@@ -81,7 +86,7 @@ function extractPackageFile(content, _, config) {
   if (!deps.length) {
     return null;
   }
-  const res = { deps };
+  const res: PackageFile = { deps };
   if (registryUrls.length > 0) {
     res.registryUrls = registryUrls;
   }
