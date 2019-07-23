@@ -1,4 +1,4 @@
-import YAWN from 'yawn-yaml';
+import YAWN from 'yawn-yaml/cjs';
 import { logger } from '../../logger';
 import { Upgrade } from '../common';
 
