@@ -7,24 +7,27 @@ Array [
     "datasource": "cargo",
     "depName": "libc",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/libc",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "1.0.4",
     "datasource": "cargo",
     "depName": "bitflags",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/bitflags",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "=0.1",
     "datasource": "cargo",
     "depName": "pcap-sys",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/pcap-sys",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -32,16 +35,18 @@ Array [
     "datasource": "cargo",
     "depName": "pnet",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/pnet",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
   },
   Object {
     "currentValue": "0.1.0",
     "datasource": "cargo",
     "depName": "git_dep_with_version",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/git_dep_with_version",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "git-dependency",
   },
   Object {
@@ -49,8 +54,9 @@ Array [
     "datasource": "cargo",
     "depName": "git_dep",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/git_dep",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "skipReason": "git-dependency",
   },
   Object {
@@ -58,40 +64,45 @@ Array [
     "datasource": "cargo",
     "depName": "same_version_1__",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/same_version_1__",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.0.0",
     "datasource": "cargo",
     "depName": "same_version_1_",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/same_version_1_",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.0.0",
     "datasource": "cargo",
     "depName": "same_version_1",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/same_version_1",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.4.2",
     "datasource": "cargo",
     "depName": "dep1",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep1",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
   },
   Object {
     "currentValue": "=0.3.6",
     "datasource": "cargo",
     "depName": "winapi",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/winapi",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "target": "cfg(windows)",
   },
   Object {
@@ -99,8 +110,9 @@ Array [
     "datasource": "cargo",
     "depName": "wasm-bindgen",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/wasm-bindgen",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -108,8 +120,9 @@ Array [
     "datasource": "cargo",
     "depName": "js-sys",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/js-sys",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -117,8 +130,9 @@ Array [
     "datasource": "cargo",
     "depName": "js_relative_import",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/js_relative_import",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "skipReason": "path-dependency",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
@@ -127,8 +141,9 @@ Array [
     "datasource": "cargo",
     "depName": "web-sys",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/web-sys",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
 ]
@@ -141,8 +156,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_animation",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_animation",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -150,8 +166,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_assets",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_assets",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -159,8 +176,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_audio",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_audio",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -168,8 +186,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_config",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_config",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -177,8 +196,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_core",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_core",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -186,8 +206,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_controls",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_controls",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -195,8 +216,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_locale",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_locale",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -204,8 +226,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_renderer",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_renderer",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -213,8 +236,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_input",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_input",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -222,8 +246,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_ui",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_ui",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -231,8 +256,9 @@ Array [
     "datasource": "cargo",
     "depName": "amethyst_utils",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_utils",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -240,64 +266,72 @@ Array [
     "datasource": "cargo",
     "depName": "derivative",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/derivative",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.5",
     "datasource": "cargo",
     "depName": "fern",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/fern",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
   },
   Object {
     "currentValue": "0.4",
     "datasource": "cargo",
     "depName": "log",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/log",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "1.0.1",
     "datasource": "cargo",
     "depName": "rayon",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/rayon",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.1",
     "datasource": "cargo",
     "depName": "rustc_version_runtime",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/rustc_version_runtime",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.15",
     "datasource": "cargo",
     "depName": "winit",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/winit",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.1",
     "datasource": "cargo",
     "depName": "thread_profiler",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/thread_profiler",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
   },
   Object {
     "currentValue": "0.2",
     "datasource": "cargo",
     "depName": "amethyst_gltf",
     "depType": "dev-dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/amethyst_gltf",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -305,48 +339,54 @@ Array [
     "datasource": "cargo",
     "depName": "env_logger",
     "depType": "dev-dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/env_logger",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.6",
     "datasource": "cargo",
     "depName": "genmesh",
     "depType": "dev-dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/genmesh",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.2",
     "datasource": "cargo",
     "depName": "ron",
     "depType": "dev-dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/ron",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "1.0",
     "datasource": "cargo",
     "depName": "serde",
     "depType": "dev-dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/serde",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "1.0",
     "datasource": "cargo",
     "depName": "serde_derive",
     "depType": "dev-dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/serde_derive",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
   Object {
     "currentValue": "0.1",
     "datasource": "cargo",
     "depName": "vergen",
     "depType": "build-dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/vergen",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
   },
 ]
 `;
@@ -358,8 +398,9 @@ Array [
     "datasource": "cargo",
     "depName": "wasm-bindgen",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/wasm-bindgen",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -367,8 +408,9 @@ Array [
     "datasource": "cargo",
     "depName": "js-sys",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/js-sys",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -376,8 +418,9 @@ Array [
     "datasource": "cargo",
     "depName": "js_relative_import",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/js_relative_import",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "skipReason": "path-dependency",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
@@ -386,8 +429,9 @@ Array [
     "datasource": "cargo",
     "depName": "web-sys",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/web-sys",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
 ]
@@ -400,8 +444,9 @@ Array [
     "datasource": "cargo",
     "depName": "pcap-sys",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/pcap-sys",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -409,16 +454,18 @@ Array [
     "datasource": "cargo",
     "depName": "pnet",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/pnet",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
   },
   Object {
     "currentValue": "1.2",
     "datasource": "cargo",
     "depName": "dep1",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep1",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -426,8 +473,9 @@ Array [
     "datasource": "cargo",
     "depName": "dep2",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep2",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -435,8 +483,9 @@ Array [
     "datasource": "cargo",
     "depName": "dep3",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep3",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -444,8 +493,9 @@ Array [
     "datasource": "cargo",
     "depName": "dep4",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep4",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "unknown-version",
   },
   Object {
@@ -453,16 +503,18 @@ Array [
     "datasource": "cargo",
     "depName": "dep5",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep5",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
   },
   Object {
     "currentValue": "",
     "datasource": "cargo",
     "depName": "dep6",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/dep6",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "skipReason": "invalid-dependency-specification",
   },
 ]
@@ -475,8 +527,9 @@ Array [
     "datasource": "cargo",
     "depName": "dep1",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep1",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -484,8 +537,9 @@ Array [
     "datasource": "cargo",
     "depName": "dep2",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep2",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -493,8 +547,9 @@ Array [
     "datasource": "cargo",
     "depName": "dep3",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep3",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -502,8 +557,9 @@ Array [
     "datasource": "cargo",
     "depName": "dep4",
     "depType": "dependencies",
-    "nestedVersion": true,
-    "purl": "pkg:cargo/dep4",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -511,8 +567,9 @@ Array [
     "datasource": "cargo",
     "depName": "dep5",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/dep5",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "skipReason": "path-dependency",
   },
   Object {
@@ -520,8 +577,9 @@ Array [
     "datasource": "cargo",
     "depName": "dep7",
     "depType": "dependencies",
-    "nestedVersion": false,
-    "purl": "pkg:cargo/dep7",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
     "skipReason": "invalid-dependency-specification",
   },
 ]

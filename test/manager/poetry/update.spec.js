@@ -18,6 +18,7 @@ describe('manager/poetry/update', () => {
         depName: 'dep1',
         depType: 'dependencies',
         newValue: '1.0.0',
+        managerData: { nestedVersion: false },
       };
       const res = updateDependency(pyproject1toml, upgrade);
       expect(res).not.toEqual(pyproject1toml);
@@ -29,6 +30,7 @@ describe('manager/poetry/update', () => {
         depName: 'dep1',
         depType: 'dependencies',
         newValue: '0.0.0',
+        managerData: { nestedVersion: false },
       };
       const res = updateDependency(pyproject1toml, upgrade);
       expect(res).toEqual(pyproject1toml);
@@ -38,7 +40,7 @@ describe('manager/poetry/update', () => {
         depName: 'dep1',
         depType: 'dependencies',
         newValue: '1.0.0',
-        nestedVersion: true,
+        managerData: { nestedVersion: true },
       };
       const res = updateDependency(pyproject2toml, upgrade);
       expect(res).not.toEqual(pyproject2toml);
@@ -50,7 +52,7 @@ describe('manager/poetry/update', () => {
         depName: 'dep3',
         depType: 'dependencies',
         newValue: '1.0.0',
-        nestedVersion: true,
+        managerData: { nestedVersion: true },
       };
       const res = updateDependency(pyproject2toml, upgrade);
       expect(res).not.toEqual(pyproject2toml);
@@ -62,7 +64,7 @@ describe('manager/poetry/update', () => {
         depName: 'dep4',
         depType: 'dependencies',
         newValue: '1.0.0',
-        nestedVersion: true,
+        managerData: { nestedVersion: true },
       };
       const res = updateDependency(pyproject2toml, upgrade);
       expect(res).toBeNull();
@@ -72,6 +74,7 @@ describe('manager/poetry/update', () => {
         depName: 'extra_dep1',
         depType: 'extras',
         newValue: '1.0.0',
+        managerData: { nestedVersion: false },
       };
       const res = updateDependency(pyproject1toml, upgrade);
       expect(res).not.toEqual(pyproject1toml);
@@ -83,6 +86,7 @@ describe('manager/poetry/update', () => {
         depName: 'dev_dep1',
         depType: 'dev-dependencies',
         newValue: '1.0.0',
+        managerData: { nestedVersion: false },
       };
       const res = updateDependency(pyproject1toml, upgrade);
       expect(res).not.toEqual(pyproject1toml);
@@ -98,6 +102,7 @@ describe('manager/poetry/update', () => {
         depName: 'dev1',
         depType: '!invalid-dev-type!',
         newValue: '1.0.0',
+        managerData: { nestedVersion: false },
       };
       const res = updateDependency(pyproject1toml, upgrade);
       expect(res).toBeNull();
@@ -107,6 +112,7 @@ describe('manager/poetry/update', () => {
         depName: 'dev_dev1',
         depType: 'dev-dependencies',
         newValue: '1.0.0',
+        managerData: { nestedVersion: false },
       };
       const res = updateDependency(pyproject2toml, upgrade);
       expect(res).toBeNull();
@@ -116,6 +122,7 @@ describe('manager/poetry/update', () => {
         depName: '~invalid-dep-name~',
         depType: 'dependencies',
         newValue: '1.0.0',
+        managerData: { nestedVersion: false },
       };
       const res = updateDependency(pyproject1toml, upgrade);
       expect(res).toBeNull();
@@ -124,7 +131,7 @@ describe('manager/poetry/update', () => {
       const upgrade = {
         depName: '~invalid-dep-name~',
         depType: 'dependencies',
-        nestedVersion: true,
+        managerData: { nestedVersion: true },
         newValue: '1.0.0',
       };
       const res = updateDependency(pyproject2toml, upgrade);
