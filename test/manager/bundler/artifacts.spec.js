@@ -1,4 +1,4 @@
-const cargo = require('../../../lib/manager/bundler/artifacts');
+import { updateArtifacts } from '../../../lib/manager/bundler/artifacts';
 
 let config;
 
@@ -8,6 +8,6 @@ describe('bundler.updateArtifacts()', () => {
     config = {};
   });
   it('returns null by default', async () => {
-    expect(await cargo.updateArtifacts('', [], '', config)).toBeNull();
+    expect(await updateArtifacts('', [], '', config)).toBeNull();
   });
 });

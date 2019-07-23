@@ -1,15 +1,15 @@
-const fs = require('fs');
-const { updateDependency } = require('../../../lib/manager/cargo/update');
+import { readFileSync } from 'fs';
+import { updateDependency } from '../../../lib/manager/cargo/update';
 
-const cargo1toml = fs.readFileSync(
+const cargo1toml = readFileSync(
   'test/manager/cargo/_fixtures/Cargo.1.toml',
   'utf8'
 );
-const cargo4toml = fs.readFileSync(
+const cargo4toml = readFileSync(
   'test/manager/cargo/_fixtures/Cargo.4.toml',
   'utf8'
 );
-const cargo5toml = fs.readFileSync(
+const cargo5toml = readFileSync(
   'test/manager/cargo/_fixtures/Cargo.5.toml',
   'utf8'
 );

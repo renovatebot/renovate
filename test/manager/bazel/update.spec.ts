@@ -1,23 +1,24 @@
-const fs = require('fs');
-/** @type any */
-const hasha = require('hasha');
-const path = require('path');
-const bazelfile = require('../../../lib/manager/bazel/update');
+import { readFileSync } from 'fs';
+import { fromStream as _fromStream } from 'hasha';
+import { resolve } from 'path';
+import { updateDependency } from '../../../lib/manager/bazel/update';
 
 jest.mock('hasha');
 jest.mock('../../../lib/util/got');
 
-const content = fs.readFileSync(
-  path.resolve('test/manager/bazel/_fixtures/WORKSPACE1'),
+const fromStream: jest.Mock<Promise<string>> = _fromStream as any;
+
+const content = readFileSync(
+  resolve('test/manager/bazel/_fixtures/WORKSPACE1'),
   'utf8'
 );
 
-const contentContainerPull = fs.readFileSync(
-  path.resolve('test/manager/bazel/_fixtures/container_pull'),
+const contentContainerPull = readFileSync(
+  resolve('test/manager/bazel/_fixtures/container_pull'),
   'utf8'
 );
 
-const fileWithBzlExtension = fs.readFileSync(
+const fileWithBzlExtension = readFileSync(
   'test/manager/bazel/_fixtures/repositories.bzl',
   'utf8'
 );
@@ -45,7 +46,7 @@ describe('manager/bazel/update', () => {
         currentValue: '0.1.8',
         newValue: '0.2.0',
       };
-      const res = await bazelfile.updateDependency(content, upgrade);
+      const res = await updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
     });
 
@@ -70,10 +71,7 @@ describe('manager/bazel/update', () => {
           'sha256:2c29ba015faef92a3f55b37632fc373a7fbc2c9fddd31e317bf07113391c640b',
         newValue: 'v1.0.0-alpha42.cli-migrations',
       };
-      const res = await bazelfile.updateDependency(
-        contentContainerPull,
-        upgrade
-      );
+      const res = await updateDependency(contentContainerPull, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(contentContainerPull);
       expect(res.includes('# v1.0.0-alpha31.cli-migrations 11/28')).toBe(true);
@@ -97,7 +95,7 @@ describe('manager/bazel/update', () => {
         newValue: 'v1.0.3',
         updateType: 'major',
       };
-      const res = await bazelfile.updateDependency(content, upgrade);
+      const res = await updateDependency(content, upgrade);
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(content);
       expect(
@@ -114,8 +112,8 @@ describe('manager/bazel/update', () => {
         },
         newDigest: '033387ac8853e6cc1cd47df6c346bc53cbc490d8',
       };
-      hasha.fromStream.mockReturnValueOnce('abc123');
-      const res = await bazelfile.updateDependency(content, upgrade);
+      fromStream.mockResolvedValueOnce('abc123');
+      const res = await updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
     });
     it('updates http archive with content other then WORKSPACE', async () => {
@@ -134,11 +132,8 @@ describe('manager/bazel/update', () => {
         currentValue: '0.6.0',
         newValue: '0.8.0',
       };
-      hasha.fromStream.mockReturnValueOnce('abc123');
-      const res = await bazelfile.updateDependency(
-        fileWithBzlExtension,
-        upgrade
-      );
+      fromStream.mockResolvedValueOnce('abc123');
+      const res = await updateDependency(fileWithBzlExtension, upgrade);
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
     });
@@ -158,11 +153,8 @@ describe('manager/bazel/update', () => {
         currentValue: '0.6.0',
         newValue: '0.8.0',
       };
-      hasha.fromStream.mockReturnValueOnce('abc123');
-      const res = await bazelfile.updateDependency(
-        fileWithBzlExtension,
-        upgrade
-      );
+      fromStream.mockResolvedValueOnce('abc123');
+      const res = await updateDependency(fileWithBzlExtension, upgrade);
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
     });
@@ -182,10 +174,7 @@ describe('manager/bazel/update', () => {
         currentValue: '0.6.0',
         newValue: '0.8.0',
       };
-      const res = await bazelfile.updateDependency(
-        fileWithBzlExtension,
-        upgrade
-      );
+      const res = await updateDependency(fileWithBzlExtension, upgrade);
       expect(res).toBeNull();
     });
     it('errors for http_archive without urls', async () => {
@@ -206,8 +195,8 @@ http_archive(
         currentValue: '0.5.0',
         newValue: '0.6.2',
       };
-      hasha.fromStream.mockReturnValueOnce('abc123');
-      const res = await bazelfile.updateDependency(content, upgrade);
+      fromStream.mockResolvedValueOnce('abc123');
+      const res = await updateDependency(content, upgrade);
       expect(res).toBeNull();
     });
     it('updates http_archive with urls array', async () => {
@@ -232,8 +221,8 @@ http_archive(
         currentValue: '0.5.0',
         newValue: '0.6.2',
       };
-      hasha.fromStream.mockReturnValueOnce('abc123');
-      const res = await bazelfile.updateDependency(content, upgrade);
+      fromStream.mockResolvedValueOnce('abc123');
+      const res = await updateDependency(content, upgrade);
       expect(res).not.toEqual(content);
       expect(res.indexOf('0.5.0')).toBe(-1);
       expect(res.indexOf('0.6.2')).not.toBe(-1);

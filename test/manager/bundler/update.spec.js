@@ -1,7 +1,7 @@
-const fs = require('fs');
-const { updateDependency } = require('../../../lib/manager/bundler/update');
+import { readFileSync } from 'fs';
+import { updateDependency } from '../../../lib/manager/bundler/update';
 
-const railsGemfile = fs.readFileSync(
+const railsGemfile = readFileSync(
   'test/manager/bundler/_fixtures/Gemfile.rails',
   'utf8'
 );
