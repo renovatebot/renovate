@@ -1,6 +1,4 @@
-const {
-  extractPackageFile,
-} = require('../../../lib/manager/ruby-version/extract');
+import { extractPackageFile } from '../../../lib/manager/ruby-version/extract';
 
 describe('lib/manager/ruby-version/extract', () => {
   describe('extractPackageFile()', () => {

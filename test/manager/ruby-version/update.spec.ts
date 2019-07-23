@@ -1,6 +1,4 @@
-const {
-  updateDependency,
-} = require('../../../lib/manager/ruby-version/update');
+import { updateDependency } from '../../../lib/manager/ruby-version/update';
 
 describe('manager/nvm/update', () => {
   describe('updateDependency', () => {
