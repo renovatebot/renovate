@@ -1,22 +1,20 @@
-const fs = require('fs-extra');
-const path = require('path');
-const upath = require('upath');
-const validateNpmPackageName = require('validate-npm-package-name');
-const { logger } = require('../../../logger');
+import { remove } from 'fs-extra';
+import { dirname } from 'path';
+import { join } from 'upath';
+import validateNpmPackageName from 'validate-npm-package-name';
+import { logger } from '../../../logger';
 
-const { getLockedVersions } = require('./locked-versions');
-const { detectMonorepos } = require('./monorepo');
-const { mightBeABrowserLibrary } = require('./type');
-const semver = require('../../../versioning/npm');
+import { getLockedVersions } from './locked-versions';
+import { detectMonorepos } from './monorepo';
+import { mightBeABrowserLibrary } from './type';
+import { isValid, isVersion } from '../../../versioning/npm';
+import { ExtractConfig, PackageFile, PackageDependency } from '../../common';
 
-module.exports = {
-  extractAllPackageFiles,
-  extractPackageFile,
-  postExtract,
-};
-
-async function extractAllPackageFiles(config, packageFiles) {
-  const npmFiles = [];
+export async function extractAllPackageFiles(
+  config: ExtractConfig,
+  packageFiles: string[]
+): Promise<PackageFile[]> {
+  const npmFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
     const content = await platform.getFile(packageFile);
     if (content) {
@@ -36,10 +34,14 @@ async function extractAllPackageFiles(config, packageFiles) {
   return npmFiles;
 }
 
-async function extractPackageFile(content, fileName, config) {
+export async function extractPackageFile(
+  content: string,
+  fileName: string,
+  config: ExtractConfig
+): Promise<PackageFile> {
   logger.trace(`npm.extractPackageFile(${fileName})`);
   logger.trace({ content });
-  const deps = [];
+  const deps: PackageDependency[] = [];
   let packageJson;
   try {
     packageJson = JSON.parse(content);
@@ -74,7 +76,7 @@ async function extractPackageFile(content, fileName, config) {
     ? 'library'
     : 'app';
 
-  const lockFiles = {
+  const lockFiles: any = {
     yarnLock: 'yarn.lock',
     packageLock: 'package-lock.json',
     shrinkwrapJson: 'npm-shrinkwrap.json',
@@ -82,7 +84,7 @@ async function extractPackageFile(content, fileName, config) {
   };
 
   for (const [key, val] of Object.entries(lockFiles)) {
-    const filePath = upath.join(path.dirname(fileName), val);
+    const filePath = join(dirname(fileName), val);
     if (await platform.getFile(filePath)) {
       lockFiles[key] = filePath;
     } else {
@@ -95,11 +97,11 @@ async function extractPackageFile(content, fileName, config) {
 
   let npmrc;
   let ignoreNpmrcFile;
-  const npmrcFileName = upath.join(path.dirname(fileName), '.npmrc');
-  const npmrcFileNameLocal = upath.join(config.localDir || '', npmrcFileName);
+  const npmrcFileName = join(dirname(fileName), '.npmrc');
+  const npmrcFileNameLocal = join(config.localDir || '', npmrcFileName);
   // istanbul ignore if
   if (config.ignoreNpmrcFile) {
-    await fs.remove(npmrcFileNameLocal);
+    await remove(npmrcFileNameLocal);
   } else {
     npmrc = await platform.getFile(npmrcFileName);
     if (npmrc && npmrc.includes('package-lock')) {
@@ -111,25 +113,24 @@ async function extractPackageFile(content, fileName, config) {
         logger.info('Discarding .npmrc file with variables');
         ignoreNpmrcFile = true;
         npmrc = undefined;
-        await fs.remove(npmrcFileNameLocal);
+        await remove(npmrcFileNameLocal);
       }
     } else {
       npmrc = undefined;
     }
   }
   const yarnrc =
-    (await platform.getFile(upath.join(path.dirname(fileName), '.yarnrc'))) ||
-    undefined;
+    (await platform.getFile(join(dirname(fileName), '.yarnrc'))) || undefined;
 
   let lernaDir;
   let lernaPackages;
   let lernaClient;
   let hasFileRefs = false;
   const lernaJson = JSON.parse(
-    await platform.getFile(upath.join(path.dirname(fileName), 'lerna.json'))
+    await platform.getFile(join(dirname(fileName), 'lerna.json'))
   );
   if (lernaJson) {
-    lernaDir = path.dirname(fileName);
+    lernaDir = dirname(fileName);
     lernaPackages = lernaJson.packages;
     lernaClient =
       lernaJson.npmClient === 'yarn' || lockFiles.yarnLock ? 'yarn' : 'npm';
@@ -143,8 +144,8 @@ async function extractPackageFile(content, fileName, config) {
     engines: 'engine',
   };
 
-  function extractDependency(depType, depName, input) {
-    const dep = {};
+  function extractDependency(depType: string, depName: string, input: string) {
+    const dep: PackageDependency = {};
     if (!validateNpmPackageName(depName).validForOldPackages) {
       dep.skipReason = 'invalid-name';
       return dep;
@@ -168,7 +169,7 @@ async function extractPackageFile(content, fileName, config) {
       } else {
         dep.skipReason = 'unknown-engines';
       }
-      if (!semver.isValid(dep.currentValue)) {
+      if (!isValid(dep.currentValue)) {
         dep.skipReason = 'unknown-version';
       }
       return dep;
@@ -191,7 +192,7 @@ async function extractPackageFile(content, fileName, config) {
       hasFileRefs = true;
       return dep;
     }
-    if (semver.isValid(dep.currentValue)) {
+    if (isValid(dep.currentValue)) {
       dep.datasource = 'npm';
       if (dep.currentValue === '*') {
         dep.skipReason = 'any-version';
@@ -226,7 +227,7 @@ async function extractPackageFile(content, fileName, config) {
       dep.skipReason = 'unknown-version';
       return dep;
     }
-    if (semver.isVersion(depRefPart)) {
+    if (isVersion(depRefPart)) {
       dep.currentRawValue = dep.currentValue;
       dep.currentValue = depRefPart;
       dep.datasource = 'github';
@@ -254,8 +255,10 @@ async function extractPackageFile(content, fileName, config) {
   for (const depType of Object.keys(depTypes)) {
     if (packageJson[depType]) {
       try {
-        for (const [depName, val] of Object.entries(packageJson[depType])) {
-          const dep = {
+        for (const [depName, val] of Object.entries(packageJson[
+          depType
+        ] as Record<string, any>)) {
+          const dep: PackageDependency = {
             depType,
             depName,
           };
@@ -319,7 +322,7 @@ async function extractPackageFile(content, fileName, config) {
   };
 }
 
-async function postExtract(packageFiles) {
+export async function postExtract(packageFiles) {
   await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }

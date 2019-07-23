@@ -1,18 +1,15 @@
-const fs = require('fs-extra');
-const upath = require('upath');
-const { getInstalledPath } = require('get-installed-path');
-const { exec } = require('../../../util/exec');
-const { logger } = require('../../../logger');
+import { readFile } from 'fs-extra';
+import { join } from 'upath';
+import { getInstalledPath } from 'get-installed-path';
+import { exec } from '../../../util/exec';
+import { logger } from '../../../logger';
+import { PostUpdateConfig } from '../../common';
 
-module.exports = {
-  generateLockFile,
-};
-
-async function generateLockFile(
-  cwd,
-  env,
-  filename,
-  config = {},
+export async function generateLockFile(
+  cwd: string,
+  env: NodeJS.ProcessEnv,
+  filename: string,
+  config: PostUpdateConfig = {},
   upgrades = []
 ) {
   logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
@@ -26,7 +23,7 @@ async function generateLockFile(
     const startTime = process.hrtime();
     try {
       // See if renovate is installed locally
-      const installedPath = upath.join(
+      const installedPath = join(
         await getInstalledPath('npm', {
           local: true,
         }),
@@ -38,7 +35,7 @@ async function generateLockFile(
       // Look inside globally installed renovate
       try {
         const renovateLocation = await getInstalledPath('renovate');
-        const installedPath = upath.join(
+        const installedPath = join(
           await getInstalledPath('npm', {
             local: true,
             cwd: renovateLocation,
@@ -50,7 +47,7 @@ async function generateLockFile(
         logger.debug('Could not find globally nested npm');
         // look for global npm
         try {
-          const installedPath = upath.join(
+          const installedPath = join(
             await getInstalledPath('npm'),
             'bin/npm-cli.js'
           );
@@ -127,7 +124,7 @@ async function generateLockFile(
     }
     const duration = process.hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    lockFile = await fs.readFile(upath.join(cwd, filename), 'utf8');
+    lockFile = await readFile(join(cwd, filename), 'utf8');
     logger.info(
       { seconds, type: filename, stdout, stderr },
       'Generated lockfile'

@@ -1,16 +1,12 @@
-const { exec } = require('../../../util/exec');
-const { logger } = require('../../../logger');
+import { exec } from '../../../util/exec';
+import { logger } from '../../../logger';
 
-module.exports = {
-  generateLockFiles,
-};
-
-async function generateLockFiles(
-  lernaClient,
-  cwd,
-  env,
-  skipInstalls,
-  binarySource
+export async function generateLockFiles(
+  lernaClient: string,
+  cwd: string,
+  env?: NodeJS.ProcessEnv,
+  skipInstalls?: boolean,
+  binarySource?: string
 ) {
   if (!lernaClient) {
     logger.warn('No lernaClient specified - returning');

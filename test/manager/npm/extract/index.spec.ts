@@ -1,10 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const npmExtract = require('../../../../lib/manager/npm/extract');
-const defaultConfig = require('../../../../lib/config/defaults').getConfig();
+import fs from 'fs';
+import path from 'path';
+import * as npmExtract from '../../../../lib/manager/npm/extract';
+import { getConfig } from '../../../../lib/config/defaults';
 
-/** @type any */
-const platform = global.platform;
+const defaultConfig = getConfig();
+const platform: any = global.platform;
 
 function readFixture(fixture) {
   return fs.readFileSync(

@@ -1,8 +1,4 @@
-module.exports = {
-  mightBeABrowserLibrary,
-};
-
-function mightBeABrowserLibrary(packageJson) {
+export function mightBeABrowserLibrary(packageJson) {
   // return true unless we're sure it's not a browser library
   if (packageJson.private === true) {
     // it's not published

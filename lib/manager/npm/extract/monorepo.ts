@@ -5,8 +5,6 @@ const path = require('path');
 const upath = require('upath');
 const { logger } = require('../../../logger');
 
-export { detectMonorepos };
-
 function matchesAnyPattern(val, patterns) {
   const res = patterns.some(
     pattern => pattern === val + '/' || minimatch(val, pattern, { dot: true })
@@ -15,7 +13,7 @@ function matchesAnyPattern(val, patterns) {
   return res;
 }
 
-function detectMonorepos(packageFiles) {
+export function detectMonorepos(packageFiles) {
   logger.debug('Detecting Lerna and Yarn Workspaces');
   for (const p of packageFiles) {
     const {

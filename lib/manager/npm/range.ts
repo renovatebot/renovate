@@ -1,11 +1,9 @@
-const { parseRange } = require('semver-utils');
-const { logger } = require('../../logger');
+import { parseRange } from 'semver-utils';
+import { logger } from '../../logger';
+import { RangeConfig } from '../common';
+import { RangeStrategy } from '../../versioning';
 
-module.exports = {
-  getRangeStrategy,
-};
-
-function getRangeStrategy(config) {
+export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const {
     depType,
     depName,

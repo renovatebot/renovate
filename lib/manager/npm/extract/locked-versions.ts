@@ -1,13 +1,22 @@
-const { valid } = require('semver');
-const { logger } = require('../../../logger');
-const { getNpmLock } = require('./npm');
-const { getYarnLock } = require('./yarn');
+import { valid } from 'semver';
+import { logger } from '../../../logger';
+import { getNpmLock } from './npm';
+import { getYarnLock } from './yarn';
+import { PackageFile } from '../../common';
 
-module.exports = {
-  getLockedVersions,
-};
+type PackageFiles = (PackageFile & {
+  npmLock: string;
+  yarnLock: string;
+  yarnIntegrity?: boolean;
+  deps: {
+    depName: string;
+    currentValue: string;
+    lockedVersion?: string;
+  }[];
+  pnpmShrinkwrap?: any;
+})[];
 
-async function getLockedVersions(packageFiles) {
+export async function getLockedVersions(packageFiles: PackageFiles) {
   const lockFileCache = {};
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {

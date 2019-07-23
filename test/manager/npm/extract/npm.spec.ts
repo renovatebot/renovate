@@ -1,8 +1,7 @@
-const fs = require('fs');
-const { getNpmLock } = require('../../../../lib/manager/npm/extract/npm');
+import { readFileSync } from 'fs';
+import { getNpmLock } from '../../../../lib/manager/npm/extract/npm';
 
-/** @type any */
-const platform = global.platform;
+const platform: any = global.platform;
 
 describe('manager/npm/extract/npm', () => {
   describe('.getNpmLock()', () => {
@@ -12,7 +11,7 @@ describe('manager/npm/extract/npm', () => {
       expect(Object.keys(res)).toHaveLength(0);
     });
     it('extracts', async () => {
-      const plocktest1Lock = fs.readFileSync(
+      const plocktest1Lock = readFileSync(
         'test/config/npm/_fixtures/plocktest1/package-lock.json'
       );
       platform.getFile.mockReturnValueOnce(plocktest1Lock);

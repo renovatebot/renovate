@@ -1,15 +1,14 @@
 import is from '@sindresorhus/is';
-
-const fs = require('fs-extra');
-const path = require('path');
-const upath = require('upath');
-const { logger } = require('../../../logger');
-const npm = require('./npm');
-const lerna = require('./lerna');
-const yarn = require('./yarn');
-const pnpm = require('./pnpm');
-const hostRules = require('../../../util/host-rules');
-const { getChildProcessEnv } = require('../../../util/env');
+import fs from 'fs-extra';
+import path from 'path';
+import upath from 'upath';
+import { logger } from '../../../logger';
+import * as npm from './npm';
+import * as lerna from './lerna';
+import * as yarn from './yarn';
+import * as pnpm from './pnpm';
+import * as hostRules from '../../../util/host-rules';
+import { getChildProcessEnv } from '../../../util/env';
 
 export {
   determineLockFileDirs,
@@ -20,7 +19,7 @@ export {
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 // istanbul ignore next
-const getDirs = arr => Array.from(new Set(arr.filter(Boolean)));
+const getDirs = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
 
 // istanbul ignore next
 function determineLockFileDirs(config, packageFiles) {

@@ -1,3 +1,4 @@
+import { ReleaseType } from 'semver';
 import { RangeStrategy } from '../versioning';
 
 export type Result<T> = T | Promise<T>;
@@ -9,8 +10,12 @@ export interface ManagerConfig {
 }
 
 export interface ExtractConfig extends ManagerConfig {
-  gradle?: { timeout?: number };
   endpoint?: string;
+  global?: any;
+  gradle?: { timeout?: number };
+  ignoreNpmrcFile?: boolean;
+
+  skipInstalls?: boolean;
   versionScheme?: string;
 }
 
@@ -58,6 +63,7 @@ export interface PackageFile {
   deps: PackageDependency[];
   manager?: string;
   mavenProps?: Record<string, any>;
+  npmrc?: string;
   packageFile?: string;
   parent?: string;
 }
@@ -74,6 +80,7 @@ export interface Package<T> {
   gradleWrapperType?: string;
   groupName?: string;
   lineNumber?: number;
+  lookupName?: string;
   managerData?: T;
   ownerName?: string;
   pipenvNestedVersion?: boolean;
@@ -83,6 +90,18 @@ export interface Package<T> {
   target?: string;
   url?: string;
   versionScheme?: string;
+
+  // npm manager
+  bumpVersion?: ReleaseType | string;
+  npmPackageAlias?: boolean;
+  packageJsonVersion?: string;
+  gitRef?: boolean;
+  sourceUrl?: string;
+  githubRepo?: string;
+  pinDigests?: boolean;
+  currentRawValue?: string;
+  major?: { enabled?: boolean };
+  prettyDepType?: any;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -92,7 +111,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   digestOneAndOnly?: boolean;
   fromVersion?: string;
   lockedVersion?: string;
-  lookupName?: string;
   lookupType?: string;
   moduleName?: string;
   propSource?: string;
@@ -106,6 +124,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
 }
 
 export interface Upgrade<T = Record<string, any>> extends Package<T> {
+  currentRawValue?: any;
   checksumUrl?: string;
   currentVersion?: string;
   depGroup?: string;
@@ -159,4 +178,12 @@ export interface ManagerApi {
   ): Result<UpdateArtifactsResult[]>;
 
   updateDependency(fileContent: string, upgrade: Upgrade): Result<string>;
+}
+
+// TODO: name and properties used by npm manager
+export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
+  cacheDir?: string;
+
+  postUpdateOptions?: string[];
+  skipInstalls?: boolean;
 }

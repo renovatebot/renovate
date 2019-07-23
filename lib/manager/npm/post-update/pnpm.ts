@@ -1,14 +1,15 @@
-const fs = require('fs-extra');
-const upath = require('upath');
-const { getInstalledPath } = require('get-installed-path');
-const { exec } = require('../../../util/exec');
-const { logger } = require('../../../logger');
+import { readFile } from 'fs-extra';
+import { join } from 'upath';
+import { getInstalledPath } from 'get-installed-path';
+import { exec } from '../../../util/exec';
+import { logger } from '../../../logger';
+import { PostUpdateConfig } from '../../common';
 
-module.exports = {
-  generateLockFile,
-};
-
-async function generateLockFile(cwd, env, config) {
+export async function generateLockFile(
+  cwd: string,
+  env: NodeJS.ProcessEnv,
+  config: PostUpdateConfig
+) {
   logger.debug(`Spawning pnpm install to create ${cwd}/pnpm-lock.yaml`);
   let lockFile = null;
   let stdout;
@@ -18,7 +19,7 @@ async function generateLockFile(cwd, env, config) {
     const startTime = process.hrtime();
     try {
       // See if renovate is installed locally
-      const installedPath = upath.join(
+      const installedPath = join(
         await getInstalledPath('pnpm', {
           local: true,
         }),
@@ -30,7 +31,7 @@ async function generateLockFile(cwd, env, config) {
       // Look inside globally installed renovate
       try {
         const renovateLocation = await getInstalledPath('renovate');
-        const installedPath = upath.join(
+        const installedPath = join(
           await getInstalledPath('pnpm', {
             local: true,
             cwd: renovateLocation,
@@ -42,7 +43,7 @@ async function generateLockFile(cwd, env, config) {
         logger.debug('Could not find globally nested pnpm');
         // look for global pnpm
         try {
-          const installedPath = upath.join(
+          const installedPath = join(
             await getInstalledPath('pnpm'),
             'lib/bin/pnpm.js'
           );
@@ -83,7 +84,7 @@ async function generateLockFile(cwd, env, config) {
     logger.debug(`pnpm stderr:\n${stderr}`);
     const duration = process.hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    lockFile = await fs.readFile(upath.join(cwd, 'pnpm-lock.yaml'), 'utf8');
+    lockFile = await readFile(join(cwd, 'pnpm-lock.yaml'), 'utf8');
     logger.info(
       { seconds, type: 'pnpm-lock.yaml', stdout, stderr },
       'Generated lockfile'

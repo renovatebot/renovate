@@ -1,16 +1,20 @@
-const { getRangeStrategy } = require('../../../lib/manager/npm');
+import { getRangeStrategy } from '../../../lib/manager/npm';
+import { RangeConfig } from '../../../lib/manager/common';
 
 describe('getRangeStrategy', () => {
   it('returns same if not auto', () => {
-    const config = { rangeStrategy: 'widen' };
+    const config: RangeConfig = { rangeStrategy: 'widen' };
     expect(getRangeStrategy(config)).toEqual('widen');
   });
   it('pins devDependencies', () => {
-    const config = { rangeStrategy: 'auto', depType: 'devDependencies' };
+    const config: RangeConfig = {
+      rangeStrategy: 'auto',
+      depType: 'devDependencies',
+    };
     expect(getRangeStrategy(config)).toEqual('pin');
   });
   it('pins app dependencies', () => {
-    const config = {
+    const config: RangeConfig = {
       rangeStrategy: 'auto',
       depType: 'dependencies',
       packageJsonType: 'app',
@@ -18,11 +22,14 @@ describe('getRangeStrategy', () => {
     expect(getRangeStrategy(config)).toEqual('pin');
   });
   it('widens peerDependencies', () => {
-    const config = { rangeStrategy: 'auto', depType: 'peerDependencies' };
+    const config: RangeConfig = {
+      rangeStrategy: 'auto',
+      depType: 'peerDependencies',
+    };
     expect(getRangeStrategy(config)).toEqual('widen');
   });
   it('widens complex ranges', () => {
-    const config = {
+    const config: RangeConfig = {
       rangeStrategy: 'auto',
       depType: 'dependencies',
       currentValue: '^1.6.0 || ^2.0.0',
@@ -30,7 +37,7 @@ describe('getRangeStrategy', () => {
     expect(getRangeStrategy(config)).toEqual('widen');
   });
   it('widens complex bump', () => {
-    const config = {
+    const config: RangeConfig = {
       rangeStrategy: 'bump',
       depType: 'dependencies',
       currentValue: '^1.6.0 || ^2.0.0',
@@ -38,7 +45,10 @@ describe('getRangeStrategy', () => {
     expect(getRangeStrategy(config)).toEqual('widen');
   });
   it('defaults to replace', () => {
-    const config = { rangeStrategy: 'auto', depType: 'dependencies' };
+    const config: RangeConfig = {
+      rangeStrategy: 'auto',
+      depType: 'dependencies',
+    };
     expect(getRangeStrategy(config)).toEqual('replace');
   });
 });

@@ -1,13 +1,12 @@
-const _ = require('lodash');
-const semver = require('semver');
-const { logger } = require('../../logger');
+import { isEqual } from 'lodash';
+import { inc, ReleaseType } from 'semver';
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-  bumpPackageVersion,
-};
-
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade
+): string {
   const { depType, depName } = upgrade;
   let { newValue } = upgrade;
   if (upgrade.currentRawValue) {
@@ -63,7 +62,7 @@ function updateDependency(fileContent, upgrade) {
           newString
         );
         // Compare the parsed JSON structure of old and new
-        if (_.isEqual(parsedContents, JSON.parse(testContent))) {
+        if (isEqual(parsedContents, JSON.parse(testContent))) {
           newFileContent = testContent;
           break;
         }
@@ -118,7 +117,7 @@ function updateDependency(fileContent, upgrade) {
               newResolution
             );
             // Compare the parsed JSON structure of old and new
-            if (_.isEqual(parsedContents, JSON.parse(testContent))) {
+            if (isEqual(parsedContents, JSON.parse(testContent))) {
               newFileContent = testContent;
               break;
             }
@@ -138,12 +137,17 @@ function updateDependency(fileContent, upgrade) {
 }
 
 // Return true if the match string is found at index in content
-function matchAt(content, index, match) {
+function matchAt(content: string, index: number, match: string) {
   return content.substring(index, index + match.length) === match;
 }
 
 // Replace oldString with newString at location index of content
-function replaceAt(content, index, oldString, newString) {
+function replaceAt(
+  content: string,
+  index: number,
+  oldString: string,
+  newString: string
+) {
   logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
     content.substr(0, index) +
@@ -152,7 +156,11 @@ function replaceAt(content, index, oldString, newString) {
   );
 }
 
-function bumpPackageVersion(content, currentValue, bumpVersion) {
+export function bumpPackageVersion(
+  content: string,
+  currentValue: string,
+  bumpVersion: ReleaseType | string
+) {
   logger.debug('bumpVersion()');
   if (!bumpVersion) {
     return content;
@@ -176,7 +184,7 @@ function bumpPackageVersion(content, currentValue, bumpVersion) {
         return content;
       }
     } else {
-      newPjVersion = semver.inc(currentValue, bumpVersion);
+      newPjVersion = inc(currentValue, bumpVersion as ReleaseType);
     }
     logger.debug({ newPjVersion });
     const bumpedContent = content.replace(

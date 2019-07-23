@@ -1,8 +1,7 @@
-const fs = require('fs');
-const { getYarnLock } = require('../../../../lib/manager/npm/extract/yarn');
+import { readFileSync } from 'fs';
+import { getYarnLock } from '../../../../lib/manager/npm/extract/yarn';
 
-/** @type any */
-const platform = global.platform;
+const platform: any = global.platform;
 
 describe('manager/npm/extract/yarn', () => {
   describe('.getYarnLock()', () => {
@@ -12,7 +11,7 @@ describe('manager/npm/extract/yarn', () => {
       expect(Object.keys(res)).toHaveLength(0);
     });
     it('extracts', async () => {
-      const plocktest1Lock = fs.readFileSync(
+      const plocktest1Lock = readFileSync(
         'test/config/npm/_fixtures/plocktest1/yarn.lock',
         'utf8'
       );

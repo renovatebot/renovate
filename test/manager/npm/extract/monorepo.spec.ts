@@ -1,6 +1,4 @@
-const {
-  detectMonorepos,
-} = require('../../../../lib/manager/npm/extract/monorepo');
+import { detectMonorepos } from '../../../../lib/manager/npm/extract/monorepo';
 
 describe('manager/npm/extract', () => {
   describe('.extractPackageFile()', () => {
@@ -23,7 +21,7 @@ describe('manager/npm/extract', () => {
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
-      expect(packageFiles[1].internalPackages).toEqual(['@org/b']);
+      expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
     it('uses yarn workspaces package settings', async () => {
       const packageFiles = [
@@ -46,7 +44,7 @@ describe('manager/npm/extract', () => {
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
-      expect(packageFiles[1].internalPackages).toEqual(['@org/b']);
+      expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
     it('uses yarn workspaces package settings', async () => {
       const packageFiles = [
@@ -66,7 +64,7 @@ describe('manager/npm/extract', () => {
       ];
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
-      expect(packageFiles[1].internalPackages).toEqual(['@org/b']);
+      expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
   });
 });

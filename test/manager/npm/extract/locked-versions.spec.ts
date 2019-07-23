@@ -1,6 +1,4 @@
-const {
-  getLockedVersions,
-} = require('../../../../lib/manager/npm/extract/locked-versions');
+import { getLockedVersions } from '../../../../lib/manager/npm/extract/locked-versions';
 
 /** @type any */
 const npm = require('../../../../lib/manager/npm/extract/npm');

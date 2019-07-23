@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const semver = require('semver');
-const npmUpdater = require('../../../lib/manager/npm/update');
+import fs from 'fs';
+import path from 'path';
+import semver from 'semver';
+import * as npmUpdater from '../../../lib/manager/npm/update';
 
 function readFixture(fixture) {
   return fs.readFileSync(
@@ -192,7 +192,7 @@ describe('workers/branch/package-json', () => {
       semver.inc = jest.fn(() => {
         throw new Error('semver inc');
       });
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', true);
+      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', true as any);
       expect(res).toEqual(content);
     });
   });

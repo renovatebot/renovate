@@ -1,14 +1,15 @@
-const fs = require('fs-extra');
-const upath = require('upath');
-const { getInstalledPath } = require('get-installed-path');
-const { exec } = require('../../../util/exec');
-const { logger } = require('../../../logger');
+import { readFile } from 'fs-extra';
+import { join } from 'upath';
+import { getInstalledPath } from 'get-installed-path';
+import { exec } from '../../../util/exec';
+import { logger } from '../../../logger';
 
-module.exports = {
-  generateLockFile,
-};
-
-async function generateLockFile(cwd, env, config = {}, upgrades = []) {
+export async function generateLockFile(
+  cwd: string,
+  env?: NodeJS.ProcessEnv,
+  config: any = {},
+  upgrades = []
+) {
   const { binarySource } = config;
   logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
   let lockFile = null;
@@ -19,7 +20,7 @@ async function generateLockFile(cwd, env, config = {}, upgrades = []) {
     const startTime = process.hrtime();
     try {
       // See if renovate is installed locally
-      const installedPath = upath.join(
+      const installedPath = join(
         await getInstalledPath('yarn', {
           local: true,
         }),
@@ -35,7 +36,7 @@ async function generateLockFile(cwd, env, config = {}, upgrades = []) {
             local: true,
           });
           logger.info('Using nested bundled yarn@1.9.4 for install');
-          cmd = 'node ' + upath.join(renovatePath, 'bin/yarn-1.9.4.js');
+          cmd = 'node ' + join(renovatePath, 'bin/yarn-1.9.4.js');
         } catch (err) {
           logger.info('Using bundled yarn@1.9.4 for install');
           cmd = cmd.replace(
@@ -49,7 +50,7 @@ async function generateLockFile(cwd, env, config = {}, upgrades = []) {
       // Look inside globally installed renovate
       try {
         const renovateLocation = await getInstalledPath('renovate');
-        const installedPath = upath.join(
+        const installedPath = join(
           await getInstalledPath('yarn', {
             local: true,
             cwd: renovateLocation,
@@ -61,7 +62,7 @@ async function generateLockFile(cwd, env, config = {}, upgrades = []) {
         logger.debug('Could not find globally nested yarn');
         // look for global yarn
         try {
-          const installedPath = upath.join(
+          const installedPath = join(
             await getInstalledPath('yarn'),
             'bin/yarn.js'
           );
@@ -150,7 +151,7 @@ async function generateLockFile(cwd, env, config = {}, upgrades = []) {
     }
     const duration = process.hrtime(startTime);
     const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    lockFile = await fs.readFile(upath.join(cwd, 'yarn.lock'), 'utf8');
+    lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
     logger.info(
       { seconds, type: 'yarn.lock', stdout, stderr },
       'Generated lockfile'

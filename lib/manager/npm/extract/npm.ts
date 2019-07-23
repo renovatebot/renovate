@@ -1,15 +1,12 @@
-const { logger } = require('../../../logger');
+import { logger } from '../../../logger';
 
-module.exports = {
-  getNpmLock,
-};
-
-async function getNpmLock(filePath) {
+export async function getNpmLock(filePath: string) {
   const lockRaw = await platform.getFile(filePath);
   try {
     const lockParsed = JSON.parse(lockRaw);
     const lockFile = {};
-    for (const [entry, val] of Object.entries(lockParsed.dependencies || {})) {
+    for (const [entry, val] of Object.entries((lockParsed.dependencies ||
+      {}) as Record<string, any>)) {
       logger.trace({ entry, version: val.version });
       lockFile[entry] = val.version;
     }

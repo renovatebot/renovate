@@ -1,6 +1,4 @@
-const {
-  mightBeABrowserLibrary,
-} = require('../../../../lib/manager/npm/extract/type');
+import { mightBeABrowserLibrary } from '../../../../lib/manager/npm/extract/type';
 
 describe('manager/npm/extract/type', () => {
   describe('.mightBeABrowserLibrary()', () => {
