@@ -7,7 +7,7 @@ import {
   extractAllPackageFiles,
   updateDependency,
 } from '../../../lib/manager/maven/index';
-import { PackageDependency } from '../../../lib/manager/common';
+import { PackageDependency, PackageFile } from '../../../lib/manager/common';
 
 const platform: any = global.platform;
 
@@ -67,7 +67,8 @@ describe('manager/maven', () => {
     });
 
     it('should update existing dependency defined via properties', () => {
-      const finder = ({ depName }) => depName === 'org.example:quux';
+      const finder = ({ depName }: PackageDependency) =>
+        depName === 'org.example:quux';
       const newValue = '9.9.9.9-final';
 
       const packages = resolveProps([
@@ -154,7 +155,8 @@ describe('manager/maven', () => {
     });
     it('should update ranges', () => {
       const newValue = '[1.2.3]';
-      const select = depSet => selectDep(depSet.deps, 'org.example:hard-range');
+      const select = (depSet: PackageFile) =>
+        selectDep(depSet.deps, 'org.example:hard-range');
       const oldContent = extractPackage(pomContent);
       const dep = select(oldContent);
       const upgrade = { ...dep, newValue };
@@ -164,7 +166,7 @@ describe('manager/maven', () => {
     });
     it('should preserve ranges', () => {
       const newValue = '[1.0.0]';
-      const select = depSet =>
+      const select = (depSet: PackageFile) =>
         depSet && depSet.deps
           ? selectDep(depSet.deps, 'org.example:hard-range')
           : null;
