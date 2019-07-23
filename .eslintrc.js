@@ -16,6 +16,7 @@ module.exports = {
   },
   rules: {
     'import/no-unresolved': 0, // done by typescript
+    'import/prefer-default-export': 0, // no benefit
     'require-await': 'error',
     'no-use-before-define': 0,
     'no-restricted-syntax': 0,
@@ -25,7 +26,6 @@ module.exports = {
     'no-underscore-dangle': 0,
 
     // TODO: fix lint
-    'import/prefer-default-export': 1,
     '@typescript-eslint/camelcase': 'off', // disabled until ??
     '@typescript-eslint/no-var-requires': 'off', // disable until all files converted to typescript
     '@typescript-eslint/no-use-before-define': 'off', // disable until all files converted to typescript
