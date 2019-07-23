@@ -1,4 +1,5 @@
-const { isValid } = require('../../versioning/swift');
+import { isValid } from '../../versioning/swift';
+import { PackageFile, PackageDependency } from '../common';
 
 const regExps = {
   wildcard: /^.*?/,
@@ -86,8 +87,14 @@ function searchKeysForState(state) {
       return [DEPS];
   }
 }
+interface MatchResult {
+  idx: number;
+  len: number;
+  label: string;
+  substr: string;
+}
 
-function getMatch(str, state) {
+function getMatch(str: string, state: string): MatchResult {
   const keys = searchKeysForState(state);
   let result = null;
   for (let i = 0; i < keys.length; i += 1) {
@@ -110,7 +117,7 @@ function getMatch(str, state) {
   return result;
 }
 
-function getDepName(url) {
+function getDepName(url: string) {
   try {
     const { host, pathname } = new URL(url);
     if (host === 'github.com' || host === 'gitlab.com') {
@@ -125,27 +132,31 @@ function getDepName(url) {
   }
 }
 
-function extractPackageFile(content, packageFile = null) {
+export function extractPackageFile(
+  content: string,
+  packageFile: string = null
+): PackageFile {
   if (!content) return null;
 
-  const result = {
+  const result: PackageFile = {
     packageFile,
+    deps: null,
   };
-  const deps = [];
+  const deps: PackageDependency[] = [];
 
   let offset = 0;
   let restStr = content;
-  let state = null;
+  let state: string = null;
   let match = getMatch(restStr, state);
 
-  let lookupName = null;
-  let currentValue = null;
-  let fileReplacePosition = null;
+  let lookupName: string = null;
+  let currentValue: string = null;
+  let fileReplacePosition: number = null;
 
   function yieldDep() {
     const depName = getDepName(lookupName);
     if (depName && currentValue && fileReplacePosition) {
-      const dep = {
+      const dep: PackageDependency = {
         datasource: 'gitTags',
         depName,
         lookupName,
@@ -340,7 +351,3 @@ function extractPackageFile(content, packageFile = null) {
   }
   return deps.length ? { ...result, deps } : null;
 }
-
-module.exports = {
-  extractPackageFile,
-};

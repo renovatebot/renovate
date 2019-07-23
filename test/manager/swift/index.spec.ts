@@ -1,10 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const { extractPackageFile } = require('../../../lib/manager/swift/extract');
-const { updateDependency } = require('../../../lib/manager/swift/update');
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { extractPackageFile } from '../../../lib/manager/swift/extract';
+import { updateDependency } from '../../../lib/manager/swift/update';
 
-const pkgContent = fs.readFileSync(
-  path.resolve(__dirname, `./_fixtures/SamplePackage.swift`),
+const pkgContent = readFileSync(
+  resolve(__dirname, `./_fixtures/SamplePackage.swift`),
   'utf8'
 );
 

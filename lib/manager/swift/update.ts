@@ -1,8 +1,12 @@
-const { isVersion } = require('../../versioning/swift');
+import { isVersion } from '../../versioning/swift';
+import { Upgrade } from '../common';
 
 const fromParam = /^\s*from\s*:\s*"([^"]+)"\s*$/;
 
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade
+): string {
   const { currentValue, newValue, fileReplacePosition } = upgrade;
   const leftPart = fileContent.slice(0, fileReplacePosition);
   const rightPart = fileContent.slice(fileReplacePosition);
@@ -24,7 +28,3 @@ function updateDependency(fileContent, upgrade) {
   }
   return null;
 }
-
-module.exports = {
-  updateDependency,
-};
