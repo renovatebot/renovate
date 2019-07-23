@@ -1,13 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const { extractPackageFile } = require('../../../lib/manager/sbt/extract');
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { extractPackageFile } from '../../../lib/manager/sbt/extract';
 
-const sbt = fs.readFileSync(
-  path.resolve(__dirname, `./_fixtures/sample.sbt`),
-  'utf8'
-);
-const sbtMissingScalaVersion = fs.readFileSync(
-  path.resolve(__dirname, `./_fixtures/missing-scala-version.sbt`),
+const sbt = readFileSync(resolve(__dirname, `./_fixtures/sample.sbt`), 'utf8');
+const sbtMissingScalaVersion = readFileSync(
+  resolve(__dirname, `./_fixtures/missing-scala-version.sbt`),
   'utf8'
 );
 

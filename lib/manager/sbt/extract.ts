@@ -1,36 +1,38 @@
-const { DEFAULT_MAVEN_REPO } = require('../maven/extract');
+import { DEFAULT_MAVEN_REPO } from '../maven/extract';
+import { PackageFile, PackageDependency } from '../common';
 
-const isComment = str => /^\s*\/\//.test(str);
+const isComment = (str: string) => /^\s*\/\//.test(str);
 
-const isSingleLineDep = str =>
+const isSingleLineDep = (str: string) =>
   /^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/.test(str);
 
-const isDepsBegin = str =>
+const isDepsBegin = (str: string) =>
   /^\s*(libraryDependencies|dependencyOverrides)\s*\+\+=\s*/.test(str);
 
-const isPluginDep = str => /^\s*addSbtPlugin\s*\(.*\)\s*$/.test(str);
+const isPluginDep = (str: string) => /^\s*addSbtPlugin\s*\(.*\)\s*$/.test(str);
 
-const isStringLiteral = str => /^"[^"]*"$/.test(str);
+const isStringLiteral = (str: string) => /^"[^"]*"$/.test(str);
 
-const isScalaVersion = str => /^\s*scalaVersion\s*:=\s*"[^"]*"\s*$/.test(str);
-const getScalaVersion = str =>
+const isScalaVersion = (str: string) =>
+  /^\s*scalaVersion\s*:=\s*"[^"]*"\s*$/.test(str);
+const getScalaVersion = (str: string) =>
   str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"\s*$/, '');
 
-const isResolver = str =>
+const isResolver = (str: string) =>
   /^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/.test(
     str
   );
-const getResolverUrl = str =>
+const getResolverUrl = (str: string) =>
   str
     .replace(/^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"/, '')
     .replace(/"[\s,)]*$/, '');
 
-const isVarDef = str =>
+const isVarDef = (str: string) =>
   /^\s*val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(str);
-const getVarName = str =>
+const getVarName = (str: string) =>
   str.replace(/^\s*val\s+/, '').replace(/\s*=\s*"[^"]*"\s*$/, '');
-const isVarName = str => /^[_a-zA-Z][_a-zA-Z0-9]*$/.test(str);
-const getVarInfo = (str, ctx) => {
+const isVarName = (str: string) => /^[_a-zA-Z][_a-zA-Z0-9]*$/.test(str);
+const getVarInfo = (str: string, ctx: ParseContext) => {
   const { fileOffset } = ctx;
   const rightPart = str.replace(/^\s*val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/, '');
   const fileReplacePosition = str.search(rightPart) + fileOffset;
@@ -38,14 +40,21 @@ const getVarInfo = (str, ctx) => {
   return { val, fileReplacePosition };
 };
 
-function parseDepExpr(expr, ctx) {
+interface ParseContext {
+  fileOffset: number;
+  scalaVersion: string;
+  variables: any;
+  depType?: string;
+}
+
+function parseDepExpr(expr: string, ctx: ParseContext) {
   const { scalaVersion, fileOffset, variables } = ctx;
   let { depType } = ctx;
 
-  const isValidToken = str =>
+  const isValidToken = (str: string) =>
     isStringLiteral(str) || (isVarName(str) && !!variables[str]);
 
-  const resolveToken = str =>
+  const resolveToken = (str: string) =>
     isStringLiteral(str)
       ? str.replace(/^"/, '').replace(/"$/, '')
       : variables[str].val;
@@ -85,7 +94,7 @@ function parseDepExpr(expr, ctx) {
     depType = rawScope.replace(/^"/, '').replace(/"$/, '');
   }
 
-  let fileReplacePosition;
+  let fileReplacePosition: number;
   if (isStringLiteral(rawVersion)) {
     // Calculate fileReplacePosition incrementally
     // help us to avoid errors in updating phase.
@@ -101,7 +110,7 @@ function parseDepExpr(expr, ctx) {
     fileReplacePosition = variables[rawVersion].fileReplacePosition;
   }
 
-  const result = {
+  const result: PackageDependency = {
     depName,
     currentValue,
     fileReplacePosition,
@@ -113,19 +122,30 @@ function parseDepExpr(expr, ctx) {
 
   return result;
 }
+interface ParseOptions {
+  fileOffset?: number;
+  isMultiDeps?: boolean;
+  scalaVersion?: string;
+  variables?: Record<string, any>;
+}
 
-function parseSbtLine(acc, line, lineIndex, lines) {
+function parseSbtLine(
+  acc: PackageFile & ParseOptions,
+  line: string,
+  lineIndex: number,
+  lines: string[]
+): PackageFile & ParseOptions {
   const { deps, registryUrls, fileOffset, variables } = acc;
 
   let { isMultiDeps, scalaVersion } = acc;
 
-  const ctx = {
+  const ctx: ParseContext = {
     scalaVersion,
     fileOffset,
     variables,
   };
 
-  let dep = null;
+  let dep: PackageDependency = null;
   if (!isComment(line)) {
     if (isScalaVersion(line)) {
       isMultiDeps = false;
@@ -170,7 +190,7 @@ function parseSbtLine(acc, line, lineIndex, lines) {
   if (dep)
     deps.push({
       datasource: 'sbt',
-      registryUrls,
+      registryUrls: registryUrls as string[],
       ...dep,
     });
 
@@ -185,7 +205,7 @@ function parseSbtLine(acc, line, lineIndex, lines) {
   return null;
 }
 
-function extractPackageFile(content) {
+export function extractPackageFile(content: string): PackageFile {
   if (!content) return null;
   const lines = content.split(/\n/);
   return lines.reduce(parseSbtLine, {
@@ -197,7 +217,3 @@ function extractPackageFile(content) {
     variables: {},
   });
 }
-
-module.exports = {
-  extractPackageFile,
-};

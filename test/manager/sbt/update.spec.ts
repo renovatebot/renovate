@@ -1,23 +1,24 @@
-const fs = require('fs');
-const path = require('path');
-const { extractPackageFile } = require('../../../lib/manager/sbt/extract');
-const { updateDependency } = require('../../../lib/manager/sbt/update');
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { extractPackageFile } from '../../../lib/manager/sbt/extract';
+import { updateDependency } from '../../../lib/manager/sbt/update';
+import { Upgrade } from '../../../lib/manager/common';
 
-const sbtPath = path.resolve(__dirname, `./_fixtures/sample.sbt`);
-const fileContent = fs.readFileSync(sbtPath, 'utf8');
+const sbtPath = resolve(__dirname, `./_fixtures/sample.sbt`);
+const fileContent = readFileSync(sbtPath, 'utf8');
 
 describe('lib/manager/terraform/extract', () => {
   describe('updateDependency()', () => {
     it('returns content untouched if versions are same', () => {
       const { deps } = extractPackageFile(fileContent);
-      const upgrade = deps.shift();
+      const upgrade: Upgrade = deps.shift();
       upgrade.newValue = upgrade.currentValue;
       const newFileContent = updateDependency(fileContent, upgrade);
       expect(newFileContent).toBe(fileContent);
     });
     it('returns null if content has been updated somewhere', () => {
       const { deps } = extractPackageFile(fileContent);
-      const upgrade = deps.shift();
+      const upgrade: Upgrade = deps.shift();
       upgrade.newValue = '0.1.1';
       const newFileContent = updateDependency(
         fileContent.replace('0.0.1', '0.1.0'),
