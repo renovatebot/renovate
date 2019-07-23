@@ -1,12 +1,10 @@
 import is from '@sindresorhus/is';
+import yaml from 'js-yaml';
+import { PackageFile, PackageDependency } from '../common';
 
-const yaml = require('js-yaml');
-
-export { extractPackageFile };
-
-function extractPackageFile(content) {
+export function extractPackageFile(content: string): PackageFile {
   const doc = yaml.safeLoad(content);
-  let deps = [];
+  let deps: PackageDependency[] = [];
   if (doc && is.array(doc.node_js)) {
     deps = [
       {

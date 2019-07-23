@@ -147,7 +147,7 @@ export interface ManagerApi {
     config?: ExtractConfig
   ): Result<PackageFile>;
 
-  getPackageUpdates(config: PackageUpdateConfig): PackageUpdateResult[];
+  getPackageUpdates(config: PackageUpdateConfig): Result<PackageUpdateResult[]>;
 
   getRangeStrategy(config: RangeConfig): RangeStrategy;
 

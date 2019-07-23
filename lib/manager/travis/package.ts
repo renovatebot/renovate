@@ -1,15 +1,29 @@
 import is from '@sindresorhus/is';
+import { isEqual } from 'lodash';
+import { logger } from '../../logger';
+import { getPkgReleases } from '../../datasource';
+import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
+import nodeJsSchedule from '../../../data/node-js-schedule.json';
+import { PackageUpdateConfig, PackageUpdateResult } from '../common';
 
-const { isEqual } = require('lodash');
-const { getPkgReleases } = require('../../datasource');
-const { isVersion, maxSatisfyingVersion } = require('../../versioning/semver');
-const { logger } = require('../../logger');
-const nodeJsSchedule = require('../../../data/node-js-schedule.json');
+interface NodeJsPolicies {
+  all: number[];
+  lts: number[];
+  active: number[];
+  lts_active: number[];
+  lts_latest: number[];
+  current: number[];
+}
+interface NodeJsSchedule {
+  lts: string;
+  maintenance: string;
+  end: string;
+  start: string;
+}
+type NodeJsData = Record<string, NodeJsSchedule>;
 
-export { getPackageUpdates };
-
-let policies;
-let refreshDate;
+let policies: NodeJsPolicies;
+let refreshDate: Date;
 
 function generatePolicies() {
   policies = {
@@ -23,7 +37,7 @@ function generatePolicies() {
 
   const now = new Date();
 
-  for (const [vRelease, data] of Object.entries(nodeJsSchedule)) {
+  for (const [vRelease, data] of Object.entries(nodeJsSchedule as NodeJsData)) {
     const isAlive = new Date(data.start) < now && new Date(data.end) > now;
     if (isAlive) {
       const release = parseInt(vRelease.replace(/^v/, ''), 10);
@@ -49,7 +63,7 @@ function checkPolicies() {
   generatePolicies();
   refreshDate = new Date('3000-01-01'); // y3k
   const now = new Date();
-  for (const data of Object.values(nodeJsSchedule)) {
+  for (const data of Object.values(nodeJsSchedule as NodeJsData)) {
     const fields = ['start', 'lts', 'maintenance', 'end'];
     for (const field of fields) {
       const fieldDate = new Date(data[field]);
@@ -61,7 +75,9 @@ function checkPolicies() {
   logger.debug('Node.js policies refresh date: ' + refreshDate);
 }
 
-async function getPackageUpdates(config) {
+export async function getPackageUpdates(
+  config: PackageUpdateConfig
+): Promise<PackageUpdateResult[]> {
   logger.trace('travis.getPackageUpdates()');
   const { supportPolicy } = config;
   if (!(supportPolicy && supportPolicy.length)) {
@@ -75,7 +91,8 @@ async function getPackageUpdates(config) {
     }
   }
   logger.debug({ supportPolicy }, `supportPolicy`);
-  let newValue = supportPolicy
+  // TODO: `newValue` is a (string | number)[] !
+  let newValue: any[] = (supportPolicy as (keyof NodeJsPolicies)[])
     .map(policy => policies[policy])
     .reduce((result, policy) => result.concat(policy), [])
     .sort((a, b) => a - b);
@@ -94,7 +111,9 @@ async function getPackageUpdates(config) {
     newValue = newValue.map(val => `${val}`);
   }
   newValue.sort((a, b) => a - b);
-  config.currentValue.sort((a, b) => a - b);
+
+  // TODO: `config.currentValue` is a string!
+  (config.currentValue as any).sort((a, b) => a - b);
   if (isEqual(config.currentValue, newValue)) {
     return [];
   }

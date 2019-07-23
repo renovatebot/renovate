@@ -1,4 +1,4 @@
-const { extractPackageFile } = require('../../../lib/manager/travis/extract');
+import { extractPackageFile } from '../../../lib/manager/travis/extract';
 
 describe('lib/manager/travis/extract', () => {
   describe('extractPackageFile()', () => {

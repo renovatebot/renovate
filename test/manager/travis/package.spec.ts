@@ -1,13 +1,16 @@
-const node = require('../../../lib/manager/travis/package');
-const defaultConfig = require('../../../lib/config/defaults').getConfig();
-/** @type any */
-const githubDatasource = require('../../../lib/datasource/github');
+import { getPackageUpdates } from '../../../lib/manager/travis/package';
+import { getPkgReleases as _getPkgReleases } from '../../../lib/datasource/github';
+import { getConfig } from '../../../lib/config/defaults';
+
+const defaultConfig = getConfig();
+const getPkgReleases: any = _getPkgReleases;
 
 jest.mock('../../../lib/datasource/github');
 
 describe('lib/manager/node/package', () => {
   describe('getPackageUpdates', () => {
-    let config;
+    // TODO: should be `PackageUpdateConfig`
+    let config: any;
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -15,27 +18,27 @@ describe('lib/manager/node/package', () => {
     });
     it('returns empty if missing supportPolicy', async () => {
       config.currentValue = ['6', '8'];
-      expect(await node.getPackageUpdates(config)).toEqual([]);
+      expect(await getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if invalid supportPolicy', async () => {
       config.currentValue = ['6', '8'];
       config.supportPolicy = ['foo'];
-      expect(await node.getPackageUpdates(config)).toEqual([]);
+      expect(await getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
       config.currentValue = ['10'];
       config.supportPolicy = ['lts_active'];
-      expect(await node.getPackageUpdates(config)).toEqual([]);
+      expect(await getPackageUpdates(config)).toEqual([]);
     });
     it('returns result if needing updates', async () => {
       config.currentValue = ['6', '8', '10'];
       config.supportPolicy = ['lts'];
-      expect(await node.getPackageUpdates(config)).toMatchSnapshot();
+      expect(await getPackageUpdates(config)).toMatchSnapshot();
     });
     it('detects pinning', async () => {
       config.currentValue = ['6.1.0', '8.4.0', '10.0.0'];
       config.supportPolicy = ['lts'];
-      githubDatasource.getPkgReleases.mockReturnValueOnce({
+      getPkgReleases.mockReturnValueOnce({
         releases: [
           {
             version: '4.4.4',
@@ -60,7 +63,7 @@ describe('lib/manager/node/package', () => {
           },
         ],
       });
-      expect(await node.getPackageUpdates(config)).toMatchSnapshot();
+      expect(await getPackageUpdates(config)).toMatchSnapshot();
     });
   });
 });
