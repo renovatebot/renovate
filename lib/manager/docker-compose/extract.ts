@@ -1,13 +1,10 @@
-const { logger } = require('../../logger');
-const { getDep } = require('../dockerfile/extract');
+import { logger } from '../../logger';
+import { getDep } from '../dockerfile/extract';
+import { PackageFile, PackageDependency } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(content) {
+export function extractPackageFile(content: string): PackageFile {
   logger.debug('docker-compose.extractPackageFile()');
-  let deps = [];
+  let deps: PackageDependency[] = [];
   let lineNumber = 0;
   for (const line of content.split('\n')) {
     const match = line.match(/^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);

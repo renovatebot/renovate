@@ -1,9 +1,22 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../logger';
+import { api as semverComposer } from '../../versioning/composer';
+import { PackageFile, PackageDependency, Registry } from '../common';
 
-const { logger } = require('../../logger');
-const semverComposer = require('../../versioning/composer');
+interface Repo {
+  name?: string;
+  type: 'composer' | 'git' | 'package' | 'vcs';
 
-export { extractPackageFile };
+  url: string;
+}
+
+interface ComposerConfig {
+  type?: string;
+  repositories: Record<string, Repo>;
+
+  require: Record<string, string>;
+  'require-dev': Record<string, string>;
+}
 
 /**
  * Parse the repositories field from a composer.json
@@ -15,7 +28,11 @@ export { extractPackageFile };
  * @param repositories
  * @param registryUrls
  */
-function parseRepositories(repoJson, repositories, registryUrls) {
+function parseRepositories(
+  repoJson: Record<string, Repo>,
+  repositories: Record<string, Repo>,
+  registryUrls: Registry[]
+) {
   try {
     Object.entries(repoJson).forEach(([key, repo]) => {
       const name = is.array(repoJson) ? repo.name : key;
@@ -26,7 +43,7 @@ function parseRepositories(repoJson, repositories, registryUrls) {
           repositories[name] = repo;
           break;
         default:
-          registryUrls.push(repo);
+          registryUrls.push({ url: repo.url, type: repo.type });
       }
     });
   } catch (e) /* istanbul ignore next */ {
@@ -37,18 +54,18 @@ function parseRepositories(repoJson, repositories, registryUrls) {
   }
 }
 
-async function extractPackageFile(content, fileName) {
+export async function extractPackageFile(content: string, fileName: string) {
   logger.trace(`composer.extractPackageFile(${fileName})`);
-  let composerJson;
+  let composerJson: ComposerConfig;
   try {
     composerJson = JSON.parse(content);
   } catch (err) {
     logger.info({ fileName }, 'Invalid JSON');
     return null;
   }
-  const repositories = {};
-  const registryUrls = [];
-  const res = {};
+  const repositories: Record<string, Repo> = {};
+  const registryUrls: Registry[] = [];
+  const res: PackageFile = { deps: [] };
 
   // handle lockfile
   const lockfilePath = fileName.replace(/\.json$/, '.lock');
@@ -75,9 +92,9 @@ async function extractPackageFile(content, fileName) {
   for (const depType of depTypes) {
     if (composerJson[depType]) {
       try {
-        for (const [depName, version] of Object.entries(
-          composerJson[depType]
-        )) {
+        for (const [depName, version] of Object.entries(composerJson[
+          depType
+        ] as Record<string, string>)) {
           const currentValue = version.trim();
           // Default datasource and lookupName
           let datasource = 'packagist';
@@ -94,7 +111,7 @@ async function extractPackageFile(content, fileName) {
                 break;
             }
           }
-          const dep = {
+          const dep: PackageDependency = {
             depType,
             depName,
             currentValue,

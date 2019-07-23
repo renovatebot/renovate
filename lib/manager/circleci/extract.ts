@@ -1,12 +1,9 @@
-const { logger } = require('../../logger');
-const { getDep } = require('../dockerfile/extract');
+import { logger } from '../../logger';
+import { getDep } from '../dockerfile/extract';
+import { PackageFile, PackageDependency } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(content) {
-  const deps = [];
+export function extractPackageFile(content: string): PackageFile {
+  const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
@@ -14,7 +11,7 @@ function extractPackageFile(content) {
       const orbs = line.match(/^\s*orbs:\s*$/);
       if (orbs) {
         logger.trace(`Matched orbs on line ${lineNumber}`);
-        let foundOrb;
+        let foundOrb: boolean;
         do {
           foundOrb = false;
           const orbLine = lines[lineNumber + 1];
@@ -26,7 +23,7 @@ function extractPackageFile(content) {
             lineNumber += 1;
             const depName = orbMatch[1];
             const [orbName, currentValue] = orbMatch[2].split('@');
-            const dep = {
+            const dep: PackageDependency = {
               depType: 'orb',
               depName,
               currentValue,

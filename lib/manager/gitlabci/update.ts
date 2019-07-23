@@ -1,11 +1,11 @@
-const { logger } = require('../../logger');
-const { getNewFrom } = require('../dockerfile/update');
+import { logger } from '../../logger';
+import { getNewFrom } from '../dockerfile/update';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(currentFileContent, upgrade) {
+export function updateDependency(
+  currentFileContent: string,
+  upgrade: Upgrade
+): string {
   try {
     const newFrom = getNewFrom(upgrade);
     const lines = currentFileContent.split('\n');

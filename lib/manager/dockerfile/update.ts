@@ -1,11 +1,7 @@
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  getNewFrom,
-  updateDependency,
-};
-
-function getNewFrom(upgrade) {
+export function getNewFrom(upgrade: Upgrade) {
   const { depName, newValue, newDigest } = upgrade;
   let newFrom = depName;
   if (newValue) {
@@ -17,7 +13,7 @@ function getNewFrom(upgrade) {
   return newFrom;
 }
 
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(fileContent: string, upgrade: Upgrade) {
   try {
     const { lineNumber, fromSuffix } = upgrade.managerData;
     let { fromPrefix } = upgrade.managerData;

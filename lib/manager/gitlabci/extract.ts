@@ -1,12 +1,9 @@
-const { logger } = require('../../logger');
-const { getDep } = require('../dockerfile/extract');
+import { logger } from '../../logger';
+import { getDep } from '../dockerfile/extract';
+import { PackageFile, PackageDependency } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(content) {
-  const deps = [];
+export function extractPackageFile(content: string): PackageFile {
+  const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
@@ -24,7 +21,6 @@ function extractPackageFile(content) {
               lineNumber += 1;
               logger.trace(`Matched image name on line ${lineNumber}`);
               const currentFrom = imageNameMatch[1];
-              /** @type any */
               const dep = getDep(currentFrom);
               dep.managerData = { lineNumber };
               dep.depType = 'image-name';
@@ -35,7 +31,6 @@ function extractPackageFile(content) {
           default: {
             logger.trace(`Matched image on line ${lineNumber}`);
             const currentFrom = imageMatch[1];
-            /** @type any */
             const dep = getDep(currentFrom);
             dep.managerData = { lineNumber };
             dep.depType = 'image';
@@ -59,7 +54,6 @@ function extractPackageFile(content) {
             foundImage = true;
             const currentFrom = serviceImageMatch[1];
             lineNumber += 1;
-            /** @type any */
             const dep = getDep(currentFrom);
             dep.managerData = { lineNumber };
             dep.depType = 'service-image';

@@ -11,9 +11,16 @@ export interface ManagerConfig {
   rangeStrategy?: RangeStrategy;
 }
 
+export interface Registry {
+  type?: string;
+  url: string;
+}
+
 export interface PackageFile {
+  composerJsonType?: string;
+  composerLock?: boolean | string;
   compatibility?: Record<string, string>;
-  registryUrls?: string[];
+  registryUrls?: (string | Registry)[];
   deps: PackageDependency[];
   manager?: string;
 
@@ -24,33 +31,36 @@ export interface Package {
   currentValue?: string;
   currentDigest?: string;
   depName?: string;
+  depType?: string;
 
   managerData?: Record<string, any>;
+  versionScheme?: string;
 }
 
 export interface PackageDependency extends Package {
-  target?: string;
-  def?: string;
-  lookupType?: string;
-  repo?: string;
-  digestOneAndOnly?: boolean;
-  currentDigestShort?: string;
-  lookupName?: string;
-  remote?: string;
   commitMessageTopic?: string;
+  currentDigestShort?: string;
   datasource?: string;
-  depType?: string;
+  def?: string;
+  digestOneAndOnly?: boolean;
+  fileReplacePosition?: number;
+  lockedVersion?: string;
+  lookupName?: string;
+  lookupType?: string;
+  remote?: string;
+  registryUrls?: string[];
+  repo?: string;
+
+  rangeStrategy?: RangeStrategy;
 
   skipReason?: string;
-
-  versionScheme?: string;
+  target?: string;
 }
 
 export interface Upgrade extends Package {
+  newDigest?: string;
   newFrom?: string;
   newValue?: string;
-
-  versionScheme?: string;
 }
 
 export interface ManagerApi {
@@ -66,7 +76,7 @@ export interface ManagerApi {
     content: string,
     packageFile?: string,
     config?: ManagerConfig
-  ): PackageFile;
+  ): PackageFile | Promise<PackageFile>;
 
   getPackageUpdates(config: ManagerConfig): any[];
 
