@@ -10,6 +10,7 @@ export interface ManagerConfig {
 export interface ExtractConfig extends ManagerConfig {
   gradle?: { timeout?: number };
   endpoint?: string;
+  versionScheme?: string;
 }
 
 export interface UpdateArtifactsConfig extends ManagerConfig {
@@ -108,6 +109,7 @@ export interface Upgrade<T = Record<string, any>> extends Package<T> {
   newFrom?: string;
   newMajor?: number;
   newValue?: string;
+  newVersion?: string;
   packageFile?: string;
   updateType?: string;
   version?: string;

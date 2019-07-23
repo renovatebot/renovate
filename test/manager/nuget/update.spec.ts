@@ -1,7 +1,7 @@
-const fs = require('fs');
-const nugetUpdater = require('../../../lib/manager/nuget/update');
+import { readFileSync } from 'fs';
+import { updateDependency } from '../../../lib/manager/nuget/update';
 
-const csProj = fs.readFileSync(
+const csProj = readFileSync(
   'test/datasource/nuget/_fixtures/sample.csproj',
   'utf8'
 );
@@ -13,7 +13,7 @@ describe('manager/nuget/update', () => {
         managerData: { lineNumber: 13 },
         newVersion: '5.0.0',
       };
-      const res = nugetUpdater.updateDependency(csProj, upgrade);
+      const res = updateDependency(csProj, upgrade);
       expect(res).not.toEqual(csProj);
     });
     it('keeps intact when same version', () => {
@@ -21,11 +21,11 @@ describe('manager/nuget/update', () => {
         managerData: { lineNumber: 13 },
         newVersion: '4.1.0',
       };
-      const res = nugetUpdater.updateDependency(csProj, upgrade);
+      const res = updateDependency(csProj, upgrade);
       expect(res).toEqual(csProj);
     });
     it('returns null on errors', () => {
-      const res = nugetUpdater.updateDependency(csProj, null);
+      const res = updateDependency(csProj, null);
       expect(res).toBeNull();
     });
   });

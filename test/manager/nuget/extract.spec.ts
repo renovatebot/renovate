@@ -1,7 +1,7 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/nuget/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/nuget/extract';
 
-const sample = fs.readFileSync(
+const sample = readFileSync(
   'test/datasource/nuget/_fixtures/sample.csproj',
   'utf8'
 );

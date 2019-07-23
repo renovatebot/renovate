@@ -1,14 +1,15 @@
-const { logger } = require('../../logger');
-const versioning = require('../../versioning');
+import { logger } from '../../logger';
+import { get } from '../../versioning';
+import { PackageDependency, ExtractConfig, PackageFile } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(content, packageFile, config = {}) {
+export function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig = {}
+): PackageFile {
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
-  const { isVersion } = versioning.get(config.versionScheme || 'semver');
-  const deps = [];
+  const { isVersion } = get(config.versionScheme || 'semver');
+  const deps: PackageDependency[] = [];
 
   let lineNumber = 0;
   for (const line of content.split('\n')) {
@@ -18,7 +19,7 @@ function extractPackageFile(content, packageFile, config = {}) {
     if (match) {
       const depName = match[1];
       const currentValue = match[2];
-      const dep = {
+      const dep: PackageDependency = {
         depType: 'nuget',
         depName,
         currentValue,

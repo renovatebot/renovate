@@ -1,10 +1,10 @@
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade<{ lineNumber: number }>
+): string {
   try {
     logger.debug(`nuget.updateDependency(): ${upgrade.newFrom}`);
     const lines = fileContent.split('\n');
