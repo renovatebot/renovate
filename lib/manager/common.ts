@@ -68,6 +68,7 @@ export interface Package<T> {
   currentDigest?: string;
   def?: string;
   depName?: string;
+  depNameShort?: string;
   depType?: string;
   fileReplacePosition?: number;
   gradleWrapperType?: string;
@@ -88,17 +89,20 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;
-  depNameShort?: string;
   digestOneAndOnly?: boolean;
   fromVersion?: string;
   lockedVersion?: string;
   lookupName?: string;
   lookupType?: string;
+  moduleName?: string;
   propSource?: string;
   remote?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
   skipReason?: string;
+  source?: string;
+  sourceLine?: number;
+  versionLine?: number;
 }
 
 export interface Upgrade<T = Record<string, any>> extends Package<T> {

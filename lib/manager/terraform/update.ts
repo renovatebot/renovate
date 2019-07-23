@@ -1,10 +1,10 @@
-const { logger } = require('../../logger');
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(currentFileContent, upgrade) {
+export function updateDependency(
+  currentFileContent: string,
+  upgrade: Upgrade
+): string {
   try {
     logger.debug(`terraform.updateDependency: ${upgrade.newValue}`);
     const lines = currentFileContent.split('\n');

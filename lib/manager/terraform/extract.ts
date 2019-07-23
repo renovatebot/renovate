@@ -1,16 +1,13 @@
-const { logger } = require('../../logger');
-const { isValid, isVersion } = require('../../versioning/hashicorp');
+import { logger } from '../../logger';
+import { isValid, isVersion } from '../../versioning/hashicorp';
+import { PackageDependency, PackageFile } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(content) {
+export function extractPackageFile(content: string): PackageFile {
   logger.trace({ content }, 'terraform.extractPackageFile()');
   if (!content.includes('module "')) {
     return null;
   }
-  const deps = [];
+  const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
@@ -18,7 +15,7 @@ function extractPackageFile(content) {
       const module = line.match(/^module\s+"([^"]+)"\s+{\s*$/);
       if (module) {
         logger.trace(`Matched module on line ${lineNumber}`);
-        const dep = {
+        const dep: PackageDependency = {
           moduleName: module[1],
           managerData: {},
         };

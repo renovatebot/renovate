@@ -1,7 +1,7 @@
-const fs = require('fs');
-const tfUpdate = require('../../../lib/manager/terraform/update');
+import { readFileSync } from 'fs';
+import { updateDependency } from '../../../lib/manager/terraform/update';
 
-const tf1 = fs.readFileSync('test/datasource/terraform/_fixtures/1.tf', 'utf8');
+const tf1 = readFileSync('test/datasource/terraform/_fixtures/1.tf', 'utf8');
 
 describe('manager/terraform/update', () => {
   describe('updateDependency', () => {
@@ -13,7 +13,7 @@ describe('manager/terraform/update', () => {
         depNameShort: 'hashicorp/example',
         newValue: 'v1.0.1',
       };
-      const res = tfUpdate.updateDependency(tf1, upgrade);
+      const res = updateDependency(tf1, upgrade);
       expect(res).not.toEqual(tf1);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
@@ -25,7 +25,7 @@ describe('manager/terraform/update', () => {
         depNameShort: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
-      const res = tfUpdate.updateDependency(tf1, upgrade);
+      const res = updateDependency(tf1, upgrade);
       expect(res).toEqual(tf1);
     });
     it('returns null if wrong line', () => {
@@ -36,7 +36,7 @@ describe('manager/terraform/update', () => {
         depNameShort: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
-      const res = tfUpdate.updateDependency(tf1, upgrade);
+      const res = updateDependency(tf1, upgrade);
       expect(res).toBeNull();
     });
     it('updates github versions', () => {
@@ -51,7 +51,7 @@ describe('manager/terraform/update', () => {
         source:
           'github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0',
       };
-      const res = tfUpdate.updateDependency(tf1, upgrade);
+      const res = updateDependency(tf1, upgrade);
       expect(res).not.toEqual(tf1);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
@@ -66,7 +66,7 @@ describe('manager/terraform/update', () => {
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
       };
-      const res = tfUpdate.updateDependency(tf1, upgrade);
+      const res = updateDependency(tf1, upgrade);
       expect(res).toBeNull();
     });
     it('updates terraform versions', () => {
@@ -80,7 +80,7 @@ describe('manager/terraform/update', () => {
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
       };
-      const res = tfUpdate.updateDependency(tf1, upgrade);
+      const res = updateDependency(tf1, upgrade);
       expect(res).not.toEqual(tf1);
       expect(res.includes(upgrade.newValue)).toBe(true);
     });
