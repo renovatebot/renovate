@@ -1,24 +1,24 @@
-const crypto = require('crypto');
-const { coerce } = require('semver');
-const { parseUrlPath } = require('./extract');
-const { skip, isSpace, removeComments } = require('./util');
-const got = require('../../util/got');
-const { logger } = require('../../logger');
-
-module.exports = {
-  updateDependency,
-};
+import { createHash } from 'crypto';
+import { coerce } from 'semver';
+import { parseUrlPath } from './extract';
+import { skip, isSpace, removeComments } from './util';
+import got from '../../util/got';
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
 // TODO: Refactor
-async function updateDependency(content, upgrade) {
+export async function updateDependency(
+  content: string,
+  upgrade: Upgrade
+): Promise<string> {
   logger.trace('updateDependency()');
   /*
     1. Update url field
     2. Update sha256 field
    */
   let newContent = content;
-  let newUrl;
-  let file;
+  let newUrl: string;
+  let file: string;
   // Example urls:
   // "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz"
   // "https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz"
@@ -61,8 +61,7 @@ async function updateDependency(content, upgrade) {
     logger.debug(`Failed to update url for dependency ${upgrade.depName}`);
     return content;
   }
-  const newSha256 = crypto
-    .createHash('sha256')
+  const newSha256 = createHash('sha256')
     .update(file)
     .digest('hex');
   newContent = updateUrl(content, upgrade.managerData.url, newUrl);
@@ -78,7 +77,7 @@ async function updateDependency(content, upgrade) {
   return newContent;
 }
 
-function updateUrl(content, oldUrl, newUrl) {
+function updateUrl(content: string, oldUrl: string, newUrl: string) {
   const urlRegExp = /(^|\s)url(\s)/;
   let i = content.search(urlRegExp);
   if (i === -1) {
@@ -103,7 +102,7 @@ function updateUrl(content, oldUrl, newUrl) {
   return newContent;
 }
 
-function getUrlTestContent(content, oldUrl, newUrl) {
+function getUrlTestContent(content: string, oldUrl: string, newUrl: string) {
   const urlRegExp = /(^|\s)url(\s)/;
   const cleanContent = removeComments(content);
   let j = cleanContent.search(urlRegExp);
@@ -114,7 +113,12 @@ function getUrlTestContent(content, oldUrl, newUrl) {
   return testContent;
 }
 
-function replaceUrl(idx, content, oldUrl, newUrl) {
+function replaceUrl(
+  idx: number,
+  content: string,
+  oldUrl: string,
+  newUrl: string
+) {
   let i = idx;
   i += 'url'.length;
   i = skip(i, content, c => isSpace(c));
@@ -128,7 +132,7 @@ function replaceUrl(idx, content, oldUrl, newUrl) {
   return newContent;
 }
 
-function updateSha256(content, oldSha256, newSha256) {
+function updateSha256(content: string, oldSha256: string, newSha256: string) {
   const sha256RegExp = /(^|\s)sha256(\s)/;
   let i = content.search(sha256RegExp);
   if (i === -1) {
@@ -153,7 +157,11 @@ function updateSha256(content, oldSha256, newSha256) {
   return newContent;
 }
 
-function getSha256TestContent(content, oldSha256, newSha256) {
+function getSha256TestContent(
+  content: string,
+  oldSha256: string,
+  newSha256: string
+) {
   const sha256RegExp = /(^|\s)sha256(\s)/;
   const cleanContent = removeComments(content);
   let j = cleanContent.search(sha256RegExp);
@@ -164,7 +172,12 @@ function getSha256TestContent(content, oldSha256, newSha256) {
   return testContent;
 }
 
-function replaceSha256(idx, content, oldSha256, newSha256) {
+function replaceSha256(
+  idx: number,
+  content: string,
+  oldSha256: string,
+  newSha256: string
+) {
   let i = idx;
   i += 'sha256'.length;
   i = skip(i, content, c => isSpace(c));

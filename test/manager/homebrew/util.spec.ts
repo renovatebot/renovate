@@ -1,4 +1,4 @@
-const { skip } = require('../../../lib/manager/homebrew/util');
+import { skip } from '../../../lib/manager/homebrew/util';
 
 describe('lib/manager/homebrew/util', () => {
   describe('skip()', () => {

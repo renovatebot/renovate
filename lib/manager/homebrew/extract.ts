@@ -1,15 +1,10 @@
-const semver = require('../../versioning/semver');
-const { skip, isSpace, removeComments } = require('./util');
-
-const { logger } = require('../../logger');
-
-module.exports = {
-  extractPackageFile,
-  parseUrlPath,
-};
+import { isValid } from '../../versioning/semver';
+import { skip, isSpace, removeComments } from './util';
+import { logger } from '../../logger';
+import { PackageFile, PackageDependency } from '../common';
 
 // TODO: Maybe check if quotes/double-quotes are balanced
-function extractPackageFile(content) {
+export function extractPackageFile(content: string): PackageFile {
   logger.trace('extractPackageFile()');
   /*
     1. match "class className < Formula"
@@ -28,10 +23,10 @@ function extractPackageFile(content) {
     logger.debug('Invalid URL field');
   }
   const urlPathResult = parseUrlPath(url);
-  let skipReason;
-  let currentValue = null;
-  let ownerName = null;
-  let repoName = null;
+  let skipReason: string;
+  let currentValue: string = null;
+  let ownerName: string = null;
+  let repoName: string = null;
   if (urlPathResult) {
     currentValue = urlPathResult.currentValue;
     ownerName = urlPathResult.ownerName;
@@ -45,7 +40,7 @@ function extractPackageFile(content) {
     logger.debug('Error: Invalid sha256 field');
     skipReason = 'invalid-sha256';
   }
-  const dep = {
+  const dep: PackageDependency = {
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,
@@ -62,7 +57,7 @@ function extractPackageFile(content) {
   return { deps };
 }
 
-function extractSha256(content) {
+function extractSha256(content: string) {
   const sha256RegExp = /(^|\s)sha256(\s)/;
   let i = content.search(sha256RegExp);
   if (isSpace(content[i])) {
@@ -71,7 +66,7 @@ function extractSha256(content) {
   return parseSha256(i, content);
 }
 
-function parseSha256(idx, content) {
+function parseSha256(idx: number, content: string) {
   let i = idx;
   i += 'sha256'.length;
   i = skip(i, content, c => {
@@ -89,7 +84,7 @@ function parseSha256(idx, content) {
   return sha256;
 }
 
-function extractUrl(content) {
+function extractUrl(content: string) {
   const urlRegExp = /(^|\s)url(\s)/;
   let i = content.search(urlRegExp);
   // content.search() returns -1 if not found
@@ -103,7 +98,7 @@ function extractUrl(content) {
   return parseUrl(i, content);
 }
 
-function parseUrlPath(urlStr) {
+export function parseUrlPath(urlStr: string) {
   if (!urlStr) {
     return null;
   }
@@ -116,7 +111,7 @@ function parseUrlPath(urlStr) {
     s = s.filter(val => val);
     const ownerName = s[0];
     const repoName = s[1];
-    let currentValue;
+    let currentValue: string;
     if (s[2] === 'archive') {
       currentValue = s[3];
       const targz = currentValue.slice(
@@ -132,7 +127,7 @@ function parseUrlPath(urlStr) {
     if (!currentValue) {
       return null;
     }
-    if (!semver.isValid(currentValue)) {
+    if (!isValid(currentValue)) {
       return null;
     }
     return { currentValue, ownerName, repoName };
@@ -141,7 +136,7 @@ function parseUrlPath(urlStr) {
   }
 }
 
-function parseUrl(idx, content) {
+function parseUrl(idx: number, content: string) {
   let i = idx;
   i += 'url'.length;
   i = skip(i, content, c => {
@@ -160,7 +155,7 @@ function parseUrl(idx, content) {
   return url;
 }
 
-function extractClassName(content) {
+function extractClassName(content: string) {
   const classRegExp = /(^|\s)class\s/;
   let i = content.search(classRegExp);
   if (isSpace(content[i])) {
@@ -171,7 +166,7 @@ function extractClassName(content) {
 
 /* This function parses the "class className < Formula" header
    and returns the className and index of the character just after the header */
-function parseClassHeader(idx, content) {
+function parseClassHeader(idx: number, content: string) {
   let i = idx;
   i += 'class'.length;
   i = skip(i, content, c => {

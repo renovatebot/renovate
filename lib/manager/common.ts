@@ -62,19 +62,20 @@ export interface PackageFile {
 
 export interface Package<T> {
   checksumLineNumber?: number;
-
   currentValue?: string;
   currentDigest?: string;
   def?: string;
   depName?: string;
   depType?: string;
-
   gradleWrapperType?: string;
-
-  managerData?: T;
   lineNumber?: number;
+  managerData?: T;
+  ownerName?: string;
   repo?: string;
+  repoName?: string;
+  sha256?: string;
   target?: string;
+  url?: string;
   versionScheme?: string;
 }
 

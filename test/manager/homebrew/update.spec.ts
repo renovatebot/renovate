@@ -1,6 +1,7 @@
-const fs = require('fs');
+import fs from 'fs';
+import { updateDependency } from '../../../lib/manager/homebrew/update';
+
 const got = require('../../../lib/util/got');
-const { updateDependency } = require('../../../lib/manager/homebrew/update');
 
 jest.mock('../../../lib/util/got');
 

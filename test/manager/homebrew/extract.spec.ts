@@ -1,5 +1,5 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/homebrew/extract');
+import fs from 'fs';
+import { extractPackageFile } from '../../../lib/manager/homebrew/extract';
 
 const aalib = fs.readFileSync(
   'test/manager/homebrew/_fixtures/aalib.rb',
