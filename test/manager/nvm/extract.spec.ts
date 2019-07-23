@@ -1,4 +1,4 @@
-const { extractPackageFile } = require('../../../lib/manager/nvm/extract');
+import { extractPackageFile } from '../../../lib/manager/nvm/extract';
 
 describe('lib/manager/nvm/extract', () => {
   describe('extractPackageFile()', () => {

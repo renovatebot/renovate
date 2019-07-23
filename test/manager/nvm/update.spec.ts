@@ -1,4 +1,4 @@
-const nodefile = require('../../../lib/manager/nvm/update');
+import { updateDependency } from '../../../lib/manager/nvm/update';
 
 describe('manager/nvm/update', () => {
   describe('updateDependency', () => {
@@ -6,7 +6,7 @@ describe('manager/nvm/update', () => {
       const upgrade = {
         newValue: '8.9.1',
       };
-      const res = nodefile.updateDependency('8.9.0\n', upgrade);
+      const res = updateDependency('8.9.0\n', upgrade);
       expect(res).toMatchSnapshot();
     });
   });
