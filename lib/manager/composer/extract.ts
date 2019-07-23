@@ -43,7 +43,9 @@ function parseRepositories(
           repositories[name] = repo;
           break;
         default:
+          // TODO: only add required props
           registryUrls.push(repo);
+          break;
       }
     });
   } catch (e) /* istanbul ignore next */ {
