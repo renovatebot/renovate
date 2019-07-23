@@ -1,11 +1,11 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/circleci/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/circleci/extract';
 
-const file1 = fs.readFileSync(
+const file1 = readFileSync(
   'test/manager/circleci/_fixtures/config.yml',
   'utf8'
 );
-const file2 = fs.readFileSync(
+const file2 = readFileSync(
   'test/manager/circleci/_fixtures/config2.yml',
   'utf8'
 );

@@ -1,9 +1,7 @@
-const fs = require('fs');
-const {
-  extractPackageFile,
-} = require('../../../lib/manager/docker-compose/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/docker-compose/extract';
 
-const yamlFile = fs.readFileSync(
+const yamlFile = readFileSync(
   'test/manager/docker-compose/_fixtures/docker-compose.1.yml',
   'utf8'
 );

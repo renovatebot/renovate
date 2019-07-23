@@ -1,30 +1,29 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/composer/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/composer/extract';
 
-/** @type any */
-const platform = global.platform;
+const platform: jest.Mocked<typeof global.platform> = global.platform as any;
 
-const requirements1 = fs.readFileSync(
+const requirements1 = readFileSync(
   'test/manager/composer/_fixtures/composer1.json',
   'utf8'
 );
-const requirements2 = fs.readFileSync(
+const requirements2 = readFileSync(
   'test/manager/composer/_fixtures/composer2.json',
   'utf8'
 );
-const requirements3 = fs.readFileSync(
+const requirements3 = readFileSync(
   'test/manager/composer/_fixtures/composer3.json',
   'utf8'
 );
-const requirements4 = fs.readFileSync(
+const requirements4 = readFileSync(
   'test/manager/composer/_fixtures/composer4.json',
   'utf8'
 );
-const requirements5 = fs.readFileSync(
+const requirements5 = readFileSync(
   'test/manager/composer/_fixtures/composer5.json',
   'utf8'
 );
-const requirements5Lock = fs.readFileSync(
+const requirements5Lock = readFileSync(
   'test/manager/composer/_fixtures/composer5.lock',
   'utf8'
 );
@@ -61,13 +60,13 @@ describe('lib/manager/composer/extract', () => {
       expect(res.registryUrls).toHaveLength(1);
     });
     it('extracts object repositories and registryUrls with lock file', async () => {
-      platform.getFile.mockReturnValueOnce(requirements5Lock);
+      platform.getFile.mockResolvedValue(requirements5Lock);
       const res = await extractPackageFile(requirements5, packageFile);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(1);
     });
     it('extracts dependencies with lock file', async () => {
-      platform.getFile.mockReturnValueOnce('some content');
+      platform.getFile.mockResolvedValue('some content');
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
     });

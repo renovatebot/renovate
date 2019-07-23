@@ -1,4 +1,4 @@
-const dockerfile = require('../../../lib/manager/dockerfile/update');
+import * as dockerfile from '../../../lib/manager/dockerfile/update';
 
 describe('manager/dockerfile/update', () => {
   describe('updateDependency', () => {

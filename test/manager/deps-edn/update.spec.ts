@@ -1,11 +1,11 @@
 /* eslint-disable no-template-curly-in-string */
-const fs = require('fs');
-const path = require('path');
-const { extractPackageFile } = require('../../../lib/manager/deps-edn/extract');
-const { updateDependency } = require('../../../lib/manager/deps-edn/update');
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { extractPackageFile } from '../../../lib/manager/deps-edn/extract';
+import { updateDependency } from '../../../lib/manager/deps-edn/update';
 
-const depsEdn = fs.readFileSync(
-  path.resolve(__dirname, `./_fixtures/deps.edn`),
+const depsEdn = readFileSync(
+  resolve(__dirname, `./_fixtures/deps.edn`),
   'utf8'
 );
 

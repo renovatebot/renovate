@@ -1,7 +1,7 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/gitlabci/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/gitlabci/extract';
 
-const yamlFile = fs.readFileSync(
+const yamlFile = readFileSync(
   'test/manager/gitlabci/_fixtures/gitlab-ci.yaml',
   'utf8'
 );

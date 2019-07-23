@@ -1,9 +1,7 @@
-const fs = require('fs');
-const {
-  extractPackageFile,
-} = require('../../../lib/manager/github-actions/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/github-actions/extract';
 
-const workflow1 = fs.readFileSync(
+const workflow1 = readFileSync(
   'test/manager/github-actions/_fixtures/main.workflow.1',
   'utf8'
 );

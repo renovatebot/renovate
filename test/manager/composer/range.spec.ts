@@ -1,4 +1,4 @@
-const { getRangeStrategy } = require('../../../lib/manager/composer');
+import { getRangeStrategy } from '../../../lib/manager/composer';
 
 describe('getRangeStrategy', () => {
   it('returns same if not auto', () => {
