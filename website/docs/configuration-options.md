@@ -1143,12 +1143,6 @@ It is not known by many that npm package authors and collaborators can _delete_ 
 
 Enabling `unpublishSafe` will add a `renovate/unpublish-safe` status check with value pending to every branch to warn you about this possibility. It can be handy when used with the `prCreation` = `not-pending` configuration option - that way you won't get the PR raised until after a patch is 24 hours old or more.
 
-## unstablePattern
-
-Because Docker uses tags instead of semver, there is no fixed convention for how to identify unstable releases. e.g. some images may use semver convention like `v2.0.0-beta1` but others may use their own convention, like Node.js or Ubuntu even/odd.
-
-This field is currently used by some config prefixes.
-
 ## updateLockFiles
 
 ## updateNotScheduled

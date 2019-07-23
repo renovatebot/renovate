@@ -92,7 +92,7 @@ Object {
         "doc",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 32,
       },
     },
     Object {
@@ -103,7 +103,7 @@ Object {
         "doc",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 33,
       },
     },
     Object {
@@ -112,7 +112,7 @@ Object {
         "doc",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 34,
       },
       "skipReason": "no-version",
     },
@@ -124,7 +124,7 @@ Object {
         "doc",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 35,
       },
     },
     Object {
@@ -170,7 +170,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 49,
       },
       "skipReason": "no-version",
     },
@@ -180,7 +180,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 50,
       },
       "skipReason": "no-version",
     },
@@ -190,7 +190,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 51,
       },
       "skipReason": "no-version",
     },
@@ -200,7 +200,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 52,
       },
       "skipReason": "no-version",
     },
@@ -210,7 +210,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 53,
       },
       "skipReason": "no-version",
     },
@@ -220,7 +220,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 54,
       },
       "skipReason": "no-version",
     },
@@ -230,7 +230,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 55,
       },
       "skipReason": "no-version",
     },
@@ -240,7 +240,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 56,
       },
       "skipReason": "no-version",
     },
@@ -250,7 +250,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 57,
       },
       "skipReason": "no-version",
     },
@@ -260,7 +260,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 58,
       },
       "skipReason": "no-version",
     },
@@ -270,7 +270,7 @@ Object {
         "job",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 59,
       },
       "skipReason": "no-version",
     },
@@ -280,7 +280,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 64,
       },
       "skipReason": "no-version",
     },
@@ -290,7 +290,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 66,
       },
       "skipReason": "no-version",
     },
@@ -302,7 +302,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 67,
       },
     },
     Object {
@@ -311,7 +311,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 69,
       },
       "skipReason": "no-version",
     },
@@ -321,7 +321,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 71,
       },
       "skipReason": "no-version",
     },
@@ -331,7 +331,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 73,
       },
       "skipReason": "no-version",
     },
@@ -341,7 +341,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 74,
       },
       "skipReason": "no-version",
     },
@@ -351,7 +351,7 @@ Object {
         "cable",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 75,
       },
       "skipReason": "no-version",
     },
@@ -361,7 +361,7 @@ Object {
         "storage",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 80,
       },
       "skipReason": "no-version",
     },
@@ -373,7 +373,7 @@ Object {
         "storage",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 81,
       },
     },
     Object {
@@ -382,7 +382,7 @@ Object {
         "storage",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 82,
       },
       "skipReason": "no-version",
     },
@@ -394,7 +394,7 @@ Object {
         "storage",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 84,
       },
     },
     Object {
@@ -417,7 +417,7 @@ Object {
         "ujs",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 92,
       },
       "skipReason": "no-version",
     },
@@ -427,7 +427,7 @@ Object {
         "ujs",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 93,
       },
       "skipReason": "no-version",
     },
@@ -437,7 +437,7 @@ Object {
         "test",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 101,
       },
       "skipReason": "no-version",
     },
@@ -447,7 +447,7 @@ Object {
         "test",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 102,
       },
       "skipReason": "no-version",
     },
@@ -457,7 +457,7 @@ Object {
         "test",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 105,
       },
       "skipReason": "no-version",
     },
@@ -467,7 +467,7 @@ Object {
         "test",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 106,
       },
       "skipReason": "no-version",
     },
@@ -477,7 +477,7 @@ Object {
         "test",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 109,
       },
       "skipReason": "no-version",
     },
@@ -486,7 +486,7 @@ Object {
       "datasource": "rubygems",
       "depName": "nokogiri",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 113,
       },
     },
     Object {
@@ -494,7 +494,7 @@ Object {
       "datasource": "rubygems",
       "depName": "racc",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 116,
       },
     },
     Object {
@@ -502,7 +502,7 @@ Object {
       "datasource": "rubygems",
       "depName": "sqlite3",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 119,
       },
     },
     Object {
@@ -513,7 +513,7 @@ Object {
         "db",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 122,
       },
     },
     Object {
@@ -524,13 +524,13 @@ Object {
         "db",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 123,
       },
     },
     Object {
       "depName": "activerecord-jdbcsqlite3-adapter",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 129,
       },
       "skipReason": "no-version",
     },
@@ -540,7 +540,7 @@ Object {
         "db",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 131,
       },
       "skipReason": "no-version",
     },
@@ -550,7 +550,7 @@ Object {
         "db",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 132,
       },
       "skipReason": "no-version",
     },
@@ -559,7 +559,7 @@ Object {
       "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 135,
       },
     },
     Object {
@@ -570,7 +570,7 @@ Object {
         "db",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 137,
       },
     },
     Object {
@@ -581,7 +581,7 @@ Object {
         "db",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 138,
       },
     },
     Object {
@@ -589,7 +589,7 @@ Object {
       "datasource": "rubygems",
       "depName": "psych",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 146,
       },
     },
     Object {
@@ -597,13 +597,13 @@ Object {
       "datasource": "rubygems",
       "depName": "ruby-oci8",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 152,
       },
     },
     Object {
       "depName": "activerecord-oracle_enhanced-adapter",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 154,
       },
       "skipReason": "no-version",
     },
@@ -645,7 +645,7 @@ Object {
     Object {
       "depName": "some_internal_gem",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 4,
       },
       "registryUrls": Array [
         "https://gems.example.com",
@@ -655,7 +655,7 @@ Object {
     Object {
       "depName": "another_internal_gem",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 5,
       },
       "registryUrls": Array [
         "https://gems.example.com",
@@ -666,14 +666,14 @@ Object {
       "currentValue": "latest",
       "depName": "ruby-debug",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 9,
       },
       "skipReason": "invalid-value",
     },
     Object {
       "depName": "sqlite3",
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 10,
       },
       "skipReason": "no-version",
     },
@@ -684,7 +684,7 @@ Object {
         "optional => true",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 14,
       },
       "skipReason": "no-version",
     },
@@ -695,7 +695,7 @@ Object {
         "optional => true",
       ],
       "managerData": Object {
-        "lineNumber": NaN,
+        "lineNumber": 15,
       },
       "skipReason": "no-version",
     },

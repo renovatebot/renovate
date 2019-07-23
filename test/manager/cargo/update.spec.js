@@ -18,7 +18,7 @@ describe('lib/manager/cargo/update', () => {
   describe('updateDependency()', () => {
     let config;
     beforeEach(() => {
-      config = {};
+      config = { managerData: {} };
     });
     it('returns same for invalid toml', () => {
       const cargotoml = 'invalid toml !#$#';
@@ -34,7 +34,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'libc',
         depType: 'dependencies',
-        nestedVersion: false,
+        managerData: { nestedVersion: false },
         newValue: '=0.2.43',
       };
       expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
@@ -46,7 +46,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'platform-specific-dep',
         depType: 'dependencies',
-        nestedVersion: false,
+        managerData: { nestedVersion: false },
         target: 'foobar',
         newValue: '1.2.3',
       };
@@ -59,7 +59,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'libc',
         depType: 'foobar',
-        nestedVersion: false,
+        managerData: { nestedVersion: false },
         newValue: '1.2.3',
       };
       expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
@@ -71,7 +71,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'does not exist',
         depType: 'dependencies',
-        nestedVersion: false,
+        managerData: { nestedVersion: false },
         newValue: '1.2.3',
       };
       expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
@@ -81,7 +81,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'libc',
         depType: 'dependencies',
-        nestedVersion: false,
+        managerData: { nestedVersion: false },
         newValue: '0.3.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
@@ -92,7 +92,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'same_version_1',
         depType: 'dependencies',
-        nestedVersion: false,
+        managerData: { nestedVersion: false },
         newValue: '1.2.3',
       };
       expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
@@ -103,7 +103,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'pcap-sys',
         depType: 'dependencies',
-        nestedVersion: true,
+        managerData: { nestedVersion: true },
         newValue: '0.2.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
@@ -115,7 +115,7 @@ describe('lib/manager/cargo/update', () => {
         depName: 'winapi',
         target: 'cfg(windows)',
         depType: 'dependencies',
-        nestedVersion: true,
+        managerData: { nestedVersion: true },
         newValue: '0.4.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).not.toBeNull();
@@ -125,7 +125,7 @@ describe('lib/manager/cargo/update', () => {
     it('handles invalid standard tables gracefully', () => {
       const upgrade = {
         depName: 'dep5',
-        nestedVersion: true,
+        managerData: { nestedVersion: true },
         depType: 'dependencies',
         newValue: '2.0.0',
       };
@@ -135,7 +135,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'libc',
         devType: 'dev-dependencies', // Wrong devType
-        nestedVersion: false,
+        managerData: { nestedVersion: false },
         newValue: '0.3.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo1toml);
@@ -144,7 +144,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'libc',
         devType: 'dependencies',
-        nestedVersion: true, // Should be false
+        managerData: { nestedVersion: true }, // Should be false
         newValue: '0.3.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo1toml);
@@ -153,7 +153,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'pcap-sys',
         devType: 'dependencies',
-        nestedVersion: false, // Should be true
+        managerData: { nestedVersion: false }, // Should be true
         newValue: '0.3.0',
       };
       expect(updateDependency(cargo1toml, upgrade)).toEqual(cargo1toml);
@@ -162,7 +162,7 @@ describe('lib/manager/cargo/update', () => {
       const upgrade = {
         depName: 'wasm-bindgen',
         depType: 'dependencies',
-        nestedVersion: false,
+        managerData: { nestedVersion: false },
         target: 'cfg(target_arch = "wasm32")',
         newValue: '0.3.0',
       };
@@ -172,7 +172,7 @@ describe('lib/manager/cargo/update', () => {
     it('updates platform specific table dependency', () => {
       const upgrade = {
         depName: 'web-sys',
-        nestedVersion: true,
+        managerData: { nestedVersion: true },
         depType: 'dependencies',
         target: 'cfg(target_arch = "wasm32")',
         newValue: '0.4.0',

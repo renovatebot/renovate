@@ -104,6 +104,7 @@ const isStable = (version: string) => {
 };
 
 const maxSatisfyingVersion = (versions: string[], range: string) => {
+  // istanbul ignore next
   return versions.reduce((result, version) => {
     if (matches(version, range)) {
       if (!result) return version;
