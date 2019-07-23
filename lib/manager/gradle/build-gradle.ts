@@ -8,7 +8,7 @@ import { BuildDependency } from './gradle-updates-report';
 let variables: Record<string, string> = {};
 
 // TODO: Unify with BuildDependency ?
-export interface GraddleDependency {
+export interface GradleDependency {
   group: string;
   name: string;
   version?: string;
@@ -16,7 +16,7 @@ export interface GraddleDependency {
 
 interface UpdateFunction {
   (
-    dependency: GraddleDependency,
+    dependency: GradleDependency,
     buildGradleContent: string,
     newVersion: string
   ): string;
@@ -24,7 +24,7 @@ interface UpdateFunction {
 
 export function updateGradleVersion(
   buildGradleContent: string,
-  dependency: GraddleDependency,
+  dependency: GradleDependency,
   newVersion: string
 ) {
   if (dependency) {
@@ -59,7 +59,7 @@ export function collectVersionVariables(
   buildGradleContent: string
 ) {
   for (const dep of dependencies) {
-    const dependency: GraddleDependency = {
+    const dependency: GradleDependency = {
       ...dep,
       group: dep.depGroup,
     };
@@ -83,7 +83,7 @@ export function init() {
 }
 
 function updateVersionStringFormat(
-  dependency: GraddleDependency,
+  dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
 ) {
@@ -95,7 +95,7 @@ function updateVersionStringFormat(
 }
 
 function updateVersionMapFormat(
-  dependency: GraddleDependency,
+  dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
 ) {
@@ -107,7 +107,7 @@ function updateVersionMapFormat(
 }
 
 function updateVersionMapVariableFormat(
-  dependency: GraddleDependency,
+  dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
 ) {
@@ -123,7 +123,7 @@ function updateVersionMapVariableFormat(
 }
 
 function updateVersionStringVariableFormat(
-  dependency: GraddleDependency,
+  dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
 ) {
@@ -139,7 +139,7 @@ function updateVersionStringVariableFormat(
 }
 
 function updateVersionExpressionVariableFormat(
-  dependency: GraddleDependency,
+  dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
 ) {
@@ -155,7 +155,7 @@ function updateVersionExpressionVariableFormat(
 }
 
 function updateGlobalVariables(
-  dependency: GraddleDependency,
+  dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
 ) {
@@ -174,7 +174,7 @@ function updateGlobalVariables(
 }
 
 function updatePropertyFileGlobalVariables(
-  dependency: GraddleDependency,
+  dependency: GradleDependency,
   buildGradleContent: string,
   newVersion: string
 ) {
@@ -190,13 +190,13 @@ function updatePropertyFileGlobalVariables(
 }
 
 // https://github.com/patrikerdes/gradle-use-latest-versions-plugin/blob/8cf9c3917b8b04ba41038923cab270d2adda3aa6/src/main/groovy/se/patrikerdes/DependencyUpdate.groovy#L27-L29
-function moduleStringVersionFormatMatch(dependency: GraddleDependency) {
+function moduleStringVersionFormatMatch(dependency: GradleDependency) {
   return new RegExp(
     `(["']${dependency.group}:${dependency.name}:)[^$].*?(([:@].*?)?["'])`
   );
 }
 
-function moduleMapVersionFormatMatch(dependency: GraddleDependency) {
+function moduleMapVersionFormatMatch(dependency: GradleDependency) {
   // prettier-ignore
   return new RegExp(
     `(group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
@@ -205,7 +205,7 @@ function moduleMapVersionFormatMatch(dependency: GraddleDependency) {
   );
 }
 
-function moduleMapVariableVersionFormatMatch(dependency: GraddleDependency) {
+function moduleMapVariableVersionFormatMatch(dependency: GradleDependency) {
   // prettier-ignore
   return new RegExp(
     `group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
@@ -215,7 +215,7 @@ function moduleMapVariableVersionFormatMatch(dependency: GraddleDependency) {
 }
 
 function moduleStringVariableInterpolationVersionFormatMatch(
-  dependency: GraddleDependency
+  dependency: GradleDependency
 ) {
   return new RegExp(
     `["']${dependency.group}:${dependency.name}:\\$([^{].*?)["']`
@@ -223,7 +223,7 @@ function moduleStringVariableInterpolationVersionFormatMatch(
 }
 
 function moduleStringVariableExpressionVersionFormatMatch(
-  dependency: GraddleDependency
+  dependency: GradleDependency
 ) {
   return new RegExp(
     `["']${dependency.group}:${dependency.name}:\\$\{([^{].*?)}["']`

@@ -6,7 +6,7 @@ import {
   init,
   collectVersionVariables,
   updateGradleVersion,
-  GraddleDependency,
+  GradleDependency,
 } from './build-gradle';
 import {
   createRenovateGradlePlugin,
@@ -75,7 +75,7 @@ export function updateDependency(
   );
 }
 
-function buildGradleDependency(config: Upgrade): GraddleDependency {
+function buildGradleDependency(config: Upgrade): GradleDependency {
   return { group: config.depGroup, name: config.name, version: config.version };
 }
 
