@@ -1,12 +1,12 @@
-const fs = require('fs');
-const dcUpdate = require('../../../lib/manager/kubernetes/update');
+import { readFileSync } from 'fs';
+import { updateDependency } from '../../../lib/manager/kubernetes/update';
 
-const yamlFile = fs.readFileSync(
+const yamlFile = readFileSync(
   'test/manager/kubernetes/_fixtures/kubernetes.yaml',
   'utf8'
 );
 
-const arraySyntaxFile = fs.readFileSync(
+const arraySyntaxFile = readFileSync(
   'test/manager/kubernetes/_fixtures/array-syntax.yaml',
   'utf8'
 );
@@ -20,7 +20,7 @@ describe('manager/kubernetes/update', () => {
         newValue: '1.15.1',
         newDigest: 'sha256:abcdefghijklmnop',
       };
-      const res = dcUpdate.updateDependency(yamlFile, upgrade);
+      const res = updateDependency(yamlFile, upgrade);
       expect(res).not.toEqual(yamlFile);
       expect(res.includes(upgrade.newDigest)).toBe(true);
     });
@@ -30,7 +30,7 @@ describe('manager/kubernetes/update', () => {
         depName: 'k8s.gcr.io/kube-proxy-amd64',
         newValue: 'v1.11.1',
       };
-      const res = dcUpdate.updateDependency(yamlFile, upgrade);
+      const res = updateDependency(yamlFile, upgrade);
       expect(res).toEqual(yamlFile);
     });
     it('returns null if mismatch', () => {
@@ -38,11 +38,11 @@ describe('manager/kubernetes/update', () => {
         managerData: { lineNumber: 1 },
         newFrom: 'k8s.gcr.io/kube-proxy-amd64:v1.11.1',
       };
-      const res = dcUpdate.updateDependency(yamlFile, upgrade);
+      const res = updateDependency(yamlFile, upgrade);
       expect(res).toBeNull();
     });
     it('returns null if error', () => {
-      const res = dcUpdate.updateDependency(null, null);
+      const res = updateDependency(null, null);
       expect(res).toBeNull();
     });
     it('replaces image inside YAML array', () => {
@@ -51,7 +51,7 @@ describe('manager/kubernetes/update', () => {
         depName: 'quay.io/external_storage/local-volume-provisioner',
         newValue: 'v2.2.0',
       };
-      const res = dcUpdate.updateDependency(arraySyntaxFile, upgrade);
+      const res = updateDependency(arraySyntaxFile, upgrade);
       expect(res).not.toEqual(arraySyntaxFile);
       expect(res).toMatchSnapshot();
     });

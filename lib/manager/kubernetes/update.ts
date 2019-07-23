@@ -1,11 +1,11 @@
-const { logger } = require('../../logger');
-const { getNewFrom } = require('../dockerfile/update');
+import { logger } from '../../logger';
+import { getNewFrom } from '../dockerfile/update';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade<{ lineNumber: number }>
+): string {
   try {
     const newFrom = getNewFrom(upgrade);
     logger.debug(`kubernetes.updateDependency(): ${newFrom}`);

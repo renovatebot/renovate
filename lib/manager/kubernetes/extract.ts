@@ -1,13 +1,10 @@
-const { logger } = require('../../logger');
-const { getDep } = require('../dockerfile/extract');
+import { logger } from '../../logger';
+import { getDep } from '../dockerfile/extract';
+import { PackageFile, PackageDependency } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(content) {
+export function extractPackageFile(content: string): PackageFile {
   logger.trace('kubernetes.extractPackageFile()');
-  let deps = [];
+  let deps: PackageDependency[] = [];
   let lineNumber = 0;
 
   const isKubernetesManifest =
@@ -20,7 +17,6 @@ function extractPackageFile(content) {
     const match = line.match(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
     if (match) {
       const currentFrom = match[1];
-      /** @type any */
       const dep = getDep(currentFrom);
       logger.debug(
         {

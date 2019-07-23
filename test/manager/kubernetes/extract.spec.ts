@@ -1,24 +1,22 @@
-const fs = require('fs');
-const {
-  extractPackageFile,
-} = require('../../../lib/manager/kubernetes/extract');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/kubernetes/extract';
 
-const kubernetesImagesFile = fs.readFileSync(
+const kubernetesImagesFile = readFileSync(
   'test/manager/kubernetes/_fixtures/kubernetes.yaml',
   'utf8'
 );
 
-const kubernetesConfigMapFile = fs.readFileSync(
+const kubernetesConfigMapFile = readFileSync(
   'test/manager/kubernetes/_fixtures/configmap.yaml',
   'utf8'
 );
 
-const kubernetesArraySyntaxFile = fs.readFileSync(
+const kubernetesArraySyntaxFile = readFileSync(
   'test/manager/kubernetes/_fixtures/array-syntax.yaml',
   'utf8'
 );
 
-const otherYamlFile = fs.readFileSync(
+const otherYamlFile = readFileSync(
   'test/manager/kubernetes/_fixtures/gitlab-ci.yaml',
   'utf8'
 );
