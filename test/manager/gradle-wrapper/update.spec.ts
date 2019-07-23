@@ -1,8 +1,10 @@
-const fs = require('fs');
-const got = require('../../../lib/util/got');
-const dcUpdate = require('../../../lib/manager/gradle-wrapper/update');
+import fs from 'fs';
+import * as dcUpdate from '../../../lib/manager/gradle-wrapper/update';
+import * as _got from '../../../lib/util/got';
 
 jest.mock('../../../lib/util/got');
+
+const got: jest.Mocked<typeof _got> = _got as any;
 
 const propertiesFile2 = fs.readFileSync(
   'test/datasource/gradle-wrapper/_fixtures/gradle-wrapper-2.properties',

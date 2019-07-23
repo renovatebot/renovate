@@ -1,11 +1,8 @@
-const { coerce } = require('semver');
-const { logger } = require('../../logger');
+import { coerce } from 'semver';
+import { logger } from '../../logger';
+import { PackageFile, PackageDependency } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function extractPackageFile(fileContent) {
+export function extractPackageFile(fileContent: string): PackageFile {
   logger.debug('gradle-wrapper.extractPackageFile()');
   const lines = fileContent.split('\n');
 
@@ -15,7 +12,7 @@ function extractPackageFile(fileContent) {
       /^distributionUrl=.*-((\d|\.)+)-(bin|all)\.zip\s*$/
     );
     if (match) {
-      const dependency = {
+      const dependency: PackageDependency = {
         datasource: 'gradleVersion',
         depType: 'gradle-wrapper',
         depName: 'gradle',

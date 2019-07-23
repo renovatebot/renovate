@@ -61,13 +61,18 @@ export interface PackageFile {
 }
 
 export interface Package<T> {
+  checksumLineNumber?: number;
+
   currentValue?: string;
   currentDigest?: string;
   def?: string;
   depName?: string;
   depType?: string;
 
+  gradleWrapperType?: string;
+
   managerData?: T;
+  lineNumber?: number;
   repo?: string;
   target?: string;
   versionScheme?: string;
@@ -90,8 +95,10 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
 }
 
 export interface Upgrade<T = Record<string, any>> extends Package<T> {
+  checksumUrl?: string;
   currentVersion?: string;
   depGroup?: string;
+  downloadUrl?: string;
   name?: string;
   newDigest?: string;
   newFrom?: string;
@@ -139,5 +146,5 @@ export interface ManagerApi {
     config: UpdateArtifactsConfig
   ): Result<UpdateArtifactsResult[]>;
 
-  updateDependency(fileContent: string, upgrade: Upgrade): string;
+  updateDependency(fileContent: string, upgrade: Upgrade): Result<string>;
 }

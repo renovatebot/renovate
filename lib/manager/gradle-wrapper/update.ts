@@ -1,11 +1,11 @@
-const got = require('../../util/got');
-const { logger } = require('../../logger');
+import got from '../../util/got';
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-async function updateDependency(fileContent, upgrade) {
+export async function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade
+): Promise<string> {
   try {
     logger.debug(upgrade, 'gradle-wrapper.updateDependency()');
     const lines = fileContent.split('\n');
@@ -35,11 +35,11 @@ async function updateDependency(fileContent, upgrade) {
   }
 }
 
-function replaceType(url) {
+function replaceType(url: string) {
   return url.replace('bin', 'all');
 }
 
-async function getChecksum(url) {
+async function getChecksum(url: string) {
   try {
     const response = await got(url);
     return response.body;
