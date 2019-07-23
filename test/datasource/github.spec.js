@@ -61,6 +61,14 @@ describe('datasource/github', () => {
     });
   });
   describe('getPreset()', () => {
+    it('passes up platform-error', async () => {
+      got.mockImplementationOnce(() => {
+        throw new Error('platform-error');
+      });
+      await expect(github.getPreset('some/repo')).rejects.toThrow(
+        'platform-error'
+      );
+    });
     it('tries default then renovate', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
