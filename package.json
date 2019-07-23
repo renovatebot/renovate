@@ -167,6 +167,7 @@
     "@types/got": "9.6.2",
     "@types/jest": "24.0.15",
     "@types/js-yaml": "3.12.1",
+    "@types/lodash": "4.14.136",
     "@types/luxon": "1.15.2",
     "@types/node": "11.13.18",
     "@types/parse-link-header": "1.0.0",
