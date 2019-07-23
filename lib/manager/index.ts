@@ -65,13 +65,13 @@ export function extractAllPackageFiles(
   config: ManagerConfig,
   files: string[]
 ) {
-  return get(manager, 'extractAllPackageFiles')
+  return managers[manager] && get(manager, 'extractAllPackageFiles')
     ? get(manager, 'extractAllPackageFiles')(config, files)
     : null;
 }
 
 export function getPackageUpdates(manager: string, config: ManagerConfig) {
-  return get(manager, 'getPackageUpdates')
+  return managers[manager] && get(manager, 'getPackageUpdates')
     ? get(manager, 'getPackageUpdates')(config)
     : null;
 }
@@ -82,7 +82,7 @@ export function extractPackageFile(
   fileName?: string,
   config?: ManagerConfig
 ) {
-  return get(manager, 'extractPackageFile')
+  return managers[manager] && get(manager, 'extractPackageFile')
     ? get(manager, 'extractPackageFile')(content, fileName, config)
     : null;
 }
