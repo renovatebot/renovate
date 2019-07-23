@@ -1,5 +1,5 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/pipenv/extract');
+import fs from 'fs';
+import { extractPackageFile } from '../../../lib/manager/pipenv/extract';
 
 const pipfile1 = fs.readFileSync(
   'test/manager/pipenv/_fixtures/Pipfile1',

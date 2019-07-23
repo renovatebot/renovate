@@ -1,24 +1,20 @@
-const fs = require('fs-extra');
-const upath = require('upath');
-const { exec } = require('../../util/exec');
-const { getChildProcessEnv } = require('../../util/env');
-const { logger } = require('../../logger');
+import { ensureDir, outputFile, readFile } from 'fs-extra';
+import { join, dirname } from 'upath';
+import { exec } from '../../util/exec';
+import { getChildProcessEnv } from '../../util/env';
+import { logger } from '../../logger';
+import { UpdateArtifactsResult, UpdateArtifactsConfig } from '../common';
 
-module.exports = {
-  updateArtifacts,
-};
-
-async function updateArtifacts(
-  pipfileName,
-  updatedDeps,
-  newPipfileContent,
-  config
-) {
+export async function updateArtifacts(
+  pipfileName: string,
+  _updatedDeps: string[],
+  newPipfileContent: string,
+  config: UpdateArtifactsConfig
+): Promise<UpdateArtifactsResult[]> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
   process.env.PIPENV_CACHE_DIR =
-    process.env.PIPENV_CACHE_DIR ||
-    upath.join(config.cacheDir, './others/pipenv');
-  await fs.ensureDir(process.env.PIPENV_CACHE_DIR);
+    process.env.PIPENV_CACHE_DIR || join(config.cacheDir, './others/pipenv');
+  await ensureDir(process.env.PIPENV_CACHE_DIR);
   logger.debug('Using pipenv cache ' + process.env.PIPENV_CACHE_DIR);
   const lockFileName = pipfileName + '.lock';
   const existingLockFileContent = await platform.getFile(lockFileName);
@@ -26,16 +22,16 @@ async function updateArtifacts(
     logger.debug('No Pipfile.lock found');
     return null;
   }
-  const cwd = upath.join(config.localDir, upath.dirname(pipfileName));
-  let stdout;
-  let stderr;
+  const cwd = join(config.localDir, dirname(pipfileName));
+  let stdout: string;
+  let stderr: string;
   try {
-    const localPipfileFileName = upath.join(config.localDir, pipfileName);
-    await fs.outputFile(localPipfileFileName, newPipfileContent);
-    const localLockFileName = upath.join(config.localDir, lockFileName);
+    const localPipfileFileName = join(config.localDir, pipfileName);
+    await outputFile(localPipfileFileName, newPipfileContent);
+    const localLockFileName = join(config.localDir, lockFileName);
     const env = getChildProcessEnv(['LC_ALL', 'LANG', 'PIPENV_CACHE_DIR']);
     const startTime = process.hrtime();
-    let cmd;
+    let cmd: string;
     if (config.binarySource === 'docker') {
       logger.info('Running pipenv via docker');
       cmd = `docker run --rm `;
@@ -71,7 +67,7 @@ async function updateArtifacts(
       {
         file: {
           name: lockFileName,
-          contents: await fs.readFile(localLockFileName, 'utf8'),
+          contents: await readFile(localLockFileName, 'utf8'),
         },
       },
     ];

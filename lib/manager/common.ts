@@ -75,6 +75,7 @@ export interface Package<T> {
   lineNumber?: number;
   managerData?: T;
   ownerName?: string;
+  pipenvNestedVersion?: boolean;
   repo?: string;
   repoName?: string;
   sha256?: string;

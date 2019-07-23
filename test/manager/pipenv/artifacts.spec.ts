@@ -1,15 +1,15 @@
+import _fs from 'fs-extra';
+import { exec as _exec } from '../../../lib/util/exec';
+import * as pipenv from '../../../lib/manager/pipenv/artifacts';
+
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 jest.mock('../../../lib/util/host-rules');
 
-/** @type any */
-const fs = require('fs-extra');
-/** @type any */
-const { exec } = require('../../../lib/util/exec');
-const pipenv = require('../../../lib/manager/pipenv/artifacts');
+const fs: any = _fs;
+const exec: any = _exec;
 
-/** @type any */
-const platform = global.platform;
+const platform: any = global.platform;
 
 const config = {
   localDir: '/tmp/github/some/repo',

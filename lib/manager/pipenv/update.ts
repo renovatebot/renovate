@@ -1,18 +1,20 @@
-const _ = require('lodash');
-const toml = require('toml');
-const { logger } = require('../../logger');
-
-module.exports = {
-  updateDependency,
-};
+import { isEqual } from 'lodash';
+import { parse } from 'toml';
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
 // Return true if the match string is found at index in content
-function matchAt(content, index, match) {
+function matchAt(content: string, index: number, match: string) {
   return content.substring(index, index + match.length) === match;
 }
 
 // Replace oldString with newString at location index of content
-function replaceAt(content, index, oldString, newString) {
+function replaceAt(
+  content: string,
+  index: number,
+  oldString: string,
+  newString: string
+) {
   logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
     content.substr(0, index) +
@@ -21,13 +23,16 @@ function replaceAt(content, index, oldString, newString) {
   );
 }
 
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade
+): string {
   try {
     const { depType, depName, newValue, managerData = {} } = upgrade;
     const { nestedVersion } = managerData;
     logger.debug(`pipenv.updateDependency(): ${newValue}`);
-    const parsedContents = toml.parse(fileContent);
-    let oldVersion;
+    const parsedContents = parse(fileContent);
+    let oldVersion: string;
     if (nestedVersion) {
       oldVersion = parsedContents[depType][depName].version;
     } else {
@@ -58,7 +63,7 @@ function updateDependency(fileContent, upgrade) {
           newString
         );
         // Compare the parsed toml structure of old and new
-        if (_.isEqual(parsedContents, toml.parse(testContent))) {
+        if (isEqual(parsedContents, parse(testContent))) {
           newFileContent = testContent;
           break;
         } else {

@@ -1,30 +1,49 @@
 import is from '@sindresorhus/is';
-
-const toml = require('toml');
+import toml from 'toml';
+import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
+import { logger } from '../../logger';
+import { PackageFile, PackageDependency } from '../common';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
-const rangePattern = require('@renovate/pep440/lib/specifier').RANGE_PATTERN;
-const { logger } = require('../../logger');
+const rangePattern = RANGE_PATTERN;
 
 const specifierPartPattern = `\\s*${rangePattern.replace(
   /\?<\w+>/g,
   '?:'
 )}\\s*`;
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
+interface PipSource {
+  name: string;
+  url: string;
+}
 
-export { extractPackageFile };
+interface PipFile {
+  source: PipSource[];
 
-function extractPackageFile(content) {
+  packages?: Record<string, PipRequirement>;
+  'dev-packages'?: Record<string, PipRequirement>;
+}
+
+interface PipRequirement {
+  index?: string;
+  version?: string;
+  path?: string;
+  file?: string;
+  git?: string;
+}
+
+export function extractPackageFile(content: string): PackageFile {
   logger.debug('pipenv.extractPackageFile()');
-  let pipfile;
+
+  let pipfile: PipFile;
   try {
     pipfile = toml.parse(content);
   } catch (err) {
     logger.debug({ err }, 'Error parsing Pipfile');
     return null;
   }
-  const res = {};
+  const res: PackageFile = { deps: [] };
   if (pipfile.source) {
     res.registryUrls = pipfile.source.map(source => source.url);
   }
@@ -39,7 +58,10 @@ function extractPackageFile(content) {
   return null;
 }
 
-function extractFromSection(pipfile, section) {
+function extractFromSection(
+  pipfile: PipFile,
+  section: 'packages' | 'dev-packages'
+): PackageDependency[] {
   if (!(section in pipfile)) {
     return [];
   }
@@ -49,9 +71,9 @@ function extractFromSection(pipfile, section) {
   const deps = Object.entries(pipfileSection)
     .map(x => {
       const [depName, requirements] = x;
-      let currentValue;
-      let nestedVersion;
-      let skipReason;
+      let currentValue: string;
+      let nestedVersion: boolean;
+      let skipReason: string;
       if (requirements.git) {
         skipReason = 'git-dependency';
       } else if (requirements.file) {
@@ -85,7 +107,7 @@ function extractFromSection(pipfile, section) {
           skipReason = 'invalid-version';
         }
       }
-      const dep = {
+      const dep: PackageDependency = {
         depType: section,
         depName,
         managerData: {},
