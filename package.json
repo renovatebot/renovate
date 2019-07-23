@@ -99,7 +99,6 @@
     "cacache": "11.3.3",
     "chalk": "2.4.2",
     "changelog-filename-regex": "2.0.1",
-    "child-process-promise": "2.2.1",
     "clean-git-ref": "2.0.1",
     "commander": "2.20.0",
     "conventional-commits-detector": "1.0.2",
