@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 
-const minimatch = require('minimatch');
-const path = require('path');
-const upath = require('upath');
-const { logger } = require('../../../logger');
+import minimatch from 'minimatch';
+import path from 'path';
+import upath from 'upath';
+import { logger } from '../../../logger';
 
-function matchesAnyPattern(val, patterns) {
+function matchesAnyPattern(val: string, patterns: string[]) {
   const res = patterns.some(
     pattern => pattern === val + '/' || minimatch(val, pattern, { dot: true })
   );

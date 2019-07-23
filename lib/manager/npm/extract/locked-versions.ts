@@ -5,14 +5,9 @@ import { getYarnLock } from './yarn';
 import { PackageFile } from '../../common';
 
 type PackageFiles = (PackageFile & {
-  npmLock: string;
-  yarnLock: string;
+  npmLock?: string;
+  yarnLock?: string;
   yarnIntegrity?: boolean;
-  deps: {
-    depName: string;
-    currentValue: string;
-    lockedVersion?: string;
-  }[];
   pnpmShrinkwrap?: any;
 })[];
 
