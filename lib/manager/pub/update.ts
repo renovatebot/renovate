@@ -1,29 +1,29 @@
-const yaml = require('js-yaml');
+import { load } from 'js-yaml';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade
+): string {
   const { depName, depType, currentValue, newValue } = upgrade;
 
   if (currentValue === newValue) return fileContent;
 
   const sectionBeginRegExp = new RegExp(`^${depType}:`);
-  const isSectionBegin = line => sectionBeginRegExp.test(line);
-  const isSectionEnd = line => /^[^\s]/.test(line);
+  const isSectionBegin = (line: string) => sectionBeginRegExp.test(line);
+  const isSectionEnd = (line: string) => /^[^\s]/.test(line);
 
   const simpleDepRegExp = new RegExp(`^\\s+${depName}:\\s*[^\\s]+\\s*$`);
-  const isOneLineDep = line => simpleDepRegExp.test(line);
+  const isOneLineDep = (line: string) => simpleDepRegExp.test(line);
 
   const multilineDepRegExp = new RegExp(`^\\s+${depName}:\\s*$`);
-  const isMultilineDepRegExp = line => multilineDepRegExp.test(line);
+  const isMultilineDepRegExp = (line: string) => multilineDepRegExp.test(line);
 
   const versionRegExp = new RegExp('^\\s+version:\\s*[^\\s]+\\s*$');
-  const isVersionLine = line => versionRegExp.test(line);
+  const isVersionLine = (line: string) => versionRegExp.test(line);
 
-  const isValidVersion = line => {
-    const version = yaml.load(line.replace(/^.*:\s*/, '')).toString();
+  const isValidVersion = (line: string) => {
+    const version = load(line.replace(/^.*:\s*/, '')).toString();
     return version === currentValue;
   };
 

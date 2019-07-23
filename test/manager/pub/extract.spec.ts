@@ -1,12 +1,12 @@
-const fs = require('fs');
-const { extractPackageFile } = require('../../../lib/manager/pub');
+import { readFileSync } from 'fs';
+import { extractPackageFile } from '../../../lib/manager/pub';
 
-const brokenYaml = fs.readFileSync(
+const brokenYaml = readFileSync(
   'test/manager/pub/_fixtures/update.yaml',
   'utf8'
 );
 
-const packageFile = fs.readFileSync(
+const packageFile = readFileSync(
   'test/manager/pub/_fixtures/extract.yaml',
   'utf8'
 );

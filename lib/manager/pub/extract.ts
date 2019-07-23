@@ -1,12 +1,12 @@
-const yaml = require('js-yaml');
-const npm = require('../../versioning/npm/index');
-const { logger } = require('../../logger');
+import { safeLoad } from 'js-yaml';
+import { isValid } from '../../versioning/npm/index';
+import { logger } from '../../logger';
+import { PackageDependency, PackageFile } from '../common';
 
-module.exports = {
-  extractPackageFile,
-};
-
-function getDeps(depsObj, preset = {}) {
+function getDeps(
+  depsObj: { [x: string]: any },
+  preset: { depType?: string } = {}
+): PackageDependency[] {
   if (!depsObj) return [];
   return Object.keys(depsObj).reduce((acc, depName) => {
     if (depName === 'meta') return acc;
@@ -14,16 +14,15 @@ function getDeps(depsObj, preset = {}) {
     const section = depsObj[depName];
     let currentValue = null;
 
-    if (section && npm.isValid(section.toString())) {
+    if (section && isValid(section.toString())) {
       currentValue = section.toString();
     }
 
-    if (section.version && npm.isValid(section.version.toString())) {
+    if (section.version && isValid(section.version.toString())) {
       currentValue = section.version.toString();
     }
 
-    /** @type any */
-    const dep = { ...preset, depName, currentValue };
+    const dep: PackageDependency = { ...preset, depName, currentValue };
     if (!currentValue) {
       dep.skipReason = 'not-a-version';
     }
@@ -32,9 +31,12 @@ function getDeps(depsObj, preset = {}) {
   }, []);
 }
 
-function extractPackageFile(content, packageFile) {
+export function extractPackageFile(
+  content: string,
+  packageFile: string
+): PackageFile {
   try {
-    const doc = yaml.safeLoad(content);
+    const doc = safeLoad(content);
     const deps = [
       ...getDeps(doc.dependencies, {
         depType: 'dependencies',

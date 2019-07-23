@@ -1,7 +1,7 @@
-const fs = require('fs');
-const { updateDependency } = require('../../../lib/manager/pub');
+import { readFileSync } from 'fs';
+import { updateDependency } from '../../../lib/manager/pub';
 
-const fileContent = fs.readFileSync(
+const fileContent = readFileSync(
   'test/manager/pub/_fixtures/update.yaml',
   'utf8'
 );
