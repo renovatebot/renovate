@@ -5,7 +5,7 @@ import { PackageDependency, PackageFile } from '../common';
 
 function getDeps(
   depsObj: { [x: string]: any },
-  preset: { depType?: string } = {}
+  preset: { depType: string }
 ): PackageDependency[] {
   if (!depsObj) return [];
   return Object.keys(depsObj).reduce((acc, depName) => {
