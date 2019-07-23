@@ -1,7 +1,8 @@
-const { exec } = require('child-process-promise');
+/** @type any */
+const { exec } = require('../../../../lib/util/exec');
 const lernaHelper = require('../../../../lib/manager/npm/post-update/lerna');
 
-jest.mock('child-process-promise');
+jest.mock('../../../../lib/util/exec');
 
 /** @type any */
 const platform = global.platform;
