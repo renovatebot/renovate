@@ -162,6 +162,7 @@
     "@babel/preset-env": "7.5.5",
     "@babel/preset-typescript": "7.3.3",
     "@types/bunyan": "1.8.6",
+    "@types/chai": "4.1.7",
     "@types/convert-hrtime": "2.0.0",
     "@types/fs-extra": "8.0.0",
     "@types/got": "9.6.2",
