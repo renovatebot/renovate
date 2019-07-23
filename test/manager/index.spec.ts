@@ -28,4 +28,16 @@ describe('manager', () => {
       ).not.toBeNull();
     });
   });
+
+  describe('extractPackageFile()', () => {
+    it('returns null', () => {
+      expect(manager.extractPackageFile('unknown', null)).toBeNull();
+    });
+  });
+
+  describe('getPackageUpdates', () => {
+    it('returns null', () => {
+      expect(manager.getPackageUpdates('unknown', null)).toBeNull();
+    });
+  });
 });
