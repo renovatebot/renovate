@@ -4,7 +4,30 @@ import { logger } from '../../logger';
 
 const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
 
-async function createRenovateGradlePlugin(localDir) {
+interface GraddleProject {
+  project: string;
+  repositories: string[];
+  dependencies: GraddleModule[];
+}
+
+interface GraddleModule {
+  name: string;
+  group: string;
+  version: string;
+}
+
+type GraddleModuleWithRepos = GraddleModule & { repos: string[] };
+
+// TODO: Unify with GraddleDependency ?
+export interface BuildDependency {
+  name: string;
+  depGroup: string;
+  depName?: string;
+  currentValue?: string;
+  registryUrls?: string[];
+}
+
+async function createRenovateGradlePlugin(localDir: string) {
   const content = `
 import groovy.json.JsonOutput
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
@@ -43,7 +66,7 @@ gradle.buildFinished {
   await writeFile(gradleInitFile, content);
 }
 
-async function extractDependenciesFromUpdatesReport(localDir) {
+async function extractDependenciesFromUpdatesReport(localDir: string) {
   const gradleProjectConfigurations = await readGradleReport(localDir);
 
   const dependencies = gradleProjectConfigurations
@@ -54,7 +77,7 @@ async function extractDependenciesFromUpdatesReport(localDir) {
   return dependencies.map(gradleModule => buildDependency(gradleModule));
 }
 
-async function readGradleReport(localDir) {
+async function readGradleReport(localDir: string): Promise<GraddleProject[]> {
   const renovateReportFilename = join(
     localDir,
     GRADLE_DEPENDENCY_REPORT_FILENAME
@@ -72,7 +95,9 @@ async function readGradleReport(localDir) {
   }
 }
 
-function mergeDependenciesWithRepositories(project) {
+function mergeDependenciesWithRepositories(
+  project: GraddleProject
+): GraddleModuleWithRepos[] {
   if (!project.dependencies) {
     return [];
   }
@@ -82,12 +107,18 @@ function mergeDependenciesWithRepositories(project) {
   }));
 }
 
-function flatternDependencies(accumulator, currentValue) {
+function flatternDependencies(
+  accumulator: GraddleModuleWithRepos[],
+  currentValue: GraddleModuleWithRepos[]
+) {
   accumulator.push(...currentValue);
   return accumulator;
 }
 
-function combineReposOnDuplicatedDependencies(accumulator, currentValue) {
+function combineReposOnDuplicatedDependencies(
+  accumulator: GraddleModuleWithRepos[],
+  currentValue: GraddleModuleWithRepos
+): GraddleModuleWithRepos[] {
   const existingDependency = accumulator.find(
     dep => dep.name === currentValue.name && dep.group === currentValue.group
   );
@@ -102,7 +133,9 @@ function combineReposOnDuplicatedDependencies(accumulator, currentValue) {
   return accumulator;
 }
 
-function buildDependency(gradleModule) {
+function buildDependency(
+  gradleModule: GraddleModuleWithRepos
+): BuildDependency {
   return {
     name: gradleModule.name,
     depGroup: gradleModule.group,

@@ -1,13 +1,34 @@
+import { BuildDependency } from './gradle-updates-report';
+
 /**
  * Functions adapted/ported from https://github.com/patrikerdes/gradle-use-latest-versions-plugin
  * gradle-use-latest-versions-plugin is licensed under MIT and Copyright (c) 2018 Patrik Erdes
  */
 
-let variables = {};
+let variables: Record<string, string> = {};
 
-function updateGradleVersion(buildGradleContent, dependency, newVersion) {
+// TODO: Unify with BuildDependency ?
+export interface GraddleDependency {
+  group: string;
+  name: string;
+  version?: string;
+}
+
+interface UpdateFunction {
+  (
+    dependency: GraddleDependency,
+    buildGradleContent: string,
+    newVersion: string
+  ): string;
+}
+
+export function updateGradleVersion(
+  buildGradleContent: string,
+  dependency: GraddleDependency,
+  newVersion: string
+) {
   if (dependency) {
-    const updateFunctions = [
+    const updateFunctions: UpdateFunction[] = [
       updateVersionStringFormat,
       updateVersionMapFormat,
       updateVersionMapVariableFormat,
@@ -33,9 +54,12 @@ function updateGradleVersion(buildGradleContent, dependency, newVersion) {
   return buildGradleContent;
 }
 
-function collectVersionVariables(dependencies, buildGradleContent) {
+export function collectVersionVariables(
+  dependencies: BuildDependency[],
+  buildGradleContent: string
+) {
   for (const dep of dependencies) {
-    const dependency = {
+    const dependency: GraddleDependency = {
       ...dep,
       group: dep.depGroup,
     };
@@ -54,11 +78,15 @@ function collectVersionVariables(dependencies, buildGradleContent) {
   }
 }
 
-function init() {
+export function init() {
   variables = {};
 }
 
-function updateVersionStringFormat(dependency, buildGradleContent, newVersion) {
+function updateVersionStringFormat(
+  dependency: GraddleDependency,
+  buildGradleContent: string,
+  newVersion: string
+) {
   const regex = moduleStringVersionFormatMatch(dependency);
   if (buildGradleContent.match(regex)) {
     return buildGradleContent.replace(regex, `$1${newVersion}$2`);
@@ -66,7 +94,11 @@ function updateVersionStringFormat(dependency, buildGradleContent, newVersion) {
   return null;
 }
 
-function updateVersionMapFormat(dependency, buildGradleContent, newVersion) {
+function updateVersionMapFormat(
+  dependency: GraddleDependency,
+  buildGradleContent: string,
+  newVersion: string
+) {
   const regex = moduleMapVersionFormatMatch(dependency);
   if (buildGradleContent.match(regex)) {
     return buildGradleContent.replace(regex, `$1${newVersion}$2`);
@@ -75,9 +107,9 @@ function updateVersionMapFormat(dependency, buildGradleContent, newVersion) {
 }
 
 function updateVersionMapVariableFormat(
-  dependency,
-  buildGradleContent,
-  newVersion
+  dependency: GraddleDependency,
+  buildGradleContent: string,
+  newVersion: string
 ) {
   const regex = moduleMapVariableVersionFormatMatch(dependency);
   const match = buildGradleContent.match(regex);
@@ -91,9 +123,9 @@ function updateVersionMapVariableFormat(
 }
 
 function updateVersionStringVariableFormat(
-  dependency,
-  buildGradleContent,
-  newVersion
+  dependency: GraddleDependency,
+  buildGradleContent: string,
+  newVersion: string
 ) {
   const regex = moduleStringVariableInterpolationVersionFormatMatch(dependency);
   const match = buildGradleContent.match(regex);
@@ -107,9 +139,9 @@ function updateVersionStringVariableFormat(
 }
 
 function updateVersionExpressionVariableFormat(
-  dependency,
-  buildGradleContent,
-  newVersion
+  dependency: GraddleDependency,
+  buildGradleContent: string,
+  newVersion: string
 ) {
   const regex = moduleStringVariableExpressionVersionFormatMatch(dependency);
   const match = buildGradleContent.match(regex);
@@ -122,7 +154,11 @@ function updateVersionExpressionVariableFormat(
   return null;
 }
 
-function updateGlobalVariables(dependency, buildGradleContent, newVersion) {
+function updateGlobalVariables(
+  dependency: GraddleDependency,
+  buildGradleContent: string,
+  newVersion: string
+) {
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
     const regex = variableDefinitionFormatMatch(variable);
@@ -138,9 +174,9 @@ function updateGlobalVariables(dependency, buildGradleContent, newVersion) {
 }
 
 function updatePropertyFileGlobalVariables(
-  dependency,
-  buildGradleContent,
-  newVersion
+  dependency: GraddleDependency,
+  buildGradleContent: string,
+  newVersion: string
 ) {
   const variable = variables[`${dependency.group}:${dependency.name}`];
   if (variable) {
@@ -154,13 +190,13 @@ function updatePropertyFileGlobalVariables(
 }
 
 // https://github.com/patrikerdes/gradle-use-latest-versions-plugin/blob/8cf9c3917b8b04ba41038923cab270d2adda3aa6/src/main/groovy/se/patrikerdes/DependencyUpdate.groovy#L27-L29
-function moduleStringVersionFormatMatch(dependency) {
+function moduleStringVersionFormatMatch(dependency: GraddleDependency) {
   return new RegExp(
     `(["']${dependency.group}:${dependency.name}:)[^$].*?(([:@].*?)?["'])`
   );
 }
 
-function moduleMapVersionFormatMatch(dependency) {
+function moduleMapVersionFormatMatch(dependency: GraddleDependency) {
   // prettier-ignore
   return new RegExp(
     `(group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
@@ -169,7 +205,7 @@ function moduleMapVersionFormatMatch(dependency) {
   );
 }
 
-function moduleMapVariableVersionFormatMatch(dependency) {
+function moduleMapVariableVersionFormatMatch(dependency: GraddleDependency) {
   // prettier-ignore
   return new RegExp(
     `group\\s*:\\s*["']${dependency.group}["']\\s*,\\s*` +
@@ -178,20 +214,22 @@ function moduleMapVariableVersionFormatMatch(dependency) {
   );
 }
 
-function moduleStringVariableInterpolationVersionFormatMatch(dependency) {
+function moduleStringVariableInterpolationVersionFormatMatch(
+  dependency: GraddleDependency
+) {
   return new RegExp(
     `["']${dependency.group}:${dependency.name}:\\$([^{].*?)["']`
   );
 }
 
-function moduleStringVariableExpressionVersionFormatMatch(dependency) {
+function moduleStringVariableExpressionVersionFormatMatch(
+  dependency: GraddleDependency
+) {
   return new RegExp(
     `["']${dependency.group}:${dependency.name}:\\$\{([^{].*?)}["']`
   );
 }
 
-function variableDefinitionFormatMatch(variable) {
+function variableDefinitionFormatMatch(variable: string) {
   return new RegExp(`(${variable}\\s*=\\s*?["'])(.*)(["'])`);
 }
-
-export { updateGradleVersion, collectVersionVariables, init };

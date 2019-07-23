@@ -6,12 +6,13 @@ import {
   init,
   collectVersionVariables,
   updateGradleVersion,
+  GraddleDependency,
 } from './build-gradle';
 import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
-import { PackageFile, ManagerConfig } from '../common';
+import { PackageFile, ManagerConfig, Upgrade } from '../common';
 
 const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
@@ -60,7 +61,10 @@ export async function extractAllPackageFiles(
   return gradleFiles;
 }
 
-export function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade
+): string {
   // prettier-ignore
   logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentVersion} ==> ${upgrade.newValue}`);
 
@@ -71,12 +75,12 @@ export function updateDependency(fileContent, upgrade) {
   );
 }
 
-function buildGradleDependency(config) {
+function buildGradleDependency(config: Upgrade): GraddleDependency {
   return { group: config.depGroup, name: config.name, version: config.version };
 }
 
 async function executeGradle(config: ManagerConfig) {
-  let stdout: string | number;
+  let stdout: string;
   let stderr: string;
   const gradleTimeout =
     config.gradle && config.gradle.timeout
@@ -109,8 +113,8 @@ async function executeGradle(config: ManagerConfig) {
   logger.info('Gradle report complete');
 }
 
-async function getGradleCommandLine(config) {
-  let cmd;
+async function getGradleCommandLine(config: ManagerConfig) {
+  let cmd: string;
   const gradlewExists = await exists(config.localDir + '/gradlew');
   if (config.binarySource === 'docker') {
     cmd = `docker run --rm -v ${config.localDir}:${config.localDir} -w ${config.localDir} renovate/gradle gradle`;

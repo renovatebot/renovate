@@ -1,23 +1,23 @@
-const gradle = require('../../../lib/manager/gradle/build-gradle');
+import {
+  init,
+  updateGradleVersion,
+  collectVersionVariables,
+} from '../../../lib/manager/gradle/build-gradle';
 
 describe('lib/manager/gradle/updateGradleVersion', () => {
   beforeEach(() => {
-    gradle.init();
+    init();
   });
 
   it('returns the same file if dependency is null', () => {
     const gradleFile = "runtime('mysql:mysql-connector-java:6.0.5')";
-    const updatedGradleFile = gradle.updateGradleVersion(
-      gradleFile,
-      null,
-      null
-    );
+    const updatedGradleFile = updateGradleVersion(gradleFile, null, null);
     expect(updatedGradleFile).toEqual(gradleFile);
   });
 
   it('returns the same file if version is not found', () => {
     const gradleFile = "runtime('mysql:mysql-connector-java:6.0.5')";
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleFile,
       { group: 'org.codehaus.groovy', name: 'groovy', version: '2.4.9' },
       '7.0.0'
@@ -27,7 +27,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
 
   it('returns a file updated if the version is found', () => {
     const gradleFile = "runtime (  'mysql:mysql-connector-java:6.0.5'  )";
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleFile,
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
@@ -40,7 +40,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
   it('should returns a file updated with keeping an extension if the version is found', () => {
     const gradleFile =
       "runtime (  'com.crashlytics.sdk.android:crashlytics:2.8.0@aar'  )";
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleFile,
       {
         group: 'com.crashlytics.sdk.android',
@@ -56,7 +56,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
 
   it('should returns a file updated with keeping a classifier and an extension if the version is found', () => {
     const gradleFile = "runtime (  'junit:junit:4.0:javadoc@jar'  )";
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleFile,
       { group: 'junit', name: 'junit', version: '4.0' },
       '5.0'
@@ -70,7 +70,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     const gradleFile = `compile group  : 'mysql'               ,
                name   : 'mysql-connector-java',
                version: '6.0.5'`;
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleFile,
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
@@ -86,7 +86,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     const gradleFile = `String mysqlVersion= "6.0.5"
     runtime (  "mysql:mysql-connector-java:$mysqlVersion"  )
     `;
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleFile,
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
@@ -100,7 +100,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     const gradleFile = `String mysqlVersion = "6.0.5"
     runtime (  "mysql:mysql-connector-java:\${mysqlVersion}"  )
     `;
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleFile,
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
@@ -116,7 +116,7 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
                name           : 'mysql-connector-java',
                version        : mysqlVersion
                `;
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleFile,
       { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
       '7.0.0'
@@ -139,10 +139,10 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
       name: 'mysql-connector-java',
       version: '6.0.5',
     };
-    gradle.collectVersionVariables([mysqlDependency], gradleFile);
+    collectVersionVariables([mysqlDependency], gradleFile);
 
     const gradleWithVersionFile = 'String mysqlVersion = "6.0.5"';
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleWithVersionFile,
       mysqlDependency,
       '7.0.0'
@@ -159,10 +159,10 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
       name: 'mysql-connector-java',
       version: '6.0.5',
     };
-    gradle.collectVersionVariables([mysqlDependency], gradleFile);
+    collectVersionVariables([mysqlDependency], gradleFile);
 
     const propertyFile = 'mysqlVersion=6.0.5';
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       propertyFile,
       mysqlDependency,
       '7.0.0'
@@ -181,10 +181,10 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
       name: 'mysql-connector-java',
       version: '6.0.5',
     };
-    gradle.collectVersionVariables([mysqlDependency], gradleFile);
+    collectVersionVariables([mysqlDependency], gradleFile);
 
     const gradleWithVersionFile = 'String mysqlVersion = "6.0.5"';
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleWithVersionFile,
       mysqlDependency,
       '7.0.0'
@@ -201,10 +201,10 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
       name: 'mysql-connector-java',
       version: '6.0.5',
     };
-    gradle.collectVersionVariables([mysqlDependency], gradleFile);
+    collectVersionVariables([mysqlDependency], gradleFile);
 
     const gradleWithVersionFile = 'String mysqlVersion = "6.0.5"';
-    const updatedGradleFile = gradle.updateGradleVersion(
+    const updatedGradleFile = updateGradleVersion(
       gradleWithVersionFile,
       mysqlDependency,
       '7.0.0'

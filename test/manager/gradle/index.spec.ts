@@ -1,17 +1,15 @@
+import { toUnix } from 'upath';
+import _fs from 'fs-extra';
+import fsReal from 'fs';
+import { exec as _exec } from '../../../lib/util/exec';
+import * as manager from '../../../lib/manager/gradle';
+
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 
-const { toUnix } = require('upath');
-/** @type any */
-const fs = require('fs-extra');
-const fsReal = require('fs');
-/** @type any */
-const { exec } = require('../../../lib/util/exec');
-
-const manager = require('../../../lib/manager/gradle/index').default;
-
-/** @type any */
-const platform = global.platform;
+const _platform: jest.Mocked<typeof global.platform> = global.platform as any;
+const fs: jest.Mocked<typeof _fs> = _fs as any;
+const exec: jest.Mock<typeof _exec> = _exec as any;
 
 const config = {
   localDir: 'localDir',
@@ -28,11 +26,11 @@ const updatesDependenciesReport = fsReal.readFileSync(
 describe('manager/gradle', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    fs.readFile.mockReturnValue(updatesDependenciesReport);
-    fs.mkdir.mockReturnValue(true);
-    fs.exists.mockReturnValue(true);
-    exec.mockReturnValue({ stdout: 'gradle output', stderr: '' });
-    platform.getFile.mockReturnValue('some content');
+    fs.readFile.mockResolvedValue(updatesDependenciesReport as any);
+    fs.mkdir.mockResolvedValue();
+    fs.exists.mockResolvedValue(true);
+    exec.mockResolvedValue({ stdout: 'gradle output', stderr: '' } as never);
+    _platform.getFile.mockResolvedValue('some content');
   });
 
   describe('extractPackageFile', () => {
@@ -45,12 +43,10 @@ describe('manager/gradle', () => {
     });
 
     it('should return empty if there are no dependencies', async () => {
-      fs.readFile.mockReturnValue(
-        fsReal.readFileSync(
-          'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
-          'utf8'
-        )
-      );
+      fs.readFile.mockResolvedValue(fsReal.readFileSync(
+        'test/datasource/gradle/_fixtures/updatesReportEmpty.json',
+        'utf8'
+      ) as any);
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -68,7 +64,7 @@ describe('manager/gradle', () => {
     });
 
     it('should return empty if there is no dependency report', async () => {
-      fs.exists.mockReturnValue(false);
+      fs.exists.mockResolvedValue(false);
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
       ]);
@@ -80,7 +76,7 @@ describe('manager/gradle', () => {
       const renovateReport = `
         Invalid JSON]
       `;
-      fs.readFile.mockReturnValue(renovateReport);
+      fs.readFile.mockResolvedValue(renovateReport as any);
 
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
@@ -93,7 +89,7 @@ describe('manager/gradle', () => {
         'test/datasource/gradle/_fixtures/MultiProjectUpdatesReport.json',
         'utf8'
       );
-      fs.readFile.mockReturnValue(multiProjectUpdatesReport);
+      fs.readFile.mockResolvedValue(multiProjectUpdatesReport as any);
 
       const dependencies = await manager.extractAllPackageFiles(config, [
         'build.gradle',
@@ -125,7 +121,7 @@ describe('manager/gradle', () => {
     it('should configure the renovate report plugin', async () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
-      expect(toUnix(fs.writeFile.mock.calls[0][0])).toBe(
+      expect(toUnix(fs.writeFile.mock.calls[0][0] as string)).toBe(
         'localDir/renovate-plugin.gradle'
       );
     });

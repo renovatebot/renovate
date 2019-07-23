@@ -67,11 +67,16 @@ export interface PackageDependency extends Package {
 }
 
 export interface Upgrade extends Package {
-  newMajor?: number;
-  updateType?: string;
+  currentVersion?: string;
+  depGroup?: string;
+  name?: string;
   newDigest?: string;
   newFrom?: string;
+  newMajor?: number;
   newValue?: string;
+  packageFile?: string;
+  updateType?: string;
+  version?: string;
 }
 
 export interface UpdateArtifactsResult {
