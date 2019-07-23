@@ -2,27 +2,12 @@ import { parse } from 'toml';
 import { logger } from '../../logger';
 import { isValid } from '../../versioning/cargo';
 import { PackageDependency, PackageFile } from '../common';
+import { CargoConfig, CargoSection } from './types';
 
-export { extractPackageFile };
-
-interface CargoDep {
-  path: any;
-  git: any;
-  version: any;
-}
-type CargoDeps = Record<string, CargoDep | string>;
-
-interface CargoSection {
-  dependencies: CargoDeps;
-  'dev-dependencies': CargoDeps;
-  'build-dependencies': CargoDeps;
-}
-
-interface CargoConfig extends CargoSection {
-  target: Record<string, CargoSection>;
-}
-
-function extractPackageFile(content: string, fileName: string): PackageFile {
+export function extractPackageFile(
+  content: string,
+  fileName: string
+): PackageFile {
   logger.trace(`cargo.extractPackageFile(${fileName})`);
   let parsedContent: CargoConfig;
   try {

@@ -3,6 +3,7 @@ import { RangeStrategy } from '../versioning';
 export type Result<T> = T | Promise<T>;
 
 export interface ManagerConfig {
+  compatibility?: Record<string, string>;
   gradle?: { timeout?: number };
   binarySource?: string;
   cacheDir?: any;
@@ -35,17 +36,17 @@ export interface PackageFile {
   packageFile?: string;
 }
 
-export interface Package {
+export interface Package<T> {
   currentValue?: string;
   currentDigest?: string;
   depName?: string;
   depType?: string;
 
-  managerData?: Record<string, any>;
+  managerData?: T;
   versionScheme?: string;
 }
 
-export interface PackageDependency extends Package {
+export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   commitMessageTopic?: string;
   currentDigestShort?: string;
   datasource?: string;
@@ -66,8 +67,9 @@ export interface PackageDependency extends Package {
   target?: string;
 }
 
-export interface Upgrade extends Package {
+export interface Upgrade<T = Record<string, any>> extends Package<T> {
   currentVersion?: string;
+  def?: string;
   depGroup?: string;
   name?: string;
   newDigest?: string;
@@ -75,16 +77,21 @@ export interface Upgrade extends Package {
   newMajor?: number;
   newValue?: string;
   packageFile?: string;
+  repo?: string;
+  target?: string;
   updateType?: string;
   version?: string;
 }
 
+interface ArtifactError {
+  lockFile?: string;
+  stderr?: string;
+}
+
 export interface UpdateArtifactsResult {
+  artifactError?: ArtifactError;
   file?: { name: string; contents: string };
-  artifactError?: {
-    lockFile?: string;
-    stderr?: string;
-  };
+  lockFileError?: ArtifactError;
 }
 
 export interface ManagerApi {

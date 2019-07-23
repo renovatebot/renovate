@@ -1,18 +1,21 @@
-const _ = require('lodash');
-const toml = require('toml');
-const { logger } = require('../../logger');
-
-module.exports = {
-  updateDependency,
-};
+import { isEqual } from 'lodash';
+import { parse } from 'toml';
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
+import { CargoConfig, CargoSection } from './types';
 
 // Return true if the match string is found at index in content
-function matchAt(content, index, match) {
+function matchAt(content: string, index: number, match: string) {
   return content.substring(index, index + match.length) === match;
 }
 
 // Replace oldString with newString at location index of content
-function replaceAt(content, index, oldString, newString) {
+function replaceAt(
+  content: string,
+  index: number,
+  oldString: string,
+  newString: string
+) {
   logger.debug(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
     content.substr(0, index) +
@@ -21,21 +24,24 @@ function replaceAt(content, index, oldString, newString) {
   );
 }
 
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade<{ nestedVersion?: boolean }>
+) {
   logger.trace({ config: upgrade }, 'poetry.updateDependency()');
   if (!upgrade) {
     return fileContent;
   }
   const { target, depType, depName, newValue, managerData } = upgrade;
   const { nestedVersion } = managerData;
-  let parsedContent;
+  let parsedContent: CargoConfig;
   try {
-    parsedContent = toml.parse(fileContent);
+    parsedContent = parse(fileContent);
   } catch (err) {
     logger.debug({ err }, 'Error parsing Cargo.toml file');
     return fileContent;
   }
-  let section;
+  let section: CargoSection;
   if (target) {
     section = parsedContent.target[target];
     if (section) {
@@ -58,7 +64,7 @@ function updateDependency(fileContent, upgrade) {
     }
     return fileContent;
   }
-  let oldVersion;
+  let oldVersion: any;
   const oldDep = section[depName];
   if (!oldDep) {
     logger.info(
@@ -115,7 +121,7 @@ function updateDependency(fileContent, upgrade) {
         newString
       );
       // Compare the parsed toml structure of old and new
-      if (_.isEqual(parsedContent, toml.parse(testContent))) {
+      if (isEqual(parsedContent, parse(testContent))) {
         newFileContent = testContent;
         break;
       } else {

@@ -1,27 +1,23 @@
-const fs = require('fs-extra');
-const upath = require('upath');
-const { exec } = require('../../util/exec');
-const { getChildProcessEnv } = require('../../util/env');
-const { logger } = require('../../logger');
-
-const { getPkgReleases } = require('../../datasource/docker');
-const {
+import { outputFile, readFile } from 'fs-extra';
+import { join, dirname } from 'upath';
+import { exec } from '../../util/exec';
+import { getChildProcessEnv } from '../../util/env';
+import { logger } from '../../logger';
+import { getPkgReleases } from '../../datasource/docker';
+import {
   isValid,
   isVersion,
   matches,
   sortVersions,
-} = require('../../versioning/ruby');
-
-module.exports = {
-  updateArtifacts,
-};
+} from '../../versioning/ruby';
+import { ManagerConfig } from '../common';
 
 // istanbul ignore next
-async function updateArtifacts(
-  packageFileName,
-  updatedDeps,
-  newPackageFileContent,
-  config
+export async function updateArtifacts(
+  packageFileName: string,
+  updatedDeps: string[],
+  newPackageFileContent: string,
+  config: ManagerConfig
 ) {
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   // istanbul ignore if
@@ -35,28 +31,25 @@ async function updateArtifacts(
     logger.debug('No Gemfile.lock found');
     return null;
   }
-  const cwd = upath.join(config.localDir, upath.dirname(packageFileName));
-  let stdout;
-  let stderr;
+  const cwd = join(config.localDir, dirname(packageFileName));
+  let stdout: string;
+  let stderr: string;
   try {
-    const localPackageFileName = upath.join(config.localDir, packageFileName);
-    await fs.outputFile(localPackageFileName, newPackageFileContent);
-    const localLockFileName = upath.join(config.localDir, lockFileName);
+    const localPackageFileName = join(config.localDir, packageFileName);
+    await outputFile(localPackageFileName, newPackageFileContent);
+    const localLockFileName = join(config.localDir, lockFileName);
     const env = getChildProcessEnv();
     const startTime = process.hrtime();
     let cmd;
     if (config.binarySource === 'docker') {
       logger.info('Running bundler via docker');
       let tag = 'latest';
-      let rubyConstraint;
+      let rubyConstraint: string;
       if (config && config.compatibility && config.compatibility.ruby) {
         logger.debug('Using rubyConstraint from config');
         rubyConstraint = config.compatibility.ruby;
       } else {
-        const rubyVersionFile = upath.join(
-          upath.dirname(packageFileName),
-          '.ruby-version'
-        );
+        const rubyVersionFile = join(dirname(packageFileName), '.ruby-version');
         logger.debug('Checking ' + rubyVersionFile);
         const rubyVersionFileContent = await platform.getFile(rubyVersionFile);
         if (rubyVersionFileContent) {
@@ -135,7 +128,7 @@ async function updateArtifacts(
       {
         file: {
           name: lockFileName,
-          contents: await fs.readFile(localLockFileName, 'utf8'),
+          contents: await readFile(localLockFileName, 'utf8'),
         },
       },
     ];
@@ -153,7 +146,7 @@ async function updateArtifacts(
       throw new Error('bundler-credentials');
     }
     if (err.stderr && err.stderr.includes('incompatible marshal file format')) {
-      const gemrcFile = await platform.getFile(upath.join(cwd, '.gemrc'));
+      const gemrcFile = await platform.getFile(join(cwd, '.gemrc'));
       logger.debug(
         { err, gemfile: newPackageFileContent, gemrcFile },
         'Gemfile marshalling error'

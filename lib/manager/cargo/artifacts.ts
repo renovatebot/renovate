@@ -1,20 +1,17 @@
-const upath = require('upath');
-const process = require('process');
-const fs = require('fs-extra');
-const { exec } = require('../../util/exec');
-const { getChildProcessEnv } = require('../../util/env');
-const { logger } = require('../../logger');
+import { join } from 'upath';
+import { hrtime } from 'process';
+import { outputFile, readFile } from 'fs-extra';
+import { exec } from '../../util/exec';
+import { getChildProcessEnv } from '../../util/env';
+import { logger } from '../../logger';
+import { ManagerConfig, UpdateArtifactsResult } from '../common';
 
-module.exports = {
-  updateArtifacts,
-};
-
-async function updateArtifacts(
-  packageFileName,
-  updatedDeps,
-  newPackageFileContent,
-  config
-) {
+export async function updateArtifacts(
+  packageFileName: string,
+  updatedDeps: string[],
+  newPackageFileContent: string,
+  config: ManagerConfig
+): Promise<UpdateArtifactsResult[]> {
   await logger.debug(`cargo.updateArtifacts(${packageFileName})`);
   if (updatedDeps === undefined || updatedDeps.length < 1) {
     logger.debug('No updated cargo deps - returning null');
@@ -26,12 +23,12 @@ async function updateArtifacts(
     logger.debug('No Cargo.lock found');
     return null;
   }
-  const localPackageFileName = upath.join(config.localDir, packageFileName);
-  const localLockFileName = upath.join(config.localDir, lockFileName);
-  let stdout;
-  let stderr;
+  const localPackageFileName = join(config.localDir, packageFileName);
+  const localLockFileName = join(config.localDir, lockFileName);
+  let stdout: string;
+  let stderr: string;
   try {
-    await fs.outputFile(localPackageFileName, newPackageFileContent);
+    await outputFile(localPackageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
     const cwd = config.localDir;
     const env = getChildProcessEnv();
@@ -55,7 +52,7 @@ async function updateArtifacts(
         cmd = 'cargo';
       }
       cmd += ` update --manifest-path ${localPackageFileName} --package ${dep}`;
-      const startTime = process.hrtime();
+      const startTime = hrtime();
       try {
         ({ stdout, stderr } = await exec(cmd, {
           cwd,
@@ -84,7 +81,7 @@ async function updateArtifacts(
           throw err; // this is caught below
         }
       }
-      const duration = process.hrtime(startTime);
+      const duration = hrtime(startTime);
       const seconds = Math.round(duration[0] + duration[1] / 1e9);
       logger.info(
         { seconds, type: 'Cargo.lock', stdout, stderr },
@@ -92,7 +89,7 @@ async function updateArtifacts(
       );
     }
     logger.debug('Returning updated Cargo.lock');
-    const newCargoLockContent = await fs.readFile(localLockFileName, 'utf8');
+    const newCargoLockContent = await readFile(localLockFileName, 'utf8');
     if (existingLockFileContent === newCargoLockContent) {
       logger.debug('Cargo.lock is unchanged');
       return null;

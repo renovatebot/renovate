@@ -1,12 +1,13 @@
-const hasha = require('hasha');
-const got = require('../../util/got');
-const { logger } = require('../../logger');
+import { fromStream } from 'hasha';
+import got from '../../util/got';
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
-module.exports = {
-  updateDependency,
-};
-
-function updateWithNewVersion(content, currentValue, newValue) {
+function updateWithNewVersion(
+  content: string,
+  currentValue: string,
+  newValue: string
+) {
   const currentVersion = currentValue.replace(/^v/, '');
   const newVersion = newValue.replace(/^v/, '');
   let newContent = content;
@@ -16,7 +17,7 @@ function updateWithNewVersion(content, currentValue, newValue) {
   return newContent;
 }
 
-function extractUrl(flattened) {
+function extractUrl(flattened: string) {
   const urlMatch = flattened.match(/url="(.*?)"/);
   if (!urlMatch) {
     logger.debug('Cannot locate urls in new definition');
@@ -25,7 +26,7 @@ function extractUrl(flattened) {
   return [urlMatch[1]];
 }
 
-function extractUrls(content) {
+function extractUrls(content: string) {
   const flattened = content.replace(/\n/g, '').replace(/\s/g, '');
   const urlsMatch = flattened.match(/urls?=\[.*?\]/);
   if (!urlsMatch) {
@@ -39,13 +40,13 @@ function extractUrls(content) {
   return urls;
 }
 
-async function getHashFromUrl(url) {
+async function getHashFromUrl(url: string) {
   const cacheNamespace = 'url-sha256';
   const cachedResult = await renovateCache.get(cacheNamespace, url);
   /* istanbul ignore next line */
   if (cachedResult) return cachedResult;
   try {
-    const hash = await hasha.fromStream(got.stream(url), {
+    const hash = await fromStream(got.stream(url), {
       algorithm: 'sha256',
     });
     const cacheMinutes = 3 * 24 * 60; // 3 days
@@ -56,7 +57,7 @@ async function getHashFromUrl(url) {
   }
 }
 
-async function getHashFromUrls(urls) {
+async function getHashFromUrls(urls: string[]) {
   const hashes = (await Promise.all(
     urls.map(url => getHashFromUrl(url))
   )).filter(Boolean);
@@ -72,16 +73,19 @@ async function getHashFromUrls(urls) {
   return distinctHashes[0];
 }
 
-function setNewHash(content, hash) {
+function setNewHash(content: string, hash: string) {
   return content.replace(/(sha256\s*=\s*)"[^"]+"/, `$1"${hash}"`);
 }
 
-async function updateDependency(fileContent, upgrade) {
+export async function updateDependency(
+  fileContent: string,
+  upgrade: Upgrade
+): Promise<string> {
   try {
     logger.debug(
       `bazel.updateDependency(): ${upgrade.newValue || upgrade.newDigest}`
     );
-    let newDef;
+    let newDef: string;
     if (upgrade.depType === 'container_pull') {
       newDef = upgrade.managerData.def
         .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${upgrade.newValue}"`)

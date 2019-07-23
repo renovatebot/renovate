@@ -1,8 +1,5 @@
-const { logger } = require('../../logger');
-
-module.exports = {
-  updateDependency,
-};
+import { logger } from '../../logger';
+import { Upgrade } from '../common';
 
 /*
  * The updateDependency() function is mandatory, and is used for updating one dependency at a time.
@@ -10,7 +7,10 @@ module.exports = {
  * or with new content if changes are necessary.
  */
 
-function updateDependency(currentFileContent, upgrade) {
+export function updateDependency(
+  currentFileContent: string,
+  upgrade: Upgrade<{ lineNumber: number }>
+): string {
   try {
     const delimiter =
       currentFileContent.split('"').length >

@@ -1,7 +1,3 @@
-module.exports = {
-  getRangeStrategy,
-};
-
 /*
  * The getRangeStrategy() function is optional and can be removed if not applicable.
  * It is used when the user configures rangeStrategy=auto.
@@ -15,6 +11,6 @@ module.exports = {
  *
  */
 
-function getRangeStrategy() {
+export function getRangeStrategy() {
   return 'replace';
 }
