@@ -8,6 +8,7 @@ const {
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 jest.mock('../../../lib/manager/composer');
+jest.mock('../../../lib/manager/npm');
 
 /** @type any */
 const platform = global.platform;
