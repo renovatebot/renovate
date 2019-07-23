@@ -194,8 +194,4 @@ function variableDefinitionFormatMatch(variable) {
   return new RegExp(`(${variable}\\s*=\\s*?["'])(.*)(["'])`);
 }
 
-module.exports = {
-  updateGradleVersion,
-  collectVersionVariables,
-  init,
-};
+export { updateGradleVersion, collectVersionVariables, init };

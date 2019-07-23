@@ -8,7 +8,7 @@ const fsReal = require('fs');
 /** @type any */
 const { exec } = require('../../../lib/util/exec');
 
-const manager = require('../../../lib/manager/gradle/index');
+const manager = require('../../../lib/manager/gradle/index').default;
 
 /** @type any */
 const platform = global.platform;

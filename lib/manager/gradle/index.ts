@@ -1,34 +1,45 @@
-const fs = require('fs-extra');
-const { exec } = require('../../util/exec');
-const { logger } = require('../../logger');
+import { exists } from 'fs-extra';
+import { exec } from '../../util/exec';
+import { logger } from '../../logger';
 
-const gradle = require('./build-gradle');
-const updatesReport = require('./gradle-updates-report');
+import {
+  init,
+  collectVersionVariables,
+  updateGradleVersion,
+} from './build-gradle';
+import {
+  createRenovateGradlePlugin,
+  extractDependenciesFromUpdatesReport,
+} from './gradle-updates-report';
+import { PackageFile, ManagerConfig } from '../common';
 
 const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
 const TIMEOUT_CODE = 143;
 
-async function extractAllPackageFiles(config, packageFiles) {
+export async function extractAllPackageFiles(
+  config: ManagerConfig,
+  packageFiles: string[]
+): Promise<PackageFile[]> {
   if (!packageFiles.some(packageFile => packageFile === 'build.gradle')) {
     logger.warn('No root build.gradle found - skipping');
     return null;
   }
   logger.info('Extracting dependencies from all gradle files');
 
-  await updatesReport.createRenovateGradlePlugin(config.localDir);
+  await createRenovateGradlePlugin(config.localDir);
   await executeGradle(config);
 
-  gradle.init();
+  init();
 
-  const dependencies = await updatesReport.extractDependenciesFromUpdatesReport(
+  const dependencies = await extractDependenciesFromUpdatesReport(
     config.localDir
   );
   if (dependencies.length === 0) {
     return [];
   }
 
-  const gradleFiles = [];
+  const gradleFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
     const content = await platform.getFile(packageFile);
     if (content) {
@@ -39,7 +50,7 @@ async function extractAllPackageFiles(config, packageFiles) {
         deps: dependencies,
       });
 
-      gradle.collectVersionVariables(dependencies, content);
+      collectVersionVariables(dependencies, content);
     } else {
       // istanbul ignore next
       logger.info({ packageFile }, 'packageFile has no content');
@@ -49,11 +60,11 @@ async function extractAllPackageFiles(config, packageFiles) {
   return gradleFiles;
 }
 
-function updateDependency(fileContent, upgrade) {
+export function updateDependency(fileContent, upgrade) {
   // prettier-ignore
   logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentVersion} ==> ${upgrade.newValue}`);
 
-  return gradle.updateGradleVersion(
+  return updateGradleVersion(
     fileContent,
     buildGradleDependency(upgrade),
     upgrade.newValue
@@ -64,9 +75,9 @@ function buildGradleDependency(config) {
   return { group: config.depGroup, name: config.name, version: config.version };
 }
 
-async function executeGradle(config) {
-  let stdout;
-  let stderr;
+async function executeGradle(config: ManagerConfig) {
+  let stdout: string | number;
+  let stderr: string;
   const gradleTimeout =
     config.gradle && config.gradle.timeout
       ? config.gradle.timeout * 1000
@@ -100,7 +111,7 @@ async function executeGradle(config) {
 
 async function getGradleCommandLine(config) {
   let cmd;
-  const gradlewExists = await fs.exists(config.localDir + '/gradlew');
+  const gradlewExists = await exists(config.localDir + '/gradlew');
   if (config.binarySource === 'docker') {
     cmd = `docker run --rm -v ${config.localDir}:${config.localDir} -w ${config.localDir} renovate/gradle gradle`;
   } else if (gradlewExists) {
@@ -110,9 +121,4 @@ async function getGradleCommandLine(config) {
   }
   return cmd + ' ' + GRADLE_DEPENDENCY_REPORT_OPTIONS;
 }
-
-module.exports = {
-  extractAllPackageFiles,
-  updateDependency,
-  language: 'java',
-};
+export const language = 'java';

@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs-extra');
-const { logger } = require('../../logger');
+import { join } from 'path';
+import { writeFile, exists, readFile } from 'fs-extra';
+import { logger } from '../../logger';
 
 const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
 
@@ -36,11 +36,11 @@ gradle.buildFinished {
    def json = JsonOutput.toJson(output)
    outputFile.write json
 }  `;
-  const gradleInitFile = path.join(localDir, 'renovate-plugin.gradle');
+  const gradleInitFile = join(localDir, 'renovate-plugin.gradle');
   logger.debug(
     'Creating renovate-plugin.gradle file with renovate gradle plugin'
   );
-  await fs.writeFile(gradleInitFile, content);
+  await writeFile(gradleInitFile, content);
 }
 
 async function extractDependenciesFromUpdatesReport(localDir) {
@@ -55,15 +55,15 @@ async function extractDependenciesFromUpdatesReport(localDir) {
 }
 
 async function readGradleReport(localDir) {
-  const renovateReportFilename = path.join(
+  const renovateReportFilename = join(
     localDir,
     GRADLE_DEPENDENCY_REPORT_FILENAME
   );
-  if (!(await fs.exists(renovateReportFilename))) {
+  if (!(await exists(renovateReportFilename))) {
     return [];
   }
 
-  const contents = await fs.readFile(renovateReportFilename, 'utf8');
+  const contents = await readFile(renovateReportFilename, 'utf8');
   try {
     return JSON.parse(contents);
   } catch (err) {
@@ -112,7 +112,7 @@ function buildDependency(gradleModule) {
   };
 }
 
-module.exports = {
+export {
   extractDependenciesFromUpdatesReport,
   createRenovateGradlePlugin,
   GRADLE_DEPENDENCY_REPORT_FILENAME,
