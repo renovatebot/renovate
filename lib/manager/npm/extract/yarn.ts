@@ -1,7 +1,12 @@
 import { parse } from '@yarnpkg/lockfile';
 import { logger } from '../../../logger';
+import { LockFileEntry } from './common';
 
-export async function getYarnLock(filePath) {
+export type YarnLock = Record<string, string> & {
+  '@renovate_yarn_integrity'?: boolean;
+};
+
+export async function getYarnLock(filePath: string): Promise<YarnLock> {
   const yarnLockRaw = await platform.getFile(filePath);
   try {
     const yarnLockParsed = parse(yarnLockRaw);
@@ -13,11 +18,11 @@ export async function getYarnLock(filePath) {
       );
       return {};
     }
-    const lockFile = {};
-    for (const [entry, val] of Object.entries(yarnLockParsed.object as Record<
-      string,
-      any
-    >)) {
+    const lockFile: YarnLock = {};
+
+    for (const [entry, val] of Object.entries(
+      yarnLockParsed.object as LockFileEntry
+    )) {
       logger.trace({ entry, version: val.version });
       lockFile[entry] = val.version;
       // istanbul ignore if

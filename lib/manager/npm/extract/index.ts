@@ -8,7 +8,13 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
 import { isValid, isVersion } from '../../../versioning/npm';
-import { ExtractConfig, PackageFile, PackageDependency } from '../../common';
+import {
+  ExtractConfig,
+  PackageFile,
+  PackageDependency,
+  NpmLockFiles,
+} from '../../common';
+import { NpmPackage } from './common';
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
@@ -42,7 +48,7 @@ export async function extractPackageFile(
   logger.trace(`npm.extractPackageFile(${fileName})`);
   logger.trace({ content });
   const deps: PackageDependency[] = [];
-  let packageJson;
+  let packageJson: NpmPackage;
   try {
     packageJson = JSON.parse(content);
   } catch (err) {
@@ -76,7 +82,7 @@ export async function extractPackageFile(
     ? 'library'
     : 'app';
 
-  const lockFiles: any = {
+  const lockFiles: NpmLockFiles = {
     yarnLock: 'yarn.lock',
     packageLock: 'package-lock.json',
     shrinkwrapJson: 'npm-shrinkwrap.json',
@@ -95,8 +101,8 @@ export async function extractPackageFile(
   delete lockFiles.packageLock;
   delete lockFiles.shrinkwrapJson;
 
-  let npmrc;
-  let ignoreNpmrcFile;
+  let npmrc: string;
+  let ignoreNpmrcFile: boolean;
   const npmrcFileName = join(dirname(fileName), '.npmrc');
   const npmrcFileNameLocal = join(config.localDir || '', npmrcFileName);
   // istanbul ignore if
@@ -122,9 +128,9 @@ export async function extractPackageFile(
   const yarnrc =
     (await platform.getFile(join(dirname(fileName), '.yarnrc'))) || undefined;
 
-  let lernaDir;
-  let lernaPackages;
-  let lernaClient;
+  let lernaDir: string;
+  let lernaPackages: string[];
+  let lernaClient: 'yarn' | 'npm';
   let hasFileRefs = false;
   const lernaJson = JSON.parse(
     await platform.getFile(join(dirname(fileName), 'lerna.json'))
@@ -322,7 +328,7 @@ export async function extractPackageFile(
   };
 }
 
-export async function postExtract(packageFiles) {
+export async function postExtract(packageFiles: PackageFile[]) {
   await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }

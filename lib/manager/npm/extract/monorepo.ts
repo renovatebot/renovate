@@ -4,6 +4,7 @@ import minimatch from 'minimatch';
 import path from 'path';
 import upath from 'upath';
 import { logger } from '../../../logger';
+import { PackageFile } from '../../common';
 
 function matchesAnyPattern(val: string, patterns: string[]) {
   const res = patterns.some(
@@ -13,7 +14,7 @@ function matchesAnyPattern(val: string, patterns: string[]) {
   return res;
 }
 
-export function detectMonorepos(packageFiles) {
+export function detectMonorepos(packageFiles: Partial<PackageFile>[]) {
   logger.debug('Detecting Lerna and Yarn Workspaces');
   for (const p of packageFiles) {
     const {

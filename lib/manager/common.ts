@@ -9,6 +9,10 @@ export interface ManagerConfig {
   registryUrls?: (string | Registry)[];
 }
 
+export interface ManagerData<T> {
+  managerData?: T;
+}
+
 export interface ExtractConfig extends ManagerConfig {
   endpoint?: string;
   global?: any;
@@ -39,7 +43,7 @@ export interface PackageUpdateResult {
   sourceUrl: string;
 }
 
-export interface RangeConfig {
+export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   composerJsonType?: 'composer-plugin' | 'library' | 'metapackage' | 'project';
   currentValue?: string;
   depName?: string;
@@ -54,21 +58,45 @@ export interface Registry {
   url: string;
 }
 
-export interface PackageFile {
+export interface NpmLockFiles {
+  yarnLock?: string;
+  packageLock?: string;
+  shrinkwrapJson?: string;
+  pnpmShrinkwrap?: string;
+
+  npmLock?: string;
+}
+
+export interface PackageFile<T = Record<string, any>>
+  extends NpmLockFiles,
+    ManagerData<T> {
+  yarnIntegrity?: boolean;
+  hasYarnWorkspaces?: boolean;
+  internalPackages?: string[];
   composerJsonType?: string;
   composerLock?: boolean | string;
   compatibility?: Record<string, string>;
   datasource?: string;
   registryUrls?: (string | Registry)[];
   deps: PackageDependency[];
+  ignoreNpmrcFile?: boolean;
+  lernaClient?: string;
+  lernaDir?: string;
+  lernaPackages?: string[];
   manager?: string;
   mavenProps?: Record<string, any>;
   npmrc?: string;
   packageFile?: string;
+  packageJsonName?: string;
+  packageJsonType?: 'app' | 'library';
+  packageJsonVersion?: string;
   parent?: string;
+  skipInstalls?: boolean;
+  yarnrc?: string;
+  yarnWorkspacesPackages?: string[] | string;
 }
 
-export interface Package<T> {
+export interface Package<T> extends ManagerData<T> {
   checksumLineNumber?: number;
   currentValue?: string;
   currentDigest?: string;
@@ -81,7 +109,6 @@ export interface Package<T> {
   groupName?: string;
   lineNumber?: number;
   lookupName?: string;
-  managerData?: T;
   ownerName?: string;
   pipenvNestedVersion?: boolean;
   repo?: string;

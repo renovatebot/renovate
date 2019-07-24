@@ -55,7 +55,7 @@ describe('manager/npm/extract', () => {
         {
           packageFile: 'packages/a/package.json',
           packageJsonName: '@org/a',
-          yarnLock: true,
+          yarnLock: 'yarn.lock',
         },
         {
           packageFile: 'packages/b/package.json',

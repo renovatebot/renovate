@@ -4,15 +4,8 @@ import { getNpmLock } from './npm';
 import { getYarnLock } from './yarn';
 import { PackageFile } from '../../common';
 
-type PackageFiles = (PackageFile & {
-  npmLock?: string;
-  yarnLock?: string;
-  yarnIntegrity?: boolean;
-  pnpmShrinkwrap?: any;
-})[];
-
-export async function getLockedVersions(packageFiles: PackageFiles) {
-  const lockFileCache = {};
+export async function getLockedVersions(packageFiles: PackageFile[]) {
+  const lockFileCache: Record<string, Record<string, string>> = {};
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
     const { yarnLock, npmLock, pnpmShrinkwrap } = packageFile;

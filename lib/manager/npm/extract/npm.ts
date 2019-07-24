@@ -1,12 +1,15 @@
 import { logger } from '../../../logger';
+import { LockFileEntry } from './common';
 
-export async function getNpmLock(filePath: string) {
+export async function getNpmLock(
+  filePath: string
+): Promise<Record<string, string>> {
   const lockRaw = await platform.getFile(filePath);
   try {
     const lockParsed = JSON.parse(lockRaw);
-    const lockFile = {};
+    const lockFile: Record<string, string> = {};
     for (const [entry, val] of Object.entries((lockParsed.dependencies ||
-      {}) as Record<string, any>)) {
+      {}) as LockFileEntry)) {
       logger.trace({ entry, version: val.version });
       lockFile[entry] = val.version;
     }
