@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "run-s clean compile:* copy-static-files",
+    "build:docker": "run-s compile:ts copy-static-files",
     "clean": "rimraf dist",
     "clean-cache": "node bin/clean-cache.js",
     "compile:ts": "tsc -p tsconfig.app.json",
