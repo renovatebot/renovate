@@ -1,7 +1,6 @@
-const fs = require('fs');
-const {
-  extractPackageFile,
-} = require('../../../lib/manager/gitlabci-include/extract');
+import fs from 'fs';
+import { extractPackageFile } from '../../../lib/manager/gitlabci-include/extract';
+import { ExtractConfig } from '../../../lib/manager/common';
 
 const yamlFile = fs.readFileSync(
   'test/manager/gitlabci-include/_fixtures/gitlab-ci.yaml',
@@ -10,7 +9,7 @@ const yamlFile = fs.readFileSync(
 
 describe('lib/manager/gitlabci-include/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
+    let config: ExtractConfig;
     beforeEach(() => {
       config = {
         endpoint: 'http://gitlab.test/api/v4/',

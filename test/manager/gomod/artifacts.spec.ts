@@ -1,17 +1,15 @@
+import _fs from 'fs-extra';
+import * as gomod from '../../../lib/manager/gomod/artifacts';
+
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
 jest.mock('../../../lib/util/host-rules');
 
-/** @type any */
-const fs = require('fs-extra');
-/** @type any */
 const { exec } = require('../../../lib/util/exec');
-const gomod = require('../../../lib/manager/gomod/artifacts');
-/** @type any */
 const hostRules = require('../../../lib/util/host-rules');
 
-/** @type any */
-const platform = global.platform;
+const fs: any = _fs;
+const platform: any = global.platform;
 
 const gomod1 = `module github.com/renovate-tests/gomod1
 

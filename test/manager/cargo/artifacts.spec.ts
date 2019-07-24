@@ -1,14 +1,12 @@
+import _fs from 'fs-extra';
+import * as cargo from '../../../lib/manager/cargo/artifacts';
+
 jest.mock('fs-extra');
 jest.mock('../../../lib/util/exec');
-
-/** @type any */
-const fs = require('fs-extra');
-/** @type any */
 const { exec } = require('../../../lib/util/exec');
-const cargo = require('../../../lib/manager/cargo/artifacts');
 
-/** @type any */
-const platform = global.platform;
+const platform: any = global.platform;
+const fs: any = _fs;
 
 const config = {
   localDir: '/tmp/github/some/repo',

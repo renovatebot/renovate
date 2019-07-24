@@ -100,7 +100,7 @@ Array [
     "npmLock": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
-    "yarnLock": true,
+    "yarnLock": "yarn.lock",
   },
   Object {
     "internalPackages": Array [
