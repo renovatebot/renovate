@@ -1,24 +1,29 @@
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 
+export interface GenerateLockFileResult {
+  error?: boolean;
+  stderr?: string;
+}
+
 export async function generateLockFiles(
   lernaClient: string,
   cwd: string,
   env?: NodeJS.ProcessEnv,
   skipInstalls?: boolean,
   binarySource?: string
-) {
+): Promise<GenerateLockFileResult> {
   if (!lernaClient) {
     logger.warn('No lernaClient specified - returning');
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
-  let stdout;
-  let stderr;
-  let cmd;
+  let stdout: string;
+  let stderr: string;
+  let cmd: string;
   try {
     const startTime = process.hrtime();
-    let lernaVersion;
+    let lernaVersion: string;
     try {
       const pJson = JSON.parse(await platform.getFile('package.json'));
       lernaVersion =
@@ -29,7 +34,7 @@ export async function generateLockFiles(
     }
     lernaVersion = lernaVersion || 'latest';
     logger.debug('Using lerna version ' + lernaVersion);
-    let params;
+    let params: string;
     if (lernaClient === 'npm') {
       if (skipInstalls === false) {
         params = '--ignore-scripts  --no-audit';

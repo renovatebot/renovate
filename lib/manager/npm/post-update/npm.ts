@@ -3,21 +3,26 @@ import { join } from 'upath';
 import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
-import { PostUpdateConfig } from '../../common';
+import { PostUpdateConfig, Upgrade } from '../../common';
 
+export interface GenerateLockFileResult {
+  error?: boolean;
+  lockFile?: string;
+  stderr?: string;
+}
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
   filename: string,
   config: PostUpdateConfig = {},
-  upgrades = []
-) {
+  upgrades: Upgrade[] = []
+): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
   const { skipInstalls, binarySource, postUpdateOptions } = config;
-  let lockFile = null;
+  let lockFile: string = null;
   let stdout = '';
   let stderr = '';
-  let cmd;
+  let cmd: string;
   let args = '';
   try {
     const startTime = process.hrtime();

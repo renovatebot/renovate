@@ -59,18 +59,18 @@ export interface Registry {
 }
 
 export interface NpmLockFiles {
+  yarnIntegrity?: boolean;
   yarnLock?: string;
   packageLock?: string;
   shrinkwrapJson?: string;
   pnpmShrinkwrap?: string;
-
   npmLock?: string;
+  lernaDir?: string;
 }
 
 export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
-  yarnIntegrity?: boolean;
   hasYarnWorkspaces?: boolean;
   internalPackages?: string[];
   composerJsonType?: string;
@@ -81,7 +81,6 @@ export interface PackageFile<T = Record<string, any>>
   deps: PackageDependency[];
   ignoreNpmrcFile?: boolean;
   lernaClient?: string;
-  lernaDir?: string;
   lernaPackages?: string[];
   manager?: string;
   mavenProps?: Record<string, any>;
@@ -150,7 +149,10 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   versionLine?: number;
 }
 
-export interface Upgrade<T = Record<string, any>> extends Package<T> {
+export interface Upgrade<T = Record<string, any>>
+  extends Package<T>,
+    NpmLockFiles {
+  isLockfileUpdate?: boolean;
   currentRawValue?: any;
   checksumUrl?: string;
   currentVersion?: string;
@@ -163,6 +165,8 @@ export interface Upgrade<T = Record<string, any>> extends Package<T> {
   newValue?: string;
   newVersion?: string;
   packageFile?: string;
+  rangeStrategy?: RangeStrategy;
+  toVersion?: string;
   updateType?: string;
   version?: string;
 }
@@ -213,4 +217,11 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
 
   postUpdateOptions?: string[];
   skipInstalls?: boolean;
+
+  platform?: string;
+  upgrades?: Upgrade[];
+  npmLock?: string;
+  yarnLock?: string;
+  branchName?: string;
+  parentBranch?: string;
 }

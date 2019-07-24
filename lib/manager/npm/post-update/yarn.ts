@@ -3,19 +3,26 @@ import { join } from 'upath';
 import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
+import { PostUpdateConfig, Upgrade } from '../../common';
+
+export interface GenerateLockFileResult {
+  error?: boolean;
+  lockFile?: string;
+  stderr?: string;
+}
 
 export async function generateLockFile(
   cwd: string,
   env?: NodeJS.ProcessEnv,
-  config: any = {},
-  upgrades = []
-) {
+  config: PostUpdateConfig = {},
+  upgrades: Upgrade[] = []
+): Promise<GenerateLockFileResult> {
   const { binarySource } = config;
   logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
   let lockFile = null;
-  let stdout;
-  let stderr;
-  let cmd;
+  let stdout: string;
+  let stderr: string;
+  let cmd: string;
   try {
     const startTime = process.hrtime();
     try {

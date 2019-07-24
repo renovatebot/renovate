@@ -5,16 +5,23 @@ import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { PostUpdateConfig } from '../../common';
 
+export interface GenerateLockFileResult {
+  error?: boolean;
+  lockFile?: string;
+  stderr?: string;
+  stdout?: string;
+}
+
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
   config: PostUpdateConfig
-) {
+): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning pnpm install to create ${cwd}/pnpm-lock.yaml`);
   let lockFile = null;
-  let stdout;
-  let stderr;
-  let cmd;
+  let stdout: string;
+  let stderr: string;
+  let cmd: string;
   try {
     const startTime = process.hrtime();
     try {

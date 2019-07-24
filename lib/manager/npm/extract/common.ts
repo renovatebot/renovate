@@ -1,13 +1,11 @@
-export interface NpmPackage {
-  main?: string;
-  private?: boolean;
+import { PackageJson } from 'type-fest';
+
+export interface NpmPackage extends PackageJson {
   workspaces?: any;
-  version?: string;
   renovate?: any;
   _from?: any;
   _args?: any;
   _id?: any;
-  name?: string;
 }
 
 export type LockFileEntry = Record<

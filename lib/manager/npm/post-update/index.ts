@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import path from 'path';
 import upath from 'upath';
+import { PackageJson } from 'type-fest';
 import { logger } from '../../../logger';
 import * as npm from './npm';
 import * as lerna from './lerna';
@@ -9,20 +10,23 @@ import * as yarn from './yarn';
 import * as pnpm from './pnpm';
 import * as hostRules from '../../../util/host-rules';
 import { getChildProcessEnv } from '../../../util/env';
-
-export {
-  determineLockFileDirs,
-  writeExistingFiles,
-  writeUpdatedPackageFiles,
-  getAdditionalFiles,
-};
+import { PostUpdateConfig, PackageFile, Upgrade } from '../../common';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 // istanbul ignore next
 const getDirs = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
 
+export interface DetermineLockFileDirsResult {
+  yarnLockDirs: string[];
+  npmLockDirs: string[];
+  pnpmShrinkwrapDirs: string[];
+  lernaDirs: string[];
+}
 // istanbul ignore next
-function determineLockFileDirs(config, packageFiles) {
+export function determineLockFileDirs(
+  config: PostUpdateConfig,
+  packageFiles: AdditionalPackageFiles
+): DetermineLockFileDirsResult {
   const npmLockDirs = [];
   const yarnLockDirs = [];
   const pnpmShrinkwrapDirs = [];
@@ -48,7 +52,7 @@ function determineLockFileDirs(config, packageFiles) {
 
   if (
     config.upgrades.every(
-      upgrade =>
+      (upgrade: Upgrade) =>
         upgrade.updateType === 'lockFileMaintenance' || upgrade.isLockfileUpdate
     )
   ) {
@@ -60,7 +64,7 @@ function determineLockFileDirs(config, packageFiles) {
     };
   }
 
-  function getPackageFile(fileName) {
+  function getPackageFile(fileName: string): Partial<PackageFile> {
     logger.trace('Looking for packageFile: ' + fileName);
     for (const packageFile of packageFiles.npm) {
       if (packageFile.packageFile === fileName) {
@@ -102,7 +106,10 @@ function determineLockFileDirs(config, packageFiles) {
 }
 
 // istanbul ignore next
-async function writeExistingFiles(config, packageFiles) {
+export async function writeExistingFiles(
+  config: PostUpdateConfig,
+  packageFiles: AdditionalPackageFiles
+) {
   const lernaJson = await platform.getFile('lerna.json');
   if (lernaJson) {
     logger.debug(`Writing repo lerna.json (${config.localDir})`);
@@ -136,7 +143,7 @@ async function writeExistingFiles(config, packageFiles) {
     );
     logger.trace(`Writing package.json to ${basedir}`);
     // Massage the file to eliminate yarn errors
-    const massagedFile = JSON.parse(
+    const massagedFile: PackageJson = JSON.parse(
       await platform.getFile(packageFile.packageFile)
     );
     if (massagedFile.name) {
@@ -266,7 +273,9 @@ async function writeExistingFiles(config, packageFiles) {
 }
 
 // istanbul ignore next
-function listLocalLibs(dependencies) {
+function listLocalLibs(
+  dependencies: { [s: string]: unknown } | ArrayLike<unknown>
+) {
   logger.trace(`listLocalLibs (${dependencies})`);
   const toCopy = [];
   if (dependencies) {
@@ -286,7 +295,7 @@ function listLocalLibs(dependencies) {
 }
 
 // istanbul ignore next
-async function writeUpdatedPackageFiles(config) {
+export async function writeUpdatedPackageFiles(config: PostUpdateConfig) {
   logger.trace({ config }, 'writeUpdatedPackageFiles');
   logger.debug('Writing any updated package files');
   if (!config.updatedPackageFiles) {
@@ -329,11 +338,32 @@ async function writeUpdatedPackageFiles(config) {
   }
 }
 
+export interface AdditionalPackageFiles {
+  npm?: Partial<PackageFile>[];
+}
+
+interface ArtifactError {
+  lockFile: string;
+  stderr: string;
+}
+
+interface UpdatedArtifcats {
+  name: string;
+  contents: string;
+}
+
+export interface WriteExistingFilesResult {
+  artifactErrors: ArtifactError[];
+  updatedArtifacts: UpdatedArtifcats[];
+}
 // istanbul ignore next
-async function getAdditionalFiles(config, packageFiles) {
+export async function getAdditionalFiles(
+  config: PostUpdateConfig,
+  packageFiles: AdditionalPackageFiles
+): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
-  const artifactErrors = [];
-  const updatedArtifacts = [];
+  const artifactErrors: ArtifactError[] = [];
+  const updatedArtifacts: UpdatedArtifcats[] = [];
   if (!(packageFiles.npm && packageFiles.npm.length)) {
     return { artifactErrors, updatedArtifacts };
   }
@@ -350,10 +380,10 @@ async function getAdditionalFiles(config, packageFiles) {
     logger.debug('Skipping lockFileMaintenance update');
     return { artifactErrors, updatedArtifacts };
   }
-  const dirs = module.exports.determineLockFileDirs(config, packageFiles);
+  const dirs = determineLockFileDirs(config, packageFiles);
   logger.debug({ dirs }, 'lock file dirs');
-  await module.exports.writeExistingFiles(config, packageFiles);
-  await module.exports.writeUpdatedPackageFiles(config);
+  await writeExistingFiles(config, packageFiles);
+  await writeUpdatedPackageFiles(config);
 
   process.env.NPM_CONFIG_CACHE =
     process.env.NPM_CONFIG_CACHE || upath.join(config.cacheDir, './others/npm');
@@ -574,7 +604,7 @@ async function getAdditionalFiles(config, packageFiles) {
   }
 
   for (const lernaDir of dirs.lernaDirs) {
-    let lockFile;
+    let lockFile: string;
     logger.debug(`Finding package.json for lerna directory "${lernaDir}"`);
     const lernaPackageFile = packageFiles.npm.find(
       p => path.dirname(p.packageFile) === lernaDir
@@ -649,7 +679,7 @@ async function getAdditionalFiles(config, packageFiles) {
           const lockFilePath = upath.join(config.localDir, filename);
           logger.trace('Checking against ' + lockFilePath);
           try {
-            let newContent;
+            let newContent: string;
             try {
               newContent = await fs.readFile(lockFilePath, 'utf8');
             } catch (err) {
