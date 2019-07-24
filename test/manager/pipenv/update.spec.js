@@ -33,7 +33,7 @@ describe('manager/pipenv/update', () => {
         depName: 'pytest-benchmark',
         newValue: '==1.9.1',
         depType: 'packages',
-        pipenvNestedVersion: true,
+        managerData: { nestedVersion: true },
       };
       const res = updateDependency(pipfile, upgrade);
       expect(res).not.toEqual(pipfile);

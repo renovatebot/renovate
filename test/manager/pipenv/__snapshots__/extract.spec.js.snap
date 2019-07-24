@@ -8,23 +8,27 @@ Object {
       "datasource": "pypi",
       "depName": "some-package",
       "depType": "packages",
+      "managerData": Object {},
     },
     Object {
       "currentValue": "==1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
       "depType": "packages",
+      "managerData": Object {},
     },
     Object {
       "currentValue": "==1.0.0",
       "depName": "_invalid-package",
       "depType": "packages",
+      "managerData": Object {},
       "skipReason": "invalid-name",
     },
     Object {
       "currentValue": "==0 0",
       "depName": "invalid-version",
       "depType": "packages",
+      "managerData": Object {},
       "skipReason": "invalid-version",
     },
     Object {
@@ -32,13 +36,16 @@ Object {
       "datasource": "pypi",
       "depName": "pytest-benchmark",
       "depType": "packages",
-      "pipenvNestedVersion": true,
+      "managerData": Object {
+        "nestedVersion": true,
+      },
     },
     Object {
       "currentValue": "==0.1.0",
       "datasource": "pypi",
       "depName": "dev-package",
       "depType": "dev-packages",
+      "managerData": Object {},
     },
   ],
   "registryUrls": Array [
@@ -54,6 +61,7 @@ Object {
     Object {
       "depName": "requests",
       "depType": "packages",
+      "managerData": Object {},
       "skipReason": "any-version",
     },
     Object {
@@ -61,27 +69,33 @@ Object {
       "datasource": "pypi",
       "depName": "records",
       "depType": "packages",
+      "managerData": Object {},
     },
     Object {
       "depName": "django",
       "depType": "packages",
+      "managerData": Object {},
       "skipReason": "git-dependency",
     },
     Object {
       "depName": "e682b37",
       "depType": "packages",
+      "managerData": Object {},
       "skipReason": "file-dependency",
     },
     Object {
       "depName": "e1839a8",
       "depType": "packages",
+      "managerData": Object {},
       "skipReason": "local-dependency",
     },
     Object {
       "currentValue": "*",
       "depName": "pywinusb",
       "depType": "packages",
-      "pipenvNestedVersion": true,
+      "managerData": Object {
+        "nestedVersion": true,
+      },
       "registryUrls": Array [
         "https://pypi.python.org/simple",
       ],
@@ -91,6 +105,7 @@ Object {
       "currentValue": "*",
       "depName": "nose",
       "depType": "dev-packages",
+      "managerData": Object {},
       "skipReason": "any-version",
     },
     Object {
@@ -98,7 +113,9 @@ Object {
       "datasource": "pypi",
       "depName": "unittest2",
       "depType": "dev-packages",
-      "pipenvNestedVersion": true,
+      "managerData": Object {
+        "nestedVersion": true,
+      },
     },
   ],
   "registryUrls": Array [
@@ -115,30 +132,35 @@ Object {
       "datasource": "pypi",
       "depName": "Django",
       "depType": "packages",
+      "managerData": Object {},
     },
     Object {
       "currentValue": "==0.6.27",
       "datasource": "pypi",
       "depName": "distribute",
       "depType": "packages",
+      "managerData": Object {},
     },
     Object {
       "currentValue": "==0.2",
       "datasource": "pypi",
       "depName": "dj-database-url",
       "depType": "packages",
+      "managerData": Object {},
     },
     Object {
       "currentValue": "==2.4.5",
       "datasource": "pypi",
       "depName": "psycopg2",
       "depType": "packages",
+      "managerData": Object {},
     },
     Object {
       "currentValue": "==0.1.2",
       "datasource": "pypi",
       "depName": "wsgiref",
       "depType": "packages",
+      "managerData": Object {},
     },
   ],
   "registryUrls": Array [
@@ -155,7 +177,9 @@ Object {
       "datasource": "pypi",
       "depName": "requests",
       "depType": "packages",
-      "pipenvNestedVersion": true,
+      "managerData": Object {
+        "nestedVersion": true,
+      },
       "registryUrls": Array [
         "https://testpypi.python.org/pypi",
       ],
