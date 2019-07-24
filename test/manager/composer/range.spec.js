@@ -12,7 +12,7 @@ describe('getRangeStrategy', () => {
   it('pins project require', () => {
     const config = {
       rangeStrategy: 'auto',
-      composerJsonType: 'project',
+      managerData: { composerJsonType: 'project' },
       depType: 'require',
     };
     expect(getRangeStrategy(config)).toEqual('pin');

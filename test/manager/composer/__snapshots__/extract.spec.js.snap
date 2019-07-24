@@ -440,7 +440,6 @@ Object {
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts object registryUrls 1`] = `
 Object {
-  "composerJsonType": "project",
   "composerLock": false,
   "deps": Array [
     Object {
@@ -532,6 +531,9 @@ Object {
       "skipReason": "any-version",
     },
   ],
+  "managerData": Object {
+    "composerJsonType": "project",
+  },
   "registryUrls": Array [
     Object {
       "type": "composer",
