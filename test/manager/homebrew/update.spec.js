@@ -18,10 +18,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.16.1',
       depName: 'Aide',
-      managerData: { ownerName: 'aide' },
+      managerData: {
+        ownerName: 'aide',
+        sha256:
+          '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
+      },
       repoName: 'aide',
-      sha256:
-        '0f2b7cecc70c1a27d35c06c98804fcdb9f326630de5d035afc447122186010b7',
       url:
         'https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz',
       newValue: 'v0.17.7',
@@ -36,10 +38,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
-      managerData: { ownerName: 'bazelbuild' },
+      managerData: {
+        ownerName: 'bazelbuild',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      },
       repoName: 'bazel-watcher',
-      sha256:
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
       url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       newValue: 'v0.9.3',
     };
@@ -53,10 +57,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
-      managerData: { ownerName: 'bazelbuild' },
+      managerData: {
+        ownerName: 'bazelbuild',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      },
       repoName: 'bazel-watcher',
-      sha256:
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
       url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       newValue: 'v0.9.3',
     };
@@ -72,10 +78,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
-      managerData: { ownerName: 'bazelbuild' },
+      managerData: {
+        ownerName: 'bazelbuild',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      },
       repoName: 'bazel-watcher',
-      sha256:
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
       url: 'invalid_url',
       newValue: 'v0.9.3',
     };
@@ -91,10 +99,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
-      managerData: { ownerName: 'bazelbuild' },
+      managerData: {
+        ownerName: 'bazelbuild',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      },
       repoName: 'invalid/repo/name',
-      sha256:
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
       url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       newValue: 'v0.9.3',
     };
@@ -114,10 +124,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
-      managerData: { ownerName: 'bazelbuild' },
+      managerData: {
+        ownerName: 'bazelbuild',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      },
       repoName: 'wrong-version/archive/v10.2.3.tar.gz',
-      sha256:
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
       url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       newValue: 'v0.9.3',
     };
@@ -144,10 +156,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
-      managerData: { ownerName: 'bazelbuild' },
+      managerData: {
+        ownerName: 'bazelbuild',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      },
       repoName: 'bazel-watcher',
-      sha256:
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
       url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       newValue: 'v0.9.3',
     };
@@ -169,10 +183,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
-      managerData: { ownerName: 'bazelbuild' },
+      managerData: {
+        ownerName: 'bazelbuild',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      },
       repoName: 'bazel-watcher',
-      sha256:
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
       url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       newValue: 'v0.9.3',
     };
@@ -195,10 +211,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
-      managerData: { ownerName: 'bazelbuild' },
+      managerData: {
+        ownerName: 'bazelbuild',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      },
       repoName: 'bazel-watcher',
-      sha256:
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
       url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       newValue: 'v0.9.3',
     };
@@ -220,10 +238,12 @@ describe('manager/homebrew/update', () => {
     const upgrade = {
       currentValue: 'v0.8.2',
       depName: 'Ibazel',
-      managerData: { ownerName: 'bazelbuild' },
+      managerData: {
+        ownerName: 'bazelbuild',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+      },
       repoName: 'bazel-watcher',
-      sha256:
-        '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
       url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
       newValue: 'v0.9.3',
     };
