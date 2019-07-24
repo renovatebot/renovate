@@ -44,7 +44,7 @@ allprojects {
            .collect { "$it.url" }
            .findAll { !it.startsWith('file:') }
         project.repositories = repos
-        def deps = configurations
+        def deps = (buildscript.configurations + configurations)
           .collect { it.dependencies }
           .flatten()
           .findAll { it instanceof DefaultExternalModuleDependency }

@@ -30,6 +30,7 @@ export function updateGradleVersion(
   if (dependency) {
     const updateFunctions: UpdateFunction[] = [
       updateVersionStringFormat,
+      updatePluginVersionStringFormat,
       updateVersionMapFormat,
       updateVersionMapVariableFormat,
       updateVersionStringVariableFormat,
@@ -88,6 +89,18 @@ function updateVersionStringFormat(
   newVersion: string
 ) {
   const regex = moduleStringVersionFormatMatch(dependency);
+  if (buildGradleContent.match(regex)) {
+    return buildGradleContent.replace(regex, `$1${newVersion}$2`);
+  }
+  return null;
+}
+
+function updatePluginVersionStringFormat(
+  dependency: GradleDependency,
+  buildGradleContent: string,
+  newVersion: string
+) {
+  const regex = pluginStringVersionFormatMatch(dependency);
   if (buildGradleContent.match(regex)) {
     return buildGradleContent.replace(regex, `$1${newVersion}$2`);
   }
@@ -193,6 +206,12 @@ function updatePropertyFileGlobalVariables(
 function moduleStringVersionFormatMatch(dependency: GradleDependency) {
   return new RegExp(
     `(["']${dependency.group}:${dependency.name}:)[^$].*?(([:@].*?)?["'])`
+  );
+}
+
+function pluginStringVersionFormatMatch(dependency: GradleDependency) {
+  return new RegExp(
+    `(id\\s+["']${dependency.group}["']\\s+version\\s+["'])[^$].*?(["'])`
   );
 }
 

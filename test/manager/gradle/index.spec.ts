@@ -153,7 +153,7 @@ describe('manager/gradle', () => {
   });
 
   describe('updateDependency', () => {
-    it('should update an existing dependency', () => {
+    it('should update an existing module dependency', () => {
       const buildGradleContent = fsReal.readFileSync(
         'test/datasource/gradle/_fixtures/build.gradle.example1',
         'utf8'
@@ -171,6 +171,35 @@ describe('manager/gradle', () => {
 
       expect(buildGradleContentUpdated).toMatch('cglib:cglib-nodep:3.2.8');
       expect(buildGradleContentUpdated).not.toMatch('cglib:cglib-nodep:3.1');
+    });
+
+    it('should update an existing plugin dependency', () => {
+      const buildGradleContent = `
+        plugins {
+            id "com.github.ben-manes.versions" version "0.20.0"
+        }
+        `;
+      const upgrade = {
+        depGroup: 'com.github.ben-manes.versions',
+        name: 'com.github.ben-manes.versions.gradle.plugin',
+        version: '0.20.0',
+        newValue: '0.21.0',
+      };
+      const buildGradleContentUpdated = manager.updateDependency(
+        buildGradleContent,
+        upgrade
+      );
+
+      expect(buildGradleContent).not.toMatch(
+        'id "com.github.ben-manes.versions" version "0.21.0"'
+      );
+
+      expect(buildGradleContentUpdated).toMatch(
+        'id "com.github.ben-manes.versions" version "0.21.0"'
+      );
+      expect(buildGradleContentUpdated).not.toMatch(
+        'id "com.github.ben-manes.versions" version "0.20.0"'
+      );
     });
   });
 });
