@@ -2,7 +2,6 @@
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts dependencies with lock file 1`] = `
 Object {
-  "composerLock": "composer.lock",
   "deps": Array [
     Object {
       "currentValue": ">=5.3.2",
@@ -221,7 +220,6 @@ Object {
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts dependencies with no lock file 1`] = `
 Object {
-  "composerLock": false,
   "deps": Array [
     Object {
       "currentValue": ">=5.3.2",
@@ -440,7 +438,6 @@ Object {
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts object registryUrls 1`] = `
 Object {
-  "composerLock": false,
   "deps": Array [
     Object {
       "currentValue": ">=5.5",
@@ -569,7 +566,6 @@ Object {
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts object repositories and registryUrls with lock file 1`] = `
 Object {
-  "composerLock": "composer.lock",
   "deps": Array [
     Object {
       "currentValue": "*",
@@ -607,7 +603,6 @@ Object {
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
 Object {
-  "composerLock": false,
   "deps": Array [
     Object {
       "currentValue": "*",
@@ -648,7 +643,6 @@ Object {
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts repositories and registryUrls 1`] = `
 Object {
-  "composerLock": false,
   "deps": Array [
     Object {
       "currentValue": "*",
