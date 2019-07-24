@@ -33,5 +33,15 @@ Array [
       "lineNumber": 23,
     },
   },
+  Object {
+    "currentDigest": undefined,
+    "currentValue": "alpine",
+    "datasource": "docker",
+    "depName": "redis",
+    "depType": "docker",
+    "managerData": Object {
+      "lineNumber": 28,
+    },
+  },
 ]
 `;

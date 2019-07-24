@@ -15,7 +15,7 @@ describe('lib/manager/droneci/extract', () => {
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(droneYAML);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(3);
+      expect(res.deps).toHaveLength(4);
     });
   });
 });

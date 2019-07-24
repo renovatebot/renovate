@@ -212,6 +212,8 @@ Add configuration here if you want to enable or disable something in particular 
 
 ## dotnet
 
+## droneci
+
 ## enabled
 
 Renovate is enabled for all packages by default, but this setting allows you to disable Renovate for specific packages, dependency types, package files, or even for the whole repository.
