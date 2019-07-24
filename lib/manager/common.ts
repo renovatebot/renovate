@@ -73,8 +73,6 @@ export interface PackageFile<T = Record<string, any>>
     ManagerData<T> {
   hasYarnWorkspaces?: boolean;
   internalPackages?: string[];
-  composerJsonType?: string;
-  composerLock?: boolean | string;
   compatibility?: Record<string, string>;
   datasource?: string;
   registryUrls?: (string | Registry)[];
@@ -96,25 +94,17 @@ export interface PackageFile<T = Record<string, any>>
 }
 
 export interface Package<T> extends ManagerData<T> {
-  checksumLineNumber?: number;
   currentValue?: string;
   currentDigest?: string;
-  def?: string;
   depName?: string;
   depNameShort?: string;
   depType?: string;
   fileReplacePosition?: number;
-  gradleWrapperType?: string;
   groupName?: string;
   lineNumber?: number;
   lookupName?: string;
-  ownerName?: string;
-  pipenvNestedVersion?: boolean;
   repo?: string;
-  repoName?: string;
-  sha256?: string;
   target?: string;
-  url?: string;
   versionScheme?: string;
 
   // npm manager
@@ -140,7 +130,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   lookupType?: string;
   moduleName?: string;
   propSource?: string;
-  remote?: string;
   registryUrls?: string[];
   rangeStrategy?: RangeStrategy;
   skipReason?: string;
