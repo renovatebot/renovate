@@ -19,5 +19,10 @@ describe('manager/npm/extract/npm', () => {
       expect(res).toMatchSnapshot();
       expect(Object.keys(res)).toHaveLength(7);
     });
+    it('returns empty if no deps', async () => {
+      platform.getFile.mockResolvedValueOnce('{}');
+      const res = await getNpmLock('package.json');
+      expect(Object.keys(res)).toHaveLength(0);
+    });
   });
 });
