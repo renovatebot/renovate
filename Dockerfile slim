@@ -63,5 +63,7 @@ COPY --from=tsbuild /usr/src/app/dist dist
 COPY bin bin
 COPY data data
 
+ENV RENOVATE_BINARY_SOURCE=docker
+
 ENTRYPOINT ["node", "/usr/src/app/dist/renovate.js"]
 CMD []
