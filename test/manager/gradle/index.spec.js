@@ -1,15 +1,17 @@
 jest.mock('fs-extra');
-jest.mock('child-process-promise');
+jest.mock('../../../lib/util/exec');
 
 const { toUnix } = require('upath');
+/** @type any */
 const fs = require('fs-extra');
 const fsReal = require('fs');
-const { exec } = require('child-process-promise');
-const { initLogger } = require('../../../lib/logger');
-
-initLogger();
+/** @type any */
+const { exec } = require('../../../lib/util/exec');
 
 const manager = require('../../../lib/manager/gradle/index');
+
+/** @type any */
+const platform = global.platform;
 
 const config = {
   localDir: 'localDir',

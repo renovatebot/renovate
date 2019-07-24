@@ -289,6 +289,10 @@ Add to this configuration setting if you need to override any of the GitHub Acti
 
 Add to this configuration setting if you need to override any of the GitLab CI default settings. Use the `docker` config object instead if you wish for configuration to apply across all Docker-related package managers.
 
+## gitlabci-include
+
+Add to this configuration setting if you need to override any of the GitLab CI default settings. Applies to the `include:` section only.
+
 ## golang
 
 Configuration added here applies for all Go-related updates, however currently the only supported package manager for Go is the native Go Modules (`go mod`).
@@ -909,6 +913,11 @@ If you set `prCreation=not-pending`, then Renovate will wait until tests are non
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
+## pruneStaleBranches
+
+Set to `false` to disable deleting orphan branches and autoclosing PRs.
+Defaults to `true`.
+
 ## pub
 
 ## python
@@ -978,7 +987,7 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 
 ## reviewers
 
-Must be valid usernames. Note: does not currently work with the GitHub App due to an outstanding GitHub API bug.
+Must be valid usernames. If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
 
 ## rollbackPrs
 
@@ -1135,12 +1144,6 @@ Note: Travis renovation is disabled by default as we cannot be sure of which com
 It is not known by many that npm package authors and collaborators can _delete_ an npm version if it is less than 24 hours old. e.g. version 1.0.0 might exist, then version 1.1.0 is released, and then version 1.1.0 might get deleted hours later. This means that version 1.1.0 essentially "disappears" and 1.0.0 returns to being the "latest". If you have installed 1.1.0 during that time then your build is essentially broken.
 
 Enabling `unpublishSafe` will add a `renovate/unpublish-safe` status check with value pending to every branch to warn you about this possibility. It can be handy when used with the `prCreation` = `not-pending` configuration option - that way you won't get the PR raised until after a patch is 24 hours old or more.
-
-## unstablePattern
-
-Because Docker uses tags instead of semver, there is no fixed convention for how to identify unstable releases. e.g. some images may use semver convention like `v2.0.0-beta1` but others may use their own convention, like Node.js or Ubuntu even/odd.
-
-This field is currently used by some config prefixes.
 
 ## updateLockFiles
 

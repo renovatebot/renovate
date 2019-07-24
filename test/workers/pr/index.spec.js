@@ -1,8 +1,13 @@
 const prWorker = require('../../../lib/workers/pr');
+/** @type any */
 const changelogHelper = require('../../../lib/workers/pr/changelog');
 const defaultConfig = require('../../../lib/config/defaults').getConfig();
 
 jest.mock('../../../lib/workers/pr/changelog');
+
+/** @type any */
+const platform = global.platform;
+
 changelogHelper.getChangeLogJSON = jest.fn();
 changelogHelper.getChangeLogJSON.mockReturnValue({
   project: {
@@ -98,6 +103,7 @@ describe('workers/pr', () => {
     });
   });
   describe('ensurePr', () => {
+    /** @type any */
     let config;
     const existingPr = {
       displayNumber: 'Existing PR',
@@ -145,6 +151,12 @@ describe('workers/pr', () => {
       config.prCreation = 'status-success';
       const pr = await prWorker.ensurePr(config);
       expect(pr).toBeNull();
+    });
+    it('should return needs-approval if prCreation set to approval', async () => {
+      platform.getBranchStatus.mockReturnValueOnce('success');
+      config.prCreation = 'approval';
+      const pr = await prWorker.ensurePr(config);
+      expect(pr).toBe('needs-pr-approval');
     });
     it('should create PR if success', async () => {
       platform.getBranchStatus.mockReturnValueOnce('success');

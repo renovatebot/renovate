@@ -3,6 +3,9 @@ const path = require('path');
 const npmExtract = require('../../../../lib/manager/npm/extract');
 const defaultConfig = require('../../../../lib/config/defaults').getConfig();
 
+/** @type any */
+const platform = global.platform;
+
 function readFixture(fixture) {
   return fs.readFileSync(
     path.resolve(__dirname, `../_fixtures/${fixture}`),
@@ -124,6 +127,34 @@ describe('manager/npm/extract', () => {
       platform.getFile = jest.fn(fileName => {
         if (fileName === 'lerna.json') {
           return '{}';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('finds "npmClient":"npm" in lerna.json', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === 'lerna.json') {
+          return '{ "npmClient": "npm" }';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('finds "npmClient":"yarn" in lerna.json', async () => {
+      platform.getFile = jest.fn(fileName => {
+        if (fileName === 'lerna.json') {
+          return '{ "npmClient": "yarn" }';
         }
         return null;
       });

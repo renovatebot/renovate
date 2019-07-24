@@ -9,7 +9,7 @@ describe('manager/terraform/update', () => {
       const upgrade = {
         depType: 'github',
         depName: 'foo',
-        lineNumber: 1,
+        managerData: { lineNumber: 1 },
         depNameShort: 'hashicorp/example',
         newValue: 'v1.0.1',
       };
@@ -21,7 +21,7 @@ describe('manager/terraform/update', () => {
       const upgrade = {
         depType: 'github',
         depName: 'foo',
-        lineNumber: 1,
+        managerData: { lineNumber: 1 },
         depNameShort: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
@@ -32,7 +32,7 @@ describe('manager/terraform/update', () => {
       const upgrade = {
         depType: 'github',
         depName: 'foo',
-        lineNumber: 2,
+        managerData: { lineNumber: 2 },
         depNameShort: 'hashicorp/example',
         newValue: 'v1.0.0',
       };
@@ -46,7 +46,7 @@ describe('manager/terraform/update', () => {
         newValue: 'v0.1.3',
         depName: 'github.com/tieto-cem/terraform-aws-ecs-task-definition',
         depNameShort: 'tieto-cem/terraform-aws-ecs-task-definition',
-        lineNumber: 14,
+        managerData: { lineNumber: 14 },
         moduleName: 'container_definition',
         source:
           'github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0',
@@ -61,7 +61,7 @@ describe('manager/terraform/update', () => {
         depName: 'hashicorp/consul/aws',
         depNameShort: 'hashicorp/consul/aws',
         depType: 'terraform',
-        lineNumber: 11,
+        managerData: { lineNumber: 11 },
         moduleName: 'consul',
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',
@@ -75,7 +75,7 @@ describe('manager/terraform/update', () => {
         depName: 'hashicorp/consul/aws',
         depNameShort: 'hashicorp/consul/aws',
         depType: 'terraform',
-        lineNumber: 10,
+        managerData: { lineNumber: 10 },
         moduleName: 'consul',
         source: 'hashicorp/consul/aws',
         newValue: '0.4.0',

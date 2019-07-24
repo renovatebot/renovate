@@ -6,12 +6,15 @@ const hostRules = require('../../lib/util/host-rules');
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
+/** @type any */
 const includesJson = fs.readFileSync(
   'test/datasource/packagist/_fixtures/includes.json'
 );
+/** @type any */
 const beytJson = fs.readFileSync(
   'test/datasource/packagist/_fixtures/1beyt.json'
 );
+/** @type any */
 const mailchimpJson = fs.readFileSync(
   'test/datasource/packagist/_fixtures/mailchimp-api.json'
 );
@@ -89,10 +92,22 @@ describe('datasource/packagist', () => {
       });
       expect(res).toMatchSnapshot();
     });
+    it('handles timeouts', async () => {
+      got.mockImplementationOnce(() =>
+        Promise.reject({
+          code: 'ETIMEDOUT',
+        })
+      );
+      const res = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'vendor/package-name2',
+      });
+      expect(res).toBeNull();
+    });
     it('handles auth rejections', async () => {
       got.mockImplementationOnce(() =>
         Promise.reject({
-          statusCode: 401,
+          statusCode: 403,
         })
       );
       const res = await datasource.getPkgReleases({

@@ -10,59 +10,79 @@ Object {
       "currentValue": ">= 11.1",
       "datasource": "rubygems",
       "depName": "rake",
-      "lineNumber": 9,
+      "managerData": Object {
+        "lineNumber": 9,
+      },
     },
     Object {
       "currentValue": ">= 2.15",
       "datasource": "rubygems",
       "depName": "capybara",
-      "lineNumber": 11,
+      "managerData": Object {
+        "lineNumber": 11,
+      },
     },
     Object {
       "currentValue": "~> 1.2",
       "datasource": "rubygems",
       "depName": "rack-cache",
-      "lineNumber": 13,
+      "managerData": Object {
+        "lineNumber": 13,
+      },
     },
     Object {
       "depName": "sass-rails",
-      "lineNumber": 14,
+      "managerData": Object {
+        "lineNumber": 14,
+      },
       "skipReason": "no-version",
     },
     Object {
       "currentValue": "~> 5",
       "datasource": "rubygems",
       "depName": "turbolinks",
-      "lineNumber": 15,
+      "managerData": Object {
+        "lineNumber": 15,
+      },
     },
     Object {
       "depName": "webpacker",
-      "lineNumber": 16,
+      "managerData": Object {
+        "lineNumber": 16,
+      },
       "skipReason": "no-version",
     },
     Object {
       "currentValue": "~> 3.1.11",
       "datasource": "rubygems",
       "depName": "bcrypt",
-      "lineNumber": 20,
+      "managerData": Object {
+        "lineNumber": 20,
+      },
     },
     Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "uglifier",
-      "lineNumber": 24,
+      "managerData": Object {
+        "lineNumber": 24,
+      },
     },
     Object {
       "currentValue": ">= 2.0.0",
       "datasource": "rubygems",
       "depName": "json",
-      "lineNumber": 27,
+      "managerData": Object {
+        "lineNumber": 27,
+      },
     },
     Object {
       "currentValue": ">= 0.47",
       "datasource": "rubygems",
       "depName": "rubocop",
-      "lineNumber": 29,
+      "managerData": Object {
+        "lineNumber": 29,
+      },
     },
     Object {
       "currentValue": "~> 1.0",
@@ -71,7 +91,9 @@ Object {
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 32,
+      "managerData": Object {
+        "lineNumber": 32,
+      },
     },
     Object {
       "currentValue": "~> 3.2.3",
@@ -80,14 +102,18 @@ Object {
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 33,
+      "managerData": Object {
+        "lineNumber": 33,
+      },
     },
     Object {
       "depName": "w3c_validators",
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 34,
+      "managerData": Object {
+        "lineNumber": 34,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -97,41 +123,55 @@ Object {
       "depTypes": Array [
         "doc",
       ],
-      "lineNumber": 35,
+      "managerData": Object {
+        "lineNumber": 35,
+      },
     },
     Object {
       "depName": "dalli",
-      "lineNumber": 39,
+      "managerData": Object {
+        "lineNumber": 39,
+      },
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 3.0.5, < 3.2",
       "datasource": "rubygems",
       "depName": "listen",
-      "lineNumber": 40,
+      "managerData": Object {
+        "lineNumber": 40,
+      },
     },
     Object {
       "depName": "libxml-ruby",
-      "lineNumber": 41,
+      "managerData": Object {
+        "lineNumber": 41,
+      },
       "skipReason": "no-version",
     },
     Object {
       "depName": "connection_pool",
-      "lineNumber": 42,
+      "managerData": Object {
+        "lineNumber": 42,
+      },
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 1.1.0",
       "datasource": "rubygems",
       "depName": "bootsnap",
-      "lineNumber": 45,
+      "managerData": Object {
+        "lineNumber": 45,
+      },
     },
     Object {
       "depName": "resque",
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 49,
+      "managerData": Object {
+        "lineNumber": 49,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -139,7 +179,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 50,
+      "managerData": Object {
+        "lineNumber": 50,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -147,7 +189,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 51,
+      "managerData": Object {
+        "lineNumber": 51,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -155,7 +199,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 52,
+      "managerData": Object {
+        "lineNumber": 52,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -163,7 +209,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 53,
+      "managerData": Object {
+        "lineNumber": 53,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -171,7 +219,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 54,
+      "managerData": Object {
+        "lineNumber": 54,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -179,7 +229,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 55,
+      "managerData": Object {
+        "lineNumber": 55,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -187,7 +239,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 56,
+      "managerData": Object {
+        "lineNumber": 56,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -195,7 +249,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 57,
+      "managerData": Object {
+        "lineNumber": 57,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -203,7 +259,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 58,
+      "managerData": Object {
+        "lineNumber": 58,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -211,7 +269,9 @@ Object {
       "depTypes": Array [
         "job",
       ],
-      "lineNumber": 59,
+      "managerData": Object {
+        "lineNumber": 59,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -219,7 +279,9 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 64,
+      "managerData": Object {
+        "lineNumber": 64,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -227,7 +289,9 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 66,
+      "managerData": Object {
+        "lineNumber": 66,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -237,14 +301,18 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 67,
+      "managerData": Object {
+        "lineNumber": 67,
+      },
     },
     Object {
       "depName": "redis-namespace",
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 69,
+      "managerData": Object {
+        "lineNumber": 69,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -252,7 +320,9 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 71,
+      "managerData": Object {
+        "lineNumber": 71,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -260,7 +330,9 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 73,
+      "managerData": Object {
+        "lineNumber": 73,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -268,7 +340,9 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 74,
+      "managerData": Object {
+        "lineNumber": 74,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -276,7 +350,9 @@ Object {
       "depTypes": Array [
         "cable",
       ],
-      "lineNumber": 75,
+      "managerData": Object {
+        "lineNumber": 75,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -284,7 +360,9 @@ Object {
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 80,
+      "managerData": Object {
+        "lineNumber": 80,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -294,14 +372,18 @@ Object {
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 81,
+      "managerData": Object {
+        "lineNumber": 81,
+      },
     },
     Object {
       "depName": "azure-storage",
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 82,
+      "managerData": Object {
+        "lineNumber": 82,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -311,16 +393,22 @@ Object {
       "depTypes": Array [
         "storage",
       ],
-      "lineNumber": 84,
+      "managerData": Object {
+        "lineNumber": 84,
+      },
     },
     Object {
       "depName": "aws-sdk-sns",
-      "lineNumber": 88,
+      "managerData": Object {
+        "lineNumber": 88,
+      },
       "skipReason": "no-version",
     },
     Object {
       "depName": "webmock",
-      "lineNumber": 89,
+      "managerData": Object {
+        "lineNumber": 89,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -328,7 +416,9 @@ Object {
       "depTypes": Array [
         "ujs",
       ],
-      "lineNumber": 92,
+      "managerData": Object {
+        "lineNumber": 92,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -336,7 +426,9 @@ Object {
       "depTypes": Array [
         "ujs",
       ],
-      "lineNumber": 93,
+      "managerData": Object {
+        "lineNumber": 93,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -344,7 +436,9 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 101,
+      "managerData": Object {
+        "lineNumber": 101,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -352,7 +446,9 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 102,
+      "managerData": Object {
+        "lineNumber": 102,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -360,7 +456,9 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 105,
+      "managerData": Object {
+        "lineNumber": 105,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -368,7 +466,9 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 106,
+      "managerData": Object {
+        "lineNumber": 106,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -376,26 +476,34 @@ Object {
       "depTypes": Array [
         "test",
       ],
-      "lineNumber": 109,
+      "managerData": Object {
+        "lineNumber": 109,
+      },
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 1.8.1",
       "datasource": "rubygems",
       "depName": "nokogiri",
-      "lineNumber": 113,
+      "managerData": Object {
+        "lineNumber": 113,
+      },
     },
     Object {
       "currentValue": ">=1.4.6",
       "datasource": "rubygems",
       "depName": "racc",
-      "lineNumber": 116,
+      "managerData": Object {
+        "lineNumber": 116,
+      },
     },
     Object {
       "currentValue": "~> 1.3.6",
       "datasource": "rubygems",
       "depName": "sqlite3",
-      "lineNumber": 119,
+      "managerData": Object {
+        "lineNumber": 119,
+      },
     },
     Object {
       "currentValue": ">= 0.18.0",
@@ -404,7 +512,9 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 122,
+      "managerData": Object {
+        "lineNumber": 122,
+      },
     },
     Object {
       "currentValue": ">= 0.4.10",
@@ -413,11 +523,15 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 123,
+      "managerData": Object {
+        "lineNumber": 123,
+      },
     },
     Object {
       "depName": "activerecord-jdbcsqlite3-adapter",
-      "lineNumber": 129,
+      "managerData": Object {
+        "lineNumber": 129,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -425,7 +539,9 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 131,
+      "managerData": Object {
+        "lineNumber": 131,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -433,14 +549,18 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 132,
+      "managerData": Object {
+        "lineNumber": 132,
+      },
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 1.3.0",
       "datasource": "rubygems",
       "depName": "activerecord-jdbcsqlite3-adapter",
-      "lineNumber": 135,
+      "managerData": Object {
+        "lineNumber": 135,
+      },
     },
     Object {
       "currentValue": ">= 1.3.0",
@@ -449,7 +569,9 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 137,
+      "managerData": Object {
+        "lineNumber": 137,
+      },
     },
     Object {
       "currentValue": ">= 1.3.0",
@@ -458,40 +580,54 @@ Object {
       "depTypes": Array [
         "db",
       ],
-      "lineNumber": 138,
+      "managerData": Object {
+        "lineNumber": 138,
+      },
     },
     Object {
       "currentValue": "~> 3.0",
       "datasource": "rubygems",
       "depName": "psych",
-      "lineNumber": 146,
+      "managerData": Object {
+        "lineNumber": 146,
+      },
     },
     Object {
       "currentValue": "~> 2.2",
       "datasource": "rubygems",
       "depName": "ruby-oci8",
-      "lineNumber": 152,
+      "managerData": Object {
+        "lineNumber": 152,
+      },
     },
     Object {
       "depName": "activerecord-oracle_enhanced-adapter",
-      "lineNumber": 154,
+      "managerData": Object {
+        "lineNumber": 154,
+      },
       "skipReason": "no-version",
     },
     Object {
       "depName": "ibm_db",
-      "lineNumber": 158,
+      "managerData": Object {
+        "lineNumber": 158,
+      },
       "skipReason": "no-version",
     },
     Object {
       "depName": "tzinfo-data",
-      "lineNumber": 159,
+      "managerData": Object {
+        "lineNumber": 159,
+      },
       "skipReason": "no-version",
     },
     Object {
       "currentValue": ">= 0.1.0",
       "datasource": "rubygems",
       "depName": "wdm",
-      "lineNumber": 160,
+      "managerData": Object {
+        "lineNumber": 160,
+      },
     },
   ],
   "registryUrls": Array [
@@ -508,7 +644,9 @@ Object {
   "deps": Array [
     Object {
       "depName": "some_internal_gem",
-      "lineNumber": 4,
+      "managerData": Object {
+        "lineNumber": 4,
+      },
       "registryUrls": Array [
         "https://gems.example.com",
       ],
@@ -516,7 +654,9 @@ Object {
     },
     Object {
       "depName": "another_internal_gem",
-      "lineNumber": 5,
+      "managerData": Object {
+        "lineNumber": 5,
+      },
       "registryUrls": Array [
         "https://gems.example.com",
       ],
@@ -525,12 +665,16 @@ Object {
     Object {
       "currentValue": "latest",
       "depName": "ruby-debug",
-      "lineNumber": 9,
+      "managerData": Object {
+        "lineNumber": 9,
+      },
       "skipReason": "invalid-value",
     },
     Object {
       "depName": "sqlite3",
-      "lineNumber": 10,
+      "managerData": Object {
+        "lineNumber": 10,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -539,7 +683,9 @@ Object {
         "development",
         "optional => true",
       ],
-      "lineNumber": 14,
+      "managerData": Object {
+        "lineNumber": 14,
+      },
       "skipReason": "no-version",
     },
     Object {
@@ -548,7 +694,9 @@ Object {
         "development",
         "optional => true",
       ],
-      "lineNumber": 15,
+      "managerData": Object {
+        "lineNumber": 15,
+      },
       "skipReason": "no-version",
     },
   ],

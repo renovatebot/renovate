@@ -1,11 +1,17 @@
 jest.mock('fs-extra');
-jest.mock('child-process-promise');
+jest.mock('../../../lib/util/exec');
 jest.mock('../../../lib/util/host-rules');
 
+/** @type any */
 const fs = require('fs-extra');
-const { exec } = require('child-process-promise');
+/** @type any */
+const { exec } = require('../../../lib/util/exec');
 const composer = require('../../../lib/manager/composer/artifacts');
+/** @type any */
 const hostRules = require('../../../lib/util/host-rules');
+
+/** @type any */
+const platform = global.platform;
 
 const config = {
   localDir: '/tmp/github/some/repo',

@@ -101,6 +101,11 @@
       "type": "boolean",
       "default": true
     },
+    "optimizeForDisabled": {
+      "description": "Set to true to first check for disabling in config before cloning",
+      "type": "boolean",
+      "default": false
+    },
     "masterIssue": {
       "description": "Whether to create a \"Master Issue\" within the repository.",
       "type": "boolean",
@@ -457,11 +462,6 @@
       "type": "boolean",
       "default": true
     },
-    "unstablePattern": {
-      "description": "Regex for identifying unstable versions (docker only)",
-      "type": "string",
-      "format": "regex"
-    },
     "followTag": {
       "description": "If defined, packages will follow this release tag exactly.",
       "type": "string"
@@ -579,7 +579,7 @@
     "prCreation": {
       "description": "When to create the PR for a branch.",
       "type": "string",
-      "enum": ["immediate", "not-pending", "status-success"],
+      "enum": ["immediate", "not-pending", "status-success", "approval"],
       "default": "immediate"
     },
     "prNotPendingHours": {
@@ -1157,6 +1157,14 @@
       },
       "$ref": "#"
     },
+    "gitlabci-include": {
+      "description": "Configuration object for GitLab CI yml renovation for include.",
+      "type": "object",
+      "default": {
+        "fileMatch": ["^\\.gitlab-ci\\.yml$"]
+      },
+      "$ref": "#"
+    },
     "dotnet": {
       "description": "Configuration object for .NET language",
       "type": "object",
@@ -1261,6 +1269,11 @@
         "rangeStrategy": "bump"
       },
       "$ref": "#"
+    },
+    "pruneStaleBranches": {
+      "description": "Enable or disable pruning of stale branches",
+      "type": "boolean",
+      "default": true
     }
   }
 }

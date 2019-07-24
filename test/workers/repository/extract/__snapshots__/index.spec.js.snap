@@ -38,6 +38,9 @@ Object {
   "gitlabci": Array [
     Object {},
   ],
+  "gitlabci-include": Array [
+    Object {},
+  ],
   "gomod": Array [
     Object {},
   ],

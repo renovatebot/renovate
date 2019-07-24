@@ -1,3 +1,4 @@
+/** @type any */
 const mockDate = require('mockdate');
 const schedule = require('../../../lib/workers/branch/schedule');
 

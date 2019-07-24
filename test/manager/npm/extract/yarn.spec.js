@@ -1,6 +1,9 @@
 const fs = require('fs');
 const { getYarnLock } = require('../../../../lib/manager/npm/extract/yarn');
 
+/** @type any */
+const platform = global.platform;
+
 describe('manager/npm/extract/yarn', () => {
   describe('.getYarnLock()', () => {
     it('returns empty if exception parsing', async () => {

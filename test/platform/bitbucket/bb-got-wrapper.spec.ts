@@ -1,7 +1,7 @@
-import { IGotApi } from '../../../lib/platform/common';
+import { GotApi } from '../../../lib/platform/common';
 
 describe('platform/gl-got-wrapper', () => {
-  let api: IGotApi;
+  let api: GotApi;
   let got: jest.Mock<typeof import('got')>;
   let hostRules: typeof import('../../../lib/util/host-rules');
   beforeEach(() => {

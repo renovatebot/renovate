@@ -3,9 +3,6 @@ const fs = require('fs');
 const nock = require('nock');
 
 const { getPkgReleases } = require('../../../lib/datasource/sbt');
-const { initLogger } = require('../../../lib/logger');
-
-initLogger();
 
 const { DEFAULT_MAVEN_REPO } = require('../../../lib/manager/maven/extract');
 const {

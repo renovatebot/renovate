@@ -3,13 +3,15 @@
 exports[`lib/manager/gradle-wrapper/extract extractPackageFile() extracts all version line 1`] = `
 Array [
   Object {
-    "checksumLineNumber": 6,
     "currentValue": "4.10.3",
     "datasource": "gradleVersion",
     "depName": "gradle",
     "depType": "gradle-wrapper",
-    "gradleWrapperType": "all",
-    "lineNumber": 5,
+    "managerData": Object {
+      "checksumLineNumber": 6,
+      "gradleWrapperType": "all",
+      "lineNumber": 5,
+    },
     "versionScheme": "semver",
   },
 ]
@@ -22,8 +24,10 @@ Array [
     "datasource": "gradleVersion",
     "depName": "gradle",
     "depType": "gradle-wrapper",
-    "gradleWrapperType": "bin",
-    "lineNumber": 4,
+    "managerData": Object {
+      "gradleWrapperType": "bin",
+      "lineNumber": 4,
+    },
     "versionScheme": "semver",
   },
 ]

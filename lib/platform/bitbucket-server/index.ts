@@ -1,10 +1,22 @@
 import url from 'url';
 import delay from 'delay';
 
-import api from './bb-got-wrapper';
+import { api } from './bb-got-wrapper';
 import * as utils from './utils';
 import * as hostRules from '../../util/host-rules';
 import GitStorage from '../git/storage';
+import { logger } from '../../logger';
+import { RepoConfig, PlatformConfig } from '../common';
+
+/*
+ * Version: 5.3 (EOL Date: 15 Aug 2019)
+ * See following docs for api information:
+ * https://docs.atlassian.com/bitbucket-server/rest/5.3.0/bitbucket-rest.html
+ * https://docs.atlassian.com/bitbucket-server/rest/5.3.0/bitbucket-build-rest.html
+ *
+ * See following page for uptodate supported versions
+ * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
+ */
 
 interface BbsConfig {
   baseBranch: string;
@@ -20,6 +32,8 @@ interface BbsConfig {
   storage: GitStorage;
 
   prVersions: Map<number, number>;
+
+  username: string;
 }
 
 let config: BbsConfig = {} as any;
@@ -93,13 +107,9 @@ export async function initRepo({
   repository,
   gitPrivateKey,
   localDir,
+  optimizeForDisabled,
   bbUseDefaultReviewers,
-}: {
-  repository: string;
-  gitPrivateKey?: string;
-  localDir: string;
-  bbUseDefaultReviewers?: boolean;
-}) {
+}: RepoConfig) {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
@@ -109,12 +119,42 @@ export async function initRepo({
   });
 
   const [projectKey, repositorySlug] = repository.split('/');
+
+  if (optimizeForDisabled) {
+    interface RenovateConfig {
+      enabled: boolean;
+    }
+
+    interface FileData {
+      isLastPage: boolean;
+
+      lines: string[];
+
+      size: number;
+    }
+
+    let renovateConfig: RenovateConfig;
+    try {
+      const { body } = await api.get<FileData>(
+        `./rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/renovate.json?limit=20000`
+      );
+      if (!body.isLastPage) logger.warn('Renovate config to big: ' + body.size);
+      else renovateConfig = JSON.parse(body.lines.join());
+    } catch {
+      // Do nothing
+    }
+    if (renovateConfig && renovateConfig.enabled === false) {
+      throw new Error('disabled');
+    }
+  }
+
   config = {
     projectKey,
     repositorySlug,
     gitPrivateKey,
     repository,
     prVersions: new Map<number, number>(),
+    username: opts!.username,
   } as any;
 
   /* istanbul ignore else */
@@ -140,7 +180,7 @@ export async function initRepo({
     url: gitUrl,
   });
 
-  const platformConfig: any = {};
+  const platformConfig: PlatformConfig = {} as any;
 
   try {
     const info = (await api.get(
@@ -164,8 +204,6 @@ export async function initRepo({
     logger.info({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
-  delete config.prList;
-  delete config.fileList;
   logger.debug(
     { platformConfig },
     `platformConfig for ${config.projectKey}/${config.repositorySlug}`
@@ -623,8 +661,13 @@ export async function getPrList(_args?: any) {
   logger.debug(`getPrList()`);
   // istanbul ignore next
   if (!config.prList) {
+    const query = new URLSearchParams({
+      state: 'ALL',
+      'role.1': 'AUTHOR',
+      'username.1': config.username,
+    }).toString();
     const values = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?state=ALL&limit=100`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
     );
 
     config.prList = values.map(utils.prInfo);

@@ -8,6 +8,9 @@ const {
   updateDependency,
 } = require('../../../lib/manager/maven/index');
 
+/** @type any */
+const platform = global.platform;
+
 const pomContent = fs.readFileSync(
   'test/manager/maven/_fixtures/simple.pom.xml',
   'utf8'
@@ -18,6 +21,10 @@ const pomParent = fs.readFileSync(
 );
 const pomChild = fs.readFileSync(
   'test/manager/maven/_fixtures/child.pom.xml',
+  'utf8'
+);
+const origContent = fs.readFileSync(
+  'test/manager/maven/_fixtures/grouping.pom.xml',
   'utf8'
 );
 
@@ -42,12 +49,7 @@ describe('manager/maven', () => {
     it('should return package files info', async () => {
       platform.getFile.mockReturnValueOnce(pomContent);
       const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
-      expect(packages).toHaveLength(1);
-
-      const pkg = packages[0];
-      expect(pkg.packageFile).toEqual('random.pom.xml');
-      expect(pkg.datasource).toEqual('maven');
-      expect(pkg.deps).not.toBeNull();
+      expect(packages).toMatchSnapshot();
     });
   });
 
@@ -95,6 +97,48 @@ describe('manager/maven', () => {
       const updatedContent = updateDependency(pomContent, upgrade);
 
       expect(pomContent).toBe(updatedContent);
+    });
+
+    it('should update to version of the latest dep in implicit group', async () => {
+      platform.getFile.mockReturnValueOnce(origContent);
+      const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
+
+      const dep1 = selectDep(deps, 'org.example:foo-1');
+      const upgrade1 = { ...dep1, newValue: '1.0.2' };
+
+      const dep2 = selectDep(deps, 'org.example:foo-2');
+      const upgrade2 = { ...dep2, newValue: '1.0.3' };
+
+      const updatedOutside = origContent.replace('1.0.0', '1.0.1');
+
+      expect(updateDependency(origContent, upgrade1)).toEqual(
+        origContent.replace('1.0.0', '1.0.2')
+      );
+      expect(updateDependency(updatedOutside, upgrade1)).toEqual(
+        origContent.replace('1.0.0', '1.0.2')
+      );
+
+      const updatedByPrevious = updateDependency(origContent, upgrade1);
+
+      expect(updateDependency(updatedByPrevious, upgrade2)).toEqual(
+        origContent.replace('1.0.0', '1.0.3')
+      );
+      expect(updateDependency(updatedOutside, upgrade2)).toEqual(
+        origContent.replace('1.0.0', '1.0.3')
+      );
+
+      expect(updateDependency(origContent, upgrade2)).toEqual(
+        origContent.replace('1.0.0', '1.0.3')
+      );
+    });
+
+    it('should return null for ungrouped deps if content was updated outside', async () => {
+      platform.getFile.mockReturnValueOnce(origContent);
+      const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
+      const dep = selectDep(deps, 'org.example:bar');
+      const upgrade = { ...dep, newValue: '2.0.2' };
+      const updatedOutside = origContent.replace('2.0.0', '2.0.1');
+      expect(updateDependency(updatedOutside, upgrade)).toBeNull();
     });
 
     it('should return null if current versions in content and upgrade are not same', () => {

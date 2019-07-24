@@ -259,7 +259,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -490,7 +490,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -519,7 +519,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -534,7 +534,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -570,7 +570,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
   Array [
@@ -961,7 +961,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -979,6 +979,14 @@ Array [
 exports[`platform/bitbucket-server endpoint with no path initPlatform() should init 1`] = `
 Object {
   "endpoint": "https://stash.renovatebot.com/",
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with no path initRepo() does not throw 1`] = `
+Object {
+  "isFork": false,
+  "privateRepo": undefined,
+  "repoFullName": "repo",
 }
 `;
 
@@ -1713,7 +1721,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1944,7 +1952,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1973,7 +1981,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -1988,7 +1996,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -2024,7 +2032,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
   Array [
@@ -2415,7 +2423,7 @@ Array [
     "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
   ],
   Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&limit=100",
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
     undefined,
   ],
 ]
@@ -2433,6 +2441,14 @@ Array [
 exports[`platform/bitbucket-server endpoint with path initPlatform() should init 1`] = `
 Object {
   "endpoint": "https://stash.renovatebot.com/",
+}
+`;
+
+exports[`platform/bitbucket-server endpoint with path initRepo() does not throw 1`] = `
+Object {
+  "isFork": false,
+  "privateRepo": undefined,
+  "repoFullName": "repo",
 }
 `;
 

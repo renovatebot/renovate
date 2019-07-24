@@ -1,4 +1,6 @@
+const datasource = require('../../lib/datasource');
 const gitlab = require('../../lib/datasource/gitlab');
+/** @type any */
 const glGot = require('../../lib/platform/gitlab/gl-got-wrapper').api.get;
 
 jest.mock('../../lib/platform/gitlab/gl-got-wrapper');
@@ -45,6 +47,39 @@ describe('datasource/gitlab', () => {
       });
       const content = await gitlab.getPreset('some/repo');
       expect(content).toEqual({ foo: 'bar' });
+    });
+  });
+  describe('getPkgReleases', () => {
+    beforeAll(() => global.renovateCache.rmAll());
+    it('returns releases', async () => {
+      const body = [
+        { tag_name: 'a' },
+        { tag_name: 'v' },
+        { tag_name: '1.0.0' },
+        { tag_name: 'v1.1.0' },
+      ];
+      glGot.mockReturnValueOnce({ headers: {}, body });
+      const res = await datasource.getPkgReleases({
+        datasource: 'gitlab',
+        depName: 'some/dep',
+        lookupType: 'releases',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
+      expect(
+        res.releases.find(release => release.version === 'v1.1.0')
+      ).toBeDefined();
+    });
+    it('returns tags', async () => {
+      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
+      glGot.mockReturnValueOnce({ headers: {}, body });
+      const res = await datasource.getPkgReleases({
+        registryUrls: ['https://gitlab.company.com/api/v4/'],
+        datasource: 'gitlab',
+        depName: 'some/dep2',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(2);
     });
   });
 });

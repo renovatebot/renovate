@@ -3,6 +3,7 @@ const {
 } = require('../../../../lib/workers/repository/process/fetch');
 
 const npm = require('../../../../lib/manager/npm');
+/** @type any */
 const lookup = require('../../../../lib/workers/repository/process/lookup');
 
 jest.mock('../../../../lib/workers/repository/process/lookup');

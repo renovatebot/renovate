@@ -1,14 +1,14 @@
 import responses from './_fixtures/responses';
-import { IGotApi } from '../../../lib/platform/common';
-import Storage from '../../../lib/platform/git/storage';
+import { GotApi, RepoConfig } from '../../../lib/platform/common';
+import { Storage } from '../../../lib/platform/git/storage';
 
 type BbsApi = typeof import('../../../lib/platform/bitbucket-server');
 
 describe('platform/bitbucket-server', () => {
   Object.entries(responses).forEach(([scenarioName, mockResponses]) => {
     describe(scenarioName, () => {
-      let bitbucket: typeof import('../../../lib/platform/bitbucket-server');
-      let api: jest.Mocked<IGotApi>;
+      let bitbucket: BbsApi;
+      let api: jest.Mocked<GotApi>;
       let hostRules: jest.Mocked<typeof import('../../../lib/util/host-rules')>;
       let GitStorage: jest.Mock<Storage> & {
         getUrl: jest.MockInstance<any, any>;
@@ -83,10 +83,11 @@ describe('platform/bitbucket-server', () => {
         bitbucket.cleanRepo();
       });
 
-      function initRepo() {
+      function initRepo(config?: Partial<RepoConfig>) {
         return bitbucket.initRepo({
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
+          ...config,
         } as any);
       }
 
@@ -125,6 +126,29 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(1);
           const res = await initRepo();
           expect(res).toMatchSnapshot();
+        });
+        it('does not throw', async () => {
+          expect.assertions(1);
+          api.get.mockResolvedValueOnce({
+            body: {
+              isLastPage: false,
+              lines: ['{'],
+              size: 50000,
+            },
+          } as any);
+
+          const res = await initRepo({ optimizeForDisabled: true });
+          expect(res).toMatchSnapshot();
+        });
+
+        it('throws disabled', async () => {
+          expect.assertions(1);
+          api.get.mockResolvedValueOnce({
+            body: { isLastPage: true, lines: ['{ "enabled": false }'] },
+          } as any);
+          await expect(initRepo({ optimizeForDisabled: true })).rejects.toThrow(
+            'disabled'
+          );
         });
       });
 

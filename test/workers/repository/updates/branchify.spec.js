@@ -1,3 +1,4 @@
+/** @type any */
 let config;
 beforeEach(() => {
   jest.resetAllMocks();
@@ -9,6 +10,8 @@ beforeEach(() => {
 const {
   branchifyUpgrades,
 } = require('../../../../lib/workers/repository/updates/branchify');
+
+/** @type any */
 const {
   flattenUpdates,
 } = require('../../../../lib/workers/repository/updates/flatten');
