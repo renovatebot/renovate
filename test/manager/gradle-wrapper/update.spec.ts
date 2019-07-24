@@ -1,10 +1,10 @@
 import fs from 'fs';
-import * as dcUpdate from '../../../lib/manager/gradle-wrapper/update';
+import * as dcUpdate from '../../../lib/manager/gradle-wrapper';
 import * as _got from '../../../lib/util/got';
 
 jest.mock('../../../lib/util/got');
 
-const got: jest.Mocked<typeof _got> = _got as any;
+const got: jest.Mock<any> = _got as any;
 
 const propertiesFile2 = fs.readFileSync(
   'test/datasource/gradle-wrapper/_fixtures/gradle-wrapper-2.properties',
@@ -74,18 +74,18 @@ describe('manager/gradle-wrapper/update', () => {
       const upgrade = {
         toVersion: '4.10.3',
         version: '4.10.3',
-        lineNumber: 5,
-        checksumLineNumber: 6,
+        managerData: {
+          lineNumber: 5,
+          checksumLineNumber: 6,
+        },
         downloadUrl:
           'https://services.gradle.org/distributions/gradle-4.10.3-all.zip',
         checksumUrl:
           'https://services.gradle.org/distributions/gradle-4.10.3-all.zip.sha256',
       };
-      got.mockImplementation(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
+      got.mockRejectedValueOnce({
+        statusCode: 404,
+      });
       const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
       expect(res).toBeNull();
     });
@@ -94,16 +94,16 @@ describe('manager/gradle-wrapper/update', () => {
       const upgrade = {
         toVersion: '4.10.3',
         version: '4.10.3',
-        lineNumber: 5,
-        checksumLineNumber: 6,
+        managerData: {
+          lineNumber: 5,
+          checksumLineNumber: 6,
+        },
         downloadUrl:
           'https://services.gradle.org/distributions/gradle-4.10.3-all.zip',
         checksumUrl:
           'https://services.gradle.org/distributions/gradle-4.10.3-all.zip.sha256',
       };
-      got.mockImplementation(() => {
-        throw new Error();
-      });
+      got.mockRejectedValueOnce(new Error());
       const res = await dcUpdate.updateDependency(propertiesFile2, upgrade);
       expect(res).toBeNull();
     });
