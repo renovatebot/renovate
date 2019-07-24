@@ -6,6 +6,7 @@ RUN yarn install --frozen-lockfile
 
 COPY lib lib
 COPY tsconfig.json tsconfig.json
+COPY tsconfig.dts.json tsconfig.dts.json
 COPY tsconfig.app.json tsconfig.app.json
 
 RUN yarn build
