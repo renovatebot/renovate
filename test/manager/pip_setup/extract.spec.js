@@ -1,7 +1,7 @@
 const fs = require('fs');
-const { exec } = require('child-process-promise');
 const tmp = require('tmp-promise');
 const { relative } = require('path');
+const { exec } = require('../../../lib/util/exec');
 const {
   extractPackageFile,
   parsePythonVersion,
@@ -49,7 +49,7 @@ describe('lib/manager/pip_setup/extract', () => {
       const fExec = jest.fn(() => {
         throw new Error('No such file or directory');
       });
-      jest.doMock('child-process-promise', () => {
+      jest.doMock('../../../lib/util/exec', () => {
         return {
           exec: fExec,
         };
@@ -73,7 +73,7 @@ describe('lib/manager/pip_setup/extract', () => {
       const fExec = jest.fn(() =>
         Promise.resolve({ stderr: 'Python 3.7.15rc1' })
       );
-      jest.doMock('child-process-promise', () => {
+      jest.doMock('../../../lib/util/exec', () => {
         return {
           exec: fExec,
         };
@@ -85,7 +85,7 @@ describe('lib/manager/pip_setup/extract', () => {
   });
   describe('Test for presence of mock lib', () => {
     it('should test if python mock lib is installed', async () => {
-      const cp = jest.requireActual('child-process-promise');
+      const cp = jest.requireActual('../../../lib/util/exec');
       let isMockInstalled = true;
       // when binarysource === docker
       try {

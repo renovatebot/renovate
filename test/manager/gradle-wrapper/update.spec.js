@@ -17,11 +17,13 @@ describe('manager/gradle-wrapper/update', () => {
 
     it('replaces existing value', async () => {
       const upgrade = {
-        gradleWrapperType: 'all',
         toVersion: '5.0.0',
         version: '5.0.0',
-        lineNumber: 5,
-        checksumLineNumber: 6,
+        managerData: {
+          gradleWrapperType: 'all',
+          lineNumber: 5,
+          checksumLineNumber: 6,
+        },
         downloadUrl:
           'https://services.gradle.org/distributions/gradle-5.0-bin.zip',
         checksumUrl:
@@ -48,8 +50,10 @@ describe('manager/gradle-wrapper/update', () => {
       const upgrade = {
         toVersion: '4.10.3',
         version: '4.10.3',
-        lineNumber: 5,
-        checksumLineNumber: 6,
+        managerData: {
+          lineNumber: 5,
+          checksumLineNumber: 6,
+        },
         downloadUrl:
           'https://services.gradle.org/distributions/gradle-4.10.3-all.zip',
         checksumUrl:

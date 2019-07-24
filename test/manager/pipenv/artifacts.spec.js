@@ -1,10 +1,11 @@
 jest.mock('fs-extra');
-jest.mock('child-process-promise');
+jest.mock('../../../lib/util/exec');
 jest.mock('../../../lib/util/host-rules');
 
 /** @type any */
 const fs = require('fs-extra');
-const { exec } = require('child-process-promise');
+/** @type any */
+const { exec } = require('../../../lib/util/exec');
 const pipenv = require('../../../lib/manager/pipenv/artifacts');
 
 /** @type any */
