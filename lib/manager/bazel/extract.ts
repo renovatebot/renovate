@@ -4,8 +4,6 @@ import { parse as _parse } from 'url';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 
-export { extractPackageFile };
-
 function parseUrl(urlString: string) {
   // istanbul ignore if
   if (!urlString) {
@@ -88,7 +86,7 @@ function parseContent(content: string) {
   );
 }
 
-function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFile {
   const definitions = parseContent(content);
   if (!definitions.length) {
     logger.debug('No matching WORKSPACE definitions found');
@@ -99,7 +97,7 @@ function extractPackageFile(content: string): PackageFile {
   definitions.forEach(def => {
     logger.debug({ def }, 'Checking bazel definition');
     const [depType] = def.split('(', 1);
-    const dep: PackageDependency  = { depType, managerData: { def } };
+    const dep: PackageDependency = { depType, managerData: { def } };
     let depName: string;
     let importpath: string;
     let remote: string;
