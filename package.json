@@ -93,7 +93,7 @@
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@sindresorhus/is": "1.0.0",
-    "@snyk/ruby-semver": "2.0.3",
+    "@snyk/ruby-semver": "2.0.4",
     "@yarnpkg/lockfile": "1.1.0",
     "azure-devops-node-api": "8.1.1",
     "bunyan": "1.8.12",
