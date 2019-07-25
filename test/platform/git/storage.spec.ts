@@ -149,6 +149,20 @@ describe('platform/git/storage', () => {
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found')).rejects.toThrow();
     });
+    it('should throw if branch merge is stale', async () => {
+      expect.assertions(1);
+      await git.setBranchPrefix('renovate/');
+      await git.commitFilesToBranch(
+        'test',
+        [{ name: 'some-new-file', contents: 'some new-contents' }],
+        'test mesage',
+        'renovate/past_branch'
+      );
+
+      await git.setBaseBranch('master');
+
+      await expect(git.mergeBranch('test')).rejects.toThrow();
+    });
   });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
