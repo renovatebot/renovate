@@ -1,28 +1,29 @@
-const { logger } = require('../logger');
-const { addMetaData } = require('./metadata');
-const versioning = require('../versioning');
+import { logger } from '../logger';
+import { addMetaData } from './metadata';
+import { get } from '../versioning';
 
-const cargo = require('./cargo');
-const dart = require('./dart');
-const docker = require('./docker');
-const hex = require('./hex');
-const github = require('./github');
-const gitlab = require('./gitlab');
-const gitTags = require('./git-tags');
-const go = require('./go');
-const gradleVersion = require('./gradle-version');
-const maven = require('./maven');
-const npm = require('./npm');
-const nuget = require('./nuget');
-const orb = require('./orb');
-const packagist = require('./packagist');
-const pypi = require('./pypi');
-const rubygems = require('./rubygems');
-const rubyVersion = require('./ruby-version');
-const sbt = require('./sbt');
-const terraform = require('./terraform');
+import * as cargo from './cargo';
+import * as dart from './dart';
+import * as docker from './docker';
+import * as hex from './hex';
+import * as github from './github';
+import * as gitlab from './gitlab';
+import * as gitTags from './git-tags';
+import * as go from './go';
+import * as gradleVersion from './gradle-version';
+import * as maven from './maven';
+import * as npm from './npm';
+import * as nuget from './nuget';
+import * as orb from './orb';
+import * as packagist from './packagist';
+import * as pypi from './pypi';
+import * as rubygems from './rubygems';
+import * as rubyVersion from './ruby-version';
+import * as sbt from './sbt';
+import * as terraform from './terraform';
+import { Datasource, PkgReleaseConfig, Release, ReleaseResult } from './common';
 
-const datasources = {
+const datasources: Record<string, Datasource> = {
   cargo,
   dart,
   docker,
@@ -46,7 +47,7 @@ const datasources = {
 
 const cacheNamespace = 'datasource-releases';
 
-async function getPkgReleases(config) {
+export async function getPkgReleases(config: PkgReleaseConfig) {
   const res = await getRawReleases({
     ...config,
     lookupName: config.lookupName || config.depName,
@@ -57,9 +58,9 @@ async function getPkgReleases(config) {
   const versionScheme =
     config && config.versionScheme ? config.versionScheme : 'semver';
   // Filter by version scheme
-  const { isVersion, sortVersions } = versioning.get(versionScheme);
+  const { isVersion, sortVersions } = get(versionScheme);
   // Return a sorted list of valid Versions
-  function sortReleases(release1, release2) {
+  function sortReleases(release1: Release, release2: Release) {
     return sortVersions(release1.version, release2.version);
   }
   if (res.releases) {
@@ -70,7 +71,7 @@ async function getPkgReleases(config) {
   return res;
 }
 
-function getRawReleases(config) {
+function getRawReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
   const cacheKey =
     cacheNamespace +
     config.datasource +
@@ -84,7 +85,7 @@ function getRawReleases(config) {
   return global.repoCache[cacheKey];
 }
 
-async function fetchReleases(config) {
+async function fetchReleases(config: PkgReleaseConfig): Promise<ReleaseResult> {
   const { datasource } = config;
   if (!datasource) {
     logger.warn('No datasource found');
@@ -98,11 +99,19 @@ async function fetchReleases(config) {
   return dep;
 }
 
-function supportsDigests(config) {
+export function supportsDigests(config: { datasource: string }) {
   return !!datasources[config.datasource].getDigest;
 }
 
-function getDigest(config, value) {
+export function getDigest(
+  config: {
+    datasource: string;
+    depName?: string;
+    registryUrls?: string[];
+    lookupName?: string;
+  },
+  value?: string
+) {
   const lookupName = config.lookupName || config.depName;
   const { registryUrls } = config;
   return datasources[config.datasource].getDigest(
@@ -110,9 +119,3 @@ function getDigest(config, value) {
     value
   );
 }
-
-module.exports = {
-  getPkgReleases,
-  supportsDigests,
-  getDigest,
-};

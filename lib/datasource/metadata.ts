@@ -1,8 +1,6 @@
 import is from '@sindresorhus/is';
-
-const parse = require('github-url-from-git');
-
-export { addMetaData };
+import parse from 'github-url-from-git';
+import { ReleaseResult } from './common';
 
 // Use this object to define changelog URLs for packages
 // Only necessary when the changelog data cannot be found in the package's source repository
@@ -64,7 +62,11 @@ const manualSourceUrls = {
 };
 
 /* eslint-disable no-param-reassign */
-function addMetaData(dep, datasource, lookupName) {
+export function addMetaData(
+  dep?: ReleaseResult,
+  datasource?: string,
+  lookupName?: string
+) {
   if (!dep) {
     return;
   }

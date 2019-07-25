@@ -21,6 +21,7 @@ const mailchimpJson = fs.readFileSync(
 
 describe('datasource/packagist', () => {
   describe('getPkgReleases', () => {
+    /** @type any */
     let config;
     beforeEach(() => {
       jest.resetAllMocks();
