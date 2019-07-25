@@ -199,6 +199,21 @@ describe('workers/branch', () => {
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
+    it('returns if branch automerged (dry-run)', async () => {
+      getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
+        updatedPackageFiles: [{}],
+      });
+      npmPostExtract.getAdditionalFiles.mockReturnValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [{}],
+      });
+      platform.branchExists.mockReturnValueOnce(true);
+      automerge.tryBranchAutomerge.mockReturnValueOnce('automerged');
+      await branchWorker.processBranch({ ...config, dryRun: true });
+      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
+      expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
+    });
     it('returns if branch exists and prCreation set to approval', async () => {
       getUpdated.getUpdatedPackageFiles.mockReturnValueOnce({
         updatedPackageFiles: [{}],
