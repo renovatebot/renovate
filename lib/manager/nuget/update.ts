@@ -3,7 +3,7 @@ import { Upgrade } from '../common';
 
 export function updateDependency(
   fileContent: string,
-  upgrade: Upgrade<{ lineNumber: number }>
+  upgrade: Upgrade
 ): string {
   try {
     logger.debug(`nuget.updateDependency(): ${upgrade.newFrom}`);

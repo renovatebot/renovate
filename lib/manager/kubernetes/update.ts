@@ -4,7 +4,7 @@ import { Upgrade } from '../common';
 
 export function updateDependency(
   fileContent: string,
-  upgrade: Upgrade<{ lineNumber: number }>
+  upgrade: Upgrade
 ): string {
   try {
     const newFrom = getNewFrom(upgrade);

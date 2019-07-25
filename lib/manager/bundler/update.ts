@@ -9,7 +9,7 @@ import { Upgrade } from '../common';
 
 export function updateDependency(
   currentFileContent: string,
-  upgrade: Upgrade<{ lineNumber: number }>
+  upgrade: Upgrade
 ): string {
   try {
     const delimiter =
