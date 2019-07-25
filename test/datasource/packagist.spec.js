@@ -30,10 +30,8 @@ describe('datasource/packagist', () => {
         datasource: 'packagist',
         versionScheme: 'composer',
         registryUrls: [
-          {
-            type: 'composer',
-            url: 'https://composer.renovatebot.com',
-          },
+          'https://composer.renovatebot.com',
+          'https://packagist.org',
         ],
       };
       return global.renovateCache.rmAll();
@@ -41,30 +39,7 @@ describe('datasource/packagist', () => {
     it('supports custom registries', async () => {
       config = {
         datasource: 'packagist',
-        registryUrls: [
-          {
-            type: 'composer',
-            url: 'https://composer.renovatebot.com',
-          },
-          {
-            type: 'unknown',
-          },
-          {
-            type: 'package',
-            package: {
-              name: 'abc/def',
-              type: 'wordpress-theme',
-              version: '1.2.6',
-              dist: {
-                type: 'zip',
-                url: 'https://github.com/abc/def/archive/v1.2.6.zip',
-              },
-            },
-          },
-          {
-            'packagist.org': false,
-          },
-        ],
+        registryUrls: ['https://composer.renovatebot.com'],
       };
       const res = await datasource.getPkgReleases({
         ...config,
@@ -236,7 +211,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(mailchimpJson),
       });
-      delete config.registryUrls;
+      config.registryUrls = ['https://packagist.org'];
       expect(
         await datasource.getPkgReleases({
           ...config,
