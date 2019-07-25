@@ -137,7 +137,7 @@
     "pnpm": "3.6.0",
     "registry-auth-token": "4.0.0",
     "safe-regex": "2.0.2",
-    "semver": "6.2.0",
+    "semver": "6.3.0",
     "semver-stable": "2.0.4",
     "semver-utils": "1.1.4",
     "simple-git": "1.122.0",
