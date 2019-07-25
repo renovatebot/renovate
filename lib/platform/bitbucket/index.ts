@@ -597,7 +597,14 @@ export async function getPr(prNo: number) {
       pr.links.commits.href + '?pagelen=1'
     );
 
-    if (body.size === 1) {
+    // istanbul ignore if
+    if (body.size === undefined) {
+      logger.warn(
+        { prNo, url: pr.links.commits.href + '?pagelen=1', body },
+        'invalid response so can rebase'
+      );
+      pr.canRebase = true;
+    } else if (body.size === 1) {
       if (global.gitAuthor) {
         const author = addrs.parseOneAddress(
           body.values[0].author.raw
