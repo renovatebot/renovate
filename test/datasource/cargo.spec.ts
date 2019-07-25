@@ -1,14 +1,13 @@
-const fs = require('fs');
+import { readFileSync } from 'fs';
 
-const got = require('../../lib/util/got');
-const { getPkgReleases } = require('../../lib/datasource/cargo');
+import _got from '../../lib/util/got';
+import { getPkgReleases } from '../../lib/datasource/cargo';
 
-const res1 = fs.readFileSync('test/datasource/cargo/_fixtures/libc', 'utf8');
-const res2 = fs.readFileSync(
-  'test/datasource/cargo/_fixtures/amethyst',
-  'utf8'
-);
-const res3 = fs.readFileSync(
+const got: any = _got;
+
+const res1 = readFileSync('test/datasource/cargo/_fixtures/libc', 'utf8');
+const res2 = readFileSync('test/datasource/cargo/_fixtures/amethyst', 'utf8');
+const res3 = readFileSync(
   'test/datasource/cargo/_fixtures/invalid_crate_data',
   'utf8'
 );

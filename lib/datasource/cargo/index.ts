@@ -1,25 +1,27 @@
-const { logger } = require('../../logger');
-const got = require('../../util/got');
+import { logger } from '../../logger';
+import got from '../../util/got';
+import { PkgReleaseConfig, ReleaseResult, Release } from '../common';
 
-module.exports = {
-  getPkgReleases,
-};
-
-async function getPkgReleases({ lookupName }) {
+export async function getPkgReleases({
+  lookupName,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
   if (!lookupName) {
     return null;
   }
 
   const cacheNamespace = 'datasource-cargo';
   const cacheKey = lookupName;
-  const cachedResult = await renovateCache.get(cacheNamespace, cacheKey);
+  const cachedResult = await renovateCache.get<ReleaseResult>(
+    cacheNamespace,
+    cacheKey
+  );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
 
   const len = lookupName.length;
-  let path;
+  let path: string;
   // Ignored because there is no way to test this without hitting up GitHub API
   /* istanbul ignore next */
   if (len === 1) {
@@ -72,11 +74,11 @@ async function getPkgReleases({ lookupName }) {
       );
       return null;
     }
-    const result = {
+    const result: ReleaseResult = {
       releases: [],
     };
-    result.releases = res.map(version => {
-      const release = {
+    result.releases = res.map((version: { vers: string; yanked: boolean }) => {
+      const release: Release = {
         version: version.vers,
       };
       if (version.yanked) {
