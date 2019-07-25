@@ -6,7 +6,7 @@ export type Result<T> = T | Promise<T>;
 export interface ManagerConfig {
   binarySource?: string;
   localDir?: string;
-  registryUrls?: (string | Registry)[];
+  registryUrls?: string[];
 }
 
 export interface ManagerData<T> {
@@ -53,11 +53,6 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   rangeStrategy: RangeStrategy;
 }
 
-export interface Registry {
-  type?: string;
-  url: string;
-}
-
 export interface NpmLockFiles {
   yarnIntegrity?: boolean;
   yarnLock?: string;
@@ -75,7 +70,7 @@ export interface PackageFile<T = Record<string, any>>
   internalPackages?: string[];
   compatibility?: Record<string, string>;
   datasource?: string;
-  registryUrls?: (string | Registry)[];
+  registryUrls?: string[];
   deps: PackageDependency[];
   ignoreNpmrcFile?: boolean;
   lernaClient?: string;
