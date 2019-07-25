@@ -1,8 +1,10 @@
-const got = require('../../lib/util/got');
-const docker = require('../../lib/datasource/docker');
-const { getPkgReleases } = require('../../lib/datasource');
-/** @type any */
-const hostRules = require('../../lib/util/host-rules');
+import _got from '../../lib/util/got';
+import * as docker from '../../lib/datasource/docker';
+import { getPkgReleases } from '../../lib/datasource';
+import * as _hostRules from '../../lib/util/host-rules';
+
+const got: any = _got;
+const hostRules: any = _hostRules;
 
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');

@@ -1,24 +1,18 @@
 import is from '@sindresorhus/is';
+import hasha from 'hasha';
+import URL from 'url';
+import parseLinkHeader from 'parse-link-header';
+import wwwAuthenticate from 'www-authenticate';
+import { logger } from '../../logger';
+import got from '../../util/got';
+import * as hostRules from '../../util/host-rules';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-const hasha = require('hasha');
-const URL = require('url');
-const parseLinkHeader = require('parse-link-header');
-const wwwAuthenticate = require('www-authenticate');
-const { logger } = require('../../logger');
+// TODO: add got typings when available
+// TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
 
-const got = require('../../util/got');
-const hostRules = require('../../util/host-rules');
-
-export { getDigest, getPkgReleases };
-
-/**
- *
- * @param {string} lookupName
- * @param {string[]=} registryUrls
- */
-function getRegistryRepository(lookupName, registryUrls) {
-  /** @type string */
-  let registry;
+function getRegistryRepository(lookupName: string, registryUrls: string[]) {
+  let registry: string;
   const split = lookupName.split('/');
   if (split.length > 1 && split[0].includes('.')) {
     [registry] = split;
@@ -43,7 +37,7 @@ function getRegistryRepository(lookupName, registryUrls) {
   };
 }
 
-async function getAuthHeaders(registry, repository) {
+async function getAuthHeaders(registry: string, repository: string) {
   try {
     const apiCheckUrl = `${registry}/v2/`;
     const apiCheckResponse = await got(apiCheckUrl, { throwHttpErrors: false });
@@ -54,8 +48,9 @@ async function getAuthHeaders(registry, repository) {
       apiCheckResponse.headers['www-authenticate']
     );
 
-    /** @type any */
-    const opts = hostRules.find({ hostType: 'docker', url: apiCheckUrl });
+    const opts: hostRules.HostRule & {
+      headers?: Record<string, string>;
+    } = hostRules.find({ hostType: 'docker', url: apiCheckUrl });
     opts.json = true;
     if (opts.username && opts.password) {
       const auth = Buffer.from(`${opts.username}:${opts.password}`).toString(
@@ -119,7 +114,7 @@ async function getAuthHeaders(registry, repository) {
   }
 }
 
-function digestFromManifestStr(str) {
+function digestFromManifestStr(str: hasha.HashaInput) {
   return 'sha256:' + hasha(str, { algorithm: 'sha256' });
 }
 
@@ -130,7 +125,11 @@ function extractDigestFromResponse(manifestResponse) {
   return manifestResponse.headers['docker-content-digest'];
 }
 
-async function getManifestResponse(registry, repository, tag) {
+async function getManifestResponse(
+  registry: string,
+  repository: string,
+  tag: string
+) {
   logger.debug(`getManifestResponse(${registry}, ${repository}, ${tag})`);
   try {
     const headers = await getAuthHeaders(registry, repository);
@@ -213,10 +212,11 @@ async function getManifestResponse(registry, repository, tag) {
  * This function will:
  *  - Look up a sha256 digest for a tag on its registry
  *  - Return the digest as a string
- * @param {{registryUrls? : string[], lookupName: string}} args
- * @param {string=} newValue
  */
-async function getDigest({ registryUrls, lookupName }, newValue) {
+export async function getDigest(
+  { registryUrls, lookupName }: PkgReleaseConfig,
+  newValue?: string
+): Promise<string> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
     registryUrls
@@ -260,12 +260,18 @@ async function getDigest({ registryUrls, lookupName }, newValue) {
   }
 }
 
-async function getTags(registry, repository) {
-  let tags = [];
+async function getTags(
+  registry: string,
+  repository: string
+): Promise<string[]> {
+  let tags: string[] = [];
   try {
     const cacheNamespace = 'datasource-docker-tags';
     const cacheKey = `${registry}:${repository}`;
-    const cachedResult = await renovateCache.get(cacheNamespace, cacheKey);
+    const cachedResult = await renovateCache.get<string[]>(
+      cacheNamespace,
+      cacheKey
+    );
     // istanbul ignore if
     if (cachedResult) {
       return cachedResult;
@@ -278,7 +284,16 @@ async function getTags(registry, repository) {
     }
     let page = 1;
     do {
-      const res = await got(url, { json: true, headers });
+      type DockerTagResult = {
+        body: {
+          tags: string[];
+        };
+        headers: {
+          link: string;
+        };
+      };
+
+      const res: DockerTagResult = await got(url, { json: true, headers });
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
       url =
@@ -350,11 +365,18 @@ async function getTags(registry, repository) {
  */
 
 // istanbul ignore next
-async function getLabels(registry, repository, tag) {
+async function getLabels(
+  registry: string,
+  repository: string,
+  tag: string
+): Promise<Record<string, string>> {
   logger.debug(`getLabels(${registry}, ${repository}, ${tag})`);
   const cacheNamespace = 'datasource-docker-labels';
   const cacheKey = `${registry}:${repository}:${tag}`;
-  const cachedResult = await renovateCache.get(cacheNamespace, cacheKey);
+  const cachedResult = await renovateCache.get<Record<string, string>>(
+    cacheNamespace,
+    cacheKey
+  );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
@@ -388,7 +410,7 @@ async function getLabels(registry, repository, tag) {
       );
       return {};
     }
-    let labels = {};
+    let labels: Record<string, string> = {};
     const configDigest = manifest.config.digest;
     const headers = await getAuthHeaders(registry, repository);
     if (!headers) {
@@ -481,9 +503,11 @@ async function getLabels(registry, repository, tag) {
  *  - '8.1.0-alpine' is the tag
  *
  * This function will filter only tags that contain a semver version
- * @param {{lookupName :string, registryUrls?: string[]  }} args
  */
-async function getPkgReleases({ lookupName, registryUrls }) {
+export async function getPkgReleases({
+  lookupName,
+  registryUrls,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
     registryUrls
@@ -493,7 +517,7 @@ async function getPkgReleases({ lookupName, registryUrls }) {
     return null;
   }
   const releases = tags.map(version => ({ version }));
-  const ret = {
+  const ret: ReleaseResult = {
     dockerRegistry: registry,
     dockerRepository: repository,
     releases,
