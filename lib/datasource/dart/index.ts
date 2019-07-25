@@ -1,11 +1,24 @@
-const got = require('../../util/got');
-const { logger } = require('../../logger');
+import got from '../../util/got';
+import { logger } from '../../logger';
+import { ReleaseResult, PkgReleaseConfig } from '../common';
 
-async function getPkgReleases({ lookupName }) {
-  /** @type any */
-  let result = null;
+export async function getPkgReleases({
+  lookupName,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
+  let result: ReleaseResult = null;
   const pkgUrl = `https://pub.dartlang.org/api/packages/${lookupName}`;
-  let raw = null;
+  type DartResult = {
+    versions?: {
+      version: string;
+    }[];
+    latest?: {
+      pubspec?: { homepage?: string; repository?: string };
+    };
+  };
+
+  let raw: {
+    body: DartResult;
+  } = null;
   try {
     raw = await got(pkgUrl, {
       json: true,
@@ -53,7 +66,3 @@ async function getPkgReleases({ lookupName }) {
 
   return result;
 }
-
-module.exports = {
-  getPkgReleases,
-};
