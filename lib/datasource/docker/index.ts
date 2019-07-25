@@ -284,14 +284,14 @@ async function getTags(
     }
     let page = 1;
     do {
-      type DockerTagResult = {
+      interface DockerTagResult {
         body: {
           tags: string[];
         };
         headers: {
           link: string;
         };
-      };
+      }
 
       const res: DockerTagResult = await got(url, { json: true, headers });
       tags = tags.concat(res.body.tags);

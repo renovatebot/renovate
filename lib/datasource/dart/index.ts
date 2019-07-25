@@ -7,14 +7,14 @@ export async function getPkgReleases({
 }: PkgReleaseConfig): Promise<ReleaseResult> {
   let result: ReleaseResult = null;
   const pkgUrl = `https://pub.dartlang.org/api/packages/${lookupName}`;
-  type DartResult = {
+  interface DartResult {
     versions?: {
       version: string;
     }[];
     latest?: {
       pubspec?: { homepage?: string; repository?: string };
     };
-  };
+  }
 
   let raw: {
     body: DartResult;
