@@ -149,13 +149,13 @@ RUN poetry config settings.virtualenvs.create false
 
 # npm
 
-ENV NPM_VERSION=6.9.0
+ENV NPM_VERSION=6.10.2
 
 RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.16.0
+ENV YARN_VERSION=1.17.3
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 
