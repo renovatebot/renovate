@@ -359,6 +359,7 @@ async function closeIssue(issueNumber: number) {
 
 export async function ensureIssue(title: string, body: string) {
   logger.debug(`ensureIssue()`);
+  const description = getPrBody(body);
 
   /* istanbul ignore if */
   if (!config.has_issues) {
@@ -373,13 +374,16 @@ export async function ensureIssue(title: string, body: string) {
         await closeIssue(issue.id);
       }
       const [issue] = issues;
-      if (String(issue.content.raw).trim() !== body.trim()) {
+      if (String(issue.content.raw).trim() !== description.trim()) {
         logger.info('Issue updated');
         await api.put(
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
           {
             body: {
-              content: { raw: readOnlyIssueBody(body), markup: 'markdown' },
+              content: {
+                raw: readOnlyIssueBody(description),
+                markup: 'markdown',
+              },
             },
           }
         );
@@ -390,7 +394,7 @@ export async function ensureIssue(title: string, body: string) {
       await api.post(`/2.0/repositories/${config.repository}/issues`, {
         body: {
           title,
-          content: { raw: readOnlyIssueBody(body), markup: 'markdown' },
+          content: { raw: readOnlyIssueBody(description), markup: 'markdown' },
         },
       });
       return 'created';
@@ -688,6 +692,7 @@ export function getPrBody(input: string) {
     .replace(/<\/?summary>/g, '**')
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- ${appSlug}-rebase -->.*?\n`), '')
+    .replace(/\]\(\.\.\/pull\//g, '](../../pull-requests/')
     .substring(0, 50000);
 }
 
