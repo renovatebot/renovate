@@ -1,5 +1,7 @@
 #trigger:
 #  - master
+variables:
+  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
 
 strategy:
   matrix:
@@ -22,6 +24,15 @@ steps:
     inputs:
       versionSpec: '3.7'
 
+  - task: CacheBeta@0
+    inputs:
+      key: |
+        yarn
+        $(Agent.OS)
+        $(Build.SourcesDirectory)/yarn.lock
+      path: $(YARN_CACHE_FOLDER)
+    displayName: Cache Yarn packages
+
   - script: |
       git config --global user.email 'bot@renovateapp.com'
       git config --global user.name  'Renovate Bot'
@@ -40,13 +51,17 @@ steps:
     displayName: 'Build'
 
   - script: |
-      yarn jest --runInBand --ci --reporters=default --reporters=jest-junit
+      yarn jest --runInBand --ci --reporters=default --reporters=jest-junit --coverageReporters=text-summary --coverageReporters=cobertura
     displayName: 'Unit Tests'
 
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: 'junit.xml'
     displayName: 'Publish test results'
+
+  - task: PublishCodeCoverageResults@1
+    inputs:
+    displayName: 'Publish coverage results'
 
   - script: |
       yarn test-e2e
