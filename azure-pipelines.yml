@@ -1,5 +1,7 @@
-#trigger:
-#  - master
+trigger:
+  batch: true
+pr:
+  autoCancel: true
 
 strategy:
   matrix:
