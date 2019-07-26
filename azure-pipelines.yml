@@ -1,7 +1,5 @@
 #trigger:
 #  - master
-variables:
-  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
 
 strategy:
   matrix:
@@ -36,15 +34,6 @@ steps:
       yarn --version
       pip --version
     displayName: 'Init platform'
-
-  - task: CacheBeta@0
-    inputs:
-      key: |
-        yarn
-        $(Agent.OS)
-        $(Build.SourcesDirectory)/yarn.lock
-      path: $(YARN_CACHE_FOLDER)
-    displayName: Cache Yarn packages
 
   - script: |
       yarn install --frozen-lockfile
