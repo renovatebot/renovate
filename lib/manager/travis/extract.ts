@@ -1,9 +1,17 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { PackageFile, PackageDependency } from '../common';
+import { logger } from '../../logger';
 
 export function extractPackageFile(content: string): PackageFile {
-  const doc = yaml.safeLoad(content);
+  let doc;
+  try {
+    doc = yaml.safeLoad(content);
+  } catch (err) {
+    logger.warn({ err, content }, 'Failed to parse .travis.yml file.');
+    return null;
+  }
+
   let deps: PackageDependency[] = [];
   if (doc && is.array(doc.node_js)) {
     deps = [
