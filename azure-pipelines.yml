@@ -38,8 +38,13 @@ steps:
     displayName: 'Build'
 
   - script: |
-      yarn jest --runInBand
+      yarn jest --runInBand --ci --reporters=default --reporters=jest-junit
     displayName: 'Unit Tests'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: 'junit.xml'
+    displayName: 'Publish test results'
 
   - script: |
       yarn test-e2e
