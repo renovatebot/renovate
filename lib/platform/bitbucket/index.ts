@@ -595,7 +595,7 @@ export async function getPr(prNo: number) {
     // we only want the first two commits, because size tells us the overall number
     const url = pr.links.commits.href + '?pagelen=2';
     const { body } = await api.get<utils.PagedResult<Commit>>(url);
-    const size = body.size || body.pagelen;
+    const size = body.size || body.values.length;
 
     // istanbul ignore if
     if (size === undefined) {
