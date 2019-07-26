@@ -9,6 +9,9 @@ pr:
     include:
       - '*'
 
+variables:
+  YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+
 jobs:
   - job: 'Test'
 
