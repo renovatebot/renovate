@@ -9,16 +9,21 @@ pr:
     include:
       - '*'
 
+# TODO: add elements
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
+# linux: ubuntu-16.04
+# mac: macOS-10.13, macOS-10.14
 strategy:
   matrix:
-    node_10_x:
+    node_10_windows:
       node_version: 10.x
-    node_12_x:
+      imageName: 'vs2017-win2016'
+    node_12_windows:
       node_version: 12.x
+      imageName: 'vs2017-win2016'
 
 pool:
-  #  vmImage: 'ubuntu-latest'
-  vmImage: 'vs2017-win2016'
+  vmImage: $(imageName)
 
 steps:
   - task: NodeTool@0
