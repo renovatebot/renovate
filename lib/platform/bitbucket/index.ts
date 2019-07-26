@@ -592,19 +592,16 @@ export async function getPr(prNo: number) {
     // TODO: Is that correct? Should we check getBranchStatus like gitlab?
     res.canMerge = !res.isConflicted;
 
-    // we only want the first commit, because size tells us the overall number
-    const { body } = await api.get<utils.PagedResult<Commit>>(
-      pr.links.commits.href + '?pagelen=1'
-    );
+    // we only want the first two commits, because size tells us the overall number
+    const url = pr.links.commits.href + '?pagelen=2';
+    const { body } = await api.get<utils.PagedResult<Commit>>(url);
+    const size = body.size || body.pagelen;
 
     // istanbul ignore if
-    if (body.size === undefined) {
-      logger.warn(
-        { prNo, url: pr.links.commits.href + '?pagelen=1', body },
-        'invalid response so can rebase'
-      );
+    if (size === undefined) {
+      logger.warn({ prNo, url, body }, 'invalid response so can rebase');
       pr.canRebase = true;
-    } else if (body.size === 1) {
+    } else if (size === 1) {
       if (global.gitAuthor) {
         const author = addrs.parseOneAddress(
           body.values[0].author.raw
@@ -630,7 +627,7 @@ export async function getPr(prNo: number) {
         pr.canRebase = true;
       }
     } else {
-      logger.debug({ prNo }, `${body.size} commits so cannot rebase`);
+      logger.debug({ prNo }, `${size} commits so cannot rebase`);
       pr.canRebase = false;
     }
   }
