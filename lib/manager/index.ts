@@ -16,6 +16,7 @@ const managerList = [
   'deps-edn',
   'docker-compose',
   'dockerfile',
+  'droneci',
   'github-actions',
   'gitlabci',
   'gitlabci-include',
