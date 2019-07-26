@@ -53,9 +53,6 @@ jobs:
           pip --version
         displayName: 'Init platform'
 
-      - download: current
-        artifact: 'yarn-deps'
-
       - pwsh: |
           yarn install --frozen-lockfile
           pip install --user -r requirements.txt
@@ -67,12 +64,10 @@ jobs:
           yarn type-check
         displayName: 'Lint'
 
-      - pwsh: |
-          yarn build
+      - pwsh: yarn build
         displayName: 'Build'
 
-      - pwsh: |
-          yarn jest --ci --reporters=default --reporters=jest-junit --coverageReporters=text-summary --coverageReporters=cobertura
+      - pwsh: yarn jest --ci --reporters=default --reporters=jest-junit --coverageReporters=text-summary --coverageReporters=cobertura
         displayName: 'Unit Tests'
         continueOnError: true
 
@@ -88,6 +83,5 @@ jobs:
           reportDirectory: '$(System.DefaultWorkingDirectory)/**/coverage'
         displayName: 'Publish coverage results'
 
-      - pwsh: |
-          yarn test-e2e
+      - pwsh: yarn test-e2e
         displayName: 'E2E Tests'
