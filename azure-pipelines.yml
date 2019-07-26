@@ -33,6 +33,10 @@ jobs:
           imageName: 'ubuntu-16.04'
           nodeVersion: '10.x'
           pythonVersion: '3.7'
+        macos-node10-py3.7:
+          imageName: 'macOS-10.14'
+          nodeVersion: '10.x'
+          pythonVersion: '3.7'
 
     pool:
       vmImage: $(imageName)
