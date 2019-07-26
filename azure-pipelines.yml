@@ -23,6 +23,16 @@ steps:
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.7'
+    displayName: 'Install Python'
+
+  - script: |
+      git config --global user.email 'bot@renovateapp.com'
+      git config --global user.name  'Renovate Bot'
+      node --version
+      python --version
+      yarn --version
+      pip --version
+    displayName: 'Init platform'
 
   - task: CacheBeta@0
     inputs:
@@ -34,8 +44,6 @@ steps:
     displayName: Cache Yarn packages
 
   - script: |
-      git config --global user.email 'bot@renovateapp.com'
-      git config --global user.name  'Renovate Bot'
       yarn install --frozen-lockfile
       pip install --user -r requirements.txt
     displayName: 'Installing Dependencies'
