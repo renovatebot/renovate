@@ -23,6 +23,7 @@ const managerList = [
   'gomod',
   'gradle',
   'gradle-wrapper',
+  'homebrew',
   'kubernetes',
   'leiningen',
   'maven',
@@ -40,7 +41,6 @@ const managerList = [
   'terraform',
   'travis',
   'ruby-version',
-  'homebrew',
 ];
 
 const managers: Record<string, ManagerApi> = {};
