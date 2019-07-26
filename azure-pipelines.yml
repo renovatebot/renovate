@@ -70,7 +70,7 @@ jobs:
       - pwsh: yarn build
         displayName: 'Build'
 
-      - pwsh: yarn jest --ci --reporters=default --reporters=jest-junit --coverageReporters=text-summary --coverageReporters=cobertura
+      - pwsh: yarn jest --ci --reporters=default --reporters=jest-junit --coverageReporters=text-summary --coverageReporters=cobertura --no-cache
         displayName: 'Unit Tests'
         continueOnError: true
 
