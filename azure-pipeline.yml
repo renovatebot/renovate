@@ -1,0 +1,46 @@
+#trigger:
+#  - master
+
+strategy:
+  matrix:
+    node_10_x:
+      node_version: 10.x
+    node_12_x:
+      node_version: 12.x
+
+pool:
+  #  vmImage: 'ubuntu-latest'
+  vmImage: 'vs2017-win2016'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: $(node_version)
+    displayName: 'Install Node.js'
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.7'
+
+  - script: |
+      yarn install --frozen-lockfile
+      pip install --user -r requirements.txt
+    displayName: 'Installing Dependencies'
+
+  - script: |
+      yarn lint
+      yarn test-schema
+      yarn type-check
+    displayName: 'Lint'
+
+  - script: |
+      yarn build
+    displayName: 'Build'
+
+  - script: |
+      yarn jest --runInBand
+    displayName: 'Unit Tests'
+
+  - script: |
+      yarn test-e2e
+    displayName: 'E2E Tests'
