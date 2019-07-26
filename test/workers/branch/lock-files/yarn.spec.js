@@ -24,6 +24,7 @@ describe('generateLockFile', () => {
   it('generates lock files', async () => {
     getInstalledPath.mockReturnValueOnce('node_modules/yarn');
     fs.readFile = jest.fn(() => 'package-lock-contents');
+    /** @type {NodeJS.ProcessEnv} */
     const env = {};
     const config = {
       postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],

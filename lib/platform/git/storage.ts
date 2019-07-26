@@ -338,7 +338,7 @@ export class Storage {
     await this._git!.reset('hard');
     await this._git!.checkout(['-B', branchName, 'origin/' + branchName]);
     await this._git!.checkout(this._config.baseBranch);
-    await this._git!.merge([branchName]);
+    await this._git!.merge(['--ff-only', branchName]);
     await this._git!.push('origin', this._config.baseBranch);
   }
 
