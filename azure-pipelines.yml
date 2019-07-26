@@ -1,7 +1,13 @@
 trigger:
   batch: true
+  branches:
+    include:
+      - '*'
 pr:
   autoCancel: true
+  branches:
+    include:
+      - '*'
 
 strategy:
   matrix:
