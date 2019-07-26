@@ -134,6 +134,15 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
 
 USER ubuntu
 
+# Cargo
+
+ENV RUST_BACKTRACE=1 \
+    PATH=/home/ubuntu/.cargo/bin:$PATH
+
+RUN set -ex ;\
+    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
+    rustup toolchain install 1.36.0
+
 # Pipenv
 
 ENV PATH="/home/ubuntu/.local/bin:$PATH"
