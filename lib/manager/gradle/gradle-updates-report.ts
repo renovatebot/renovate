@@ -7,16 +7,16 @@ const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
 interface GradleProject {
   project: string;
   repositories: string[];
-  dependencies: GradleModule[];
+  dependencies: GradleDependency[];
 }
 
-interface GradleModule {
+interface GradleDependency {
   name: string;
   group: string;
   version: string;
 }
 
-type GradleModuleWithRepos = GradleModule & { repos: string[] };
+type GradleDependencyWithRepos = GradleDependency & { repos: string[] };
 
 // TODO: Unify with GradleDependency ?
 export interface BuildDependency {
@@ -40,9 +40,10 @@ allprojects {
     doLast {
         def project = ['project': project.name]
         output << project
-        def repos = repositories
+        def repos = (repositories + settings.pluginManagement.repositories)
            .collect { "$it.url" }
            .findAll { !it.startsWith('file:') }
+           .unique()
         project.repositories = repos
         def deps = (buildscript.configurations + configurations)
           .collect { it.dependencies }
@@ -97,7 +98,7 @@ async function readGradleReport(localDir: string): Promise<GradleProject[]> {
 
 function mergeDependenciesWithRepositories(
   project: GradleProject
-): GradleModuleWithRepos[] {
+): GradleDependencyWithRepos[] {
   if (!project.dependencies) {
     return [];
   }
@@ -108,17 +109,17 @@ function mergeDependenciesWithRepositories(
 }
 
 function flatternDependencies(
-  accumulator: GradleModuleWithRepos[],
-  currentValue: GradleModuleWithRepos[]
+  accumulator: GradleDependencyWithRepos[],
+  currentValue: GradleDependencyWithRepos[]
 ) {
   accumulator.push(...currentValue);
   return accumulator;
 }
 
 function combineReposOnDuplicatedDependencies(
-  accumulator: GradleModuleWithRepos[],
-  currentValue: GradleModuleWithRepos
-): GradleModuleWithRepos[] {
+  accumulator: GradleDependencyWithRepos[],
+  currentValue: GradleDependencyWithRepos
+): GradleDependencyWithRepos[] {
   const existingDependency = accumulator.find(
     dep => dep.name === currentValue.name && dep.group === currentValue.group
   );
@@ -133,7 +134,9 @@ function combineReposOnDuplicatedDependencies(
   return accumulator;
 }
 
-function buildDependency(gradleModule: GradleModuleWithRepos): BuildDependency {
+function buildDependency(
+  gradleModule: GradleDependencyWithRepos
+): BuildDependency {
   return {
     name: gradleModule.name,
     depGroup: gradleModule.group,
