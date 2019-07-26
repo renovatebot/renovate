@@ -29,6 +29,10 @@ jobs:
           imageName: 'vs2017-win2016'
           nodeVersion: '12.x'
           pythonVersion: '3.7'
+        linux-node10-py3.7:
+          imageName: 'ubuntu-16.04'
+          nodeVersion: '10.x'
+          pythonVersion: '3.7'
 
     pool:
       vmImage: $(imageName)
