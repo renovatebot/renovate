@@ -25,6 +25,9 @@ steps:
       versionSpec: '3.7'
     displayName: 'Install Python'
 
+  - script: python -m pip install --upgrade pip setuptools wheel
+    displayName: 'Install python tools'
+
   - script: |
       git config --global user.email 'bot@renovateapp.com'
       git config --global user.name  'Renovate Bot'
