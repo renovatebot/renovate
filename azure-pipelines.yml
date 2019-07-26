@@ -23,6 +23,8 @@ steps:
       versionSpec: '3.7'
 
   - script: |
+      git config --global user.email 'bot@renovateapp.com'
+      git config --global user.name  'Renovate Bot'
       yarn install --frozen-lockfile
       pip install --user -r requirements.txt
     displayName: 'Installing Dependencies'
