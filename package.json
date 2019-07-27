@@ -205,7 +205,8 @@
     "typescript": "3.5.1"
   },
   "resolutions": {
-    "lodash": "4.17.15"
+    "lodash": "4.17.15",
+    "yargs": "13.3.0"
   },
   "files": [
     "bin/config-validator.js",
