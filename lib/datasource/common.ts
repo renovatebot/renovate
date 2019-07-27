@@ -9,15 +9,15 @@ export interface PkgReleaseConfig {
 }
 
 export interface Release {
-  version: string;
+  gitref?: string;
   isDeprecated?: boolean;
+  version: string;
 }
 
 export interface ReleaseResult {
   changelogUrl?: string;
   dockerRegistry?: string;
   dockerRepository?: string;
-  gitref?: string;
   homepage?: string;
   pkgName?: string;
   releases: Release[];
@@ -28,7 +28,12 @@ export interface DigestConfig {
   lookupName: string;
   registryUrls: string[];
 }
+
+// TODO: Proper typing
+export type Preset = any;
+
 export interface Datasource {
   getDigest?(config: DigestConfig, newValue?: string): Promise<string>;
+  getPreset?(packageName: string, presetName?: string): Promise<Preset>;
   getPkgReleases(config: PkgReleaseConfig): Promise<ReleaseResult>;
 }

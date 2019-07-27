@@ -1,16 +1,15 @@
 import { api } from '../../lib/platform/github/gh-got-wrapper';
 
-const datasource = require('../../lib/datasource');
-const github = require('../../lib/datasource/github');
-const got = require('../../lib/util/got');
-const hostRules = require('../../lib/util/host-rules');
+import * as datasource from '../../lib/datasource';
+import * as github from '../../lib/datasource/github';
+import got from '../../lib/util/got';
+import * as hostRules from '../../lib/util/host-rules';
 
 jest.mock('../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../lib/util/got');
 jest.mock('../../lib/util/host-rules');
 
-/** @type any */
-const ghGot = api.get;
+const ghGot: any = api.get;
 
 describe('datasource/github', () => {
   beforeEach(() => global.renovateCache.rmAll());

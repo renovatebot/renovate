@@ -1,13 +1,16 @@
 import { api } from '../../platform/github/gh-got-wrapper';
-
-const { logger } = require('../../logger');
-const got = require('../../util/got');
+import {
+  ReleaseResult,
+  PkgReleaseConfig,
+  Preset,
+  DigestConfig,
+} from '../common';
+import { logger } from '../../logger';
+import got from '../../util/got';
 
 const ghGot = api.get;
 
-export { getPreset, getDigest, getPkgReleases };
-
-async function fetchJSONFile(repo, fileName) {
+async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
   const opts = {
     headers: {
@@ -18,7 +21,7 @@ async function fetchJSONFile(repo, fileName) {
     json: true,
     hostType: 'github',
   };
-  let res;
+  let res: { body: { content: string } };
   try {
     res = await got(url, opts);
   } catch (err) {
@@ -40,7 +43,10 @@ async function fetchJSONFile(repo, fileName) {
   }
 }
 
-async function getPreset(pkgName, presetName = 'default') {
+export async function getPreset(
+  pkgName: string,
+  presetName = 'default'
+): Promise<Preset> {
   if (presetName === 'default') {
     try {
       const defaultJson = await fetchJSONFile(pkgName, 'default.json');
@@ -60,20 +66,12 @@ async function getPreset(pkgName, presetName = 'default') {
 }
 
 const cacheNamespace = 'datasource-github';
-function getCacheKey(repo, type) {
+function getCacheKey(repo: string, type: string) {
   return `${repo}:${type}`;
 }
 
-/*
- * github.getDigest
- *
- * The `newValue` supplied here should be a valid tag for the docker image.
- *
- * This function will simply return the latest commit hash for the configured repository.
- */
-
-async function getTagCommit(githubRepo, tag) {
-  const cachedResult = await renovateCache.get(
+async function getTagCommit(githubRepo: string, tag: string): Promise<string> {
+  const cachedResult = await renovateCache.get<string>(
     cacheNamespace,
     getCacheKey(githubRepo, `tag-${tag}`)
   );
@@ -81,7 +79,7 @@ async function getTagCommit(githubRepo, tag) {
   if (cachedResult) {
     return cachedResult;
   }
-  let digest;
+  let digest: string;
   try {
     const url = `https://api.github.com/repos/${githubRepo}/git/refs/tags/${tag}`;
     const res = (await ghGot(url)).body.object;
@@ -111,7 +109,17 @@ async function getTagCommit(githubRepo, tag) {
   return digest;
 }
 
-async function getDigest({ lookupName: githubRepo }, newValue) {
+/**
+ * github.getDigest
+ *
+ * The `newValue` supplied here should be a valid tag for the docker image.
+ *
+ * This function will simply return the latest commit hash for the configured repository.
+ */
+export async function getDigest(
+  { lookupName: githubRepo }: Partial<DigestConfig>,
+  newValue?: string
+): Promise<string> {
   if (newValue && newValue.length) {
     return getTagCommit(githubRepo, newValue);
   }
@@ -123,7 +131,7 @@ async function getDigest({ lookupName: githubRepo }, newValue) {
   if (cachedResult) {
     return cachedResult;
   }
-  let digest;
+  let digest: string;
   try {
     const url = `https://api.github.com/repos/${githubRepo}/commits?per_page=1`;
     digest = (await ghGot(url)).body[0].sha;
@@ -146,7 +154,7 @@ async function getDigest({ lookupName: githubRepo }, newValue) {
   return digest;
 }
 
-/*
+/**
  * github.getPkgReleases
  *
  * This function can be used to fetch releases with a customisable version scheme (e.g. semver) and with either tags or releases.
@@ -156,10 +164,12 @@ async function getDigest({ lookupName: githubRepo }, newValue) {
  *  - Sanitize the versions if desired (e.g. strip out leading 'v')
  *  - Return a dependency object containing sourceUrl string and releases array
  */
-
-async function getPkgReleases({ lookupName: repo, lookupType }) {
-  let versions;
-  const cachedResult = await renovateCache.get(
+export async function getPkgReleases({
+  lookupName: repo,
+  lookupType,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
+  let versions: string[];
+  const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(repo, lookupType || 'tags')
   );
@@ -170,13 +180,21 @@ async function getPkgReleases({ lookupName: repo, lookupType }) {
   try {
     if (lookupType === 'releases') {
       const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
-      versions = (await ghGot(url, { paginate: true })).body.map(
-        o => o.tag_name
-      );
+      type GitHubRelease = {
+        tag_name: string;
+      }[];
+
+      versions = (await ghGot<GitHubRelease>(url, {
+        paginate: true,
+      })).body.map(o => o.tag_name);
     } else {
       // tag
       const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
-      versions = (await ghGot(url, {
+      type GitHubTag = {
+        name: string;
+      }[];
+
+      versions = (await ghGot<GitHubTag>(url, {
         paginate: true,
       })).body.map(o => o.name);
     }
@@ -186,8 +204,9 @@ async function getPkgReleases({ lookupName: repo, lookupType }) {
   if (!versions) {
     return null;
   }
-  const dependency = {
+  const dependency: ReleaseResult = {
     sourceUrl: 'https://github.com/' + repo,
+    releases: null,
   };
   dependency.releases = versions.map(version => ({
     version,
