@@ -1,21 +1,25 @@
 import is from '@sindresorhus/is';
+import { api } from '../../platform/gitlab/gl-got-wrapper';
+import { logger } from '../../logger';
+import { PkgReleaseConfig, ReleaseResult, Preset } from '../common';
 
-const glGot = require('../../platform/gitlab/gl-got-wrapper').api.get;
-const { logger } = require('../../logger');
-
-export { getPreset, getPkgReleases };
+const glGot = api.get;
 
 const GitLabApiUrl = 'https://gitlab.com/api/v4/projects';
 
-async function getPreset(pkgName, presetName = 'default') {
+export async function getPreset(
+  pkgName: string,
+  presetName = 'default'
+): Promise<Preset> {
   if (presetName !== 'default') {
+    // TODO: proper error contructor
     throw new Error(
       { pkgName, presetName },
       // @ts-ignore
       'Sub-preset names are not supported with Gitlab datasource'
     );
   }
-  let res;
+  let res: string;
   try {
     const urlEncodedPkgName = encodeURIComponent(pkgName);
     const defautlBranchName = await getDefaultBranchName(urlEncodedPkgName);
@@ -38,22 +42,22 @@ async function getPreset(pkgName, presetName = 'default') {
 }
 
 const cacheNamespace = 'datasource-gitlab';
-function getCacheKey(depHost, repo, lookupType) {
+function getCacheKey(depHost: string, repo: string, lookupType: string) {
   const type = lookupType || 'tags';
   return `${depHost}:${repo}:${type}`;
 }
 
-/**
- *
- * @param {{registryUrls? : string[], lookupName:string, lookupType:string}} param0
- */
-async function getPkgReleases({ registryUrls, lookupName: repo, lookupType }) {
+export async function getPkgReleases({
+  registryUrls,
+  lookupName: repo,
+  lookupType,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
   // Use registryUrls if present, otherwise default to publid gitlab.com
   const depHost = is.nonEmptyArray(registryUrls)
     ? registryUrls[0].replace(/\/$/, '')
     : 'https://gitlab.com';
-  let versions;
-  const cachedResult = await renovateCache.get(
+  let versions: string[];
+  const cachedResult = await renovateCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(depHost, repo, lookupType)
   );
@@ -67,13 +71,21 @@ async function getPkgReleases({ registryUrls, lookupName: repo, lookupType }) {
   try {
     if (lookupType === 'releases') {
       const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/releases?per_page=100`;
-      versions = (await glGot(url, { paginate: true })).body.map(
-        o => o.tag_name
-      );
+      type GlRelease = {
+        tag_name: string;
+      }[];
+
+      versions = (await glGot<GlRelease>(url, {
+        paginate: true,
+      })).body.map(o => o.tag_name);
     } else {
       // tag
       const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
-      versions = (await glGot(url, {
+      type GlTag = {
+        name: string;
+      }[];
+
+      versions = (await glGot<GlTag>(url, {
         paginate: true,
       })).body.map(o => o.name);
     }
@@ -87,8 +99,9 @@ async function getPkgReleases({ registryUrls, lookupName: repo, lookupType }) {
     return null;
   }
 
-  const dependency = {
+  const dependency: ReleaseResult = {
     sourceUrl: `${depHost}/${repo}`,
+    releases: null,
   };
   dependency.releases = versions.map(version => ({
     version,
@@ -105,9 +118,14 @@ async function getPkgReleases({ registryUrls, lookupName: repo, lookupType }) {
   return dependency;
 }
 
-async function getDefaultBranchName(urlEncodedPkgName) {
+async function getDefaultBranchName(urlEncodedPkgName: string) {
   const branchesUrl = `${GitLabApiUrl}/${urlEncodedPkgName}/repository/branches`;
-  const res = await glGot(branchesUrl);
+  type GlBranch = {
+    default: boolean;
+    name: string;
+  }[];
+
+  const res = await glGot<GlBranch>(branchesUrl);
   const branches = res.body;
   let defautlBranchName = 'master';
   for (const branch of branches) {

@@ -1,10 +1,11 @@
-const datasource = require('../../lib/datasource');
-const gitlab = require('../../lib/datasource/gitlab');
-/** @type any */
-const glGot = require('../../lib/platform/gitlab/gl-got-wrapper').api.get;
+import { getPkgReleases } from '../../lib/datasource';
+import { getPreset } from '../../lib/datasource/gitlab';
+import { api } from '../../lib/platform/gitlab/gl-got-wrapper';
 
 jest.mock('../../lib/platform/gitlab/gl-got-wrapper');
 jest.mock('../../lib/util/got');
+
+const glGot: any = api.get;
 
 describe('datasource/gitlab', () => {
   beforeEach(() => {
@@ -13,15 +14,13 @@ describe('datasource/gitlab', () => {
   });
   describe('getPreset()', () => {
     it('throws if non-default', async () => {
-      await expect(
-        gitlab.getPreset('some/repo', 'non-default')
-      ).rejects.toThrow();
+      await expect(getPreset('some/repo', 'non-default')).rejects.toThrow();
     });
     it('throws if no content', async () => {
       glGot.mockImplementationOnce(() => ({
         body: {},
       }));
-      await expect(gitlab.getPreset('some/repo')).rejects.toThrow();
+      await expect(getPreset('some/repo')).rejects.toThrow();
     });
     it('throws if fails to parse', async () => {
       glGot.mockImplementationOnce(() => ({
@@ -29,7 +28,7 @@ describe('datasource/gitlab', () => {
           content: Buffer.from('not json').toString('base64'),
         },
       }));
-      await expect(gitlab.getPreset('some/repo')).rejects.toThrow();
+      await expect(getPreset('some/repo')).rejects.toThrow();
     });
     it('should return the preset', async () => {
       glGot.mockResolvedValueOnce({
@@ -45,7 +44,7 @@ describe('datasource/gitlab', () => {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         },
       });
-      const content = await gitlab.getPreset('some/repo');
+      const content = await getPreset('some/repo');
       expect(content).toEqual({ foo: 'bar' });
     });
   });
@@ -59,7 +58,7 @@ describe('datasource/gitlab', () => {
         { tag_name: 'v1.1.0' },
       ];
       glGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await datasource.getPkgReleases({
+      const res = await getPkgReleases({
         datasource: 'gitlab',
         depName: 'some/dep',
         lookupType: 'releases',
@@ -73,7 +72,7 @@ describe('datasource/gitlab', () => {
     it('returns tags', async () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       glGot.mockReturnValueOnce({ headers: {}, body });
-      const res = await datasource.getPkgReleases({
+      const res = await getPkgReleases({
         registryUrls: ['https://gitlab.company.com/api/v4/'],
         datasource: 'gitlab',
         depName: 'some/dep2',
