@@ -1,17 +1,23 @@
-const simpleGit = require('simple-git/promise');
-const semver = require('../../versioning/semver');
+import simpleGit from 'simple-git/promise';
+import { isVersion, isValid } from '../../versioning/semver';
+import { logger } from '../../logger';
+import { ReleaseResult, PkgReleaseConfig } from '../common';
 
 const cacheNamespace = 'git-tags';
 const cacheMinutes = 10;
-const { logger } = require('../../logger');
 
 // git will prompt for known hosts or passwords, unless we activate BatchMode
 process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 
-async function getPkgReleases({ lookupName }) {
+export async function getPkgReleases({
+  lookupName,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
   const git = simpleGit();
   try {
-    const cachedResult = await renovateCache.get(cacheNamespace, lookupName);
+    const cachedResult = await renovateCache.get<ReleaseResult>(
+      cacheNamespace,
+      lookupName
+    );
     /* istanbul ignore next line */
     if (cachedResult) return cachedResult;
 
@@ -25,12 +31,12 @@ async function getPkgReleases({ lookupName }) {
     const tags = lsRemote
       .replace(/^.+?refs\/tags\//gm, '')
       .split('\n')
-      .filter(tag => semver.isVersion(tag));
+      .filter(tag => isVersion(tag));
     const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
-    const result = {
+    const result: ReleaseResult = {
       sourceUrl,
       releases: tags.map(tag => ({
-        version: semver.isValid(tag),
+        version: isValid(tag),
         gitref: tag,
       })),
     };
@@ -42,7 +48,3 @@ async function getPkgReleases({ lookupName }) {
   }
   return null;
 }
-
-module.exports = {
-  getPkgReleases,
-};

@@ -17,6 +17,7 @@ export interface ReleaseResult {
   changelogUrl?: string;
   dockerRegistry?: string;
   dockerRepository?: string;
+  gitref?: string;
   homepage?: string;
   pkgName?: string;
   releases: Release[];

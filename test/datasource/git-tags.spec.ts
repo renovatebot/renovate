@@ -1,8 +1,8 @@
-/** @type any */
-const simpleGit = require('simple-git/promise');
-const { getPkgReleases } = require('../../lib/datasource/git-tags');
+import _simpleGit from 'simple-git/promise';
+import { getPkgReleases } from '../../lib/datasource/git-tags';
 
 jest.mock('simple-git/promise.js');
+const simpleGit: any = _simpleGit;
 
 // const lookupName = 'vapor';
 const lookupName = 'https://github.com/example/example.git';
