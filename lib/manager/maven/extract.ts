@@ -179,9 +179,8 @@ export function extractPackage(rawContent: string, packageFile: string = null) {
     });
   }
 
-  if (packageFile && project.childNamed('parent')) {
-    const parentPath =
-      project.valueWithPath('parent.relativePath') || '../pom.xml';
+  const parentPath = project.valueWithPath('parent.relativePath');
+  if (parentPath) {
     result.parent = resolveParentFile(packageFile, parentPath);
   }
 
