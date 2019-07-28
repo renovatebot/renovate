@@ -132,8 +132,7 @@ function resolveParentFile(packageFile: string, parentPath: string) {
     parentDir = dirname(parentPath);
   }
   const dir = dirname(packageFile);
-  const result = normalize(join(dir, parentDir, parentFile));
-  return process.platform === 'win32' ? result.split('\\').join('/') : result;
+  return normalize(join(dir, parentDir, parentFile));
 }
 
 export function extractPackage(rawContent: string, packageFile: string = null) {
