@@ -1,18 +1,25 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { api as semverComposer } from '../../versioning/composer';
-import { PackageFile, PackageDependency, Registry } from '../common';
+import { PackageFile, PackageDependency } from '../common';
 
 interface Repo {
   name?: string;
   type: 'composer' | 'git' | 'package' | 'vcs';
-
+  packagist?: boolean;
+  'packagist.org'?: boolean;
   url: string;
 }
 
 interface ComposerConfig {
   type?: string;
-  repositories: Record<string, Repo>;
+  /**
+   * A repositories field can be an array of Repo objects or an object of repoName: Repo
+   * Also it can be a boolean (usually false) to disable packagist.
+   * (Yes this can be confusing, as it is also not properly documented in the composer docs)
+   * See https://getcomposer.org/doc/05-repositories.md#disabling-packagist-org
+   */
+  repositories: Record<string, Repo | boolean> | Repo[];
 
   require: Record<string, string>;
   'require-dev': Record<string, string>;
@@ -29,25 +36,43 @@ interface ComposerConfig {
  * @param registryUrls
  */
 function parseRepositories(
-  repoJson: Record<string, Repo>,
+  repoJson: ComposerConfig['repositories'],
   repositories: Record<string, Repo>,
-  registryUrls: Registry[]
+  registryUrls: string[]
 ) {
   try {
+    let packagist = true;
     Object.entries(repoJson).forEach(([key, repo]) => {
-      const name = is.array(repoJson) ? repo.name : key;
-      switch (repo.type) {
-        case 'vcs':
-        case 'git':
-          // eslint-disable-next-line no-param-reassign
-          repositories[name] = repo;
-          break;
-        default:
-          // TODO: only add required props
-          registryUrls.push(repo);
-          break;
+      if (is.object(repo)) {
+        const name = is.array(repoJson) ? repo.name : key;
+        // eslint-disable-next-line default-case
+        switch (repo.type) {
+          case 'vcs':
+          case 'git':
+            // eslint-disable-next-line no-param-reassign
+            repositories[name] = repo;
+            break;
+          case 'composer':
+            registryUrls.push(repo.url);
+            break;
+          case 'package':
+            logger.info({ url: repo.url }, 'type package is not supported yet');
+        }
+        if (repo.packagist === false || repo['packagist.org'] === false) {
+          packagist = false;
+        }
+      } else if (
+        ['packagist', 'packagist.org'].includes(key) &&
+        repo === false
+      ) {
+        packagist = false;
       }
     });
+    if (packagist) {
+      registryUrls.push('https://packagist.org');
+    } else {
+      logger.debug('Disabling packagist.org');
+    }
   } catch (e) /* istanbul ignore next */ {
     logger.info(
       { repositories: repoJson },
@@ -66,7 +91,7 @@ export async function extractPackageFile(content: string, fileName: string) {
     return null;
   }
   const repositories: Record<string, Repo> = {};
-  const registryUrls: Registry[] = [];
+  const registryUrls: string[] = [];
   const res: PackageFile = { deps: [] };
 
   // handle lockfile
@@ -88,6 +113,8 @@ export async function extractPackageFile(content: string, fileName: string) {
   }
   if (registryUrls.length !== 0) {
     res.registryUrls = registryUrls;
+  } else {
+    logger.warn({ fileName }, 'No registryUrls defined (packagist disabled)');
   }
   const deps = [];
   const depTypes = ['require', 'require-dev'];

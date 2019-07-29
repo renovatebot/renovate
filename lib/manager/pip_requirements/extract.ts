@@ -3,12 +3,7 @@ import { RANGE_PATTERN as rangePattern } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { isValid, isSingleVersion } from '../../versioning/pep440';
-import {
-  ExtractConfig,
-  Registry,
-  PackageDependency,
-  PackageFile,
-} from '../common';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -38,7 +33,7 @@ export function extractPackageFile(
       extraUrls.push(extraUrl);
     }
   });
-  let registryUrls: (string | Registry)[] = [];
+  let registryUrls: string[] = [];
   if (indexUrl) {
     // index url in file takes precedence
     registryUrls.push(indexUrl);
