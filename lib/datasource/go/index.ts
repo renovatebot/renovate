@@ -1,13 +1,17 @@
-const { logger } = require('../../logger');
-const got = require('../../util/got');
-const github = require('../github');
+import { logger } from '../../logger';
+import got from '../../util/got';
+import {
+  getPkgReleases as _getPkgReleases,
+  getDigest as _getDigest,
+} from '../github';
+import { DigestConfig, PkgReleaseConfig, ReleaseResult } from '../common';
 
-module.exports = {
-  getPkgReleases,
-  getDigest,
-};
+interface DataSource {
+  datasource: string;
+  lookupName: string;
+}
 
-async function getDatasource(name) {
+async function getDatasource(name: string): Promise<DataSource> {
   if (name.startsWith('gopkg.in/')) {
     const [pkg] = name.replace('gopkg.in/', '').split('.');
     if (pkg.includes('/')) {
@@ -59,7 +63,7 @@ async function getDatasource(name) {
   }
 }
 
-/*
+/**
  * go.getPkgReleases
  *
  * This datasource resolves a go module URL into its source repository
@@ -69,13 +73,13 @@ async function getDatasource(name) {
  *  - Determine the source URL for the module
  *  - Call the respective getPkgReleases in github to retrieve the tags
  */
-
-async function getPkgReleases({ lookupName }) {
+export async function getPkgReleases({
+  lookupName,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
   logger.trace(`go.getPkgReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
   if (source && source.datasource === 'github') {
-    // @ts-ignore
-    const res = await github.getPkgReleases(source);
+    const res = await _getPkgReleases(source);
     if (res && res.releases) {
       res.releases = res.releases.filter(
         release => release.version && release.version.startsWith('v')
@@ -86,7 +90,7 @@ async function getPkgReleases({ lookupName }) {
   return null;
 }
 
-/*
+/**
  * go.getDigest
  *
  * This datasource resolves a go module URL into its source repository
@@ -96,13 +100,15 @@ async function getPkgReleases({ lookupName }) {
  *  - Determine the source URL for the module
  *  - Call the respective getDigest in github to retrieve the commit hash
  */
-
-async function getDigest({ lookupName }, value) {
+export async function getDigest(
+  { lookupName }: DigestConfig,
+  value?: string
+): Promise<string> {
   const source = await getDatasource(lookupName);
   if (source && source.datasource === 'github') {
     // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead
     const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
-    const digest = await github.getDigest(source, tag);
+    const digest = await _getDigest(source, tag);
     return digest;
   }
   return null;
