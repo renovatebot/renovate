@@ -1,0 +1,43 @@
+skip_tags: true
+skip_branch_with_pr: true
+
+max_jobs: 2
+
+image: Visual Studio 2017
+
+environment:
+  matrix:
+    - nodejs_version: 10
+    - nodejs_version: 12
+
+matrix:
+  fast_finish: true
+
+cache:
+  - node_modules -> yarn.lock
+  - '%LOCALAPPDATA%/Yarn'
+
+init:
+  - git config --global core.autocrlf false
+  - git config --global core.symlinks true
+
+install:
+  - ps: Install-Product node $env:nodejs_version
+  #  - ps: $env:Path = "C:\Python37-x64;"
+  - yarn install --frozen-lockfile --link-duplicates
+  - pip install --user -r requirements.txt
+
+build_script:
+  - yarn lint
+  - yarn test-schema
+  - yarn type-check
+  - yarn build
+
+test_script:
+  - yarn jest -i --ci --reporters=default --reporters=jest-junit
+  - yarn test-e2e
+
+on_finish:
+  - ps: |
+      $wc = New-Object 'System.Net.WebClient'
+      $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\junit.xml))
