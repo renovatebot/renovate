@@ -36,6 +36,7 @@ install:
   - "SET PATH=C:\Python%python_version%-x64;%PATH%"
   - python --version
   - python -m pip install --upgrade pip
+  - pip --version
   - yarn install --frozen-lockfile --link-duplicates
   - pip install --user -r requirements.txt
 
