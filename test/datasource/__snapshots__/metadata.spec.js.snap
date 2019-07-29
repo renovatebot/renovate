@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/terraform Should handle manualChangelogUrls 1`] = `
+exports[`datasource/metadata Should handle manualChangelogUrls 1`] = `
 Object {
   "changelogUrl": "https://github.com/django/django/tree/master/docs/releases",
   "releases": Array [
@@ -25,7 +25,7 @@ Object {
 }
 `;
 
-exports[`datasource/terraform Should handle manualSourceUrls 1`] = `
+exports[`datasource/metadata Should handle manualSourceUrls 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -49,7 +49,7 @@ Object {
 }
 `;
 
-exports[`datasource/terraform Should handle parsing of sourceUrls correctly 1`] = `
+exports[`datasource/metadata Should handle parsing of sourceUrls correctly 1`] = `
 Object {
   "releases": Array [
     Object {
