@@ -223,6 +223,7 @@ describe('datasource/packagist', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(mailchimpJson),
       });
+      config.registryUrls = [];
       expect(
         await datasource.getPkgReleases({
           ...config,
