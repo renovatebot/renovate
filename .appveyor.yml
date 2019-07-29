@@ -33,7 +33,7 @@ install:
   - node --version
   - cup yarn
   - yarn --version
-  - "SET PATH=C:\Python%python_version%-x64;%PATH%"
+  - SET PATH=C:\Python%python_version%-x64;%PATH%
   - python --version
   - python -m pip install --upgrade pip
   - pip --version
