@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`logger/pretty-stdout formatRecord(rec) formats record 1`] = `
-"[90mTRACE[39m: test message
+"TRACE: test message
        \\"config\\": {\\"a\\": \\"b\\", \\"d\\": [\\"e\\", \\"f\\"]}
 "
 `;

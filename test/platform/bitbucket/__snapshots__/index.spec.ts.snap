@@ -214,7 +214,7 @@ Array [
     },
   ],
   Array [
-    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/3/commits?pagelen=1",
+    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/3/commits?pagelen=2",
   ],
   Array [
     "/2.0/repositories/some/repo/pullrequests/5",
@@ -226,7 +226,7 @@ Array [
     },
   ],
   Array [
-    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=1",
+    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=2",
   ],
   Array [
     "/2.0/repositories/some/repo/pullrequests/5",
@@ -238,7 +238,7 @@ Array [
     },
   ],
   Array [
-    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=1",
+    "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=2",
   ],
 ]
 `;

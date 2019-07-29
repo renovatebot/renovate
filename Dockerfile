@@ -125,7 +125,7 @@ RUN chmod -R a+rw /usr
 RUN groupadd -g 999 docker
 RUN usermod -aG docker ubuntu
 
-ENV DOCKER_VERSION=18.09.2
+ENV DOCKER_VERSION=19.03.1
 
 RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz \
   && tar xzvf docker-${DOCKER_VERSION}.tgz --strip 1 \
@@ -133,6 +133,15 @@ RUN curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${
   && rm docker-${DOCKER_VERSION}.tgz
 
 USER ubuntu
+
+# Cargo
+
+ENV RUST_BACKTRACE=1 \
+    PATH=/home/ubuntu/.cargo/bin:$PATH
+
+RUN set -ex ;\
+    curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain none -y ; \
+    rustup toolchain install 1.36.0
 
 # Pipenv
 
@@ -149,13 +158,13 @@ RUN poetry config settings.virtualenvs.create false
 
 # npm
 
-ENV NPM_VERSION=6.9.0
+ENV NPM_VERSION=6.10.2
 
 RUN npm install -g npm@$NPM_VERSION
 
 # Yarn
 
-ENV YARN_VERSION=1.16.0
+ENV YARN_VERSION=1.17.3
 
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION}
 

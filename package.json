@@ -63,6 +63,7 @@
     "Dragomir Țurcanu <dragomirt22@gmail.com>",
     "Filip Stenbeck <filip.stenbeck@gmail.com>",
     "Hutson Betts <hutson@hyper-expanse.net>",
+    "IKEDA Sho <suicaicoca@gmail.com>",
     "Israel Bethencourt <ieb.core@gmail.com>",
     "James King <james@jamesking56.uk>",
     "Jamie Magee <jamie.magee@gmail.com>",
@@ -123,7 +124,7 @@
     "later": "1.2.0",
     "linkify-markdown": "1.0.0",
     "lodash": "4.17.15",
-    "luxon": "1.17.1",
+    "luxon": "1.17.2",
     "markdown-it": "9.0.1",
     "markdown-table": "1.1.3",
     "minimatch": "3.0.4",
@@ -134,7 +135,7 @@
     "p-all": "2.1.0",
     "parse-diff": "0.5.1",
     "parse-link-header": "1.0.1",
-    "pnpm": "3.6.0",
+    "pnpm": "3.6.1",
     "registry-auth-token": "4.0.0",
     "safe-regex": "2.0.2",
     "semver": "6.3.0",
@@ -204,7 +205,8 @@
     "typescript": "3.5.1"
   },
   "resolutions": {
-    "lodash": "4.17.15"
+    "lodash": "4.17.15",
+    "yargs": "13.3.0"
   },
   "files": [
     "bin/config-validator.js",

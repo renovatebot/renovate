@@ -1,6 +1,13 @@
 import chalk from 'chalk';
 import * as prettyStdout from '../../lib/logger/pretty-stdout';
 
+jest.mock('chalk', () =>
+  ['bgRed', 'blue', 'gray', 'green', 'magenta', 'red'].reduce(
+    (r, c) => Object.defineProperty(r, c, { value: (s: string) => s }),
+    {}
+  )
+);
+
 describe('logger/pretty-stdout', () => {
   describe('getMeta(rec)', () => {
     it('returns empty string if null rec', () => {
@@ -62,6 +69,12 @@ describe('logger/pretty-stdout', () => {
     });
   });
   describe('formatRecord(rec)', () => {
+    beforeEach(() => {
+      process.env.FORCE_COLOR = '1';
+    });
+    afterEach(() => {
+      delete process.env.FORCE_COLOR;
+    });
     it('formats record', () => {
       const rec: prettyStdout.BunyanRecord = {
         level: 10,

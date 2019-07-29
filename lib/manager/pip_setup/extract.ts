@@ -131,18 +131,18 @@ export async function extractPackageFile(
         ...dep,
         depName,
         currentValue,
-        lineNumber,
+        managerData: { lineNumber },
         datasource: 'pypi',
       };
       return dep;
     })
     .filter(Boolean)
     .sort((a, b) =>
-      a.lineNumber === b.lineNumber
+      a.managerData.lineNumber === b.managerData.lineNumber
         ? // TODO: dummy comment for prettier
           // @ts-ignore
           (a.depName > b.depName) - (a.depName < b.depName)
-        : a.lineNumber - b.lineNumber
+        : a.managerData.lineNumber - b.managerData.lineNumber
     );
   // istanbul ignore if
   if (!deps.length) {
