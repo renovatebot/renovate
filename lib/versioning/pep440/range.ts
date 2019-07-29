@@ -76,7 +76,7 @@ function getNewValue(
     logger.warn('Arbitrary equality not supported: ' + currentValue);
     return null;
   }
-  const result = ranges
+  let result = ranges
     .map(range => {
       // used to exclude versions,
       // we assume that's for a good reason
@@ -132,6 +132,10 @@ function getNewValue(
     })
     .filter(Boolean)
     .join(', ');
+
+  if (result.includes(', ') && !currentValue.includes(', ')) {
+    result = result.replace(/, /g, ',');
+  }
 
   if (!satisfies(toVersion, result)) {
     // we failed at creating the range
