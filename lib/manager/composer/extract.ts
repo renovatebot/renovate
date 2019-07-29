@@ -113,8 +113,6 @@ export async function extractPackageFile(content: string, fileName: string) {
   }
   if (registryUrls.length !== 0) {
     res.registryUrls = registryUrls;
-  } else {
-    logger.warn({ fileName }, 'No registryUrls defined (packagist disabled)');
   }
   const deps = [];
   const depTypes = ['require', 'require-dev'];
