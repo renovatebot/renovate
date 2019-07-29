@@ -210,7 +210,9 @@ function parseSbtLine(
       isMultiDeps,
       scalaVersion:
         scalaVersion ||
-        (scalaVersionVariable && variables[scalaVersionVariable].val),
+        (scalaVersionVariable &&
+          variables[scalaVersionVariable] &&
+          variables[scalaVersionVariable].val),
     };
   if (deps.length) return { deps };
   return null;
