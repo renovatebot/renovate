@@ -219,5 +219,16 @@ describe('datasource/packagist', () => {
         })
       ).toMatchSnapshot();
     });
+    it('adds packagist source implicitly', async () => {
+      got.mockReturnValueOnce({
+        body: JSON.parse(mailchimpJson),
+      });
+      expect(
+        await datasource.getPkgReleases({
+          ...config,
+          lookupName: 'drewm/mailchimp-api',
+        })
+      ).toMatchSnapshot();
+    });
   });
 });
