@@ -216,6 +216,17 @@ describe('datasource/maven', () => {
       });
       expect(releases).toBeNull();
     });
+
+    it('should support scm.url values prefixed with "scm:"', async () => {
+      const releases = await datasource.getPkgReleases({
+        ...config,
+        lookupName: 'io.realm:realm-gradle-plugin',
+        registryUrls: [
+          'file://test/datasource/gradle/_fixtures/maven/jcenter/',
+        ],
+      });
+      expect(releases.sourceUrl).toEqual('https://github.com/realm/realm-java');
+    });
   });
 });
 
