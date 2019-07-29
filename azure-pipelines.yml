@@ -14,90 +14,49 @@ variables:
   CI: true
 
 jobs:
-  - job: 'Test'
-
-    # TODO: add build variants
-    # https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops
-    # linux: ubuntu-16.04
-    # mac: macOS-10.13, macOS-10.14
+  - job: 'Windows'
     strategy:
       matrix:
-        windows-node10-py3.7:
-          imageName: 'vs2017-win2016'
+        Node10 Py3.7:
           nodeVersion: '10.x'
           pythonVersion: '3.7'
-        windows-node12-py3.7:
-          imageName: 'vs2017-win2016'
+        Node12 Py3.7:
           nodeVersion: '12.x'
           pythonVersion: '3.7'
-        linux-node10-py3.7:
-          imageName: 'ubuntu-16.04'
-          nodeVersion: '10.x'
-          pythonVersion: '3.7'
-        macos-node10-py3.7:
-          imageName: 'macOS-10.14'
-          nodeVersion: '10.x'
-          pythonVersion: '3.7'
-
     pool:
-      vmImage: $(imageName)
-
+      vmImage: vs2017-win2016
     steps:
-      - task: NodeTool@0
-        inputs:
-          versionSpec: '$(nodeVersion)'
-        displayName: 'Install Node.js'
-
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(pythonVersion)'
-        displayName: 'Install Python'
-
-      - pwsh: python -m pip install --upgrade pip setuptools wheel
-        displayName: 'Install python tools'
-
-      - pwsh: |
-          git config --global user.email 'bot@renovateapp.com'
-          git config --global user.name  'Renovate Bot'
+      - script: |
           git config --global core.autocrlf false
           git config --global core.symlinks true
-          node --version
-          python --version
-          yarn --version
-          pip --version
-        displayName: 'Init platform'
-
-      - pwsh: |
-          yarn install --no-progress --frozen-lockfile
-          pip install --user -r requirements.txt
-        displayName: 'Installing Dependencies'
-
-      - pwsh: |
-          yarn lint
-          yarn test-schema
-          yarn type-check
-        displayName: 'Lint'
-
-      - pwsh: yarn build
-        displayName: 'Build'
-
-      - pwsh: yarn jest -i --ci --reporters=default --reporters=jest-junit --coverageReporters=text-summary --coverageReporters=cobertura --no-cache
-        displayName: 'Unit Tests'
-        continueOnError: true
-
-      - task: PublishTestResults@2
+        displayName: 'Preserve LF endings and symbolic links on check out'
+      - task: PowerShell@2
         inputs:
-          testResultsFiles: 'junit.xml'
-          testRunTitle: 'CI Tests $(Agent.OS)'
-        displayName: 'Publish test results'
-        condition: succeededOrFailed()
+          targetType: 'inline'
+          script: Set-MpPreference -DisableRealtimeMonitoring $true
+        displayName: 'Disable defender'
 
-      - task: PublishCodeCoverageResults@1
-        inputs:
-          codeCoverageTool: Cobertura
-          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
-          reportDirectory: '$(System.DefaultWorkingDirectory)/**/coverage'
-        displayName: 'Publish coverage results'
+      - template: .azure/steps.yml
 
-      - pwsh: yarn test-e2e
-        displayName: 'E2E Tests'
+  - job: 'Linux'
+    strategy:
+      matrix:
+        node10-py3.7:
+          nodeVersion: '10.x'
+          pythonVersion: '3.7'
+    pool:
+      vmImage: ubuntu-16.04
+    steps:
+      - template: .azure/steps.yml
+
+  - job: 'MacOS'
+    strategy:
+      matrix:
+        node10-py3.7:
+          nodeVersion: '10.x'
+          pythonVersion: '3.7'
+    pool:
+      vmImage: macOS-10.14
+
+    steps:
+      - template: .azure/steps.yml
