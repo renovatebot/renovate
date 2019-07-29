@@ -20,6 +20,8 @@ cache:
 init:
   - git config --global core.autocrlf false
   - git config --global core.symlinks true
+  - git config --global user.email 'bot@renovateapp.com'
+  - git config --global user.name  'Renovate Bot'
 
 install:
   - ps: Install-Product node $env:nodejs_version
