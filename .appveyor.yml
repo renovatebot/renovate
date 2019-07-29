@@ -2,6 +2,7 @@ skip_tags: true
 skip_branch_with_pr: true
 
 max_jobs: 2
+clone_depth: 5
 
 image: Visual Studio 2017
 
@@ -19,8 +20,8 @@ cache:
   - node_modules -> yarn.lock
   - '%APPDATA%\npm-cache'
   - '%LOCALAPPDATA%\Yarn'
-  - '%LOCALAPPDATA%\pip\Cache'
-  - '%LOCALAPPDATA%\NuGet\Cache' # choco cache
+  - '%LOCALAPPDATA%\pip\Cache -> .appveyor.yml'
+  - '%LOCALAPPDATA%\NuGet\Cache -> .appveyor.yml' # choco cache
 
 init:
   - git config --global core.autocrlf false
