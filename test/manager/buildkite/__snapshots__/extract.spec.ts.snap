@@ -6,7 +6,7 @@ Array [
     "currentValue": "v1.3.2.5",
     "depName": "namespace/docker-compose",
     "managerData": Object {
-      "lineNumber": 4,
+      "lineNumber": 5,
     },
     "skipReason": "invalid-version",
   },
@@ -14,7 +14,7 @@ Array [
     "currentValue": "v1.3.2",
     "depName": "https://github.com/buildkite/plugin-docker-compose",
     "managerData": Object {
-      "lineNumber": 15,
+      "lineNumber": 16,
     },
     "skipReason": "git-plugin",
   },
@@ -22,7 +22,7 @@ Array [
     "currentValue": "v1.3.2",
     "depName": "github.com/buildkite/plugin-docker-compose",
     "managerData": Object {
-      "lineNumber": 22,
+      "lineNumber": 23,
     },
     "skipReason": "unknown",
   },
@@ -37,7 +37,17 @@ Array [
     "depName": "docker-login",
     "lookupName": "buildkite-plugins/docker-login-buildkite-plugin",
     "managerData": Object {
-      "lineNumber": 2,
+      "lineNumber": 3,
+    },
+    "skipReason": undefined,
+  },
+  Object {
+    "currentValue": "v2.5.1",
+    "datasource": "github",
+    "depName": "docker-compose",
+    "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
+    "managerData": Object {
+      "lineNumber": 5,
     },
     "skipReason": undefined,
   },
@@ -47,7 +57,17 @@ Array [
     "depName": "docker-login",
     "lookupName": "buildkite-plugins/docker-login-buildkite-plugin",
     "managerData": Object {
-      "lineNumber": 10,
+      "lineNumber": 11,
+    },
+    "skipReason": undefined,
+  },
+  Object {
+    "currentValue": "v2.5.1",
+    "datasource": "github",
+    "depName": "docker-compose",
+    "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
+    "managerData": Object {
+      "lineNumber": 13,
     },
     "skipReason": undefined,
   },
@@ -62,7 +82,7 @@ Array [
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
     "managerData": Object {
-      "lineNumber": 4,
+      "lineNumber": 5,
     },
     "skipReason": undefined,
   },
@@ -72,7 +92,7 @@ Array [
     "depName": "docker-compose",
     "lookupName": "buildkite-plugins/docker-compose-buildkite-plugin",
     "managerData": Object {
-      "lineNumber": 15,
+      "lineNumber": 16,
     },
     "skipReason": undefined,
   },
@@ -87,7 +107,7 @@ Array [
     "depName": "abc/detect-clowns",
     "lookupName": "abc/detect-clowns-buildkite-plugin",
     "managerData": Object {
-      "lineNumber": 2,
+      "lineNumber": 3,
     },
     "skipReason": undefined,
   },
