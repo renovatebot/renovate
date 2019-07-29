@@ -75,7 +75,7 @@ async function getDatasource(name: string): Promise<DataSource> {
  */
 export async function getPkgReleases({
   lookupName,
-}: PkgReleaseConfig): Promise<ReleaseResult> {
+}: Partial<PkgReleaseConfig>): Promise<ReleaseResult> {
   logger.trace(`go.getPkgReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
   if (source && source.datasource === 'github') {
@@ -101,7 +101,7 @@ export async function getPkgReleases({
  *  - Call the respective getDigest in github to retrieve the commit hash
  */
 export async function getDigest(
-  { lookupName }: DigestConfig,
+  { lookupName }: Partial<DigestConfig>,
   value?: string
 ): Promise<string> {
   const source = await getDatasource(lookupName);
