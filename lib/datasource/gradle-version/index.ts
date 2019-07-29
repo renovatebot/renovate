@@ -1,16 +1,26 @@
-const { coerce } = require('semver');
-const { logger } = require('../../logger');
-const got = require('../../util/got');
-
-module.exports = {
-  getPkgReleases,
-};
+import { coerce } from 'semver';
+import { logger } from '../../logger';
+import got from '../../util/got';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
 const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
 
-async function getPkgReleases() {
+export async function getPkgReleases(
+  _config: PkgReleaseConfig
+): Promise<ReleaseResult> {
   try {
-    const response = await got(GradleVersionsServiceUrl, {
+    type GradleRelease = {
+      body: {
+        snapshot?: boolean;
+        nightly?: boolean;
+        rcFor?: string;
+        version: string;
+        downloadUrl?: string;
+        checksumUrl?: string;
+      }[];
+    };
+
+    const response: GradleRelease = await got(GradleVersionsServiceUrl, {
       json: true,
     });
     const releases = response.body
@@ -25,7 +35,7 @@ async function getPkgReleases() {
         downloadUrl: release.downloadUrl,
         checksumUrl: release.checksumUrl,
       }));
-    const gradle = {
+    const gradle: ReleaseResult = {
       releases,
       homepage: 'https://gradle.org',
       sourceUrl: 'https://github.com/gradle/gradle',

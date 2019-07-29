@@ -2,9 +2,13 @@ export interface PkgReleaseConfig {
   compatibility?: Record<string, string>;
   datasource?: string;
   depName?: string;
+  digests?: string;
+  digestsStrategy?: string;
+  gradleWrapperType?: string;
   lookupName?: string;
   lookupType?: string;
   registryUrls?: string[];
+  typeStrategy?: string;
   versionScheme?: string;
 }
 

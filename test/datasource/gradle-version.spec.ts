@@ -1,15 +1,17 @@
-const fs = require('fs');
-const got = require('../../lib/util/got');
-const datasource = require('../../lib/datasource');
+import { readFileSync } from 'fs';
+import _got from '../../lib/util/got';
+import { getPkgReleases } from '../../lib/datasource';
+import { PkgReleaseConfig } from '../../lib/datasource/common';
 
 jest.mock('../../lib/util/got');
 
-/** @type any */
-const allResponse = fs.readFileSync(
+const allResponse: any = readFileSync(
   'test/datasource/gradle-wrapper/_fixtures/all.json'
 );
 
-let config = {};
+const got: any = _got;
+
+let config: PkgReleaseConfig = {};
 
 describe('datasource/gradle', () => {
   describe('getPkgReleases', () => {
@@ -29,7 +31,7 @@ describe('datasource/gradle', () => {
     it('throws for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
       await expect(
-        datasource.getPkgReleases({
+        getPkgReleases({
           ...config,
         })
       ).rejects.toThrow();
@@ -42,7 +44,7 @@ describe('datasource/gradle', () => {
         })
       );
       await expect(
-        datasource.getPkgReleases({
+        getPkgReleases({
           ...config,
         })
       ).rejects.toThrow();
@@ -53,7 +55,7 @@ describe('datasource/gradle', () => {
         throw new Error();
       });
       await expect(
-        datasource.getPkgReleases({
+        getPkgReleases({
           ...config,
         })
       ).rejects.toThrow();
@@ -63,7 +65,7 @@ describe('datasource/gradle', () => {
       got.mockReturnValueOnce({
         body: JSON.parse(allResponse),
       });
-      const res = await datasource.getPkgReleases(config);
+      const res = await getPkgReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
