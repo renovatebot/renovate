@@ -41,7 +41,7 @@ jobs:
   - job: 'Linux'
     strategy:
       matrix:
-        node10-py3.7:
+        Node10 Py3.7:
           nodeVersion: '10.x'
           pythonVersion: '3.7'
     pool:
@@ -52,7 +52,7 @@ jobs:
   - job: 'MacOS'
     strategy:
       matrix:
-        node10-py3.7:
+        Node10 Py3.7:
           nodeVersion: '10.x'
           pythonVersion: '3.7'
     pool:
