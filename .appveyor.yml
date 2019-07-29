@@ -8,15 +8,19 @@ image: Visual Studio 2017
 environment:
   matrix:
     - nodejs_version: 10
+      python_version: 37
     - nodejs_version: 12
+      python_version: 37
 
 matrix:
   fast_finish: true
 
 cache:
   - node_modules -> yarn.lock
+  - '%APPDATA%\npm-cache'
   - '%LOCALAPPDATA%\Yarn'
   - '%LOCALAPPDATA%\pip\Cache'
+  - '%LOCALAPPDATA%\NuGet\Cache' # choco cache
 
 init:
   - git config --global core.autocrlf false
@@ -25,8 +29,13 @@ init:
   - git config --global user.name  'Renovate Bot'
 
 install:
-  - ps: Install-Product node $env:nodejs_version
-  #  - ps: $env:Path = "C:\Python37-x64;"
+  - ps: Install-Product node $env:nodejs_version x64
+  - node --version
+  - cup yarn
+  - yarn --version
+  - "SET PATH=C:\Python%python_version%-x64;%PATH%"
+  - python --version
+  - python -m pip install --upgrade pip
   - yarn install --frozen-lockfile --link-duplicates
   - pip install --user -r requirements.txt
 
@@ -43,4 +52,4 @@ test_script:
 on_finish:
   - ps: |
       $wc = New-Object 'System.Net.WebClient'
-      $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\junit.xml))
+      $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\junit.xml))
