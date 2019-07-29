@@ -11,6 +11,7 @@ pr:
 
 variables:
   YARN_CACHE_FOLDER: $(Pipeline.Workspace)/.yarn
+  CI: true
 
 jobs:
   - job: 'Test'
@@ -58,6 +59,8 @@ jobs:
       - pwsh: |
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
           node --version
           python --version
           yarn --version
@@ -65,7 +68,7 @@ jobs:
         displayName: 'Init platform'
 
       - pwsh: |
-          yarn install --frozen-lockfile
+          yarn install --no-progress --frozen-lockfile
           pip install --user -r requirements.txt
         displayName: 'Installing Dependencies'
 
@@ -78,14 +81,16 @@ jobs:
       - pwsh: yarn build
         displayName: 'Build'
 
-      - pwsh: yarn jest --ci --reporters=default --reporters=jest-junit --coverageReporters=text-summary --coverageReporters=cobertura --no-cache
+      - pwsh: yarn jest -i --ci --reporters=default --reporters=jest-junit --coverageReporters=text-summary --coverageReporters=cobertura --no-cache
         displayName: 'Unit Tests'
         continueOnError: true
 
       - task: PublishTestResults@2
         inputs:
           testResultsFiles: 'junit.xml'
+          testRunTitle: 'CI Tests $(Agent.OS)'
         displayName: 'Publish test results'
+        condition: succeededOrFailed()
 
       - task: PublishCodeCoverageResults@1
         inputs:
