@@ -19,7 +19,8 @@ export interface Config {
 }
 
 export interface PagedResult<T = any> {
-  size: number;
+  pagelen: number;
+  size?: number;
   next?: string;
   values: T[];
 }
