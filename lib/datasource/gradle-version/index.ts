@@ -5,21 +5,21 @@ import { PkgReleaseConfig, ReleaseResult } from '../common';
 
 const GradleVersionsServiceUrl = 'https://services.gradle.org/versions/all';
 
+interface GradleRelease {
+  body: {
+    snapshot?: boolean;
+    nightly?: boolean;
+    rcFor?: string;
+    version: string;
+    downloadUrl?: string;
+    checksumUrl?: string;
+  }[];
+}
+
 export async function getPkgReleases(
   _config: PkgReleaseConfig
 ): Promise<ReleaseResult> {
   try {
-    type GradleRelease = {
-      body: {
-        snapshot?: boolean;
-        nightly?: boolean;
-        rcFor?: string;
-        version: string;
-        downloadUrl?: string;
-        checksumUrl?: string;
-      }[];
-    };
-
     const response: GradleRelease = await got(GradleVersionsServiceUrl, {
       json: true,
     });
