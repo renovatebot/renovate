@@ -1,20 +1,14 @@
-const got = require('../../util/got');
-const { logger } = require('../../logger');
+import url from 'url';
+import got from '../../util/got';
+import { logger } from '../../logger';
 
-module.exports = {
-  downloadHttpProtocol,
-};
-
-/**
- * @param {import('url').URL | string} pkgUrl
- */
-function isMavenCentral(pkgUrl) {
+function isMavenCentral(pkgUrl: url.URL | string) {
   return (
     (typeof pkgUrl === 'string' ? pkgUrl : pkgUrl.host) === 'central.maven.org'
   );
 }
 
-function isTemporalError(err) {
+function isTemporalError(err: { code: string; statusCode: number }) {
   return (
     err.code === 'ECONNRESET' ||
     err.statusCode === 429 ||
@@ -22,24 +16,27 @@ function isTemporalError(err) {
   );
 }
 
-function isHostError(err) {
+function isHostError(err: { code: string }) {
   return err.code === 'ETIMEDOUT';
 }
 
-function isNotFoundError(err) {
+function isNotFoundError(err: { code: string; statusCode: number }) {
   return err.code === 'ENOTFOUND' || err.statusCode === 404;
 }
 
-function isPermissionsIssue(err) {
+function isPermissionsIssue(err: { statusCode: number }) {
   return err.statusCode === 401 || err.statusCode === 403;
 }
 
-function isConnectionError(err) {
+function isConnectionError(err: { code: string }) {
   return err.code === 'ECONNREFUSED';
 }
 
-async function downloadHttpProtocol(pkgUrl, hostType = 'maven') {
-  let raw;
+export async function downloadHttpProtocol(
+  pkgUrl: url.URL,
+  hostType = 'maven'
+) {
+  let raw: { body: string };
   try {
     raw = await got(pkgUrl, { hostType });
   } catch (err) {

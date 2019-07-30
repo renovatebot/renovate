@@ -1,23 +1,18 @@
 import is from '@sindresorhus/is';
+import url from 'url';
+import fs from 'fs-extra';
+import { XmlDocument } from 'xmldoc';
+import { logger } from '../../logger';
+import { compare } from '../../versioning/maven/compare';
+import { containsPlaceholder } from '../../manager/maven/extract';
+import { downloadHttpProtocol } from './util';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-const url = require('url');
-const fs = require('fs-extra');
-const { XmlDocument } = require('xmldoc');
-const { logger } = require('../../logger');
-
-const { compare } = require('../../versioning/maven/compare');
-const { containsPlaceholder } = require('../../manager/maven/extract');
-const { downloadHttpProtocol } = require('./util');
-
-export { getPkgReleases };
-
-/**
- *
- * @param {{lookupName:string, registryUrls?: string[]}} args
- */
-// eslint-disable-next-line no-unused-vars
-async function getPkgReleases({ lookupName, registryUrls }) {
-  const versions = [];
+export async function getPkgReleases({
+  lookupName,
+  registryUrls,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
+  const versions: string[] = [];
   const dependency = getDependencyParts(lookupName);
   if (!is.nonEmptyArray(registryUrls)) {
     logger.warn(`No repositories defined for ${dependency.display}`);
@@ -84,13 +79,24 @@ function getDependencyParts(lookupName) {
   };
 }
 
-async function downloadMavenXml(dependency, repoUrl, dependencyFilePath) {
+type MavenDependency = {
+  display: string;
+  group?: string;
+  name?: string;
+  dependencyUrl: string;
+};
+
+async function downloadMavenXml(
+  dependency: MavenDependency,
+  repoUrl: string,
+  dependencyFilePath: string
+) {
   const pkgUrl = new url.URL(
     `${dependency.dependencyUrl}/${dependencyFilePath}`,
     repoUrl
   );
 
-  let rawContent;
+  let rawContent: string;
   switch (pkgUrl.protocol) {
     case 'file:':
       rawContent = await downloadFileProtocol(pkgUrl);
@@ -122,14 +128,14 @@ async function downloadMavenXml(dependency, repoUrl, dependencyFilePath) {
   }
 }
 
-function extractVersions(metadata) {
+function extractVersions(metadata: XmlDocument) {
   const versions = metadata.descendantWithPath('versioning.versions');
   const elements = versions && versions.childrenNamed('version');
   if (!elements) return [];
   return elements.map(el => el.val);
 }
 
-async function downloadFileProtocol(pkgUrl) {
+async function downloadFileProtocol(pkgUrl: url.URL) {
   const pkgPath = pkgUrl.toString().replace('file://', '');
   if (!(await fs.exists(pkgPath))) {
     return null;
@@ -137,15 +143,19 @@ async function downloadFileProtocol(pkgUrl) {
   return fs.readFile(pkgPath, 'utf8');
 }
 
-function getLatestVersion(versions) {
+function getLatestVersion(versions: string[]) {
   if (versions.length === 0) return null;
   return versions.reduce((latestVersion, version) =>
     compare(version, latestVersion) === 1 ? version : latestVersion
   );
 }
 
-async function getDependencyInfo(dependency, repoUrl, version) {
-  const result = {};
+async function getDependencyInfo(
+  dependency: MavenDependency,
+  repoUrl: string,
+  version: string
+) {
+  const result: Partial<ReleaseResult> = {};
   const path = `${version}/${dependency.name}-${version}.pom`;
 
   const pomContent = await downloadMavenXml(dependency, repoUrl, path);
