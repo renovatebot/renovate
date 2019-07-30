@@ -1,9 +1,12 @@
-const { compare } = require('../../versioning/maven/compare');
-const { downloadHttpProtocol } = require('../maven/util');
-const { parseIndexDir, SBT_PLUGINS_REPO } = require('./util');
-const { logger } = require('../../logger');
+import { compare } from '../../versioning/maven/compare';
+import { downloadHttpProtocol } from '../maven/util';
+import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
+import { logger } from '../../logger';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-async function getPkgReleases(config) {
+export async function getPkgReleases(
+  config: PkgReleaseConfig
+): Promise<ReleaseResult> {
   const { lookupName, depType } = config;
 
   const registryUrls =
@@ -17,7 +20,7 @@ async function getPkgReleases(config) {
   const [artifact, scalaVersion] = artifactIdSplit;
 
   const repoRoots = registryUrls.map(x => x.replace(/\/?$/, ''));
-  const searchRoots = [];
+  const searchRoots: string[] = [];
   repoRoots.forEach(repoRoot => {
     // Optimize lookup order
     if (depType === 'plugin') {
@@ -56,12 +59,17 @@ async function getPkgReleases(config) {
   return null;
 }
 
-async function resolvePluginReleases(rootUrl, artifact, scalaVersion) {
+async function resolvePluginReleases(
+  rootUrl: string,
+  artifact: string,
+  scalaVersion: string
+) {
   const searchRoot = `${rootUrl}/${artifact}`;
-  const parse = content => parseIndexDir(content, x => !/^\.+$/.test(x));
+  const parse = (content: string) =>
+    parseIndexDir(content, x => !/^\.+$/.test(x));
   const indexContent = await downloadHttpProtocol(searchRoot, 'sbt');
   if (indexContent) {
-    const releases = [];
+    const releases: string[] = [];
     const scalaVersionItems = parse(indexContent);
     const scalaVersions = scalaVersionItems.map(x => x.replace(/^scala_/, ''));
     const searchVersions =
@@ -91,11 +99,15 @@ async function resolvePluginReleases(rootUrl, artifact, scalaVersion) {
   return resolvePackageReleases(rootUrl, artifact, scalaVersion);
 }
 
-async function resolvePackageReleases(searchRoot, artifact, scalaVersion) {
+async function resolvePackageReleases(
+  searchRoot: string,
+  artifact: string,
+  scalaVersion: string
+): Promise<string[]> {
   const indexContent = await downloadHttpProtocol(searchRoot, 'sbt');
   if (indexContent) {
-    const releases = [];
-    const parseSubdirs = content =>
+    const releases: string[] = [];
+    const parseSubdirs = (content: string) =>
       parseIndexDir(content, x => {
         if (x === artifact) return true;
         if (x.indexOf(`${artifact}_native`) === 0) return false;
@@ -110,7 +122,7 @@ async function resolvePackageReleases(searchRoot, artifact, scalaVersion) {
     ) {
       searchSubdirs = [`${artifact}_${scalaVersion}`];
     }
-    const parseReleases = content =>
+    const parseReleases = (content: string) =>
       parseIndexDir(content, x => !/^\.+$/.test(x));
     for (const searchSubdir of searchSubdirs) {
       const content = await downloadHttpProtocol(
@@ -127,7 +139,3 @@ async function resolvePackageReleases(searchRoot, artifact, scalaVersion) {
 
   return null;
 }
-
-module.exports = {
-  getPkgReleases,
-};

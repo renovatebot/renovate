@@ -2,6 +2,7 @@ export interface PkgReleaseConfig {
   compatibility?: Record<string, string>;
   datasource?: string;
   depName?: string;
+  depType?: string;
   digests?: string;
   digestsStrategy?: string;
   gradleWrapperType?: string;
@@ -23,8 +24,11 @@ export interface Release {
 
 export interface ReleaseResult {
   changelogUrl?: string;
+  dependencyUrl?: string;
+  display?: string;
   dockerRegistry?: string;
   dockerRepository?: string;
+  group?: string;
   homepage?: string;
   name?: string;
   pkgName?: string;

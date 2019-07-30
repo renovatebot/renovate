@@ -1,22 +1,22 @@
-const path = require('path');
-const fs = require('fs');
-const nock = require('nock');
+import { resolve } from 'path';
+import { readFileSync } from 'fs';
+import nock, { disableNetConnect, enableNetConnect } from 'nock';
 
-const { getPkgReleases } = require('../../../lib/datasource/sbt');
+import { getPkgReleases } from '../../../lib/datasource/sbt';
 
-const { DEFAULT_MAVEN_REPO } = require('../../../lib/manager/maven/extract');
-const {
+import { DEFAULT_MAVEN_REPO } from '../../../lib/manager/maven/extract';
+import {
   parseIndexDir,
   SBT_PLUGINS_REPO,
-} = require('../../../lib/datasource/sbt/util');
+} from '../../../lib/datasource/sbt/util';
 
-const mavenIndexHtml = fs.readFileSync(
-  path.resolve(__dirname, `./_fixtures/maven-index.html`),
+const mavenIndexHtml = readFileSync(
+  resolve(__dirname, `./_fixtures/maven-index.html`),
   'utf8'
 );
 
-const sbtPluginIndex = fs.readFileSync(
-  path.resolve(__dirname, `./_fixtures/sbt-plugins-index.html`),
+const sbtPluginIndex = readFileSync(
+  resolve(__dirname, `./_fixtures/sbt-plugins-index.html`),
   'utf8'
 );
 
@@ -30,7 +30,7 @@ describe('datasource/sbt', () => {
 
   describe('getPkgReleases', () => {
     beforeEach(() => {
-      nock.disableNetConnect();
+      disableNetConnect();
       nock('https://failed_repo')
         .get('/maven/org/scalatest')
         .reply(404, null);
@@ -98,7 +98,7 @@ describe('datasource/sbt', () => {
     });
 
     afterEach(() => {
-      nock.enableNetConnect();
+      enableNetConnect();
     });
 
     it('returns null in case of errors', async () => {
