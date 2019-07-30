@@ -13,8 +13,11 @@ export interface PkgReleaseConfig {
 }
 
 export interface Release {
+  changelogUrl?: string;
   gitref?: string;
   isDeprecated?: boolean;
+
+  releaseDate?: string;
   version: string;
 }
 

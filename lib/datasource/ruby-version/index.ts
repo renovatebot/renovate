@@ -1,25 +1,27 @@
-const { parse } = require('node-html-parser');
-const { logger } = require('../../logger');
+import { parse } from 'node-html-parser';
+import { logger } from '../../logger';
 
-const got = require('../../util/got');
-const { isVersion } = require('../../versioning/ruby');
-
-module.exports = {
-  getPkgReleases,
-};
+import got from '../../util/got';
+import { isVersion } from '../../versioning/ruby';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
 const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';
 
-async function getPkgReleases() {
+export async function getPkgReleases(
+  _config?: PkgReleaseConfig
+): Promise<ReleaseResult> {
   // First check the persistent cache
   const cacheNamespace = 'datasource-ruby-version';
-  const cachedResult = await renovateCache.get(cacheNamespace, 'all');
+  const cachedResult = await renovateCache.get<ReleaseResult>(
+    cacheNamespace,
+    'all'
+  );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
   try {
-    const res = {
+    const res: ReleaseResult = {
       homepage: 'https://www.ruby-lang.org',
       sourceUrl: 'https://github.com/ruby/ruby',
       releases: [],
@@ -29,7 +31,7 @@ async function getPkgReleases() {
     // @ts-ignore
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
     for (const row of rows) {
-      const columns = Array.from(
+      const columns: string[] = Array.from(
         row.querySelectorAll('td').map(td => td.innerHTML)
       );
       if (columns.length) {
