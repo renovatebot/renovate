@@ -33,7 +33,7 @@ function isConnectionError(err: { code: string }) {
 }
 
 export async function downloadHttpProtocol(
-  pkgUrl: url.URL,
+  pkgUrl: url.URL | string,
   hostType = 'maven'
 ) {
   let raw: { body: string };

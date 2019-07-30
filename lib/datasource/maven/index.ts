@@ -79,12 +79,12 @@ function getDependencyParts(lookupName) {
   };
 }
 
-type MavenDependency = {
+interface MavenDependency {
   display: string;
   group?: string;
   name?: string;
   dependencyUrl: string;
-};
+}
 
 async function downloadMavenXml(
   dependency: MavenDependency,

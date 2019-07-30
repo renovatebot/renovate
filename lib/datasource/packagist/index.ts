@@ -21,11 +21,9 @@ function getHostOpts(url: string) {
   return opts;
 }
 
-interface PackagistPackage {}
-
 interface PackageMeta {
   includes?: Record<string, { sha256: string }>;
-  packages: PackagistPackage[];
+  packages: Record<string, RegistryFile>;
   'provider-includes': Record<string, { sha256: string }>;
   'providers-url'?: string;
 }
@@ -38,7 +36,7 @@ interface RegistryMeta {
   files?: RegistryFile[];
   providersUrl?: string;
   includesFiles?: RegistryFile[];
-  packages?: PackagistPackage[];
+  packages?: Record<string, RegistryFile>;
 }
 
 async function getRegistryMeta(regUrl: string) {
@@ -148,7 +146,15 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
   return dep;
 }
 
-async function getAllPackages(regUrl: string) {
+interface AllPackages {
+  packages: Record<string, RegistryFile>;
+  providersUrl: string;
+  providerPackages: Record<string, string>;
+
+  includesPackages: Record<string, ReleaseResult>;
+}
+
+async function getAllPackages(regUrl: string): Promise<AllPackages> {
   let repoCacheResult = global.repoCache[`packagist-${regUrl}`];
   // istanbul ignore if
   if (repoCacheResult) {
@@ -188,7 +194,7 @@ async function getAllPackages(regUrl: string) {
       }
     }
   }
-  const allPackages = {
+  const allPackages: AllPackages = {
     packages,
     providersUrl,
     providerPackages,
