@@ -61,6 +61,11 @@
       "description": "The directory for Renovate for storing caches. If left empty, Renovate will create a subdirectory within `baseDir` to use.",
       "type": "string"
     },
+    "dockerMapDotfiles": {
+      "description": "Map relevant home directory dotfiles into containers when binarySource=docker.",
+      "type": "boolean",
+      "default": false
+    },
     "logLevel": {
       "description": "Logging level",
       "type": "string",

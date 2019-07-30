@@ -75,6 +75,12 @@ export async function generateLockFile(
         volumes.push(config.cacheDir);
       }
       cmd += volumes.map(v => `-v ${v}:${v} `).join('');
+      if (config.dockerMapDotfiles) {
+        const homeDir =
+          process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+        const homeNpmrc = join(homeDir, '.npmrc');
+        cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
+      }
       const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
       cmd += envVars.map(e => `-e ${e} `).join('');
       cmd += `-w ${cwd} `;

@@ -28,6 +28,10 @@ Set this to `docker` instead to use docker-based binaries.
 
 Configure this directory if you want to change which directory Renovate uses for storing cache data. If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/cache/`. If you configure this to be different to the `baseDir`, it means you can have one location for repo data and another for cache data.
 
+## dockerMapDotfiles
+
+This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files. Currently applicable to `.npmrc` only.
+
 ## dryRun
 
 ## endpoint
