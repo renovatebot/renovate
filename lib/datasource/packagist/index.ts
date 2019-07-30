@@ -1,18 +1,17 @@
 import is from '@sindresorhus/is';
 
-const URL = require('url');
-const delay = require('delay');
-const parse = require('github-url-from-git');
-const pAll = require('p-all');
-const { logger } = require('../../logger');
+import URL from 'url';
+import delay from 'delay';
+import parse from 'github-url-from-git';
+import pAll from 'p-all';
+import { logger } from '../../logger';
 
-const got = require('../../util/got');
-const hostRules = require('../../util/host-rules');
+import got from '../../util/got';
+import * as hostRules from '../../util/host-rules';
+import { PkgReleaseConfig, ReleaseResult } from '../common';
 
-export { getPkgReleases };
-
-function getHostOpts(url) {
-  const opts = {
+function getHostOpts(url: string) {
+  const opts: any = {
     json: true,
   };
   const { username, password } = hostRules.find({ hostType: 'packagist', url });
@@ -22,12 +21,32 @@ function getHostOpts(url) {
   return opts;
 }
 
-async function getRegistryMeta(regUrl) {
+interface PackagistPackage {}
+
+interface PackageMeta {
+  includes?: Record<string, { sha256: string }>;
+  packages: PackagistPackage[];
+  'provider-includes': Record<string, { sha256: string }>;
+  'providers-url'?: string;
+}
+
+interface RegistryFile {
+  key: string;
+  sha256: string;
+}
+interface RegistryMeta {
+  files?: RegistryFile[];
+  providersUrl?: string;
+  includesFiles?: RegistryFile[];
+  packages?: PackagistPackage[];
+}
+
+async function getRegistryMeta(regUrl: string) {
   try {
     const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
     const opts = getHostOpts(url);
-    const res = (await got(url, opts)).body;
-    const meta = {};
+    const res: PackageMeta = (await got(url, opts)).body;
+    const meta: RegistryMeta = {};
     meta.packages = res.packages;
     if (res.includes) {
       meta.includesFiles = [];
@@ -73,7 +92,15 @@ async function getRegistryMeta(regUrl) {
   }
 }
 
-async function getPackagistFile(regUrl, file) {
+interface PackagistFile {
+  providers: Record<string, RegistryFile>;
+  packages?: Record<string, RegistryFile>;
+}
+
+async function getPackagistFile(
+  regUrl: string,
+  file: RegistryFile
+): Promise<PackagistFile> {
   const { key, sha256 } = file;
   const fileName = key.replace('%hash%', sha256);
   const opts = getHostOpts(regUrl);
@@ -99,8 +126,8 @@ async function getPackagistFile(regUrl, file) {
   return res;
 }
 
-function extractDepReleases(versions) {
-  const dep = {};
+function extractDepReleases(versions: RegistryFile): ReleaseResult {
+  const dep: ReleaseResult = { releases: null };
   // istanbul ignore if
   if (!versions) {
     dep.releases = [];
@@ -121,7 +148,7 @@ function extractDepReleases(versions) {
   return dep;
 }
 
-async function getAllPackages(regUrl) {
+async function getAllPackages(regUrl: string) {
   let repoCacheResult = global.repoCache[`packagist-${regUrl}`];
   // istanbul ignore if
   if (repoCacheResult) {
@@ -138,7 +165,7 @@ async function getAllPackages(regUrl) {
     return null;
   }
   const { packages, providersUrl, files, includesFiles } = registryMeta;
-  const providerPackages = {};
+  const providerPackages: Record<string, string> = {};
   if (files) {
     const queue = files.map(file => () => getPackagistFile(regUrl, file));
     const resolvedFiles = await pAll(queue, { concurrency: 5 });
@@ -148,7 +175,7 @@ async function getAllPackages(regUrl) {
       }
     }
   }
-  const includesPackages = {};
+  const includesPackages: Record<string, ReleaseResult> = {};
   if (includesFiles) {
     for (const file of includesFiles) {
       const res = await getPackagistFile(regUrl, file);
@@ -171,14 +198,17 @@ async function getAllPackages(regUrl) {
   return allPackages;
 }
 
-async function packagistOrgLookup(name) {
+async function packagistOrgLookup(name: string) {
   const cacheNamespace = 'datasource-packagist-org';
-  const cachedResult = await renovateCache.get(cacheNamespace, name);
+  const cachedResult = await renovateCache.get<ReleaseResult>(
+    cacheNamespace,
+    name
+  );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
-  let dep = null;
+  let dep: ReleaseResult = null;
   const regUrl = 'https://packagist.org';
   const pkgUrl = URL.resolve(regUrl, `/p/${name}.json`);
   const res = (await got(pkgUrl, {
@@ -195,7 +225,7 @@ async function packagistOrgLookup(name) {
   return dep;
 }
 
-async function packageLookup(regUrl, name) {
+async function packageLookup(regUrl: string, name: string) {
   try {
     if (regUrl === 'https://packagist.org') {
       const packagistResult = await packagistOrgLookup(name);
@@ -251,10 +281,13 @@ async function packageLookup(regUrl, name) {
   }
 }
 
-async function getPkgReleases({ lookupName, registryUrls }) {
+export async function getPkgReleases({
+  lookupName,
+  registryUrls,
+}: PkgReleaseConfig): Promise<ReleaseResult> {
   logger.trace(`getPkgReleases(${lookupName})`);
 
-  let res;
+  let res: ReleaseResult;
   const registries = is.nonEmptyArray(registryUrls)
     ? registryUrls
     : ['https://packagist.org'];
